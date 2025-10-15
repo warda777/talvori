@@ -1,297 +1,166 @@
 // supabase/functions/ingest_word/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-type Body = {
-  id?: string; // optional: Force-Translate by UUID
-  text?: string;
-  fromLang: string;
-  toLang: string;
-  pos?: string; // optional: 'noun'|'verb'|'adj'|...
-  mode?: "create" | "fix"; // 'create' (default) oder 'fix' für Re-Translate/QA
-  formality?: "default" | "prefer_more" | "prefer_less";
-};
+type Body = { text: string; fromLang: string; toLang: string };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const deeplKey = Deno.env.get("DEEPL_API_KEY")!; // in Supabase Secrets
-const glossaryId = Deno.env.get("DEEPL_GLOSSARY_ID") || ""; // optional
-const deeplEndpoint = "https://api-free.deepl.com/v2/translate"; // oder api.deepl.com
+const serviceKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const deeplKey    = Deno.env.get("DEEPL_API_KEY")!;
 
-function norm(s: string) {
-  return s.trim();
-}
-
-// Text-Normalisierung: Trim + Whitespace auf einzelne Leerzeichen reduzieren
-function normalizeText(s: string) {
-  return s.replace(/\s+/g, " ").trim();
-}
-function jaccard(a: string, b: string) {
-  const A = new Set(a.toLowerCase().split(/\s+/));
-  const B = new Set(b.toLowerCase().split(/\s+/));
-  const inter = [...A].filter((x) => B.has(x)).length;
-  return inter / (A.size + B.size - inter || 1);
-}
-
-async function deeplTranslate(
-  texts: string[],
-  source: string,
-  target: string,
-  formality?: string
-) {
-  const form = new URLSearchParams();
-  form.append("auth_key", deeplKey);
-  texts.forEach((t) => form.append("text", t));
-  form.append("source_lang", source.toUpperCase());
-  form.append("target_lang", target.toUpperCase());
-  if (formality) form.append("formality", formality);
-  // Tipp: Format beibehalten, bessere Terminologie
-  form.append("preserve_formatting", "1");
-  if (glossaryId) form.append("glossary_id", glossaryId);
-
-  const res = await fetch(deeplEndpoint, {
+async function translateIfNeeded(text: string, fromLang: string, toLang: string) {
+  if (!deeplKey) return null;
+  // DeepL: nur wenn translation fehlt (Wir speichern Original + Übersetzung in words)
+  const params = new URLSearchParams({
+    auth_key: deeplKey,
+    text,
+    source_lang: fromLang.toUpperCase(),
+    target_lang: toLang.toUpperCase()
+  });
+  const res = await fetch("https://api-free.deepl.com/v2/translate", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form.toString(),
+    body: params.toString(),
   });
-  if (!res.ok) throw new Error(`DeepL ${res.status}`);
+  if (!res.ok) return null;
   const data = await res.json();
-  return (data?.translations ?? []).map((t: any) => String(t.text));
+  const translated = data?.translations?.[0]?.text as string | undefined;
+  return translated ?? null;
+}
+
+function extractWord(raw: string): string | null {
+  // URLs raus
+  let s = raw.replace(/\bhttps?:\/\/\S+/gi, " ");
+  // Sonderzeichen weg, nur Wort-Tokens lassen
+  const m = s.match(/\b[a-zA-Z][a-zA-Z'-]{1,38}\b/);
+  if (!m) return null;
+  const w = m[0].toLowerCase();
+  // sehr kurze "stop"-Fragmente filtern (z. B. 'a', 'of')
+  if (w.length < 2) return null;
+  return w;
 }
 
 serve(async (req) => {
-  // Debug-Ping
-  if (new URL(req.url).searchParams.get("debug") === "ping") {
+  // --- DEBUG: ganz oben, keine Auth nötig ---
+  const u = new URL(req.url);
+  if (u.searchParams.get("debug") === "ping") {
     return new Response(
-      JSON.stringify({ ok: true, fn: "ingest_word", build: "v5-qa" }),
-      { status: 200 }
+      JSON.stringify({ ok: true, fn: "ingest_word", build: "v4-top-shortcircuit" }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
   }
 
   try {
+    // Nur für Auth (liest den User aus dem JWT im Header)
+    const sbAuth = createClient(supabaseUrl, serviceKey, {
+      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+    });
+
+    // Für alle DB-Reads/Writes OHNE Authorization-Header → umgeht RLS
     const sbAdmin = createClient(supabaseUrl, serviceKey);
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    let userId: string | null = null;
+    // Auth-Kontext holen
+    const { data: auth, error: authErr } = await sbAuth.auth.getUser();
+    if (authErr) throw authErr;
+    if (!auth?.user) return new Response("Unauthorized", { status: 401 });
 
-    try {
-      const sbAuth = createClient(supabaseUrl, serviceKey, {
-        global: { headers: { Authorization: authHeader } },
-      });
-      const { data: auth } = await sbAuth.auth.getUser();
-      userId = auth?.user?.id ?? null; // kann null sein
-    } catch {
-      userId = null;
-    }
-
+    // Body + Wort extrahieren
     const body = (await req.json()) as Body;
-    const fromLang = norm(body.fromLang ?? "");
-    const toLang = norm(body.toLang ?? "");
-    const pos = (body.pos ?? "").toLowerCase();
-    const mode = body.mode ?? "create";
-    const formality = body.formality ?? "prefer_more";
+    const raw  = (body.text ?? "").trim();
+    const fromLang = (body.fromLang ?? "").trim();
+    const toLang   = (body.toLang ?? "").trim();
+    if (!raw || !fromLang || !toLang) return new Response("Bad Request", { status: 400 });
 
-    // Validierung: entweder id ODER text muss vorhanden sein
-    if (!body.id && !body.text) {
-      return new Response("Bad Request: id or text required", { status: 400 });
-    }
-    if (!fromLang || !toLang) {
-      return new Response("Bad Request: fromLang and toLang required", {
-        status: 400,
-      });
+    const text = extractWord(raw);
+    if (!text) {
+      return new Response(JSON.stringify({ ok:false, error:"No single word found" }),
+        { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    let textNormalized = "";
-    let existing = null;
-    let sErr = null;
-
-    // 1) Force-Translate by ID (wenn id gegeben)
-    if (body.id) {
-      const { data: byId, error: idErr } = await sbAdmin
-        .from("words")
-        .select("id, text, translation, pos, from_lang, to_lang")
-        .eq("id", body.id)
-        .maybeSingle();
-
-      if (idErr) throw idErr;
-      if (byId) {
-        existing = byId;
-        textNormalized = normalizeText(byId.text || "");
-      } else {
-        return new Response(
-          JSON.stringify({ ok: false, error: "Word not found by id" }),
-          { status: 404, headers: { "Content-Type": "application/json" } }
-        );
-      }
-    }
-    // 2) Lookup existierendes Wort by text (case-insensitive, whitespace-tolerant)
-    else if (body.text) {
-      const raw = norm(body.text);
-      textNormalized = normalizeText(raw);
-
-      // Versuch 1: ilike (case-insensitive)
-      const lookup1 = await sbAdmin
-        .from("words")
-        .select("id, text, translation, pos, from_lang, to_lang")
-        .eq("from_lang", fromLang)
-        .eq("to_lang", toLang)
-        .ilike("text", textNormalized)
-        .limit(1)
-        .maybeSingle();
-
-      if (lookup1.error) {
-        sErr = lookup1.error;
-      } else if (lookup1.data) {
-        // Exakte Übereinstimmung nach Normalisierung prüfen
-        if (normalizeText(lookup1.data.text) === textNormalized) {
-          existing = lookup1.data;
-        }
-      }
-
-      // Versuch 2: Falls kein Match, exact match mit normalisiertem Text
-      if (!existing && !sErr) {
-        const lookup2 = await sbAdmin
-          .from("words")
-          .select("id, text, translation, pos, from_lang, to_lang")
-          .eq("text", textNormalized)
-          .eq("from_lang", fromLang)
-          .eq("to_lang", toLang)
-          .limit(1)
-          .maybeSingle();
-
-        if (lookup2.error) {
-          sErr = lookup2.error;
-        } else if (lookup2.data) {
-          existing = lookup2.data;
-        }
-      }
-
-      if (sErr) throw sErr;
-    }
+    // 1) exaktes Lookup (wir speichern lowercase)
+    const { data: existing, error: sErr } = await sbAdmin
+      .from("words")
+      .select("id, translation")
+      .eq("text", text)
+      .eq("from_lang", fromLang)
+      .eq("to_lang", toLang)
+      .limit(1)
+      .maybeSingle();
+    if (sErr) throw sErr;
 
     let wordId = existing?.id as string | undefined;
     let translation = existing?.translation as string | undefined;
-    let finalPos = pos || existing?.pos || "";
+    let wasNewWord = false;
 
-    // Heuristik: Nomen auf Deutsch groß schreiben
-    const enforceGermanNoun = (de: string) =>
-      finalPos === "noun" && de
-        ? de.replace(/^([a-zäöü])/u, (m) => m.toUpperCase())
-        : de;
-
-    // (a) CREATE-Modus: nur übersetzen, wenn leer
-    // (b) FIX-Modus: neu übersetzen, wenn leer ODER QA schlecht
-    let needsTranslation = !translation || translation.trim() === "";
-    let qa_score: number | null = null;
-    let qa_note = "";
-
-    if (mode === "fix" && translation) {
-      // Back-translation zur Qualität
-      const backEn = await deeplTranslate([translation], "DE", "EN", "default");
-      const score = jaccard(textNormalized, backEn[0] || "");
-      qa_score = score;
-      if (score < 0.55) {
-        needsTranslation = true;
-        qa_note = "low_backtranslation_similarity";
-      }
-      // POS-Heuristik: Nomen groß
-      if (finalPos === "noun" && /^[a-zäöü]/u.test(translation)) {
-        needsTranslation = true;
-        qa_note = (qa_note ? qa_note + ";" : "") + "noun_capitalization_fix";
+    // NEW: Übersetzung nachtragen, falls Wort existiert aber translation leer ist
+    if (wordId && (!translation || translation.trim() === "")) {
+      const fixTr = await translateIfNeeded(text, fromLang, toLang);
+      if (fixTr) {
+        const { data: upd, error: upErr2 } = await sbAdmin
+          .from("words")
+          .update({ translation: fixTr })
+          .eq("id", wordId)
+          .select("translation")
+          .single();
+        if (upErr2) throw upErr2;
+        translation = upd?.translation ?? fixTr;
       }
     }
 
-    // Übersetzen (DeepL) - nutze normalisierten Text für konsistente Übersetzungen
-    if (needsTranslation) {
-      if (!deeplKey) {
-        return new Response(
-          JSON.stringify({ ok: false, error: "DEEPL_API_KEY missing" }),
-          { status: 500 }
-        );
-      }
-      const out = await deeplTranslate(
-        [textNormalized],
-        fromLang,
-        toLang,
-        formality
-      );
-      const rawTranslation = out[0] || "";
-      translation = enforceGermanNoun(rawTranslation);
+    // 2) Insert als UPSERT gegen UNIQUE(text, from_lang, to_lang)
+    if (!wordId) {
+      const deeplTranslation = await translateIfNeeded(text, fromLang, toLang);
+      translation = deeplTranslation ?? translation ?? "";
 
-      // Logging: Wenn DeepL leer zurückgibt
-      if (!translation || translation.trim() === "") {
-        console.error("DeepL returned empty translation for:", {
-          text: textNormalized,
-          fromLang,
-          toLang,
-          formality,
-          rawResponse: out,
-        });
-        qa_note = (qa_note ? qa_note + ";" : "") + "deepl_empty_result";
-      }
+      const { data: ins, error: upErr } = await sbAdmin
+        .from("words")
+        .upsert(
+          [{ text, translation, from_lang: fromLang, to_lang: toLang }],
+          { onConflict: "text,from_lang,to_lang", ignoreDuplicates: false }
+        )
+        .select("id, translation")
+        .single();
+      if (upErr) throw upErr;
+
+      wordId = ins.id;
+      translation = ins.translation ?? translation ?? "";
+      wasNewWord = true;
     }
 
-    // Upsert (mit normalisiertem Text)
-    const payload: any = {
-      text: textNormalized,
-      translation: translation ?? "",
-      from_lang: fromLang,
-      to_lang: toLang,
-    };
-    if (finalPos) payload.pos = finalPos;
-    payload.translated_by = "deepl";
-    payload.translated_at = new Date().toISOString();
-    if (qa_score !== null) payload.qa_score = qa_score;
-    if (qa_note) payload.qa_note = qa_note;
+    // 3) user_words upsert
+    const { error: uErr } = await sbAdmin.from("user_words").upsert({
+      user_id: auth.user.id,
+      word_id: wordId,
+      picked: true,
+      source: "browser",
+    }, { onConflict: "user_id,word_id" });
+    if (uErr) throw uErr;
 
-    const { data: up, error: upErr } = await sbAdmin
-      .from("words")
-      .upsert([payload], {
-        onConflict: "text,from_lang,to_lang",
-        ignoreDuplicates: false,
-      })
-      .select("id, translation, qa_score, qa_note")
-      .single();
-    if (upErr) throw upErr;
-
-    wordId = up.id;
-    translation = up.translation;
-
-    // user_words upsert (nur wenn userId existiert)
-    if (userId) {
-      const { error: uErr } = await sbAdmin.from("user_words").upsert(
-        {
-          user_id: userId,
-          word_id: wordId,
-          picked: true,
-          source: "browser",
-        },
-        { onConflict: "user_id,word_id" }
-      );
-      if (uErr) throw uErr;
-    }
-
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        wordId,
-        text: textNormalized,
-        translation,
-        qa_score: up.qa_score ?? qa_score,
-        qa_note: up.qa_note ?? qa_note,
-        mode,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  } catch (e) {
+    // 4) Antwort (ohne Browser-Count/Link)
+    return new Response(JSON.stringify({
+      ok: true,
+      wordId,
+      text,
+      translation,
+      wasNewWord,
+    }), { status: 200, headers: { "Content-Type": "application/json" }});
+  } catch (e: unknown) {
     console.error("ingest_word error:", e);
-    const msg =
-      e && typeof e === "object"
-        ? (e as any).message ?? JSON.stringify(e)
-        : String(e);
-    return new Response(JSON.stringify({ ok: false, error: msg }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    let msg = "unknown";
+    if (e && typeof e === "object") {
+      const a = e as any;
+      msg =
+        a.message ??
+        a.error ??
+        a.code ??
+        (a.details ? `${a.hint ?? ""} ${a.details}`.trim() : null) ??
+        JSON.stringify(a);
+    } else {
+      msg = String(e);
+    }
+    return new Response(
+      JSON.stringify({ ok: false, error: msg }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 });
+
