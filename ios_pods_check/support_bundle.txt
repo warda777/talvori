@@ -1,0 +1,111 @@
+=== VERSIONS ===
+Flutter 3.37.0-1.0.pre-566 • channel main • https://github.com/flutter/flutter.git
+Framework • revision 2f110cc7e5 (35 hours ago) • 2025-10-16 19:07:39 -0700
+Engine • hash b1412aa317bcfd3590a02eb108b9fe0ba9e53e51 (revision 5187246256) (35 hours ago) • 2025-10-17 01:45:11.000Z
+Tools • Dart 3.11.0 (build 3.11.0-25.0.dev) • DevTools 2.51.0
+[✓] Flutter (Channel main, 3.37.0-1.0.pre-566, on macOS 26.0.1 25A362 darwin-arm64, locale de-DE) [76,3s]
+    • Flutter version 3.37.0-1.0.pre-566 on channel main at /opt/homebrew/share/flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 2f110cc7e5 (35 hours ago), 2025-10-16 19:07:39 -0700
+    • Engine revision 5187246256
+    • Dart version 3.11.0 (build 3.11.0-25.0.dev)
+    • DevTools version 2.51.0
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, omit-legacy-version-file, enable-lldb-debugging
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 35.0.0) [89,3s]
+    • Android SDK at /Users/andreaswarda/Library/Android/sdk
+    • Emulator version 34.2.16.0 (build_id 12038310) (CL:N/A)
+    • Platform android-36, build-tools 35.0.0
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 17.0.11+0-17.0.11b1207.24-11852314)
+    • All Android licenses accepted.
+
+[!] Xcode - develop for iOS and macOS (Xcode 16.4) [96,7s]
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 16F6
+    ✗ Unable to get list of installed Simulator runtimes.
+    • CocoaPods version 1.16.2
+
+[✓] Chrome - develop for the web [12ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (3 available) [88,2s]
+    • iPhondreas (wireless) (mobile) • 00008130-001948CA2613803A • ios            • iOS 26.0.1 23A355
+    • macOS (desktop)                • macos                     • darwin-arm64   • macOS 26.0.1 25A362 darwin-arm64
+    • Chrome (web)                   • chrome                    • web-javascript • Google Chrome 141.0.7390.108
+
+[✓] Network resources [226ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 1 category.
+ProductName:		macOS
+ProductVersion:		26.0.1
+BuildVersion:		25A362
+Xcode 16.4
+Build version 16F6
+ruby 3.4.5 (2025-07-16 revision 20cda200d3) +PRISM [arm64-darwin24]
+/opt/homebrew/opt/ruby/bin/ruby
+1.16.2
+/opt/homebrew/lib/ruby/gems/3.4.0/bin/pod
+RubyGems Environment:
+  - RUBYGEMS VERSION: 3.6.9
+  - RUBY VERSION: 3.4.5 (2025-07-16 patchlevel 51) [arm64-darwin24]
+  - INSTALLATION DIRECTORY: /opt/homebrew/lib/ruby/gems/3.4.0
+  - USER INSTALLATION DIRECTORY: /Users/andreaswarda/.gem/ruby/3.4.0
+  - CREDENTIALS FILE: /Users/andreaswarda/.local/share/gem/credentials
+  - RUBY EXECUTABLE: /opt/homebrew/opt/ruby/bin/ruby
+  - GIT EXECUTABLE: /opt/homebrew/bin/git
+  - EXECUTABLE DIRECTORY: /opt/homebrew/lib/ruby/gems/3.4.0/bin
+  - SPEC CACHE DIRECTORY: /Users/andreaswarda/.gem/specs
+  - SYSTEM CONFIGURATION DIRECTORY: /opt/homebrew/Cellar/ruby/3.4.5/etc
+  - RUBYGEMS PLATFORMS:
+     - ruby
+     - arm64-darwin-24
+  - GEM PATHS:
+     - /opt/homebrew/lib/ruby/gems/3.4.0
+     - /Users/andreaswarda/.gem/ruby/3.4.0
+     - /opt/homebrew/Cellar/ruby/3.4.5/lib/ruby/gems/3.4.0
+  - GEM CONFIGURATION:
+     - :update_sources => true
+     - :verbose => true
+     - :backtrace => true
+     - :bulk_threshold => 1000
+     - :sources => nil
+     - :concurrent_downloads => 8
+     - :install_extension_in_lib => true
+  - REMOTE SOURCES:
+     - https://rubygems.org/
+  - SHELL PATH:
+     - /Users/andreaswarda/.npm-global/bin
+     - /Users/andreaswarda/.npm-global/bin
+     - /Users/andreaswarda/.npm-global/bin
+     - /opt/homebrew/lib/ruby/gems/3.4.0/bin
+     - /opt/homebrew/opt/ruby/bin
+     - /opt/homebrew/opt/ruby/bin
+     - /opt/homebrew/bin
+     - /opt/homebrew/sbin
+     - /Library/Frameworks/Python.framework/Versions/3.11/bin
+     - /opt/local/bin
+     - /opt/local/sbin
+     - /usr/local/bin
+     - /System/Cryptexes/App/usr/bin
+     - /usr/bin
+     - /bin
+     - /usr/sbin
+     - /sbin
+     - /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin
+     - /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin
+     - /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
+     - /Library/Apple/usr/bin
+     - /Users/andreaswarda/.npm-global/bin
+     - /opt/homebrew/lib/ruby/gems/3.4.0/bin
+     - /opt/homebrew/opt/ruby/bin
+     - /opt/homebrew/bin
+     - /opt/homebrew/sbin
+     - /Library/Frameworks/Python.framework/Versions/3.11/bin
+     - /opt/local/bin
+     - /opt/local/sbin
+     - /Users/andreaswarda/Library/Application Support/JetBrains/Toolbox/scripts
+     - /Users/andreaswarda/Library/Application Support/JetBrains/Toolbox/scripts

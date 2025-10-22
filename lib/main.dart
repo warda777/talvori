@@ -6,6 +6,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:talvori/core/theme/app_theme.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
+import 'package:talvori/core/browser_return_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
 
 void main() {
   // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
@@ -13,6 +19,12 @@ void main() {
     FlutterError.dumpErrorToConsole(details);
     Zone.current.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
   };
+  // ignore: unused_element
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await BrowserReturnService.initShareListener();
+    runApp(const MyApp());
+  }
 
   runZonedGuarded(() {
     runApp(const MyApp());
@@ -27,11 +39,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Talvori',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark, // oder ThemeData.dark()
-      home: const _InitGate(child: HomeScreen()),
+    return ProviderScope(
+      child: MaterialApp(
+        title: 'Talvori',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: const _InitGate(child: HomeScreen()),
+      ),
     );
   }
 }
@@ -86,6 +100,10 @@ class _InitGateState extends State<_InitGate> {
         debugPrint('TEST_EMAIL / TEST_PASSWORD fehlen in .env');
       }
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
+
 
     // Logging hilft beim Teilen-Debug:
     debugPrint('Logged in as: ${Supabase.instance.client.auth.currentUser?.id}');

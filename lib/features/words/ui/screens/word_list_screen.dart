@@ -3,7 +3,7 @@ import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
 // Filter-Modell
-enum WordFilterKind { about, domain, pos, level, query }
+enum WordFilterKind { about, domain, pos, level, category, query }
 class WordListFilter {
   final WordFilterKind kind;
   final String value;
@@ -15,7 +15,17 @@ enum SortMode { az, newest }
 
 class WordListScreen extends StatefulWidget {
   final WordListFilter filter;
-  const WordListScreen({super.key, required this.filter});
+  final String? titleOverride;
+  final String? overrideCategoryId;
+  final String? overrideCategoryLabel;
+  
+  const WordListScreen({
+    Key? key,
+    required this.filter,
+    this.titleOverride,
+    this.overrideCategoryId,
+    this.overrideCategoryLabel,
+  }) : super(key: key);
 
   @override
   State<WordListScreen> createState() => _WordListScreenState();
@@ -53,6 +63,15 @@ class _WordListScreenState extends State<WordListScreen> {
     super.dispose();
   }
 
+  WordListFilter _getEffectiveFilter() {
+    final effectiveCategoryId = widget.overrideCategoryId ?? widget.filter.value;
+    
+    return WordListFilter(
+      widget.filter.kind,
+      effectiveCategoryId,
+    );
+  }
+
   Future<void> _loadFirstPage() async {
     setState(() {
       _isFirstLoad = true;
@@ -63,8 +82,9 @@ class _WordListScreenState extends State<WordListScreen> {
     });
 
     // 1) Erste Seite laden
+    final effectiveFilter = _getEffectiveFilter();
     final batch = await _repo.fetchByFilter(
-      widget.filter,
+      effectiveFilter,
       limit: _pageSize,
       offset: _offset,
     );
@@ -94,8 +114,9 @@ class _WordListScreenState extends State<WordListScreen> {
 
   Future<void> _loadMore() async {
     setState(() => _isLoadingMore = true);
+    final effectiveFilter = _getEffectiveFilter();
     final batch = await _repo.fetchByFilter(
-      widget.filter,
+      effectiveFilter,
       limit: _pageSize,
       offset: _offset,
     );
@@ -117,7 +138,8 @@ class _WordListScreenState extends State<WordListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Word Hub • ${widget.filter.value}';
+    final effectiveCategoryLabel = widget.overrideCategoryLabel ?? widget.filter.value;
+    final title = widget.titleOverride ?? 'Word Hub • $effectiveCategoryLabel';
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),

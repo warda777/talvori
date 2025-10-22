@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
+
+
+// Repo top-level (vermeidet const-Konstruktor-Fehler)
+final _repo = SupabaseWordRepository();
 
 class WordHubScreen extends StatelessWidget {
   const WordHubScreen({super.key});
@@ -43,6 +49,7 @@ class WordHubScreen extends StatelessWidget {
 
       body: CustomScrollView(
         slivers: [
+          // Suche
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -68,75 +75,78 @@ class WordHubScreen extends StatelessWidget {
             ),
           ),
 
-          // Über uns
-          _SectionHeader('Über uns'),
-          _GridSection(
-            items: const ['Menschen', 'Körper', 'Essen'],
-            locks: const [false, true, true],
-            onTapItem: (label) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => WordListScreen(
-                    filter: WordListFilter(WordFilterKind.about, label),
-                  ),
-                ),
-              );
-            },
-          ),
+          // Dynamische Bereiche aus hubSections
+          for (final section in hubSections) ...[
+            _SectionHeader('${section.title} • ${section.focus}'),
+            _GridSection(
+              sectionKey: section.key,
+              subs: section.subcats,
+              repo: _repo,
+              onTapSub: (sub) async {
+                String? catId;
 
-          // Nach Fachgebiet
-          _SectionHeader('Nach Fachgebiet'),
-          _GridSection(
-            items: const ['Technik', 'Wissenschaft', 'Medizin', 'Literatur'],
-            locks: const [true, true, true, true],
-            onTapItem: (label) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => WordListScreen(
-                    filter: WordListFilter(WordFilterKind.domain, label),
-                  ),
-                ),
-              );
-            },
-          ),
+                try {
+                  // 1) UUID aus Taxonomie oder dynamisch per Name
+                  catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
+                      ? sub.supabaseId
+                      : await _repo.findCategoryIdByName(sub.label);
+                } catch (e) {
+                  // Lookup fehlgeschlagen – wir navigieren trotzdem via Fallback
+                  catId = null;
+                }
 
-          // Nach Wortart
-          _SectionHeader('Nach Wortart'),
-          _GridSection(
-            items: const ['Verben', 'Nomen', 'Adjektive'],
-            locks: const [true, true, true],
-            onTapItem: (label) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => WordListScreen(
-                    filter: WordListFilter(WordFilterKind.pos, label),
-                  ),
-                ),
-              );
-            },
-          ),
+                // Context nach await prüfen
+                if (!context.mounted) return;
+                
+                // Fehler-SnackBar nur anzeigen, wenn Context noch gültig ist
+                if (catId == null && sub.supabaseId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.')),
+                  );
+                }
 
-          // Nach Level
-          _SectionHeader('Nach Level'),
-          _GridSection(
-            items: const ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
-            locks: const [true, true, true, true, true, true],
-            onTapItem: (label) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => WordListScreen(
-                    filter: WordListFilter(WordFilterKind.level, label),
-                  ),
-                ),
-              );
-            },
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: bottomInset + 10), // extra Luft über dem Home-Indicator
-          ),
+                if (catId != null) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => CategoryDetailScreen(
+                        title: sub.label,
+                        categoryId: catId!,
+                        categorySlug: null,
+                        listFilter: WordListFilter(WordFilterKind.category, catId),
+                      ),
+                    ),
+                  );
+                } else {
+                  // 2) Sicherer Fallback (Tags/Level), immer navigieren
+                  final (kind, value) = _mapToFilter(section.key, sub.label);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => CategoryDetailScreen(
+                        title: sub.label,
+                        categoryId: null,
+                        categorySlug: _slugifyLocal(sub.label),
+                        listFilter: WordListFilter(kind, value),
+                      ),
+                    ),
+                  );
+                }
+              },
+
+            ),
+          ],
+
+          SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
         ],
       ),
     );
+  }
+
+  // Mapping: Level explizit; Rest vorerst als Tag („about“)
+  (WordFilterKind, String) _mapToFilter(String sectionKey, String label) {
+    if (sectionKey == 'levels_progress') {
+      return (WordFilterKind.level, label);
+    }
+    return (WordFilterKind.about, label);
   }
 }
 
@@ -149,21 +159,24 @@ class _SectionHeader extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
       ),
     );
   }
 }
 
 class _GridSection extends StatelessWidget {
-  final List<String> items;
-  final List<bool>? locks;
-  final void Function(String label)? onTapItem;
+  final String sectionKey;
+  final List<HubSubcat> subs;
+  final SupabaseWordRepository repo;
+  final void Function(HubSubcat sub)? onTapSub;
 
-  const _GridSection({required this.items, this.locks, this.onTapItem});
+  const _GridSection({
+    required this.sectionKey,
+    required this.subs,
+    required this.repo,
+    this.onTapSub,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -172,11 +185,12 @@ class _GridSection extends StatelessWidget {
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
           (context, i) => _CategoryCard(
-            label: items[i],
-            locked: locks != null ? locks![i] : false,
-            onTap: onTapItem == null ? null : () => onTapItem!(items[i]),
+            sectionKey: sectionKey,
+            sub: subs[i],
+            repo: repo,
+            onTap: onTapSub == null ? null : () => onTapSub!(subs[i]),
           ),
-          childCount: items.length,
+          childCount: subs.length,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -189,57 +203,137 @@ class _GridSection extends StatelessWidget {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  final String label;
-  final bool locked;
+String _slugifyLocal(String s) {
+  return s
+      .toLowerCase()
+      .replaceAll('&', 'and')
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+}
+
+class _CategoryCard extends StatefulWidget {
+  final String sectionKey;
+  final HubSubcat sub;
+  final SupabaseWordRepository repo;
   final VoidCallback? onTap;
 
-  const _CategoryCard({required this.label, this.locked = false, this.onTap});
+  const _CategoryCard({
+    required this.sectionKey,
+    required this.sub,
+    required this.repo,
+    this.onTap,
+  });
+
+  @override
+  State<_CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<_CategoryCard> {
+  int? _total;
+  int? _dueToday;
+  int? _newTotal;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      String? catId = (widget.sub.supabaseId != null && widget.sub.supabaseId!.isNotEmpty)
+          ? widget.sub.supabaseId
+          : await widget.repo.findCategoryIdByName(widget.sub.label);
+
+      if (catId != null) {
+        final prog = await fetchCategoryProgress(catId);
+        final wl = await fetchWorkloadToday(catId);
+        if (!mounted) return;
+        setState(() {
+          _total = prog.total;
+          _dueToday = wl.dueToday;
+          _newTotal = wl.newTotal;
+          _loading = false;
+        });
+      } else {
+        if (!mounted) return;
+        setState(() => _loading = false);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
+    final t = Theme.of(context);
+    return Material(
+      color: t.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        // In Debug immer öffnen; in Release gesperrt lassen
-        if (locked && !kDebugMode) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Premium-Bereich – „Alles freischalten“, um Zugriff zu erhalten.')),
-          );
-          return;
-        }
-        onTap?.call();
-      },
-      child: Ink(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.outlineVariant),
-        ),
-        child: Stack(
-          children: [
-            // Label
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text(label, style: theme.textTheme.titleMedium),
-                ),
+      clipBehavior: Clip.antiAlias, // für saubere Ripple
+      child: InkWell(
+        onTap: widget.onTap, // Navigation kommt aus dem Parent
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: t.colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                if (_loading)
+                  const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                const Spacer(),
+                if (!_loading && _dueToday != null) _MiniBadge(icon: Icons.refresh, label: '$_dueToday'),
+                const SizedBox(width: 6),
+                if (!_loading && _newTotal != null) _MiniBadge(icon: Icons.fiber_new, label: '$_newTotal'),
+              ]),
+              const Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
+                  if (!_loading && _total != null) Text('$_total', style: t.textTheme.bodyMedium),
+                ],
               ),
-            ),
-            // Lock
-            if (locked)
-              const Positioned(
-                right: 10,
-                top: 10,
-                child: Icon(Icons.lock_outline, size: 18),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _MiniBadge extends StatelessWidget {
+  final IconData? icon;
+  final String label;
+  const _MiniBadge({this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(right: 6),
+      decoration: BoxDecoration(
+        color: t.colorScheme.surface, // modern, neutral
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: t.colorScheme.outlineVariant),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14),
+            const SizedBox(width: 4),
+          ],
+          Text(label, style: t.textTheme.labelSmall),
+        ],
+      ),
+    );
+  }
+}

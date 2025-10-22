@@ -17,9 +17,12 @@ dependencies:
   image_picker: ^1.0.7
   flutter_dotenv: ^5.1.0
   supabase_flutter: ^2.6.0
-  share_handler: ^0.0.21
+  shared_preferences: ^2.3.2
   http: ^1.2.2
   app_links: ^6.4.1
+  url_launcher: ^6.3.0
+  path: ^1.9.0
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +35,4 @@ flutter:
     - .env
     - assets/icons/
     - assets/images/
+    - assets/sounds/

@@ -53,13 +53,25 @@ Future<List<StageCount>> fetchStageCounts(String categoryId) async {
 
 /// 2) „Aktuelle Aufgabe“ (fällig heute + neu gesamt) pro Kategorie
 Future<WorkloadToday> fetchWorkloadToday(String categoryId) async {
-  final rows = await _sb.rpc('fn_user_workload_today', params: {'cat': categoryId});
-  final first = (rows as List).cast<Map<String, dynamic>>().firstOrNull ?? const {};
+  final res = await Supabase.instance.client
+      .rpc('fn_user_workload_today', params: {'cat': categoryId});
+
+  late final Map<String, dynamic> j;
+  if (res is Map<String, dynamic>) {
+    j = res;
+  } else if (res is List && res.isNotEmpty && res.first is Map<String, dynamic>) {
+    j = res.first as Map<String, dynamic>;
+  } else {
+    j = const {}; // fallback
+  }
+
   return WorkloadToday(
-    dueToday: (first['due_today'] as int?) ?? 0,
-    newTotal: (first['new_total'] as int?) ?? 0,
+    newTotal: (j['newTotal'] ?? j['new_total'] ?? 0) as int,
+    dueToday: (j['dueToday'] ?? j['due_today'] ?? 0) as int,
   );
 }
+
+
 
 /// 3) Lern-Queue (zuerst fällige, dann neue) – liefert v_words_user
 Future<List<WordUserView>> fetchLearnQueue(String categoryId, {int take = 50}) async {
@@ -107,7 +119,7 @@ class CategoryProgress {
 
 Future<CategoryProgress> fetchCategoryProgress(String categoryId) async {
   final rows = await _sb.rpc('fn_user_category_progress', params: {'cat': categoryId});
-  final r = (rows as List).cast<Map<String, dynamic>>().first;
+  final r = rows.cast<Map<String, dynamic>>().first;
 
   return CategoryProgress(
     total: (r['total'] as int?) ?? 0,
@@ -139,6 +151,23 @@ class SupabaseWordRepository {
         .toList();
   }
 
+    Future<String> _ensureCategorySlug(String value) async {
+    // Wenn 'value' already a slug, einfach zurückgeben (heuristik: enthält keine '{' und keine ':' und keine Großbuchstaben)
+    final isUuidLike = RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(value);
+    if (!isUuidLike) return value; // already a slug
+
+    // sonst: per UUID -> slug nachschlagen
+    final row = await _sb
+        .from('categories')
+        .select('slug')
+        .eq('id', value)
+        .maybeSingle();
+    if (row == null || row['slug'] == null) {
+      throw Exception('Kategorie-Slug nicht gefunden für id=$value');
+    }
+    return row['slug'] as String;
+  }
+
   Future<List<Word>> fetchByFilter(
     WordListFilter filter, {
     int limit = 50,
@@ -158,6 +187,14 @@ class SupabaseWordRepository {
         break;
       case WordFilterKind.level:
         qb = qb.eq('level', filter.value); // TEXT
+        break;
+      case WordFilterKind.category:
+        // NEU: aus der View per Slug lesen (keine user_words-Vermischung)
+        final slug = await _ensureCategorySlug(filter.value);
+        qb = _sb
+            .from('v_words_by_category')
+            .select('id,text,translation,from_lang,to_lang,level,pos,created_at:word_created_at')
+            .eq('category_slug', slug);
         break;
       case WordFilterKind.query:
         final q = filter.value;
@@ -280,4 +317,57 @@ extension MyWordsApi on SupabaseWordRepository {
 
     return (data as List).length;
   }
+}
+
+// --- Kategorie-Resolver -----------------------------------------------
+extension CategoryLookup on SupabaseWordRepository {
+  /// Sucht die Kategorie-ID (UUID) per Anzeigename (case-insensitive).
+  Future<String?> findCategoryIdByName(String name) async {
+    final row = await _sb
+        .from('categories')
+        .select('id')
+        .ilike('name', name) // "Health & Fitness" ≈ "health & fitness"
+        .maybeSingle();
+    if (row == null) return null;
+    return row['id'] as String?;
+  }
+}
+
+/// Info für die UI
+class CategoryInfo {
+  final String id;
+  final String name;
+  final String slug;
+  final String? groupSlug;
+  final String? groupName;
+  final int? orderIndex;
+
+  CategoryInfo({
+    required this.id,
+    required this.name,
+    required this.slug,
+    this.groupSlug,
+    this.groupName,
+    this.orderIndex,
+  });
+
+  factory CategoryInfo.fromJson(Map<String, dynamic> j) => CategoryInfo(
+        id: j['id'] as String,
+        name: j['name'] as String,
+        slug: j['slug'] as String,
+        groupSlug: j['group_slug'] as String?,
+        groupName: j['group_name'] as String?,
+        orderIndex: j['order_index'] as int?,
+      );
+}
+
+
+Future<List<CategoryInfo>> fetchAllCategories() async {
+  final rows = await _sb
+      .from('categories')
+      .select('id,name,slug,group_slug,group_name,order_index,type')
+      .eq('type', 'topic')
+      .order('group_slug', ascending: true)
+      .order('order_index', ascending: true);
+  return (rows as List).map((e) => CategoryInfo.fromJson(e as Map<String, dynamic>)).toList();
 }

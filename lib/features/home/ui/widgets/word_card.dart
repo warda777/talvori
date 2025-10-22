@@ -4,9 +4,17 @@ import 'counter_badge.dart';
 import 'dart:ui' as ui;
 import 'glow_sweep_ring.dart';
 import 'tap_flash.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:talvori/core/browser_return_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/data/last_shared_word_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: unnecessary_null_comparison
 
 
-class WordCard extends StatelessWidget {
+class WordCard extends ConsumerWidget {
   // Aktionen
   final VoidCallback onSpeak;
   final VoidCallback onMarkWords;
@@ -25,7 +33,7 @@ class WordCard extends StatelessWidget {
   // Größe + Wort
   final double? height;      // äußere Zielhöhe der Karte (nur als Mindesthöhe)
   final double? maxWidth;    // äußere Zielbreite (Deckel)
-  final String mainWord;
+  final String? initialWord; // optionales Fallback
 
   // Feste Innenränder der Karte (bleiben IMMER gleich)
   final EdgeInsets contentPadding;
@@ -50,7 +58,7 @@ class WordCard extends StatelessWidget {
     this.onCountTap,
     this.height,
     this.maxWidth,
-    this.mainWord = 'to assume',
+    this.initialWord,
     this.contentPadding = const EdgeInsets.fromLTRB(20, 16, 20, 16),
     this.isImageExpanded = false,
     this.onToggleImage,
@@ -59,11 +67,16 @@ class WordCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final cardRadius = BorderRadius.circular(28);
     final onImageFg = isImageDark ? Colors.white : Colors.black;          // helle/dunkle Schrift/Icons
     final onImageIcon = isImageDark ? Colors.white : Colors.black87;      // Icons minimal kräftiger
+    final asyncWord = ref.watch(lastSharedWordProvider);
+    final displayWord = asyncWord.maybeWhen(
+      data: (v) => (v != null && v.trim().isNotEmpty) ? v.trim() : (initialWord ?? 'to assume'),
+      orElse: () => initialWord ?? 'to assume',
+    );
 
 
     return ConstrainedBox(
@@ -149,17 +162,51 @@ class WordCard extends StatelessWidget {
                   // ─── WORT (immer identisch) ───
                   Positioned(
                     top: 220, left: 0, right: 0,
-                    child: Text(
-                      mainWord,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.w800,
-                        // nur Farbe/Schatten ändert sich, NICHT die Position
-                        color: isImageExpanded ? onImageFg : cs.onSurface,  // <- hier onImageFg verwenden
-                        shadows: isImageExpanded
-                            ? const [Shadow(color: Colors.black54, blurRadius: 8)]
-                            : const [],
+                    child: GestureDetector(
+                      onLongPress: () async {
+                        final controller = TextEditingController(text: displayWord);
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Wort setzen'),
+                            content: TextField(
+                              controller: controller,
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                hintText: 'Neues Wort eingeben',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
+                              TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('OK')),
+                            ],
+                          ),
+                        ) ?? false;
+
+                        if (!ok || !context.mounted) return;
+                        final w = controller.text.trim();
+                        if (w.isEmpty) return;
+
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('last_shared_word', w);
+                        // Provider neu laden
+                        ref.invalidate(lastSharedWordProvider);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Gesetzt: $w')),
+                        );
+                      },
+                      child: Text(
+                        displayWord,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.w800,
+                          color: isImageExpanded ? onImageFg : cs.onSurface,
+                          shadows: isImageExpanded
+                              ? const [Shadow(color: Colors.black54, blurRadius: 8)]
+                              : const [],
+                        ),
                       ),
                     ),
                   ),
@@ -250,24 +297,50 @@ class WordCard extends StatelessWidget {
                     ),
                   ),
 
-                  // ─── RECHTES ICON (unten rechts) mit TapFlash ───
+                  // ─── RECHTES ICON Chrome Button(unten rechts) mit TapFlash ───
                   Positioned(
                     bottom: 16, right: 8,
-                    child: SizedBox.square(
-                      dimension: 52,
-                      child: TapFlash(
-                        color: Theme.of(context).colorScheme.primary, // gleiche Flash-Logik
-                        shape: BoxShape.circle,
-                        onTapAfter: onGo,
-                        child: Container(
-                          decoration: const BoxDecoration(shape: BoxShape.circle),
-                          alignment: Alignment.center,
-                          child: SvgPicture.asset(
-                            'assets/icons/line_chrome.svg',
-                            width: 56, height: 56,
-                            colorFilter: ColorFilter.mode(
-                              isImageExpanded ? onImageIcon : cs.onSurface,
-                              BlendMode.srcIn,
+                    child: Tooltip(
+                      message: 'Zuletzt geteilte Quelle öffnen (Long-press: zurücksetzen)',
+                      child: GestureDetector( // ⬅️ NEU für Long-Press
+                        onLongPress: () async {
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Gespeicherten Link löschen?'),
+                              content: const Text('Die „Zurück zum Browser“-Position wird zurückgesetzt.'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
+                                TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Löschen')),
+                              ],
+                            ),
+                          ) ?? false;
+
+                          if (!context.mounted) return;
+                          if (ok) {
+                            await BrowserReturnService.clear();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Zurück-Position gelöscht')),
+                            );
+                          }
+                        },
+                        child: SizedBox.square(
+                          dimension: 52,
+                          child: TapFlash(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            onTapAfter: () => onChromeButtonTap(context),
+                            child: Container(
+                              decoration: const BoxDecoration(shape: BoxShape.circle),
+                              alignment: Alignment.center,
+                              child: SvgPicture.asset(
+                                'assets/icons/line_chrome.svg',
+                                width: 56, height: 56,
+                                colorFilter: ColorFilter.mode(
+                                  isImageExpanded ? onImageIcon : cs.onSurface,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -284,6 +357,49 @@ class WordCard extends StatelessWidget {
     );
   }
 }
+
+void onChromeButtonTap(BuildContext context) {
+  final messenger = ScaffoldMessenger.of(context);
+
+  BrowserReturnService.getLastUrl().then((url) async {
+    if (!context.mounted) return;
+
+    if (url == null) {
+      messenger.showSnackBar(const SnackBar(content: Text('Kein geteilter Link gefunden')));
+      return;
+    }
+
+    final isPdf = looksLikePdf(url);
+
+    // vorher: SnackBar mit Action „Kopieren“
+    // nachher: kurzer Auto-Dismiss, kein Button
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(isPdf
+              ? 'Öffne zuletzt geteilte PDF …'
+              : 'Öffne zuletzt geteilte Quelle …'),
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
+
+    // Primär öffnen
+    final Uri primary = url.startsWith('/') ? Uri.file(url) : Uri.parse(url);
+    final ok = await launchUrl(primary, mode: LaunchMode.externalApplication);
+
+    // PDF-Fallback (nur http/https)
+    if (!ok && isPdf && (primary.scheme == 'http' || primary.scheme == 'https')) {
+      final gview = Uri.parse(
+        'https://docs.google.com/gview?embedded=1&url=${Uri.encodeComponent(url)}',
+      );
+      await launchUrl(gview, mode: LaunchMode.externalApplication);
+    }
+  });
+}
+
 
 /// Optionaler Helfer (falls du den Titel separat brauchst)
 // ignore: unused_element
@@ -395,4 +511,5 @@ class _WordImageWithProbeState extends State<_WordImageWithProbe> {
     final prov = widget.provider ?? const AssetImage('assets/images/placeholder_1.png');
     return Image(image: prov, fit: widget.fit);
   }
+  
 }

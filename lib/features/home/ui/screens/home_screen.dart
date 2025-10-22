@@ -13,24 +13,30 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:share_handler/share_handler.dart';
+// import 'package:share_handler/share_handler.dart'; // Temporär deaktiviert für Web-Build
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:app_links/app_links.dart';
+import 'package:talvori/core/browser_return_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  // Share-Listener
-  StreamSubscription<SharedMedia>? _shareSub;
-  final _share = ShareHandlerPlatform.instance;
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
+  // Share-Listener (temporär deaktiviert für Web-Build)
+  // StreamSubscription<SharedMedia>? _shareSub;
+  // final _share = ShareHandlerPlatform.instance;
+  StreamSubscription<String>? _savedUrlSub;
 
   // UI-State
   bool _imageExpanded = false;
@@ -56,20 +62,61 @@ class _HomeScreenState extends State<HomeScreen> {
   void _toggleImage() => setState(() => _imageExpanded = !_imageExpanded);
   void _setImageDark(bool v) => setState(() => _imageIsDark = v);
 
-  // NEU: Deep-Linking (iOS Share → URL-Scheme)
+  // Deep-Linking
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linksSub;
+
+  // Helper
+  bool _looksLikePdf(String url) => url.toLowerCase().trim().endsWith('.pdf');
+
+  // URL aus geteiltem Text extrahieren und speichern
+  Future<void> _captureUrlIfPresent(String text) async {
+    final m = RegExp(r'(https?:\/\/[^\s<>()\[\]]+)').firstMatch(text);
+    if (m != null) {
+      await BrowserReturnService.setLastUrl(m.group(1)!);
+    }
+  }
+
+  // Erstes markiertes Wort aus dem geteilten Text extrahieren
+  String? _extractMarkedWord(String text) {
+    debugPrint('🔍 _extractMarkedWord input: "$text"');
+    
+    // Entferne URLs und extrahiere nur den Text vor der URL
+    final urlPattern = RegExp(r'https?://[^\s]+');
+    final textWithoutUrl = text.replaceAll(urlPattern, '').trim();
+    
+    debugPrint('🔍 Text ohne URL: "$textWithoutUrl"');
+    
+    // Wenn der Text leer ist, versuche das erste Wort aus dem gesamten Text zu extrahieren
+    final sourceText = textWithoutUrl.isEmpty ? text : textWithoutUrl;
+    
+    final matches = RegExp(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+")
+        .allMatches(sourceText)
+        .map((m) => m.group(0)!)
+        .toList();
+    
+    debugPrint('🔍 Gefundene Wörter: $matches');
+    
+    if (matches.isEmpty) return null;
+    
+    // Nimm das ERSTE Wort (das markierte Wort), nicht das letzte
+    final result = matches.first;
+    debugPrint('🔍 Extrahieres Wort: "$result"');
+    return result;
+  }
 
   // ===== Android: „Teilen an App“ einhängen =====
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     final user = Supabase.instance.client.auth.currentUser;
     debugPrint('AUTH USER: ${user?.id}');
 
-    // 1) Laufende Shares
+    // 1) Laufende Shares (temporär deaktiviert für Web-Build)
+    /*
     _shareSub = _share.sharedMediaStream.listen((SharedMedia media) {
       final text = media.content?.trim();
       if (text != null && text.isNotEmpty) {
@@ -84,8 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _handleIncomingShare(text);
       }
     });
+    */
 
-    // NEU: AppLinks initialisieren
+    // AppLinks initialisieren
     _appLinks = AppLinks();
 
     // 1) Initialer Link (App via Share geöffnet)
@@ -94,6 +142,16 @@ class _HomeScreenState extends State<HomeScreen> {
       if (t != null && t.isNotEmpty) {
         _handleIncomingShare(t);
       }
+    });
+
+    _savedUrlSub = BrowserReturnService.onSavedUrl.listen((url) {
+      if (!mounted) return;
+      final isPdf = _looksLikePdf(url);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(isPdf ? 'PDF-Position gespeichert'
+                                : 'Seitenposition gespeichert')),
+      );
     });
 
     // 2) Laufende Links (App bereits offen)
@@ -108,15 +166,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Zurück aus Chrome/Share → Wort neu laden
+      ref.invalidate(lastSharedWordProvider);
+    }
+  }
+
+  @override
   void dispose() {
-    _linksSub?.cancel(); // iOS Deep Link stream
-    _shareSub?.cancel(); // Android Share stream
+    WidgetsBinding.instance.removeObserver(this);
+    _linksSub?.cancel(); // Deep Link stream
+    // _shareSub?.cancel(); // Android Share stream (temporär deaktiviert)
+    _savedUrlSub?.cancel();
     super.dispose();
   }
 
   Future<void> _handleIncomingShare(String raw) async {
     final text = raw.trim();
     if (text.isEmpty) return;
+
+    // URL aus dem geteilten Text abgreifen (falls vorhanden)
+    await _captureUrlIfPresent(text);
+
+    // markiertes Wort persistieren (+ UI refresh)
+    final markedWord = _extractMarkedWord(text);
+    if (markedWord != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_shared_word', markedWord);
+      if (mounted) {
+        ref.invalidate(lastSharedWordProvider);
+      }
+    }
 
     final sb = Supabase.instance.client;
 
@@ -145,8 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
     session ??= await sb.auth.refreshSession().then((_) => sb.auth.currentSession);
     final token = session?.accessToken;
 
-    // --- Variante A: Direkt an Functions-Domain posten (stabil) ---
-    final functionsUrl = 'https://naplllscmpqexahxtbwg.functions.supabase.co/ingest_word';
+    // — Direkt an Functions-Domain posten —
+    final functionsUrl =
+        'https://naplllscmpqexahxtbwg.functions.supabase.co/ingest_word';
 
     try {
       final resp = await http.post(
@@ -163,14 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
-        final data   = jsonDecode(resp.body) as Map<String, dynamic>;
-        final added  = (data['text'] as String?) ?? _currentWord;
-        final tr     = (data['translation'] as String?) ?? '—';
+        final data = jsonDecode(resp.body) as Map<String, dynamic>;
+        final added = (data['text'] as String?) ?? _currentWord;
+        final tr = (data['translation'] as String?) ?? '—';
         final wasNew = (data['wasNewWord'] as bool?) ?? false;
 
-        final msg = wasNew
-            ? 'Hinzugefügt: $added — $tr'
-            : 'Schon vorhanden: $added — $tr';
+        final msg =
+            wasNew ? 'Hinzugefügt: $added — $tr' : 'Schon vorhanden: $added — $tr';
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -183,7 +264,6 @@ class _HomeScreenState extends State<HomeScreen> {
         SnackBar(content: Text('Share-Fehler: $e')),
       );
     }
-    
   }
 
   // ===== Ende Android-Share =====
@@ -351,13 +431,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     FilledButton.tonal(
                       onPressed: () {
                         Navigator.pop(ctx);
-                        // Navigator vor dem Await aus dem Context holen:
                         final nav = Navigator.of(context);
                         Future.microtask(() async {
                           await nav.push(
                             MaterialPageRoute(builder: (_) => const MyWordsScreen()),
                           );
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           await _refreshMyWordsCount();
                         });
                       },
@@ -409,9 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: const [
-                          BoxShadow(blurRadius: 12, color: Colors.black26)
-                        ],
+                        boxShadow: const [BoxShadow(blurRadius: 12, color: Colors.black26)],
                       ),
                       padding: const EdgeInsets.all(16),
                       alignment: Alignment.centerRight,
@@ -476,8 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 final screen = MediaQuery.of(context).size;
                 final safeLeft = posLeft.clamp(0.0, screen.width - 280);
-                final safeBottom =
-                    posBottom.clamp(8.0, screen.height - 415 - 8);
+                final safeBottom = posBottom.clamp(8.0, screen.height - 415 - 8);
 
                 return Positioned(
                   left: safeLeft,
@@ -538,20 +614,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: h,
                         child: wc.WordCard(
                           key: ValueKey((_imageIsDark, _imageExpanded)),
-                          mainWord: _currentWord,
-                          onQuickSend: () {
-                            final res = DailyPicksStore.I.add(_currentWord);
+                          initialWord: null, // WordCard verwendet lastSharedWordProvider
+                          onQuickSend: () async {
+                            // Aktuelles Wort aus dem Provider holen
+                            final currentWord = await ref.read(lastSharedWordProvider.future) ?? 'to assume';
+                            final res = DailyPicksStore.I.add(currentWord);
+                            
+                            // Context nach await prüfen
+                            if (!context.mounted) return;
+                            
                             switch (res) {
                               case AddResult.ok:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Added to today's picks")),
+                                  const SnackBar(content: Text("Added to today's picks")),
                                 );
                                 break;
                               case AddResult.duplicate:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Already in today\'s picks')),
+                                  const SnackBar(content: Text('Already in today\'s picks')),
                                 );
                                 break;
                               case AddResult.full:
@@ -563,8 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 break;
                               case AddResult.invalid:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Cannot add empty word')),
+                                  const SnackBar(content: Text('Cannot add empty word')),
                                 );
                                 break;
                             }
@@ -582,12 +661,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             await nav.push(
                               MaterialPageRoute(builder: (_) => const MyWordsScreen()),
                             );
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             await _refreshMyWordsCount();
                           },
                           onSpeak: () => _todo(context, 'Speak word'),
-                          onMarkWords: () =>
-                              _todo(context, 'Open Mark Words (web)'),
+                          onMarkWords: () => _todo(context, 'Open Mark Words (web)'),
                           onGo: () => _todo(context, 'Start: My Words practice'),
                         ),
                       );
