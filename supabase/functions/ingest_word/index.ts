@@ -22,9 +22,9 @@ function norm(s: string) {
   return s.trim();
 }
 
-// Text-Normalisierung: Trim + Whitespace auf einzelne Leerzeichen reduzieren
+// Text-Normalisierung: Trim + Whitespace auf einzelne Leerzeichen reduzieren + Case-insensitive
 function normalizeText(s: string) {
-  return s.replace(/\s+/g, " ").trim();
+  return s.replace(/\s+/g, " ").trim().toLowerCase();
 }
 function jaccard(a: string, b: string) {
   const A = new Set(a.toLowerCase().split(/\s+/));
@@ -105,8 +105,9 @@ serve(async (req) => {
     let existing = null;
     let sErr = null;
 
-    // 1) Force-Translate by ID (wenn id gegeben)
-    if (body.id) {
+    // 1) Force-Translate by ID (wenn id gegeben) - 100% Treffer
+    let row = existing;
+    if (!row && body.id) {
       const { data: byId, error: idErr } = await sbAdmin
         .from("words")
         .select("id, text, translation, pos, from_lang, to_lang")
@@ -114,9 +115,10 @@ serve(async (req) => {
         .maybeSingle();
 
       if (idErr) throw idErr;
-      if (byId) {
-        existing = byId;
-        textNormalized = normalizeText(byId.text || "");
+      row = byId || null;
+      if (row) {
+        existing = row;
+        textNormalized = normalizeText(row.text || "");
       } else {
         return new Response(
           JSON.stringify({ ok: false, error: "Word not found by id" }),
@@ -129,7 +131,7 @@ serve(async (req) => {
       const raw = norm(body.text);
       textNormalized = normalizeText(raw);
 
-      // Versuch 1: ilike (case-insensitive)
+      // Versuch 1: ilike (case-insensitive) - jetzt mit normalisiertem Text
       const lookup1 = await sbAdmin
         .from("words")
         .select("id, text, translation, pos, from_lang, to_lang")
@@ -142,7 +144,7 @@ serve(async (req) => {
       if (lookup1.error) {
         sErr = lookup1.error;
       } else if (lookup1.data) {
-        // Exakte Übereinstimmung nach Normalisierung prüfen
+        // Exakte Übereinstimmung nach Normalisierung prüfen (jetzt case-insensitive)
         if (normalizeText(lookup1.data.text) === textNormalized) {
           existing = lookup1.data;
         }
@@ -163,6 +165,29 @@ serve(async (req) => {
           sErr = lookup2.error;
         } else if (lookup2.data) {
           existing = lookup2.data;
+        }
+      }
+
+      // Versuch 3: Falls immer noch kein Match, RPC mit btrim für robuste Whitespace-Behandlung
+      if (!existing && !sErr) {
+        try {
+          const { data: lookup3, error: rpcErr } = await sbAdmin.rpc(
+            "find_word_by_normalized_text",
+            {
+              p_text: textNormalized,
+              p_from_lang: fromLang,
+              p_to_lang: toLang,
+            }
+          );
+
+          if (!rpcErr && lookup3 && lookup3.length > 0) {
+            existing = lookup3[0];
+          }
+        } catch (rpcError) {
+          // RPC-Funktion existiert möglicherweise nicht, das ist OK
+          console.log(
+            "RPC lookup not available, continuing with standard search"
+          );
         }
       }
 
