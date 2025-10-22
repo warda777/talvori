@@ -10,48 +10,37 @@ import 'package:talvori/core/browser_return_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-
 void main() {
   // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
     Zone.current.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
   };
-  // ignore: unused_element
-  void main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await BrowserReturnService.initShareListener();
-    runApp(const MyApp());
-  }
 
   runZonedGuarded(() {
-    runApp(const MyApp());
+    runApp(const ProviderScope(child: TalvoriApp()));
   }, (error, stack) {
     // Optional: an Crashlytics/Sentry senden
     debugPrint('Uncaught error: $error');
   });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TalvoriApp extends ConsumerWidget {
+  const TalvoriApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp(
-        title: 'Talvori',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        home: const _InitGate(child: HomeScreen()),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
+      title: 'Talvori',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
+      home: const _InitGate(child: HomeScreen()),
     );
   }
 }
 
 /// Lädt .env, initialisiert Supabase und (im Debug) loggt den Test-User ein.
-/// Zeigt dabei klaren Lade- und Fehlerzustand statt „weißer Screen“.
+/// Zeigt dabei klaren Lade- und Fehlerzustand statt „weißer Screen".
 class _InitGate extends StatefulWidget {
   final Widget child;
   const _InitGate({required this.child});
@@ -73,14 +62,11 @@ class _InitGateState extends State<_InitGate> {
     // 1) .env laden
     await dotenv.load(fileName: ".env");
 
-    
-
     // 2) Supabase initialisieren
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL']!,
       anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
     );
-
 
     // 3) Debug-Auto-Login (nur wenn kein User vorhanden)
     final auth = Supabase.instance.client.auth;
@@ -104,11 +90,9 @@ class _InitGateState extends State<_InitGate> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
 
-
     // Logging hilft beim Teilen-Debug:
     debugPrint('Logged in as: ${Supabase.instance.client.auth.currentUser?.id}');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +136,7 @@ class _InitGateState extends State<_InitGate> {
         }
         // Fertig initialisiert → eigentliche App
         return widget.child;
-    });
+      },
+    );
   }
 }
