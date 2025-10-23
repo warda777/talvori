@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final counterProvider = StateProvider<int>((_) => 0);
+final counterProvider = NotifierProvider<CounterNotifier, int>(() => CounterNotifier());
+
+class CounterNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+  
+  void increment() => state++;
+}
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -20,7 +27,7 @@ class HomeScreen extends ConsumerWidget {
             Text('$count'),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () => ref.read(counterProvider.notifier).state++,
+              onPressed: () => ref.read(counterProvider.notifier).increment(),
               child: const Text('Increment'),
             ),
           ],
