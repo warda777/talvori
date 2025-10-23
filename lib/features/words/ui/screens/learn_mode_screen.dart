@@ -4,7 +4,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/reset_event.dart';
 import 'dart:async';
+import 'dart:math' as math;
+
 
 const _kCard = Color(0xFF2D2C2C);
 const _kStageOuter = Color(0xFFE4B866);
@@ -137,8 +140,23 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
   List<String> _recentlySwipedCards = []; // Kürzlich geswipete Karten (für Wiederholung)
   int _cardsSwipedInSession = 0; // Anzahl Karten in aktueller Session geswipet
   bool _hasLoadedReviews = false; // Ob Wiederholungen bereits geladen wurden
-  static const int _newCardsBeforeReview = 10; // Nach X neuen Karten → Wiederholungen
-  static const double _reviewRatio = 0.5; // 50% der neuen Karten wiederholen (anpassbar)
+  static const int _newCardsBeforeReview = 4; // Nach X neuen Karten → Wiederholungen
+  static const double _reviewRatio = 0.8; // 80% der neuen Karten wiederholen (anpassbar)
+  // --- S0 Cooldown: wie viele andere Karten MINDESTENS dazwischen liegen müssen
+  static const int _s0MinOthers = 3; // ← gern auf 5 erhöhen, wenn gewünscht
+  final Map<String, int> _cooldown = {}; // wordId -> verbleibende "andere Karten"
+
+  // --- Queue-Steuerung: wie viele Karten vorn „gesteuert" werden
+  static const int _headSize = 150;
+
+  // --- Interleave-Muster (Gewichte) – gern anpassen
+  static const int _pS0 = 1;  // neue pushen (minimal, aber vorhanden)
+  static const int _pS1 = 4;  // S1 verstärken
+  static const int _pS2 = 5;  // S2 verstärken
+  static const int _pS3 = 3;
+  static const int _pS4 = 2;
+  static const int _pS5 = 2;
+
 
   // Wörter-Queue aus der Datenbank
   List<WordUserView> _wordQueue = [];
@@ -170,7 +188,7 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
         _categories = cats;
         _selectedCategoryIndex = cats.isEmpty ? 0 : _findInitialIndex(cats);
       });
-     // Lade Stage-Daten und Wörter für die aktuelle Kategorie
+      // Lade Stage-Daten und Wörter für die aktuelle Kategorie
       if (_categories.isNotEmpty) {
         await _loadStageData();
         await _loadWords();
@@ -227,6 +245,9 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       
       // 3. Speichere aktuelle Daten lokal als Backup
       await _persistStageData();
+      
+      // 4. Prüfe auf Completion (alle Wörter auf S5)
+      await _checkCompletionAndMaybeReset();
     } catch (e) {
       print('❌ Error loading stage data from backend: $e');
       print('   → Using local data if available');
@@ -303,7 +324,7 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       
       // Lade Wörter aus der Learn-Queue für die aktuelle Kategorie
       // Lade alle verfügbaren Wörter (kein Limit)
-      final words = await fetchLearnQueue(catId);
+      final words = await fetchLearnQueueAll(catId);
       
       print('🔍 Loaded ${words.length} words for category $catId');
       // Erstelle eine zufällige Liste von IDs (keine Wiederholungen)
@@ -312,33 +333,13 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       // Setze _wordQueue zuerst, damit _getSmartCardOrder() darauf zugreifen kann
       _wordQueue = words;
       
-      // Wende intelligente SRS-Auswahl an: 70% Wiederholungen, 30% neue Karten
-      final smartOrder = await _getSmartCardOrder();
-      List<String> shuffledIds;
-      if (smartOrder.isNotEmpty) {
-        // Filtere gültige Indizes
-        final validIndices = smartOrder.where((i) => i >= 0 && i < allWordIds.length).toList();
-        shuffledIds = validIndices.map((i) => allWordIds[i]).toList();
-        print('🎯 Smart order applied: ${shuffledIds.length} cards');
-        print('🎯 Smart order indices: ${validIndices.take(3).join(", ")}...');
-        if (validIndices.length != smartOrder.length) {
-          print('⚠️ Filtered out ${smartOrder.length - validIndices.length} invalid indices');
-        }
-      } else {
-        // Fallback: Einfaches Shuffle wenn keine intelligente Auswahl möglich
-        shuffledIds = List<String>.from(allWordIds);
-        shuffledIds.shuffle();
-        print('🎯 Fallback shuffle applied: ${shuffledIds.length} cards');
-      }
+      // Verwende due-first + weighted head
+      final shuffledIds = _buildQueueDueFirst(_wordQueue);
       
       setState(() {
         _wordQueue = words;
         _shuffledWordIds = shuffledIds;
-        
-        // Reset Index, wenn neue Kategorie
-        if (_index >= _shuffledWordIds.length) {
-          _index = 0;
-        }
+        if (_index >= _shuffledWordIds.length) _index = 0;
       });
       
       print('🎯 UI updated with ${_shuffledWordIds.length} cards');
@@ -506,6 +507,56 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       HapticFeedback.selectionClick();
     }
   }
+
+  void _startCooldownIfNeeded(String wordId) {
+  // Nur für S0 aktivieren
+  final stage = _getStageFor(wordId);
+  if (stage == 0) {
+    final cur = _cooldown[wordId] ?? 0;
+    // setze mindestens _s0MinOthers; falls bereits höher, beibehalten
+    _cooldown[wordId] = cur > 0 ? (cur > _s0MinOthers ? cur : _s0MinOthers) : _s0MinOthers;
+  }
+}
+
+void _tickCooldowns() {
+  // Nach JEDEM Kartenwechsel eine "andere Karte" gezählt
+  final keys = List<String>.from(_cooldown.keys);
+  for (final k in keys) {
+    final v = (_cooldown[k] ?? 0) - 1;
+    if (v <= 0) {
+      _cooldown.remove(k);
+    } else {
+      _cooldown[k] = v;
+    }
+  }
+}
+
+/// Wählt die nächste anzeigbare Karte, die NICHT im Cooldown ist.
+/// Optional: `avoidId` sofort nicht nochmal nehmen (z. B. eben geswipte Karte).
+void _advanceToNextEligible({String? avoidId}) {
+  if (_shuffledWordIds.isEmpty) {
+    _index = 0;
+    return;
+  }
+  int tries = 0;
+  final len = _shuffledWordIds.length;
+
+  // Stelle sicher, dass _index im Bereich ist
+  _index = _index % len;
+
+  while (tries < len) {
+    final candidateId = _shuffledWordIds[_index];
+    final cd = _cooldown[candidateId] ?? 0;
+    final blocked = cd > 0 || (avoidId != null && candidateId == avoidId);
+    if (!blocked) break;
+
+    // zur nächsten Karte vorgehen
+    _index = (_index + 1) % len;
+    tries++;
+  }
+  // Falls alles blockiert ist: wir nehmen was da ist (Verhungern verhindern)
+  }
+  
   void _handleTimeout() {
     // Zeit abgelaufen → als falsch werten
     HapticFeedback.mediumImpact();
@@ -607,9 +658,9 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
         if (correct) {
           if (isReview) {
             // Wiederholung richtig: Stage hoch (max 5)
-            estimatedNewStage = (oldStage + 1).clamp(0, 5);
+          estimatedNewStage = (oldStage + 1).clamp(0, 5);
             print('🔄 Review correct: Stage $oldStage → $estimatedNewStage');
-          } else {
+        } else {
             // Neue Karte richtig: Stage hoch (max 5)
             estimatedNewStage = (oldStage + 1).clamp(0, 5);
             print('🆕 New card correct: Stage $oldStage → $estimatedNewStage');
@@ -617,7 +668,7 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
         } else {
           if (isReview) {
             // Wiederholung falsch: Stage runter (min 0)
-            estimatedNewStage = (oldStage - 1).clamp(0, 5);
+          estimatedNewStage = (oldStage - 1).clamp(0, 5);
             print('🔄 Review incorrect: Stage $oldStage → $estimatedNewStage');
           } else {
             // Neue Karte falsch: Stage runter (min 0)
@@ -628,6 +679,19 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
         
         // direkt NACH: int estimatedNewStage = (oldStage + 1/ - 1).clamp(0, 5);
         _setLocalWordStage(currentWord.id, estimatedNewStage);
+        
+        // Inkrementiere tägliche Zähler bei S0→S1 Übergang (richtig gelernt)
+        if (correct && oldStage == 0 && estimatedNewStage == 1) {
+          await _incToday(_currentCatId, isNew: true);
+          print('📈 Daily counter incremented: S0→S1 (new word learned)');
+        }
+        
+        // refresh head so newly-due S3/S4 float to the top right away
+        final order = await _getSmartCardOrder();
+        setState(() {
+          _shuffledWordIds = [for (final idx in order) _wordQueue[idx].id];
+          _index = _index % _shuffledWordIds.length;
+        });
         
         // Optimistisches UI-Update: Stage-Zähler sofort aktualisieren
         print('🎯 Optimistic update: word="${currentWord.text}", oldStage=$oldStage, estimatedNew=$estimatedNewStage, correct=$correct');
@@ -708,27 +772,40 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       _showTranslation = false;
 
       if (correct) {
-        // Richtig: normal weiter zur nächsten Karte
-        _index = (_index + 1) % _shuffledWordIds.length;
-      } else {
-        // Falsch: aktuelle Karte ans Ende schieben,
-        // Index NICHT erhöhen (damit jetzt die nächste Karte dran ist)
-        final id = currentWord?.id;
-        if (id == null) return; // Sicherheitscheck
-        // erste Vorkommnis entfernen und hinten anhängen
-        _shuffledWordIds.remove(id);
-        _shuffledWordIds.add(id);
+        // Richtig: normal weiter
+      _index = (_index + 1) % _shuffledWordIds.length;
 
-        // sicherstellen, dass sie als Review gilt und später wiederkommt
-        if (!_recentlySwipedCards.contains(id)) {
-          _recentlySwipedCards.add(id);
+        // Eine "andere Karte" wurde gezeigt → Cooldowns ticken
+        _tickCooldowns();
+
+        // vermeide sofortige Wiederkehr derselben Karte
+        _advanceToNextEligible(avoidId: currentWord?.id);
+      } else {
+        // Falsch: aktuelle Karte hinten re-queuen, S0 bekommt Cooldown
+        final id = currentWord?.id;
+        if (id == null) return;
+
+        // erstes Vorkommen entfernen und hinten anhängen
+        final oldIndex = _shuffledWordIds.indexOf(id);
+        if (oldIndex != -1) {
+          _shuffledWordIds.removeAt(oldIndex);
+          _shuffledWordIds.add(id);
         }
 
-        // Index bleibt auf derselben Position, zeigt nun auf die nächste Karte
+        // Nur bei S0 Cooldown starten
+        _startCooldownIfNeeded(id);
+
+        // Index auf aktuelle Position clampen
         _index = _index % _shuffledWordIds.length;
+
+        // Eine "andere Karte" wird als nächstes gezeigt → Cooldowns ticken schon JETZT,
+        // damit das gerade falsche S0-Wort mindestens _s0MinOthers Karten warten muss.
+        _tickCooldowns();
+
+        // Wähle die nächste Karte, die nicht im Cooldown ist (und nicht sofort dieselbe)
+        _advanceToNextEligible(avoidId: id);
       }
 
-      _isSlidingIn = true;
     });
 
     // Prüfe ob neue Karten geladen werden müssen (nach Wiederholungen)
@@ -794,91 +871,293 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
   // SRS-Algorithmus: Berechne nächste Wiederholung basierend auf Anki-Algorithmus
   DateTime _calculateNextReview(int currentStage, bool correct) {
     final now = DateTime.now();
-    
-    if (correct) {
-      // Richtig beantwortet: Stage erhöhen, Intervall verlängern
+    if (!correct) return now.add(const Duration(seconds: 15));
+
+    // Session-Boost: wenn der Timer läuft, schneller staffeln
+    final sessionBoost = _timerActive;
+
+    if (sessionBoost) {
       switch (currentStage) {
-        case 0: return now.add(const Duration(minutes: 1));    // A1 → A2: 1 Min
-        case 1: return now.add(const Duration(minutes: 10));   // A2 → B1: 10 Min
-        case 2: return now.add(const Duration(hours: 1));      // B1 → B2: 1 Stunde
-        case 3: return now.add(const Duration(days: 1));       // B2 → C1: 1 Tag
-        case 4: return now.add(const Duration(days: 3));       // C1 → C2: 3 Tage
-        case 5: return now.add(const Duration(days: 7));       // C2 → C2: 1 Woche
-        default: return now.add(const Duration(minutes: 1));
+        case 0: return now.add(const Duration(seconds: 5));   // A1 → A2
+        case 1: return now.add(const Duration(seconds: 10));   // A2 → B1
+        case 2: return now.add(const Duration(seconds: 20));    // B1 → B2
+        case 3: return now.add(const Duration(seconds: 30));    // B2 → C1
+        case 4: return now.add(const Duration(minutes: 1));   // C1 → C2
+        case 5: return now.add(const Duration(minutes: 2));       // C2 Revisit
+        default: return now.add(const Duration(seconds: 10));
       }
     } else {
-      // Falsch beantwortet: Zurück zu Stage 0, sofort wiederholen
-      return now.add(const Duration(seconds: 10));
+      // konservativer außerhalb der Session
+      switch (currentStage) {
+        case 0: return now.add(const Duration(seconds: 10));
+        case 1: return now.add(const Duration(seconds: 20));
+        case 2: return now.add(const Duration(seconds: 40));
+        case 3: return now.add(const Duration(minutes: 1));
+        case 4: return now.add(const Duration(minutes: 2));
+        case 5: return now.add(const Duration(minutes: 5));
+        default: return now.add(const Duration(seconds: 20));
+      }
     }
   }
-  
+
   // Intelligente Karten-Auswahl: Kartenbasiertes System
   Future<List<int>> _getSmartCardOrder() async {
-    final reviewCards = <int>[];
-    final newCards = <int>[];
-    
-    print('🎯 Getting smart card order...');
-    print('   Session: $_cardsSwipedInSession/$_newCardsBeforeReview');
-    print('   Review list: ${_recentlySwipedCards.length} cards');
-    print('   Should show reviews: ${_shouldShowReviews()}');
-    
-    // Kategorisiere Karten (verwende _wordQueue statt _shuffledWordIds)
+    final now = DateTime.now();
+
+    // Buckets: due vs wait per stage
+    final s0Due = <int>[], s1Due = <int>[], s2Due = <int>[], s3Due = <int>[], s4Due = <int>[], s5Due = <int>[];
+    final s0Wait = <int>[], s1Wait = <int>[], s2Wait = <int>[], s3Wait = <int>[], s4Wait = <int>[], s5Wait = <int>[], rest = <int>[];
+
+    bool _isDue(WordUserView w) {
+      final t = w.nextDueAt;
+      return t != null && !t.isAfter(now); // nextDueAt <= now
+    }
+
     for (int i = 0; i < _wordQueue.length; i++) {
-      final word = _wordQueue[i];
-      final wordId = word.id;
-      // Prüfe ob es eine Wiederholung ist (aus kürzlich geswipeten Karten)
-      if (_shouldReviewCard(wordId)) {
-        reviewCards.add(i);
-      } else {
-        // Alle anderen Karten sind "neu" für das kartenbasierte System
-        newCards.add(i);
+      final w = _wordQueue[i];
+      final st = _getStageFor(w.id);
+      final due = _isDue(w);
+
+      switch (st) {
+        case 0: (due ? s0Due : s0Wait).add(i); break;
+        case 1: (due ? s1Due : s1Wait).add(i); break;
+        case 2: (due ? s2Due : s2Wait).add(i); break;
+        case 3: (due ? s3Due : s3Wait).add(i); break;
+        case 4: (due ? s4Due : s4Wait).add(i); break;
+        case 5: (due ? s5Due : s5Wait).add(i); break;
+        default: rest.add(i); break;
       }
     }
+
+    void shuf<T>(List<T> x) => x..shuffle();
+    for (final b in [s0Due,s1Due,s2Due,s3Due,s4Due,s5Due,
+                    s0Wait,s1Wait,s2Wait,s3Wait,s4Wait,s5Wait,rest]) {
+      shuf(b);
+    }
+
+    // Head pattern (weights are applied as "pull this many from X, then move on")
+    int needS0 = _pS0, needS1 = _pS1, needS2 = _pS2, needS3 = _pS3, needS4 = _pS4, needS5 = _pS5;
+    void resetPattern() { needS0=_pS0; needS1=_pS1; needS2=_pS2; needS3=_pS3; needS4=_pS4; needS5=_pS5; }
     
-    print('   Found ${newCards.length} new cards, ${reviewCards.length} review cards');
+    // Intelligente S0-Logik: Reduziere neue Karten, wenn viele Wiederholungen vorhanden sind
+    final totalS1toS5 = s1Due.length + s1Wait.length + s2Due.length + s2Wait.length + 
+                       s3Due.length + s3Wait.length + s4Due.length + s4Wait.length + 
+                       s5Due.length + s5Wait.length;
     
-    // Mische die Listen
-    reviewCards.shuffle();
-    newCards.shuffle();
-    
-    final result = <int>[];
-    
-    // Kartenbasiertes System: Prüfe ob Wiederholungen fällig sind
-    if (_shouldShowReviews()) {
-      // Zeige Wiederholungen aus kürzlich geswipeten Karten
-      final reviewIndices = _getReviewIndices(_recentlySwipedCards.length);
-      
-      for (final index in reviewIndices) {
-        result.add(index);
-      }
-      
-      print('🔄 Showing ${reviewIndices.length} reviews from recently swiped cards');
-      print('   Review cards: ${_recentlySwipedCards.take(3).join(", ")}...');
-      print('   Review indices: ${reviewIndices.take(3).join(", ")}...');
-    } else {
-      // Zeige neue Karten
-      final remainingNewCards = _newCardsBeforeReview - _cardsSwipedInSession;
-      final newCount = remainingNewCards > 0 ? remainingNewCards : newCards.length;
-      
-      // Stelle sicher, dass wir genug Karten haben
-      if (newCards.length < newCount) {
-        print('⚠️ Not enough new cards available: ${newCards.length} < $newCount');
-        // Zeige alle verfügbaren neuen Karten
-        for (int i = 0; i < newCards.length; i++) {
-          result.add(newCards[i]);
-        }
-        print('🆕 Showing all ${newCards.length} available new cards');
+    // Reduziere S0 Gewicht, wenn viele Wiederholungen vorhanden sind
+    if (totalS1toS5 > 10) {
+      needS0 = 0; // Keine neuen Karten, wenn viele Wiederholungen vorhanden sind
+    } else if (totalS1toS5 > 5) {
+      needS0 = 1; // Weniger neue Karten
+    }
+
+    final head = <int>[];
+    while (head.length < _headSize &&
+          (s0Due.isNotEmpty||s1Due.isNotEmpty||s2Due.isNotEmpty||s3Due.isNotEmpty||s4Due.isNotEmpty||s5Due.isNotEmpty||
+            s0Wait.isNotEmpty||s1Wait.isNotEmpty||s2Wait.isNotEmpty||s3Wait.isNotEmpty||s4Wait.isNotEmpty||s5Wait.isNotEmpty)) {
+
+      // 1) due-first, prioritise higher stages
+      while (needS3 > 0 && s3Due.isNotEmpty && head.length < _headSize) { head.add(s3Due.removeLast()); needS3--; }
+      while (needS4 > 0 && s4Due.isNotEmpty && head.length < _headSize) { head.add(s4Due.removeLast()); needS4--; }
+      while (needS5 > 0 && s5Due.isNotEmpty && head.length < _headSize) { head.add(s5Due.removeLast()); needS5--; }
+      while (needS2 > 0 && s2Due.isNotEmpty && head.length < _headSize) { head.add(s2Due.removeLast()); needS2--; }
+      while (needS1 > 0 && s1Due.isNotEmpty && head.length < _headSize) { head.add(s1Due.removeLast()); needS1--; }
+      while (needS0 > 0 && s0Due.isNotEmpty && head.length < _headSize) { head.add(s0Due.removeLast()); needS0--; }
+
+      // 2) then wait-pools (still give higher stages a nudge)
+      while (needS3 > 0 && s3Wait.isNotEmpty && head.length < _headSize) { head.add(s3Wait.removeLast()); needS3--; }
+      while (needS4 > 0 && s4Wait.isNotEmpty && head.length < _headSize) { head.add(s4Wait.removeLast()); needS4--; }
+      while (needS2 > 0 && s2Wait.isNotEmpty && head.length < _headSize) { head.add(s2Wait.removeLast()); needS2--; }
+      while (needS1 > 0 && s1Wait.isNotEmpty && head.length < _headSize) { head.add(s1Wait.removeLast()); needS1--; }
+      while (needS0 > 0 && s0Wait.isNotEmpty && head.length < _headSize) { head.add(s0Wait.removeLast()); needS0--; }
+      while (needS5 > 0 && s5Wait.isNotEmpty && head.length < _headSize) { head.add(s5Wait.removeLast()); needS5--; }
+
+      if (needS0==0 && needS1==0 && needS2==0 && needS3==0 && needS4==0 && needS5==0) {
+        resetPattern();
       } else {
-        for (int i = 0; i < newCount && i < newCards.length; i++) {
-          result.add(newCards[i]);
+        // if a bucket is empty, soft-reset to keep pulling from what exists
+        if ((needS0>0 && s0Due.isEmpty && s0Wait.isEmpty) ||
+            (needS1>0 && s1Due.isEmpty && s1Wait.isEmpty) ||
+            (needS2>0 && s2Due.isEmpty && s2Wait.isEmpty) ||
+            (needS3>0 && s3Due.isEmpty && s3Wait.isEmpty) ||
+            (needS4>0 && s4Due.isEmpty && s4Wait.isEmpty) ||
+            (needS5>0 && s5Due.isEmpty && s5Wait.isEmpty)) {
+          resetPattern();
         }
-        print('🆕 Showing $newCount new cards (${_cardsSwipedInSession}/$_newCardsBeforeReview swiped)');
       }
     }
-    
-    print('   Final result: ${result.length} cards');
-    return result;
+
+    // Debug: Log head mix
+    debugPrint('HEAD mix → S0:${head.where((i)=>_getStageFor(_wordQueue[i].id)==0).length} '
+               'S1:${head.where((i)=>_getStageFor(_wordQueue[i].id)==1).length} '
+               'S2:${head.where((i)=>_getStageFor(_wordQueue[i].id)==2).length} '
+               'S3:${head.where((i)=>_getStageFor(_wordQueue[i].id)==3).length} '
+               'S4:${head.where((i)=>_getStageFor(_wordQueue[i].id)==4).length} '
+               'S5:${head.where((i)=>_getStageFor(_wordQueue[i].id)==5).length}');
+
+    // Tail = the rest, shuffled
+    final tail = <int>[
+      ...s0Due, ...s1Due, ...s2Due, ...s3Due, ...s4Due, ...s5Due,
+      ...s0Wait, ...s1Wait, ...s2Wait, ...s3Wait, ...s4Wait, ...s5Wait,
+      ...rest,
+    ]..shuffle();
+
+    return <int>[...head, ...tail];
   }
+
+
+  List<String> _buildQueueDueFirst(List<WordUserView> words) {
+    final now = DateTime.now();
+
+    bool isDue(WordUserView w) {
+      final d = w.nextDueAt;
+      if (d == null) return false;           // S0 hat meist null → nicht „due"
+      return !d.isAfter(now);                // d <= now
+    }
+
+    // Pools: due vs. wait für S1..S5 und S0 separat
+    final s0      = <WordUserView>[];
+    final s1Due   = <WordUserView>[], s1Wait = <WordUserView>[];
+    final s2Due   = <WordUserView>[], s2Wait = <WordUserView>[];
+    final s3Due   = <WordUserView>[], s3Wait = <WordUserView>[];
+    final s4Due   = <WordUserView>[], s4Wait = <WordUserView>[];
+    final s5Due   = <WordUserView>[], s5Wait = <WordUserView>[];
+
+    for (final w in words) {
+      final st = _getStageFor(w.id);
+      if (st <= 0) { s0.add(w); continue; }
+      final due = isDue(w);
+      switch (st) {
+        case 1: (due ? s1Due : s1Wait).add(w); break;
+        case 2: (due ? s2Due : s2Wait).add(w); break;
+        case 3: (due ? s3Due : s3Wait).add(w); break;
+        case 4: (due ? s4Due : s4Wait).add(w); break;
+        case 5: (due ? s5Due : s5Wait).add(w); break;
+        default: s1Wait.add(w); break;
+      }
+    }
+
+    // Shuffle alle Pools
+    void shuffleAll() {
+      s0.shuffle();
+      s1Due.shuffle(); s1Wait.shuffle();
+      s2Due.shuffle(); s2Wait.shuffle();
+      s3Due.shuffle(); s3Wait.shuffle();
+      s4Due.shuffle(); s4Wait.shuffle();
+      s5Due.shuffle(); s5Wait.shuffle();
+    }
+    shuffleAll();
+
+    // Hilfsnehmer: zieht 1 Element wenn vorhanden
+    WordUserView? _take(List<WordUserView> pool) {
+      if (pool.isEmpty) return null;
+      return pool.removeLast();
+    }
+
+    final allLen = words.length;
+    final headSize = math.min(allLen, 120);          // steuerbares Head-Fenster
+
+    // 1) Due zuerst – stärkerer Fokus auf höhere Stufen:
+    final pattern = <List<List<WordUserView>>>[
+      [s3Due], [s4Due], [s5Due],          // hohe Stufen (due) zuerst
+      [s1Due], [s2Due],                   // dann die niedrigeren (due)
+
+      // 2) Danach Mischung für nicht-due (wait):
+      //    leicht mehr S0 und S1, aber S2/S3/S4 früher als bisher.
+      [s0], [s1Wait], [s2Wait],
+      [s0], [s3Wait], [s4Wait],
+      [s1Wait], [s2Wait], [s3Wait],
+      [s4Wait], [s5Wait],
+    ];
+
+    final head = <String>[];
+    int pi = 0; // pattern-index
+    int stall = 0;
+
+    while (head.length < headSize && stall < headSize * 4) {
+      final bucketGroup = pattern[pi % pattern.length];
+      bool wrote = false;
+
+      // versuche nacheinander aus der Gruppe zu ziehen
+      for (final bucket in bucketGroup) {
+        final w = _take(bucket);
+        if (w != null) {
+          head.add(w.id);
+          wrote = true;
+          break;
+        }
+      }
+
+      if (!wrote) {
+        // kein Treffer in dieser Gruppe → weiterdrehen
+        stall++;
+      } else {
+        stall = 0;
+      }
+
+      pi++;
+    }
+
+    // Tail = alles Übrige (egal ob due/wait), gemischt hinten dran
+    final used = head.toSet();
+    final tail = words
+        .where((w) => !used.contains(w.id))
+        .map((w) => w.id)
+        .toList()
+      ..shuffle();
+
+    return <String>[...head, ...tail];
+  }
+
+  List<String> _buildPrioritizedQueue(List<String> allIds) {
+  // Menge für schnellen Ausschluss
+  final allSet = allIds.toSet();
+
+  // Reviews (nur die, die es wirklich in allIds gibt)
+  final reviewIds = _recentlySwipedCards.where(allSet.contains).toList()..shuffle();
+
+  // Neue (alles, was nicht Review ist)
+  final reviewSet = reviewIds.toSet();
+  final newIds = allIds.where((id) => !reviewSet.contains(id)).toList()..shuffle();
+
+  // Falls noch nicht Zeit für Reviews → alles neu gemischt
+  if (!_shouldShowReviews() || reviewIds.isEmpty) {
+    final mixed = List<String>.from(newIds);
+    // Sicherheitsnetz: Rest (falls irgendwas fehlte)
+    final rest = allIds.where((id) => !mixed.contains(id)).toList();
+    mixed.addAll(rest);
+    return mixed;
+  }
+
+  // Kopf-Fenster: mische nach _reviewRatio (z. B. 0.5 -> 1:1)
+  final headSize = math.min(allIds.length, math.max(10, _newCardsBeforeReview * 2));
+  final targetReviews = math.min(reviewIds.length, (headSize * _reviewRatio).round());
+  final targetNews    = math.min(newIds.length, headSize - targetReviews);
+
+  final headReviews = reviewIds.take(targetReviews).toList();
+  final headNews    = newIds.take(targetNews).toList();
+
+  // Interleave (beginne mit Review, wenn Ratio >= 0.5)
+  final head = <String>[];
+  int i = 0, j = 0;
+  final startWithReview = _reviewRatio >= 0.5;
+  while (i < headReviews.length || j < headNews.length) {
+    if (startWithReview) {
+      if (i < headReviews.length) head.add(headReviews[i++]);
+      if (j < headNews.length)    head.add(headNews[j++]);
+      } else {
+      if (j < headNews.length)    head.add(headNews[j++]);
+      if (i < headReviews.length) head.add(headReviews[i++]);
+    }
+  }
+
+  // Tail = übrige (alles, was nicht im Head liegt), gemischt
+  final used = head.toSet();
+  final tail = allIds.where((id) => !used.contains(id)).toList()..shuffle();
+
+  return <String>[...head, ...tail];
+}
+
   
   // Prüft ob eine Karte wiederholt werden sollte (kartenbasiert)
   bool _shouldReviewCard(String wordId) {
@@ -997,11 +1276,11 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       }
       
       // Fallback: Berechne basierend auf Stage
-      final word = _wordQueue.firstWhere((w) => w.id == wordId, orElse: () => _wordQueue.first);
-      final stage = word.srsStage ?? 0;
-      
-      if (stage == 0) return null; // Neue Karten haben keine Wiederholungszeit
-      
+    final word = _wordQueue.firstWhere((w) => w.id == wordId, orElse: () => _wordQueue.first);
+    final stage = word.srsStage ?? 0;
+    
+    if (stage == 0) return null; // Neue Karten haben keine Wiederholungszeit
+    
       // Berechne nächste Wiederholung basierend auf Stage
       final now = DateTime.now();
       switch (stage) {
@@ -1050,6 +1329,56 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
     _setStageFor(wordId, newStage);
     print('🔄 Local stage updated: $wordId → Stage $newStage');
   }
+
+  // Hilfsfunktion zum Inkrementieren der täglichen Zähler
+  Future<void> _incToday(String categoryId, {required bool isNew}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = isNew ? 'today_new_$categoryId' : 'today_repeats_$categoryId';
+    final cur = prefs.getInt(key) ?? 0;
+    await prefs.setInt(key, cur + 1);
+  }
+
+  // Baut die Head-Queue nach jedem Swipe kurz auf
+  Future<void> _rebuildQueueHead() async {
+    // baut nur neu, nutzt _wordQueue (mit _stageOverride!) und hält den Index im Rahmen
+    final newIds = _buildQueueDueFirst(_wordQueue);
+    setState(() {
+      _shuffledWordIds = newIds;
+      _index = _index % _shuffledWordIds.length;
+    });
+  }
+
+  // Prüft ob alle Wörter auf S5 sind und zeigt Gratulation + Reset
+  Future<void> _checkCompletionAndMaybeReset() async {
+    try {
+      // alles erledigt?
+      if (_totalWordsInCategory > 0 && _stages[5] >= _totalWordsInCategory) {
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            backgroundColor: const Color(0xFF2D2D2F),
+            title: const Text('Geschafft! 🎉', style: TextStyle(color: Colors.white)),
+            content: Text(
+              'Herzlichen Glückwunsch! Du hast alle ${_totalWordsInCategory} Wörter dieser Kategorie auf S5 gebracht.',
+              style: const TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Weiter', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+
+        // Danach alles wieder auf Anfang setzen
+        await _performReset(); // nutzt schon deinen Server-/Local-Reset
+      }
+    } catch (_) {/* ignore */}
+  }
+
 
   Widget _buildCardFront(String word) {
     return Container(
@@ -1426,6 +1755,21 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
       await _loadStageData();
       await _loadWords();
       
+      // 4) SharedPreferences für category_detail_screen zurücksetzen
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'daily_stats_$_currentCatId';
+        final stageKey = 'learn_stages_$_currentCatId';
+        await prefs.remove(key);
+        await prefs.remove(stageKey);
+        print('✅ Cleared SharedPreferences for category: $_currentCatId');
+      } catch (e) {
+        print('❌ Failed to clear SharedPreferences: $e');
+      }
+      
+      // 5) Benachrichtige alle anderen Screens über den Reset
+      ResetEvent.notifyReset(_currentCatId);
+      
       print('🔄 Reset complete: $_stages');
     } catch (e) {
       print('❌ Reset error: $e');
@@ -1606,7 +1950,7 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
                   children: [
                     _VerticalStageSwitch(
                       count: _stages[0],
-                      outerColor: _kStageInnerRed,
+                      outerColor: _stages[0] > 0 ? _kStageInnerRed : Colors.grey.shade400,
                       innerColor: const Color(0xFF2D2D2F),
                       highlight: _stages[0] > 0,
                       completed: false,
@@ -1618,7 +1962,7 @@ class _LearnModeScreenState extends State<LearnModeScreen> with TickerProviderSt
                     for (int stage = 1; stage <= 5; stage++) ...[
                       _VerticalStageSwitch(
                         count: _stages[stage],
-                        outerColor: _kStageOuter,
+                        outerColor: _stages[stage] > 0 ? _kStageOuter : Colors.grey.shade400,
                         innerColor: _kStageInner,
                         highlight: _stages[stage] > 0 && _stages[stage] < _goalPerStage,
                         completed: _stages[stage] >= _goalPerStage,
@@ -1955,7 +2299,7 @@ class _EdgeFade extends StatelessWidget {
                     Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
                     Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
                     Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
-Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
                     Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
                   ],
                   stops: [0.0, 0.3, 0.6, 0.8, 1.0],
