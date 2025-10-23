@@ -67,12 +67,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   // Nur UI: Flip- und Swipe-Animation + Audio
   AnimationController? _flipController;
   Animation<double>? _flipAnimation;
-
+  
   Offset _cardOffset = Offset.zero;
   double _cardRotation = 0.0;
   bool _isDragging = false;
   bool _isSlidingIn = false;
-
+  
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
@@ -103,7 +103,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     _audioPlayer.dispose();
     super.dispose();
   }
-
+  
   // === UI helpers ===
 
   Future<void> _playCorrectSound() async {
@@ -113,7 +113,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       HapticFeedback.lightImpact();
     }
   }
-
+  
   Future<void> _playIncorrectSound() async {
     try {
       await _audioPlayer.play(AssetSource('sounds/incorrect.mp3'));
@@ -121,7 +121,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       HapticFeedback.mediumImpact();
     }
   }
-
+  
   Future<void> _playNewCardSound() async {
     try {
       await _audioPlayer.play(AssetSource('sounds/new_card.mp3'));
@@ -148,30 +148,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     
     final screenWidth = MediaQuery.of(context).size.width;
     final endX = correct ? screenWidth * 1.5 : -screenWidth * 1.5;
-
+    
     HapticFeedback.mediumImpact();
     setState(() {
       _cardOffset = Offset(endX, _cardOffset.dy - 100);
       _cardRotation = correct ? 0.5 : -0.5;
     });
-
+    
     // Warte auf die Weg-Animation
     await Future.delayed(const Duration(milliseconds: 300));
-
+    
     // Antwort ans System
-    if (correct) {
+        if (correct) {
       _controller.onSwipeRight();
-    } else {
+        } else {
       _controller.onSwipeLeft();
-    }
-
+        }
+        
     // Flip zurück auf Vorderseite
     _flipController?.reset();
-
+        
     // Kurze Pause, dann hereinsliden
     await Future.delayed(const Duration(milliseconds: 50));
     _playNewCardSound();
-    setState(() {
+        setState(() {
       _cardOffset = Offset.zero;
       _cardRotation = 0.0;
       _isSlidingIn = true;
@@ -368,7 +368,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                         } else if (_cardOffset.dx < -threshold) {
                           _playIncorrectSound();
                           _animateCardAway(false);
-                        } else {
+    } else {
                           _resetCardPosition();
                         }
                       },
@@ -469,7 +469,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                     onTap: () {
                       if (!s.timerActive) {
                         _controller.startTimer();
-                      } else {
+      } else {
                         if (s.running) {
                           _controller.pauseTimer();
                         } else {
@@ -481,7 +481,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   const SizedBox(width: 80),
                   s.timerActive
                       ? _CancelTimerButton(onTap: _controller.cancelTimer)
-                      : _ResetButton(onConfirm: _controller.performReset),
+                      : _ResetButton(onResetComplete: _controller.performReset),
                 ],
               ),
             ),
@@ -525,9 +525,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
-                ),
               ),
             ),
+          ),
           ),
           const Positioned(
             top: 12,
@@ -546,10 +546,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       final wordCount = word.split(' ').length;
                       final isPhrase = wordCount > 1;
                       final totalLength = word.length;
-
+                      
                       double fontSize;
                       int maxLines;
-
+                      
                       if (isPhrase) {
                         if (totalLength > 40) {
                           fontSize = 26.0;
@@ -638,37 +638,37 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             right: 0,
             child: Center(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                   Icon(Icons.swipe_left,
                       color: Colors.red.withOpacity(0.6), size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Falsch',
-                    style: TextStyle(
-                      color: Colors.red.withOpacity(0.7),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Falsch',
+                        style: TextStyle(
+                          color: Colors.red.withOpacity(0.7),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
                   Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
-                  const SizedBox(width: 16),
-                  Text(
-                    'Richtig',
-                    style: TextStyle(
-                      color: Colors.green.withOpacity(0.7),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Richtig',
+                        style: TextStyle(
+                          color: Colors.green.withOpacity(0.7),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
                   Icon(Icons.swipe_right,
                       color: Colors.green.withOpacity(0.6), size: 16),
-                ],
+                    ],
+                  ),
               ),
             ),
-          ),
           // Übersetzung zentriert
           Center(
             child: Padding(
@@ -678,10 +678,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   final wordCount = text.split(' ').length;
                   final isPhrase = wordCount > 1;
                   final totalLength = text.length;
-
+                  
                   double fontSize;
                   int maxLines;
-
+                  
                   if (isPhrase) {
                     if (totalLength > 50) {
                       fontSize = 24.0;
@@ -711,7 +711,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       maxLines = 1;
                     }
                   }
-
+                  
                   return Text(
                     text,
                     textAlign: TextAlign.center,
@@ -741,14 +741,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       ),
     );
   }
-
+  
   // === Timer-Bar (aus Controller-State) ===
   Widget _buildTimerBar(LearnModeState s) {
     final progress =
         (s.remainingMillis / (s.timeLimit * 1000.0)).clamp(0.0, 1.0);
     final isLowTime = s.remainingMillis <= 3000; // 3 Sekunden
     final isActive = s.timerActive;
-
+    
     return Container(
       height: 6,
       decoration: BoxDecoration(
@@ -855,10 +855,10 @@ class _CancelTimerButton extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
-        child: Container(
+                          child: Container(
           width: 44,
           height: 44,
-          decoration: BoxDecoration(
+                            decoration: BoxDecoration(
             color: const Color(0xFF2D2D2F),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.black, width: 1),
@@ -889,10 +889,10 @@ class _PlayPauseButton extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
-        child: Container(
+                          child: Container(
           width: 64,
           height: 64,
-          decoration: BoxDecoration(
+                            decoration: BoxDecoration(
             color: const Color(0xFF2D2D2F),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.black, width: 1.5),
@@ -915,65 +915,184 @@ class _PlayPauseButton extends StatelessWidget {
   }
 }
 
-class _ResetButton extends StatelessWidget {
-  final Future<void> Function() onConfirm;
-  const _ResetButton({required this.onConfirm});
+/// Reset-Button mit Hold-to-Confirm:
+/// - Langes Drücken startet einen 3s-Countdown im Overlay.
+/// - Haptik bei Start & Abschluss.
+/// - Finger loslassen → Abbruch.
+/// - Nach Ablauf wird [onResetComplete] aufgerufen.
+class _ResetButton extends StatefulWidget {
+  final Future<void> Function() onResetComplete;
 
-  Future<void> _confirm(BuildContext context) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2F),
-        title: const Text('Lernfortschritt zurücksetzen?',
-            style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Alle Wörter dieser Kategorie werden auf S0 gesetzt.',
-          style: TextStyle(color: Colors.white70),
+  const _ResetButton({required this.onResetComplete});
+
+  @override
+  State<_ResetButton> createState() => _ResetButtonState();
+}
+
+class _ResetButtonState extends State<_ResetButton>
+    with SingleTickerProviderStateMixin {
+  bool _isPressed = false;
+  int _countdown = 3;
+  OverlayEntry? _overlayEntry;
+
+  void _onLongPressStart(LongPressStartDetails details) {
+    setState(() {
+      _isPressed = true;
+      _countdown = 3;
+    });
+
+    HapticFeedback.mediumImpact();
+    _showOverlay();
+    _startCountdown();
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) {
+    _cancel();
+  }
+
+  void _onLongPressCancel() {
+    _cancel();
+  }
+
+  void _cancel() {
+    setState(() {
+      _isPressed = false;
+      _countdown = 3;
+    });
+    _removeOverlay();
+    HapticFeedback.lightImpact();
+  }
+
+  void _showOverlay() {
+    final overlay = Overlay.of(context);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Material(
+        color: Colors.black.withOpacity(0.85),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Reset',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Lernfortschritt?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 40),
+              // Countdown
+              StatefulBuilder(
+                builder: (context, setOverlayState) {
+                  return Text(
+                    '$_countdown',
+                    style: const TextStyle(
+                      color: Color(0xFFA05260),
+                      fontSize: 80,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 40),
+              const Text(
+                'Finger gedrückt halten...',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Zurücksetzen'),
-          ),
-        ],
       ),
     );
 
-    if (ok == true) {
-      HapticFeedback.heavyImpact();
-      await onConfirm();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lernfortschritt wurde zurückgesetzt'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Color(0xFFA05260),
-          ),
-        );
+    overlay.insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  Future<void> _startCountdown() async {
+    for (int i = 3; i > 0; i--) {
+      if (!_isPressed) {
+        _removeOverlay();
+        return;
       }
+      setState(() => _countdown = i);
+      _overlayEntry?.markNeedsBuild();
+      await Future.delayed(const Duration(seconds: 1));
     }
+
+    if (!_isPressed) {
+      _removeOverlay();
+      return;
+    }
+
+    // Countdown fertig → bestätigen
+    _removeOverlay();
+    HapticFeedback.heavyImpact();
+
+    await widget.onResetComplete();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lernfortschritt wurde zurückgesetzt'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Color(0xFFA05260),
+        ),
+      );
+    }
+
+    setState(() {
+      _isPressed = false;
+      _countdown = 3;
+    });
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => _confirm(context),
+    return GestureDetector(
+      onLongPressStart: _onLongPressStart,
+      onLongPressEnd: _onLongPressEnd,
+      onLongPressCancel: _onLongPressCancel,
+      child: Material(
+        color: Colors.transparent,
         child: Container(
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: const Color(0xFF2D2D2F),
+            color: _isPressed
+                ? const Color(0xFFA05260)
+                : const Color(0xFF2D2D2F),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.black, width: 1),
           ),
-          child: const Icon(Icons.refresh_rounded, color: Colors.white70),
+          child: Icon(
+            Icons.refresh_rounded,
+            color: _isPressed ? Colors.white : Colors.white70,
+          ),
         ),
       ),
     );
@@ -999,7 +1118,7 @@ class _MenuRow extends StatelessWidget {
           .map(
             (it) => Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
+                children: [
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.85, end: 1.0),
                   duration: const Duration(milliseconds: 260),
@@ -1467,11 +1586,11 @@ class _VerticalStageSwitch extends StatelessWidget {
             child: Text(
               note,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+                    style: const TextStyle(
                   fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
+                    ),
+                  ),
+                ],
       ),
     );
   }
