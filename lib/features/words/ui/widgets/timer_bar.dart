@@ -12,6 +12,7 @@ class TimerBar extends StatelessWidget {
         .clamp(0.0, 1.0);
     final isLowTime = s.remainingMillis <= 3000;
 
+
     if (!s.timerActive) {
       return ProgressBar(value: 0.0, background: Colors.white10);
     }

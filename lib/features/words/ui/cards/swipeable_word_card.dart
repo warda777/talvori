@@ -1,8 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:talvori/features/words/ui/consts.dart';
-import '../widgets/timer_bar.dart';
+import 'package:talvori/features/words/ui/ui_constants.dart';
 import '../widgets/level_badge.dart';
 
 typedef SwipeDecision = Future<void> Function(bool correct);
@@ -227,10 +226,10 @@ class _CardShell extends StatelessWidget {
       width: MediaQuery.of(context).size.width * 0.78,
       height: MediaQuery.of(context).size.height * 0.52,
       decoration: BoxDecoration(
-        color: dark ? const Color(0xFF3A3939) : kCardColor,
-        borderRadius: BorderRadius.circular(kCardBorderRadius),
+        color: dark ? const Color(0xFF3A3939) : WordsUIConstants.cardBackground,
+        borderRadius: BorderRadius.circular(WordsUIConstants.borderRadius),
         border: Border.all(color: Colors.white24),
-        boxShadow: kCardShadow,
+        boxShadow: WordsUIConstants.cardShadow,
       ),
       child: child,
     );

@@ -7,3 +7,7 @@ export 'timer_bar.dart';
 export 'category_wheel.dart';
 export 'level_badge.dart';
 export 'menu_sheet.dart';
+export 'header_bar.dart';
+export 'card_area.dart';
+export 'stage_switch_row.dart';
+export 'bottom_controls.dart';

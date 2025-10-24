@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talvori/features/words/ui/ui_constants.dart';
 
 class VerticalStageSwitch extends StatelessWidget {
   final int count;
@@ -36,11 +37,11 @@ class VerticalStageSwitch extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
-            width: 42,
-            height: 75,
+            width: WordsUIConstants.stageSwitchWidth,
+            height: WordsUIConstants.stageSwitchHeight,
             decoration: BoxDecoration(
               color: outerColor,
-              borderRadius: BorderRadius.circular(21),
+              borderRadius: BorderRadius.circular(WordsUIConstants.stageSwitchRadius),
               boxShadow: badgeGlow,
               border: Border.all(color: Colors.black.withOpacity(0.2), width: 1),
             ),

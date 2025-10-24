@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/srs_logic.dart';
 import 'package:talvori/features/words/application/srs_config.dart';
+import 'package:talvori/features/words/services/sfx_service.dart';
 
 /// ---------- State ----------
 
@@ -128,7 +129,8 @@ class LearnModeState {
 
 /// ---------- Provider ----------
 
-final learnModeControllerProvider = NotifierProvider<LearnModeController, LearnModeState>(() {
+final learnModeControllerProvider =
+    NotifierProvider.autoDispose<LearnModeController, LearnModeState>(() {
   return LearnModeController();
 });
 
@@ -139,6 +141,7 @@ class LearnModeController extends Notifier<LearnModeState> {
   LearnModeState build() => LearnModeState.initial();
 
   Timer? _wordTimer;
+  SfxService? _sfx;
 
   // ---- SRS-Einstellungen und Konstanten ----
   
@@ -173,16 +176,19 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   Future<void> init({required String categoryId, required String title}) async {
     _set(categoryId: categoryId, title: title);
+    _sfx = ref.read(sfxProvider);
     await _loadCategories();
   }
 
   void onSwipeRight() {
     if (!_canInteract()) return;
+    _sfx?.correct();
     _handleAnswer(correct: true);
   }
-  
+
   void onSwipeLeft() {
     if (!_canInteract()) return;
+    _sfx?.wrong();
     _handleAnswer(correct: false);
   }
   
@@ -196,7 +202,10 @@ class LearnModeController extends Notifier<LearnModeState> {
     return !state.timerPaused;
   }
 
-  void startTimer() => _startWordTimer(forceActive: true);
+  void startTimer() {
+    print('🎮 startTimer() aufgerufen');
+    _startWordTimer(forceActive: true);
+  }
   void pauseTimer() => _set(timerPaused: true, running: false);
   void resumeTimer() {
     if (!state.timerActive) return; // nur wenn Timer aktiv ist
@@ -797,6 +806,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // 2) laufende Session/Queues leeren
     _cooldown.clear();
+    _wordTimer?.cancel();
     _set(
       wordQueue: const [],
       shuffledWordIds: const [],

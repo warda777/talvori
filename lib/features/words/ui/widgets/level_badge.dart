@@ -16,6 +16,7 @@ class LevelBadge extends StatelessWidget {
     if (text.isEmpty) return const SizedBox.shrink();
 
     final color = _getLevelColor(text);
+    final textColor = _getTextColor(color);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -31,8 +32,8 @@ class LevelBadge extends StatelessWidget {
       ),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: textColor,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
@@ -69,5 +70,15 @@ class LevelBadge extends StatelessWidget {
       default:
         return Colors.grey.shade600;
     }
+  }
+
+  /// Bestimmt die optimale Schriftfarbe basierend auf der Hintergrundfarbe
+  Color _getTextColor(Color backgroundColor) {
+    // Berechne die relative Helligkeit der Hintergrundfarbe
+    final luminance = backgroundColor.computeLuminance();
+    
+    // Wenn die Hintergrundfarbe hell ist (luminance > 0.5), verwende schwarze Schrift
+    // Wenn die Hintergrundfarbe dunkel ist (luminance <= 0.5), verwende weiße Schrift
+    return luminance > 0.5 ? Colors.black : Colors.white;
   }
 }
