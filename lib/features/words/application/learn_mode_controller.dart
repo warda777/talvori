@@ -282,7 +282,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
 
       final queue = _buildQueueDueFirst(words);
-      final shuffledIdx = await _getSmartCardOrder(queue.length);
+      final shuffledIdx = await _getSmartCardOrder(queue);
 
       _set(
         wordQueue: queue,
@@ -314,7 +314,7 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   /// Intelligente SRS-Kartenauswahl mit gewichteten Mustern
-  Future<List<int>> _getSmartCardOrder(int length) async {
+  Future<List<int>> _getSmartCardOrder(List<WordUserView> queue) async {
     final now = DateTime.now();
 
     // Buckets: due vs wait per stage
@@ -326,8 +326,8 @@ class LearnModeController extends Notifier<LearnModeState> {
       return t != null && !t.isAfter(now); // nextDueAt <= now
     }
 
-    for (int i = 0; i < state.wordQueue.length; i++) {
-      final w = state.wordQueue[i];
+    for (int i = 0; i < queue.length; i++) {
+      final w = queue[i];
       final st = w.srsStage;
       final due = isDue(w);
 
@@ -454,7 +454,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // 7) ggf. neu mischen, wenn am Ende
     if (nextIndex == 0) {
-      final shuffled = await _getSmartCardOrder(queue.length);
+      final shuffled = await _getSmartCardOrder(queue);
       _set(shuffledWordIds: [for (final k in shuffled) queue[k].id]);
     }
 

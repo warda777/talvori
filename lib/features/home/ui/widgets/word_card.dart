@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'glow_sweep_ring.dart';
 import 'tap_flash.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:talvori/core/browser_return_service.dart';
+import 'package:talvori/core/services/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

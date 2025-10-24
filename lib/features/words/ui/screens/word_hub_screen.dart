@@ -3,7 +3,7 @@ import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
-import '../../../core/reset_event.dart';
+import 'package:talvori/core/events/events.dart';
 import 'dart:async';
 
 

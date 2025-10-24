@@ -1,4 +1,4 @@
-// lib/features/core/reset_event.dart
+// lib/core/events/reset_event.dart
 import 'dart:async';
 
 /// Globaler Event-Stream für Reset-Events

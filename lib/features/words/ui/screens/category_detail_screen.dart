@@ -5,7 +5,7 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'dart:async';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/reset_event.dart';
+import 'package:talvori/core/events/events.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
