@@ -36,19 +36,11 @@ class LearnModeScreen extends ConsumerStatefulWidget {
   ConsumerState<LearnModeScreen> createState() => _LearnModeScreenState();
 }
 
-class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
-    with TickerProviderStateMixin {
+class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   // Controller (Business-Logik)
   late final LearnModeController _controller;
 
-  // Nur UI: Flip- und Swipe-Animation + Audio
-  AnimationController? _flipController;
-  Animation<double>? _flipAnimation;
-  
-  Offset _cardOffset = Offset.zero;
-  double _cardRotation = 0.0;
-  bool _isDragging = false;
-  bool _isSlidingIn = false;
+  // Nur UI: Audio
   
   final AudioPlayer _audioPlayer = AudioPlayer();
 
@@ -56,14 +48,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void initState() {
     super.initState();
     _controller = ref.read(learnModeControllerProvider.notifier);
-
-    _flipController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _flipController!, curve: Curves.easeInOut),
-    );
 
     // Init nach 1. Frame (damit Provider hängt)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,7 +60,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   @override
   void dispose() {
-    _flipController?.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -107,58 +90,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }
   }
 
-  void _resetCardPosition() {
-    setState(() {
-      _cardOffset = Offset.zero;
-      _cardRotation = 0.0;
-    });
-  }
-
-  Future<void> _animateCardAway(bool correct) async {
-    final s = ref.read(learnModeControllerProvider);
-    
-    // Blockiere Swipe, wenn Timer pausiert ist
-    if (s.timerPaused) {
-      print('🚫 Swipe blockiert: Timer ist pausiert');
-      return;
-    }
-    
-    final screenWidth = MediaQuery.of(context).size.width;
-    final endX = correct ? screenWidth * 1.5 : -screenWidth * 1.5;
-    
-    HapticFeedback.mediumImpact();
-    setState(() {
-      _cardOffset = Offset(endX, _cardOffset.dy - 100);
-      _cardRotation = correct ? 0.5 : -0.5;
-    });
-    
-    // Warte auf die Weg-Animation
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    // Antwort ans System
-        if (correct) {
-      _controller.onSwipeRight();
-        } else {
-      _controller.onSwipeLeft();
-        }
-        
-    // Flip zurück auf Vorderseite
-    _flipController?.reset();
-        
-    // Kurze Pause, dann hereinsliden
-    await Future.delayed(const Duration(milliseconds: 50));
-    _playNewCardSound();
-        setState(() {
-      _cardOffset = Offset.zero;
-      _cardRotation = 0.0;
-      _isSlidingIn = true;
-    });
-
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (mounted) {
-      setState(() => _isSlidingIn = false);
-    }
-  }
 
   // === Karten UI ===
 
@@ -172,25 +103,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     return list.firstWhere((w) => w.id == wordId, orElse: () => list.first);
   }
 
-  String _getSrsLevelDisplay(int? stage) {
-    final st = stage ?? 0;
-    switch (st) {
-      case 0:
-        return 'A1';
-      case 1:
-        return 'A2';
-      case 2:
-        return 'B1';
-      case 3:
-        return 'B2';
-      case 4:
-        return 'C1';
-      case 5:
-        return 'C2';
-      default:
-        return 'A1';
-    }
-  }
 
   // === Build ===
 
@@ -255,125 +167,27 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               child: Center(
                 child: Stack(
                   children: [
-                    if (_isDragging) ...[
-                      // Rechts = Richtig (Grün)
-                      Positioned(
-                        right: 40,
-                        top: MediaQuery.of(context).size.height * 0.25,
-                        child: AnimatedOpacity(
-                          opacity: (_cardOffset.dx > 50) ? 0.8 : 0.0,
-                          duration: const Duration(milliseconds: 100),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.green, width: 3),
-                            ),
-                            child: const Icon(Icons.check, color: Colors.green, size: 48),
-                          ),
-                        ),
-                      ),
-                      // Links = Falsch (Rot)
-                      Positioned(
-                        left: 40,
-                        top: MediaQuery.of(context).size.height * 0.25,
-                        child: AnimatedOpacity(
-                          opacity: (_cardOffset.dx < -50) ? 0.8 : 0.0,
-                          duration: const Duration(milliseconds: 100),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.red, width: 3),
-                            ),
-                            child: const Icon(Icons.close, color: Colors.red, size: 48),
-                          ),
-                        ),
-                      ),
-                    ],
 
                     // Karte selbst
-                    GestureDetector(
-                      onTap: () {
-                        if (s.wordQueue.isEmpty) return;
-                        
-                        // Blockiere Flip, wenn Timer pausiert ist
-                        if (s.timerPaused) {
-                          print('🚫 Flip blockiert: Timer ist pausiert');
-                          return;
-                        }
-                        
-                        HapticFeedback.selectionClick();
-                        _controller.toggleFlip();
-                        if (s.showTranslation) {
-                          _flipController?.reverse();
-                        } else {
-                          _flipController?.forward();
-                        }
-                      },
-                      onPanUpdate: (details) {
-                        // Blockiere Pan-Gesten, wenn Timer pausiert ist
-                        if (s.timerPaused) return;
-                        
-                        setState(() {
-                          _isDragging = true;
-                          _cardOffset += details.delta;
-                          _cardRotation =
-                              (_cardOffset.dx / 1000).clamp(-0.26, 0.26); // ±15°
-                        });
-                      },
-                      onPanEnd: (details) {
-                        if (!_isDragging) return;
-                        
-                        // Blockiere Pan-End, wenn Timer pausiert ist
-                        if (s.timerPaused) {
-                          setState(() => _isDragging = false);
-                          _resetCardPosition();
-                          return;
-                        }
-                        
-                        setState(() => _isDragging = false);
-
-                        final screenWidth = MediaQuery.of(context).size.width;
-                        final threshold = screenWidth * 0.35;
-
-                        if (_cardOffset.dx > threshold) {
+                    SwipeableWordCard(
+                      frontText: word,
+                      backText: translation,
+                      level: current?.level,
+                      showTranslation: s.showTranslation,
+                      gesturesEnabled: !s.timerPaused,
+                      onSwipe: (correct) async {
+                        if (correct) {
                           _playCorrectSound();
-                          _animateCardAway(true);
-                        } else if (_cardOffset.dx < -threshold) {
+                          await c.onSwipeRight();
+                        } else {
                           _playIncorrectSound();
-                          _animateCardAway(false);
-    } else {
-                          _resetCardPosition();
+                          await c.onSwipeLeft();
                         }
                       },
-                      child: AnimatedContainer(
-                        duration: _isDragging
-                            ? Duration.zero
-                            : (_isSlidingIn
-                                ? const Duration(milliseconds: 400)
-                                : const Duration(milliseconds: 300)),
-                        curve: _isSlidingIn ? Curves.easeOutCubic : Curves.easeOut,
-                        transform: Matrix4.identity()
-                          ..translate(_cardOffset.dx, _cardOffset.dy)
-                          ..rotateZ(_isSlidingIn ? 0.0 : _cardRotation),
-                        child: SwipeableWordCard(
-                          frontText: word,
-                          backText: translation,
-                          level: current?.level,
-                          showTranslation: s.showTranslation,
-                          gesturesEnabled: !s.timerPaused,
-                          onSwipe: (correct) async {
-                            c.onSwipeRight();
-                          },
-                          onFlip: () {
-                            c.toggleFlip();
-                          },
-                          footer: TimerBar(s: s),
-                        ),
-                      ),
+                      onFlip: () {
+                        c.toggleFlip();
+                      },
+                      footer: TimerBar(s: s),
                     ),
                   ],
                 ),
