@@ -276,98 +276,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
 
 
 
-  // === Menü (Stub) ===
+  // === Menü ===
   void _showMenu() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.black.withOpacity(0.75),
-      barrierColor: Colors.black.withOpacity(0.85),
-      builder: (ctx) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _MenuRow(
-                  items: [
-                    _MenuItem(icon: Icons.auto_awesome, label: 'ChatGPT', onTap: () {}),
-                    _MenuItem(icon: Icons.translate_rounded, label: 'DeepL', onTap: () {}),
-                    _MenuItem(icon: Icons.favorite_border, label: 'Favorit', onTap: () {}),
-                    _MenuItem(icon: Icons.note_alt_outlined, label: 'Notizen', onTap: () {}),
-                    _MenuItem(icon: Icons.settings_rounded, label: 'Einstellungen', onTap: () {}),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    showWordsMenuSheet(context, items: [
+      MenuItemData(Icons.auto_awesome, 'ChatGPT', () {}),
+      MenuItemData(Icons.translate_rounded, 'DeepL', () {}),
+      MenuItemData(Icons.favorite_border, 'Favorit', () {}),
+      MenuItemData(Icons.note_alt_outlined, 'Notizen', () {}),
+      MenuItemData(Icons.settings_rounded, 'Einstellungen', () {}),
+    ]);
   }
 }
 
-// ====== Widgets (UI-only, keine Business-Logik) ======
-
-
-
-
-
-class _MenuItem {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _MenuItem({required this.icon, required this.label, required this.onTap});
-}
-
-class _MenuRow extends StatelessWidget {
-  final List<_MenuItem> items;
-  const _MenuRow({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: items
-          .map(
-            (it) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.85, end: 1.0),
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutBack,
-              builder: (_, v, child) => Transform.scale(scale: v, child: child),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      it.onTap();
-                    },
-                child: Container(
-                      width: 56,
-                      height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: Icon(it.icon, color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-                Text(it.label,
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
-          ],
-            ),
-          )
-          .toList(),
-    );
-  }
-}
 
 
