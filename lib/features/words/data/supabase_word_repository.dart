@@ -23,6 +23,7 @@ class WordUserView {
   final String id;
   final String text;
   final String translation;
+  final String? level;
   final bool inMyWords;
   final bool pickedUser;
   final bool favoriteUser;
@@ -34,6 +35,7 @@ class WordUserView {
       : id = j['id'] as String,
         text = j['text'] as String,
         translation = j['translation'] as String,
+        level = j['level'] as String?,
         inMyWords = (j['in_my_words'] as bool?) ?? false,
         pickedUser = (j['picked_user'] as bool?) ?? false,
         favoriteUser = (j['favorite_user'] as bool?) ?? false,

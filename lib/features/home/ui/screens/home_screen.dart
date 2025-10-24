@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/home/ui/widgets/top_bar.dart';
-import 'package:talvori/features/home/ui/widgets/word_card.dart' as wc;
+import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
@@ -52,9 +52,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _refreshMyWordsCount() async {
     try {
       final c = await _wordRepo.countMyWords();
+      debugPrint('🔢 My Words Count: $c');
       if (!mounted) return;
       setState(() => _myWordsCount = c);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('❌ Error loading My Words Count: $e');
       // z. B. nicht eingeloggt → still
     }
   }

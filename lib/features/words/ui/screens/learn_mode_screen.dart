@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/application.dart';
 import '../widgets/widgets.dart';
+import '../cards/swipeable_word_card.dart';
 
 
 // ---- Farben / UI-Konstanten (wie gehabt) ----
@@ -196,6 +197,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(learnModeControllerProvider);
+    final c = ref.read(learnModeControllerProvider.notifier);
 
     final current = _currentWord(s);
     final word = current?.text ?? (s.shuffledWordIds.isEmpty ? 'Keine Wörter\nverfügbar' : '—');
@@ -357,29 +359,20 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                         transform: Matrix4.identity()
                           ..translate(_cardOffset.dx, _cardOffset.dy)
                           ..rotateZ(_isSlidingIn ? 0.0 : _cardRotation),
-                        child: _flipAnimation == null
-                            ? _buildCardFront(context, s, word)
-                            : AnimatedBuilder(
-                                animation: _flipAnimation!,
-                                builder: (context, child) {
-                                  final angle = _flipAnimation!.value * math.pi;
-                                  final isFront = angle < math.pi / 2;
-
-                                  return Transform(
-                                    transform: Matrix4.identity()
-                                      ..setEntry(3, 2, 0.001)
-                                      ..rotateY(angle),
-                                    alignment: Alignment.center,
-                                    child: isFront
-                                        ? _buildCardFront(context, s, word)
-                                        : Transform(
-                                            transform: Matrix4.identity()..rotateY(math.pi),
-                                            alignment: Alignment.center,
-                                            child: _buildCardBack(context, s, translation),
-                                          ),
-                                  );
-                                },
-                              ),
+                        child: SwipeableWordCard(
+                          frontText: word,
+                          backText: translation,
+                          level: current?.level,
+                          showTranslation: s.showTranslation,
+                          gesturesEnabled: !s.timerPaused,
+                          onSwipe: (correct) async {
+                            c.onSwipeRight();
+                          },
+                          onFlip: () {
+                            c.toggleFlip();
+                          },
+                          footer: TimerBar(s: s),
+                        ),
                       ),
                     ),
                   ],
@@ -466,264 +459,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     );
   }
 
-  // === Card Faces ===
-  Widget _buildCardFront(BuildContext context, LearnModeState s, String word) {
-    final current = _currentWord(s);
-    final stage = current?.srsStage ?? 0;
 
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.78,
-      height: MediaQuery.of(context).size.height * 0.52,
-      decoration: BoxDecoration(
-        color: _kCard,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white24),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 20, offset: Offset(0, 12)),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Level Badge
-          Positioned(
-            top: 12,
-            right: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.35),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: Text(
-                _getSrsLevelDisplay(stage),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          ),
-          const Positioned(
-            top: 12,
-            left: 12,
-            child: Icon(Icons.rocket_launch_rounded, color: Colors.white70, size: 20),
-          ),
-          // Wort in der Mitte
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LayoutBuilder(
-                    builder: (_, constraints) {
-                      final wordCount = word.split(' ').length;
-                      final isPhrase = wordCount > 1;
-                      final totalLength = word.length;
-                      
-                      double fontSize;
-                      int maxLines;
-                      
-                      if (isPhrase) {
-                        if (totalLength > 40) {
-                          fontSize = 26.0;
-                          maxLines = 4;
-                        } else if (totalLength > 25) {
-                          fontSize = 28.0;
-                          maxLines = 3;
-                        } else {
-                          fontSize = 30.0;
-                          maxLines = 2;
-                        }
-                      } else {
-                        if (totalLength > 18) {
-                          fontSize = 28.0;
-                          maxLines = 2;
-                        } else if (totalLength > 12) {
-                          fontSize = 30.0;
-                          maxLines = 2;
-                        } else {
-                          fontSize = 34.0;
-                          maxLines = 1;
-                        }
-                      }
-                      return Text(
-                        word,
-                        textAlign: TextAlign.center,
-                        maxLines: maxLines,
-                        overflow: TextOverflow.visible,
-                        softWrap: true,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                          height: 1.3,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () => HapticFeedback.lightImpact(),
-                    child: const Icon(
-                      Icons.volume_up_rounded,
-                      color: Colors.white70,
-                      size: 32,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Timer-Bar
-          Positioned(
-            bottom: 8,
-            left: 30,
-            right: 30,
-            child: TimerBar(
-              remainingMillis: s.remainingMillis,
-              timeLimitSeconds: s.timeLimit,
-              active: s.timerActive,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCardBack(
-      BuildContext context, LearnModeState s, String translation) {
-    final text = translation.isNotEmpty ? translation : '—';
-
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.78,
-      height: MediaQuery.of(context).size.height * 0.52,
-      decoration: BoxDecoration(
-        color: const Color(0xFF3A3939),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white24),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 20, offset: Offset(0, 12)),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Swipe-Hinweis oben
-          Positioned(
-            top: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                  Icon(Icons.swipe_left,
-                      color: Colors.red.withOpacity(0.6), size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Falsch',
-                        style: TextStyle(
-                          color: Colors.red.withOpacity(0.7),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                  Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Richtig',
-                        style: TextStyle(
-                          color: Colors.green.withOpacity(0.7),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                  Icon(Icons.swipe_right,
-                      color: Colors.green.withOpacity(0.6), size: 16),
-                    ],
-                  ),
-              ),
-            ),
-          // Übersetzung zentriert
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
-              child: LayoutBuilder(
-                builder: (_, __) {
-                  final wordCount = text.split(' ').length;
-                  final isPhrase = wordCount > 1;
-                  final totalLength = text.length;
-                  
-                  double fontSize;
-                  int maxLines;
-                  
-                  if (isPhrase) {
-                    if (totalLength > 50) {
-                      fontSize = 24.0;
-                      maxLines = 5;
-                    } else if (totalLength > 35) {
-                      fontSize = 26.0;
-                      maxLines = 4;
-                    } else if (totalLength > 20) {
-                      fontSize = 28.0;
-                      maxLines = 3;
-                    } else {
-                      fontSize = 30.0;
-                      maxLines = 2;
-                    }
-                  } else {
-                    if (totalLength > 20) {
-                      fontSize = 26.0;
-                      maxLines = 3;
-                    } else if (totalLength > 14) {
-                      fontSize = 28.0;
-                      maxLines = 2;
-                    } else if (totalLength > 10) {
-                      fontSize = 30.0;
-                      maxLines = 2;
-                    } else {
-                      fontSize = 32.0;
-                      maxLines = 1;
-                    }
-                  }
-                  
-                  return Text(
-                    text,
-                    textAlign: TextAlign.center,
-                    maxLines: maxLines,
-                    overflow: TextOverflow.visible,
-                    softWrap: true,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
-                      height: 1.35,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          // Timer-Bar
-          Positioned(
-            bottom: 8,
-            left: 30,
-            right: 30,
-            child: TimerBar(
-              remainingMillis: s.remainingMillis,
-              timeLimitSeconds: s.timeLimit,
-              active: s.timerActive,
-                ),
-              ),
-          ],
-      ),
-    );
-  }
 
 
   // === Menü (Stub) ===

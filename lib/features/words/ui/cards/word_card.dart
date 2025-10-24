@@ -136,7 +136,8 @@ class WordCard extends ConsumerWidget {
                         child: CounterBadge(
                           count: userWordCount,
                           onTap: null,            // TapFlash übernimmt das Tippen
-                          color: onImageFg,
+                          color: Colors.black.withValues(alpha: 0.7), // Hintergrund
+                          textColor: onImageFg,   // Textfarbe
                         ),
                       ),
                     ),

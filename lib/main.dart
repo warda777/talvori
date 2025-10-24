@@ -59,39 +59,85 @@ class _InitGateState extends State<_InitGate> {
   }
 
   Future<void> _initialize() async {
-    // 1) .env laden
-    await dotenv.load(fileName: ".env");
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    // 1) .env laden (mit Fallback)
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      print('⚠️ .env nicht gefunden, verwende .env.example');
+      await dotenv.load(fileName: ".env.example");
+    }
+    
+    // Debug: Prüfe ob Keys geladen werden
+    print('URL=${dotenv.env['SUPABASE_URL']}');
+    print('ANON=${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 8)}...');
+    assert(dotenv.env['SUPABASE_URL']?.isNotEmpty == true, 'SUPABASE_URL missing');
+    assert(dotenv.env['SUPABASE_ANON_KEY']?.isNotEmpty == true, 'SUPABASE_ANON_KEY missing');
 
-    // 2) Supabase initialisieren
-    await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-    );
+    // 2) Supabase initialisieren (mit Fallback)
+    print('🔧 Supabase URL: ${dotenv.env['SUPABASE_URL']}');
+    print('🔧 Supabase Anon Key: ${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 20)}...');
+    
+    try {
+      await Supabase.initialize(
+        url: dotenv.env['SUPABASE_URL']!,
+        anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+      );
+      print('✅ Supabase erfolgreich initialisiert');
+    } catch (e) {
+      print('❌ Supabase-Initialisierung fehlgeschlagen: $e');
+      print('⚠️ App läuft im Offline-Modus');
+      // App läuft trotzdem weiter, aber ohne Supabase
+    }
 
-    // 3) Debug-Auto-Login (nur wenn kein User vorhanden)
-    final auth = Supabase.instance.client.auth;
-    if (kDebugMode && auth.currentUser == null) {
-      final email = dotenv.env['TEST_EMAIL'];
-      final pw    = dotenv.env['TEST_PASSWORD'];
-      if (email != null && pw != null && email.isNotEmpty && pw.isNotEmpty) {
-        try {
-          await auth.signInWithPassword(email: email, password: pw)
-                    .timeout(const Duration(seconds: 8));
-        } on TimeoutException {
-          debugPrint('Login timeout – UI startet trotzdem');
-        } catch (e) {
-          debugPrint('Login fehlgeschlagen: $e');
+    // 3) Debug-Auto-Login (nur wenn Supabase verfügbar)
+    try {
+      final auth = Supabase.instance.client.auth;
+      print('🔧 Current user: ${auth.currentUser?.email ?? "Kein User"}');
+      
+      if (kDebugMode && auth.currentUser == null) {
+        final email = dotenv.env['TEST_EMAIL'];
+        final pw    = dotenv.env['TEST_PASSWORD'];
+        print('🔧 Versuche Login mit: $email');
+        
+        if (email != null && pw != null && email.isNotEmpty && pw.isNotEmpty) {
+          try {
+            final result = await auth.signInWithPassword(email: email, password: pw)
+                      .timeout(const Duration(seconds: 8));
+            print('✅ Login erfolgreich: ${result.user?.email}');
+          } on TimeoutException {
+            print('⚠️ Login timeout – UI startet trotzdem');
+          } catch (e) {
+            print('❌ Login fehlgeschlagen: $e');
+          }
+        } else {
+          print('⚠️ Keine Login-Credentials in .env gefunden');
         }
-      } else {
-        debugPrint('TEST_EMAIL / TEST_PASSWORD fehlen in .env');
       }
+    } catch (e) {
+      print('⚠️ Supabase nicht verfügbar - Login übersprungen: $e');
+    }
+
+    // 4) Test-Datenbankverbindung (nur wenn Supabase verfügbar)
+    try {
+      final client = Supabase.instance.client;
+      final response = await client.from('categories').select('count').limit(1);
+      print('🔧 Datenbank-Test: ${response.length} Kategorien gefunden');
+    } catch (e) {
+      print('❌ Datenbank-Test fehlgeschlagen: $e');
+      print('⚠️ App läuft ohne Datenbankverbindung');
     }
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
 
     // Logging hilft beim Teilen-Debug:
-    debugPrint('Logged in as: ${Supabase.instance.client.auth.currentUser?.id}');
+    try {
+      debugPrint('Logged in as: ${Supabase.instance.client.auth.currentUser?.id}');
+    } catch (e) {
+      debugPrint('Kein User eingeloggt (Supabase nicht verfügbar)');
+    }
   }
 
   @override
