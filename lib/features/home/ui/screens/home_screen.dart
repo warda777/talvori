@@ -164,7 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     });
 
-    _refreshMyWordsCount();
+    // My Words Count wird nur bei Bedarf geladen (nicht bei jedem App-Start)
   }
 
   @override
@@ -659,6 +659,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                           userWordCount: _myWordsCount,
                           onCountTap: () async {
+                            // Lazy-Load: Counter nur laden, wenn er das erste Mal angezeigt wird
+                            if (_myWordsCount == 0) {
+                              await _refreshMyWordsCount();
+                            }
+                            
                             final nav = Navigator.of(context); // vor await
                             await nav.push(
                               MaterialPageRoute(builder: (_) => const MyWordsScreen()),

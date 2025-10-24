@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/srs_logic.dart';
+import 'package:talvori/features/words/application/srs_config.dart';
 
 /// ---------- State ----------
 
@@ -148,6 +149,11 @@ class LearnModeController extends Notifier<LearnModeState> {
   static const int _newCardsBeforeReview = 4; // Nach X neuen Karten → Wiederholungen
   static const double _reviewRatio = 0.8; // 80% der neuen Karten wiederholen (anpassbar)
   
+  // SRS Stats für adaptive Konfiguration
+  double _rollingAccuracy = 0.8; // Rolling accuracy (0..1)
+  double _avgSwipeMs = 3000.0; // Durchschnittliche Antwortzeit in ms
+  int _recentTimeouts = 0; // Anzahl der letzten Timeouts
+  
   // --- S0 Cooldown: wie viele andere Karten MINDESTENS dazwischen liegen müssen
   static const int _s0MinOthers = 3; // ← gern auf 5 erhöhen, wenn gewünscht
   final Map<String, int> _cooldown = {}; // wordId -> verbleibende "andere Karten"
@@ -266,7 +272,16 @@ class LearnModeController extends Notifier<LearnModeState> {
   Future<void> _loadWords() async {
     try {
       final catId = _currentCatId;
-      final words = await fetchLearnQueueAll(catId); // an Repo-Funktion aus deinem Screen angepasst
+      print('🧪 RPC: fn_user_learn_queue_mode(catId=$catId)');
+      final words = await fetchLearnQueueForMode(catId);
+
+      // Histogramm ausgeben
+      final rpcHist = <int,int>{};
+      for (final w in words.take(60)) { rpcHist[w.srsStage] = (rpcHist[w.srsStage] ?? 0) + 1; }
+      print('🧪 Words(60) stages: $rpcHist');
+
+      // Ersten 10 Stufen klar loggen
+      print('🧪 First10 stages: ${words.take(10).map((w) => w.srsStage).toList()}');
 
       if (words.isEmpty) {
         _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
@@ -274,11 +289,50 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
 
       final queue = _buildQueueDueFirst(words);
-      final shuffledIdx = buildSmartCardOrder(queue);
+      
+      // Sofort prüfen: Queue-Stages analysieren
+      final hist = <int,int>{};
+      for (final w in queue.take(50)) {
+        hist[w.srsStage] = (hist[w.srsStage] ?? 0) + 1;
+      }
+      print('🔎 Queue first50 stages: $hist');
+      
+      // Config berechnen und übergeben
+      final now = DateTime.now();
+      final dueCount = queue.where((w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(now)).length;
+
+      // Stats für adaptive Konfiguration
+      final stats = SrsStats(
+        rollingAccuracy: _rollingAccuracy,
+        avgSwipeMs: _avgSwipeMs,
+        recentTimeouts: _recentTimeouts,
+      );
+
+      final cfg = computeSrsConfig(
+        totalWordsInCategory: state.totalWordsInCategory,
+        dueCount: dueCount,
+        stats: stats,
+      );
+
+      final allowed = _computeAllowedMaxStageFromQueue(queue);
+      final order = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowed);
+
+      // Debug-Log für Gate-Logik
+      final s1Count = queue.where((w) => w.srsStage == 1).length;
+      final s2Count = queue.where((w) => w.srsStage == 2).length;
+      final s3Count = queue.where((w) => w.srsStage == 3).length;
+      final s4Count = queue.where((w) => w.srsStage == 4).length;
+      print('🚪 Gate: allowedMaxStage=$allowed (Queue: S1:$s1Count, S2:$s2Count, S3:$s3Count, S4:$s4Count)');
+
+      // Debug-Log für SRS-Ratio Verifikation
+      final headSizePreview = order.take(40).map((ix) => queue[ix]).toList();
+      final newCount = headSizePreview.where((w) => w.srsStage == 0).length;
+      final dueCountHead = headSizePreview.where((w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(DateTime.now())).length;
+      print('🧠 Head[40]: new=$newCount, due=$dueCountHead, total=${headSizePreview.length}');
 
       _set(
         wordQueue: queue,
-        shuffledWordIds: [for (final i in shuffledIdx) queue[i].id],
+        shuffledWordIds: [for (final i in order) queue[i].id],
         index: 0,
       );
     } catch (_) {
@@ -310,13 +364,19 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   Future<void> _handleAnswer({required bool correct}) async {
     final queue = state.wordQueue;
-    if (queue.isEmpty) return;
+    final ids   = state.shuffledWordIds;
+    if (queue.isEmpty || ids.isEmpty) return;
 
     final i = state.index;
-    if (i >= queue.length) return;
+    if (i >= ids.length) return;
 
-    final current = queue[i];
-    final currentId = current.id;
+    // 🔑 1) Aktuelle Karte über shuffled IDs auflösen (statt queue[i])
+    final currentId = ids[i];
+    final current = queue.firstWhere((w) => w.id == currentId, orElse: () => queue.first);
+    
+    // Debug-Log für Karten-Bewertung
+    final isDueNow = current.nextDueAt != null && !current.nextDueAt!.isAfter(DateTime.now());
+    print('🎯 Bewerte Karte: ${current.text} (Stage: ${current.srsStage}, Due: $isDueNow) - $correct');
 
     // 1) Timer-Status merken (nicht stoppen!)
     final wasActive = state.timerActive;
@@ -342,13 +402,76 @@ class LearnModeController extends Notifier<LearnModeState> {
     }
     _set(stages: stages);
 
-    // 4) Review an Backend schicken (an deine Repo-Signatur angepasst)
+    // 4) Review an Backend schicken und Server-Response verwenden
     try {
-      await submitReview(currentId, correct); // <- (String wordId, bool correct)
-    } catch (_) {}
+      final (serverStage, serverDue) = await submitReview(currentId, correct);
+      print('🗂 Server says: word=$currentId -> stage=$serverStage, due=$serverDue (old=$oldStage, correct=$correct)');
+
+      // aktuelles Word-Objekt im Cache updaten
+      final q = List<WordUserView>.from(state.wordQueue);
+      final pos = q.indexWhere((w) => w.id == currentId);
+      if (pos != -1) {
+        q[pos] = q[pos].copyWith(srsStage: serverStage, nextDueAt: serverDue);
+        _set(wordQueue: q);
+      }
+
+      // Stages mit Server-Response synchronisieren (falls abweichend)
+      if (serverStage != newStage) {
+        final updatedStages = [...state.stages];
+        // Alte lokale Schätzung rückgängig machen
+        if (newStage >= 0 && newStage < updatedStages.length) {
+          updatedStages[newStage] = (updatedStages[newStage] - 1).clamp(0, 1 << 30);
+        }
+        // Server-Stage hinzufügen
+        if (serverStage >= 0 && serverStage < updatedStages.length) {
+          updatedStages[serverStage] = updatedStages[serverStage] + 1;
+        }
+        _set(stages: updatedStages);
+        print('🔄 Stages korrigiert: lokale Schätzung $newStage -> Server $serverStage');
+      }
+
+      final allowed = _computeAllowedMaxStageFromQueue(state.wordQueue);
+      final now = DateTime.now();
+      final isNowDue = serverDue != null && !serverDue.isAfter(now);
+
+      // ⛔️ Entfernen, wenn:
+      // 1) Gate überschritten (z.B. S2 bei allowed=1)
+      // 2) oder S1+ und nicht (mehr) fällig – ABER NICHT, wenn es gerade S0→S1 wurde (Echo bleibt)
+      final bool justLearnedToS1 = (oldStage == 0 && serverStage == 1);
+
+      final shouldRemoveFromSession =
+          (serverStage > allowed) ||
+          ((serverStage >= 1) && !isNowDue && !justLearnedToS1);
+
+      if (shouldRemoveFromSession) {
+        final newIds = List<String>.from(state.shuffledWordIds);
+        final pos = newIds.indexOf(currentId);
+        if (pos != -1) {
+          newIds.removeAt(pos);
+          var nextIndex = state.index;
+          if (pos <= state.index && nextIndex > 0) nextIndex -= 1;
+          _set(shuffledWordIds: newIds, index: newIds.isEmpty ? 0 : nextIndex);
+          print('🗑️ Karte entfernt: $currentId (Stage: $serverStage, allowed: $allowed, due: $isNowDue)');
+        }
+      }
+
+      // Echo nur, wenn es wirklich S0→S1 war:
+      if (correct && justLearnedToS1) {
+        _scheduleImmediateReinforce(currentId, after: 10);
+        _startCooldownForS0(currentId, minOthers: 8);
+      }
+
+      // (optional) auch für S1 bei korrekt einmaliges „Echo":
+      if (correct && oldStage == 1) {
+        _scheduleImmediateReinforce(currentId, after: 14);
+      }
+    } catch (e) {
+      // optional loggen
+      print('❌ Review submission failed: $e');
+    }
 
     // 5) Nächste Karte
-    final nextIndex = (i + 1) % queue.length;
+    final nextIndex = (i + 1) % ids.length;
 
     // 6) recentlySwiped aktualisieren
     final newSwiped = [...state.recentlySwiped, currentId];
@@ -362,8 +485,63 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // 7) ggf. neu mischen, wenn am Ende
     if (nextIndex == 0) {
-      final shuffled = buildSmartCardOrder(queue);
+      // Config für Re-Shuffle berechnen
+      final now = DateTime.now();
+      final dueCount = queue.where((w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(now)).length;
+      
+      final stats = SrsStats(
+        rollingAccuracy: _rollingAccuracy,
+        avgSwipeMs: _avgSwipeMs,
+        recentTimeouts: _recentTimeouts,
+      );
+
+      final cfg = computeSrsConfig(
+        totalWordsInCategory: state.totalWordsInCategory,
+        dueCount: dueCount,
+        stats: stats,
+      );
+
+      final allowed = _computeAllowedMaxStageFromQueue(queue);
+      final shuffled = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowed);
+      
+      // Debug-Log für Re-Shuffle
+      final reshufflePreview = shuffled.take(40).map((ix) => queue[ix]).toList();
+      final reshuffleNewCount = reshufflePreview.where((w) => w.srsStage == 0).length;
+      final reshuffleDueCount = reshufflePreview.where((w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(DateTime.now())).length;
+      print('🔄 Re-Shuffle[40]: new=$reshuffleNewCount, due=$reshuffleDueCount, total=${reshufflePreview.length}');
+      
       _set(shuffledWordIds: [for (final k in shuffled) queue[k].id]);
+    }
+
+    // 7b) Mini-Reshuffle nach dem „Burst" (z. B. nach 10 Swipes)
+    final shouldMiniReshuffle = state.cardsSwipedInSession == 10 ||
+                                (state.cardsSwipedInSession > 10 &&
+                                 state.cardsSwipedInSession % 8 == 0); // danach regelmäßig
+
+    if (shouldMiniReshuffle) {
+      final now = DateTime.now();
+      final dueCount = state.wordQueue.where((w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(now)).length;
+
+      final cfg = computeSrsConfig(
+        totalWordsInCategory: state.totalWordsInCategory,
+        dueCount: dueCount,
+        stats: SrsStats(
+          rollingAccuracy: _rollingAccuracy,
+          avgSwipeMs: _avgSwipeMs,
+          recentTimeouts: _recentTimeouts,
+        ),
+      );
+
+      final allowed = _computeAllowedMaxStageFromQueue(state.wordQueue);
+      final newOrderIdx = buildSmartCardOrder(state.wordQueue, config: cfg, allowedMaxStage: allowed);
+      final newIds = [for (final i in newOrderIdx) state.wordQueue[i].id];
+
+      // Index auf gleiche Karte (per id) abbilden, damit kein Sprung sichtbar ist
+      final currentId = state.shuffledWordIds[state.index];
+      final newIndex = newIds.indexOf(currentId);
+      _set(shuffledWordIds: newIds, index: newIndex >= 0 ? newIndex : 0);
+      
+      print('🔄 Mini-Reshuffle nach ${state.cardsSwipedInSession} Swipes');
     }
 
     // 8) Timer-Verhalten wie gewünscht:
@@ -423,27 +601,28 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     _set(
       remainingMillis: state.timeLimit * 1000.0,
-      timerPaused: keepPaused ? true : false,
-      timerActive: shouldBeActive ? true : true, // ab jetzt aktiv
+      timerPaused: keepPaused,
+      timerActive: shouldBeActive,
       running: keepPaused ? false : true,
     );
 
-    // Nur ticken, wenn nicht pausiert
-    const tick = Duration(milliseconds: 16);
-    _wordTimer = Timer.periodic(tick, (t) {
-      if (state.timerPaused) return;
+    // Nur ticken, wenn nicht pausiert UND aktiv
+    if (!keepPaused && shouldBeActive) {
+      const tick = Duration(milliseconds: 16);
+      _wordTimer = Timer.periodic(tick, (t) {
+        if (state.timerPaused) return;
 
-      final left = state.remainingMillis - 16;
-      if (left <= 0) {
-        t.cancel();
-        HapticFeedback.mediumImpact();
-        // Zeit abgelaufen -> als falsch werten,
-        // dabei greift _handleAnswer mit der gleichen Restart-Logik
-        _handleAnswer(correct: false);
-      } else {
-        _set(remainingMillis: left);
-      }
-    });
+        final left = state.remainingMillis - 16;
+        if (left <= 0) {
+          t.cancel();
+          HapticFeedback.mediumImpact();
+          // Zeit abgelaufen -> als falsch werten
+          _handleAnswer(correct: false);
+        } else {
+          _set(remainingMillis: left);
+        }
+      });
+    }
   }
 
   /// Für den Kartenwechsel: nur die Restzeit auf neue Karte setzen.
@@ -476,18 +655,18 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // Nur tick starten, wenn NICHT pausiert
     if (!wasPaused && wasRunning) {
-      const tick = Duration(milliseconds: 16);
-      _wordTimer = Timer.periodic(tick, (t) {
-        if (state.timerPaused) return;
-        final left = state.remainingMillis - 16;
-        if (left <= 0) {
-          t.cancel();
-          HapticFeedback.mediumImpact();
-          _handleAnswer(correct: false);
-        } else {
-          _set(remainingMillis: left);
-        }
-      });
+    const tick = Duration(milliseconds: 16);
+    _wordTimer = Timer.periodic(tick, (t) {
+      if (state.timerPaused) return;
+      final left = state.remainingMillis - 16;
+      if (left <= 0) {
+        t.cancel();
+        HapticFeedback.mediumImpact();
+        _handleAnswer(correct: false);
+      } else {
+        _set(remainingMillis: left);
+      }
+    });
     }
   }
 
@@ -548,6 +727,46 @@ class LearnModeController extends Notifier<LearnModeState> {
     _set(index: currentIndex);
   }
 
+  void _scheduleImmediateReinforce(String wordId, {int after = 8}) {
+    final ids = List<String>.from(state.shuffledWordIds);
+    final curPos = ids.indexOf(wordId);
+    if (curPos == -1 || ids.isEmpty) return;
+
+    // Karte an Position „index + after" verschieben (wrap-around)
+    ids.removeAt(curPos);
+    final insertAt = ((state.index + after) % (ids.length + 1)).clamp(0, ids.length);
+    ids.insert(insertAt, wordId);
+
+    _set(shuffledWordIds: ids);
+  }
+
+  /// Für S0-Karten auch bei KORREKT einen Cooldown zählen,
+  /// damit sie NICHT sofort wieder direkt nebenan auftauchen.
+  void _startCooldownForS0(String wordId, {int minOthers = 8}) {
+    final cur = _cooldown[wordId] ?? 0;
+    _cooldown[wordId] = (cur > 0) ? (cur > minOthers ? cur : minOthers) : minOthers;
+  }
+
+  int _computeAllowedMaxStageFromQueue(List<WordUserView> queue) {
+    // Zähle Stufen in der aktuell aktiven Menge (kannst auch _capActivePool-Spiegel nutzen)
+    int s1 = 0, s2 = 0, s3 = 0, s4 = 0;
+    for (final w in queue) {
+      switch (w.srsStage) {
+        case 1: s1++; break;
+        case 2: s2++; break;
+        case 3: s3++; break;
+        case 4: s4++; break;
+      }
+    }
+
+    // Gate-Stufen NUR anhand der real verfügbaren Karten in der Queue öffnen
+    if (s1 < 12) return 1;  // erst S1 aufbauen
+    if (s2 < 20) return 2;  // dann S2
+    if (s3 < 25) return 3;  // dann S3
+    if (s4 < 30) return 4;  // dann S4
+    return 5;
+  }
+
   // ---- Helpers ----
 
   int _findInitialIndex(List<CategoryInfo> cats) {
@@ -568,22 +787,29 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   Future<void> _performReset() async {
-    try {
-      // Auf 0 setzen: alle Wörter in dieser Kategorie als S0
-      final total = state.totalWordsInCategory > 0
-          ? state.totalWordsInCategory
-          : state.wordQueue.length;
+    // lokale Anzeige sofort auf 0
+    final total = state.totalWordsInCategory > 0 ? state.totalWordsInCategory : state.wordQueue.length;
+    state = state.copyWith(stages: [total, 0, 0, 0, 0, 0]);
 
-      state = state.copyWith(stages: [total, 0, 0, 0, 0, 0]);
-      await _persistStageData();
+    // 1) lokale Persistenz löschen
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_stageStoreKey);
 
-      // Backend-Reset, falls vorhanden (safe call)
-      // TODO: Implement backend reset if needed
+    // 2) laufende Session/Queues leeren
+    _cooldown.clear();
+    _set(
+      wordQueue: const [],
+      shuffledWordIds: const [],
+      index: 0,
+      recentlySwiped: const [],
+      cardsSwipedInSession: 0,
+    );
 
-      // Neu laden
-      await _loadStageData();
-      await _loadWords();
-    } catch (_) {}
+    // 3) (optional) Backend-Reset per RPC aufrufen, falls vorhanden
+
+    // 4) frisch laden
+    await _loadStageData();
+    await _loadWords();
   }
 
   // ---- State setter (einheitlich) ----

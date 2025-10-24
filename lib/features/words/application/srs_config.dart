@@ -1,0 +1,95 @@
+// lib/features/words/application/srs_config.dart
+class SrsStats {
+  final double rollingAccuracy; // 0..1
+  final double avgSwipeMs;      // Durchschnittliche Antwortzeit in ms (letzte N)
+  final int recentTimeouts;     // letzte N
+  const SrsStats({
+    required this.rollingAccuracy,
+    required this.avgSwipeMs,
+    required this.recentTimeouts,
+  });
+}
+
+class SrsPhase {
+  final int length;        // wie viele Karten für diese Phase "steuern"
+  final double reviewRatio; // 0..1
+  const SrsPhase({required this.length, required this.reviewRatio});
+}
+
+class SrsConfig {
+  final int initialNewBurst;
+  final int headSize;
+  final List<int> stageWeights;   // S0..S5
+  final List<SrsPhase> phases;    // Ratio-Phasen nach dem Burst
+  final int activePoolCap;        // wie viele Karten maximal gleichzeitig im Umlauf
+
+  const SrsConfig({
+    required this.initialNewBurst,
+    required this.headSize,
+    required this.stageWeights,
+    required this.phases,
+    required this.activePoolCap,
+  });
+}
+
+/// Rechnet eine sinnvolle Konfiguration aus:
+/// - totalWordsInCategory: 159..1379 etc.
+/// - dueCount: aktuell fällige Anzahl
+/// - stats: Leistung + Tempo
+SrsConfig computeSrsConfig({
+  required int totalWordsInCategory,
+  required int dueCount,
+  required SrsStats stats,
+}) {
+  // 1) Initialer Burst skaliert moderat mit Kategoriegröße
+  final burst = _clampInt(
+    (0.018 * totalWordsInCategory).round(),
+    8, 14,
+  ); // ~2% der Kategorie, min 8, max 14
+
+  // 2) Kopfgröße (wie viele wir "steuern")
+  final head = _clampInt(
+    (totalWordsInCategory < 400) ? 120 : 180,
+    90, 220,
+  );
+
+  // 3) Grund-Ratios
+  double r1 = 0.70, r2 = 0.80, r3 = 0.90;
+
+  // 4) Adaptieren anhand Accuracy
+  if (stats.rollingAccuracy < 0.75) { r1 += 0.10; r2 += 0.05; r3 += 0.00; }
+  if (stats.rollingAccuracy > 0.90) { r1 -= 0.05; r2 -= 0.05; r3 -= 0.05; }
+
+  // 5) Adaptieren anhand Tempo / Timeouts
+  if (stats.avgSwipeMs > 5000 || stats.recentTimeouts > 2) {
+    r1 = (r1 + 0.10).clamp(0.6, 0.95);
+    r2 = (r2 + 0.05).clamp(0.6, 0.95);
+    // r3 belassen – Endphase bleibt review-lastig
+  } else if (stats.avgSwipeMs < 2000) {
+    r1 = (r1 - 0.05).clamp(0.6, 0.95);
+  }
+
+  // 6) Phasenlängen abhängig von vorhandenen "due"s (wenn viele fällig → schneller in hohe Review-Ratio)
+  final p1Len = (dueCount > 50) ? 30 : 40;
+  final p2Len = (dueCount > 100) ? 70 : 60;
+
+  // 7) Stage-Gewichte (S0..S5) – S2/S3 leicht priorisieren
+  final weights = <int>[1, 3, 4, 4, 2, 1];
+
+  // 8) Active-Pool-Cap – wie viele Karten gleichzeitig im Umlauf:
+  final cap = (totalWordsInCategory < 400) ? 80 : 120;
+
+  return SrsConfig(
+    initialNewBurst: burst,
+    headSize: head,
+    stageWeights: weights,
+    phases: [
+      SrsPhase(length: p1Len, reviewRatio: r1),
+      SrsPhase(length: p2Len, reviewRatio: r2),
+      const SrsPhase(length: 99999, reviewRatio: 0.90), // Rest der Session
+    ],
+    activePoolCap: cap,
+  );
+}
+
+int _clampInt(int v, int min, int max) => v < min ? min : (v > max ? max : v);

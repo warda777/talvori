@@ -31,6 +31,19 @@ class WordUserView {
   final DateTime? nextDueAt;
   final DateTime? userAddedAt;
 
+  WordUserView({
+    required this.id,
+    required this.text,
+    required this.translation,
+    this.level,
+    this.inMyWords = false,
+    this.pickedUser = false,
+    this.favoriteUser = false,
+    this.srsStage = 0,
+    this.nextDueAt,
+    this.userAddedAt,
+  });
+
   WordUserView.fromJson(Map<String, dynamic> j)
       : id = j['id'] as String,
         text = j['text'] as String,
@@ -42,6 +55,25 @@ class WordUserView {
         srsStage = (j['srs_stage_user'] as int?) ?? 0,
         nextDueAt = j['next_due_at_user'] != null ? DateTime.parse(j['next_due_at_user']) : null,
         userAddedAt = j['user_added_at'] != null ? DateTime.parse(j['user_added_at']) : null;
+  
+  WordUserView copyWith({
+    int? srsStage,
+    DateTime? nextDueAt,
+    bool setDueNull = false,
+  }) {
+    return WordUserView(
+      id: id,
+      text: text,
+      translation: translation,
+      level: level,
+      inMyWords: inMyWords,
+      pickedUser: pickedUser,
+      favoriteUser: favoriteUser,
+      srsStage: srsStage ?? this.srsStage,
+      nextDueAt: setDueNull ? null : (nextDueAt ?? this.nextDueAt),
+      userAddedAt: userAddedAt,
+    );
+  }
 }
 
 final _sb = Supabase.instance.client;
@@ -79,6 +111,13 @@ Future<List<WordUserView>> fetchLearnQueueAll(String categoryId) async {
   final prog = await fetchCategoryProgress(categoryId);
   final take = (prog.total > 0) ? prog.total : 2000; // Fallback
   final rows = await _sb.rpc('fn_user_learn_queue', params: {'cat': categoryId, 'take': take});
+  final list = (rows as List).cast<Map<String, dynamic>>();
+  return list.map((j) => WordUserView.fromJson(j)).toList();
+}
+
+/// Lern-Queue für Learn Mode (nur S0 + fällige S1-S5)
+Future<List<WordUserView>> fetchLearnQueueForMode(String categoryId) async {
+  final rows = await _sb.rpc('fn_user_learn_queue_mode', params: {'cat': categoryId});
   final list = (rows as List).cast<Map<String, dynamic>>();
   return list.map((j) => WordUserView.fromJson(j)).toList();
 }
