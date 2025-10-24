@@ -3,6 +3,8 @@ import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/core/events/events.dart';
+import 'dart:async';
 
 
 // Repo top-level (vermeidet const-Konstruktor-Fehler)
@@ -228,16 +230,43 @@ class _CategoryCard extends StatefulWidget {
   State<_CategoryCard> createState() => _CategoryCardState();
 }
 
-class _CategoryCardState extends State<_CategoryCard> {
+class _CategoryCardState extends State<_CategoryCard> with WidgetsBindingObserver {
   int? _total;
   int? _dueToday;
   int? _newTotal;
   bool _loading = true;
+  
+  // Reset-Event Listener
+  StreamSubscription<String>? _resetSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Lausche auf Reset-Events
+    _resetSubscription = ResetEvent.stream.listen((categoryId) {
+      // Lade für alle Kategorien neu (da wir nicht wissen, welche Kategorie betroffen ist)
+      _load();
+    });
+    
     _load();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Lade Daten neu, wenn die App wieder aktiv wird (z.B. nach Reset im Lernmodus)
+    if (state == AppLifecycleState.resumed) {
+      _load();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _resetSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -253,7 +282,7 @@ class _CategoryCardState extends State<_CategoryCard> {
         setState(() {
           _total = prog.total;
           _dueToday = wl.dueToday;
-          _newTotal = wl.newTotal;
+          _newTotal = prog.stages[0]; // Stage 0 = neue Wörter (korrekte Berechnung)
           _loading = false;
         });
       } else {

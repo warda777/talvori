@@ -72,13 +72,15 @@ Future<WorkloadToday> fetchWorkloadToday(String categoryId) async {
 }
 
 
-
-/// 3) Lern-Queue (zuerst fällige, dann neue) – liefert v_words_user
-Future<List<WordUserView>> fetchLearnQueue(String categoryId, {int take = 50}) async {
+/// Lern-Queue (alle Wörter der Kategorie – Größe dynamisch aus Progress)
+Future<List<WordUserView>> fetchLearnQueueAll(String categoryId) async {
+  final prog = await fetchCategoryProgress(categoryId);
+  final take = (prog.total > 0) ? prog.total : 2000; // Fallback
   final rows = await _sb.rpc('fn_user_learn_queue', params: {'cat': categoryId, 'take': take});
   final list = (rows as List).cast<Map<String, dynamic>>();
   return list.map((j) => WordUserView.fromJson(j)).toList();
 }
+
 
 /// Review-Ergebnis senden (true = richtig, false = falsch)
 Future<(int stage, DateTime due)> submitReview(String wordId, bool correct) async {

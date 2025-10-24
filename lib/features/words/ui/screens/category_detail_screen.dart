@@ -5,34 +5,16 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'dart:async';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/events/events.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
 /// Returns: (newCount, repeatCount) für den heutigen Tag
 Future<(int, int)> loadDailyLearningStats(String categoryId) async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final today = DateTime.now().toIso8601String().split('T')[0];
-    final key = 'daily_stats_$categoryId';
-    final stored = prefs.getString(key);
-    
-    if (stored != null) {
-      final parts = stored.split(':');
-      if (parts.length == 3) {
-        final storedDate = parts[0];
-        if (storedDate == today) {
-          final newCount = int.tryParse(parts[1]) ?? 0;
-          final repeatCount = int.tryParse(parts[2]) ?? 0;
-          return (newCount, repeatCount);
-        }
-      }
-    }
-    
-    return (0, 0); // Keine Daten oder anderer Tag
-  } catch (e) {
-    print('⚠️ Failed to load daily stats: $e');
-    return (0, 0);
-  }
+  final prefs = await SharedPreferences.getInstance();
+  final newToday = prefs.getInt('today_new_$categoryId') ?? 0;
+  final repsToday = prefs.getInt('today_repeats_$categoryId') ?? 0;
+  return (newToday, repsToday);
 }
 
 Timer? _switchDebounce;
@@ -159,7 +141,7 @@ class CategoryDetailScreen extends StatefulWidget {
   State<CategoryDetailScreen> createState() => _CategoryDetailScreenState();
 }
 
-class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
+class _CategoryDetailScreenState extends State<CategoryDetailScreen> with WidgetsBindingObserver {
   CategoryProgress? _progress;
   WorkloadToday? _workload;
 
@@ -172,6 +154,18 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   int _dailyRepeatsLearned = 0;
 
   bool _loading = true;
+  
+  // Reset-Event Listener
+  StreamSubscription<String>? _resetSubscription;
+
+  /// Helper-Funktion: Setzt lokale Stage-Daten auf 0 nach einem Reset
+  Future<void> _applyLocalReset(String categoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('learn_stages_$categoryId', '0,0,0,0,0,0'); // nur Stages
+    await prefs.setInt('today_new_$categoryId', 0);                   // Daily
+    await prefs.setInt('today_repeats_$categoryId', 0);               // Daily
+    print('✅ Applied local reset for category: $categoryId');
+  }
 
   // Kategorien aus DB + aktuelle Auswahl (für das Wheel im Header)
   List<CategoryInfo> _categories = const [];
@@ -198,7 +192,8 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         setState(() {
           _progress       = prog;
           _workload       = wl;
-          _weeklyNew      = _workload?.newTotal ?? 0;
+          // Korrekte Berechnung: newTotal = Stage 0 (neue Wörter)
+          _weeklyNew      = prog.stages[0]; // Stage 0 = neue Wörter
           _weeklyRepeats  = _workload?.dueToday ?? 0;
         });
       } catch (_) {
@@ -255,10 +250,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           newTotal: prog.newTotal,
         );
         _workload       = wl;
-        _weeklyNew      = _workload?.newTotal ?? 0;
+        // Korrekte Berechnung: newTotal = Stage 0 (neue Wörter) - IMMER aus lokalen Stages
+        _weeklyNew      = stages[0]; // RICHTIG (stages = localStages ?? prog.stages)
         _weeklyRepeats  = _workload?.dueToday ?? 0;
         
-        _dailyNewLearned = dailyNew;
+        // Korrekte tägliche Statistiken: Verwende lokale Stages (nach Reset sofort 0)
+        _dailyNewLearned = dailyNew; 
         _dailyRepeatsLearned = dailyRepeats;
       });
       
@@ -306,11 +303,32 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   @override
   void initState() {
     super.initState();
-  _initAll();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Lausche auf Reset-Events
+    _resetSubscription = ResetEvent.stream.listen((categoryId) async {
+      if (categoryId == _currentCatId) {
+        await _applyLocalReset(categoryId);
+        if (mounted) await _initAll();
+      }
+    });
+    
+    _initAll();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Lade Daten neu, wenn die App wieder aktiv wird (z.B. nach Reset im Lernmodus)
+    if (state == AppLifecycleState.resumed) {
+      _initAll();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _resetSubscription?.cancel();
     _switchDebounce?.cancel();
     _switchDebounce = null;
     super.dispose();
@@ -360,7 +378,10 @@ Future<void> _initAll() async {
         newTotal: prog.newTotal,
       );
       _workload   = wl;
-      _weeklyNew      = _workload?.newTotal ?? 0;
+      
+      // Nachdem _progress gesetzt wurde: IMMER aus lokalen Stages ableiten
+      final usedStages = _progress!.stages;
+      _weeklyNew      = usedStages[0];  // RICHTIG
       _weeklyRepeats  = _workload?.dueToday ?? 0;
       
       _dailyNewLearned = dailyNew;
@@ -384,15 +405,13 @@ Future<void> _initAll() async {
     final dailyTarget = 20; // Ziel: 20 Wörter pro Tag
     final dailyPercent = dailyTarget == 0 ? 0.0 : (dailyTotal / dailyTarget).clamp(0.0, 1.0);
     
-    final weeklyTotal   = (_weeklyNew + _weeklyRepeats).clamp(0, _weeklyTarget);
-    final weeklyPercent = _weeklyTarget == 0 ? 0.0 : weeklyTotal / _weeklyTarget;
-
-    final int totalVocabsInCat = stages.fold<int>(0, (sum, v) => sum + v);
-    
-    // Gesamtfortschritt: Wie viele Wörter wurden bereits gelernt (Stage 1+)?
+    // Progress Circle: Zeige Gesamtfortschritt (gelernte Wörter / Gesamtwörter)
+    final int totalWords = _progress?.total ?? stages.fold<int>(0, (sum, v) => sum + v);
     final int learnedWords = stages.skip(1).fold<int>(0, (sum, v) => sum + v); // Stage 1-5
-    final int totalWords = totalVocabsInCat;
-    final double overallPercent = totalWords == 0 ? 0.0 : (learnedWords / totalWords).clamp(0.0, 1.0);
+    final double weeklyPercent = totalWords == 0 ? 0.0 : (learnedWords / totalWords).clamp(0.0, 1.0);
+
+    // Gesamtfortschritt: Wie viele Wörter wurden bereits gelernt (Stage 1+)?
+    final double overallPercent = weeklyPercent; // Verwende die gleiche Berechnung
     final String overallLabel = '$learnedWords/$totalWords';
 
     // Höhe unterhalb der Top-Kachel (inkl. SafeAreas)
@@ -450,7 +469,7 @@ Future<void> _initAll() async {
                             const SnackBar(content: Text('Settings tapped')),
                           );
                         },
-                        vocabsCount: totalVocabsInCat,
+                        vocabsCount: totalWords,
                       ),
                     ),
 
@@ -1537,7 +1556,7 @@ class _PipelineLevelsCard extends StatelessWidget {
                   children: [
                     _VerticalStageSwitch(
                       count: s[0],
-                        outerColor: _kStageInnerRed,
+                        outerColor: s[0] > 0 ? _kStageInnerRed : Colors.grey.shade400,
                         innerColor: const Color(0xFF2D2D2F),
                         highlight: s[0] > 0,
                         completed: false,
@@ -1549,7 +1568,7 @@ class _PipelineLevelsCard extends StatelessWidget {
                     for (int stage = 1; stage <= 5; stage++) ...[
                       _VerticalStageSwitch(
                         count: s[stage],
-                        outerColor: _kStageOuter,
+                        outerColor: s[stage] > 0 ? _kStageOuter : Colors.grey.shade400,
                         innerColor: _kStageInner,
                         highlight: s[stage] > 0 && s[stage] < goalPerStage,
                         completed: s[stage] >= goalPerStage,
