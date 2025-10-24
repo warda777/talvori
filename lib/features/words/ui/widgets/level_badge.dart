@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 
 class LevelBadge extends StatelessWidget {
   final String? level;
+  final int? stage;
 
   const LevelBadge({
     super.key,
     this.level,
+    this.stage,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (level == null || level!.isEmpty) return const SizedBox.shrink();
+    final text = level ?? _mapStageToLevel(stage ?? 0);
+    if (text.isEmpty) return const SizedBox.shrink();
 
-    final levelText = level!.toUpperCase();
-    final levelColor = _getLevelColor(level!);
-
+    final color = _getLevelColor(text);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: levelColor,
+        color: color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -29,7 +30,7 @@ class LevelBadge extends StatelessWidget {
         ],
       ),
       child: Text(
-        levelText,
+        text.toUpperCase(),
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -37,6 +38,18 @@ class LevelBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _mapStageToLevel(int s) {
+    switch (s) {
+      case 0: return 'A1';
+      case 1: return 'A2';
+      case 2: return 'B1';
+      case 3: return 'B2';
+      case 4: return 'C1';
+      case 5: return 'C2';
+      default: return '';
+    }
   }
 
   Color _getLevelColor(String level) {
