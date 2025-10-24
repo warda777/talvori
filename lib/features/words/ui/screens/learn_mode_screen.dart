@@ -178,10 +178,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       onSwipe: (correct) async {
                         if (correct) {
                           _playCorrectSound();
-                          await c.onSwipeRight();
+                          c.onSwipeRight();
                         } else {
                           _playIncorrectSound();
-                          await c.onSwipeLeft();
+                          c.onSwipeLeft();
                         }
                       },
                       onFlip: () {
