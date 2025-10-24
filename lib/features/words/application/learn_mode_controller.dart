@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/words/application/srs_logic.dart';
 
 /// ---------- State ----------
 
@@ -152,15 +153,6 @@ class LearnModeController extends Notifier<LearnModeState> {
   final Map<String, int> _cooldown = {}; // wordId -> verbleibende "andere Karten"
   
   // --- Queue-Steuerung: wie viele Karten vorn „gesteuert" werden
-  static const int _headSize = 150;
-  
-  // --- Interleave-Muster (Gewichte) – gern anpassen
-  static const int _pS0 = 1; // neue pushen (minimal, aber vorhanden)
-  static const int _pS1 = 4; // S1 verstärken
-  static const int _pS2 = 5; // S2 verstärken
-  static const int _pS3 = 3;
-  static const int _pS4 = 2;
-  static const int _pS5 = 2;
 
   String get _currentCatId {
     final cats = state.categories;
@@ -282,7 +274,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
 
       final queue = _buildQueueDueFirst(words);
-      final shuffledIdx = await _getSmartCardOrder(queue);
+      final shuffledIdx = buildSmartCardOrder(queue);
 
       _set(
         wordQueue: queue,
@@ -313,90 +305,6 @@ class LearnModeController extends Notifier<LearnModeState> {
     return [...due, ...notDue];
   }
 
-  /// Intelligente SRS-Kartenauswahl mit gewichteten Mustern
-  Future<List<int>> _getSmartCardOrder(List<WordUserView> queue) async {
-    final now = DateTime.now();
-
-    // Buckets: due vs wait per stage
-    final s0Due = <int>[], s1Due = <int>[], s2Due = <int>[], s3Due = <int>[], s4Due = <int>[], s5Due = <int>[];
-    final s0Wait = <int>[], s1Wait = <int>[], s2Wait = <int>[], s3Wait = <int>[], s4Wait = <int>[], s5Wait = <int>[], rest = <int>[];
-
-    bool isDue(WordUserView w) {
-      final t = w.nextDueAt;
-      return t != null && !t.isAfter(now); // nextDueAt <= now
-    }
-
-    for (int i = 0; i < queue.length; i++) {
-      final w = queue[i];
-      final st = w.srsStage;
-      final due = isDue(w);
-
-      switch (st) {
-        case 0: (due ? s0Due : s0Wait).add(i); break;
-        case 1: (due ? s1Due : s1Wait).add(i); break;
-        case 2: (due ? s2Due : s2Wait).add(i); break;
-        case 3: (due ? s3Due : s3Wait).add(i); break;
-        case 4: (due ? s4Due : s4Wait).add(i); break;
-        case 5: (due ? s5Due : s5Wait).add(i); break;
-        default: rest.add(i); break;
-      }
-    }
-
-    void shuf<T>(List<T> x) => x..shuffle();
-    for (final b in [s0Due,s1Due,s2Due,s3Due,s4Due,s5Due,
-                    s0Wait,s1Wait,s2Wait,s3Wait,s4Wait,s5Wait,rest]) {
-      shuf(b);
-    }
-
-    // Head pattern (weights are applied as "pull this many from X, then move on")
-    int needS0 = _pS0, needS1 = _pS1, needS2 = _pS2, needS3 = _pS3, needS4 = _pS4, needS5 = _pS5;
-    void resetPattern() { needS0=_pS0; needS1=_pS1; needS2=_pS2; needS3=_pS3; needS4=_pS4; needS5=_pS5; }
-
-    final head = <int>[];
-    while (head.length < _headSize &&
-          (s0Due.isNotEmpty||s1Due.isNotEmpty||s2Due.isNotEmpty||s3Due.isNotEmpty||s4Due.isNotEmpty||s5Due.isNotEmpty||
-            s0Wait.isNotEmpty||s1Wait.isNotEmpty||s2Wait.isNotEmpty||s3Wait.isNotEmpty||s4Wait.isNotEmpty||s5Wait.isNotEmpty)) {
-
-      // 1) due-first, prioritise higher stages
-      while (needS3 > 0 && s3Due.isNotEmpty && head.length < _headSize) { head.add(s3Due.removeLast()); needS3--; }
-      while (needS4 > 0 && s4Due.isNotEmpty && head.length < _headSize) { head.add(s4Due.removeLast()); needS4--; }
-      while (needS5 > 0 && s5Due.isNotEmpty && head.length < _headSize) { head.add(s5Due.removeLast()); needS5--; }
-      while (needS2 > 0 && s2Due.isNotEmpty && head.length < _headSize) { head.add(s2Due.removeLast()); needS2--; }
-      while (needS1 > 0 && s1Due.isNotEmpty && head.length < _headSize) { head.add(s1Due.removeLast()); needS1--; }
-      while (needS0 > 0 && s0Due.isNotEmpty && head.length < _headSize) { head.add(s0Due.removeLast()); needS0--; }
-
-      // 2) then wait-pools (still give higher stages a nudge)
-      while (needS3 > 0 && s3Wait.isNotEmpty && head.length < _headSize) { head.add(s3Wait.removeLast()); needS3--; }
-      while (needS4 > 0 && s4Wait.isNotEmpty && head.length < _headSize) { head.add(s4Wait.removeLast()); needS4--; }
-      while (needS2 > 0 && s2Wait.isNotEmpty && head.length < _headSize) { head.add(s2Wait.removeLast()); needS2--; }
-      while (needS1 > 0 && s1Wait.isNotEmpty && head.length < _headSize) { head.add(s1Wait.removeLast()); needS1--; }
-      while (needS0 > 0 && s0Wait.isNotEmpty && head.length < _headSize) { head.add(s0Wait.removeLast()); needS0--; }
-      while (needS5 > 0 && s5Wait.isNotEmpty && head.length < _headSize) { head.add(s5Wait.removeLast()); needS5--; }
-
-      if (needS0==0 && needS1==0 && needS2==0 && needS3==0 && needS4==0 && needS5==0) {
-        resetPattern();
-      } else {
-        // if a bucket is empty, soft-reset to keep pulling from what exists
-        if ((needS0>0 && s0Due.isEmpty && s0Wait.isEmpty) ||
-            (needS1>0 && s1Due.isEmpty && s1Wait.isEmpty) ||
-            (needS2>0 && s2Due.isEmpty && s2Wait.isEmpty) ||
-            (needS3>0 && s3Due.isEmpty && s3Wait.isEmpty) ||
-            (needS4>0 && s4Due.isEmpty && s4Wait.isEmpty) ||
-            (needS5>0 && s5Due.isEmpty && s5Wait.isEmpty)) {
-          resetPattern();
-        }
-      }
-    }
-
-    // Tail = the rest, shuffled
-    final tail = <int>[
-      ...s0Due, ...s1Due, ...s2Due, ...s3Due, ...s4Due, ...s5Due,
-      ...s0Wait, ...s1Wait, ...s2Wait, ...s3Wait, ...s4Wait, ...s5Wait,
-      ...rest,
-    ]..shuffle();
-
-    return <int>[...head, ...tail];
-  }
 
   // ---- Review / Antwort-Handling ----
 
@@ -454,7 +362,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // 7) ggf. neu mischen, wenn am Ende
     if (nextIndex == 0) {
-      final shuffled = await _getSmartCardOrder(queue);
+      final shuffled = buildSmartCardOrder(queue);
       _set(shuffledWordIds: [for (final k in shuffled) queue[k].id]);
     }
 
