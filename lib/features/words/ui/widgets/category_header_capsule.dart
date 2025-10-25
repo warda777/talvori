@@ -27,8 +27,10 @@ class CategoryHeaderCapsule extends StatelessWidget {
   final double vocabsTileOffsetY;
   final double rightBtnsOffsetX;
   final double rightBtnsOffsetY;
+  final double wheelBottomGap; // NEU
 
   final Color accentColor;
+  final Color? backgroundColor;
 
   const CategoryHeaderCapsule({
     super.key,
@@ -45,27 +47,30 @@ class CategoryHeaderCapsule extends StatelessWidget {
     this.wheelOffsetX = 0.0,
     this.wheelOffsetY = 0.0,
     this.rowOffsetX = 0.0,
-    this.rowOffsetY = 50.0,
-    this.vocabsTileOffsetX = 20.0,
+    this.rowOffsetY = 0.0,
+    this.vocabsTileOffsetX = 0.0,
     this.vocabsTileOffsetY = 0.0,
-    this.rightBtnsOffsetX = -10.0,
+    this.rightBtnsOffsetX = 0.0,
     this.rightBtnsOffsetY = 0.0,
+    this.wheelBottomGap = 24.0, // Default: 24px Luft unterm Wheel
     this.accentColor = const Color(0xFFB1CCFE),
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: height,
+      color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back + Wheel
+            // Back + Wheel - mit fester Höhe wie im Learn-Mode
             SizedBox(
-              height: 72.0, // kWheelHeight
+              height: 72.0, // Gleiche Höhe wie im Learn-Mode
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -78,14 +83,11 @@ class CategoryHeaderCapsule extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Transform.translate(
-                      offset: Offset(wheelOffsetX, wheelOffsetY),
-                      child: Center(
-                        child: CategoryWheel(
-                          categories: categories,
-                          initialIndex: selectedIndex,
-                          onChanged: onWheelChanged,
-                        ),
+                    child: Center(
+                      child: CategoryWheel(
+                        categories: categories,
+                        initialIndex: selectedIndex,
+                        onChanged: onWheelChanged,
                       ),
                     ),
                   ),
@@ -93,7 +95,7 @@ class CategoryHeaderCapsule extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: wheelBottomGap), // ← statt const SizedBox(height: 10),
 
             // Vocabs-Kachel + Buttons
             Transform.translate(

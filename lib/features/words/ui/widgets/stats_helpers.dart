@@ -16,7 +16,7 @@ Future<void> ensureTodayBucket(String categoryId) async {
   final today = DateTime.now().toIso8601String().substring(0, 10);
   final last = prefs.getString(keyDate);
   if (last != today) {
-    await prefs
+    prefs
       ..setString(keyDate, today)
       ..setInt('today_new_$categoryId', 0)
       ..setInt('today_repeats_$categoryId', 0);

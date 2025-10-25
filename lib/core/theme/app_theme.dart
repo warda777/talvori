@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talvori/features/words/ui/theme/words_colors.dart';
 
 class AppTheme {
   static ThemeData get dark {
@@ -19,7 +20,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: scheme,
       useMaterial3: true,
-      scaffoldBackgroundColor: const Color(0xFF0F0F10),
+      scaffoldBackgroundColor: Colors.black,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -40,6 +41,14 @@ class AppTheme {
           foregroundColor: scheme.onSecondaryContainer,
         ),
       ),
+      
+      // WordsColors ThemeExtension
+      extensions: const [
+        WordsColors(
+          surfaceBg: Colors.black, // Gleiche Farbe wie scaffoldBackgroundColor
+          cardBg: Color(0xFF2D2D2F),
+        ),
+      ],
     );
   }
 }
