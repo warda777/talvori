@@ -6,9 +6,9 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
+import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
@@ -23,9 +23,6 @@ Future<(int, int)> loadDailyLearningStats(String categoryId) async {
 Timer? _switchDebounce;
 
 
-const _kStageOuter = Color(0xFFE4B866);
-const _kStageInner = Color(0xFF2D2C2C);
-const _kStageInnerRed = Color(0xFFA05260);
 const kAccentBlue = Color(0xFFB1CCFE);
 
 
@@ -704,43 +701,33 @@ Future<void> _initAll() async {
                               height: kBottomBlockReserve,
                               child: Align(
                                 alignment: Alignment.bottomCenter,
-                            child: _PipelineLevelsCard(
-                                  height: kLevelsCardH,
-                                  stages: stages,
-                                  goalPerStage: 100,
-                                  onStartPressed: () async {
-                                    final currentId = _currentCatId;
-                                    final currentName = _categories.isNotEmpty
-                                        ? _categories[_selectedCategoryIndex].name
-                                        : widget.title;
-                                    if (currentId.isEmpty) return;
+                            child: LevelsCard(
+                              height: kLevelsCardH,
+                              stages: stages,
+                              goalPerStage: 100,
+                              onStartPressed: () async {
+                                final currentId = _currentCatId;
+                                final currentName = _categories.isNotEmpty
+                                    ? _categories[_selectedCategoryIndex].name
+                                    : widget.title;
+                                if (currentId.isEmpty) return;
 
-                                    // 1) S0-Seed (serverseitig)
-                                    final sb = Supabase.instance.client;
-                                    await sb.rpc('fn_seed_user_category', params: {
-                                      'p_category_id': currentId,
-                                    });
+                                final sb = Supabase.instance.client;
+                                await sb.rpc('fn_seed_user_category', params: {'p_category_id': currentId});
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.remove('learn_stages_$currentId');
+                                await prefs.remove('just_reset_$currentId');
+                                await prefs.setBool('just_seeded_$currentId', true);
 
-                                    final prefs = await SharedPreferences.getInstance();
-                                    await prefs.remove('learn_stages_$currentId');       // <- lokale 0er löschen
-                                    await prefs.remove('just_reset_$currentId');         // <- sicherheitshalber
-                                    await prefs.setBool('just_seeded_$currentId', true); // <- einmalig Backend bevorzugen
-
-
-                                    // 2) Learn Mode
-                                    await Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => LearnModeScreen(
-                                          categoryId: currentId,
-                                          title: currentName,
-                                        ),
-                                      ),
-                                    );
-                                    
-                                    // 3) Nach Rückkehr synchron neu laden
-                                    await _reloadProgress();
-                                  },
-                                ),
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        LearnModeScreen(categoryId: currentId, title: currentName),
+                                  ),
+                                );
+                                await _reloadProgress();
+                              },
+                            ),
                               ),
                             ),
                           ),
@@ -773,100 +760,4 @@ Future<void> _initAll() async {
 
 // Ring mit CustomPainter (runde Kappen)
 
-// ---------- Untere Levels-Kachel (unten verankert) ----------
-class _PipelineLevelsCard extends StatelessWidget {
-  final double height;     // Kachelhöhe (OBERKANTE bewegt sich)
-  final List<int> stages;  // erwartet [s0..s5]
-  final int goalPerStage;  // z.B. 100
-  final Future<void> Function() onStartPressed; // Callback für Start-Button
-
-  const _PipelineLevelsCard({
-    required this.height,
-    required this.stages,
-    required this.goalPerStage,
-    required this.onStartPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final s = (stages.length >= 6) ? stages : [0, 0, 0, 0, 0, 0];
-
-    return SizedBox(
-      width: double.infinity,
-      height: height, // nimmt die Höhe vom Aufrufer (unten verankert via Align)
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          kLevelsOuterPadL, kLevelsOuterPadT, kLevelsOuterPadR, kLevelsOuterPadB),
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-
-            // "Levels"-Titel verschiebbar
-            Transform.translate(
-              offset: Offset(kLevelsTitleOffsetX, kLevelsTitleOffsetY),
-              child: Center(
-              child: Text('Levels', style: t.textTheme.titleMedium?.copyWith(color: Colors.white)),
-            ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Switches (gesamte Reihe verschiebbar in X/Y, Gap steuerbar)
-            Expanded(
-              child: Center(
-                child: Transform.translate(
-                  offset: Offset(kSwitchesOffsetX, kSwitchesOffsetY),
-                  child: StageSwitchRow(
-                    counts: s,                    // erwartet [s0..s5]
-                    goalPerStage: goalPerStage,   // z.B. 100
-                    gap: kSwitchGap,              // dein existierender Abstand
-                    sizes: const StageSwitchSizes(
-                      width: 42, height: 75, knobTop: 2, knobBottom: 18,
-                    ),
-                    colors: StageSwitchColors(
-                      newOuter: _kStageInnerRed,  // „New" (S0)
-                      stageOuter: _kStageOuter,   // S1..S5
-                      inner: _kStageInner,        // inneres Grau
-                      disabledOuter: Colors.grey.shade400, // falls count==0
-                    ),
-                    labels: const StageSwitchLabels(
-                      newLabel: 'New', newNote: '0', stagePrefix: 'S',
-                    ),
-                ),
-              ),
-            ),
-            ),
-
-            SizedBox(height: 12),
-
-            // Start-Button verschiebbar
-            Transform.translate(
-              offset: Offset(kStartBtnOffsetX, kStartBtnOffsetY),
-              child: Center(
-              child: SizedBox(
-                width: 138,
-                height: 48,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D2D2F),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: const BorderSide(color: Colors.black, width: 1),
-                    ),
-                  ),
-                  onPressed: onStartPressed,
-
-                  child: const Text('Start'),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
