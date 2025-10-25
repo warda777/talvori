@@ -6,6 +6,9 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
+import 'package:talvori/features/words/ui/widgets/progress_ring.dart';
+import 'package:talvori/features/words/ui/widgets/glow_circle_button.dart';
+import 'package:talvori/features/words/ui/widgets/glow_rect_tile.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
@@ -19,7 +22,6 @@ Future<(int, int)> loadDailyLearningStats(String categoryId) async {
 
 Timer? _switchDebounce;
 
-const _kCard = Color(0xFF2D2C2C);
 
 const _kStageOuter = Color(0xFFE4B866);
 const _kStageInner = Color(0xFF2D2C2C);
@@ -623,7 +625,7 @@ class _TopCapsule extends StatelessWidget {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(15),
                           onTap: onVocabs,
-                    child: _GlowRectTile(
+                    child: GlowRectTile(
                     width: 84,
                     height: 85,
                     radius: 15,
@@ -644,7 +646,7 @@ class _TopCapsule extends StatelessWidget {
                     offset: Offset(kTopRightBtnsOffsetX, kTopRightBtnsOffsetY),
                     child: Row(
                     children: [
-                  _GlowCircleButton(
+                  GlowCircleButton(
                     size: 62,
                     onTap: onAdd,
                     child: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -652,7 +654,7 @@ class _TopCapsule extends StatelessWidget {
                           glowColor: kAccentBlue,
                   ),
                       const SizedBox(width: 10),
-                  _GlowCircleButton(
+                  GlowCircleButton(
                     size: 62,
                     onTap: onSettings,
                     child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
@@ -673,163 +675,7 @@ class _TopCapsule extends StatelessWidget {
 }
 
 
-class _GlowCircleButton extends StatelessWidget {
-  final double size;
-  final Widget child;
-  final VoidCallback? onTap;
-  final Color outlineColor;
-  final Color glowColor;
 
-  const _GlowCircleButton({required this.size, required this.child, this.onTap, required this.outlineColor, required this.glowColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(), // → exakte runde Hitbox
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: _kCard,
-          shape: BoxShape.circle,
-          boxShadow: [
-              BoxShadow(color: glowColor.withOpacity(0.5), blurRadius: 8, offset: Offset(0, -2)),
-              BoxShadow(color: glowColor.withOpacity(0.4), blurRadius: 20, offset: Offset(0, 4)),
-              BoxShadow(color: glowColor.withOpacity(0.3), blurRadius: 30, offset: Offset(0, 8)),
-          ],
-          border: Border.all(color: outlineColor, width: 1.5),
-        ),
-        alignment: Alignment.center,
-        child: child,
-        ),
-      ),
-    );
-  }
-
-}
-
-class _GlowRectTile extends StatelessWidget {
-  final double width;
-  final double height;
-  final double radius;
-  final String title;
-  final Widget icon;
-  final VoidCallback? onTap;
-
-  // NEU:
-  final Color outlineColor;
-  final Color glowColor;
-  final String? badgeText; // zeigt oben-rechts die Zahl
-
-  const _GlowRectTile({
-    required this.width,
-    required this.height,
-    required this.radius,
-    required this.title,
-    required this.icon,
-    this.onTap,
-    this.outlineColor = Colors.white,
-    this.glowColor = Colors.white,
-    this.badgeText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final borderR = BorderRadius.circular(radius);
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: _kCard,
-            borderRadius: borderR,
-            boxShadow: [
-              BoxShadow(color: glowColor.withOpacity(0.5), blurRadius: 8, offset: const Offset(0, -2)),
-              BoxShadow(color: glowColor.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 4)),
-              BoxShadow(color: glowColor.withOpacity(0.3), blurRadius: 30, offset: const Offset(0, 8)),
-            ],
-            border: Border.all(color: outlineColor, width: 1.5),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: borderR),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              borderRadius: borderR,
-              onTap: onTap,
-              child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-                    Text(title,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
-            icon,
-          ],
-        ),
-      ),
-            ),
-          ),
-        ),
-
-        // NEU: Badge oben rechts (leicht außerhalb)
-        if (badgeText != null && badgeText!.isNotEmpty)
-          Positioned(
-            top: -8,
-            right: -30, // ← hier X verschieben
-            child: _CountBadge(text: badgeText!, outlineColor: outlineColor, glowColor: glowColor),
-          ),
-      ],
-    );
-  }
-}
-
-class _CountBadge extends StatelessWidget {
-  final String text;
-  final Color outlineColor;
-  final Color glowColor;
-
-  const _CountBadge({
-    required this.text,
-    required this.outlineColor,
-    required this.glowColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 44, minHeight: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: _kCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: outlineColor, width: 1.5),
-        boxShadow: [
-          BoxShadow(color: glowColor.withOpacity(0.7), blurRadius: 3, offset: const Offset(0, -1)),
-          BoxShadow(color: glowColor.withOpacity(0.7), blurRadius: 15, offset: const Offset(0, 5)),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.fade,
-        softWrap: false,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
 
 
 
@@ -873,7 +719,7 @@ class _MidProgress extends StatelessWidget {
               // Progress Ring links
               Transform.translate(
                 offset: Offset(kMidRingOffsetX, kMidRingOffsetY),
-                child: _ProgressRing(
+                child: ProgressRing(
                 size: 120,
                 thickness: 12,
                 percent: percent,
@@ -1042,104 +888,6 @@ class _Pill extends StatelessWidget {
 }
 
 // Ring mit CustomPainter (runde Kappen)
-class _ProgressRing extends StatelessWidget {
-  final double size;
-  final double thickness;
-  final double percent; // 0..1
-  final Widget? center;
-
-  const _ProgressRing({
-    required this.size,
-    required this.thickness,
-    required this.percent,
-    this.center,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: Size.square(size),
-            painter: _RingPainter(
-              percent: percent.clamp(0, 1),
-              thickness: thickness,
-              bgColor: Colors.white.withOpacity(0.12),
-              fgColor: Colors.white,
-            ),
-          ),
-          if (center != null) center!,
-        ],
-      ),
-    );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  final double percent;
-  final double thickness;
-  final Color bgColor;
-  final Color fgColor;
-
-  _RingPainter({
-    required this.percent,
-    required this.thickness,
-    required this.bgColor,
-    required this.fgColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final center = rect.center;
-    final radius = size.width / 2 - thickness / 2;
-
-    final bgPaint = Paint()
-      ..color = bgColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness
-      ..strokeCap = StrokeCap.round;
-
-    final fgPaint = Paint()
-      ..color = fgColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness
-      ..strokeCap = StrokeCap.round;
-
-    // Hintergrundkreis
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -90 * (3.1415926535 / 180),
-      360 * (3.1415926535 / 180),
-      false,
-      bgPaint,
-    );
-
-    // Progressbogen
-    final sweep = 360 * percent;
-    if (sweep > 0) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        -90 * (3.1415926535 / 180),
-        sweep * (3.1415926535 / 180),
-        false,
-        fgPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter old) {
-    return old.percent != percent ||
-        old.thickness != thickness ||
-        old.bgColor != bgColor ||
-        old.fgColor != fgColor;
-  }
-}
 
 // ---------- Untere Levels-Kachel (unten verankert) ----------
 class _PipelineLevelsCard extends StatelessWidget {

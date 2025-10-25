@@ -1,6 +1,7 @@
 # Talvori - Flutter App Project Structure
 
 ## 📁 Project Overview
+
 - **Total Dart Files**: 63
 - **Architecture**: Feature-based with Clean Architecture principles
 - **State Management**: Riverpod
@@ -10,6 +11,7 @@
 ## 🏗️ Core Architecture
 
 ### 📂 `lib/core/` - Shared Infrastructure
+
 ```
 lib/core/
 ├── events/                    # Global event system
@@ -30,6 +32,7 @@ lib/core/
 ### 📂 `lib/features/` - Feature-based Organization
 
 #### 🏠 Home Feature (`lib/features/home/`)
+
 ```
 lib/features/home/
 └── ui/
@@ -50,6 +53,7 @@ lib/features/home/
 ```
 
 #### 📚 Words Feature (`lib/features/words/`) - Main Learning Module
+
 ```
 lib/features/words/
 ├── application/              # Business logic & state management
@@ -104,6 +108,7 @@ lib/features/words/
 ```
 
 #### 🃏 Decks Feature (`lib/features/decks/`)
+
 ```
 lib/features/decks/
 └── domain/
@@ -111,6 +116,7 @@ lib/features/decks/
 ```
 
 #### 🔔 Push Feature (`lib/features/push/`)
+
 ```
 lib/features/push/
 └── data/
@@ -118,6 +124,7 @@ lib/features/push/
 ```
 
 #### 🏆 Rewards Feature (`lib/features/rewards/`)
+
 ```
 lib/features/rewards/
 └── ui/screens/
@@ -127,16 +134,19 @@ lib/features/rewards/
 ## 🎨 UI Architecture Highlights
 
 ### 🎯 Centralized Theme System
+
 - **`ui_constants.dart`**: All colors, sizes, spacing, and UI constants
 - **Dynamic color adaptation**: LevelBadge automatically adjusts text color for contrast
 - **Consistent spacing**: Standardized gaps and padding throughout the app
 
 ### 🧩 Component Architecture
+
 - **Modular widgets**: Each UI component is self-contained
 - **Barrel files**: Clean imports with `widgets.dart`, `cards.dart`, etc.
 - **Reusable components**: ProgressBar, RoundIcon, etc. in core
 
 ### 📱 Learn Mode UI Structure
+
 ```
 LearnModeScreen
 ├── HeaderBar (Back button + CategoryWheel)
@@ -148,22 +158,26 @@ LearnModeScreen
 ## 🔧 Key Technical Features
 
 ### 🧠 Spaced Repetition System (SRS)
+
 - **Adaptive algorithm**: Adjusts based on user performance
 - **Stage progression**: S0 (new) → S1-S5 (mastered)
 - **Smart queue management**: Balances new cards with reviews
 - **Gate logic**: Prevents overwhelming users with too many new cards
 
 ### ⏱️ Timer System
+
 - **Visual progress bar**: Shows remaining time
 - **Pause/Resume functionality**: User can control learning pace
 - **Auto-reset**: Timer resets after each card
 
 ### 🎵 Audio & Haptic Feedback
+
 - **SFX Service**: Sound effects for correct/incorrect answers
 - **Haptic feedback**: Tactile responses for better UX
 - **Fallback system**: Haptic when audio fails
 
 ### 🎨 Visual Feedback
+
 - **Swipe animations**: Smooth card transitions
 - **Stage indicators**: Visual progress tracking
 - **Level badges**: CEFR level display with proper contrast
@@ -172,11 +186,13 @@ LearnModeScreen
 ## 📊 State Management
 
 ### 🏪 Riverpod Providers
+
 - **`learnModeControllerProvider`**: Main learning state
 - **Granular selectors**: `currentWordProvider`, `stagesProvider`, etc.
 - **Auto-dispose**: Automatic cleanup when not needed
 
 ### 🔄 State Flow
+
 1. **User interaction** → Controller method
 2. **Business logic** → State update
 3. **UI rebuild** → Provider notification
@@ -185,11 +201,13 @@ LearnModeScreen
 ## 🗄️ Data Layer
 
 ### 🗃️ Supabase Integration
+
 - **Real-time sync**: Live updates across devices
 - **RPC functions**: Server-side logic for SRS
 - **User progress**: Persistent learning data
 
 ### 💾 Local Storage
+
 - **SharedPreferences**: Offline progress tracking
 - **Stage persistence**: Local SRS stage data
 - **Session management**: Current learning session
@@ -197,21 +215,25 @@ LearnModeScreen
 ## 🚀 Performance Optimizations
 
 ### ⚡ Efficient Rebuilds
+
 - **Selective providers**: Only rebuild necessary widgets
 - **Memoization**: Expensive calculations cached
 - **Lazy loading**: Components loaded on demand
 
 ### 🎯 Memory Management
+
 - **Auto-dispose providers**: Automatic cleanup
 - **Timer management**: Proper cancellation
 - **Image optimization**: Efficient asset loading
 
 ## 📱 Platform Support
+
 - **iOS**: Native iOS design patterns
 - **Android**: Material Design compliance
 - **Responsive**: Adapts to different screen sizes
 
 ## 🔧 Development Tools
+
 - **Hot reload**: Fast development iteration
 - **Debug logging**: Comprehensive debugging info
 - **Error handling**: Graceful failure recovery
@@ -219,6 +241,6 @@ LearnModeScreen
 
 ---
 
-*Last updated: $(date)*
-*Total files: 63 Dart files*
-*Architecture: Feature-based Clean Architecture with Riverpod*
+_Last updated: $(date)_
+_Total files: 63 Dart files_
+_Architecture: Feature-based Clean Architecture with Riverpod_

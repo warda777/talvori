@@ -5,7 +5,6 @@ import 'package:talvori/features/words/ui/ui_constants.dart';
 import '../widgets/widgets.dart';
 
 
-
 class LearnModeScreen extends ConsumerStatefulWidget {
   final String categoryId;
   final String title; // z. B. "Money & Shopping"
@@ -39,9 +38,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
     });
   }
 
-  
-
-
 
   // === Build ===
 
@@ -62,10 +58,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       ),
     );
   }
-
-
-
-
 }
 
 
