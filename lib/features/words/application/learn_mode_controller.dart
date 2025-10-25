@@ -8,6 +8,8 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/srs_logic.dart';
 import 'package:talvori/features/words/application/srs_config.dart';
 import 'package:talvori/features/words/services/sfx_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:talvori/core/events/events.dart';
 
 /// ---------- State ----------
 
@@ -384,7 +386,8 @@ class LearnModeController extends Notifier<LearnModeState> {
     final current = queue.firstWhere((w) => w.id == currentId, orElse: () => queue.first);
     
     // Debug-Log für Karten-Bewertung
-    final isDueNow = current.nextDueAt != null && !current.nextDueAt!.isAfter(DateTime.now());
+    final nowUtc = DateTime.now().toUtc();
+    final isDueNow = current.nextDueAt != null && !current.nextDueAt!.isAfter(nowUtc);
     print('🎯 Bewerte Karte: ${current.text} (Stage: ${current.srsStage}, Due: $isDueNow) - $correct');
 
     // 1) Timer-Status merken (nicht stoppen!)
@@ -412,8 +415,12 @@ class LearnModeController extends Notifier<LearnModeState> {
     _set(stages: stages);
 
     // 4) Review an Backend schicken und Server-Response verwenden
+    int serverStage = newStage; // Fallback auf lokale Schätzung
+    DateTime? serverDue;
     try {
-      final (serverStage, serverDue) = await submitReview(currentId, correct);
+      final result = await submitReview(currentId, correct);
+      serverStage = result.$1;
+      serverDue = result.$2;
       print('🗂 Server says: word=$currentId -> stage=$serverStage, due=$serverDue (old=$oldStage, correct=$correct)');
 
       // aktuelles Word-Objekt im Cache updaten
@@ -595,6 +602,16 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     // 10) lokalen Fortschritt speichern
     await _persistStageData();
+
+    // 11) Stage-Transition Event feuern
+    print('🎯 EMIT StageEvent cat=${state.categoryId} word=$currentId from=$oldStage to=$serverStage due=$isDueNow');
+    StageTransitionEvent.emit(StageTransitionEvent(
+      categoryId: state.categoryId,
+      wordId: currentId,
+      fromStage: oldStage,
+      toStage: serverStage,
+      wasDueBefore: isDueNow,
+    ));
 
   }
 
@@ -796,30 +813,49 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   Future<void> _performReset() async {
-    // lokale Anzeige sofort auf 0
-    final total = state.totalWordsInCategory > 0 ? state.totalWordsInCategory : state.wordQueue.length;
-    state = state.copyWith(stages: [total, 0, 0, 0, 0, 0]);
-
-    // 1) lokale Persistenz löschen
+    // === Im Reset-Handler EINSETZEN (bestehende lokale-only-Resets ersetzen) ===
+    final sb = Supabase.instance.client;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_stageStoreKey);
+    final catId = state.categoryId; // oder deine aktuelle Category-ID
 
-    // 2) laufende Session/Queues leeren
-    _cooldown.clear();
-    _wordTimer?.cancel();
-    _set(
-      wordQueue: const [],
-      shuffledWordIds: const [],
-      index: 0,
-      recentlySwiped: const [],
-      cardsSwipedInSession: 0,
-    );
+    try {
+      // 1) Server-Reset
+      await sb.rpc('fn_reset_user_category', params: {'p_category_id': catId});
 
-    // 3) (optional) Backend-Reset per RPC aufrufen, falls vorhanden
+      // 2) Sofort für LearnMode wieder befüllen (volle S0)
+      await sb.rpc('fn_seed_user_category', params: {'p_category_id': catId});
 
-    // 4) frisch laden
-    await _loadStageData();
-    await _loadWords();
+      // 3) Category-Ansicht soll 0 zeigen → just_reset setzen
+      await prefs.setString('learn_stages_$catId', '0,0,0,0,0,0');
+      await prefs.setInt('today_new_$catId', 0);
+      await prefs.setInt('today_repeats_$catId', 0);
+      await prefs.setBool('just_reset_$catId', true);
+
+      // 4) Event feuern (damit Category neu lädt – sie zeigt 0 dank Marker)
+      ResetEvent.notifyReset(catId);
+
+      // 5) Laufende Session/Queues leeren
+      _cooldown.clear();
+      _wordTimer?.cancel();
+      _set(
+        wordQueue: const [],
+        shuffledWordIds: const [],
+        index: 0,
+        recentlySwiped: const [],
+        cardsSwipedInSession: 0,
+      );
+
+      // 6) LearnMode danach NICHT aus den lokalen Prefs lesen, sondern Backend neu laden
+      final prog = await fetchCategoryProgress(catId);   // <- zieht S0 voll vom Server
+      _set(stages: prog.stages); // <- nutze hier prog.stages (NICHT localStages)
+      
+      // 7) Frisch laden
+      await _loadWords();
+
+    } catch (e) {
+      // optional: SnackBar/Log
+      print('⚠️ Reset failed: $e');
+    }
   }
 
   // ---- State setter (einheitlich) ----

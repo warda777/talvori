@@ -5,10 +5,10 @@ import 'dart:async';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/events/events.dart';
-import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/features/words/ui/widgets/progress_ring.dart';
-import 'package:talvori/features/words/ui/widgets/glow_circle_button.dart';
-import 'package:talvori/features/words/ui/widgets/glow_rect_tile.dart';
+import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
@@ -156,8 +156,11 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
 
   bool _loading = true;
   
+  int _vocabsTotal = 0; // echte Gesamtzahl der Wörter in der Kategorie
+  
   // Reset-Event Listener
   StreamSubscription<String>? _resetSubscription;
+  StreamSubscription<StageTransitionEvent>? _stageSub;
 
   /// Helper-Funktion: Setzt lokale Stage-Daten auf 0 nach einem Reset
   Future<void> _applyLocalReset(String categoryId) async {
@@ -165,6 +168,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     await prefs.setString('learn_stages_$categoryId', '0,0,0,0,0,0'); // nur Stages
     await prefs.setInt('today_new_$categoryId', 0);                   // Daily
     await prefs.setInt('today_repeats_$categoryId', 0);               // Daily
+    
+    // NEU: Marker setzen, damit der nächste Reload ausschließlich lokale Stände nutzt
+    await prefs.setBool('just_reset_$categoryId', true);
+    
+    await _loadVocabsTotal(categoryId); // Badge bleibt echte Gesamtanzahl der Kategorie
+    
     print('✅ Applied local reset for category: $categoryId');
   }
 
@@ -197,6 +206,8 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
           _weeklyNew      = prog.stages[0]; // Stage 0 = neue Wörter
           _weeklyRepeats  = _workload?.dueToday ?? 0;
         });
+        
+        await _loadVocabsTotal(selId);
       } catch (_) {
         // optional: SnackBar / Log
       }
@@ -210,6 +221,8 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     
     final selId = _currentCatId;
     if (selId.isEmpty) return;
+    
+    await _ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
     
     try {
       print('🔄 Reloading progress for category: $selId');
@@ -230,6 +243,59 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
         } catch (e) {
           print('⚠️ Failed to parse local stages: $e');
         }
+      }
+      
+      // NEU: Marker prüfen & Backend-Fetch überspringen (1x)
+      final justReset = prefs.getBool('just_reset_$selId') ?? false;
+      final justSeeded = prefs.getBool('just_seeded_$selId') ?? false;
+
+      if (justSeeded) {
+        // Backendwerte verwenden (kein lokales Override), Flag danach löschen
+        final prog  = await fetchCategoryProgress(selId);
+        final wl    = await fetchWorkloadToday(selId);
+        await prefs.remove('just_seeded_$selId');
+
+        _progress = CategoryProgress(
+          total: prog.total,
+          stages: prog.stages,     // <- HIER: DB-Stages (S0 jetzt > 0)
+          dueToday: prog.dueToday,
+          newTotal: prog.newTotal,
+        );
+        _workload = wl;
+
+        final used = _progress!.stages;
+        _weeklyNew     = used[0];
+        _weeklyRepeats = _workload?.dueToday ?? 0;
+
+        // Tageswerte NICHT nullen – aus prefs laden:
+        final (dailyNew, dailyRepeats) = await loadDailyLearningStats(selId);
+        _dailyNewLearned = dailyNew;
+        _dailyRepeatsLearned = dailyRepeats;
+
+        await _loadVocabsTotal(selId);  // stellt sicher, dass die Kachel nie 0 zeigt
+
+        if (mounted) setState(() {});
+        return; // Wichtig: normale lokale-Override-Logik überspringen
+      }
+
+      if (justReset && localStages != null) {
+        _progress = CategoryProgress(
+          total: 0,
+          stages: localStages,
+          dueToday: 0,
+          newTotal: 0,
+        );
+        _workload = WorkloadToday(dueToday: 0, newTotal: 0);
+        _weeklyNew = 0;
+        _weeklyRepeats = 0;
+        _dailyNewLearned = 0;
+        _dailyRepeatsLearned = 0;
+
+        await _loadVocabsTotal(selId);  // stellt sicher, dass die Kachel nie 0 zeigt
+
+        await prefs.remove('just_reset_$selId');
+        if (mounted) setState(() {});
+        return;
       }
       
       // Lade vom Backend (für total und workload)
@@ -256,15 +322,37 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
         _weeklyRepeats  = _workload?.dueToday ?? 0;
         
         // Korrekte tägliche Statistiken: Verwende lokale Stages (nach Reset sofort 0)
-        _dailyNewLearned = dailyNew; 
+        _dailyNewLearned = dailyNew;
         _dailyRepeatsLearned = dailyRepeats;
       });
       
       print('✅ Progress reloaded: stages=$localStages (local) vs ${prog.stages} (backend), total=${prog.total}');
       print('📈 Daily stats: new=$dailyNew, repeats=$dailyRepeats');
+      
+      await _loadVocabsTotal(selId);
     } catch (e) {
       print('❌ Failed to reload progress: $e');
       // Fallback: behalte alte Daten
+    }
+  }
+
+  Future<void> _loadVocabsTotal(String catId) async {
+    final sb = Supabase.instance.client;
+    final res = await sb.rpc('fn_category_word_count', params: {'p_category_id': catId});
+    if (!mounted) return;
+    setState(() => _vocabsTotal = (res as int?) ?? 0);
+  }
+
+  Future<void> _ensureTodayBucket(String categoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final keyDate = 'today_date_$categoryId';
+    final today = DateTime.now().toIso8601String().substring(0,10);
+    final last = prefs.getString(keyDate);
+    if (last != today) {
+      prefs
+        ..setString(keyDate, today)
+        ..setInt('today_new_$categoryId', 0)
+        ..setInt('today_repeats_$categoryId', 0);
     }
   }
 
@@ -313,8 +401,42 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
         if (mounted) await _initAll();
       }
     });
+
+    // Lausche auf Stage-Transition-Events
+    _stageSub = StageTransitionEvent.stream.listen((e) async {
+      print('📥 RECV StageEvent cat=${e.categoryId} cur=$_currentCatId word=${e.wordId} from=${e.fromStage} to=${e.toStage} due=${e.wasDueBefore}');
+      if (e.categoryId != _currentCatId) return;
+      await _ensureTodayBucket(e.categoryId);
+
+      final prefs = await SharedPreferences.getInstance();
+      var todayNew = prefs.getInt('today_new_${e.categoryId}') ?? 0;
+      var todayRep = prefs.getInt('today_repeats_${e.categoryId}') ?? 0;
+
+      // NEW: +1 bei S0->S1+, -1 bei S1+->S0 (aber nie < 0)
+      if (e.fromStage == 0 && e.toStage >= 1) {
+        todayNew += 1;
+      } else if (e.fromStage >= 1 && e.toStage == 0) {
+        todayNew = (todayNew - 1).clamp(0, 1<<30);
+      }
+
+      // 👇 WICHTIG: Repeats steigen, wenn die Karte VOR dem Schritt fällig war
+      if (e.wasDueBefore == true) {
+        todayRep += 1;
+      }
+
+      await prefs.setInt('today_new_${e.categoryId}', todayNew);
+      await prefs.setInt('today_repeats_${e.categoryId}', todayRep);
+
+      // UI sofort aktualisieren
+      if (!mounted) return;
+      print('📊 Today before->after new=$todayNew repeats=$todayRep');
+      setState(() {
+        _dailyNewLearned = todayNew;
+        _dailyRepeatsLearned = todayRep;
+      });
+    });
     
-    _initAll();
+  _initAll();
   }
 
   @override
@@ -326,10 +448,12 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     }
   }
 
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _resetSubscription?.cancel();
+    _stageSub?.cancel();
     _switchDebounce?.cancel();
     _switchDebounce = null;
     super.dispose();
@@ -345,6 +469,8 @@ Future<void> _initAll() async {
 
     if (_categories.isNotEmpty) {
       final selId = _categories[_selectedCategoryIndex].id;
+      
+      await _ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
       
       // Lade lokale Stages (falls vorhanden)
       final prefs = await SharedPreferences.getInstance();
@@ -362,6 +488,61 @@ Future<void> _initAll() async {
         } catch (e) {
           print('⚠️ Failed to parse local stages: $e');
         }
+      }
+      
+      // NEU: Marker prüfen & Backend-Fetch überspringen (1x)
+      final justReset = prefs.getBool('just_reset_$selId') ?? false;
+      final justSeeded = prefs.getBool('just_seeded_$selId') ?? false;
+
+      if (justSeeded) {
+        // Backendwerte verwenden (kein lokales Override), Flag danach löschen
+        final prog  = await fetchCategoryProgress(selId);
+        final wl    = await fetchWorkloadToday(selId);
+        await prefs.remove('just_seeded_$selId');
+
+        _progress = CategoryProgress(
+          total: prog.total,
+          stages: prog.stages,     // <- HIER: DB-Stages (S0 jetzt > 0)
+          dueToday: prog.dueToday,
+          newTotal: prog.newTotal,
+        );
+        _workload = wl;
+
+        final used = _progress!.stages;
+        _weeklyNew     = used[0];
+        _weeklyRepeats = _workload?.dueToday ?? 0;
+
+        // Tageswerte NICHT nullen – aus prefs laden:
+        final (dailyNew, dailyRepeats) = await loadDailyLearningStats(selId);
+        _dailyNewLearned = dailyNew;
+        _dailyRepeatsLearned = dailyRepeats;
+
+        await _loadVocabsTotal(selId);  // stellt sicher, dass die Kachel nie 0 zeigt
+
+        if (mounted) setState(() {});
+        return; // Wichtig: normale lokale-Override-Logik überspringen
+      }
+
+      if (justReset && localStages != null) {
+        // Lokale 0-Stände einmalig als Quelle der Wahrheit setzen
+        _progress = CategoryProgress(
+          total: 0,                // falls du total brauchst: 0 oder prog.total bei dir?
+          stages: localStages,     // <- bleibt 0,0,0,0,0,0
+          dueToday: 0,
+          newTotal: 0,
+        );
+        _workload = WorkloadToday(dueToday: 0, newTotal: 0);
+
+        _weeklyNew = 0;
+        _weeklyRepeats = 0;
+        _dailyNewLearned = 0;
+        _dailyRepeatsLearned = 0;
+
+        // Marker entfernen, damit beim nächsten regulären Load wieder Backend genutzt werden kann
+        await prefs.remove('just_reset_$selId');
+
+        if (mounted) setState(() {}); // UI sofort auf 0
+        return; // WICHTIG: Diesen Durchlauf kein Backend laden -> verhindert Zurückspringen
       }
       
       // Lade vom Backend
@@ -390,6 +571,8 @@ Future<void> _initAll() async {
       
       print('📊 Initial load - using stages: ${_progress?.stages} (local: $localStages, backend: ${prog.stages})');
       print('📈 Daily stats: new=$dailyNew, repeats=$dailyRepeats');
+      
+      await _loadVocabsTotal(selId);
     }
   } finally {
     if (mounted) setState(() => _loading = false);
@@ -410,10 +593,14 @@ Future<void> _initAll() async {
     final int totalWords = _progress?.total ?? stages.fold<int>(0, (sum, v) => sum + v);
     final int learnedWords = stages.skip(1).fold<int>(0, (sum, v) => sum + v); // Stage 1-5
     final double weeklyPercent = totalWords == 0 ? 0.0 : (learnedWords / totalWords).clamp(0.0, 1.0);
-
+    
     // Gesamtfortschritt: Wie viele Wörter wurden bereits gelernt (Stage 1+)?
     final double overallPercent = weeklyPercent; // Verwende die gleiche Berechnung
     final String overallLabel = '$learnedWords/$totalWords';
+
+    // Werte vorbereiten
+    final int s0New = stages[0];                 // neue Wörter (Stage 0)
+    final int repeatsDue = _workload?.dueToday ?? 0; // echte Wiederholungen heute
 
     // Höhe unterhalb der Top-Kachel (inkl. SafeAreas)
     final insets    = MediaQuery.of(context).padding;
@@ -438,28 +625,31 @@ Future<void> _initAll() async {
                     // ---------- TOP-KACHEL (als Block verschiebbar) ----------
                     Transform.translate(
                       offset: Offset(kTopBlockOffsetX, kTopBlockOffsetY),
-                      child: _TopCapsule(
+                      child: CategoryHeaderCapsule(
+                        height: kTopCapsuleH,
                         title: _categories.isNotEmpty
                             ? _categories[_selectedCategoryIndex].name
                             : widget.title,
-                      onBack: () => Navigator.of(context).pop(),
-                      onVocabs: () {
-                        final currentId   = _currentCatId;
-                        final currentName = (_categories.isNotEmpty)
-                            ? _categories[_selectedCategoryIndex].name
-                            : widget.title;
-
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => WordListScreen(
-                              filter: widget.listFilter,
-                              overrideCategoryId: currentId,
-                              overrideCategoryLabel: currentName,
+                        vocabsCount: _vocabsTotal, // bleibt deine echte Kategorie-Gesamtzahl
+                        categories: _categories.map((e) => e.name).toList(),
+                        selectedIndex: _selectedCategoryIndex,
+                        onWheelChanged: (idx, label) => _switchTo(idx),
+                        onBack: () => Navigator.of(context).pop(),
+                        onVocabs: () {
+                          final currentId   = _currentCatId;
+                          final currentName = (_categories.isNotEmpty)
+                              ? _categories[_selectedCategoryIndex].name
+                              : widget.title;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => WordListScreen(
+                                filter: widget.listFilter,
+                                overrideCategoryId: currentId,
+                                overrideCategoryLabel: currentName,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-
+                          );
+                        },
                         onAdd: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Add tapped')),
@@ -470,7 +660,17 @@ Future<void> _initAll() async {
                             const SnackBar(content: Text('Settings tapped')),
                           );
                         },
-                        vocabsCount: totalWords,
+
+                        // Optional: Offsets wie gehabt
+                        wheelOffsetX: kWheelOffsetX,
+                        wheelOffsetY: kWheelOffsetY,
+                        rowOffsetX: kTopRowOffsetX,
+                        rowOffsetY: kTopRowOffsetY,
+                        vocabsTileOffsetX: kTopVocabsTileOffsetX,
+                        vocabsTileOffsetY: kTopVocabsTileOffsetY,
+                        rightBtnsOffsetX: kTopRightBtnsOffsetX,
+                        rightBtnsOffsetY: kTopRightBtnsOffsetY,
+                        accentColor: kAccentBlue,
                       ),
                     ),
 
@@ -485,13 +685,13 @@ Future<void> _initAll() async {
                             child: Transform.translate(
                               offset: Offset(kMidBlockOffsetX, kMidBlockOffsetY),
                               child: _MidProgress(
-                                percent: dailyPercent,
-                      percentLabel: '${(dailyPercent * 100).round()}%',
-                      newCount: _dailyNewLearned,
-                      repeatsCount: _dailyRepeatsLearned,
-                      repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
-                      overallPercent: overallPercent,
-                      overallLabel: overallLabel,
+                                percent: dailyPercent,                 // heute wirklich neu gelernte (aus Events)
+                                percentLabel: '${(dailyPercent * 100).round()}%',
+                                newCount: _dailyNewLearned,                  // bleibt: heute echte Neue (S0->S1+ minus Rückfälle)
+                                repeatsCount: _dailyRepeatsLearned,          // NEU: heute erledigte Wiederholungen
+                                repeatsOfTargetLabel: '${_dailyNewLearned + _dailyRepeatsLearned}/$dailyTarget',
+                                overallPercent: overallPercent,
+                                overallLabel: overallLabel,
                               ),
                             ),
                           ),
@@ -513,8 +713,21 @@ Future<void> _initAll() async {
                                     final currentName = _categories.isNotEmpty
                                         ? _categories[_selectedCategoryIndex].name
                                         : widget.title;
-                                    
-                                    // Navigiere zum Learn Mode
+                                    if (currentId.isEmpty) return;
+
+                                    // 1) S0-Seed (serverseitig)
+                                    final sb = Supabase.instance.client;
+                                    await sb.rpc('fn_seed_user_category', params: {
+                                      'p_category_id': currentId,
+                                    });
+
+                                    final prefs = await SharedPreferences.getInstance();
+                                    await prefs.remove('learn_stages_$currentId');       // <- lokale 0er löschen
+                                    await prefs.remove('just_reset_$currentId');         // <- sicherheitshalber
+                                    await prefs.setBool('just_seeded_$currentId', true); // <- einmalig Backend bevorzugen
+
+
+                                    // 2) Learn Mode
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) => LearnModeScreen(
@@ -524,7 +737,7 @@ Future<void> _initAll() async {
                                       ),
                                     );
                                     
-                                    // Lade Daten neu nach Rückkehr
+                                    // 3) Nach Rückkehr synchron neu laden
                                     await _reloadProgress();
                                   },
                                 ),
@@ -547,132 +760,6 @@ Future<void> _initAll() async {
 
 /* ======================= UI-Bausteine ======================= */
 
-// ---------- Top-Kachel ----------
-class _TopCapsule extends StatelessWidget {
-  final String title;
-  final VoidCallback onBack;
-  final VoidCallback onVocabs;
-  final VoidCallback onAdd;
-  final VoidCallback onSettings;
-
-  // NEU:
-  final int vocabsCount;
-
-  const _TopCapsule({
-    required this.title,
-    required this.onBack,
-    required this.onVocabs,
-    required this.onAdd,
-    required this.onSettings,
-    required this.vocabsCount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: kTopCapsuleH,
-        child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            // Back + Wheel
-            SizedBox(
-              height: kWheelHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(22),
-                    onTap: onBack,
-                    child: const SizedBox(
-                      width: 44, height: 44,
-                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-                    ),
-                  ),
-                  Expanded(
-                    child: Transform.translate(
-                      offset: Offset(kWheelOffsetX, kWheelOffsetY),
-                      child: Center(child: CategoryWheel(
-                        categories: (context.findAncestorStateOfType<_CategoryDetailScreenState>()?._categories
-                                      .map((e) => e.name).toList()) ?? const <String>[],
-                        initialIndex: context.findAncestorStateOfType<_CategoryDetailScreenState>()?._selectedCategoryIndex ?? 0,
-                        onChanged: (idx, label) {
-                          context.findAncestorStateOfType<_CategoryDetailScreenState>()?._switchTo(idx);
-                        },
-                      )),
-                    ),
-                  ),
-                  const SizedBox(width: 28),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // Vocabs-Kachel + Buttons
-            Transform.translate(
-              offset: Offset(kTopRowOffsetX, kTopRowOffsetY),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Transform.translate(
-                    offset: Offset(kTopVocabsTileOffsetX, kTopVocabsTileOffsetY),
-                    child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(15),
-                          onTap: onVocabs,
-                    child: GlowRectTile(
-                    width: 84,
-                    height: 85,
-                    radius: 15,
-                      title: 'Vocabs',
-                    icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 28),
-
-                            // NEU: Farbe & Badge
-                            outlineColor: kAccentBlue,
-                            glowColor: kAccentBlue,
-                            badgeText: '$vocabsCount',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Transform.translate(
-                    offset: Offset(kTopRightBtnsOffsetX, kTopRightBtnsOffsetY),
-                    child: Row(
-                    children: [
-                  GlowCircleButton(
-                    size: 62,
-                    onTap: onAdd,
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
-                          outlineColor: kAccentBlue,
-                          glowColor: kAccentBlue,
-                  ),
-                      const SizedBox(width: 10),
-                  GlowCircleButton(
-                    size: 62,
-                    onTap: onSettings,
-                    child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
-                          outlineColor: kAccentBlue,
-                          glowColor: kAccentBlue,
-                      ),
-                    ],
-                  ),
-              ),
-            ],
-          ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 
 
@@ -933,34 +1020,22 @@ class _PipelineLevelsCard extends StatelessWidget {
               child: Center(
                 child: Transform.translate(
                   offset: Offset(kSwitchesOffsetX, kSwitchesOffsetY),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _VerticalStageSwitch(
-                      count: s[0],
-                        outerColor: s[0] > 0 ? _kStageInnerRed : Colors.grey.shade400,
-                        innerColor: const Color(0xFF2D2D2F),
-                        highlight: s[0] > 0,
-                        completed: false,
-                      label: 'New',
-                      note: '0',
-                        isFirst: true,
+                  child: StageSwitchRow(
+                    counts: s,                    // erwartet [s0..s5]
+                    goalPerStage: goalPerStage,   // z.B. 100
+                    gap: kSwitchGap,              // dein existierender Abstand
+                    sizes: const StageSwitchSizes(
+                      width: 42, height: 75, knobTop: 2, knobBottom: 18,
                     ),
-                      SizedBox(width: kSwitchGap),
-                    for (int stage = 1; stage <= 5; stage++) ...[
-                      _VerticalStageSwitch(
-                        count: s[stage],
-                        outerColor: s[stage] > 0 ? _kStageOuter : Colors.grey.shade400,
-                        innerColor: _kStageInner,
-                        highlight: s[stage] > 0 && s[stage] < goalPerStage,
-                        completed: s[stage] >= goalPerStage,
-                        label: 'S$stage',
-                        note: '$stage',
-                      ),
-                        if (stage != 5) SizedBox(width: kSwitchGap),
-                    ],
-                  ],
+                    colors: StageSwitchColors(
+                      newOuter: _kStageInnerRed,  // „New" (S0)
+                      stageOuter: _kStageOuter,   // S1..S5
+                      inner: _kStageInner,        // inneres Grau
+                      disabledOuter: Colors.grey.shade400, // falls count==0
+                    ),
+                    labels: const StageSwitchLabels(
+                      newLabel: 'New', newNote: '0', stagePrefix: 'S',
+                    ),
                 ),
               ),
             ),
@@ -998,93 +1073,3 @@ class _PipelineLevelsCard extends StatelessWidget {
   }
 }
 
-/// Ein „hochkant Switch“ pro Stufe.
-class _VerticalStageSwitch extends StatelessWidget {
-  final int count;
-  final Color outerColor;
-  final Color innerColor;
-  final bool highlight;
-  final bool completed;
-  final String label; // "S1" / "New"
-  final String note;  // "0".."5"
-  final bool isFirst;
-
-  const _VerticalStageSwitch({
-    required this.count,
-    required this.outerColor,
-    required this.innerColor,
-    required this.highlight,
-    required this.completed,
-    required this.label,
-    required this.note,
-    this.isFirst = false,
-  });
-
-  double _getSwitchPosition() {
-    // Bei 0 unten, bei >0 oben
-    return count > 0 ? 2.0 : 18.0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final badgeGlow = highlight
-        ? [BoxShadow(color: outerColor.withOpacity(0.8), blurRadius: 14, spreadRadius: 1)]
-        : const <BoxShadow>[];
-
-    return Padding(
-      padding: EdgeInsets.only(left: isFirst ? 6 : 0, right: isFirst ? 4 : 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Switch
-          Container(
-            width: 42,
-            height: 75,
-            decoration: BoxDecoration(
-              color: outerColor,
-              borderRadius: BorderRadius.circular(21),
-              boxShadow: badgeGlow,
-              border: Border.all(color: Colors.black.withOpacity(0.2), width: 1),
-            ),
-            child: Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  left: 2,
-                  right: 2,
-                  top: _getSwitchPosition(),
-                  child: Container(
-                    width: 38,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: innerColor,
-                      borderRadius: BorderRadius.circular(21),
-                      border: Border.all(color: Colors.white24, width: 1),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$count',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Zahlen unter den Switches
-          SizedBox(
-            width: 42,
-            child: Text(
-              note,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
