@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
 
 class LevelsCard extends StatelessWidget {
   final double height;
@@ -32,11 +33,11 @@ class LevelsCard extends StatelessWidget {
     this.outerPadB = 0.0,
     this.titleOffsetX = 0.0,
     this.titleOffsetY = 0.0,
-    this.switchesOffsetX = 0.0,
-    this.switchesOffsetY = -12.0,
-    this.startBtnOffsetX = 0.0,
-    this.startBtnOffsetY = 0.0,
-    this.switchGap = 12.0,
+    this.switchesOffsetX = WordsLayout.switchesOffsetX,
+    this.switchesOffsetY = WordsLayout.switchesOffsetY,
+    this.startBtnOffsetX = WordsLayout.startBtnOffsetX,
+    this.startBtnOffsetY = WordsLayout.startBtnOffsetY,
+    this.switchGap = WordsLayout.switchGap,
   });
 
   @override

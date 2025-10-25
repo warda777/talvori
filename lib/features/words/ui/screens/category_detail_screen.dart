@@ -6,24 +6,10 @@ import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
 
 // ===== KONSTANTEN =====
 const kAccentBlue = Color(0xFFB1CCFE);
-const kTopCapsuleH = 260.0; // vorher 240
-const kLevelsCardH = 260.0;
-const kGapBelowTop = 16.0;
-const kGapAboveBottom = 40.0;
-const kPageBottomPadding = 24.0;
-
-// Offsets für Top-Kachel - wie im Learn-Mode
-const kTopRowOffsetX = 0.0;
-const kTopRowOffsetY = 0.0;
-const kWheelOffsetX = 0.0;
-const kWheelOffsetY = 0.0;
-const kTopVocabsTileOffsetX = 0.0;
-const kTopVocabsTileOffsetY = 0.0;
-const kTopRightBtnsOffsetX = 0.0;
-const kTopRightBtnsOffsetY = 0.0;
 
 /// ==============================
 /// SCREEN
@@ -107,9 +93,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                   children: [
             // FIX: fester Header – kein Flexible
             SizedBox(
-              height: kTopCapsuleH,
+              height: WordsLayout.topCapsuleH,
               child: CategoryHeaderCapsule(
-                height: kTopCapsuleH,
+                height: WordsLayout.topCapsuleH,
                 title: cats.isNotEmpty ? cats[selIndex].name : widget.title,
                 vocabsCount: s.vocabsTotal,
                 categories: cats.map((e)=>e.name).toList(),
@@ -139,26 +125,26 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                           );
                         },
                 // Offsets wie im Learn-Mode:
-                wheelOffsetX: kWheelOffsetX,
-                wheelOffsetY: kWheelOffsetY,
-                rowOffsetX: kTopRowOffsetX,
-                rowOffsetY: kTopRowOffsetY,
-                vocabsTileOffsetX: kTopVocabsTileOffsetX,
-                vocabsTileOffsetY: kTopVocabsTileOffsetY,
-                rightBtnsOffsetX: kTopRightBtnsOffsetX,
-                rightBtnsOffsetY: kTopRightBtnsOffsetY,
-                wheelBottomGap: 28.0,     // sichtbarer Abstand unter dem Wheel
+                wheelOffsetX: WordsLayout.wheelOffsetX,
+                wheelOffsetY: WordsLayout.wheelOffsetY,
+                rowOffsetX: WordsLayout.rowOffsetX,
+                rowOffsetY: WordsLayout.rowOffsetY,
+                vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+                vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+                rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+                rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+                wheelBottomGap: WordsLayout.wheelBottomGap,
                 accentColor: kAccentBlue,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               ),
             ),
 
-            const SizedBox(height: kGapBelowTop),
+            const SizedBox(height: WordsLayout.gapBelowTop),
 
             // FIX: Mittel + Levels scrollbar machen, damit nix überläuft
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: kPageBottomPadding),
+                padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
                       child: Column(
                         children: [
                     LearningStatusPanel(
@@ -171,13 +157,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                       overallLabel: overallLabel,
                           ),
 
-                    const SizedBox(height: kGapAboveBottom),
+                          const SizedBox(height: WordsLayout.gapAboveBottom),
                           Transform.translate(
-                      offset: const Offset(0, -24), // 🔼 nach oben (spiel mit -16…-32)
+                            offset: const Offset(0, -24), // 🔼 nach oben (spiel mit -16…-32)
                             child: SizedBox(
-                        height: kLevelsCardH,
-                        child: LevelsCard(
-                                  height: kLevelsCardH,
+                              height: WordsLayout.levelsCardH,
+                              child: LevelsCard(
+                                height: WordsLayout.levelsCardH,
                                   stages: stages,
                                   goalPerStage: 100,
                                   onStartPressed: () async {

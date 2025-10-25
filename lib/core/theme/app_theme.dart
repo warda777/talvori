@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:talvori/features/words/ui/theme/words_colors.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
 
 class AppTheme {
   static ThemeData get dark {

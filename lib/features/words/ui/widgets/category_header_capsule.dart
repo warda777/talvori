@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 import 'package:talvori/features/words/ui/widgets/glow_circle_button.dart';
 import 'package:talvori/features/words/ui/widgets/glow_rect_tile.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
 
 class CategoryHeaderCapsule extends StatelessWidget {
   final double height;
@@ -44,15 +45,15 @@ class CategoryHeaderCapsule extends StatelessWidget {
     required this.onVocabs,
     required this.onAdd,
     required this.onSettings,
-    this.wheelOffsetX = 0.0,
-    this.wheelOffsetY = 0.0,
-    this.rowOffsetX = 0.0,
-    this.rowOffsetY = 0.0,
-    this.vocabsTileOffsetX = 0.0,
-    this.vocabsTileOffsetY = 0.0,
-    this.rightBtnsOffsetX = 0.0,
-    this.rightBtnsOffsetY = 0.0,
-    this.wheelBottomGap = 24.0, // Default: 24px Luft unterm Wheel
+    this.wheelOffsetX = WordsLayout.wheelOffsetX,
+    this.wheelOffsetY = WordsLayout.wheelOffsetY,
+    this.rowOffsetX = WordsLayout.rowOffsetX,
+    this.rowOffsetY = WordsLayout.rowOffsetY,
+    this.vocabsTileOffsetX = WordsLayout.vocabsTileOffsetX,
+    this.vocabsTileOffsetY = WordsLayout.vocabsTileOffsetY,
+    this.rightBtnsOffsetX = WordsLayout.rightBtnsOffsetX,
+    this.rightBtnsOffsetY = WordsLayout.rightBtnsOffsetY,
+    this.wheelBottomGap = WordsLayout.wheelBottomGap,
     this.accentColor = const Color(0xFFB1CCFE),
     this.backgroundColor,
   });
@@ -64,13 +65,13 @@ class CategoryHeaderCapsule extends StatelessWidget {
       height: height,
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        padding: WordsLayout.topPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Back + Wheel - mit fester Höhe wie im Learn-Mode
             SizedBox(
-              height: 72.0, // Gleiche Höhe wie im Learn-Mode
+              height: WordsLayout.wheelHeight,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
