@@ -6,9 +6,9 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:talvori/features/words/ui/widgets/progress_ring.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 
 // ===== Globale Hilfsfunktion für Daily Stats =====
 /// Lädt tägliche Lernstatistiken für eine Kategorie
@@ -634,22 +634,22 @@ Future<void> _initAll() async {
                         categories: _categories.map((e) => e.name).toList(),
                         selectedIndex: _selectedCategoryIndex,
                         onWheelChanged: (idx, label) => _switchTo(idx),
-                        onBack: () => Navigator.of(context).pop(),
-                        onVocabs: () {
-                          final currentId   = _currentCatId;
-                          final currentName = (_categories.isNotEmpty)
-                              ? _categories[_selectedCategoryIndex].name
-                              : widget.title;
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => WordListScreen(
-                                filter: widget.listFilter,
-                                overrideCategoryId: currentId,
-                                overrideCategoryLabel: currentName,
-                              ),
+                      onBack: () => Navigator.of(context).pop(),
+                      onVocabs: () {
+                        final currentId   = _currentCatId;
+                        final currentName = (_categories.isNotEmpty)
+                            ? _categories[_selectedCategoryIndex].name
+                            : widget.title;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => WordListScreen(
+                              filter: widget.listFilter,
+                              overrideCategoryId: currentId,
+                              overrideCategoryLabel: currentName,
                             ),
-                          );
-                        },
+                          ),
+                        );
+                      },
                         onAdd: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Add tapped')),
@@ -684,11 +684,11 @@ Future<void> _initAll() async {
                           Expanded(
                             child: Transform.translate(
                               offset: Offset(kMidBlockOffsetX, kMidBlockOffsetY),
-                              child: _MidProgress(
-                                percent: dailyPercent,                 // heute wirklich neu gelernte (aus Events)
+                              child: LearningStatusPanel(
+                                percent: dailyPercent,
                                 percentLabel: '${(dailyPercent * 100).round()}%',
-                                newCount: _dailyNewLearned,                  // bleibt: heute echte Neue (S0->S1+ minus Rückfälle)
-                                repeatsCount: _dailyRepeatsLearned,          // NEU: heute erledigte Wiederholungen
+                                newCount: _dailyNewLearned,
+                                repeatsCount: _dailyRepeatsLearned,
                                 repeatsOfTargetLabel: '${_dailyNewLearned + _dailyRepeatsLearned}/$dailyTarget',
                                 overallPercent: overallPercent,
                                 overallLabel: overallLabel,
@@ -770,209 +770,6 @@ Future<void> _initAll() async {
 
 
 
-// ---------- Mittelteil ----------
-class _MidProgress extends StatelessWidget {
-  final double percent;        // 0..1 (täglicher Fortschritt)
-  final String percentLabel;   // z.B. "15%"
-  final int newCount;
-  final int repeatsCount;
-  final String repeatsOfTargetLabel; // z.B. "0/100"
-  
-  // Gesamtfortschritt (alle Wörter)
-  final double overallPercent; // 0..1
-  final String overallLabel;   // z.B. "150/263"
-
-  const _MidProgress({
-    required this.percent,
-    required this.percentLabel,
-    required this.newCount,
-    required this.repeatsCount,
-    required this.repeatsOfTargetLabel,
-    required this.overallPercent,
-    required this.overallLabel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: kMidPaddingH),
-      child: Column(
-        children: [
-          // Ring + "Daily Progress" + Counter
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Progress Ring links
-              Transform.translate(
-                offset: Offset(kMidRingOffsetX, kMidRingOffsetY),
-                child: ProgressRing(
-                size: 120,
-                thickness: 12,
-                percent: percent,
-                center: Text(
-                  percentLabel,
-                  style: t.textTheme.titleSmall?.copyWith(color: Colors.white),
-                ),
-              ),
-              ),
-              
-              SizedBox(width: kMidInnerGap),
-              
-              // Spacer um Counter nach rechts zu schieben
-              Expanded(child: SizedBox()),
-              
-              // Counter rechts MIT "Daily Progress" oben in gleicher Column
-              Transform.translate(
-                offset: Offset(kMidCountersOffsetX, kMidCountersOffsetY),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // "Daily Progress" Label - höher und weiter links
-                    Transform.translate(
-                      offset: Offset(-100, -30), // Mehr nach links und höher
-                      child: Text(
-                        'Daily Progress',
-                        style: t.textTheme.titleSmall?.copyWith(
-                          color: Colors.white,  // Gleiche Größe wie "Overall Progress"
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _CounterRow(label: 'new', pill: _Pill(text: '$newCount')),
-                    const SizedBox(height: 12),
-                    _CounterRow(label: 'Repeats', pill: _Pill(text: repeatsOfTargetLabel)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          // Gesamtfortschritt-Balken
-          SizedBox(height: kOverallBarGap),
-          _OverallProgressBar(
-            percent: overallPercent,
-            label: overallLabel,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------- Gesamtfortschritt-Balken ----------
-class _OverallProgressBar extends StatelessWidget {
-  final double percent; // 0..1
-  final String label;   // z.B. "150/263"
-  
-  const _OverallProgressBar({
-    required this.percent,
-    required this.label,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Zeile 1: Label "Overall Progress"
-        Text(
-          'Overall Progress',
-          style: t.textTheme.titleSmall?.copyWith(color: Colors.white),
-        ),
-        const SizedBox(height: 8),
-        
-        // Zeile 2: Progress-Balken + Counter-Pill rechts
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Progress-Balken links
-            Expanded(
-              child: Container(
-                height: kOverallBarHeight,
-                decoration: BoxDecoration(
-                  color: Color(0xFF2D2D2F), // Hintergrund (dunkel)
-                  borderRadius: BorderRadius.circular(kOverallBarHeight / 2),
-                  border: Border.all(color: Colors.black, width: 1),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(kOverallBarHeight / 2 - 1),
-                  child: Stack(
-                    children: [
-                      // Gefüllter Teil
-                      FractionallySizedBox(
-                        widthFactor: percent.clamp(0.0, 1.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFFE4B866), // Gold (links)
-                                Color(0xFFF5D492), // Heller Gold (rechts)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            
-            const SizedBox(width: 8),
-            
-            // Counter-Pill rechts (aligned mit "new" und "Repeats")
-            _Pill(text: label),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _CounterRow extends StatelessWidget {
-  final String label;
-  final Widget pill;
-  const _CounterRow({required this.label, required this.pill});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(label, style: t.textTheme.titleSmall?.copyWith(color: Colors.white)),
-        const SizedBox(width: 8),
-        pill,
-      ],
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String text;
-  const _Pill({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 75,
-      height: 30,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color(0xFF2C2C2C), width: 1),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-        ),
-      ),
-    );
-  }
-}
 
 // Ring mit CustomPainter (runde Kappen)
 
