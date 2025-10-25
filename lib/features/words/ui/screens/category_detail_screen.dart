@@ -9,16 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
+import 'package:talvori/features/words/ui/widgets/stats_helpers.dart';
 
-// ===== Globale Hilfsfunktion für Daily Stats =====
-/// Lädt tägliche Lernstatistiken für eine Kategorie
-/// Returns: (newCount, repeatCount) für den heutigen Tag
-Future<(int, int)> loadDailyLearningStats(String categoryId) async {
-  final prefs = await SharedPreferences.getInstance();
-  final newToday = prefs.getInt('today_new_$categoryId') ?? 0;
-  final repsToday = prefs.getInt('today_repeats_$categoryId') ?? 0;
-  return (newToday, repsToday);
-}
 
 Timer? _switchDebounce;
 
@@ -143,9 +135,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
   CategoryProgress? _progress;
   WorkloadToday? _workload;
 
-  int _weeklyNew = 0;
-  int _weeklyRepeats = 0;
-  final int _weeklyTarget = 100;
   
   // Tägliche Lernstatistiken (tatsächlich gelernte Wörter heute)
   int _dailyNewLearned = 0;
@@ -200,8 +189,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
           _progress       = prog;
           _workload       = wl;
           // Korrekte Berechnung: newTotal = Stage 0 (neue Wörter)
-          _weeklyNew      = prog.stages[0]; // Stage 0 = neue Wörter
-          _weeklyRepeats  = _workload?.dueToday ?? 0;
         });
         
         await _loadVocabsTotal(selId);
@@ -219,7 +206,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     final selId = _currentCatId;
     if (selId.isEmpty) return;
     
-    await _ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
+    await ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
     
     try {
       print('🔄 Reloading progress for category: $selId');
@@ -260,9 +247,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
         );
         _workload = wl;
 
-        final used = _progress!.stages;
-        _weeklyNew     = used[0];
-        _weeklyRepeats = _workload?.dueToday ?? 0;
 
         // Tageswerte NICHT nullen – aus prefs laden:
         final (dailyNew, dailyRepeats) = await loadDailyLearningStats(selId);
@@ -283,8 +267,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
           newTotal: 0,
         );
         _workload = WorkloadToday(dueToday: 0, newTotal: 0);
-        _weeklyNew = 0;
-        _weeklyRepeats = 0;
         _dailyNewLearned = 0;
         _dailyRepeatsLearned = 0;
 
@@ -315,8 +297,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
         );
         _workload       = wl;
         // Korrekte Berechnung: newTotal = Stage 0 (neue Wörter) - IMMER aus lokalen Stages
-        _weeklyNew      = stages[0]; // RICHTIG (stages = localStages ?? prog.stages)
-        _weeklyRepeats  = _workload?.dueToday ?? 0;
         
         // Korrekte tägliche Statistiken: Verwende lokale Stages (nach Reset sofort 0)
         _dailyNewLearned = dailyNew;
@@ -340,18 +320,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     setState(() => _vocabsTotal = (res as int?) ?? 0);
   }
 
-  Future<void> _ensureTodayBucket(String categoryId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final keyDate = 'today_date_$categoryId';
-    final today = DateTime.now().toIso8601String().substring(0,10);
-    final last = prefs.getString(keyDate);
-    if (last != today) {
-      prefs
-        ..setString(keyDate, today)
-        ..setInt('today_new_$categoryId', 0)
-        ..setInt('today_repeats_$categoryId', 0);
-    }
-  }
 
 
   int _findInitialIndex(List<CategoryInfo> cats) {
@@ -403,7 +371,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> with Widget
     _stageSub = StageTransitionEvent.stream.listen((e) async {
       print('📥 RECV StageEvent cat=${e.categoryId} cur=$_currentCatId word=${e.wordId} from=${e.fromStage} to=${e.toStage} due=${e.wasDueBefore}');
       if (e.categoryId != _currentCatId) return;
-      await _ensureTodayBucket(e.categoryId);
+      await ensureTodayBucket(e.categoryId);
 
       final prefs = await SharedPreferences.getInstance();
       var todayNew = prefs.getInt('today_new_${e.categoryId}') ?? 0;
@@ -467,7 +435,7 @@ Future<void> _initAll() async {
     if (_categories.isNotEmpty) {
       final selId = _categories[_selectedCategoryIndex].id;
       
-      await _ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
+      await ensureTodayBucket(_currentCatId.isNotEmpty ? _currentCatId : (widget.categoryId ?? ''));
       
       // Lade lokale Stages (falls vorhanden)
       final prefs = await SharedPreferences.getInstance();
@@ -505,9 +473,6 @@ Future<void> _initAll() async {
         );
         _workload = wl;
 
-        final used = _progress!.stages;
-        _weeklyNew     = used[0];
-        _weeklyRepeats = _workload?.dueToday ?? 0;
 
         // Tageswerte NICHT nullen – aus prefs laden:
         final (dailyNew, dailyRepeats) = await loadDailyLearningStats(selId);
@@ -529,9 +494,6 @@ Future<void> _initAll() async {
           newTotal: 0,
         );
         _workload = WorkloadToday(dueToday: 0, newTotal: 0);
-
-        _weeklyNew = 0;
-        _weeklyRepeats = 0;
         _dailyNewLearned = 0;
         _dailyRepeatsLearned = 0;
 
@@ -559,9 +521,6 @@ Future<void> _initAll() async {
       _workload   = wl;
       
       // Nachdem _progress gesetzt wurde: IMMER aus lokalen Stages ableiten
-      final usedStages = _progress!.stages;
-      _weeklyNew      = usedStages[0];  // RICHTIG
-      _weeklyRepeats  = _workload?.dueToday ?? 0;
       
       _dailyNewLearned = dailyNew;
       _dailyRepeatsLearned = dailyRepeats;
@@ -595,9 +554,6 @@ Future<void> _initAll() async {
     final double overallPercent = weeklyPercent; // Verwende die gleiche Berechnung
     final String overallLabel = '$learnedWords/$totalWords';
 
-    // Werte vorbereiten
-    final int s0New = stages[0];                 // neue Wörter (Stage 0)
-    final int repeatsDue = _workload?.dueToday ?? 0; // echte Wiederholungen heute
 
     // Höhe unterhalb der Top-Kachel (inkl. SafeAreas)
     final insets    = MediaQuery.of(context).padding;
@@ -744,20 +700,3 @@ Future<void> _initAll() async {
     );
   }
 }
-
-/* ======================= UI-Bausteine ======================= */
-
-
-
-
-
-
-
-
-
-
-
-
-// Ring mit CustomPainter (runde Kappen)
-
-
