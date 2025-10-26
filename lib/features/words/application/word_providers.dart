@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:equatable/equatable.dart';
 import 'package:talvori/features/words/data/mock_word_repository.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
@@ -64,3 +65,90 @@ final selectedCategoryProvider = Provider<CategoryInfo?>((ref) {
   if (s.selectedCategoryIndex < 0 || s.selectedCategoryIndex >= s.categories.length) return null;
   return s.categories[s.selectedCategoryIndex];
 });
+
+// ===== WordHub (Liste/Suche/Pagination) =====
+
+// WICHTIG: eigener Name, kollidiert nicht mit MockWordRepository oben.
+final supabaseWordRepositoryProvider = Provider<SupabaseWordRepository>((ref) {
+  return SupabaseWordRepository();
+});
+
+class WordHubState extends Equatable {
+  final bool loading;
+  final List<Word> items;
+  final String? query;
+  final String? categorySlug;
+  final bool canLoadMore;
+
+  const WordHubState({
+    this.loading = false,
+    this.items = const [],
+    this.query,
+    this.categorySlug,
+    this.canLoadMore = true,
+  });
+
+  WordHubState copyWith({
+    bool? loading,
+    List<Word>? items,
+    String? query,
+    String? categorySlug,
+    bool? canLoadMore,
+  }) => WordHubState(
+        loading: loading ?? this.loading,
+        items: items ?? this.items,
+        query: query ?? this.query,
+        categorySlug: categorySlug ?? this.categorySlug,
+        canLoadMore: canLoadMore ?? this.canLoadMore,
+      );
+
+  @override
+  List<Object?> get props => [loading, items, query, categorySlug, canLoadMore];
+}
+
+class WordHubController extends Notifier<WordHubState> {
+  static const _pageSize = 50;
+  late final SupabaseWordRepository _repo;
+
+  @override
+  WordHubState build() {
+    _repo = ref.read(supabaseWordRepositoryProvider);
+    return const WordHubState();
+  }
+
+  Future<void> init({String? categorySlug}) async {
+    state = state.copyWith(loading: true, categorySlug: categorySlug);
+    final data = await _repo.fetchRecentWords(limit: _pageSize);
+    state = state.copyWith(
+      loading: false,
+      items: data,
+      canLoadMore: data.length == _pageSize,
+    );
+  }
+
+  Future<void> search(String? q) async {
+    state = state.copyWith(query: q);
+    await init(categorySlug: state.categorySlug);
+  }
+
+  Future<void> loadMore() async {
+    if (!state.canLoadMore || state.loading) return;
+    state = state.copyWith(loading: true);
+    final more = await _repo.fetchRecentWords(limit: _pageSize);
+    state = state.copyWith(
+      loading: false,
+      items: [...state.items, ...more],
+      canLoadMore: more.length == _pageSize,
+    );
+  }
+
+  // Exponiere Repo für bestehende Card-Stats (_CategoryCard nutzt derzeit Repo-Methoden)
+  SupabaseWordRepository get repo => _repo;
+}
+
+// Riverpod-Provider für Controller/State
+final wordHubControllerProvider =
+    NotifierProvider<WordHubController, WordHubState>(() {
+  return WordHubController();
+});
+

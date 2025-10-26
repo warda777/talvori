@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/core/events/events.dart';
 import 'dart:async';
 
-
-// Repo top-level (vermeidet const-Konstruktor-Fehler)
-final _repo = SupabaseWordRepository();
-
-class WordHubScreen extends StatelessWidget {
+class WordHubScreen extends ConsumerWidget {
   const WordHubScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final controller = ref.read(wordHubControllerProvider.notifier);
+    final repo = controller.repo;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -48,7 +48,6 @@ class WordHubScreen extends StatelessWidget {
           ),
         ],
       ),
-
       body: CustomScrollView(
         slivers: [
           // Suche
@@ -77,30 +76,24 @@ class WordHubScreen extends StatelessWidget {
             ),
           ),
 
-          // Dynamische Bereiche aus hubSections
+          // Dynamische Bereiche
           for (final section in hubSections) ...[
             _SectionHeader('${section.title} • ${section.focus}'),
             _GridSection(
               sectionKey: section.key,
               subs: section.subcats,
-              repo: _repo,
+              repo: repo,
               onTapSub: (sub) async {
                 String? catId;
-
                 try {
-                  // 1) UUID aus Taxonomie oder dynamisch per Name
                   catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
                       ? sub.supabaseId
-                      : await _repo.findCategoryIdByName(sub.label);
-                } catch (e) {
-                  // Lookup fehlgeschlagen – wir navigieren trotzdem via Fallback
+                      : await repo.findCategoryIdByName(sub.label);
+                } catch (_) {
                   catId = null;
                 }
 
-                // Context nach await prüfen
                 if (!context.mounted) return;
-                
-                // Fehler-SnackBar nur anzeigen, wenn Context noch gültig ist
                 if (catId == null && sub.supabaseId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.')),
@@ -119,7 +112,6 @@ class WordHubScreen extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // 2) Sicherer Fallback (Tags/Level), immer navigieren
                   final (kind, value) = _mapToFilter(section.key, sub.label);
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -133,7 +125,6 @@ class WordHubScreen extends StatelessWidget {
                   );
                 }
               },
-
             ),
           ],
 
@@ -143,7 +134,6 @@ class WordHubScreen extends StatelessWidget {
     );
   }
 
-  // Mapping: Level explizit; Rest vorerst als Tag („about“)
   (WordFilterKind, String) _mapToFilter(String sectionKey, String label) {
     if (sectionKey == 'levels_progress') {
       return (WordFilterKind.level, label);
@@ -235,31 +225,20 @@ class _CategoryCardState extends State<_CategoryCard> with WidgetsBindingObserve
   int? _dueToday;
   int? _newTotal;
   bool _loading = true;
-  
-  // Reset-Event Listener
   StreamSubscription<String>? _resetSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
-    // Lausche auf Reset-Events
-    _resetSubscription = ResetEvent.stream.listen((categoryId) {
-      // Lade für alle Kategorien neu (da wir nicht wissen, welche Kategorie betroffen ist)
-      _load();
-    });
-    
+    _resetSubscription = ResetEvent.stream.listen((_) => _load());
     _load();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Lade Daten neu, wenn die App wieder aktiv wird (z.B. nach Reset im Lernmodus)
-    if (state == AppLifecycleState.resumed) {
-      _load();
-    }
+    if (state == AppLifecycleState.resumed) _load();
   }
 
   @override
@@ -282,7 +261,7 @@ class _CategoryCardState extends State<_CategoryCard> with WidgetsBindingObserve
         setState(() {
           _total = prog.total;
           _dueToday = wl.dueToday;
-          _newTotal = prog.stages[0]; // Stage 0 = neue Wörter (korrekte Berechnung)
+          _newTotal = prog.stages[0];
           _loading = false;
         });
       } else {
@@ -301,9 +280,9 @@ class _CategoryCardState extends State<_CategoryCard> with WidgetsBindingObserve
     return Material(
       color: t.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias, // für saubere Ripple
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: widget.onTap, // Navigation kommt aus dem Parent
+        onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: t.colorScheme.outlineVariant),
@@ -349,7 +328,7 @@ class _MiniBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       margin: const EdgeInsets.only(right: 6),
       decoration: BoxDecoration(
-        color: t.colorScheme.surface, // modern, neutral
+        color: t.colorScheme.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: t.colorScheme.outlineVariant),
       ),
