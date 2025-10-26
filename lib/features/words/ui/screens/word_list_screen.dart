@@ -37,6 +37,21 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     _provKey = _buildKey();
     _scroll.addListener(_onScroll);
 
+    // Re-Online Snackbar
+    ref.listen<WordListState>(wordListControllerProvider(_provKey), (prev, next) {
+      if ((prev?.offline ?? false) && !next.offline) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Wieder online'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+
     // Controller initialisieren
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final s = ref.read(wordListControllerProvider(_provKey));
