@@ -160,3 +160,99 @@ final wordHubControllerProvider =
   return WordHubController();
 });
 
+// ===== Meine Wörter (Liste / Suche / Pagination) =====
+
+// State
+class MyWordsState extends Equatable {
+  final bool loadingFirst;
+  final bool loadingMore;
+  final bool hasMore;
+  final List<Word> items;
+  final String query;
+  final int offset;
+
+  const MyWordsState({
+    this.loadingFirst = false,
+    this.loadingMore = false,
+    this.hasMore = true,
+    this.items = const [],
+    this.query = '',
+    this.offset = 0,
+  });
+
+  MyWordsState copyWith({
+    bool? loadingFirst,
+    bool? loadingMore,
+    bool? hasMore,
+    List<Word>? items,
+    String? query,
+    int? offset,
+  }) => MyWordsState(
+        loadingFirst: loadingFirst ?? this.loadingFirst,
+        loadingMore: loadingMore ?? this.loadingMore,
+        hasMore: hasMore ?? this.hasMore,
+        items: items ?? this.items,
+        query: query ?? this.query,
+        offset: offset ?? this.offset,
+      );
+
+  @override
+  List<Object?> get props => [loadingFirst, loadingMore, hasMore, items, query, offset];
+}
+
+// Controller
+class MyWordsController extends Notifier<MyWordsState> {
+  static const _pageSize = 50;
+  late final SupabaseWordRepository _repo;
+  Timer? _debounce;
+
+  @override
+  MyWordsState build() {
+    _repo = ref.read(supabaseWordRepositoryProvider);
+    ref.onDispose(() => _debounce?.cancel());
+    return const MyWordsState();
+  }
+
+  Future<void> init() async {
+    state = state.copyWith(loadingFirst: true, items: [], offset: 0, hasMore: true);
+    final batch = await _repo.fetchMyWords(limit: _pageSize, offset: 0, query: state.query);
+    state = state.copyWith(
+      loadingFirst: false,
+      items: batch,
+      offset: batch.length,
+      hasMore: batch.length == _pageSize,
+    );
+  }
+
+  void setQuery(String q) {
+    state = state.copyWith(query: q);
+  }
+
+  void searchDebounced(String q, {Duration delay = const Duration(milliseconds: 350)}) {
+    setQuery(q);
+    _debounce?.cancel();
+    _debounce = Timer(delay, () => init());
+  }
+
+  Future<void> loadMore() async {
+    if (state.loadingMore || !state.hasMore) return;
+    state = state.copyWith(loadingMore: true);
+    final batch = await _repo.fetchMyWords(limit: _pageSize, offset: state.offset, query: state.query);
+    state = state.copyWith(
+      loadingMore: false,
+      items: [...state.items, ...batch],
+      offset: state.offset + batch.length,
+      hasMore: batch.length == _pageSize,
+    );
+  }
+
+  Future<void> removeWord(String wordId) async {
+    await _repo.removeFromMyWords(wordId);
+    final next = [...state.items]..removeWhere((w) => w.id == wordId);
+    state = state.copyWith(items: next, offset: next.length);
+  }
+}
+
+// Provider
+final myWordsControllerProvider =
+    NotifierProvider<MyWordsController, MyWordsState>(() => MyWordsController());

@@ -1,88 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/domain/word.dart';
 
-class MyWordsScreen extends StatefulWidget {
+class MyWordsScreen extends ConsumerStatefulWidget {
   const MyWordsScreen({super.key});
 
   @override
-  State<MyWordsScreen> createState() => _MyWordsScreenState();
+  ConsumerState<MyWordsScreen> createState() => _MyWordsScreenState();
 }
 
-class _MyWordsScreenState extends State<MyWordsScreen> {
-  final _repo = SupabaseWordRepository();
-  final _scroll = ScrollController();
-
-  final List<Word> _items = [];
-  bool _isFirstLoad = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  int _offset = 0;
-  final int _pageSize = 50;
-  String _query = '';
-
+class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFirst();
-    _scroll.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scroll.removeListener(_onScroll);
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadFirst() async {
-    setState(() {
-      _isFirstLoad = true;
-      _items.clear();
-      _offset = 0;
-      _hasMore = true;
-    });
-
-    final batch = await _repo.fetchMyWords(
-      limit: _pageSize,
-      offset: 0,
-      query: _query,
-    );
-
-    setState(() {
-      _items.addAll(batch);
-      _offset = _items.length; // int, korrekt
-      _hasMore = batch.length == _pageSize;
-      _isFirstLoad = false;
-    });
-  }
-
-  void _onScroll() {
-    if (_isLoadingMore || !_hasMore) return;
-    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
-      _loadMore();
-    }
-  }
-
-  Future<void> _loadMore() async {
-    setState(() => _isLoadingMore = true);
-
-    final batch = await _repo.fetchMyWords(
-      limit: _pageSize,
-      offset: _offset,
-      query: _query,
-    );
-
-    setState(() {
-      _items.addAll(batch);
-      _offset = _items.length; // weiterzählen
-      _hasMore = batch.length == _pageSize;
-      _isLoadingMore = false;
-    });
+    // ersten Load starten
+    Future.microtask(() => ref.read(myWordsControllerProvider.notifier).init());
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = ref.watch(myWordsControllerProvider);
+    final c = ref.read(myWordsControllerProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Meine Wörter')),
       body: Column(
@@ -90,8 +30,8 @@ class _MyWordsScreenState extends State<MyWordsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
-              onChanged: (v) => setState(() => _query = v),
-              onSubmitted: (_) => _loadFirst(),
+              onChanged: (v) => c.searchDebounced(v.trim()),
+              onSubmitted: (_) => c.init(),
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: 'Suchen in „Meine Wörter“',
@@ -101,41 +41,44 @@ class _MyWordsScreenState extends State<MyWordsScreen> {
             ),
           ),
           Expanded(
-            child: _isFirstLoad
+            child: vm.loadingFirst
                 ? const Center(child: CircularProgressIndicator())
-                : _items.isEmpty
+                : vm.items.isEmpty
                     ? const Center(child: Text('Noch keine Wörter gemerkt.'))
-                    : ListView.separated(
-                        controller: _scroll,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _items.length + (_isLoadingMore || _hasMore ? 1 : 0),
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (_, i) {
-                          if (i >= _items.length) {
-                            // Lade-Spinner-Zeile am Ende
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
-                          final w = _items[i];
-                          return ListTile(
-                            title: Text(w.text),
-                            subtitle: Text(w.translation),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle_outline),
-                              tooltip: 'Aus „Meine Wörter“ entfernen',
-                              onPressed: () async {
-                                final messenger = ScaffoldMessenger.of(context); // vor await holen
-                                await _repo.removeFromMyWords(w.id);
-                                setState(() => _items.removeAt(i));
-                                messenger.showSnackBar(
-                                  SnackBar(content: Text('Entfernt: ${w.text}')),
-                                );
-                              },
-                            ),
-                          );
+                    : NotificationListener<ScrollNotification>(
+                        onNotification: (n) {
+                          if (n.metrics.extentAfter < 400) c.loadMore();
+                          return false;
                         },
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: vm.items.length + ((vm.loadingMore || vm.hasMore) ? 1 : 0),
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, i) {
+                            if (i >= vm.items.length) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                            final Word w = vm.items[i];
+                            return ListTile(
+                              title: Text(w.text),
+                              subtitle: Text(w.translation),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.remove_circle_outline),
+                                tooltip: 'Aus „Meine Wörter“ entfernen',
+                                onPressed: () async {
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  await c.removeWord(w.id);
+                                  messenger.showSnackBar(
+                                    SnackBar(content: Text('Entfernt: ${w.text}')),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
           ),
         ],
