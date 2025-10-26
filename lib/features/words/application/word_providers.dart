@@ -6,6 +6,8 @@ import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
+import 'package:talvori/features/words/data/supabase_word_repository.dart' show WordUserView;
+
 final wordRepositoryProvider = Provider<MockWordRepository>((ref) {
   return MockWordRepository();
 });
@@ -156,9 +158,7 @@ class WordHubController extends Notifier<WordHubState> {
 
 // Riverpod-Provider für Controller/State
 final wordHubControllerProvider =
-    NotifierProvider<WordHubController, WordHubState>(() {
-  return WordHubController();
-});
+    NotifierProvider<WordHubController, WordHubState>(() => WordHubController());
 
 // ===== Meine Wörter (Liste / Suche / Pagination) =====
 
@@ -256,3 +256,4 @@ class MyWordsController extends Notifier<MyWordsState> {
 // Provider
 final myWordsControllerProvider =
     NotifierProvider<MyWordsController, MyWordsState>(() => MyWordsController());
+
