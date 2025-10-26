@@ -11,3 +11,8 @@ export 'header_bar.dart';
 export 'card_area.dart';
 export 'stage_switch_row.dart';
 export 'bottom_controls.dart';
+export 'section_header.dart';
+export 'mini_badge.dart';
+export 'category_card.dart';
+export 'grid_section.dart';
+export 'package:talvori/features/words/application/category_stats_provider.dart';
