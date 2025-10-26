@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:equatable/equatable.dart';
 import 'package:talvori/features/words/data/mock_word_repository.dart';
@@ -109,10 +110,12 @@ class WordHubState extends Equatable {
 class WordHubController extends Notifier<WordHubState> {
   static const _pageSize = 50;
   late final SupabaseWordRepository _repo;
+  Timer? _debounce;
 
   @override
   WordHubState build() {
     _repo = ref.read(supabaseWordRepositoryProvider);
+    ref.onDispose(() => _debounce?.cancel());
     return const WordHubState();
   }
 
@@ -144,6 +147,11 @@ class WordHubController extends Notifier<WordHubState> {
 
   // Exponiere Repo für bestehende Card-Stats (_CategoryCard nutzt derzeit Repo-Methoden)
   SupabaseWordRepository get repo => _repo;
+
+  void searchDebounced(String q, {Duration delay = const Duration(milliseconds: 350)}) {
+    _debounce?.cancel();
+    _debounce = Timer(delay, () => search(q));
+  }
 }
 
 // Riverpod-Provider für Controller/State

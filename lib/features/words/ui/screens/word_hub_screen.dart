@@ -14,6 +14,7 @@ class WordHubScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final vm = ref.watch(wordHubControllerProvider);
     final controller = ref.read(wordHubControllerProvider.notifier);
     final repo = controller.repo;
 
@@ -47,14 +48,22 @@ class WordHubScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (n) {
+          if (n.metrics.extentAfter < 800) { // nahe am Ende
+            controller.loadMore();
+          }
+          return false;
+        },
+        child: CustomScrollView(
+          slivers: [
           // Suche
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: TextField(
                 textInputAction: TextInputAction.search,
+                onChanged: (q) => controller.searchDebounced(q.trim()),
                 onSubmitted: (q) {
                   final query = q.trim();
                   if (query.isEmpty) return;
@@ -127,8 +136,17 @@ class WordHubScreen extends ConsumerWidget {
             ),
           ],
 
+          if (vm.loading && vm.canLoadMore)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+            ),
+
           SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
         ],
+        ),
       ),
     );
   }
