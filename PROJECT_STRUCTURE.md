@@ -32,22 +32,31 @@ lib/core/
 
 ### 📂 `lib/features/` - Feature-based Organization
 
-#### 🏠 Home Feature (`lib/features/home/`)
+#### 🏠 Home Feature (`lib/features/home/`) - Refactored Architecture
 
 ```
 lib/features/home/
+├── application/              # Business logic & state management
+│   ├── application.dart     # Barrel file for application layer
+│   ├── home_controller.dart # Home screen controller (NotifierProvider)
+│   └── home_state.dart      # Home screen state model
+├── data/                     # Data layer
+│   ├── data.dart            # Barrel file for data layer
+│   └── share_ingest_service.dart  # Share data ingestion service
+├── providers.dart            # Riverpod provider definitions
 └── ui/
-    ├── home_screen.dart      # Main home screen entry point
     ├── screens/              # Home-related screens
-    │   ├── category_screen.dart
     │   ├── course_screen.dart
-    │   ├── home_screen.dart
+    │   ├── home_screen.dart  # Refactored main home screen
     │   ├── profile_screen.dart
     │   └── vocab_screen.dart
     └── widgets/              # Home-specific widgets
+        ├── widgets.dart      # Barrel file for widgets
         ├── bottom_nav.dart
+        ├── category_popup.dart    # Category selection popup
         ├── counter_badge.dart
         ├── glow_sweep_ring.dart
+        ├── practice_picker.dart   # Practice mode picker
         ├── progress_pill.dart
         ├── tap_flash.dart
         └── top_bar.dart
@@ -205,9 +214,11 @@ LearnModeScreen
 
 - **`learnModeControllerProvider`**: Main learning state (NotifierProvider.autoDispose)
 - **`categoryDetailControllerProvider`**: Category detail state management
+- **`homeControllerProvider`**: Home screen state management (NotifierProvider)
 - **Granular selectors**: `currentWordProvider`, `stagesProvider`, `isPlayingProvider`, etc.
 - **Auto-dispose**: Automatic cleanup when not needed
 - **Modern Riverpod**: Using NotifierProvider instead of StateNotifierProvider
+- **Provider separation**: Provider definitions in separate `providers.dart` files
 
 ### 🔄 State Flow
 
@@ -259,6 +270,15 @@ LearnModeScreen
 
 ## 🆕 Recent Updates
 
+### 🏠 Home Feature Refactoring
+
+- **Controller Architecture**: `HomeController` with `NotifierProvider` for state management
+- **Service Extraction**: `ShareIngestService` for handling incoming share data
+- **Widget Extraction**: `PracticePicker` and `CategoryPopup` as reusable components
+- **Provider Separation**: Provider definitions moved to dedicated `providers.dart` files
+- **Lifecycle Management**: `WidgetsBindingObserver` for proper app lifecycle handling
+- **Barrel Files**: Clean imports with `application.dart`, `data.dart`, and `widgets.dart`
+
 ### 🎨 Theme System Overhaul
 
 - **ThemeExtension Integration**: `WordsColors` for scalable color management
@@ -268,20 +288,23 @@ LearnModeScreen
 
 ### 🏗️ Architecture Improvements
 
-- **Controller Refactoring**: `CategoryDetailController` for better state management
+- **Controller Refactoring**: `CategoryDetailController` and `HomeController` for better state management
 - **Component Extraction**: Modular UI components for better maintainability
 - **Modern Riverpod**: Migration to `NotifierProvider` for better performance
 - **Clean Imports**: Barrel files for simplified dependency management
+- **Error Handling**: Improved error handling with silent catch blocks
 
 ### 🐛 Bug Fixes
 
 - **Compilation Errors**: Fixed const expression errors in layout constants
 - **Wheel Transitions**: Smooth category wheel transitions with proper background opacity
 - **State Synchronization**: Improved client-server state synchronization
+- **Import Cleanup**: Removed unused imports after widget extraction
 
 ---
 
 _Last updated: December 2024_
-_Total files: 65+ Dart files_
+_Total files: 70+ Dart files_
 _Architecture: Feature-based Clean Architecture with Modern Riverpod_
 _Theme System: Centralized with ThemeExtension and Layout Constants_
+_Home Feature: Fully refactored with Controller, Services, and Extracted Widgets_

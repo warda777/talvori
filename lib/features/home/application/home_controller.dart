@@ -12,7 +12,7 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
 
   @override
   HomeState build() {
-    _refreshMyWordsCount(); // Initial load
+    refreshMyWordsCount(); // Initial load
     return const HomeState();
   }
 
@@ -23,7 +23,7 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
       onIncomingText: (text) async {
         await _shareService.handleIncomingShare(text);
         ref.invalidate(lastSharedWordProvider);
-        await _refreshMyWordsCount();
+        await refreshMyWordsCount();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Inhalt erfasst')),
@@ -59,7 +59,7 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
   void setCategoriesActive(bool v) => state = state.copyWith(categoriesActive: v);
 
   // Data
-  Future<void> _refreshMyWordsCount() async {
+  Future<void> refreshMyWordsCount() async {
     try {
       final c = await _wordRepo.countMyWords();
       debugPrint('🔢 My Words Count: $c');
@@ -71,7 +71,7 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
     final markedWord = await _shareService.handleIncomingShare(rawText);
     if (markedWord != null) {
       ref.invalidate(lastSharedWordProvider); // Trigger UI refresh for last shared word
-      await _refreshMyWordsCount();
+      await refreshMyWordsCount();
     }
     return markedWord;
   }
