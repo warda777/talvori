@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
+import 'package:talvori/features/words/ui/widgets/empty_state.dart';
+import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
 class MyWordsScreen extends ConsumerStatefulWidget {
   const MyWordsScreen({super.key});
@@ -45,13 +47,19 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
                 : RefreshIndicator(
                     onRefresh: () => c.init(),
                     child: vm.items.isEmpty
-                        // leerer Zustand: trotzdem scrollable für Pull-to-Refresh
                         ? ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(16),
-                            children: const [
-                              SizedBox(height: 120),
-                              Center(child: Text('Noch keine Wörter gemerkt.')),
+                            children: [
+                              const SizedBox(height: 120),
+                              EmptyState(
+                                icon: Icons.bookmark_add_outlined,
+                                title: 'Noch keine Wörter gemerkt',
+                                message: 'Markiere Wörter im Word Hub oder in Kategorien, um sie hier zu sehen.',
+                                cta: 'Zum Word Hub',
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const WordHubScreen()),
+                                ),
+                              ),
                             ],
                           )
                         : NotificationListener<ScrollNotification>(
