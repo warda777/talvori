@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/application/category_stats_provider.dart';
 import 'mini_badge.dart';
+import 'shimmer_box.dart';
 
 class CategoryCard extends ConsumerStatefulWidget {
   final String sectionKey;
@@ -62,7 +64,12 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: widget.onTap,
+        onTap: () { 
+          HapticFeedback.selectionClick(); 
+          if (widget.onTap != null) widget.onTap!(); 
+        },
+        overlayColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.primary.withOpacity(0.06)),
+        splashFactory: InkRipple.splashFactory,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: t.colorScheme.outlineVariant),
@@ -71,23 +78,27 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
           padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                if (loading)
-                  const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                const Spacer(),
-                if (!loading && stats != null) ...[
-                  MiniBadge(icon: Icons.refresh, label: '${stats.dueToday}'),
-                  const SizedBox(width: 6),
-                  MiniBadge(icon: Icons.fiber_new, label: '${stats.newTotal}'),
-                ],
-              ]),
+          children: [
+            Row(children: [
+              if (loading) const Expanded(child: ShimmerBox(height: 16, borderRadius: 999)),
+              if (loading) const SizedBox(width: 8),
+              if (!loading && stats != null) ...[
+                MiniBadge(icon: Icons.refresh, label: '${stats.dueToday}'),
+                const SizedBox(width: 6),
+                MiniBadge(icon: Icons.fiber_new, label: '${stats.newTotal}'),
+              ],
+            ]),
               const Spacer(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
+                  if (loading)
+                    const Expanded(child: ShimmerBox(height: 18, borderRadius: 6))
+                  else
+                    Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
                   if (!loading && stats != null) Text('${stats.total}', style: t.textTheme.bodyMedium),
+                  if (loading) const SizedBox(width: 12),
+                  if (loading) const ShimmerBox(height: 14, borderRadius: 6),
                 ],
               ),
             ],
