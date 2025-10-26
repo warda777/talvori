@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
-import 'package:talvori/features/words/domain/word.dart';
 
 class MyWordsScreen extends ConsumerStatefulWidget {
   const MyWordsScreen({super.key});
@@ -43,43 +42,52 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
           Expanded(
             child: vm.loadingFirst
                 ? const Center(child: CircularProgressIndicator())
-                : vm.items.isEmpty
-                    ? const Center(child: Text('Noch keine Wörter gemerkt.'))
-                    : NotificationListener<ScrollNotification>(
-                        onNotification: (n) {
-                          if (n.metrics.extentAfter < 400) c.loadMore();
-                          return false;
-                        },
-                        child: ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: vm.items.length + ((vm.loadingMore || vm.hasMore) ? 1 : 0),
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, i) {
-                            if (i >= vm.items.length) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
-                            }
-                            final Word w = vm.items[i];
-                            return ListTile(
-                              title: Text(w.text),
-                              subtitle: Text(w.translation),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.remove_circle_outline),
-                                tooltip: 'Aus „Meine Wörter“ entfernen',
-                                onPressed: () async {
-                                  final messenger = ScaffoldMessenger.of(context);
-                                  await c.removeWord(w.id);
-                                  messenger.showSnackBar(
-                                    SnackBar(content: Text('Entfernt: ${w.text}')),
+                : RefreshIndicator(
+                    onRefresh: () => c.init(),
+                    child: vm.items.isEmpty
+                        // leerer Zustand: trotzdem scrollable für Pull-to-Refresh
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(16),
+                            children: const [
+                              SizedBox(height: 120),
+                              Center(child: Text('Noch keine Wörter gemerkt.')),
+                            ],
+                          )
+                        : NotificationListener<ScrollNotification>(
+                            onNotification: (n) {
+                              if (n.metrics.extentAfter < 400) c.loadMore();
+                              return false;
+                            },
+                            child: ListView.separated(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: vm.items.length + ((vm.loadingMore || vm.hasMore) ? 1 : 0),
+                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              itemBuilder: (context, i) {
+                                if (i >= vm.items.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(child: CircularProgressIndicator()),
                                   );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                                }
+                                final w = vm.items[i];
+                                return ListTile(
+                                  title: Text(w.text),
+                                  subtitle: Text(w.translation),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline),
+                                    tooltip: 'Aus „Meine Wörter" entfernen',
+                                    onPressed: () async {
+                                      final messenger = ScaffoldMessenger.of(context);
+                                      await c.removeWord(w.id);
+                                      messenger.showSnackBar(SnackBar(content: Text('Entfernt: ${w.text}')));
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                  ),
           ),
         ],
       ),
