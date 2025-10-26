@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
@@ -85,6 +87,7 @@ class WordListController extends _$WordListController {
 
   static final Map<String, _CacheEntry> _cache = {}; // key = provKey
   Timer? _debounce; // (hast du schon)
+  StreamSubscription? _connSub;
   late String _provKey; // merken
 
   late WordListFilter _baseFilter;
@@ -99,7 +102,23 @@ class WordListController extends _$WordListController {
     final link = ref.keepAlive();
     ref.onDispose(() {
       _debounce?.cancel();
+      _connSub?.cancel();
       link.close();
+    });
+
+    // Verbindung überwachen
+    _connSub = Connectivity().onConnectivityChanged.listen((results) async {
+      final online = !results.contains(ConnectivityResult.none);
+      if (online && state.offline) {
+        // Supabase einmal testen (Ping)
+        try {
+          await Supabase.instance.client.from('words').select('id').limit(1);
+          // Wenn erfolgreich → neu laden
+          await loadFirstPage(resetCache: true);
+        } catch (_) {
+          // bleibt offline
+        }
+      }
     });
 
     final hit = _cache[provKey];
