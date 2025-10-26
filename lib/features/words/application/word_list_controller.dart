@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
@@ -117,6 +119,26 @@ class WordListController extends _$WordListController {
     return WordListFilter(_baseFilter.kind, value);
   }
 
+  Future<void> _saveOfflineSnapshot(List<Word> words) async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final data = words.map((w) => w.toJson()).toList();
+      await sp.setString('wl_snapshot_$_provKey', jsonEncode(data));
+    } catch (_) {/* silent */}
+  }
+
+  Future<List<Word>?> _loadOfflineSnapshot() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final raw = sp.getString('wl_snapshot_$_provKey');
+      if (raw == null) return null;
+      final List list = jsonDecode(raw);
+      return list.map<Word>((m) => Word.fromJson(m as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> loadFirstPage({bool resetCache = false}) async {
     if (resetCache) _cache.remove(_provKey);
     state = state.copyWith(
@@ -150,12 +172,26 @@ class WordListController extends _$WordListController {
         error: null,
       );
       _cache[_provKey] = _CacheEntry(state);
+      await _saveOfflineSnapshot(state.words); // NEU
     } catch (e) {
-      state = state.copyWith(
-        isFirstLoad: false,
-        isLoadingMore: false,
-        error: e.toString(),
-      );
+      // Offline-Snapshot versuchen
+      final snap = await _loadOfflineSnapshot();
+      if (snap != null && snap.isNotEmpty) {
+        state = state.copyWith(
+          words: snap,
+          isFirstLoad: false,
+          isLoadingMore: false,
+          hasMore: false,
+          error: 'Offline – zeige zuletzt geladene Liste',
+        );
+        _cache[_provKey] = _CacheEntry(state);
+      } else {
+        state = state.copyWith(
+          isFirstLoad: false,
+          isLoadingMore: false,
+          error: e.toString(),
+        );
+      }
     }
   }
 
@@ -187,6 +223,7 @@ class WordListController extends _$WordListController {
         error: null,
       );
       _cache[_provKey] = _CacheEntry(state);
+      await _saveOfflineSnapshot(state.words); // NEU
     } catch (e) {
       state = state.copyWith(
         isFirstLoad: false,
