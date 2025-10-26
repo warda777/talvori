@@ -2,11 +2,12 @@
 
 ## 📁 Project Overview
 
-- **Total Dart Files**: 63
+- **Total Dart Files**: 65+
 - **Architecture**: Feature-based with Clean Architecture principles
-- **State Management**: Riverpod
+- **State Management**: Riverpod (NotifierProvider)
 - **Backend**: Supabase
 - **UI Framework**: Flutter Material Design
+- **Theme System**: Centralized with ThemeExtension
 
 ## 🏗️ Core Architecture
 
@@ -21,7 +22,7 @@ lib/core/
 │   ├── services.dart         # Barrel file for services
 │   └── browser_return_service.dart  # Browser navigation service
 ├── theme/                     # App theming
-│   └── app_theme.dart        # Main app theme configuration
+│   └── app_theme.dart        # Main app theme configuration with ThemeExtension
 └── ui/widgets/               # Reusable UI components
     ├── progress_bar.dart     # Generic progress bar widget
     └── round_icon.dart       # Round icon button widget
@@ -58,7 +59,9 @@ lib/features/home/
 lib/features/words/
 ├── application/              # Business logic & state management
 │   ├── application.dart     # Barrel file for application layer
-│   ├── learn_mode_controller.dart  # Main learning controller
+│   ├── category_detail_controller.dart  # Category detail state management
+│   ├── category_detail_state.dart       # Category detail state model
+│   ├── learn_mode_controller.dart  # Main learning controller (NotifierProvider)
 │   ├── srs_config.dart      # Spaced Repetition System config
 │   ├── srs_logic.dart       # SRS algorithm implementation
 │   ├── timer_helpers.dart   # Timer utility functions
@@ -75,7 +78,10 @@ lib/features/words/
 │   ├── services.dart        # Barrel file for services
 │   └── sfx_service.dart     # Sound effects & haptic feedback
 └── ui/                      # User interface
-    ├── ui_constants.dart    # Centralized UI constants & theme
+    ├── theme/               # Centralized theme system
+    │   ├── theme.dart       # Barrel file for theme
+    │   ├── words_colors.dart # ThemeExtension for colors
+    │   └── words_layout.dart # Centralized layout constants
     ├── cards/               # Card components
     │   ├── cards.dart       # Barrel file for cards
     │   ├── counter_badge.dart
@@ -84,7 +90,7 @@ lib/features/words/
     │   ├── tap_flash.dart
     │   └── word_card.dart
     ├── screens/             # Screen components
-    │   ├── category_detail_screen.dart
+    │   ├── category_detail_screen.dart  # Refactored with controller
     │   ├── learn_mode_screen.dart    # Main learning interface
     │   ├── my_words_screen.dart
     │   ├── vocab_sort_screen.dart
@@ -95,13 +101,20 @@ lib/features/words/
         ├── bottom_controls.dart      # Play/Pause/Reset controls
         ├── cancel_timer_button.dart
         ├── card_area.dart           # Card display area
+        ├── category_header_capsule.dart  # Category header component
         ├── category_wheel.dart      # Category selector
+        ├── glow_circle_button.dart  # Glowing circular button
+        ├── glow_rect_tile.dart      # Glowing rectangular tile
         ├── header_bar.dart          # Top navigation bar
+        ├── learning_status_panel.dart  # Progress & stats panel
+        ├── levels_card.dart         # SRS levels display card
         ├── level_badge.dart         # CEFR level display (A1-C2)
         ├── menu_sheet.dart          # Context menu
         ├── play_pause_button.dart
+        ├── progress_ring.dart       # Circular progress indicator
         ├── reset_button.dart        # Hold-to-reset button
         ├── stage_switch_row.dart    # SRS stage indicators
+        ├── stats_helpers.dart       # Statistics helper functions
         ├── timer_bar.dart           # Progress timer
         ├── vertical_stage_switch.dart  # Individual stage switch
         └── widgets.dart
@@ -135,9 +148,12 @@ lib/features/rewards/
 
 ### 🎯 Centralized Theme System
 
-- **`ui_constants.dart`**: All colors, sizes, spacing, and UI constants
+- **`WordsColors` ThemeExtension**: Scalable color management with fallback support
+- **`WordsLayout`**: Centralized layout constants for consistent spacing and dimensions
+- **`app_theme.dart`**: Main theme configuration with ThemeExtension registration
 - **Dynamic color adaptation**: LevelBadge automatically adjusts text color for contrast
 - **Consistent spacing**: Standardized gaps and padding throughout the app
+- **Single source of truth**: All layout values managed centrally
 
 ### 🧩 Component Architecture
 
@@ -187,9 +203,11 @@ LearnModeScreen
 
 ### 🏪 Riverpod Providers
 
-- **`learnModeControllerProvider`**: Main learning state
-- **Granular selectors**: `currentWordProvider`, `stagesProvider`, etc.
+- **`learnModeControllerProvider`**: Main learning state (NotifierProvider.autoDispose)
+- **`categoryDetailControllerProvider`**: Category detail state management
+- **Granular selectors**: `currentWordProvider`, `stagesProvider`, `isPlayingProvider`, etc.
 - **Auto-dispose**: Automatic cleanup when not needed
+- **Modern Riverpod**: Using NotifierProvider instead of StateNotifierProvider
 
 ### 🔄 State Flow
 
@@ -239,8 +257,31 @@ LearnModeScreen
 - **Error handling**: Graceful failure recovery
 - **Type safety**: Full Dart type checking
 
+## 🆕 Recent Updates
+
+### 🎨 Theme System Overhaul
+
+- **ThemeExtension Integration**: `WordsColors` for scalable color management
+- **Centralized Layout**: `WordsLayout` class for consistent spacing and dimensions
+- **Barrel Files**: Clean imports with `theme.dart` barrel file
+- **Fallback Support**: Robust theme handling with graceful degradation
+
+### 🏗️ Architecture Improvements
+
+- **Controller Refactoring**: `CategoryDetailController` for better state management
+- **Component Extraction**: Modular UI components for better maintainability
+- **Modern Riverpod**: Migration to `NotifierProvider` for better performance
+- **Clean Imports**: Barrel files for simplified dependency management
+
+### 🐛 Bug Fixes
+
+- **Compilation Errors**: Fixed const expression errors in layout constants
+- **Wheel Transitions**: Smooth category wheel transitions with proper background opacity
+- **State Synchronization**: Improved client-server state synchronization
+
 ---
 
-_Last updated: $(date)_
-_Total files: 63 Dart files_
-_Architecture: Feature-based Clean Architecture with Riverpod_
+_Last updated: December 2024_
+_Total files: 65+ Dart files_
+_Architecture: Feature-based Clean Architecture with Modern Riverpod_
+_Theme System: Centralized with ThemeExtension and Layout Constants_

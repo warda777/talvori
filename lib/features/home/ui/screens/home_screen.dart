@@ -9,20 +9,11 @@ import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/push/data/daily_picks_store.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
-import 'package:talvori/features/words/data/supabase_word_repository.dart';
-
-import 'dart:async';
-import 'dart:convert';
-// import 'package:share_handler/share_handler.dart'; // Temporär deaktiviert für Web-Build
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'package:app_links/app_links.dart';
-import 'package:talvori/core/services/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
+import 'package:talvori/features/home/application/application.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -33,81 +24,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
-  // Share-Listener (temporär deaktiviert für Web-Build)
-  // StreamSubscription<SharedMedia>? _shareSub;
-  // final _share = ShareHandlerPlatform.instance;
-  StreamSubscription<String>? _savedUrlSub;
-
-  // UI-State
-  bool _imageExpanded = false;
-  bool _imageIsDark = false;
-  bool _categoriesActive = false;
-
-  final String _currentWord = 'to assume';
-
-  // Repo + Live-Zähler „My Words“
-  final SupabaseWordRepository _wordRepo = SupabaseWordRepository();
-  int _myWordsCount = 0;
-
-  Future<void> _refreshMyWordsCount() async {
-    try {
-      final c = await _wordRepo.countMyWords();
-      debugPrint('🔢 My Words Count: $c');
-      if (!mounted) return;
-      setState(() => _myWordsCount = c);
-    } catch (e) {
-      debugPrint('❌ Error loading My Words Count: $e');
-      // z. B. nicht eingeloggt → still
-    }
-  }
-
-  void _toggleImage() => setState(() => _imageExpanded = !_imageExpanded);
-  void _setImageDark(bool v) => setState(() => _imageIsDark = v);
-
-  // Deep-Linking
-  late final AppLinks _appLinks;
-  StreamSubscription<Uri>? _linksSub;
-
-  // Helper
-  bool _looksLikePdf(String url) => url.toLowerCase().trim().endsWith('.pdf');
-
-  // URL aus geteiltem Text extrahieren und speichern
-  Future<void> _captureUrlIfPresent(String text) async {
-    final m = RegExp(r'(https?:\/\/[^\s<>()\[\]]+)').firstMatch(text);
-    if (m != null) {
-      await BrowserReturnService.setLastUrl(m.group(1)!);
-    }
-  }
-
-  // Erstes markiertes Wort aus dem geteilten Text extrahieren
-  String? _extractMarkedWord(String text) {
-    debugPrint('🔍 _extractMarkedWord input: "$text"');
-    
-    // Entferne URLs und extrahiere nur den Text vor der URL
-    final urlPattern = RegExp(r'https?://[^\s]+');
-    final textWithoutUrl = text.replaceAll(urlPattern, '').trim();
-    
-    debugPrint('🔍 Text ohne URL: "$textWithoutUrl"');
-    
-    // Wenn der Text leer ist, versuche das erste Wort aus dem gesamten Text zu extrahieren
-    final sourceText = textWithoutUrl.isEmpty ? text : textWithoutUrl;
-    
-    final matches = RegExp(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+")
-        .allMatches(sourceText)
-        .map((m) => m.group(0)!)
-        .toList();
-    
-    debugPrint('🔍 Gefundene Wörter: $matches');
-    
-    if (matches.isEmpty) return null;
-    
-    // Nimm das ERSTE Wort (das markierte Wort), nicht das letzte
-    final result = matches.first;
-    debugPrint('🔍 Extrahieres Wort: "$result"');
-    return result;
-  }
-
-  // ===== Android: „Teilen an App“ einhängen =====
 
   @override
   void initState() {
@@ -117,54 +33,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final user = Supabase.instance.client.auth.currentUser;
     debugPrint('AUTH USER: ${user?.id}');
 
-    // 1) Laufende Shares (temporär deaktiviert für Web-Build)
-    /*
-    _shareSub = _share.sharedMediaStream.listen((SharedMedia media) {
-      final text = media.content?.trim();
-      if (text != null && text.isNotEmpty) {
-        _handleIncomingShare(text);
-      }
+    // Initialize controller
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(homeControllerProvider.notifier).init(context);
     });
-
-    // 2) Initial (App via Share gestartet)
-    _share.getInitialSharedMedia().then((media) {
-      final text = media?.content?.trim();
-      if (text != null && text.isNotEmpty) {
-        _handleIncomingShare(text);
-      }
-    });
-    */
-
-    // AppLinks initialisieren
-    _appLinks = AppLinks();
-
-    // 1) Initialer Link (App via Share geöffnet)
-    _appLinks.getInitialLink().then((uri) {
-      final t = uri?.queryParameters['text']?.trim();
-      if (t != null && t.isNotEmpty) {
-        _handleIncomingShare(t);
-      }
-    });
-
-    _savedUrlSub = BrowserReturnService.onSavedUrl.listen((url) {
-      if (!mounted) return;
-      final isPdf = _looksLikePdf(url);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(isPdf ? 'PDF-Position gespeichert'
-                                : 'Seitenposition gespeichert')),
-      );
-    });
-
-    // 2) Laufende Links (App bereits offen)
-    _linksSub = _appLinks.uriLinkStream.listen((uri) {
-      final t = uri.queryParameters['text']?.trim();
-      if (t != null && t.isNotEmpty) {
-        _handleIncomingShare(t);
-      }
-    });
-
-    // My Words Count wird nur bei Bedarf geladen (nicht bei jedem App-Start)
   }
 
   @override
@@ -178,97 +50,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _linksSub?.cancel(); // Deep Link stream
-    // _shareSub?.cancel(); // Android Share stream (temporär deaktiviert)
-    _savedUrlSub?.cancel();
+    ref.read(homeControllerProvider.notifier).dispose();
     super.dispose();
   }
-
-  Future<void> _handleIncomingShare(String raw) async {
-    final text = raw.trim();
-    if (text.isEmpty) return;
-
-    // URL aus dem geteilten Text abgreifen (falls vorhanden)
-    await _captureUrlIfPresent(text);
-
-    // markiertes Wort persistieren (+ UI refresh)
-    final markedWord = _extractMarkedWord(text);
-    if (markedWord != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_shared_word', markedWord);
-      if (mounted) {
-        ref.invalidate(lastSharedWordProvider);
-      }
-    }
-
-    final sb = Supabase.instance.client;
-
-    // 1) Login sicherstellen (nutzt TEST_EMAIL/TEST_PASSWORD aus .env, wenn kein User)
-    if (sb.auth.currentUser == null) {
-      final email = dotenv.env['TEST_EMAIL'];
-      final pw = dotenv.env['TEST_PASSWORD'];
-      if (email != null && pw != null && email.isNotEmpty && pw.isNotEmpty) {
-        try {
-          await sb.auth.signInWithPassword(email: email, password: pw);
-          if (mounted) {
-            await _refreshMyWordsCount();
-          }
-        } catch (e) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login fehlgeschlagen: $e')),
-          );
-          return;
-        }
-      }
-    }
-
-    // 2) Token holen (falls nötig frisch)
-    var session = sb.auth.currentSession;
-    session ??= await sb.auth.refreshSession().then((_) => sb.auth.currentSession);
-    final token = session?.accessToken;
-
-    // — Direkt an Functions-Domain posten —
-    final functionsUrl =
-        'https://naplllscmpqexahxtbwg.functions.supabase.co/ingest_word';
-
-    try {
-      final resp = await http.post(
-        Uri.parse(functionsUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'text': text,
-          'fromLang': 'EN',
-          'toLang': 'DE',
-        }),
-      );
-
-      if (resp.statusCode >= 200 && resp.statusCode < 300) {
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        final added = (data['text'] as String?) ?? _currentWord;
-        final tr = (data['translation'] as String?) ?? '—';
-        final wasNew = (data['wasNewWord'] as bool?) ?? false;
-
-        final msg =
-            wasNew ? 'Hinzugefügt: $added — $tr' : 'Schon vorhanden: $added — $tr';
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-
-        await _refreshMyWordsCount();
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Share-Fehler: $e')),
-      );
-    }
-  }
-
-  // ===== Ende Android-Share =====
 
   void _todo(BuildContext ctx, String what) {
     ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$what – TODO')));
@@ -439,7 +223,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             MaterialPageRoute(builder: (_) => const MyWordsScreen()),
                           );
                           if (!context.mounted) return;
-                          await _refreshMyWordsCount();
                         });
                       },
                       style: pill,
@@ -576,6 +359,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(homeControllerProvider);
+    
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       body: SafeArea(
@@ -615,7 +400,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         width: w,
                         height: h,
                         child: wc.WordCard(
-                          key: ValueKey((_imageIsDark, _imageExpanded)),
+                          key: ValueKey((state.imageIsDark, state.imageExpanded)),
                           initialWord: null, // WordCard verwendet lastSharedWordProvider
                           onQuickSend: () async {
                             // Aktuelles Wort aus dem Provider holen
@@ -650,26 +435,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 break;
                             }
                           },
-                          isImageExpanded: _imageExpanded,
-                          onToggleImage: _toggleImage,
-                          isImageDark: _imageIsDark,
-                          onImageBrightnessChanged: _setImageDark,
+                          isImageExpanded: state.imageExpanded,
+                          onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
+                          isImageDark: state.imageIsDark,
+                          onImageBrightnessChanged: (isDark) => ref.read(homeControllerProvider.notifier).setImageDark(isDark),
                           contentPadding:
                               const EdgeInsets.fromLTRB(20, 16, 20, 16),
 
-                          userWordCount: _myWordsCount,
+                          userWordCount: state.myWordsCount,
                           onCountTap: () async {
-                            // Lazy-Load: Counter nur laden, wenn er das erste Mal angezeigt wird
-                            if (_myWordsCount == 0) {
-                              await _refreshMyWordsCount();
-                            }
                             
                             final nav = Navigator.of(context); // vor await
                             await nav.push(
                               MaterialPageRoute(builder: (_) => const MyWordsScreen()),
                             );
                             if (!context.mounted) return;
-                            await _refreshMyWordsCount();
                           },
                           onSpeak: () => _todo(context, 'Speak word'),
                           onMarkWords: () => _todo(context, 'Open Mark Words (web)'),
@@ -689,17 +469,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: HomeBottomNav(
             onCategories: () {
-              setState(() => _categoriesActive = true);
+              ref.read(homeControllerProvider.notifier).setCategoriesActive(true);
               _showCategoryPopup(context).whenComplete(() {
                 if (!mounted) return;
-                setState(() => _categoriesActive = false);
+                ref.read(homeControllerProvider.notifier).setCategoriesActive(false);
               });
             },
             onPractice: () => _showPracticePicker(context),
             onProfile: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ProfileScreen()),
             ),
-            categoriesActive: _categoriesActive,
+            categoriesActive: state.categoriesActive,
           ),
         ),
       ),
