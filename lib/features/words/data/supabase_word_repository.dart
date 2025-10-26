@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/features/words/domain/word.dart';
 // Wir brauchen nur die Typen für den Filter:
-import 'package:talvori/features/words/ui/screens/word_list_screen.dart'
+import 'package:talvori/features/words/application/word_list_controller.dart'
     show WordListFilter, WordFilterKind;
 import 'package:flutter/foundation.dart'; // für debugPrint
 

@@ -132,7 +132,7 @@ class LearnModeState {
 /// ---------- Provider ----------
 
 final learnModeControllerProvider =
-    NotifierProvider.autoDispose<LearnModeController, LearnModeState>(() {
+    NotifierProvider<LearnModeController, LearnModeState>(() {
   return LearnModeController();
 });
 

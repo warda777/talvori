@@ -1,5 +1,5 @@
 import 'package:talvori/features/words/domain/word.dart';
-import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart';
 
 /// Kleiner Vertrag für das UI
 abstract class WordRepository {

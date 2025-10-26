@@ -1,60 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/domain/word.dart';
-import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart';
 
-// Filter-Modell
-enum WordFilterKind { about, domain, pos, level, category, query }
-class WordListFilter {
-  final WordFilterKind kind;
-  final String value;
-  const WordListFilter(this.kind, this.value);
-}
-
-// Sortiermodus (Top-Level)
-enum SortMode { az, newest }
-
-class WordListScreen extends StatefulWidget {
+class WordListScreen extends ConsumerStatefulWidget {
   final WordListFilter filter;
   final String? titleOverride;
   final String? overrideCategoryId;
   final String? overrideCategoryLabel;
-  
+
   const WordListScreen({
-    Key? key,
+    super.key,
     required this.filter,
     this.titleOverride,
     this.overrideCategoryId,
     this.overrideCategoryLabel,
-  }) : super(key: key);
+  });
 
   @override
-  State<WordListScreen> createState() => _WordListScreenState();
+  ConsumerState<WordListScreen> createState() => _WordListScreenState();
 }
 
-class _WordListScreenState extends State<WordListScreen> {
-  final _repo = SupabaseWordRepository();
+class _WordListScreenState extends ConsumerState<WordListScreen> {
   final _scroll = ScrollController();
-
-  final List<Word> _words = [];
-  final Set<String> _picked = {}; // Quick-Add Häkchen
-
-  bool _isFirstLoad = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  bool _authMissingWarned = false; // SnackBar nicht spammen
-
-  int _offset = 0;
-  final int _pageSize = 50;
-
-  String _query = '';
-  SortMode _sort = SortMode.az;
+  late final String _provKey; // stabiler Key für provider family
 
   @override
   void initState() {
     super.initState();
-    _loadFirstPage();
+    _provKey = _buildKey();
     _scroll.addListener(_onScroll);
+
+    // Controller initialisieren
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(wordListControllerProvider(_provKey).notifier)
+          .init(filter: widget.filter, overrideCategoryId: widget.overrideCategoryId);
+    });
   }
+
+  String _buildKey() =>
+      '${widget.filter.kind}:${widget.overrideCategoryId ?? widget.filter.value}';
 
   @override
   void dispose() {
@@ -63,102 +49,43 @@ class _WordListScreenState extends State<WordListScreen> {
     super.dispose();
   }
 
-  WordListFilter _getEffectiveFilter() {
-    final effectiveCategoryId = widget.overrideCategoryId ?? widget.filter.value;
-    
-    return WordListFilter(
-      widget.filter.kind,
-      effectiveCategoryId,
-    );
-  }
-
-  Future<void> _loadFirstPage() async {
-    setState(() {
-      _isFirstLoad = true;
-      _words.clear();
-      _picked.clear();
-      _offset = 0;
-      _hasMore = true;
-    });
-
-    // 1) Erste Seite laden
-    final effectiveFilter = _getEffectiveFilter();
-    final batch = await _repo.fetchByFilter(
-      effectiveFilter,
-      limit: _pageSize,
-      offset: _offset,
-    );
-
-    // 2) Bereits markierte IDs für diese Page laden (falls vorhanden)
-    Set<String> pickedIds = {};
-    if (batch.isNotEmpty) {
-      pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
-    }
-
-    // 3) State aktualisieren
-    setState(() {
-      _words.addAll(batch);
-      _picked.addAll(pickedIds);
-      _offset += batch.length;
-      _hasMore = batch.length == _pageSize;
-      _isFirstLoad = false;
-    });
-  }
-
   void _onScroll() {
-    if (_isLoadingMore || !_hasMore) return;
+    final s = ref.read(wordListControllerProvider(_provKey));
+    if (s.isLoadingMore || !s.hasMore) return;
     if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
-      _loadMore();
+      ref.read(wordListControllerProvider(_provKey).notifier).loadMore();
     }
-  }
-
-  Future<void> _loadMore() async {
-    setState(() => _isLoadingMore = true);
-    final effectiveFilter = _getEffectiveFilter();
-    final batch = await _repo.fetchByFilter(
-      effectiveFilter,
-      limit: _pageSize,
-      offset: _offset,
-    );
-
-    // Optional: auch hier bereits gepickte IDs nachladen
-    Set<String> pickedIds = {};
-    if (batch.isNotEmpty) {
-      pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
-    }
-
-    setState(() {
-      _words.addAll(batch);
-      _picked.addAll(pickedIds);
-      _offset += batch.length;
-      _hasMore = batch.length == _pageSize;
-      _isLoadingMore = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final effectiveCategoryLabel = widget.overrideCategoryLabel ?? widget.filter.value;
+    final state = ref.watch(wordListControllerProvider(_provKey));
+    final ctrl = ref.read(wordListControllerProvider(_provKey).notifier);
+    final effectiveCategoryLabel =
+        widget.overrideCategoryLabel ?? widget.filter.value;
     final title = widget.titleOverride ?? 'Word Hub • $effectiveCategoryLabel';
+
+    // Suche + Sort lokal auf sichtbarer Liste anwenden
+    final filtered = _applyQuery(state.words, state.query);
+    final sorted = _applySort(filtered, state.sort);
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
-          // Suche
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
-              onChanged: (v) => setState(() => _query = v),
+              onChanged: (v) => ctrl.setQuery(v),
               decoration: InputDecoration(
                 hintText: 'Suchen (Wort oder Übersetzung)',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
-
-          // Sortier-Toolbar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Row(
@@ -166,48 +93,41 @@ class _WordListScreenState extends State<WordListScreen> {
                 Expanded(
                   child: SegmentedButton<SortMode>(
                     segments: const [
-                      ButtonSegment(value: SortMode.az,     label: Text('A–Z')),
+                      ButtonSegment(value: SortMode.az, label: Text('A–Z')),
                       ButtonSegment(value: SortMode.newest, label: Text('Neueste')),
                     ],
-                    selected: {_sort},
-                    onSelectionChanged: (s) => setState(() => _sort = s.first),
+                    selected: {state.sort},
+                    onSelectionChanged: (s) => ctrl.setSort(s.first),
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text('${_words.length}'),
+                Text('${sorted.length}'),
               ],
             ),
           ),
-
-          // Liste
           Expanded(
-            child: _isFirstLoad
+            child: state.isFirstLoad
                 ? const Center(child: CircularProgressIndicator())
-                : _buildList(),
+                : _buildList(context, sorted, state, ctrl),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildList() {
-    // Suche anwenden
-    final q = _query.trim().toLowerCase();
-    final visible = q.isEmpty
-        ? _words
-        : _words
-            .where((w) =>
-                w.text.toLowerCase().contains(q) ||
-                w.translation.toLowerCase().contains(q))
-            .toList();
+  List<Word> _applyQuery(List<Word> input, String q) {
+    final query = q.trim().toLowerCase();
+    if (query.isEmpty) return input;
+    return input
+        .where((w) =>
+            w.text.toLowerCase().contains(query) ||
+            w.translation.toLowerCase().contains(query))
+        .toList();
+  }
 
-    if (visible.isEmpty) {
-      return const Center(child: Text('Keine Wörter gefunden.'));
-    }
-
-    // Sortierung anwenden
-    final list = List<Word>.from(visible);
-    switch (_sort) {
+  List<Word> _applySort(List<Word> input, SortMode mode) {
+    final list = List<Word>.from(input);
+    switch (mode) {
       case SortMode.az:
         list.sort((a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
         break;
@@ -215,12 +135,19 @@ class _WordListScreenState extends State<WordListScreen> {
         list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
     }
+    return list;
+  }
 
-    // Liste mit Pagination-Footer
+  Widget _buildList(BuildContext context, List<Word> list, WordListState state,
+      WordListController ctrl) {
+    if (list.isEmpty) {
+      return const Center(child: Text('Keine Wörter gefunden.'));
+    }
+
     return ListView.separated(
       controller: _scroll,
       padding: const EdgeInsets.all(16),
-      itemCount: list.length + (_isLoadingMore || _hasMore ? 1 : 0),
+      itemCount: list.length + (state.isLoadingMore || state.hasMore ? 1 : 0),
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (_, i) {
         if (i >= list.length) {
@@ -230,7 +157,7 @@ class _WordListScreenState extends State<WordListScreen> {
           );
         }
         final w = list[i];
-        final picked = _picked.contains(w.id);
+        final picked = state.picked.contains(w.id);
 
         return ListTile(
           title: Text(w.text),
@@ -238,57 +165,14 @@ class _WordListScreenState extends State<WordListScreen> {
           trailing: IconButton(
             icon: Icon(picked ? Icons.check_circle : Icons.add_circle_outline),
             onPressed: () async {
-              final wasPicked = picked;
-              final messenger = ScaffoldMessenger.of(context); // vor await
-
-              // Optimistisches UI-Update
-              setState(() {
-                if (picked) {
-                  _picked.remove(w.id);
-                } else {
-                  _picked.add(w.id);
-                }
-              });
-
-              try {
-                if (wasPicked) {
-                  await _repo.removeFromMyWords(w.id);
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Entfernt: ${w.text}')),
-                  );
-                } else {
-                  await _repo.addToMyWords(w.id);
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Hinzugefügt: ${w.text}')),
-                  );
-                }
-              } catch (e) {
-                // Rollback
-                setState(() {
-                  if (wasPicked) {
-                    _picked.add(w.id);
-                  } else {
-                    _picked.remove(w.id);
-                  }
-                });
-
-                final msg = e.toString();
-                if (!_authMissingWarned && msg.contains('Not authenticated')) {
-                  _authMissingWarned = true;
-                  messenger.showSnackBar(
-                    const SnackBar(content: Text('Bitte anmelden, um zu speichern.')),
-                  );
-                } else {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Fehler: $msg')),
-                  );
-                }
+              final msg = await ctrl.togglePick(context, w);
+              if (!context.mounted) return;
+              if (msg != null) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
               }
             },
           ),
-          onTap: () {
-            // Optional: Detail/BottomSheet
-          },
+          onTap: () {},
         );
       },
     );
