@@ -197,6 +197,11 @@ class WordListController extends _$WordListController {
     await loadFirstPage(); // NEU: serverseitig neu laden
   }
 
+  void setSortDebounced(SortMode s, {Duration d = const Duration(milliseconds: 150)}) {
+    _debounce?.cancel();
+    _debounce = Timer(d, () => setSort(s));
+  }
+
   Future<String?> togglePick(BuildContext ctx, Word w) async {
     final wasPicked = state.picked.contains(w.id);
 

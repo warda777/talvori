@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/widgets/word_list_toolbar.dart';
 import 'package:talvori/features/words/ui/widgets/word_list_item.dart';
+import 'package:talvori/features/words/ui/widgets/list_end_footer.dart';
+import 'package:talvori/features/words/ui/widgets/shimmer_list.dart';
 
 class WordListScreen extends ConsumerStatefulWidget {
   final WordListFilter filter;
@@ -26,6 +29,7 @@ class WordListScreen extends ConsumerStatefulWidget {
 class _WordListScreenState extends ConsumerState<WordListScreen> {
   final _scroll = ScrollController();
   late final String _provKey; // stabiler Key für provider family
+  Timer? _scrollThrottle; // oben bei _scroll
 
   @override
   void initState() {
@@ -51,6 +55,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
   void dispose() {
     _scroll.removeListener(_onScroll);
     _scroll.dispose();
+    _scrollThrottle?.cancel();
     super.dispose();
   }
 
@@ -58,6 +63,10 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     final s = ref.read(wordListControllerProvider(_provKey));
     if (s.isLoadingMore || !s.hasMore) return;
     if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
+      if (_scrollThrottle != null) return; // throttle aktiv
+      _scrollThrottle = Timer(const Duration(milliseconds: 200), () {
+        _scrollThrottle = null;
+      });
       ref.read(wordListControllerProvider(_provKey).notifier).loadMore();
     }
   }
@@ -79,12 +88,12 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
           WordListToolbar(
             onQueryChanged: ctrl.setQueryDebounced, // <-- statt ctrl.setQuery
             sort: state.sort,
-            onSortChanged: ctrl.setSort,
+            onSortChanged: ctrl.setSortDebounced,
             visibleCount: list.length, // statt: sorted.length
           ),
           Expanded(
             child: state.isFirstLoad
-                ? const Center(child: CircularProgressIndicator())
+                ? const ShimmerList(items: 10)
                 : state.error != null
                     ? Center(
                         child: Column(
@@ -141,27 +150,24 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
       key: PageStorageKey('wordList:$_provKey'),
       controller: _scroll,
       padding: const EdgeInsets.all(16),
-      itemCount: list.length + (state.isLoadingMore || state.hasMore ? 1 : 0),
+      itemCount: list.length + 1, // immer ein Footer
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (_, i) {
-        if (i >= list.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
-          );
+        if (i == list.length) {
+          return ListEndFooter(loading: state.isLoadingMore || state.hasMore);
         }
         final w = list[i];
-
+        final picked = state.picked.contains(w.id);
         return WordListItem(
           word: w,
-          picked: state.picked.contains(w.id),
+          picked: picked,
           onTogglePick: () async {
             final msg = await ctrl.togglePick(context, w);
             if (context.mounted && msg != null) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
             }
           },
-          onTap: () {}, // optional
+          onTap: () {},
         );
       },
     );
