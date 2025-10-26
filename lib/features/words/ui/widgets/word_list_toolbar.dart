@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/ui/common/mini_badge.dart';
 
 class WordListToolbar extends StatelessWidget {
   final ValueChanged<String> onQueryChanged;
@@ -52,22 +53,7 @@ class WordListToolbar extends StatelessWidget {
               Text('$visibleCount'),
               if (offline) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    color: Theme.of(context).colorScheme.surface,
-                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.cloud_off, size: 14),
-                      SizedBox(width: 4),
-                      Text('Offline'),
-                    ],
-                  ),
-                ),
+                const MiniBadge(icon: Icons.cloud_off, label: 'Offline'),
               ],
             ],
           ),

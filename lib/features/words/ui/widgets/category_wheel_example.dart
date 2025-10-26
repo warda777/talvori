@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/category_controller.dart';
 import 'package:talvori/features/words/ui/widgets/shimmer_list.dart';
-import 'package:talvori/features/words/ui/widgets/offline_badge.dart';
+import 'package:talvori/ui/common/mini_badge.dart';
 
 /// Beispiel für die Verwendung des CategoryController im UI
 class CategoryWheelExample extends ConsumerWidget {
@@ -14,7 +14,7 @@ class CategoryWheelExample extends ConsumerWidget {
 
     return Column(
       children: [
-        if (catState.offline) const OfflineBadge(),
+        if (catState.offline) const MiniBadge(icon: Icons.cloud_off, label: 'Offline'),
         Expanded(
           child: _buildContent(catState, ref),
         ),
@@ -67,7 +67,7 @@ class CategoryWheelWithRefresh extends ConsumerWidget {
 
     return Column(
       children: [
-        if (catState.offline) const OfflineBadge(),
+        if (catState.offline) const MiniBadge(icon: Icons.cloud_off, label: 'Offline'),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () => ref.read(categoryControllerProvider.notifier).refresh(),

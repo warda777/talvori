@@ -7,7 +7,7 @@ part of 'word_list_controller.dart';
 // **************************************************************************
 
 String _$wordListControllerHash() =>
-    r'a2a88c1e6e4be6d2a626ac5682a3eec91ab32cf0';
+    r'31f1c9f025e8ace6323cbfc9f62297e94e895350';
 
 /// Copied from Dart SDK
 class _SystemHash {
