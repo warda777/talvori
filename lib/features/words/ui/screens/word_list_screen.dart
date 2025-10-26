@@ -90,6 +90,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
             sort: state.sort,
             onSortChanged: ctrl.setSortDebounced,
             visibleCount: list.length, // statt: sorted.length
+            offline: state.offline, // NEU
           ),
           Expanded(
             child: state.isFirstLoad

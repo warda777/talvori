@@ -37,6 +37,7 @@ class WordListState {
   final String query;
   final SortMode sort;
   final String? error; // NEU
+  final bool offline; // NEU
 
   const WordListState({
     this.words = const [],
@@ -48,6 +49,7 @@ class WordListState {
     this.query = '',
     this.sort = SortMode.az,
     this.error,
+    this.offline = false, // NEU
   });
 
   WordListState copyWith({
@@ -60,6 +62,7 @@ class WordListState {
     String? query,
     SortMode? sort,
     String? error,
+    bool? offline, // NEU
   }) {
     return WordListState(
       words: words ?? this.words,
@@ -71,6 +74,7 @@ class WordListState {
       query: query ?? this.query,
       sort: sort ?? this.sort,
       error: error,
+      offline: offline ?? this.offline,
     );
   }
 }
@@ -170,6 +174,7 @@ class WordListController extends _$WordListController {
         hasMore: batch.length == _pageSize,
         isFirstLoad: false,
         error: null,
+        offline: false,
       );
       _cache[_provKey] = _CacheEntry(state);
       await _saveOfflineSnapshot(state.words); // NEU
@@ -183,6 +188,7 @@ class WordListController extends _$WordListController {
           isLoadingMore: false,
           hasMore: false,
           error: 'Offline – zeige zuletzt geladene Liste',
+          offline: true, // NEU
         );
         _cache[_provKey] = _CacheEntry(state);
       } else {
@@ -190,6 +196,7 @@ class WordListController extends _$WordListController {
           isFirstLoad: false,
           isLoadingMore: false,
           error: e.toString(),
+          offline: false,
         );
       }
     }
@@ -221,6 +228,7 @@ class WordListController extends _$WordListController {
         hasMore: batch.length == _pageSize,
         isLoadingMore: false,
         error: null,
+        offline: false,
       );
       _cache[_provKey] = _CacheEntry(state);
       await _saveOfflineSnapshot(state.words); // NEU

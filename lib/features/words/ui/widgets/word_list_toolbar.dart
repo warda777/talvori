@@ -6,6 +6,7 @@ class WordListToolbar extends StatelessWidget {
   final SortMode sort;
   final ValueChanged<SortMode> onSortChanged;
   final int visibleCount;
+  final bool offline; // NEU
 
   const WordListToolbar({
     super.key,
@@ -13,6 +14,7 @@ class WordListToolbar extends StatelessWidget {
     required this.sort,
     required this.onSortChanged,
     required this.visibleCount,
+    this.offline = false, // NEU
   });
 
   @override
@@ -48,6 +50,25 @@ class WordListToolbar extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text('$visibleCount'),
+              if (offline) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.cloud_off, size: 14),
+                      SizedBox(width: 4),
+                      Text('Offline'),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
