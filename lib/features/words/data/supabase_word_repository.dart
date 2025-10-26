@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/features/words/domain/word.dart';
 // Wir brauchen nur die Typen für den Filter:
 import 'package:talvori/features/words/application/word_list_controller.dart'
-    show WordListFilter, WordFilterKind;
+    show WordListFilter, WordFilterKind, SortMode;
 import 'package:flutter/foundation.dart'; // für debugPrint
 
 
@@ -215,43 +215,57 @@ class SupabaseWordRepository {
     WordListFilter filter, {
     int limit = 50,
     int offset = 0,
+    String? query,
+    SortMode? sort,
   }) async {
-    var qb = _sb.from('words').select();
+    final sb = Supabase.instance.client;
+
+    // 1) Start: Filter-Builder (hier sind eq/or/... verfügbar)
+    PostgrestFilterBuilder<List<Map<String, dynamic>>> qb =
+        sb.from('words_view').select();
 
     switch (filter.kind) {
-      case WordFilterKind.about:
-        qb = qb.contains('tags', [filter.value]); // TEXT[]
-        break;
-      case WordFilterKind.domain:
-        qb = qb.eq('domain', filter.value); // TEXT
-        break;
-      case WordFilterKind.pos:
-        qb = qb.eq('pos', filter.value); // TEXT
+      case WordFilterKind.category:
+        qb = qb.eq('category_id', filter.value);
         break;
       case WordFilterKind.level:
-        qb = qb.eq('level', filter.value); // TEXT
+        qb = qb.eq('level', filter.value);
         break;
-      case WordFilterKind.category:
-        // NEU: aus der View per Slug lesen (keine user_words-Vermischung)
-        final slug = await _ensureCategorySlug(filter.value);
-        qb = _sb
-            .from('v_words_by_category')
-            .select('id,text,translation,from_lang,to_lang,level,pos,created_at:word_created_at')
-            .eq('category_slug', slug);
+      case WordFilterKind.pos:
+        qb = qb.eq('pos', filter.value);
+        break;
+      case WordFilterKind.domain: // = group
+        qb = qb.eq('group_slug', filter.value);
+        break;
+      case WordFilterKind.about:  // = konkrete Kategorie
+        qb = qb.eq('category_slug', filter.value);
         break;
       case WordFilterKind.query:
-        final q = filter.value;
-        qb = qb.or('text.ilike.%$q%,translation.ilike.%$q%');
         break;
     }
 
-    final data = await qb
-        .order('text', ascending: true)
-        .range(offset, offset + limit - 1);
+    if (query != null && query.trim().isNotEmpty) {
+      final s = query.trim();
+      qb = qb.or('text.ilike.%$s%,translation.ilike.%$s%');
+    }
 
-    return (data as List)
-        .map((j) => Word.fromJson(j as Map<String, dynamic>))
-        .toList();
+    // 2) Wechsel auf Transform-Builder für order/range
+    PostgrestTransformBuilder<List<Map<String, dynamic>>> req = qb;
+
+    switch (sort) {
+      case SortMode.newest:
+        req = req.order('created_at', ascending: false);
+        break;
+      case SortMode.az:
+      default:
+        req = req.order('text', ascending: true);
+        break;
+    }
+
+    req = req.range(offset, offset + limit - 1);
+
+    final rows = await req;
+    return rows.map((j) => Word.fromJson(j)).toList();
   }
 
   Future<void> addToMyWords(String wordId) async {

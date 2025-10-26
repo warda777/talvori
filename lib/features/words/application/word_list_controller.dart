@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:talvori/features/words/domain/word.dart';
@@ -67,16 +68,19 @@ class WordListController extends _$WordListController {
 
   late WordListFilter _baseFilter;
   String? _overrideCategoryId;
+  Timer? _debounce;
 
   static const _pageSize = 50;
 
   // Family-Arg kommt hier rein:
   @override
   WordListState build(String provKey) {
-    // provKey = z.B. "${filter.kind}:${overrideCategoryId ?? filter.value}"
+    final link = ref.keepAlive(); // <- hält Instanz am Leben
     ref.onDispose(() {
-      // optional: Cleanup
+      _debounce?.cancel();
+      link.close();
     });
+    // provKey = z.B. "${filter.kind}:${overrideCategoryId ?? filter.value}"
     return const WordListState();
   }
 
@@ -107,6 +111,8 @@ class WordListController extends _$WordListController {
       _effectiveFilter(),
       limit: _pageSize,
       offset: 0,
+      query: state.query.isEmpty ? null : state.query, // NEU
+      sort: state.sort,                                 // NEU
     );
 
     Set<String> pickedIds = {};
@@ -132,6 +138,8 @@ class WordListController extends _$WordListController {
       _effectiveFilter(),
       limit: _pageSize,
       offset: state.offset,
+      query: state.query.isEmpty ? null : state.query, // NEU
+      sort: state.sort,                                 // NEU
     );
 
     Set<String> pickedIds = {};
@@ -148,9 +156,24 @@ class WordListController extends _$WordListController {
     );
   }
 
+  void setQueryDebounced(String q, {Duration delay = const Duration(milliseconds: 300)}) {
+    _debounce?.cancel();
+    _debounce = Timer(delay, () async {
+      if (state.query != q) {
+        state = state.copyWith(query: q);
+      }
+      await loadFirstPage(); // NEU: serverseitig neu laden
+    });
+  }
+
+  // optional weiterhin verfügbar
   void setQuery(String q) => state = state.copyWith(query: q);
 
-  void setSort(SortMode s) => state = state.copyWith(sort: s);
+  void setSort(SortMode s) async {
+    if (state.sort == s) return;
+    state = state.copyWith(sort: s);
+    await loadFirstPage(); // NEU: serverseitig neu laden
+  }
 
   Future<String?> togglePick(BuildContext ctx, Word w) async {
     final wasPicked = state.picked.contains(w.id);

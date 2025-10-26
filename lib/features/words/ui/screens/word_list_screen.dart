@@ -35,9 +35,12 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
 
     // Controller initialisieren
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(wordListControllerProvider(_provKey).notifier)
-          .init(filter: widget.filter, overrideCategoryId: widget.overrideCategoryId);
+      final s = ref.read(wordListControllerProvider(_provKey));
+      if (s.isFirstLoad && s.words.isEmpty) {
+        ref
+            .read(wordListControllerProvider(_provKey).notifier)
+            .init(filter: widget.filter, overrideCategoryId: widget.overrideCategoryId);
+      }
     });
   }
 
@@ -76,7 +79,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
       body: Column(
         children: [
           WordListToolbar(
-            onQueryChanged: ctrl.setQuery,
+            onQueryChanged: ctrl.setQueryDebounced, // <-- statt ctrl.setQuery
             sort: state.sort,
             onSortChanged: ctrl.setSort,
             visibleCount: sorted.length,
@@ -84,7 +87,10 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
           Expanded(
             child: state.isFirstLoad
                 ? const Center(child: CircularProgressIndicator())
-                : _buildList(context, sorted, state, ctrl),
+                : RefreshIndicator(
+                    onRefresh: () => ctrl.loadFirstPage(),
+                    child: _buildList(context, sorted, state, ctrl),
+                  ),
           ),
         ],
       ),
@@ -121,6 +127,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     }
 
     return ListView.separated(
+      key: PageStorageKey('wordList:$_provKey'),
       controller: _scroll,
       padding: const EdgeInsets.all(16),
       itemCount: list.length + (state.isLoadingMore || state.hasMore ? 1 : 0),
