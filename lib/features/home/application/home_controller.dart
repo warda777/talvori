@@ -6,10 +6,6 @@ import 'package:talvori/features/home/data/share_ingest_service.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 
-final homeControllerProvider = NotifierProvider<HomeController, HomeState>(() {
-  return HomeController();
-});
-
 class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
   final SupabaseWordRepository _wordRepo = SupabaseWordRepository();
   final ShareIngestService _shareService = ShareIngestService();
