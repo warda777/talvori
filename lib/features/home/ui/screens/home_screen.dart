@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:talvori/features/home/ui/widgets/top_bar.dart';
-import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
-import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
-import 'package:talvori/features/home/ui/screens/profile_screen.dart';
-import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
-import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
-import 'package:talvori/features/push/data/daily_picks_store.dart';
-import 'package:talvori/features/home/ui/widgets/widgets.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talvori/features/words/data/last_shared_word_provider.dart';
+
+import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
+import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
+import 'package:talvori/features/home/ui/screens/profile_screen.dart';
+import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
+
 import 'package:talvori/features/home/application/application.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:talvori/features/home/ui/widgets/widgets.dart';
+import 'package:talvori/features/home/ui/theme/theme.dart';
+import 'package:talvori/features/home/ui/strings/strings.dart';
+import 'package:talvori/features/words/data/last_shared_word_provider.dart';
+import 'package:talvori/features/push/data/daily_picks_store.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -20,40 +20,27 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver {
-
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-
-    final user = Supabase.instance.client.auth.currentUser;
-    debugPrint('AUTH USER: ${user?.id}');
-
-    // Initialize controller
+    // Controller initialisieren (kümmert sich um Lifecycle & Share-Listener)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeControllerProvider.notifier).init(context);
     });
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Zurück aus Chrome/Share → Wort neu laden
-      ref.invalidate(lastSharedWordProvider);
-    }
-  }
-
-  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    // Aufräumen zentral im Controller
     ref.read(homeControllerProvider.notifier).dispose();
     super.dispose();
   }
 
-  void _todo(BuildContext ctx, String what) {
-    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$what – TODO')));
+  void _todo(String what) {
+          if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('$what${HomeStrings.todo}')));
   }
 
 
@@ -63,10 +50,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final state = ref.watch(homeControllerProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: HomeTheme.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: HomeTheme.horizontal,
           child: Column(
             children: [
               AnimatedBuilder(
@@ -79,8 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     onAllWords: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const VocabSortScreen()),
                     ),
-                    onRewards: () => _todo(context, 'Rewards/Leaderboard/Stats'),
-                    onProgressTap: () => _todo(context, 'Daily picks settings'),
+                    onRewards: () => _todo('Rewards/Leaderboard/Stats'),
+                    onProgressTap: () => _todo('Daily picks settings'),
                     selected: count,
                     max: max,
                     showProgress: count < max,
@@ -114,24 +101,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             switch (res) {
                               case AddResult.ok:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Added to today's picks")),
+                                  const SnackBar(content: Text(HomeStrings.added)),
                                 );
                                 break;
                               case AddResult.duplicate:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Already in today\'s picks')),
+                                  const SnackBar(content: Text(HomeStrings.duplicate)),
                                 );
                                 break;
                               case AddResult.full:
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text(
-                                          'Limit reached (${DailyPicksStore.I.maxCount})')),
+                                          '${HomeStrings.full} (${DailyPicksStore.I.maxCount})')),
                                 );
                                 break;
                               case AddResult.invalid:
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Cannot add empty word')),
+                                  const SnackBar(content: Text(HomeStrings.invalid)),
                                 );
                                 break;
                             }
@@ -140,8 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
                           isImageDark: state.imageIsDark,
                           onImageBrightnessChanged: (isDark) => ref.read(homeControllerProvider.notifier).setImageDark(isDark),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                          contentPadding: HomeTheme.contentPadding,
 
                           userWordCount: state.myWordsCount,
                           onCountTap: () async {
@@ -152,9 +138,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             );
                             if (!context.mounted) return;
                           },
-                          onSpeak: () => _todo(context, 'Speak word'),
-                          onMarkWords: () => _todo(context, 'Open Mark Words (web)'),
-                          onGo: () => _todo(context, 'Start: My Words practice'),
+                          onSpeak: () => _todo('Speak word'),
+                          onMarkWords: () => _todo('Open Mark Words (web)'),
+                          onGo: () => _todo('Start: My Words practice'),
                         ),
                       );
                     },
@@ -167,21 +153,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: HomeTheme.bottomPadding,
           child: HomeBottomNav(
-            onCategories: () {
+            onCategories: () async {
               ref.read(homeControllerProvider.notifier).setCategoriesActive(true);
-              showCategoryPopup(
+              await showCategoryPopup(
                 context: context,
                 onRefreshMyWords: () async {
                   // Refresh My Words count after returning from My Words screen
                   await ref.read(homeControllerProvider.notifier).refreshMyWordsCount();
                 },
-                onTodo: (what) => _todo(context, what),
-              ).whenComplete(() {
+                onTodo: (s) => _todo(s),
+              );
                 if (!mounted) return;
-                ref.read(homeControllerProvider.notifier).setCategoriesActive(false);
-              });
+              ref.read(homeControllerProvider.notifier).setCategoriesActive(false);
             },
             onPractice: () => showPracticePicker(context),
             onProfile: () => Navigator.of(context).push(

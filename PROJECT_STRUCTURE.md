@@ -47,9 +47,15 @@ lib/features/home/
 └── ui/
     ├── screens/              # Home-related screens
     │   ├── course_screen.dart
-    │   ├── home_screen.dart  # Refactored main home screen
+    │   ├── home_screen.dart  # Fully refactored & presentational
     │   ├── profile_screen.dart
     │   └── vocab_screen.dart
+    ├── strings/              # Localization & UI strings
+    │   ├── strings.dart      # Barrel file for strings
+    │   └── home_strings.dart # Centralized UI strings
+    ├── theme/                # Theme & styling
+    │   ├── theme.dart        # Barrel file for theme
+    │   └── home_theme.dart   # Colors, spacing & dimensions
     └── widgets/              # Home-specific widgets
         ├── widgets.dart      # Barrel file for widgets
         ├── bottom_nav.dart
@@ -159,10 +165,12 @@ lib/features/rewards/
 
 - **`WordsColors` ThemeExtension**: Scalable color management with fallback support
 - **`WordsLayout`**: Centralized layout constants for consistent spacing and dimensions
+- **`HomeTheme`**: Feature-specific theme constants for colors, spacing, and dimensions
 - **`app_theme.dart`**: Main theme configuration with ThemeExtension registration
 - **Dynamic color adaptation**: LevelBadge automatically adjusts text color for contrast
 - **Consistent spacing**: Standardized gaps and padding throughout the app
 - **Single source of truth**: All layout values managed centrally
+- **Localization ready**: `HomeStrings` for centralized UI text management
 
 ### 🧩 Component Architecture
 
@@ -277,7 +285,10 @@ LearnModeScreen
 - **Widget Extraction**: `PracticePicker` and `CategoryPopup` as reusable components
 - **Provider Separation**: Provider definitions moved to dedicated `providers.dart` files
 - **Lifecycle Management**: `WidgetsBindingObserver` for proper app lifecycle handling
-- **Barrel Files**: Clean imports with `application.dart`, `data.dart`, and `widgets.dart`
+- **Presentational Screen**: `HomeScreen` is now fully presentational (no business logic)
+- **Theme Centralization**: `HomeTheme` for colors, spacing, and dimensions
+- **String Centralization**: `HomeStrings` for UI text and localization preparation
+- **Barrel Files**: Clean imports with `application.dart`, `data.dart`, `widgets.dart`, `theme.dart`, and `strings.dart`
 
 ### 🎨 Theme System Overhaul
 
@@ -304,7 +315,7 @@ LearnModeScreen
 ---
 
 _Last updated: December 2024_
-_Total files: 70+ Dart files_
+_Total files: 75+ Dart files_
 _Architecture: Feature-based Clean Architecture with Modern Riverpod_
-_Theme System: Centralized with ThemeExtension and Layout Constants_
-_Home Feature: Fully refactored with Controller, Services, and Extracted Widgets_
+_Theme System: Centralized with ThemeExtension, Layout Constants, and Feature-specific Themes_
+_Home Feature: Fully refactored with Presentational UI, Centralized Theme & Strings_
