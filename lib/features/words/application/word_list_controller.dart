@@ -134,7 +134,15 @@ class WordListController extends _$WordListController {
   }) async {
     _baseFilter = filter;
     _overrideCategoryId = overrideCategoryId;
-    await loadFirstPage();
+
+    // 1) Sofort UI befüllen, falls Snapshot existiert (kein Spinner)
+    await _hydrateFromSnapshotIfAny();
+
+    // 2) Danach im Hintergrund frisch laden (revalidieren)
+    //    Achtung: bewusst NICHT awaited, damit UI sofort bleibt.
+    //    Wenn du keine unawaited()-Helper hast, einfach so aufrufen.
+    // ignore: discarded_futures
+    loadFirstPage();
   }
 
   WordListFilter _effectiveFilter() {
@@ -159,6 +167,21 @@ class WordListController extends _$WordListController {
       return list.map<Word>((m) => Word.fromJson(m as Map<String, dynamic>)).toList();
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> _hydrateFromSnapshotIfAny() async {
+    final snap = await _loadOfflineSnapshot();
+    if (snap != null && snap.isNotEmpty) {
+      state = state.copyWith(
+        words: snap,
+        isFirstLoad: false,   // <- kein Spinner
+        isLoadingMore: false,
+        hasMore: false,       // korrigiert sich nach Netz-Load
+        error: null,
+        offline: false,
+      );
+      _cache[_provKey] = _CacheEntry(state);
     }
   }
 
