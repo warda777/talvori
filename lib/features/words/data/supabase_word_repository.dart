@@ -266,7 +266,13 @@ class SupabaseWordRepository {
     req = req.range(offset, offset + limit - 1);
 
     final rows = await req;
-    return rows.map((j) => Word.fromJson(j)).toList();
+    final words = rows.map((j) => Word.fromJson(j)).toList();
+    final seen = <String>{};
+    final unique = <Word>[];
+    for (final w in words) {
+      if (seen.add(w.id)) unique.add(w);
+    }
+    return unique;
   }
 
   Future<void> addToMyWords(String wordId) async {
