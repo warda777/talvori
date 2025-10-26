@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/ui/widgets/word_list_toolbar.dart';
+import 'package:talvori/features/words/ui/widgets/word_list_item.dart';
 
 class WordListScreen extends ConsumerStatefulWidget {
   final WordListFilter filter;
@@ -73,37 +75,11 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
       appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              onChanged: (v) => ctrl.setQuery(v),
-              decoration: InputDecoration(
-                hintText: 'Suchen (Wort oder Übersetzung)',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SegmentedButton<SortMode>(
-                    segments: const [
-                      ButtonSegment(value: SortMode.az, label: Text('A–Z')),
-                      ButtonSegment(value: SortMode.newest, label: Text('Neueste')),
-                    ],
-                    selected: {state.sort},
-                    onSelectionChanged: (s) => ctrl.setSort(s.first),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text('${sorted.length}'),
-              ],
-            ),
+          WordListToolbar(
+            onQueryChanged: ctrl.setQuery,
+            sort: state.sort,
+            onSortChanged: ctrl.setSort,
+            visibleCount: sorted.length,
           ),
           Expanded(
             child: state.isFirstLoad
@@ -157,22 +133,17 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
           );
         }
         final w = list[i];
-        final picked = state.picked.contains(w.id);
 
-        return ListTile(
-          title: Text(w.text),
-          subtitle: Text(w.translation),
-          trailing: IconButton(
-            icon: Icon(picked ? Icons.check_circle : Icons.add_circle_outline),
-            onPressed: () async {
-              final msg = await ctrl.togglePick(context, w);
-              if (!context.mounted) return;
-              if (msg != null) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-              }
-            },
-          ),
-          onTap: () {},
+        return WordListItem(
+          word: w,
+          picked: state.picked.contains(w.id),
+          onTogglePick: () async {
+            final msg = await ctrl.togglePick(context, w);
+            if (context.mounted && msg != null) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+            }
+          },
+          onTap: () {}, // optional
         );
       },
     );
