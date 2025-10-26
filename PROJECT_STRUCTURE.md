@@ -278,6 +278,16 @@ LearnModeScreen
 
 ## 🆕 Recent Updates
 
+### 🎨 UI Loading & Performance Improvements
+
+- **Stale-While-Revalidate**: Implemented instant render pattern for better perceived performance
+- **Loading Condition Fixes**: Fixed unnecessary spinners when data is already available
+- **Riverpod Integration**: Replaced local `_CategoryCard` with Riverpod `CategoryCard` in WordHubScreen
+- **SWR-Correct Loading**: Category cards now show existing data during revalidation instead of shimmer
+- **ListEndFooter Enhancement**: Added `showDone` parameter for intelligent footer display
+- **Debug Visibility**: Added debug prints for loading state monitoring
+- **Instant Render**: Controllers immediately show cached data, only show spinners when truly empty
+
 ### 🏠 Home Feature Refactoring
 
 - **Controller Architecture**: `HomeController` with `NotifierProvider` for state management
@@ -305,12 +315,20 @@ LearnModeScreen
 - **Clean Imports**: Barrel files for simplified dependency management
 - **Error Handling**: Improved error handling with silent catch blocks
 
+### 🎯 UI/UX Enhancements
+
+- **Gold Glow Effects**: Updated all main buttons (Categories, Practice, Play) to use gold glow effects
+- **Consistent Button Styling**: All buttons now use the same TapFlash system with gold accents
+- **Visual Feedback**: Enhanced user feedback with consistent golden glow animations
+- **Button Color Unification**: Categories button and Play button now share the same gold color scheme
+
 ### 🐛 Bug Fixes
 
 - **Compilation Errors**: Fixed const expression errors in layout constants
 - **Wheel Transitions**: Smooth category wheel transitions with proper background opacity
 - **State Synchronization**: Improved client-server state synchronization
 - **Import Cleanup**: Removed unused imports after widget extraction
+- **Loading State Issues**: Fixed unnecessary loading spinners when data is already available
 
 ---
 

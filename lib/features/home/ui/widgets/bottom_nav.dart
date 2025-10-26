@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:talvori/features/home/ui/widgets/glow_sweep_ring.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
 // Einheitliche Größe für die runden Bottom-Buttons (Category/Profile)
@@ -77,7 +76,7 @@ class HomeBottomNav extends StatelessWidget {
             width: 140,
             height: 52,
             child: TapFlash(
-              color: cs.secondary,                                  // Flash-Farbe
+              color: gold,                                          // Flash-Farbe
               shape: BoxShape.rectangle,
               borderRadius: const BorderRadius.all(Radius.circular(999)),
               onTapAfter: onPractice,                               // nach dem Flash ausführen

@@ -254,7 +254,7 @@ class WordCard extends ConsumerWidget {
                               cyclesPerBurst: 1,
                               idle: const Duration(seconds: 5),
                               loop: true,
-                              color: cs.primary, // deine alte Play-Farbe, NICHT Gold
+                              color: const Color(0xFFF1C86B), // Gold
                             ),
 
                             // Play-Icon
