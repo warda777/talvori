@@ -4,6 +4,10 @@ import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart'
     show WordListFilter, WordFilterKind, SortMode;
 import 'package:flutter/foundation.dart'; // für debugPrint
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
 
 class StageCount {
@@ -182,6 +186,7 @@ Future<CategoryProgress> fetchCategoryProgress(String categoryId) async {
 class SupabaseWordRepository {
   final _sb = Supabase.instance.client;
 
+
   Future<List<Word>> fetchRecentWords({int limit = 20}) async {
     final data = await _sb
         .from('words')
@@ -218,55 +223,80 @@ class SupabaseWordRepository {
     String? query,
     SortMode? sort,
   }) async {
-    // 1) Start: Filter-Builder (hier sind eq/or/... verfügbar)
-    PostgrestFilterBuilder<List<Map<String, dynamic>>> qb =
-        Supabase.instance.client
-            .from('words_view')
-            // nur Modellfelder – vermeidet Mapping-Probleme trotz extra Spalten der View
-            .select('id,text,translation,level,pos,created_at');
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/words_view';
+    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
 
+    // Lokaler Schlüssel pro Filter+Sort-Kombination
+    final etagKey = '${filter.kind}:${filter.value}:${sort ?? ''}:${query ?? ''}';
+    final prefs = await SharedPreferences.getInstance();
+    final oldEtag = prefs.getString('etag_$etagKey');
+
+    final headers = {
+      'apikey': apiKey,
+      'Authorization': 'Bearer $apiKey',
+      'Accept': 'application/json',
+      if (oldEtag != null) 'If-None-Match': oldEtag,
+    };
+
+    // Querystring aufbauen
+    final params = <String>[
+      'select=id,text,translation,level,pos,created_at,category_id',
+      'limit=$limit',
+      'offset=$offset',
+      'order=${sort == SortMode.newest ? 'created_at.desc' : 'text.asc'}',
+    ];
+
+    // Filter (per eq)
     switch (filter.kind) {
       case WordFilterKind.category:
-        qb = qb.eq('category_id', filter.value);
+        params.add('category_id=eq.${filter.value}');
         break;
       case WordFilterKind.level:
-        qb = qb.eq('level', filter.value);
+        params.add('level=eq.${filter.value}');
         break;
       case WordFilterKind.pos:
-        qb = qb.eq('pos', filter.value);
+        params.add('pos=eq.${filter.value}');
         break;
-      case WordFilterKind.domain: // = group
-        qb = qb.eq('group_slug', filter.value);
+      case WordFilterKind.domain:
+        params.add('group_slug=eq.${filter.value}');
         break;
-      case WordFilterKind.about:  // = konkrete Kategorie
-        qb = qb.eq('category_slug', filter.value);
+      case WordFilterKind.about:
+        params.add('category_slug=eq.${filter.value}');
         break;
       case WordFilterKind.query:
         break;
     }
 
     if (query != null && query.trim().isNotEmpty) {
-      final s = query.trim();
-      qb = qb.or('text.ilike.%$s%,translation.ilike.%$s%');
+      final q = query.trim();
+      params.add('or=(text.ilike.%$q%,translation.ilike.%$q%)');
     }
 
-    // 2) Wechsel auf Transform-Builder für order/range
-    PostgrestTransformBuilder<List<Map<String, dynamic>>> req = qb;
+    final uri = Uri.parse('$baseUrl?${params.join('&')}');
 
-    switch (sort) {
-      case SortMode.newest:
-        req = req.order('created_at', ascending: false);
-        break;
-      case SortMode.az:
-      default:
-        req = req.order('text', ascending: true);
-        break;
+    // Anfrage senden
+    final resp = await http.get(uri, headers: headers);
+
+    // 304: keine Änderungen → alten Cache behalten
+    if (resp.statusCode == 304) {
+      return [];
     }
 
-    req = req.range(offset, offset + limit - 1);
+    if (resp.statusCode != 200) {
+      throw Exception('HTTP ${resp.statusCode}: ${resp.reasonPhrase}');
+    }
 
-    final rows = await req;
-    final words = rows.map((j) => Word.fromJson(j)).toList();
+    // Neuen ETag speichern
+    final newEtag = resp.headers['etag'];
+    if (newEtag != null) {
+      await prefs.setString('etag_$etagKey', newEtag);
+    }
+
+    // Daten parsen
+    final List data = jsonDecode(resp.body);
+    final words = data.map((m) => Word.fromJson(m)).toList();
+
+    // Dedupe nach ID
     final seen = <String>{};
     final unique = <Word>[];
     for (final w in words) {
