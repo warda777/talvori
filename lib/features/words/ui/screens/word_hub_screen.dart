@@ -16,7 +16,6 @@ class WordHubScreen extends ConsumerWidget {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final vm = ref.watch(wordHubControllerProvider);
     final controller = ref.read(wordHubControllerProvider.notifier);
-    final repo = controller.repo;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -90,24 +89,24 @@ class WordHubScreen extends ConsumerWidget {
             GridSection(
               sectionKey: section.key,
               subs: section.subcats,
-              repo: repo,
               onTapSub: (sub) async {
+                final controller = ref.read(wordHubControllerProvider.notifier);
+                // catId via Repo-Lookup (Repo kommt jetzt aus Provider im Controller)
                 String? catId;
                 try {
+                  // Controller hat Repo intern – also:
                   catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
                       ? sub.supabaseId
-                      : await repo.findCategoryIdByName(sub.label);
+                      : await controller.repo.findCategoryIdByName(sub.label);
                 } catch (_) {
                   catId = null;
                 }
-
                 if (!context.mounted) return;
                 if (catId == null && sub.supabaseId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.')),
                   );
                 }
-
                 if (catId != null) {
                   Navigator.of(context).push(
                     MaterialPageRoute(

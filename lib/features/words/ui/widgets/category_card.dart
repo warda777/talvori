@@ -3,20 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
-import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/category_stats_provider.dart';
 import 'mini_badge.dart';
 
 class CategoryCard extends ConsumerStatefulWidget {
   final String sectionKey;
   final HubSubcat sub;
-  final SupabaseWordRepository repo;
   final VoidCallback? onTap;
 
   const CategoryCard({
     required this.sectionKey,
     required this.sub,
-    required this.repo,
     this.onTap,
     super.key,
   });
