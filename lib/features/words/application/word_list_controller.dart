@@ -27,6 +27,7 @@ class WordListState {
   final int offset;
   final String query;
   final SortMode sort;
+  final String? error; // NEU
 
   const WordListState({
     this.words = const [],
@@ -37,6 +38,7 @@ class WordListState {
     this.offset = 0,
     this.query = '',
     this.sort = SortMode.az,
+    this.error,
   });
 
   WordListState copyWith({
@@ -48,6 +50,7 @@ class WordListState {
     int? offset,
     String? query,
     SortMode? sort,
+    String? error,
   }) {
     return WordListState(
       words: words ?? this.words,
@@ -58,6 +61,7 @@ class WordListState {
       offset: offset ?? this.offset,
       query: query ?? this.query,
       sort: sort ?? this.sort,
+      error: error,
     );
   }
 }
@@ -107,26 +111,35 @@ class WordListController extends _$WordListController {
       hasMore: true,
     );
 
-    final batch = await _repo.fetchByFilter(
-      _effectiveFilter(),
-      limit: _pageSize,
-      offset: 0,
-      query: state.query.isEmpty ? null : state.query, // NEU
-      sort: state.sort,                                 // NEU
-    );
+    try {
+      final batch = await _repo.fetchByFilter(
+        _effectiveFilter(),
+        limit: _pageSize,
+        offset: 0,
+        query: state.query.isEmpty ? null : state.query, // NEU
+        sort: state.sort,                                 // NEU
+      );
 
-    Set<String> pickedIds = {};
-    if (batch.isNotEmpty) {
-      pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
+      Set<String> pickedIds = {};
+      if (batch.isNotEmpty) {
+        pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
+      }
+
+      state = state.copyWith(
+        words: [...batch],
+        picked: {...pickedIds},
+        offset: batch.length,
+        hasMore: batch.length == _pageSize,
+        isFirstLoad: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isFirstLoad: false,
+        isLoadingMore: false,
+        error: e.toString(),
+      );
     }
-
-    state = state.copyWith(
-      words: [...batch],
-      picked: {...pickedIds},
-      offset: batch.length,
-      hasMore: batch.length == _pageSize,
-      isFirstLoad: false,
-    );
   }
 
   Future<void> loadMore() async {
@@ -134,26 +147,35 @@ class WordListController extends _$WordListController {
 
     state = state.copyWith(isLoadingMore: true);
 
-    final batch = await _repo.fetchByFilter(
-      _effectiveFilter(),
-      limit: _pageSize,
-      offset: state.offset,
-      query: state.query.isEmpty ? null : state.query, // NEU
-      sort: state.sort,                                 // NEU
-    );
+    try {
+      final batch = await _repo.fetchByFilter(
+        _effectiveFilter(),
+        limit: _pageSize,
+        offset: state.offset,
+        query: state.query.isEmpty ? null : state.query, // NEU
+        sort: state.sort,                                 // NEU
+      );
 
-    Set<String> pickedIds = {};
-    if (batch.isNotEmpty) {
-      pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
+      Set<String> pickedIds = {};
+      if (batch.isNotEmpty) {
+        pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
+      }
+
+      state = state.copyWith(
+        words: [...state.words, ...batch],
+        picked: {...state.picked, ...pickedIds},
+        offset: state.offset + batch.length,
+        hasMore: batch.length == _pageSize,
+        isLoadingMore: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isFirstLoad: false,
+        isLoadingMore: false,
+        error: e.toString(),
+      );
     }
-
-    state = state.copyWith(
-      words: [...state.words, ...batch],
-      picked: {...state.picked, ...pickedIds},
-      offset: state.offset + batch.length,
-      hasMore: batch.length == _pageSize,
-      isLoadingMore: false,
-    );
   }
 
   void setQueryDebounced(String q, {Duration delay = const Duration(milliseconds: 300)}) {

@@ -70,9 +70,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
         widget.overrideCategoryLabel ?? widget.filter.value;
     final title = widget.titleOverride ?? 'Word Hub • $effectiveCategoryLabel';
 
-    // Suche + Sort lokal auf sichtbarer Liste anwenden
-    final filtered = _applyQuery(state.words, state.query);
-    final sorted = _applySort(filtered, state.sort);
+    final list = state.words;
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -82,48 +80,61 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
             onQueryChanged: ctrl.setQueryDebounced, // <-- statt ctrl.setQuery
             sort: state.sort,
             onSortChanged: ctrl.setSort,
-            visibleCount: sorted.length,
+            visibleCount: list.length, // statt: sorted.length
           ),
           Expanded(
             child: state.isFirstLoad
                 ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => ctrl.loadFirstPage(),
-                    child: _buildList(context, sorted, state, ctrl),
-                  ),
+                : state.error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Fehler: ${state.error}', textAlign: TextAlign.center),
+                            const SizedBox(height: 12),
+                            FilledButton(
+                              onPressed: () => ctrl.loadFirstPage(),
+                              child: const Text('Erneut versuchen'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () => ctrl.loadFirstPage(),
+                        child: _buildList(context, list, state, ctrl),
+                      ),
           ),
         ],
       ),
     );
   }
 
-  List<Word> _applyQuery(List<Word> input, String q) {
-    final query = q.trim().toLowerCase();
-    if (query.isEmpty) return input;
-    return input
-        .where((w) =>
-            w.text.toLowerCase().contains(query) ||
-            w.translation.toLowerCase().contains(query))
-        .toList();
-  }
-
-  List<Word> _applySort(List<Word> input, SortMode mode) {
-    final list = List<Word>.from(input);
-    switch (mode) {
-      case SortMode.az:
-        list.sort((a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
-        break;
-      case SortMode.newest:
-        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
-    }
-    return list;
-  }
 
   Widget _buildList(BuildContext context, List<Word> list, WordListState state,
       WordListController ctrl) {
     if (list.isEmpty) {
-      return const Center(child: Text('Keine Wörter gefunden.'));
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Keine Wörter gefunden.'),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () async {
+                // Suche zurücksetzen + neu laden (serverside)
+                ctrl.setQuery('');
+                await ctrl.loadFirstPage();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Filter zurückgesetzt')),
+                  );
+                }
+              },
+              child: const Text('Filter zurücksetzen'),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.separated(

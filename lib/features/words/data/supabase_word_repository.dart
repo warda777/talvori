@@ -218,11 +218,12 @@ class SupabaseWordRepository {
     String? query,
     SortMode? sort,
   }) async {
-    final sb = Supabase.instance.client;
-
     // 1) Start: Filter-Builder (hier sind eq/or/... verfügbar)
     PostgrestFilterBuilder<List<Map<String, dynamic>>> qb =
-        sb.from('words_view').select();
+        Supabase.instance.client
+            .from('words_view')
+            // nur Modellfelder – vermeidet Mapping-Probleme trotz extra Spalten der View
+            .select('id,text,translation,level,pos,created_at');
 
     switch (filter.kind) {
       case WordFilterKind.category:
