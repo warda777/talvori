@@ -6,6 +6,13 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
 part 'word_list_controller.g.dart';
 
+class _CacheEntry {
+  final WordListState state;
+  final DateTime ts;
+  _CacheEntry(this.state) : ts = DateTime.now();
+  bool get fresh => DateTime.now().difference(ts) < const Duration(minutes: 5);
+}
+
 enum WordFilterKind { about, domain, pos, level, category, query }
 
 @immutable
@@ -70,22 +77,30 @@ class WordListState {
 class WordListController extends _$WordListController {
   final _repo = SupabaseWordRepository();
 
+  static final Map<String, _CacheEntry> _cache = {}; // key = provKey
+  Timer? _debounce; // (hast du schon)
+  late String _provKey; // merken
+
   late WordListFilter _baseFilter;
   String? _overrideCategoryId;
-  Timer? _debounce;
 
   static const _pageSize = 50;
 
   // Family-Arg kommt hier rein:
   @override
   WordListState build(String provKey) {
-    final link = ref.keepAlive(); // <- hält Instanz am Leben
+    _provKey = provKey;
+    final link = ref.keepAlive();
     ref.onDispose(() {
       _debounce?.cancel();
       link.close();
     });
-    // provKey = z.B. "${filter.kind}:${overrideCategoryId ?? filter.value}"
-    return const WordListState();
+
+    final hit = _cache[provKey];
+    if (hit != null && hit.fresh) {
+      return hit.state.copyWith(isFirstLoad: false); // sofort anzeigen
+    }
+    return const WordListState(); // kalt, lädt via init()
   }
 
   Future<void> init({
@@ -102,7 +117,8 @@ class WordListController extends _$WordListController {
     return WordListFilter(_baseFilter.kind, value);
   }
 
-  Future<void> loadFirstPage() async {
+  Future<void> loadFirstPage({bool resetCache = false}) async {
+    if (resetCache) _cache.remove(_provKey);
     state = state.copyWith(
       isFirstLoad: true,
       words: const [],
@@ -133,6 +149,7 @@ class WordListController extends _$WordListController {
         isFirstLoad: false,
         error: null,
       );
+      _cache[_provKey] = _CacheEntry(state);
     } catch (e) {
       state = state.copyWith(
         isFirstLoad: false,
@@ -169,6 +186,7 @@ class WordListController extends _$WordListController {
         isLoadingMore: false,
         error: null,
       );
+      _cache[_provKey] = _CacheEntry(state);
     } catch (e) {
       state = state.copyWith(
         isFirstLoad: false,
@@ -185,6 +203,7 @@ class WordListController extends _$WordListController {
         state = state.copyWith(query: q);
       }
       await loadFirstPage(); // NEU: serverseitig neu laden
+      _cache[_provKey] = _CacheEntry(state);
     });
   }
 
@@ -195,6 +214,7 @@ class WordListController extends _$WordListController {
     if (state.sort == s) return;
     state = state.copyWith(sort: s);
     await loadFirstPage(); // NEU: serverseitig neu laden
+    _cache[_provKey] = _CacheEntry(state);
   }
 
   void setSortDebounced(SortMode s, {Duration d = const Duration(milliseconds: 150)}) {

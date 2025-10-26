@@ -109,7 +109,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
                         ),
                       )
                     : RefreshIndicator(
-                        onRefresh: () => ctrl.loadFirstPage(),
+                        onRefresh: () => ctrl.loadFirstPage(resetCache: true),
                         child: _buildList(context, list, state, ctrl),
                       ),
           ),
