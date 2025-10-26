@@ -23,6 +23,9 @@ class CategoryWheelExample extends ConsumerWidget {
   }
 
   Widget _buildContent(CategoryState catState, WidgetRef ref) {
+    // Mikro-Check
+    debugPrint('wheel: loading=${catState.loading} items=${catState.categories.length}');
+    
     if (catState.loading && catState.categories.isEmpty) {
       return const ShimmerList(items: 5); // Shimmer während Loading
     }

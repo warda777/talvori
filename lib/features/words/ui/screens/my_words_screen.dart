@@ -42,7 +42,7 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
             ),
           ),
           Expanded(
-            child: vm.loadingFirst
+            child: vm.loadingFirst && vm.items.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
                     onRefresh: () => c.init(),

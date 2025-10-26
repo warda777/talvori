@@ -216,7 +216,7 @@ class SupabaseWordRepository {
     return row['slug'] as String;
   }
 
-  Future<List<Word>> fetchByFilter(
+  Future<List<Word>?> fetchByFilter(
     WordListFilter filter, {
     int limit = 50,
     int offset = 0,
@@ -277,9 +277,12 @@ class SupabaseWordRepository {
     // Anfrage senden
     final resp = await http.get(uri, headers: headers);
 
-    // 304: keine Änderungen → alten Cache behalten
+    // 👇 nur Debug
+    // ignore: avoid_print
+    print('ETag fetch ${uri.path}: ${resp.statusCode} (If-None-Match=${headers['If-None-Match'] != null})');
+
     if (resp.statusCode == 304) {
-      return [];
+      return null; // WICHTIG: „unverändert" – UI nicht überschreiben!
     }
 
     if (resp.statusCode != 200) {

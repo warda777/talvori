@@ -108,7 +108,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
             offline: state.offline, // NEU
           ),
           Expanded(
-            child: state.isFirstLoad
+            child: state.words.isEmpty && state.isFirstLoad
                 ? const ShimmerList(items: 10)
                 : state.error != null
                     ? Center(
@@ -170,7 +170,10 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (_, i) {
         if (i == list.length) {
-          return ListEndFooter(loading: state.isLoadingMore || state.hasMore);
+          return ListEndFooter(
+            loading: state.isLoadingMore,
+            showDone: !state.hasMore,
+          );
         }
         final w = list[i];
         final picked = state.picked.contains(w.id);

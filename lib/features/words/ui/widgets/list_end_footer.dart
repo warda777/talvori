@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class ListEndFooter extends StatelessWidget {
   final bool loading;
-  const ListEndFooter({super.key, required this.loading});
+  final bool showDone;
+  const ListEndFooter({super.key, required this.loading, this.showDone = false});
 
   @override
   Widget build(BuildContext context) {
@@ -12,9 +13,12 @@ class ListEndFooter extends StatelessWidget {
         child: Center(child: CircularProgressIndicator()),
       );
     }
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      child: Center(child: Text('— alles geladen —')),
-    );
+    if (showDone) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(child: Text('— alles geladen —')),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

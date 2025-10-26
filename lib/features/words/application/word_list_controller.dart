@@ -135,14 +135,15 @@ class WordListController extends _$WordListController {
     _baseFilter = filter;
     _overrideCategoryId = overrideCategoryId;
 
-    // 1) Sofort UI befüllen, falls Snapshot existiert (kein Spinner)
+    // SWR: Zeig Snapshot, wenn vorhanden (kein Spinner)
     await _hydrateFromSnapshotIfAny();
 
-    // 2) Danach im Hintergrund frisch laden (revalidieren)
-    //    Achtung: bewusst NICHT awaited, damit UI sofort bleibt.
-    //    Wenn du keine unawaited()-Helper hast, einfach so aufrufen.
-    // ignore: discarded_futures
-    loadFirstPage();
+    // Nur laden, wenn wirklich leer (oder explizit Refresh)
+    if (state.words.isEmpty) {
+      // unawaited: stilles Revalidate
+      // ignore: discarded_futures
+      loadFirstPage();
+    }
   }
 
   WordListFilter _effectiveFilter() {
@@ -187,9 +188,14 @@ class WordListController extends _$WordListController {
 
   Future<void> loadFirstPage({bool resetCache = false}) async {
     if (resetCache) _cache.remove(_provKey);
+    
+    // Instant Render: Behalte vorhandene Wörter, nur Spinner wenn wirklich leer
+    final hadWords = state.words.isNotEmpty;
+    
     state = state.copyWith(
-      isFirstLoad: true,
-      words: const [],
+      isFirstLoad: !hadWords,   // Spinner nur, wenn wirklich leer
+      isLoadingMore: false,
+      // words NICHT leeren, wenn hadWords == true
       picked: <String>{},
       offset: 0,
       hasMore: true,
@@ -200,10 +206,25 @@ class WordListController extends _$WordListController {
         _effectiveFilter(),
         limit: _pageSize,
         offset: 0,
-        query: state.query.isEmpty ? null : state.query, // NEU
-        sort: state.sort,                                 // NEU
+        query: state.query.isEmpty ? null : state.query,
+        sort: state.sort,
       );
 
+      if (batch == null) {
+        // 304 – nichts neu → State so lassen, nur Flags korrigieren
+        state = state.copyWith(
+          isFirstLoad: false,
+          isLoadingMore: false,
+          error: null,
+          offline: false,
+          // hasMore bleibt wie zuvor (optional: neu berechnen, wenn nötig)
+        );
+        _cache[_provKey] = _CacheEntry(state);
+        await _saveOfflineSnapshot(state.words);
+        return;
+      }
+
+      // Normaler 200-Pfad
       Set<String> pickedIds = {};
       if (batch.isNotEmpty) {
         pickedIds = await _repo.getPickedWordIds(batch.map((w) => w.id));
@@ -215,11 +236,12 @@ class WordListController extends _$WordListController {
         offset: batch.length,
         hasMore: batch.length == _pageSize,
         isFirstLoad: false,
+        isLoadingMore: false,
         error: null,
         offline: false,
       );
       _cache[_provKey] = _CacheEntry(state);
-      await _saveOfflineSnapshot(state.words); // NEU
+      await _saveOfflineSnapshot(state.words);
     } catch (e) {
       // Offline-Snapshot versuchen
       final snap = await _loadOfflineSnapshot();
@@ -254,9 +276,16 @@ class WordListController extends _$WordListController {
         _effectiveFilter(),
         limit: _pageSize,
         offset: state.offset,
-        query: state.query.isEmpty ? null : state.query, // NEU
-        sort: state.sort,                                 // NEU
+        query: state.query.isEmpty ? null : state.query,
+        sort: state.sort,
       );
+
+      if (batch == null) {
+        // 304 beim Pagination-Call ist ungewöhnlich, aber: nichts tun
+        state = state.copyWith(isLoadingMore: false, error: null, offline: false);
+        _cache[_provKey] = _CacheEntry(state);
+        return;
+      }
 
       Set<String> pickedIds = {};
       if (batch.isNotEmpty) {
@@ -273,7 +302,7 @@ class WordListController extends _$WordListController {
         offline: false,
       );
       _cache[_provKey] = _CacheEntry(state);
-      await _saveOfflineSnapshot(state.words); // NEU
+      await _saveOfflineSnapshot(state.words);
     } catch (e) {
       state = state.copyWith(
         isFirstLoad: false,

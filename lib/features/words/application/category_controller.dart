@@ -41,55 +41,68 @@ class _CacheEntry {
   _CacheEntry(this.categories) : timestamp = DateTime.now();
   
   bool get isFresh => DateTime.now().difference(timestamp) < const Duration(minutes: 5);
+  
+  CategoryState get state => CategoryState(
+    categories: categories,
+    loading: false,
+    offline: false,
+  );
 }
 
 @riverpod
 class CategoryController extends _$CategoryController {
   final _repo = CategoryRepository();
   static final Map<String, _CacheEntry> _cache = {};
-  Timer? _debounce;
+  StreamSubscription? _connSub;
 
   @override
   CategoryState build() {
-    ref.onDispose(() {
-      _debounce?.cancel();
+    final link = ref.keepAlive();
+    ref.onDispose(() async {
+      await _connSub?.cancel();
+      link.close();
     });
 
-    // Initial load
-    _loadCategories();
-    return const CategoryState();
-  }
-
-  Future<void> _loadCategories() async {
-    state = state.copyWith(loading: true, error: null);
-
-    // Cache prüfen
-    final cached = _cache['categories'];
-    if (cached != null && cached.isFresh) {
-      state = state.copyWith(
-        categories: cached.categories,
-        loading: false,
-        offline: false,
-      );
-      return;
+    if (_cache['categories'] != null && _cache['categories']!.isFresh) {
+      _revalidate(unawaited: true);
+      return _cache['categories']!.state.copyWith(loading: false);
     }
 
-    // Snapshot zuerst laden (sofortige UI)
-    final snapshot = await _loadSnapshot();
-    if (snapshot.isNotEmpty) {
-      state = state.copyWith(
-        categories: snapshot,
-        loading: false,
-        offline: false,
-      );
-      // Hintergrund-Refresh starten
-      _refreshInBackground();
-      return;
-    }
+    // Prefs-Hydration sofort starten (setzt loading=false, wenn Daten da sind)
+    _hydrateFromPrefs();
 
-    // Kein Snapshot → normal laden
-    await _loadFromServer();
+    // Revalidate im Hintergrund
+    _revalidate(unawaited: true);
+
+    // nur dann als "loading" starten, wenn noch keine Items da sind
+    return const CategoryState(loading: true);
   }
+
+  Future<void> _hydrateFromPrefs() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final raw = sp.getString('cache_categories_v1');
+      if (raw == null) return;
+      final List data = jsonDecode(raw);
+      final items = data.map((m) => Category.fromJson(m as Map<String, dynamic>)).toList();
+      // sofort anzeigen, kein Spinner
+      state = state.copyWith(categories: items, loading: false, error: null);
+      _cache['categories'] = _CacheEntry(items);
+    } catch (_) {
+      // ignoriere Pref-Fehler still
+    }
+  }
+
+  Future<void> _revalidate({bool unawaited = false}) async {
+    final future = _loadFromServer();
+    if (unawaited) {
+      // ignore: discarded_futures
+      future;
+    } else {
+      await future;
+    }
+  }
+
 
   Future<List<Category>> _loadSnapshot() async {
     try {
@@ -133,23 +146,6 @@ class CategoryController extends _$CategoryController {
     }
   }
 
-  void _refreshInBackground() {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 100), () async {
-      try {
-        final categories = await _repo.fetchCategories();
-        _cache['categories'] = _CacheEntry(categories);
-        // State aktualisieren, falls sich etwas geändert hat
-        state = state.copyWith(
-          categories: categories,
-          offline: false,
-          error: null,
-        );
-      } catch (_) {
-        // Hintergrund-Fehler ignorieren
-      }
-    });
-  }
 
   Future<void> refresh() async {
     state = state.copyWith(loading: true, error: null);

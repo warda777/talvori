@@ -7,6 +7,7 @@ import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
+import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 
 // ===== KONSTANTEN =====
@@ -34,11 +35,21 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> with WidgetsBindingObserver {
+  ProviderSubscription<CategoryDetailState>? _controllerSub;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    
+    // Controller-Listener ohne ref in dispose
+    _controllerSub = ref.listenManual<CategoryDetailState>(
+      categoryDetailControllerProvider,
+      (prev, next) {
+        // Optional: auf State-Änderungen reagieren
+      },
+    );
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(categoryDetailControllerProvider.notifier).init(
         categoryId: widget.categoryId,
@@ -51,14 +62,21 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    ref.read(categoryDetailControllerProvider.notifier).disposeSubscriptions();
+    // ✅ Subscription ohne ref schließen
+    _controllerSub?.close();
+    _controllerSub = null;
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(categoryDetailControllerProvider.notifier).reload();
+      // Reload über WidgetsBinding, nicht über ref
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(categoryDetailControllerProvider.notifier).reload();
+        }
+      });
     }
   }
 
@@ -81,7 +99,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     final selIndex = s.selectedIndex;
     final currentId = cats.isNotEmpty ? cats[selIndex].id : '';
 
-    if (loading) {
+    // Fix 4: Loader nur zeigen, wenn wirklich leer
+    if (loading && s.categories.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );

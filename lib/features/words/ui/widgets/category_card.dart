@@ -56,8 +56,8 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final asyncStats = ref.watch(categoryStatsProvider(widget.sub));
-    final loading = asyncStats.isLoading;
-    final stats = asyncStats.value;
+    final stats = asyncStats.value; // kann schon befüllt sein
+    final loading = asyncStats.isLoading && stats == null; // 👈 nur dann "echt" laden
 
     return Material(
       color: t.colorScheme.surfaceContainerHighest,
@@ -68,7 +68,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
           HapticFeedback.selectionClick(); 
           if (widget.onTap != null) widget.onTap!(); 
         },
-        overlayColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.primary.withOpacity(0.06)),
+        overlayColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
         splashFactory: InkRipple.splashFactory,
         child: Container(
           decoration: BoxDecoration(

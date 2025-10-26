@@ -21,9 +21,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  ProviderSubscription<HomeState>? _homeSub;
+
   @override
   void initState() {
     super.initState();
+    
+    // Controller-Listener ohne ref in dispose
+    _homeSub = ref.listenManual<HomeState>(
+      homeControllerProvider,
+      (prev, next) {
+        // Optional: auf State-Änderungen reagieren
+      },
+    );
+    
     // Controller initialisieren (kümmert sich um Lifecycle & Share-Listener)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeControllerProvider.notifier).init(context);
@@ -32,8 +43,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
-    // Aufräumen zentral im Controller
-    ref.read(homeControllerProvider.notifier).dispose();
+    // ✅ Subscription ohne ref schließen
+    _homeSub?.close();
+    _homeSub = null;
     super.dispose();
   }
 

@@ -3,7 +3,7 @@ import 'package:talvori/features/words/application/word_list_controller.dart';
 
 /// Kleiner Vertrag für das UI
 abstract class WordRepository {
-  Future<List<Word>> fetchByFilter(WordListFilter filter, {int limit = 50, int offset = 0, String? query, SortMode? sort});
+  Future<List<Word>?> fetchByFilter(WordListFilter filter, {int limit = 50, int offset = 0, String? query, SortMode? sort});
   Future<List<Word>> fetchRecentWords({int limit = 20});
 }
 
@@ -29,7 +29,7 @@ class MockWordRepository implements WordRepository {
   }
 
   @override
-  Future<List<Word>> fetchByFilter(WordListFilter filter, {int limit = 50, int offset = 0, String? query, SortMode? sort}) async {
+  Future<List<Word>?> fetchByFilter(WordListFilter filter, {int limit = 50, int offset = 0, String? query, SortMode? sort}) async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     // einfache Demo-Daten auf Basis des Filters
     return List.generate(limit, (i) {
