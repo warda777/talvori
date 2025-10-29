@@ -10,6 +10,8 @@ import 'package:talvori/features/words/application/srs_config.dart';
 import 'package:talvori/features/words/services/sfx_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/events/events.dart';
+import 'package:talvori/features/words/application/level_selection_provider.dart';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 
 /// ---------- State ----------
 
@@ -283,8 +285,15 @@ class LearnModeController extends Notifier<LearnModeState> {
   Future<void> _loadWords() async {
     try {
       final catId = _currentCatId;
-      print('🧪 RPC: fn_user_learn_queue_mode(catId=$catId)');
-      final words = await fetchLearnQueueForMode(catId);
+      final mode = ref.read(levelSelectionProvider);
+      final singleStage = ref.read(singleStageProvider); // 1..5, nur für Single relevant
+      
+      print('🧪 RPC: fn_user_learn_queue_mode(catId=$catId, mode=$mode, singleStage=$singleStage)');
+      final words = await fetchLearnQueueForMode(
+        catId,
+        mode: mode,
+        singleStage: singleStage,
+      );
 
       // Histogramm ausgeben
       final rpcHist = <int,int>{};
@@ -374,6 +383,13 @@ class LearnModeController extends Notifier<LearnModeState> {
   // ---- Review / Antwort-Handling ----
 
   Future<void> _handleAnswer({required bool correct}) async {
+    // NEU: Single-Mode Prüfung - keine Stage-Änderung im Single-Modus
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single) {
+      // Im Single-Modus keine Änderung der Stage
+      return;
+    }
+
     final queue = state.wordQueue;
     final ids   = state.shuffledWordIds;
     if (queue.isEmpty || ids.isEmpty) return;

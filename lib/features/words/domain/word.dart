@@ -31,9 +31,13 @@ class Word {
   );
 
   factory Word.fromJson(Map<String, dynamic> j) => Word(
-    id: j['id'], text: j['text'], translation: j['translation'],
-    fromLang: j['from_lang'], toLang: j['to_lang'],
-    deckId: j['deck_id'], favorite: (j['favorite'] ?? false) as bool,
+    id: (j['id'] as String?) ?? '',
+    text: (j['text'] as String?) ?? '',
+    translation: (j['translation'] as String?) ?? '',
+    fromLang: (j['from_lang'] as String?) ?? '',
+    toLang: (j['to_lang'] as String?) ?? '',
+    deckId: j['deck_id'] as String?,
+    favorite: (j['favorite'] ?? false) as bool,
     createdAt: DateTime.parse(j['created_at']), 
     dueAt: j['due_at'] != null ? DateTime.parse(j['due_at']) : null,
     srsStage: (j['srs_stage'] ?? 0) as int,

@@ -7,6 +7,8 @@ import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/application/level_selection_provider.dart';
+import 'package:talvori/features/words/application/level_selection_controller.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
@@ -124,7 +126,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                 onWheelChanged: (idx, _) => ref.read(categoryDetailControllerProvider.notifier).switchTo(idx),
                       onBack: () => Navigator.of(context).pop(),
                       onVocabs: () {
-                  final currentName = cats.isNotEmpty ? cats[selIndex].name : widget.title;
+                        if (currentId.isEmpty) return;
+                        final currentName = cats.isNotEmpty ? cats[selIndex].name : widget.title;
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => WordListScreen(
@@ -187,11 +190,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                                 height: WordsLayout.levelsCardH,
                                   stages: stages,
                                   goalPerStage: 100,
-                                  mode: LevelSelectionMode.s0toS5,
-                                  onModeChanged: (mode) {
-                                    // TODO: später durch Riverpod-State ersetzen
-                                    debugPrint('Mode gewechselt zu: $mode');
-                                  },
+                                  mode: ref.watch(levelSelectionProvider),
+                                  onModeChanged: (mode) => LevelSelectionController.handleModeChange(context, ref, mode),
                                   titleOffsetY: -15, // Buttons höher positionieren
                                   onStartPressed: () async {
                             if (currentId.isEmpty) return;

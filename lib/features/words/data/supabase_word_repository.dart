@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // falls noch nicht
 
 
 class StageCount {
@@ -49,9 +51,9 @@ class WordUserView {
   });
 
   WordUserView.fromJson(Map<String, dynamic> j)
-      : id = j['id'] as String,
-        text = j['text'] as String,
-        translation = j['translation'] as String,
+      : id = (j['id'] as String?) ?? '',
+        text = (j['text'] as String?) ?? '',
+        translation = (j['translation'] as String?) ?? '',
         level = j['level'] as String?,
         inMyWords = (j['in_my_words'] as bool?) ?? false,
         pickedUser = (j['picked_user'] as bool?) ?? false,
@@ -120,9 +122,27 @@ Future<List<WordUserView>> fetchLearnQueueAll(String categoryId) async {
 }
 
 /// Lern-Queue für Learn Mode (nur S0 + fällige S1-S5)
-Future<List<WordUserView>> fetchLearnQueueForMode(String categoryId) async {
-  final rows = await _sb.rpc('fn_user_learn_queue_mode', params: {'cat': categoryId});
-  final list = (rows as List).cast<Map<String, dynamic>>();
+Future<List<WordUserView>> fetchLearnQueueForMode(
+  String categoryId, {
+  required LevelSelectionMode mode,
+  int? singleStage, // 1..5 (nur relevant bei single)
+}) async {
+  // Korrekte RPC-Funktion mit korrekten Parameter-Namen
+  final modeStr = switch (mode) {
+    LevelSelectionMode.s0toS5 => 'all',
+    LevelSelectionMode.s1toS5 => 'reviews',
+    LevelSelectionMode.single => 'single',
+  };
+
+  final params = <String, dynamic>{
+    'category_id': categoryId,        // ✅ genau so benannt
+    'mode': modeStr,                  // 'all' | 'reviews' | 'single'
+    if (mode == LevelSelectionMode.single) 'single_stage': singleStage, // 1..5
+    'limit': 50,                      // falls in SQL unterstützt
+  };
+
+  final res = await _sb.rpc('fn_user_learn_queue_mode', params: params);
+  final list = (res as List).cast<Map<String, dynamic>>();
   return list.map((j) => WordUserView.fromJson(j)).toList();
 }
 
@@ -449,9 +469,9 @@ class CategoryInfo {
   });
 
   factory CategoryInfo.fromJson(Map<String, dynamic> j) => CategoryInfo(
-        id: j['id'] as String,
-        name: j['name'] as String,
-        slug: j['slug'] as String,
+        id: (j['id'] as String?) ?? '',
+        name: (j['name'] as String?) ?? '',
+        slug: (j['slug'] as String?) ?? '',
         groupSlug: j['group_slug'] as String?,
         groupName: j['group_name'] as String?,
         orderIndex: j['order_index'] as int?,

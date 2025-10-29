@@ -3,7 +3,7 @@ import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 
-class LevelsCard extends StatelessWidget {
+class LevelsCard extends StatefulWidget {
   final double height;
   final List<int> stages;
   final int goalPerStage;
@@ -46,24 +46,41 @@ class LevelsCard extends StatelessWidget {
   });
 
   @override
+  State<LevelsCard> createState() => _LevelsCardState();
+}
+
+class _LevelsCardState extends State<LevelsCard> {
+  final _switchCtrl = StageSwitchRowController();
+
+  @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final s = (stages.length >= 6) ? stages : [0, 0, 0, 0, 0, 0];
+    final s = (widget.stages.length >= 6) ? widget.stages : [0, 0, 0, 0, 0, 0];
 
     return SizedBox(
       width: double.infinity,
-      height: height,
+      height: widget.height,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(outerPadL, outerPadT, outerPadR, outerPadB),
+        padding: EdgeInsets.fromLTRB(widget.outerPadL, widget.outerPadT, widget.outerPadR, widget.outerPadB),
         child: Column(
           children: [
             const SizedBox(height: 32),
             Transform.translate(
-              offset: Offset(titleOffsetX, titleOffsetY),
+              offset: Offset(widget.titleOffsetX, widget.titleOffsetY),
               child: Center(
                 child: LevelSelectorButtons(
-                  mode: mode,
-                  onModeChanged: onModeChanged,
+                  mode: widget.mode,
+                  onModeChanged: (m) async {
+                    widget.onModeChanged(m); // nach außen melden
+
+                    if (m == LevelSelectionMode.s0toS5) {
+                      await _switchCtrl.blinkS0toS5();
+                    } else if (m == LevelSelectionMode.s1toS5) {
+                      await _switchCtrl.blinkS1toS5();
+                    } else {
+                      await _switchCtrl.blinkSequentialS1toS5();
+                    }
+                  },
                 ),
               ),
             ),
@@ -71,11 +88,12 @@ class LevelsCard extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Transform.translate(
-                  offset: Offset(switchesOffsetX, switchesOffsetY),
+                  offset: Offset(widget.switchesOffsetX, widget.switchesOffsetY),
                   child: StageSwitchRow(
+                    controller: _switchCtrl,
                     counts: s,
-                    goalPerStage: goalPerStage,
-                    gap: switchGap,
+                    goalPerStage: widget.goalPerStage,
+                    gap: widget.switchGap,
                     sizes: const StageSwitchSizes(
                         width: 42, height: 75, knobTop: 2, knobBottom: 18),
                     colors: StageSwitchColors(
@@ -92,7 +110,7 @@ class LevelsCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Transform.translate(
-              offset: Offset(startBtnOffsetX, startBtnOffsetY),
+              offset: Offset(widget.startBtnOffsetX, widget.startBtnOffsetY),
               child: Center(
                 child: SizedBox(
                   width: 138,
@@ -106,7 +124,7 @@ class LevelsCard extends StatelessWidget {
                         side: const BorderSide(color: Colors.black, width: 1),
                       ),
                     ),
-                    onPressed: onStartPressed,
+                    onPressed: widget.onStartPressed,
                     child: const Text('Start'),
                   ),
                 ),

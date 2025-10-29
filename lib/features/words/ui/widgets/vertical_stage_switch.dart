@@ -10,6 +10,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final String label; // "S1" / "New" (nur für Semantik)
   final String note;  // "0".."5"
   final bool isFirst;
+  final bool glow; // NEU: für Blink-Effekt
 
   const VerticalStageSwitch({
     super.key,
@@ -21,6 +22,7 @@ class VerticalStageSwitch extends StatelessWidget {
     required this.label,
     required this.note,
     this.isFirst = false,
+    this.glow = false, // NEU: Standard false
   });
 
   double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
@@ -52,13 +54,25 @@ class VerticalStageSwitch extends StatelessWidget {
                   left: 2,
                   right: 2,
                   top: _getSwitchPosition(),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 120),
                     width: 38,
                     height: 52,
                     decoration: BoxDecoration(
                       color: innerColor,
                       borderRadius: BorderRadius.circular(21),
-                      border: Border.all(color: Colors.white24, width: 1),
+                      border: glow
+                          ? Border.all(color: const Color(0xFF00FF88), width: 1)
+                          : Border.all(color: Colors.white24, width: 1),
+                      boxShadow: glow
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF00FF88).withOpacity(0.85), // Grün-Glow
+                                blurRadius: 16,
+                                spreadRadius: 1.5,
+                              ),
+                            ]
+                          : null,
                     ),
                     alignment: Alignment.center,
                     child: Text(

@@ -30,6 +30,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
   final _scroll = ScrollController();
   late final String _provKey; // stabiler Key für provider family
   Timer? _scrollThrottle; // oben bei _scroll
+  ProviderSubscription<WordListState>? _controllerSub; // NEU: für listenManual
 
   @override
   void initState() {
@@ -37,20 +38,23 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     _provKey = _buildKey();
     _scroll.addListener(_onScroll);
 
-    // Re-Online Snackbar
-    ref.listen<WordListState>(wordListControllerProvider(_provKey), (prev, next) {
-      if ((prev?.offline ?? false) && !next.offline) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Wieder online'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+    // Re-Online Snackbar - FIX: listenManual statt listen
+    _controllerSub = ref.listenManual<WordListState>(
+      wordListControllerProvider(_provKey), 
+      (prev, next) {
+        if ((prev?.offline ?? false) && !next.offline) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Wieder online'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
 
     // Controller initialisieren
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,6 +75,9 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     _scroll.removeListener(_onScroll);
     _scroll.dispose();
     _scrollThrottle?.cancel();
+    // FIX: Subscription schließen
+    _controllerSub?.close();
+    _controllerSub = null;
     super.dispose();
   }
 
