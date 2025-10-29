@@ -25,3 +25,4 @@ Füge die folgenden Sound-Dateien in dieses Verzeichnis ein:
 
 Du kannst auch andere Formate verwenden (WAV, OGG), musst dann aber die Dateiendungen in der App anpassen.
 
+

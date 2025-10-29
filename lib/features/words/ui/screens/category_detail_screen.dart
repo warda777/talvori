@@ -6,6 +6,7 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
@@ -186,6 +187,12 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                                 height: WordsLayout.levelsCardH,
                                   stages: stages,
                                   goalPerStage: 100,
+                                  mode: LevelSelectionMode.s0toS5,
+                                  onModeChanged: (mode) {
+                                    // TODO: später durch Riverpod-State ersetzen
+                                    debugPrint('Mode gewechselt zu: $mode');
+                                  },
+                                  titleOffsetY: -15, // Buttons höher positionieren
                                   onStartPressed: () async {
                             if (currentId.isEmpty) return;
                             await ref.read(categoryDetailControllerProvider.notifier).seedForStart(currentId);
@@ -203,8 +210,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                       ),
                       ),
                     ],
-                  ),
-          ),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 
 class LevelsCard extends StatelessWidget {
@@ -7,6 +8,8 @@ class LevelsCard extends StatelessWidget {
   final List<int> stages;
   final int goalPerStage;
   final Future<void> Function() onStartPressed;
+  final LevelSelectionMode mode;
+  final void Function(LevelSelectionMode) onModeChanged;
 
   // Layout-Knobs (standard-Werte wie vorher)
   final double outerPadL;
@@ -27,6 +30,8 @@ class LevelsCard extends StatelessWidget {
     required this.stages,
     required this.goalPerStage,
     required this.onStartPressed,
+    required this.mode,
+    required this.onModeChanged,
     this.outerPadL = 20.0,
     this.outerPadT = 8.0,
     this.outerPadR = 20.0,
@@ -56,8 +61,10 @@ class LevelsCard extends StatelessWidget {
             Transform.translate(
               offset: Offset(titleOffsetX, titleOffsetY),
               child: Center(
-                child: Text('Levels',
-                    style: t.textTheme.titleMedium?.copyWith(color: Colors.white)),
+                child: LevelSelectorButtons(
+                  mode: mode,
+                  onModeChanged: onModeChanged,
+                ),
               ),
             ),
             const SizedBox(height: 8),
