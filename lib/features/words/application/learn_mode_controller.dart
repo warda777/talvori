@@ -224,7 +224,15 @@ class LearnModeController extends Notifier<LearnModeState> {
     await _loadWords();
   }
 
-  Future<void> performReset() async => _performReset();
+  Future<void> performReset() async {
+    // Single-Session Reset falls im Single-Modus
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single) {
+      await resetSingleSession();
+    } else {
+      await _performReset();
+    }
+  }
 
   // ---- Loading ----
 
@@ -295,6 +303,34 @@ class LearnModeController extends Notifier<LearnModeState> {
         singleStage: singleStage,
       );
 
+        // Client-seitige Filterung als zusätzliche Absicherung
+        final allowed = ref.read(allowedStagesProvider);
+        final filteredWords = words.where((w) => allowed.contains(w.srsStage)).toList();
+
+        // Session-Buckets für Single-Modus initialisieren
+        if (mode == LevelSelectionMode.single) {
+          final cnt = filteredWords.length;
+          ref.read(singleSessionBucketsProvider.notifier).state = SingleSessionBuckets(src: cnt);
+          
+          // Single-Session seeden
+          try {
+            await singleSeed(catId, singleStage);
+            final counts = await singleCounts(catId, singleStage);
+            print('🔢 SingleCounts for $catId (stage $singleStage): src=${counts.$1}, sr1=${counts.$2}, sr2=${counts.$3}');
+            ref.read(singleSessionBucketsProvider.notifier).state = SingleSessionBuckets(
+              src: counts.$1, 
+              sx: counts.$2, 
+              sy: counts.$3,
+            );
+            // Auch die neuen Counts setzen
+            ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(
+              counts.$1, counts.$2, counts.$3,
+            );
+          } catch (e) {
+            print('❌ Single session seed failed: $e');
+          }
+        }
+
       // Histogramm ausgeben
       final rpcHist = <int,int>{};
       for (final w in words.take(60)) { rpcHist[w.srsStage] = (rpcHist[w.srsStage] ?? 0) + 1; }
@@ -303,12 +339,12 @@ class LearnModeController extends Notifier<LearnModeState> {
       // Ersten 10 Stufen klar loggen
       print('🧪 First10 stages: ${words.take(10).map((w) => w.srsStage).toList()}');
 
-      if (words.isEmpty) {
+      if (filteredWords.isEmpty) {
         _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
         return;
       }
 
-      final queue = _buildQueueDueFirst(words);
+      final queue = _buildQueueDueFirst(filteredWords);
       
       // Sofort prüfen: Queue-Stages analysieren
       final hist = <int,int>{};
@@ -334,15 +370,15 @@ class LearnModeController extends Notifier<LearnModeState> {
         stats: stats,
       );
 
-      final allowed = _computeAllowedMaxStageFromQueue(queue);
-      final order = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowed);
+      final allowedMaxStage = _computeAllowedMaxStageFromQueue(queue);
+      final order = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowedMaxStage);
 
       // Debug-Log für Gate-Logik
       final s1Count = queue.where((w) => w.srsStage == 1).length;
       final s2Count = queue.where((w) => w.srsStage == 2).length;
       final s3Count = queue.where((w) => w.srsStage == 3).length;
       final s4Count = queue.where((w) => w.srsStage == 4).length;
-      print('🚪 Gate: allowedMaxStage=$allowed (Queue: S1:$s1Count, S2:$s2Count, S3:$s3Count, S4:$s4Count)');
+      print('🚪 Gate: allowedMaxStage=$allowedMaxStage (Queue: S1:$s1Count, S2:$s2Count, S3:$s3Count, S4:$s4Count)');
 
       // Debug-Log für SRS-Ratio Verifikation
       final headSizePreview = order.take(40).map((ix) => queue[ix]).toList();
@@ -380,15 +416,162 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
 
+  // ---- Single Session Reset ----
+  
+  Future<void> resetSingleSession() async {
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single) {
+      try {
+        final singleStage = ref.read(singleStageProvider);
+        await singleReset(_currentCatId, singleStage);
+        
+        // Counts nachladen und UI aktualisieren
+        final counts = await singleCounts(_currentCatId, singleStage);
+        ref.read(singleSessionBucketsProvider.notifier).state = SingleSessionBuckets(
+          src: counts.$1, 
+          sx: counts.$2, 
+          sy: counts.$3,
+        );
+        ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(
+          counts.$1, counts.$2, counts.$3,
+        );
+      } catch (e) {
+        print('❌ Single session reset failed: $e');
+      }
+    }
+  }
+
   // ---- Review / Antwort-Handling ----
 
   Future<void> _handleAnswer({required bool correct}) async {
-    // NEU: Single-Mode Prüfung - keine Stage-Änderung im Single-Modus
     final mode = ref.read(levelSelectionProvider);
-    if (mode == LevelSelectionMode.single) {
-      // Im Single-Modus keine Änderung der Stage
+    
+        // Progress-Update basierend auf Modus
+        if (mode == LevelSelectionMode.single) {
+          // Single-Modus: Server-Session updaten
+          try {
+            final st = ref.read(singleStageProvider);     // 1..5
+            final catId = _currentCatId;                  // wie bei Seed
+            
+            // Aktuelles Wort aus wordQueue und index ableiten
+            final currentWord = state.wordQueue.isNotEmpty && state.index < state.wordQueue.length
+                ? state.wordQueue[state.index]
+                : null;
+            
+            if (currentWord == null) return; // Kein aktuelles Wort verfügbar
+
+            // 1) in Session-Bucket verschieben
+            await singleMove(catId, st, currentWord.id, correct);
+
+            // 2) nächste Karte aus SRC holen
+            final nextId = await singleNextWordId(catId, st);
+
+            // Falls es eine nächste Karte gibt -> IDs & Queue aktualisieren
+            final ids = List<String>.from(state.shuffledWordIds);
+            final i = state.index;
+
+            if (nextId != null) {
+              // IDs auf die nächste Karte setzen
+              if (i < ids.length) {
+                ids[i] = nextId;
+              } else {
+                ids.add(nextId);
+              }
+              // Wortobjekt nachladen (für CardArea)
+              final next = await fetchWordById(nextId);
+              if (next != null) {
+                final q = List<WordUserView>.from(state.wordQueue);
+                if (i < q.length) {
+                  q[i] = next;
+                } else {
+                  q.add(next);
+                }
+                _set(wordQueue: q, shuffledWordIds: ids);
+              } else {
+                _set(shuffledWordIds: ids);
+              }
+            } else {
+              // keine SRC-Karte mehr -> aktuelle ID entfernen
+              if (i < ids.length) {
+                ids.removeAt(i);
+              }
+              final newIdx = ids.isEmpty ? 0 : (i % ids.length);
+              _set(shuffledWordIds: ids, index: newIdx);
+            }
+
+            // 3) Zähler aktualisieren (S{n}, SR1, SR2)
+            final c = await singleCounts(catId, st);
+            ref.read(singleSessionCountsProvider.notifier).state =
+                SingleSessionCounts(c.$1, c.$2, c.$3);
+          } catch (e) {
+            print('❌ Single session move failed: $e');
+          }
+          return; // ✅ KEIN normales SRS-Update ausführen
+        }
+    
+    if (mode == LevelSelectionMode.s1toS5) {
+      // S1-S5: nur in 1..5 bewegen; niemals 0
+      final queue = state.wordQueue;
+      final ids = state.shuffledWordIds;
+      if (queue.isEmpty || ids.isEmpty) return;
+
+      final i = state.index;
+      if (i >= ids.length) return;
+
+      final currentId = ids[i];
+      final current = queue.firstWhere((w) => w.id == currentId, orElse: () => queue.first);
+      
+      final oldStage = current.srsStage;
+      final delta = correct ? 1 : -1;
+      final newStage = (oldStage + delta).clamp(1, 5); // Niemals unter 1
+      
+      // Lokale Stage-Update
+      final stages = [...state.stages];
+      if (oldStage >= 1 && oldStage < stages.length) {
+        stages[oldStage] = (stages[oldStage] - 1).clamp(0, 1 << 30);
+      }
+      if (newStage >= 1 && newStage < stages.length) {
+        stages[newStage] = stages[newStage] + 1;
+      }
+      _set(stages: stages);
+      
+      // Server-Update
+      try {
+        final result = await submitReview(currentId, correct);
+        final serverStage = result.$1;
+        final serverDue = result.$2;
+        
+        // Server-Response verwenden
+        final q = List<WordUserView>.from(state.wordQueue);
+        final pos = q.indexWhere((w) => w.id == currentId);
+        if (pos != -1) {
+          q[pos] = q[pos].copyWith(srsStage: serverStage, nextDueAt: serverDue);
+          _set(wordQueue: q);
+        }
+        
+        // Stages mit Server-Response synchronisieren
+        if (serverStage != newStage) {
+          final updatedStages = [...state.stages];
+          if (newStage >= 1 && newStage < updatedStages.length) {
+            updatedStages[newStage] = (updatedStages[newStage] - 1).clamp(0, 1 << 30);
+          }
+          if (serverStage >= 1 && serverStage < updatedStages.length) {
+            updatedStages[serverStage] = updatedStages[serverStage] + 1;
+          }
+          _set(stages: updatedStages);
+        }
+      } catch (e) {
+        print('❌ Review submission failed: $e');
+      }
+      
+      // Nächste Karte
+      final nextIndex = (i + 1) % ids.length;
+      _set(index: nextIndex);
+      
       return;
     }
+    
+    // S0-S5: normale Logik (inkl. 0 ↔ 1 Übergänge)
 
     final queue = state.wordQueue;
     final ids   = state.shuffledWordIds;
@@ -462,7 +645,7 @@ class LearnModeController extends Notifier<LearnModeState> {
         print('🔄 Stages korrigiert: lokale Schätzung $newStage -> Server $serverStage');
       }
 
-      final allowed = _computeAllowedMaxStageFromQueue(state.wordQueue);
+      final allowedMaxStage = _computeAllowedMaxStageFromQueue(state.wordQueue);
       final now = DateTime.now();
       final isNowDue = serverDue != null && !serverDue.isAfter(now);
 
@@ -472,7 +655,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       final bool justLearnedToS1 = (oldStage == 0 && serverStage == 1);
 
       final shouldRemoveFromSession =
-          (serverStage > allowed) ||
+          (serverStage > allowedMaxStage) ||
           ((serverStage >= 1) && !isNowDue && !justLearnedToS1);
 
       if (shouldRemoveFromSession) {
@@ -483,7 +666,7 @@ class LearnModeController extends Notifier<LearnModeState> {
           var nextIndex = state.index;
           if (pos <= state.index && nextIndex > 0) nextIndex -= 1;
           _set(shuffledWordIds: newIds, index: newIds.isEmpty ? 0 : nextIndex);
-          print('🗑️ Karte entfernt: $currentId (Stage: $serverStage, allowed: $allowed, due: $isNowDue)');
+          print('🗑️ Karte entfernt: $currentId (Stage: $serverStage, allowed: $allowedMaxStage, due: $isNowDue)');
         }
       }
 
@@ -533,8 +716,8 @@ class LearnModeController extends Notifier<LearnModeState> {
         stats: stats,
       );
 
-      final allowed = _computeAllowedMaxStageFromQueue(queue);
-      final shuffled = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowed);
+      final allowedMaxStage = _computeAllowedMaxStageFromQueue(queue);
+      final shuffled = buildSmartCardOrder(queue, config: cfg, allowedMaxStage: allowedMaxStage);
       
       // Debug-Log für Re-Shuffle
       final reshufflePreview = shuffled.take(40).map((ix) => queue[ix]).toList();
@@ -564,8 +747,8 @@ class LearnModeController extends Notifier<LearnModeState> {
         ),
       );
 
-      final allowed = _computeAllowedMaxStageFromQueue(state.wordQueue);
-      final newOrderIdx = buildSmartCardOrder(state.wordQueue, config: cfg, allowedMaxStage: allowed);
+      final allowedMaxStage = _computeAllowedMaxStageFromQueue(state.wordQueue);
+      final newOrderIdx = buildSmartCardOrder(state.wordQueue, config: cfg, allowedMaxStage: allowedMaxStage);
       final newIds = [for (final i in newOrderIdx) state.wordQueue[i].id];
 
       // Index auf gleiche Karte (per id) abbilden, damit kein Sprung sichtbar ist

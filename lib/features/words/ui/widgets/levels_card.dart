@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 
-class LevelsCard extends StatefulWidget {
+class LevelsCard extends ConsumerStatefulWidget {
   final double height;
   final List<int> stages;
   final int goalPerStage;
@@ -23,6 +25,9 @@ class LevelsCard extends StatefulWidget {
   final double startBtnOffsetX;
   final double startBtnOffsetY;
   final double switchGap;
+  final bool selectingSingle;                      // ← NEU
+  final ValueChanged<int>? onSelectSingleStage;    // ← NEU
+  final List<bool>? visibleMask;                   // ← NEU
 
   const LevelsCard({
     super.key,
@@ -43,13 +48,16 @@ class LevelsCard extends StatefulWidget {
     this.startBtnOffsetX = WordsLayout.startBtnOffsetX,
     this.startBtnOffsetY = WordsLayout.startBtnOffsetY,
     this.switchGap = WordsLayout.switchGap,
+    this.selectingSingle = false,                  // ← NEU
+    this.onSelectSingleStage,                      // ← NEU
+    this.visibleMask,                              // ← NEU
   });
 
   @override
-  State<LevelsCard> createState() => _LevelsCardState();
+  ConsumerState<LevelsCard> createState() => _LevelsCardState();
 }
 
-class _LevelsCardState extends State<LevelsCard> {
+class _LevelsCardState extends ConsumerState<LevelsCard> {
   final _switchCtrl = StageSwitchRowController();
 
   @override
@@ -104,6 +112,14 @@ class _LevelsCardState extends State<LevelsCard> {
                     ),
                     labels: const StageSwitchLabels(
                         newLabel: 'New', newNote: '0', stagePrefix: 'S'),
+                    selectable: widget.mode == LevelSelectionMode.single,   // ← NEU
+                    idlePulse: widget.mode == LevelSelectionMode.single && widget.selectingSingle, // ← NEU
+                    selectedStageHighlight: (widget.mode == LevelSelectionMode.single) ? ref.read(singleStageProvider) : null, // ← NEU
+                    // ✅ KEINE visibleMask hier im Kategorie-Screen
+                    onSelectStage: (stg) {
+                      // Nutzer hat S1..S5 gewählt:
+                      widget.onSelectSingleStage?.call(stg); // ← wir fügen Props hinzu
+                    },
                   ),
                 ),
               ),

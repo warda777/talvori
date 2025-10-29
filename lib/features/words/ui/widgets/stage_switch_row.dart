@@ -22,6 +22,11 @@ class StageSwitchRow extends StatefulWidget {
   final StageSwitchColors? colors;
   final StageSwitchLabels? labels;
   final StageSwitchRowController? controller;
+  final bool selectable;                 // ← NEU: Tippen erlaubt?
+  final ValueChanged<int>? onSelectStage; // ← NEU: Callback bei Tap
+  final bool idlePulse;                  // ← NEU: sanftes Pulsieren aller
+  final List<bool>? visibleMask;         // ← NEU: List<bool> mit Länge 6
+  final int? selectedStageHighlight;     // ← NEU: 1..5 (nur Single), null = keiner
 
   const StageSwitchRow({
     super.key,
@@ -32,19 +37,29 @@ class StageSwitchRow extends StatefulWidget {
     this.colors,
     this.labels,
     this.controller,
+    this.selectable = false,                 // ← NEU: Tippen erlaubt?
+    this.onSelectStage,                      // ← NEU: Callback bei Tap
+    this.idlePulse = false,                  // ← NEU: sanftes Pulsieren aller
+    this.visibleMask,                        // ← NEU: List<bool> mit Länge 6
+    this.selectedStageHighlight,             // ← NEU: 1..5 (nur Single), null = keiner
   });
 
   @override
   State<StageSwitchRow> createState() => _StageSwitchRowState();
 }
 
-class _StageSwitchRowState extends State<StageSwitchRow> {
+class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProviderStateMixin {
   final Set<int> _blinking = {}; // Indizes die kurz glühen
+  late final AnimationController _pulseCtrl;
+  late final Animation<double> _pulse; // 0..1
 
   @override
   void initState() {
     super.initState();
     widget.controller?._attach(this);
+    _pulseCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+    _pulse = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+    _maybeRunPulse();
   }
 
   @override
@@ -52,6 +67,15 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       widget.controller?._attach(this);
+    }
+    _maybeRunPulse();
+  }
+
+  void _maybeRunPulse() {
+    if (widget.idlePulse) {
+      if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat(reverse: true);
+    } else {
+      _pulseCtrl.stop();
     }
   }
 
@@ -85,6 +109,15 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
     }
   }
 
+  // NEU: nur eine Stufe blinken (z. B. nach Auswahl)
+  Future<void> _blinkOnly(int s) async => _blinkIndices([s], repeats: 1, sequential: false);
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Wenn Parameter übergeben wurden, verwende diese (für category_detail_screen)
@@ -106,13 +139,29 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
     final goal = widget.goalPerStage ?? 100;
     final switchGap = widget.gap ?? 8.0;
     
-    List<Widget> children = [];
-    
-    // S0 (New) Switch
-    children.add(
-      Padding(
-        padding: EdgeInsets.only(right: switchGap),
-        child: VerticalStageSwitch(
+    // 6er-Default wenn keine Maske übergeben
+    final mask = widget.visibleMask ??
+        const [true, true, true, true, true, true];
+
+    // Welche Indizes sollen wirklich sichtbar sein?
+    final visibleIndices = <int>[];
+    for (var i = 0; i < 6; i++) {
+      final show = i < mask.length ? mask[i] : true;
+      if (show) visibleIndices.add(i);
+    }
+
+    final children = <Widget>[];
+
+    for (var vi = 0; vi < visibleIndices.length; vi++) {
+      final i = visibleIndices[vi];
+      final isLast = vi == visibleIndices.length - 1;
+
+      // Switch-Body für Index i
+      Widget switchBody;
+      
+      if (i == 0) {
+        // S0 (New) Switch
+        switchBody = VerticalStageSwitch(
           count: s[0],
           outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.grey),
           innerColor: widget.colors?.inner ?? Colors.grey,
@@ -122,25 +171,49 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
           note: widget.labels?.newNote ?? '0',
           isFirst: true,
           glow: _blinking.contains(0),
-        ),
-      ),
-    );
-    
-    // S1-S5 Switches
-    for (int stage = 1; stage <= 5; stage++) {
+        );
+      } else {
+        // S1-S5 Switches
+        final stage = i;
+        
+        // Bestimme, ob gerade Blink (hart) oder Idle-Pulse (soft) greift
+        final bool hardGlow = _blinking.contains(stage);
+        final bool softGlow = widget.idlePulse && (stage >= 1);
+        final bool isSelected = (widget.selectedStageHighlight != null) && (stage == widget.selectedStageHighlight);
+
+        switchBody = VerticalStageSwitch(
+          count: s[stage],
+          outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.grey),
+          innerColor: widget.colors?.inner ?? Colors.grey,
+          highlight: s[stage] > 0 && s[stage] < goal,
+          completed: s[stage] >= goal,
+          label: '${widget.labels?.stagePrefix ?? 'S'}$stage',
+          note: '$stage',
+          glow: hardGlow || softGlow || isSelected,
+          pulseAnimation: softGlow ? _pulse : null,
+          selectedHighlight: isSelected,
+        );
+      }
+
+      // Falls selektierbar (Single-Mode), Tap/LongPress wie gehabt:
+      if (widget.selectable && i >= 1) {
+        switchBody = GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            widget.onSelectStage?.call(i);
+            await _blinkOnly(i);
+          },
+          onLongPress: () {
+            // TODO: später Karten verschieben
+          },
+          child: switchBody,
+        );
+      }
+
       children.add(
-        Padding(
-          padding: EdgeInsets.only(right: stage < 5 ? switchGap : 0),
-          child: VerticalStageSwitch(
-            count: s[stage],
-            outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.grey),
-            innerColor: widget.colors?.inner ?? Colors.grey,
-            highlight: s[stage] > 0 && s[stage] < goal,
-            completed: s[stage] >= goal,
-            label: '${widget.labels?.stagePrefix ?? 'S'}$stage',
-            note: '$stage',
-            glow: _blinking.contains(stage),
-          ),
+        Container(
+          margin: EdgeInsets.only(right: isLast ? 0 : switchGap),
+          child: switchBody,
         ),
       );
     }
@@ -154,13 +227,29 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
   }
 
   Widget _buildWithStages(List<int> stages) {
-    List<Widget> children = [];
-    
-    // S0 (New) Switch
-    children.add(
-      Padding(
-        padding: const EdgeInsets.only(right: WordsUIConstants.switchGap),
-        child: VerticalStageSwitch(
+    // 6er-Default wenn keine Maske übergeben
+    final mask = widget.visibleMask ??
+        const [true, true, true, true, true, true];
+
+    // Welche Indizes sollen wirklich sichtbar sein?
+    final visibleIndices = <int>[];
+    for (var i = 0; i < 6; i++) {
+      final show = i < mask.length ? mask[i] : true;
+      if (show) visibleIndices.add(i);
+    }
+
+    final children = <Widget>[];
+
+    for (var vi = 0; vi < visibleIndices.length; vi++) {
+      final i = visibleIndices[vi];
+      final isLast = vi == visibleIndices.length - 1;
+
+      // Switch-Body für Index i
+      Widget switchBody;
+      
+      if (i == 0) {
+        // S0 (New) Switch
+        switchBody = VerticalStageSwitch(
           count: stages[0],
           outerColor: stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive,
           innerColor: WordsUIConstants.stageInnerDark,
@@ -170,25 +259,41 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
           note: '0',
           isFirst: true,
           glow: _blinking.contains(0),
-        ),
-      ),
-    );
-    
-    // S1-S5 Switches
-    for (int stage = 1; stage <= 5; stage++) {
+        );
+      } else {
+        // S1-S5 Switches
+        final stage = i;
+        switchBody = VerticalStageSwitch(
+          count: stages[stage],
+          outerColor: stages[stage] > 0 ? WordsUIConstants.stageOuter : WordsUIConstants.stageInactive,
+          innerColor: WordsUIConstants.stageInner,
+          highlight: stages[stage] > 0 && stages[stage] < WordsUIConstants.stageGoal,
+          completed: stages[stage] >= WordsUIConstants.stageGoal,
+          label: 'S$stage',
+          note: '$stage',
+          glow: _blinking.contains(stage),
+        );
+      }
+
+      // Falls selektierbar (Single-Mode), Tap/LongPress wie gehabt:
+      if (widget.selectable && i >= 1) {
+        switchBody = GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            widget.onSelectStage?.call(i);
+            await _blinkOnly(i);
+          },
+          onLongPress: () {
+            // TODO: später Karten verschieben
+          },
+          child: switchBody,
+        );
+      }
+
       children.add(
-        Padding(
-          padding: EdgeInsets.only(right: stage < 5 ? WordsUIConstants.switchGap : 0),
-          child: VerticalStageSwitch(
-            count: stages[stage],
-            outerColor: stages[stage] > 0 ? WordsUIConstants.stageOuter : WordsUIConstants.stageInactive,
-            innerColor: WordsUIConstants.stageInner,
-            highlight: stages[stage] > 0 && stages[stage] < WordsUIConstants.stageGoal,
-            completed: stages[stage] >= WordsUIConstants.stageGoal,
-            label: 'S$stage',
-            note: '$stage',
-            glow: _blinking.contains(stage),
-          ),
+        Container(
+          margin: EdgeInsets.only(right: isLast ? 0 : WordsUIConstants.switchGap),
+          child: switchBody,
         ),
       );
     }
@@ -207,6 +312,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> {
     );
   }
 }
+
 
 // Helper classes für Parameter
 class StageSwitchSizes {

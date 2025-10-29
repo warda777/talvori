@@ -488,3 +488,97 @@ Future<List<CategoryInfo>> fetchAllCategories() async {
       .order('order_index', ascending: true);
   return (rows as List).map((e) => CategoryInfo.fromJson(e as Map<String, dynamic>)).toList();
 }
+
+// === Single Session Hooks ===
+
+Future<void> singleSeed(String catId, int stage) =>
+  _sb.rpc('fn_single_session_seed', params: {
+    'p_category_id': catId, 'p_stage': stage, 'p_limit': 200,
+  });
+
+Future<(int src, int sr1, int sr2)> singleCounts(String catId, int stage) async {
+  final res = await _sb.rpc('fn_single_session_counts', params: {
+    'p_category_id': catId,
+    'p_stage': stage,
+  });
+  final list = (res as List).cast<Map<String, dynamic>>(); // ⬅ wie bei deinen anderen RPCs
+  final row = list.isEmpty ? null : list.first;
+  return (
+    (row?['src'] ?? 0) as int,
+    (row?['sr1'] ?? 0) as int,
+    (row?['sr2'] ?? 0) as int
+  );
+}
+
+Future<void> singleMove(String catId, int stage, String wordId, bool correct) =>
+  _sb.rpc('fn_single_session_move', params: {
+    'p_category_id': catId,
+    'p_stage': stage,
+    'p_word_id': wordId,
+    'p_correct': correct, // <-- boolean statt Bucket-String
+  });
+
+Future<void> singleReset(String catId, int stage) =>
+  _sb.rpc('fn_single_session_reset', params: {
+    'p_category_id': catId, 'p_stage': stage,
+  });
+
+Future<Map<String, dynamic>?> fetchNextFromSingle(String catId, int stage) async {
+  final res = await _sb
+      .from('single_session_items')
+      .select('word_id, bucket')
+      .eq('category_id', catId)
+      .eq('stage', stage)
+      .eq('bucket', 'src')
+      .limit(1);
+  if (res.isEmpty) return null;
+  final wordId = res[0]['word_id'];
+  // Lade Wortdaten wie sonst auch:
+  final w = await _sb.from('v_words_user')
+      .select()
+      .eq('id', wordId)
+      .maybeSingle();
+  return w;
+}
+
+Future<String?> singleNextWordId(String catId, int stage) async {
+  final res = await _sb
+      .rpc('fn_single_session_next', params: {
+        'p_category_id': catId,
+        'p_stage': stage,
+      });
+
+  if (res == null) return null;
+
+  // Rückgabe kann Liste oder Map sein (je nach Supabase-Version)
+  final data = res is List
+      ? (res.isNotEmpty ? res.first as Map<String, dynamic> : null)
+      : (res as Map<String, dynamic>?);
+
+  if (data == null) return null;
+
+  final wordId = data['word_id'] as String?;
+  final bucket = data['bucket'] as String?;
+
+  if (wordId == null) return null;
+
+  // Debug-Ausgabe zur Kontrolle
+  debugPrint('🧩 Next word: $wordId from bucket=$bucket');
+
+  // Wortdaten nachladen (wie bisher)
+  final w = await _sb.from('v_words_user')
+      .select()
+      .eq('id', wordId)
+      .maybeSingle();
+
+  return w == null ? null : wordId;
+}
+
+Future<WordUserView?> fetchWordById(String wordId) async {
+  final row = await _sb
+      .from('v_words_user')
+      .select()
+      .eq('id', wordId)
+      .maybeSingle();
+  return row == null ? null : WordUserView.fromJson(row);
+}

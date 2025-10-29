@@ -8,7 +8,6 @@ import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
-import 'package:talvori/features/words/application/level_selection_controller.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
@@ -88,6 +87,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     final s = ref.watch(categoryDetailControllerProvider);
     final loading = s.loading;
     final stages = s.progress?.stages ?? const [0,0,0,0,0,0];
+    final mode = ref.watch(levelSelectionProvider);
+    final selecting = ref.watch(selectingSingleProvider);
+    final allowed = ref.watch(allowedStagesProvider);
+    final mask = List<bool>.generate(6, (i) => allowed.contains(i));
 
     final dailyTotal = s.dailyNew + s.dailyRepeats;
     const dailyTarget = 20;
@@ -190,8 +193,23 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                                 height: WordsLayout.levelsCardH,
                                   stages: stages,
                                   goalPerStage: 100,
-                                  mode: ref.watch(levelSelectionProvider),
-                                  onModeChanged: (mode) => LevelSelectionController.handleModeChange(context, ref, mode),
+                                  mode: mode,
+                                  selectingSingle: selecting,                         // ← NEU
+                                  visibleMask: mask,                                 // ← NEU
+                                  onSelectSingleStage: (stg) {                        // ← NEU
+                                    ref.read(singleStageProvider.notifier).state = stg;      // 1..5
+                                    ref.read(selectingSingleProvider.notifier).state = false; // Pulse stoppen
+                                  },
+                                  onModeChanged: (m) async {
+                                    ref.read(levelSelectionProvider.notifier).state = m;
+                                    if (m == LevelSelectionMode.single) {
+                                      // 1× sequentiell blinken (S1..S5), dann Idle-Pulse starten
+                                      // await _switchCtrl.blinkSequentialS1toS5();     // du hast den Controller schon in LevelsCard; hier aufrufen, falls exposed
+                                      ref.read(selectingSingleProvider.notifier).state = true;
+                                    } else {
+                                      ref.read(selectingSingleProvider.notifier).state = false;
+                                    }
+                                  },
                                   titleOffsetY: -15, // Buttons höher positionieren
                                   onStartPressed: () async {
                             if (currentId.isEmpty) return;
