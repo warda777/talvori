@@ -159,6 +159,7 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                 ),
               ),
             ),
+            
             const SizedBox(height: 12),
             Transform.translate(
               offset: Offset(widget.startBtnOffsetX, widget.startBtnOffsetY),

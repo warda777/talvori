@@ -14,8 +14,9 @@ import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 // removed srs_mode_provider import to avoid SrsSystem conflicts; we use controller enum
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle.dart';
+import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
-import 'package:talvori/features/words/ui/widgets/srs_hybrid_wrapper.dart';
+
 
 
 // ===== KONSTANTEN =====
@@ -71,6 +72,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
         // per Tap-Logik zurück (setzt auf lastNonHybrid)
         ctrl.tap();
       }
+
     });
   }
 
@@ -180,7 +182,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                 wheelBottomGap: WordsLayout.wheelBottomGap,
                 accentColor: kAccentBlue,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                trailingRightBelow: const SrsModeToggle(),
+                trailingRightBelow: const SrsModeToggleWithHint(),
               ),
             ),
 

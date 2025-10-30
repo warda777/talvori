@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 import 'package:talvori/features/words/ui/widgets/glow_circle_button.dart';
 import 'package:talvori/features/words/ui/widgets/glow_rect_tile.dart';
@@ -70,9 +71,12 @@ class CategoryHeaderCapsule extends StatelessWidget {
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: WordsLayout.topPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
             // Back + Wheel - mit fester Höhe wie im Learn-Mode
             SizedBox(
               height: WordsLayout.wheelHeight,
@@ -176,7 +180,8 @@ class CategoryHeaderCapsule extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
