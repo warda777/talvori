@@ -14,6 +14,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final Animation<double>? pulseAnimation; // NEU: für sanftes Pulsieren
   final bool selectedHighlight; // NEU: für Single-Modus Hervorhebung
   final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
+  final Widget Function(Widget knob)? knobWrapper; // optionaler Wrapper nur um den Knopf
 
   const VerticalStageSwitch({
     super.key,
@@ -29,6 +30,7 @@ class VerticalStageSwitch extends StatelessWidget {
     this.pulseAnimation, // NEU: für sanftes Pulsieren
     this.selectedHighlight = false, // NEU: für Single-Modus Hervorhebung
     this.innerStrokeColor,
+    this.knobWrapper,
   });
 
   double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
@@ -91,7 +93,7 @@ class VerticalStageSwitch extends StatelessWidget {
                                         ),
                                       ]);
 
-                            return AnimatedContainer(
+                            final Widget knobCore = AnimatedContainer(
                               duration: const Duration(milliseconds: 120),
                               width: 38,
                               height: 52,
@@ -115,9 +117,12 @@ class VerticalStageSwitch extends StatelessWidget {
                                 ),
                               ),
                             );
+                            final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
+                            return knob;
                           },
                         )
-                      : AnimatedContainer(
+                      : () {
+                          final Widget knobCore = AnimatedContainer(
                           duration: const Duration(milliseconds: 120),
                           width: 38,
                           height: 52,
@@ -156,7 +161,10 @@ class VerticalStageSwitch extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-                        ),
+                          );
+                          final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
+                          return knob;
+                        }(),
                 ),
               ],
             ),

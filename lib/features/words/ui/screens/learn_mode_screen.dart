@@ -166,7 +166,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
           children: [
             const HeaderBar(),
             const CardArea(),
-            switchesRow,                          // ← bedingte Row
+            switchesRow,
             const SizedBox(height: WordsUIConstants.sectionSpacing), // Mehr Luft zwischen Switches und Buttons
             const BottomControls(),
           ],

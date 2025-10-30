@@ -5,6 +5,18 @@ import 'package:talvori/features/words/application/application.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
 import 'vertical_stage_switch.dart';
 
+// Knopf-Anker: Finger sitzt leicht UNTER dem Knopf, damit der Knopf sichtbar VOR dem Finger ist.
+Offset knobDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset globalPosition) {
+  // Knopfgröße: 38x52 -> Anker unten bei ~75% Höhe
+  return const Offset(19.0, 80.0);
+}
+
+class StageDrag {
+  final int fromStage; // 0..5
+  final int count;     // vorerst 1
+  const StageDrag(this.fromStage, {this.count = 1});
+}
+
 class StageSwitchRowController {
   _StageSwitchRowState? _state;
   void _attach(_StageSwitchRowState s) => _state = s;
@@ -12,6 +24,34 @@ class StageSwitchRowController {
   Future<void> blinkS0toS5() async => _state?._blinkIndices([0,1,2,3,4,5], repeats: 2);
   Future<void> blinkS1toS5() async => _state?._blinkIndices([1,2,3,4,5], repeats: 2);
   Future<void> blinkSequentialS1toS5() async => _state?._blinkIndices([1,2,3,4,5], repeats: 1, sequential: true);
+}
+
+class _KnobFeedback extends StatelessWidget {
+  final int count;
+  final Color innerColor;
+  final Color? stroke;
+  const _KnobFeedback({required this.count, required this.innerColor, this.stroke});
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: SizedBox(
+        width: 38, height: 52,
+        child: Container(
+          decoration: BoxDecoration(
+            color: innerColor,
+            borderRadius: BorderRadius.circular(21),
+            border: Border.all(color: (stroke ?? Colors.white24), width: 1.6),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '$count',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class StageSwitchRow extends StatefulWidget {
@@ -27,6 +67,7 @@ class StageSwitchRow extends StatefulWidget {
   final bool idlePulse;                  // ← NEU: sanftes Pulsieren aller
   final List<bool>? visibleMask;         // ← NEU: List<bool> mit Länge 6
   final int? selectedStageHighlight;     // ← NEU: 1..5 (nur Single), null = keiner
+  final void Function(int fromStage, int toStage, int count)? onStageDrop; // NEW
 
   const StageSwitchRow({
     super.key,
@@ -42,6 +83,7 @@ class StageSwitchRow extends StatefulWidget {
     this.idlePulse = false,                  // ← NEU: sanftes Pulsieren aller
     this.visibleMask,                        // ← NEU: List<bool> mit Länge 6
     this.selectedStageHighlight,             // ← NEU: 1..5 (nur Single), null = keiner
+    this.onStageDrop,
   });
 
   @override
@@ -160,18 +202,22 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       Widget switchBody;
       
       if (i == 0) {
-        // S0 (New) Switch
-        switchBody = VerticalStageSwitch(
-          count: s[0],
-          outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.white),
-          innerColor: widget.colors?.inner ?? Colors.grey,
-          innerStrokeColor: widget.colors?.innerStroke,
-          highlight: s[0] > 0,
-          completed: false,
-          label: widget.labels?.newLabel ?? 'New',
-          note: widget.labels?.newNote ?? '0',
-          isFirst: true,
-          glow: _blinking.contains(0),
+        // S0 (New) Switch: nur Drop-Ziel
+        switchBody = DragTarget<StageDrag>(
+          onWillAccept: (data) => data != null && data.fromStage != 0,
+          onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
+          builder: (_, __, ___) => VerticalStageSwitch(
+            count: s[0],
+            outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.white),
+            innerColor: widget.colors?.inner ?? Colors.grey,
+            innerStrokeColor: widget.colors?.innerStroke,
+            highlight: s[0] > 0,
+            completed: false,
+            label: widget.labels?.newLabel ?? 'New',
+            note: widget.labels?.newNote ?? '0',
+            isFirst: true,
+            glow: _blinking.contains(0),
+          ),
         );
       } else {
         // S1-S5 Switches
@@ -183,7 +229,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         final bool softGlow = widget.idlePulse && (stage >= 1);
         final bool isSelected = (widget.selectedStageHighlight != null) && (stage == widget.selectedStageHighlight);
 
-        switchBody = VerticalStageSwitch(
+        Widget knobbed = VerticalStageSwitch(
           count: s[stage],
           outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.white),
           innerColor: widget.colors?.inner ?? Colors.grey,
@@ -195,6 +241,21 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           glow: hardGlow || softGlow || isSelected,
           pulseAnimation: softGlow ? _pulse : null,
           selectedHighlight: isSelected,
+          knobWrapper: (knob) => LongPressDraggable<StageDrag>(
+            data: StageDrag(stage, count: 1),
+            child: knob,
+            childWhenDragging: Opacity(opacity: 0.35, child: knob),
+            feedback: _KnobFeedback(count: s[stage], innerColor: widget.colors?.inner ?? Colors.grey, stroke: widget.colors?.innerStroke),
+            dragAnchorStrategy: knobDragAnchorStrategy,
+            feedbackOffset: Offset.zero,
+            maxSimultaneousDrags: s[stage] > 0 ? 1 : 0,
+          ),
+        );
+
+        switchBody = DragTarget<StageDrag>(
+          onWillAccept: (d) => d != null && d.fromStage != stage,
+          onAccept: (d) => widget.onStageDrop?.call(d.fromStage, stage, d.count),
+          builder: (_, __, ___) => knobbed,
         );
       }
 
@@ -251,22 +312,26 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       Widget switchBody;
       
       if (i == 0) {
-        // S0 (New) Switch
-        switchBody = VerticalStageSwitch(
-          count: stages[0],
-          outerColor: stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive,
-          innerColor: WordsUIConstants.stageInnerDark,
-          highlight: stages[0] > 0,
-          completed: false,
-          label: 'New',
-          note: '0',
-          isFirst: true,
-          glow: _blinking.contains(0),
+        // S0 (New) Switch: nur Drop-Ziel
+        switchBody = DragTarget<StageDrag>(
+          onWillAccept: (data) => data != null && data.fromStage != 0,
+          onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
+          builder: (_, __, ___) => VerticalStageSwitch(
+            count: stages[0],
+            outerColor: stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive,
+            innerColor: WordsUIConstants.stageInnerDark,
+            highlight: stages[0] > 0,
+            completed: false,
+            label: 'New',
+            note: '0',
+            isFirst: true,
+            glow: _blinking.contains(0),
+          ),
         );
       } else {
         // S1-S5 Switches
         final stage = i;
-        switchBody = VerticalStageSwitch(
+        Widget knobbed = VerticalStageSwitch(
           count: stages[stage],
           outerColor: stages[stage] > 0 ? WordsUIConstants.stageOuter : WordsUIConstants.stageInactive,
           innerColor: WordsUIConstants.stageInner,
@@ -275,6 +340,21 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           label: 'S$stage',
           note: '$stage',
           glow: _blinking.contains(stage),
+          knobWrapper: (knob) => LongPressDraggable<StageDrag>(
+            data: StageDrag(stage, count: 1),
+            child: knob,
+            childWhenDragging: Opacity(opacity: 0.35, child: knob),
+            feedback: const _KnobFeedback(count: 0, innerColor: WordsUIConstants.stageInner, stroke: null),
+            dragAnchorStrategy: knobDragAnchorStrategy,
+            feedbackOffset: Offset.zero,
+            maxSimultaneousDrags: stages[stage] > 0 ? 1 : 0,
+          ),
+        );
+
+        switchBody = DragTarget<StageDrag>(
+          onWillAccept: (d) => d != null && d.fromStage != stage,
+          onAccept: (d) => widget.onStageDrop?.call(d.fromStage, stage, d.count),
+          builder: (_, __, ___) => knobbed,
         );
       }
 
