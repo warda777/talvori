@@ -12,6 +12,11 @@ import 'package:talvori/features/words/application/level_selection_provider.dart
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
+// removed srs_mode_provider import to avoid SrsSystem conflicts; we use controller enum
+import 'package:talvori/features/words/ui/widgets/srs_mode_toggle.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/ui/widgets/srs_hybrid_wrapper.dart';
+
 
 // ===== KONSTANTEN =====
 const kAccentBlue = Color(0xFFB1CCFE);
@@ -59,6 +64,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
         categorySlug: widget.categorySlug,
         fallbackTitle: widget.title,
       );
+      // Sicherstellen: Toggle startet NICHT im Hybrid-Modus
+      final ctrl = ref.read(srsModeControllerProvider.notifier);
+      final st = ref.read(srsModeControllerProvider);
+      if (st.mode == SrsSystem.hybrid) {
+        // per Tap-Logik zurück (setzt auf lastNonHybrid)
+        ctrl.tap();
+      }
     });
   }
 
@@ -114,9 +126,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     }
 
 
+    final srs = ref.watch(srsModeControllerProvider);
+
     return Scaffold(
       body: SafeArea(
-                child: Column(
+        child: Stack(
+          children: [
+            Column(
                   children: [
             // FIX: fester Header – kein Flexible
             SizedBox(
@@ -164,17 +180,17 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                 wheelBottomGap: WordsLayout.wheelBottomGap,
                 accentColor: kAccentBlue,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                trailingRightBelow: const LearningEngineToggle(),
+                trailingRightBelow: const SrsModeToggle(),
               ),
             ),
 
             const SizedBox(height: WordsLayout.gapBelowTop),
 
             // FIX: Mittel + Levels scrollbar machen, damit nix überläuft
-            Expanded(
+          Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
-                      child: Column(
+            child: Column(
                         children: [
                     LearningStatusPanel(
                                 percent: dailyPercent,
@@ -230,6 +246,33 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                       ),
                       ),
                     ],
+                  ),
+              ),
+            ),
+          ],
+            ),
+
+            if (srs.counting) Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: Colors.black.withOpacity(0.75),
+                  alignment: const Alignment(0, -1.0),
+        child: Column(
+                    mainAxisSize: MainAxisSize.min,
+          children: [
+                      const Text(
+                        'System wird auf Hybrid umgestellt',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Colors.white70),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${srs.count}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w900, color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -165,7 +165,7 @@ class CategoryHeaderCapsule extends StatelessWidget {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 16), // mehr nach innen
+                              padding: const EdgeInsets.only(right: 70), // mehr nach innen
                               child: trailingRightBelow!,
                             ),
                           ),
