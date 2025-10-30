@@ -6,6 +6,8 @@ import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
 import '../widgets/widgets.dart';
 import 'package:talvori/features/words/ui/widgets/single_mode_switch_row.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/ui/widgets/srs_visuals.dart';
 
 
 class LearnModeScreen extends ConsumerStatefulWidget {
@@ -57,14 +59,89 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       final st = ref.watch(singleStageProvider);                 // z.B. 2
       final counts = ref.watch(singleSessionCountsProvider);     // (src, sr1, sr2)
 
+      // Modus → Stroke & Prefix ableiten
+      final srsMode = ref.watch(srsModeControllerProvider);
+      final kind = switch (srsMode.mode) {
+        SrsSystem.time => SrsKind.tSrs,
+        SrsSystem.adaptive => SrsKind.aSrs,
+        SrsSystem.hybrid => SrsKind.neutral,
+      };
+      final t = Theme.of(context);
+      // Stroke: T/A ausblenden, Hybrid beibehalten
+      final stroke = () {
+        switch (kind) {
+          case SrsKind.tSrs:
+          case SrsKind.aSrs:
+            return Colors.transparent;
+          case SrsKind.neutral:
+            return innerCapsuleStrokeColor(t, kind);
+        }
+      }();
+      // Inner-Fill je Modus
+      final innerFill = () {
+        switch (kind) {
+          case SrsKind.tSrs:
+            return Colors.black;
+          case SrsKind.aSrs:
+            return const Color(0xFF3A3A3A);
+          case SrsKind.neutral:
+            return const Color(0xFF2D2D2F);
+        }
+      }();
+      final prefix = switch (kind) {
+        SrsKind.tSrs => 'T',
+        SrsKind.aSrs => 'A',
+        SrsKind.neutral => '', // Hybrid
+      };
+      final stageLabelText = prefix.isEmpty ? 'S$st' : '$prefix$st';
+      final srPrefix = prefix; // '' => Hybrid zeigt 'R1/R2'
+
       switchesRow = SingleModeSwitchRow(
-        stageLabel: 'S$st',
-        srcCount: counts.src,    // ⬅ Session-Count statt stageCount
+        stageLabel: stageLabelText,
+        srcCount: counts.src,
         sr1Count: counts.sr1,
         sr2Count: counts.sr2,
+        srPrefix: srPrefix,               // ← NEU
+        innerStrokeColor: stroke,         // ← NEU
+        innerFillColor: innerFill,        // ← NEU
       );
     } else {
-      // dein bisheriges StageSwitchRow für S0–S5 / S1–S5
+      // Non-Single: S0–S5 / S1–S5
+      // Modus → Stroke & Prefix ableiten
+      final srsMode = ref.watch(srsModeControllerProvider);
+      final kind = switch (srsMode.mode) {
+        SrsSystem.time => SrsKind.tSrs,
+        SrsSystem.adaptive => SrsKind.aSrs,
+        SrsSystem.hybrid => SrsKind.neutral,
+      };
+      final t = Theme.of(context);
+      // Stroke: T/A ausblenden, Hybrid beibehalten
+      final stroke = () {
+        switch (kind) {
+          case SrsKind.tSrs:
+          case SrsKind.aSrs:
+            return Colors.transparent;
+          case SrsKind.neutral:
+            return innerCapsuleStrokeColor(t, kind);
+        }
+      }();
+      // Inner-Fill je Modus
+      final innerFill = () {
+        switch (kind) {
+          case SrsKind.tSrs:
+            return Colors.black;
+          case SrsKind.aSrs:
+            return const Color(0xFF3A3A3A);
+          case SrsKind.neutral:
+            return const Color(0xFF2D2D2F);
+        }
+      }();
+      final prefix = switch (kind) {
+        SrsKind.tSrs => 'T',
+        SrsKind.aSrs => 'A',
+        SrsKind.neutral => '',
+      };
+
       switchesRow = StageSwitchRow(
         counts: s, 
         goalPerStage: 100, 
@@ -73,10 +150,11 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
         colors: StageSwitchColors(
           newOuter: const Color(0xFFA05260),
           stageOuter: const Color(0xFFE4B866),
-          inner: const Color(0xFF2D2C2C),
-          disabledOuter: Colors.grey,
+          inner: innerFill,
+          disabledOuter: Colors.white,
+          innerStroke: stroke,
         ),
-        labels: const StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: 'S'),
+        labels: StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: prefix),
         visibleMask: mask,                        // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
       );
     }

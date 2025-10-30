@@ -8,10 +8,17 @@ class SingleModeSwitchRow extends StatelessWidget {
     required this.srcCount,
     required this.sr1Count,
     required this.sr2Count,
+    required this.srPrefix,        // NEU
+    this.innerStrokeColor,         // NEU
+    required this.innerFillColor,  // NEU: dynamische Füllfarbe innen
   });
 
   final String stageLabel;
   final int srcCount, sr1Count, sr2Count;
+  // neu:
+  final String srPrefix;              // z.B. 'T' / 'A' / '' (Hybrid)
+  final Color? innerStrokeColor;      // Stroke-Farbe für die innere Kapsel
+  final Color innerFillColor;         // Füllfarbe der inneren Kapsel
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +28,9 @@ class SingleModeSwitchRow extends StatelessWidget {
           ? (isFirst 
               ? const Color(0xFFA05260)  // Rot für den ersten Switch (S{n}) wenn aktiv
               : const Color(0xFFE4B866)) // Gold für andere aktive Switches
-          : Colors.grey;                // Grau für inaktive Switches
+          : Colors.white;               // Inaktiv jetzt komplett Weiß
       
-      final Color innerColor = const Color(0xFF2D2C2C); // Immer dunkelgrau für die innere Kapsel
+      final Color innerColor = innerFillColor; // aus Modus abgeleitet
       
       final bool highlight = count > 0 && count < 100; // Glow nur wenn 1-99 Karten
       
@@ -60,7 +67,7 @@ class SingleModeSwitchRow extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: innerColor,
                         borderRadius: BorderRadius.circular(21),
-                        border: Border.all(color: Colors.white24, width: 1),
+                        border: Border.all(color: (innerStrokeColor ?? Colors.white24), width: 1.6),
                         // KEIN Glow für die innere Kapsel - nur für den äußeren Container
                       ),
                       alignment: Alignment.center,
@@ -92,9 +99,9 @@ class SingleModeSwitchRow extends StatelessWidget {
     }
 
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      buildSwitch(stageLabel, srcCount, isFirst: true), // ← S{n} (Quelle) mit roter Farbe
-      buildSwitch('SR1', sr1Count),
-      buildSwitch('SR2', sr2Count),
+      buildSwitch(stageLabel, srcCount, isFirst: true),   // z.B. 'T2' / 'A2' / 'S2'
+      buildSwitch('${srPrefix}R1', sr1Count),             // z.B. 'TR1' / 'AR1' / 'R1'
+      buildSwitch('${srPrefix}R2', sr2Count),             // z.B. 'TR2' / 'AR2' / 'R2'
     ]);
   }
 }

@@ -4,6 +4,7 @@ import 'package:talvori/features/words/application/level_selection_provider.dart
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 class LevelsCard extends ConsumerStatefulWidget {
   final double height;
@@ -64,6 +65,39 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final s = (widget.stages.length >= 6) ? widget.stages : [0, 0, 0, 0, 0, 0];
+    final srs = ref.watch(srsModeControllerProvider);
+    // Stroke: in T/A ausblenden, in Hybrid wie gehabt
+    final Color stroke = () {
+      switch (srs.mode) {
+        case SrsSystem.time:
+          return Colors.transparent;
+        case SrsSystem.adaptive:
+          return Colors.transparent;
+        case SrsSystem.hybrid:
+          return Colors.white24;
+      }
+    }();
+    // Inner-Fill: T = schwarz, A = helleres Grau, Hybrid = 0xFF2D2D2F
+    final Color innerFill = () {
+      switch (srs.mode) {
+        case SrsSystem.time:
+          return Colors.black;
+        case SrsSystem.adaptive:
+          return const Color(0xFF3A3A3A);
+        case SrsSystem.hybrid:
+          return const Color(0xFF2D2D2F);
+      }
+    }();
+    final String prefix = () {
+      switch (srs.mode) {
+        case SrsSystem.time:
+          return 'T';
+        case SrsSystem.adaptive:
+          return 'A';
+        case SrsSystem.hybrid:
+          return '';
+      }
+    }();
 
     return SizedBox(
       width: double.infinity,
@@ -107,11 +141,12 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                     colors: StageSwitchColors(
                       newOuter: Color(0xFFA05260),
                       stageOuter: Color(0xFFE4B866),
-                      inner: Color(0xFF2D2C2C),
-                      disabledOuter: Colors.grey,
+                      inner: innerFill,
+                      disabledOuter: Colors.white,
+                      innerStroke: stroke,
                     ),
-                    labels: const StageSwitchLabels(
-                        newLabel: 'New', newNote: '0', stagePrefix: 'S'),
+                    labels: StageSwitchLabels(
+                        newLabel: 'New', newNote: '0', stagePrefix: prefix),
                     selectable: widget.mode == LevelSelectionMode.single,   // ← NEU
                     idlePulse: widget.mode == LevelSelectionMode.single && widget.selectingSingle, // ← NEU
                     selectedStageHighlight: (widget.mode == LevelSelectionMode.single) ? ref.read(singleStageProvider) : null, // ← NEU

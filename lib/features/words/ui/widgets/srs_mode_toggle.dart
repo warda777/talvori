@@ -9,7 +9,8 @@ class SrsModeToggle extends ConsumerWidget {
   static const _size = Size(80, 44);
   static const _gold = Color(0xFFE5B966);
   static const _track = Color(0xFF2C2C2C);
-  static const _thumb = Color(0xFFAFCCFE);
+  static const _thumb = _gold;
+  static const _outline = Color(0xFFAFCCFE); // blau: Stroke/Outline
   static const _activeTxt = _gold;
   static const _inactiveTxt = Colors.white70;
 
@@ -68,7 +69,7 @@ class SrsModeToggle extends ConsumerWidget {
                   onChanged: (_) {},
                   thumbColor: const MaterialStatePropertyAll(_thumb),
                   trackColor: const MaterialStatePropertyAll(_track),
-                  trackOutlineColor: const MaterialStatePropertyAll(_thumb),
+                  trackOutlineColor: const MaterialStatePropertyAll(_outline),
                 ),
               ),
             ),

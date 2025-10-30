@@ -69,7 +69,7 @@ class SrsModeController extends StateNotifier<SrsModeState> {
   void longPressStart() {
     if (state.counting || state.mode == SrsSystem.hybrid) return;
     _cancel();
-    state = state.copyWith(counting: true, count: 3);
+    state = state.copyWith(counting: true, count: 2);
     HapticFeedback.lightImpact();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {

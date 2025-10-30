@@ -14,8 +14,8 @@ class WordsUIConstants {
   static const Color stageInnerRed = Color(0xFFA05260);
   static const Color stageInnerDark = Color(0xFF2D2D2F);
   
-  /// Inaktive Stage-Switch Farbe
-  static Color get stageInactive => Colors.grey.shade400;
+  /// Inaktive Stage-Switch Farbe (jetzt komplett Weiß)
+  static Color get stageInactive => Colors.white;
   
   /// Loading-Indikator Farbe
   static const Color loadingIndicator = Colors.white54;

@@ -163,8 +163,9 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         // S0 (New) Switch
         switchBody = VerticalStageSwitch(
           count: s[0],
-          outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.grey),
+          outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.white),
           innerColor: widget.colors?.inner ?? Colors.grey,
+          innerStrokeColor: widget.colors?.innerStroke,
           highlight: s[0] > 0,
           completed: false,
           label: widget.labels?.newLabel ?? 'New',
@@ -175,6 +176,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       } else {
         // S1-S5 Switches
         final stage = i;
+        final prefix = widget.labels?.stagePrefix ?? 'S';
         
         // Bestimme, ob gerade Blink (hart) oder Idle-Pulse (soft) greift
         final bool hardGlow = _blinking.contains(stage);
@@ -183,12 +185,13 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
 
         switchBody = VerticalStageSwitch(
           count: s[stage],
-          outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.grey),
+          outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.white),
           innerColor: widget.colors?.inner ?? Colors.grey,
+          innerStrokeColor: widget.colors?.innerStroke,
           highlight: s[stage] > 0 && s[stage] < goal,
           completed: s[stage] >= goal,
-          label: '${widget.labels?.stagePrefix ?? 'S'}$stage',
-          note: '$stage',
+          label: '$prefix$stage',
+          note: '$prefix$stage',
           glow: hardGlow || softGlow || isSelected,
           pulseAnimation: softGlow ? _pulse : null,
           selectedHighlight: isSelected,
@@ -334,12 +337,14 @@ class StageSwitchColors {
   final Color stageOuter;
   final Color inner;
   final Color disabledOuter;
+  final Color? innerStroke; // NEU
 
   const StageSwitchColors({
     required this.newOuter,
     required this.stageOuter,
     required this.inner,
     required this.disabledOuter,
+    this.innerStroke,
   });
 }
 

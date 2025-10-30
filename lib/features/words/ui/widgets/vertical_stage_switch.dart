@@ -13,6 +13,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final bool glow; // NEU: für Blink-Effekt
   final Animation<double>? pulseAnimation; // NEU: für sanftes Pulsieren
   final bool selectedHighlight; // NEU: für Single-Modus Hervorhebung
+  final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
 
   const VerticalStageSwitch({
     super.key,
@@ -27,6 +28,7 @@ class VerticalStageSwitch extends StatelessWidget {
     this.glow = false, // NEU: Standard false
     this.pulseAnimation, // NEU: für sanftes Pulsieren
     this.selectedHighlight = false, // NEU: für Single-Modus Hervorhebung
+    this.innerStrokeColor,
   });
 
   double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
@@ -100,7 +102,7 @@ class VerticalStageSwitch extends StatelessWidget {
                                     ? Border.all(color: glowColor, width: 1)
                                     : (selectedHighlight
                                         ? Border.all(color: accentColor, width: 1)
-                                        : Border.all(color: Colors.white24, width: 1)),
+                                        : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
                                 boxShadow: boxShadow,
                               ),
                               alignment: Alignment.center,
@@ -126,7 +128,7 @@ class VerticalStageSwitch extends StatelessWidget {
                                 ? Border.all(color: const Color(0xFF00FF88), width: 1)
                                 : (selectedHighlight
                                     ? Border.all(color: const Color(0xFF6FD3FF), width: 1)
-                                    : Border.all(color: Colors.white24, width: 1)),
+                                    : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
                             boxShadow: glow
                                 ? [
                                     BoxShadow(
