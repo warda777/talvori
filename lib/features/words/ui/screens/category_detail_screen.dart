@@ -6,6 +6,7 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
+import 'package:talvori/features/words/ui/widgets/mode_toggle.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
@@ -163,6 +164,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                 wheelBottomGap: WordsLayout.wheelBottomGap,
                 accentColor: kAccentBlue,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                trailingRightBelow: const LearningEngineToggle(),
               ),
             ),
 

@@ -32,6 +32,9 @@ class CategoryHeaderCapsule extends StatelessWidget {
 
   final Color accentColor;
   final Color? backgroundColor;
+  
+  // Optional: zusätzliches Widget rechts unter den Add/Settings-Buttons (z. B. Toggle)
+  final Widget? trailingRightBelow;
 
   const CategoryHeaderCapsule({
     super.key,
@@ -56,6 +59,7 @@ class CategoryHeaderCapsule extends StatelessWidget {
     this.wheelBottomGap = WordsLayout.wheelBottomGap,
     this.accentColor = const Color(0xFFB1CCFE),
     this.backgroundColor,
+    this.trailingRightBelow,
   });
 
   @override
@@ -130,23 +134,42 @@ class CategoryHeaderCapsule extends StatelessWidget {
                   const Spacer(),
                   Transform.translate(
                     offset: Offset(rightBtnsOffsetX, rightBtnsOffsetY),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        GlowCircleButton(
-                          size: 62,
-                          onTap: onAdd,
-                          child: const Icon(Icons.add, color: Colors.white, size: 28),
-                          outlineColor: accentColor,
-                          glowColor: accentColor,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 24),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                            GlowCircleButton(
+                              size: 62,
+                              onTap: onAdd,
+                              child: const Icon(Icons.add, color: Colors.white, size: 28),
+                              outlineColor: accentColor,
+                              glowColor: accentColor,
+                            ),
+                            const SizedBox(width: 10),
+                            GlowCircleButton(
+                              size: 62,
+                              onTap: onSettings,
+                              child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
+                              outlineColor: accentColor,
+                              glowColor: accentColor,
+                            ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 10),
-                        GlowCircleButton(
-                          size: 62,
-                          onTap: onSettings,
-                          child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
-                          outlineColor: accentColor,
-                          glowColor: accentColor,
-                        ),
+                        if (trailingRightBelow != null) ...[
+                          const SizedBox(height: 25), // weiter nach unten
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16), // mehr nach innen
+                              child: trailingRightBelow!,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

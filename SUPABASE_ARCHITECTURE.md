@@ -169,6 +169,40 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 **Rückgabe:** Stufen-Array, Gesamtanzahl, fällige Wörter
 **Verwendung:** `fetchCategoryProgress()` - Fortschritts-Anzeige
 
+### Single-Session (Single Mode)
+
+#### `fn_single_session_seed`
+
+**Zweck:** Startzustand für Single-Session vorbereiten (füllt SRC-Bucket)
+**Parameter:** `p_category_id` (String), `p_stage` (Integer), `p_limit` (Integer)
+**Verwendung:** `singleSeed(catId, stage)`
+
+#### `fn_single_session_counts`
+
+**Zweck:** Zähler für Session-Buckets ermitteln
+**Parameter:** `p_category_id` (String), `p_stage` (Integer)
+**Rückgabe:** `src`, `sr1`, `sr2` (Integer)
+**Verwendung:** `singleCounts(catId, stage)`
+
+#### `fn_single_session_move`
+
+**Zweck:** Aktuelle Karte in SR1/SR2 verschieben
+**Parameter:** `p_category_id` (String), `p_stage` (Integer), `p_word_id` (String), `p_correct` (Boolean)
+**Verwendung:** `singleMove(catId, stage, wordId, correct)`
+
+#### `fn_single_session_reset`
+
+**Zweck:** Session zurücksetzen (alle Karten zurück nach SRC)
+**Parameter:** `p_category_id` (String), `p_stage` (Integer)
+**Verwendung:** `singleReset(catId, stage)`
+
+#### `fn_single_session_next`
+
+**Zweck:** Nächste Karte aus SRC (Single-Session) liefern
+**Parameter:** `p_category_id` (String), `p_stage` (Integer)
+**Rückgabe:** `{ word_id, bucket }` (als Map oder List mit erster Zeile)
+**Verwendung:** `singleNextWordId(catId, stage)`
+
 ### Kategorie-Management Functions
 
 #### `fn_reset_user_category`
