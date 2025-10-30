@@ -84,8 +84,8 @@ class SrsModeToggle extends ConsumerWidget {
               decoration: !isAdaptive
                   ? BoxDecoration(
                       boxShadow: [
-                        BoxShadow(color: _activeTxt.withOpacity(0.28), blurRadius: 8, spreadRadius: 1, offset: const Offset(0, 2)),
-                        BoxShadow(color: _activeTxt.withOpacity(0.18), blurRadius: 18, spreadRadius: 2, offset: const Offset(0, 8)),
+                        BoxShadow(color: _activeTxt.withOpacity(0.20), blurRadius: 16, spreadRadius: 3, offset: const Offset(0, 6)),
+                        BoxShadow(color: _activeTxt.withOpacity(0.10), blurRadius: 20, spreadRadius: 2, offset: const Offset(0, 6)),
                       ],
                     )
                   : null,
@@ -113,8 +113,8 @@ class SrsModeToggle extends ConsumerWidget {
               decoration: isAdaptive
                   ? BoxDecoration(
                       boxShadow: [
-                        BoxShadow(color: _activeTxt.withOpacity(0.28), blurRadius: 8, spreadRadius: 1, offset: const Offset(0, 2)),
-                        BoxShadow(color: _activeTxt.withOpacity(0.18), blurRadius: 18, spreadRadius: 2, offset: const Offset(0, 8)),
+                        BoxShadow(color: _activeTxt.withOpacity(0.20), blurRadius: 16, spreadRadius: 1, offset: const Offset(0, 6)),
+                        BoxShadow(color: _activeTxt.withOpacity(0.10), blurRadius: 20, spreadRadius: 2, offset: const Offset(0, 6)),
                       ],
                     )
                   : null,
