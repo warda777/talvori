@@ -9,16 +9,23 @@ import 'package:talvori/features/words/ui/widgets/single_mode_switch_row.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/srs_visuals.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart';
 
 
 class LearnModeScreen extends ConsumerStatefulWidget {
   final String categoryId;
   final String title; // z. B. "Money & Shopping"
+  
+  // ⬇️ NEU: Custom Wheel für QuickSets
+  final List<String>? customWheelLabels;
+  final int? customWheelInitialIndex;
 
   const LearnModeScreen({
     super.key,
     required this.categoryId,
     required this.title,
+    this.customWheelLabels,        // <— NEU
+    this.customWheelInitialIndex,  // <— NEU
   });
 
   @override
@@ -31,10 +38,27 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   // Controller für Switch-Row Blink-Effekte
   final _switchCtrl = StageSwitchRowController();
 
+  // ⬇️ NEU: State für Custom Wheel
+  late List<String> _wheelLabels;
+  late int _wheelIndex;
 
   @override
   void initState() {
     super.initState();
+    
+    // ⬇️ NEU: Wheel-Labels initialisieren (ganz am Anfang)
+    // Wenn übergeben, nutze die QuickSets-Wheel, sonst die bisherigen Kategorien
+    if (widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty) {
+      _wheelLabels = widget.customWheelLabels!;
+      _wheelIndex = (widget.customWheelInitialIndex ?? 0)
+          .clamp(0, _wheelLabels.length - 1);
+    } else {
+      // Behalte die bestehende Logik für die normale Kategorie-Wheel
+      // Die Labels werden später aus categoriesProvider geholt
+      _wheelLabels = [];
+      _wheelIndex = 0;
+    }
+    
     _controller = ref.read(learnModeControllerProvider.notifier);
 
     // Init nach 1. Frame (damit Provider hängt)
@@ -42,8 +66,25 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       _controller.init(
         categoryId: widget.categoryId,
         title: widget.title,
+        initialQuickSetsIndex: widget.categoryId == 'quicksets' ? _wheelIndex : null,
       );
     });
+  }
+
+  // ⬇️ NEU: Helper-Funktion für QuickSets-Filter
+  WordListFilter _quicksetsFilterFor(int idx) {
+    // nur aktiv, wenn wir im QuickSets-Modus sind
+    if (widget.categoryId != 'quicksets') {
+      return const WordListFilter(WordFilterKind.query, '');
+    }
+    switch (idx) {
+      case 0: return const WordListFilter(WordFilterKind.query, '');
+      case 1: return const WordListFilter(WordFilterKind.about, 'my-words');
+      case 2: return const WordListFilter(WordFilterKind.about, 'favorites');
+      case 3: return const WordListFilter(WordFilterKind.about, 'known-words');
+      case 4: return const WordListFilter(WordFilterKind.about, 'my-mix');
+      default: return const WordListFilter(WordFilterKind.query, '');
+    }
   }
 
 
@@ -170,16 +211,33 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
           if (wasLocked) {
             await _switchCtrl.blinkS0Once();
           }
-        },
-      );
-    }
+      },
+    );
+  }
 
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            const HeaderBar(),
+            HeaderBar(
+              // ⬇️ NEU: Custom Wheel Labels übergeben, wenn vorhanden
+              customWheelLabels: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  ? _wheelLabels
+                  : null,
+              customWheelInitialIndex: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  ? _wheelIndex
+                  : null,
+              customOnWheelChanged: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  ? (idx, label) {
+                      setState(() => _wheelIndex = idx);
+                      // ⬇️ NEU: Bei QuickSets Wörter neu laden mit neuem Filter
+                      if (widget.categoryId == 'quicksets') {
+                        _controller.loadWordsForQuickSets(idx);
+                      }
+                    }
+                  : null,
+            ),
             const CardArea(),
             switchesRow,
             const SizedBox(height: WordsUIConstants.sectionSpacing), // Mehr Luft zwischen Switches und Buttons

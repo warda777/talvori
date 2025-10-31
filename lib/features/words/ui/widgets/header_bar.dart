@@ -6,14 +6,28 @@ import 'package:talvori/features/words/ui/ui_constants.dart';
 import 'category_wheel.dart';
 
 class HeaderBar extends ConsumerWidget {
-  const HeaderBar({super.key});
+  // ⬇️ NEU: Optionale Custom Wheel Labels für QuickSets
+  final List<String>? customWheelLabels;
+  final int? customWheelInitialIndex;
+  final void Function(int index, String label)? customOnWheelChanged;
+
+  const HeaderBar({
+    super.key,
+    this.customWheelLabels,
+    this.customWheelInitialIndex,
+    this.customOnWheelChanged,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = ref.watch(isLoadingProvider);
-    final categories = ref.watch(categoriesProvider);
-    final s = ref.watch(learnModeControllerProvider);
-    final c = ref.read(learnModeControllerProvider.notifier);
+    
+    // ⬇️ NEU: Verwende Custom Wheel wenn vorhanden, sonst normale Kategorien
+    final useCustomWheel = customWheelLabels != null && customWheelLabels!.isNotEmpty;
+    
+    final categories = useCustomWheel ? null : ref.watch(categoriesProvider);
+    final s = useCustomWheel ? null : ref.watch(learnModeControllerProvider);
+    final c = useCustomWheel ? null : ref.read(learnModeControllerProvider.notifier);
 
     return SizedBox(
       height: WordsUIConstants.headerHeight,
@@ -42,12 +56,18 @@ class HeaderBar extends ConsumerWidget {
                         ),
                       )
                     : CategoryWheel(
-                        categories: categories.map((c) => c.name).toList(),
-                        initialIndex: s.selectedCategoryIndex,
-                        onChanged: (idx, label) async {
-                          // Kategorie umschalten → macht Controller (lädt Stages + Queue)
-                          await c.selectCategoryIndex(idx);
-                        },
+                        categories: useCustomWheel
+                            ? customWheelLabels!
+                            : categories!.map((c) => c.name).toList(),
+                        initialIndex: useCustomWheel
+                            ? (customWheelInitialIndex ?? 0)
+                            : s!.selectedCategoryIndex,
+                        onChanged: useCustomWheel
+                            ? (customOnWheelChanged ?? (idx, label) {})
+                            : (idx, label) async {
+                                // Kategorie umschalten → macht Controller (lädt Stages + Queue)
+                                await c!.selectCategoryIndex(idx);
+                              },
                       ),
               ),
             ),

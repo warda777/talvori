@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart';
 
 /// ---------- State ----------
 
@@ -146,6 +147,10 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   Timer? _wordTimer;
   SfxService? _sfx;
+  
+  // ⬇️ NEU: QuickSets-Index für Filter-Mapping
+  int? _quickSetsIndex;
+  final _repo = SupabaseWordRepository();
 
   // ---- SRS-Einstellungen und Konstanten ----
   
@@ -176,12 +181,40 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   String get _stageStoreKey => 'learn_stages_$_currentCatId';
 
+  // ⬇️ NEU: Prüfe ob virtuelle Kategorie (z.B. QuickSets)
+  bool _isVirtualCategory(String catId) {
+    return catId == 'quicksets' || catId.isEmpty;
+  }
+  
+  // ⬇️ NEU: Helper-Funktion für QuickSets-Filter (identisch zum Screen)
+  WordListFilter _quicksetsFilterFor(int idx) {
+    switch (idx) {
+      case 0: return const WordListFilter(WordFilterKind.query, '');
+      case 1: return const WordListFilter(WordFilterKind.about, 'my-words');
+      case 2: return const WordListFilter(WordFilterKind.about, 'favorites');
+      case 3: return const WordListFilter(WordFilterKind.about, 'known-words');
+      case 4: return const WordListFilter(WordFilterKind.about, 'my-mix');
+      default: return const WordListFilter(WordFilterKind.query, '');
+    }
+  }
+
   // ---- Public API (Screen ruft das auf) ----
 
-  Future<void> init({required String categoryId, required String title}) async {
+  Future<void> init({
+    required String categoryId,
+    required String title,
+    int? initialQuickSetsIndex,
+  }) async {
     _set(categoryId: categoryId, title: title);
+    _quickSetsIndex = initialQuickSetsIndex;
     _sfx = ref.read(sfxProvider);
     await _loadCategories();
+  }
+  
+  // ⬇️ NEU: Wörter für QuickSets mit Filter laden
+  Future<void> loadWordsForQuickSets(int index) async {
+    _quickSetsIndex = index;
+    await _loadWords();
   }
 
   void onSwipeRight() {
@@ -239,11 +272,20 @@ class LearnModeController extends Notifier<LearnModeState> {
   Future<void> _loadCategories() async {
     _set(loading: true);
     try {
-      final cats = await fetchAllCategories();
-      final sel = _findInitialIndex(cats);
-      _set(categories: cats, selectedCategoryIndex: sel);
-      await _loadStageData();
-      await _loadWords();
+      // ⬇️ NEU: Guard für virtuelle Kategorien
+      if (_isVirtualCategory(state.categoryId)) {
+        // Bei virtuellen Kategorien keine echten DB-Kategorien laden
+        // Kategorien bleiben leer (Custom Wheel wird vom Screen übergeben)
+        _set(categories: const [], selectedCategoryIndex: 0);
+        await _loadStageData();
+        await _loadWords();
+      } else {
+        final cats = await fetchAllCategories();
+        final sel = _findInitialIndex(cats);
+        _set(categories: cats, selectedCategoryIndex: sel);
+        await _loadStageData();
+        await _loadWords();
+      }
     } finally {
       _set(loading: false);
     }
@@ -257,6 +299,19 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   Future<void> _loadStageData() async {
+    final catId = _currentCatId;
+    
+    // ⬇️ NEU: Guard für virtuelle Kategorien
+    if (_isVirtualCategory(catId)) {
+      // Bei virtuellen Kategorien keine DB-RPC aufrufen
+      // Defensive Defaults setzen
+      _set(
+        stages: const [0, 0, 0, 0, 0, 0],
+        totalWordsInCategory: 0,
+      );
+      return;
+    }
+
     bool hasLocal = false;
 
     try {
@@ -274,7 +329,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
 
       // 2) Backend
-      final prog = await fetchCategoryProgress(_currentCatId);
+      final prog = await fetchCategoryProgress(catId);
       if (!hasLocal) {
         _set(stages: prog.stages);
       }
@@ -293,6 +348,50 @@ class LearnModeController extends Notifier<LearnModeState> {
   Future<void> _loadWords() async {
     try {
       final catId = _currentCatId;
+      
+      // ⬇️ NEU: Guard für virtuelle Kategorien mit Filter-Logik
+      if (_isVirtualCategory(catId)) {
+        // Bei virtuellen Kategorien (QuickSets) verwende fetchByFilter
+        if (_quickSetsIndex == null) {
+          _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
+          return;
+        }
+        
+        // Filter basierend auf Wheel-Index erstellen
+        final filter = _quicksetsFilterFor(_quickSetsIndex!);
+        final wordsList = await _repo.fetchByFilter(filter, limit: 200);
+        
+        if (wordsList == null || wordsList.isEmpty) {
+          _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
+          return;
+        }
+        
+        // Word-Liste zu WordUserView konvertieren
+        // Nutze srsStage aus Word (wurde bereits aus v_words_user gemappt)
+        // Hinweis: Word hat kein level-Feld direkt, also null setzen
+        final wordViews = wordsList.map((w) => WordUserView(
+          id: w.id,
+          text: w.text,
+          translation: w.translation,
+          level: null, // Word hat kein level-Feld
+          srsStage: w.srsStage, // Nutze srsStage aus Word
+        )).toList();
+        
+        // Client-seitige Filterung
+        final allowed = ref.read(allowedStagesProvider);
+        final filteredWords = wordViews.where((w) => allowed.contains(w.srsStage)).toList();
+        
+        if (filteredWords.isEmpty) {
+          _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
+          return;
+        }
+        
+        final queue = _buildQueueDueFirst(filteredWords);
+        final ids = queue.map((w) => w.id).toList();
+        _set(wordQueue: queue, shuffledWordIds: ids, index: 0);
+        return;
+      }
+      
       final mode = ref.read(levelSelectionProvider);
       final singleStage = ref.read(singleStageProvider); // 1..5, nur für Single relevant
       

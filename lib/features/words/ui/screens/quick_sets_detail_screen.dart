@@ -11,6 +11,7 @@ import 'package:talvori/features/words/application/level_selection_provider.dart
 import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/application/quick_sets_providers.dart';
 
 /// “Schnellzugriff”-Detailseite:
 /// Gleiche Optik wie CategoryDetailScreen, aber die Wheel hat NUR diese 5 Einträge:
@@ -88,26 +89,13 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
   }
 
   Future<void> _startLearnMode() async {
-    // Wir starten LearnMode "genau wie bei CategoryDetail" – aber Konzept:
-    // Der LearnMode soll die Wheel NUR mit diesen 5 Labels zeigen.
-    //
-    // Variante A (ohne Eingriff in Controller): wir geben den Titel mit
-    // und nutzen die vorhandene Kategorie-Logik; die Wheel-Anzeige (HeaderBar)
-    // bezieht ihre Labels aus categoriesProvider. Falls du bereits eine
-    // "override categories"-Option am LearnMode/Controller hast, nutze die.
-    //
-    // Variante B (kleine Erweiterung später): LearnModeController bekommt
-    // eine `setCustomCategories(List<String> labels, int initialIndex)`-API.
-    //
-    // Für jetzt starten wir den Screen, die eigentliche Einschränkung der Wheel
-    // bauen wir im nächsten Schritt in den LearnModeController ein (1 kleine Methode).
-    // TODO: categoryId muss für LearnModeScreen bereitgestellt werden
-    // Für QuickSets können wir eine dummy-ID verwenden oder den Controller erweitern
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => LearnModeScreen(
-          categoryId: '', // TODO: Muss angepasst werden für QuickSets
+          categoryId: 'quicksets',               // stabile, virtuelle ID
           title: _title,
+          customWheelLabels: _labels,            // <— NEU
+          customWheelInitialIndex: _selected,    // <— NEU
         ),
       ),
     );
@@ -121,15 +109,10 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
     final mask = List<bool>.generate(6, (i) => allowed.contains(i));
     final srs = ref.watch(srsModeControllerProvider);
     
-    // Platzhalter-Werte (später aus Repo)
-    const dailyTotal = 0;
-    const dailyTarget = 20;
-    const dailyPercent = 0.0;
-    const totalWords = 0;
-    const learnedWords = 0;
-    const overallPercent = 0.0;
-    const overallLabel = '0/0';
-    const stages = [0, 0, 0, 0, 0, 0];
+    // ⬇️ NEU: Stats aus Provider laden (für aktuell gewählte Pill)
+    final stats = ref.watch(quickSetsStatsProvider(_selected));
+    
+    const stages = [0, 0, 0, 0, 0, 0]; // TODO: später aus echten Daten
 
     const kAccentBlue = Color(0xFFB1CCFE);
 
@@ -177,14 +160,45 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
                     padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
                     child: Column(
                       children: [
-                        LearningStatusPanel(
-                          percent: dailyPercent,
-                          percentLabel: '${(dailyPercent * 100).round()}%',
-                          newCount: 0,
-                          repeatsCount: 0,
-                          repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
-                          overallPercent: overallPercent,
-                          overallLabel: overallLabel,
+                        // ⬇️ NEU: Stats aus Provider verwenden
+                        stats.when(
+                          data: (s) {
+                            final overallPercent = s.total == 0 ? 0.0 : s.learned / s.total;
+                            final overallLabel = '${s.learned}/${s.total}';
+
+                            // Daily-Progress
+                            final dailyTotal = s.dueToday; // fällige Wiederholungen heute
+                            final dailyTarget = s.newTotal + s.dueToday; // grobe Zielanzeige
+                            final dailyPercent = dailyTarget == 0 ? 0.0 : dailyTotal / dailyTarget;
+
+                            return LearningStatusPanel(
+                              percent: dailyPercent,
+                              percentLabel: '${(dailyPercent * 100).round()}%',
+                              newCount: s.newTotal,
+                              repeatsCount: s.dueToday,
+                              repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
+                              overallPercent: overallPercent,
+                              overallLabel: overallLabel,
+                            );
+                          },
+                          loading: () => const LearningStatusPanel(
+                            percent: 0,
+                            percentLabel: '0%',
+                            newCount: 0,
+                            repeatsCount: 0,
+                            repeatsOfTargetLabel: '0/0',
+                            overallPercent: 0,
+                            overallLabel: '0/0',
+                          ),
+                          error: (_, __) => const LearningStatusPanel(
+                            percent: 0,
+                            percentLabel: '0%',
+                            newCount: 0,
+                            repeatsCount: 0,
+                            repeatsOfTargetLabel: '0/0',
+                            overallPercent: 0,
+                            overallLabel: '0/0',
+                          ),
                         ),
 
                         const SizedBox(height: WordsLayout.gapAboveBottom),

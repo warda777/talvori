@@ -206,6 +206,49 @@ Future<CategoryProgress> fetchCategoryProgress(String categoryId) async {
 class SupabaseWordRepository {
   final _sb = Supabase.instance.client;
 
+  // ⬇️ NEU: Helper-Funktion zum Erstellen von Query-Parametern aus Filter
+  Map<String, String> _buildQueryParamsForFilter(WordListFilter filter) {
+    final params = <String, String>{};
+    
+    switch (filter.kind) {
+      case WordFilterKind.category:
+        params['category_id'] = 'eq.${filter.value}';
+        break;
+      case WordFilterKind.level:
+        params['level'] = 'eq.${filter.value}';
+        break;
+      case WordFilterKind.pos:
+        params['pos'] = 'eq.${filter.value}';
+        break;
+      case WordFilterKind.domain:
+        params['group_slug'] = 'eq.${filter.value}';
+        break;
+      case WordFilterKind.about:
+        // QuickSets-Slugs mit User-Flags filtern
+        switch (filter.value) {
+          case 'my-words':
+            params['in_my_words'] = 'eq.true';
+            break;
+          case 'favorites':
+            params['favorite_user'] = 'eq.true';
+            break;
+          case 'known-words':
+            params['srs_stage_user'] = 'gte.1';
+            break;
+          case 'my-mix':
+            params['picked_user'] = 'eq.true';
+            break;
+          default:
+            params['category_slug'] = 'eq.${filter.value}';
+        }
+        break;
+      case WordFilterKind.query:
+        // Query-Filter hat keine zusätzlichen Parameter
+        break;
+    }
+    
+    return params;
+  }
 
   Future<List<Word>> fetchRecentWords({int limit = 20}) async {
     final data = await _sb
@@ -243,7 +286,8 @@ class SupabaseWordRepository {
     String? query,
     SortMode? sort,
   }) async {
-    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/words_view';
+    // ⬇️ NEU: Verwende v_words_user für User-Flags (statt words_view)
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
     final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
 
     // Lokaler Schlüssel pro Filter+Sort-Kombination
@@ -259,8 +303,9 @@ class SupabaseWordRepository {
     };
 
     // Querystring aufbauen
+    // ⬇️ NEU: User-Flags mit auswählen (für QuickSets-Filter)
     final params = <String>[
-      'select=id,text,translation,level,pos,created_at,category_id',
+      'select=id,text,translation,level,pos,created_at,category_id,in_my_words,favorite_user,srs_stage_user,picked_user',
       'limit=$limit',
       'offset=$offset',
       'order=${sort == SortMode.newest ? 'created_at.desc' : 'text.asc'}',
@@ -281,7 +326,23 @@ class SupabaseWordRepository {
         params.add('group_slug=eq.${filter.value}');
         break;
       case WordFilterKind.about:
-        params.add('category_slug=eq.${filter.value}');
+        // ⬇️ NEU: QuickSets-Slugs mit User-Flags filtern
+        switch (filter.value) {
+          case 'my-words':
+            params.add('in_my_words=eq.true');          // ← nutzt bool-Spalte
+            break;
+          case 'favorites':
+            params.add('favorite_user=eq.true');        // ← nutzt bool-Spalte
+            break;
+          case 'known-words':
+            params.add('srs_stage_user=gte.1');         // ← "ich kenne" = ab S1
+            break;
+          case 'my-mix':
+            params.add('picked_user=eq.true');          // ← dein Mix
+            break;
+          default:
+            params.add('category_slug=eq.${filter.value}'); // fallback
+        }
         break;
       case WordFilterKind.query:
         break;
@@ -317,7 +378,15 @@ class SupabaseWordRepository {
 
     // Daten parsen
     final List data = jsonDecode(resp.body);
-    final words = data.map((m) => Word.fromJson(m)).toList();
+    // ⬇️ NEU: Map srs_stage_user zu srs_stage für Word.fromJson
+    final words = data.map((m) {
+      final Map<String, dynamic> json = Map<String, dynamic>.from(m);
+      // v_words_user hat srs_stage_user, Word.fromJson erwartet srs_stage
+      if (json.containsKey('srs_stage_user') && !json.containsKey('srs_stage')) {
+        json['srs_stage'] = json['srs_stage_user'];
+      }
+      return Word.fromJson(json);
+    }).toList();
 
     // Dedupe nach ID
     final seen = <String>{};
@@ -326,6 +395,140 @@ class SupabaseWordRepository {
       if (seen.add(w.id)) unique.add(w);
     }
     return unique;
+  }
+
+  // ⬇️ NEU: Count-APIs für QuickSets (nutzen HTTP-API wie fetchByFilter)
+  Future<int> countByFilter(WordListFilter filter) async {
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
+    
+    final params = <String>[
+      'select=id',
+      'limit=1',
+      'prefer=count=exact',
+    ];
+    
+    final queryParams = _buildQueryParamsForFilter(filter);
+    params.addAll(queryParams.entries.map((e) => '${e.key}=${e.value}'));
+    
+    final uri = Uri.parse('$baseUrl?${params.join('&')}');
+    final headers = {
+      'apikey': apiKey,
+      'Authorization': 'Bearer $apiKey',
+      'Accept': 'application/json',
+      'Prefer': 'count=exact',
+    };
+    
+    final resp = await http.head(uri, headers: headers);
+    final countHeader = resp.headers['content-range'];
+    if (countHeader != null) {
+      // Format: "0-0/123" -> 123
+      final match = RegExp(r'/(\d+)$').firstMatch(countHeader);
+      if (match != null) {
+        return int.parse(match.group(1)!);
+      }
+    }
+    return 0;
+  }
+
+  Future<int> countLearnedByFilter(WordListFilter filter) async {
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
+    
+    final params = <String>[
+      'select=id',
+      'limit=1',
+      'prefer=count=exact',
+      'srs_stage_user=gte.1',
+    ];
+    
+    final queryParams = _buildQueryParamsForFilter(filter);
+    params.addAll(queryParams.entries.map((e) => '${e.key}=${e.value}'));
+    
+    final uri = Uri.parse('$baseUrl?${params.join('&')}');
+    final headers = {
+      'apikey': apiKey,
+      'Authorization': 'Bearer $apiKey',
+      'Accept': 'application/json',
+      'Prefer': 'count=exact',
+    };
+    
+    final resp = await http.head(uri, headers: headers);
+    final countHeader = resp.headers['content-range'];
+    if (countHeader != null) {
+      final match = RegExp(r'/(\d+)$').firstMatch(countHeader);
+      if (match != null) {
+        return int.parse(match.group(1)!);
+      }
+    }
+    return 0;
+  }
+
+  Future<int> countNewByFilter(WordListFilter filter) async {
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
+    
+    final params = <String>[
+      'select=id',
+      'limit=1',
+      'prefer=count=exact',
+      'srs_stage_user=eq.0',
+    ];
+    
+    final queryParams = _buildQueryParamsForFilter(filter);
+    params.addAll(queryParams.entries.map((e) => '${e.key}=${e.value}'));
+    
+    final uri = Uri.parse('$baseUrl?${params.join('&')}');
+    final headers = {
+      'apikey': apiKey,
+      'Authorization': 'Bearer $apiKey',
+      'Accept': 'application/json',
+      'Prefer': 'count=exact',
+    };
+    
+    final resp = await http.head(uri, headers: headers);
+    final countHeader = resp.headers['content-range'];
+    if (countHeader != null) {
+      final match = RegExp(r'/(\d+)$').firstMatch(countHeader);
+      if (match != null) {
+        return int.parse(match.group(1)!);
+      }
+    }
+    return 0;
+  }
+
+  Future<int> countDueTodayByFilter(WordListFilter filter) async {
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
+    
+    final params = <String>[
+      'select=id',
+      'limit=1',
+      'prefer=count=exact',
+      'srs_stage_user=gte.1',
+      'next_due_at_user=lte.${DateTime.now().toIso8601String()}',
+    ];
+    
+    final queryParams = _buildQueryParamsForFilter(filter);
+    params.addAll(queryParams.entries.map((e) => '${e.key}=${e.value}'));
+    
+    final uri = Uri.parse('$baseUrl?${params.join('&')}');
+    final headers = {
+      'apikey': apiKey,
+      'Authorization': 'Bearer $apiKey',
+      'Accept': 'application/json',
+      'Prefer': 'count=exact',
+    };
+    
+    final resp = await http.head(uri, headers: headers);
+    final countHeader = resp.headers['content-range'];
+    if (countHeader != null) {
+      final match = RegExp(r'/(\d+)$').firstMatch(countHeader);
+      if (match != null) {
+        return int.parse(match.group(1)!);
+      }
+    }
+    return 0;
   }
 
   Future<void> addToMyWords(String wordId) async {
