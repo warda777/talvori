@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
+import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 
 typedef VoidSnack = void Function(String);
 
@@ -47,9 +48,11 @@ Future<void> showCategoryPopup({
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FilledButton.tonal(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(context);
-                      onTodo('All words');
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 0)),
+                      );
                     },
                     style: pill(context),
                     child: const Text('All words'),
@@ -57,9 +60,8 @@ Future<void> showCategoryPopup({
                   FilledButton.tonal(
                     onPressed: () async {
                       Navigator.pop(context);
-                      final nav = Navigator.of(context);
-                      await nav.push(
-                        MaterialPageRoute(builder: (_) => const MyWordsScreen()),
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 1)),
                       );
                       await onRefreshMyWords();
                     },
@@ -74,20 +76,24 @@ Future<void> showCategoryPopup({
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FilledButton.tonal(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(context);
-                      onTodo('Favorites');
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 2)),
+                      );
                     },
                     style: pill(context),
                     child: const Text('Favorites'),
                   ),
                   FilledButton.tonal(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(context);
-                      onTodo('Daily picks');
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 3)),
+                      );
                     },
                     style: pill(context),
-                    child: const Text('Daily picks'),
+                    child: const Text('Words I know'),
                   ),
                 ],
               ),

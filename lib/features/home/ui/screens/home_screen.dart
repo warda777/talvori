@@ -5,6 +5,7 @@ import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
+import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';

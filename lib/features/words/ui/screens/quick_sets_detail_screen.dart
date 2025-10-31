@@ -1,0 +1,267 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/levels_card.dart';
+import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
+import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
+import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/application/level_selection_provider.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
+import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+
+/// “Schnellzugriff”-Detailseite:
+/// Gleiche Optik wie CategoryDetailScreen, aber die Wheel hat NUR diese 5 Einträge:
+/// [All words, My words, Favorites, Words I know, My mix]
+///
+/// - Start -> LearnMode nur mit diesen 5 Kategorien im Wheel
+/// - Vocabs -> WordList mit zum Tab passenden Filter (so gut wie derzeit möglich)
+///
+/// WICHTIG: “Words I know” ersetzt “Daily Picks”.
+class QuickSetsDetailScreen extends ConsumerStatefulWidget {
+  /// Optional: Welcher Tab zuerst ausgewählt sein soll (0..4)
+  final int initialIndex;
+
+  const QuickSetsDetailScreen({super.key, this.initialIndex = 0});
+
+  @override
+  ConsumerState<QuickSetsDetailScreen> createState() => _QuickSetsDetailScreenState();
+}
+
+class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
+  static const _labels = <String>[
+    'All words',
+    'My words',
+    'Favorites',
+    'Words I know',
+    'My mix',
+  ];
+
+  int _selected = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.initialIndex.clamp(0, _labels.length - 1);
+  }
+
+  // Mapping der Tabs auf WordList-Filter.
+  // Hinweis:
+  // - “All words” => query (kein Filter)
+  // - “My words” / “Favorites” / “Words I know” / “My mix”
+  //   gehen derzeit über “about”-Slug. Wenn dein Repo andere Keys nutzt,
+  //   passe die Slugs unten zentral an.
+  WordListFilter _toFilter(int i) {
+    switch (i) {
+      case 0:
+        return const WordListFilter(WordFilterKind.query, '');
+      case 1:
+        return const WordListFilter(WordFilterKind.about, 'my-words');
+      case 2:
+        return const WordListFilter(WordFilterKind.about, 'favorites');
+      case 3:
+        return const WordListFilter(WordFilterKind.about, 'known-words');
+      case 4:
+        return const WordListFilter(WordFilterKind.about, 'my-mix');
+      default:
+        return const WordListFilter(WordFilterKind.query, '');
+    }
+  }
+
+  // Title oberhalb (links) – passend zur bestehenden Optik
+  String get _title => _labels[_selected];
+
+  Future<void> _openWordList() async {
+    final filter = _toFilter(_selected);
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WordListScreen(
+          filter: filter,
+          titleOverride: _title,
+          // Hinweis:
+          // overrideCategoryId/Label bleiben leer; wir kommen ja nicht aus einer echten DB-Kategorie.
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startLearnMode() async {
+    // Wir starten LearnMode "genau wie bei CategoryDetail" – aber Konzept:
+    // Der LearnMode soll die Wheel NUR mit diesen 5 Labels zeigen.
+    //
+    // Variante A (ohne Eingriff in Controller): wir geben den Titel mit
+    // und nutzen die vorhandene Kategorie-Logik; die Wheel-Anzeige (HeaderBar)
+    // bezieht ihre Labels aus categoriesProvider. Falls du bereits eine
+    // "override categories"-Option am LearnMode/Controller hast, nutze die.
+    //
+    // Variante B (kleine Erweiterung später): LearnModeController bekommt
+    // eine `setCustomCategories(List<String> labels, int initialIndex)`-API.
+    //
+    // Für jetzt starten wir den Screen, die eigentliche Einschränkung der Wheel
+    // bauen wir im nächsten Schritt in den LearnModeController ein (1 kleine Methode).
+    // TODO: categoryId muss für LearnModeScreen bereitgestellt werden
+    // Für QuickSets können wir eine dummy-ID verwenden oder den Controller erweitern
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LearnModeScreen(
+          categoryId: '', // TODO: Muss angepasst werden für QuickSets
+          title: _title,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = ref.watch(levelSelectionProvider);
+    final selecting = ref.watch(selectingSingleProvider);
+    final allowed = ref.watch(allowedStagesProvider);
+    final mask = List<bool>.generate(6, (i) => allowed.contains(i));
+    final srs = ref.watch(srsModeControllerProvider);
+    
+    // Platzhalter-Werte (später aus Repo)
+    const dailyTotal = 0;
+    const dailyTarget = 20;
+    const dailyPercent = 0.0;
+    const totalWords = 0;
+    const learnedWords = 0;
+    const overallPercent = 0.0;
+    const overallLabel = '0/0';
+    const stages = [0, 0, 0, 0, 0, 0];
+
+    const kAccentBlue = Color(0xFFB1CCFE);
+
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // FIX: fester Header – kein Flexible
+                SizedBox(
+                  height: WordsLayout.topCapsuleH,
+                  child: CategoryHeaderCapsule(
+                    height: WordsLayout.topCapsuleH,
+                    title: _title,
+                    vocabsCount: 0, // Optional: kann später echt gezählt werden
+                    categories: _labels,
+                    selectedIndex: _selected,
+                    onWheelChanged: (idx, _) => setState(() => _selected = idx),
+                    onBack: () => Navigator.of(context).pop(),
+                    onVocabs: _openWordList,
+                    onAdd: () {},
+                    onSettings: () {},
+                    // Offsets wie im Learn-Mode:
+                    wheelOffsetX: WordsLayout.wheelOffsetX,
+                    wheelOffsetY: WordsLayout.wheelOffsetY,
+                    rowOffsetX: WordsLayout.rowOffsetX,
+                    rowOffsetY: WordsLayout.rowOffsetY,
+                    vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+                    vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+                    rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+                    rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+                    wheelBottomGap: WordsLayout.wheelBottomGap,
+                    accentColor: kAccentBlue,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    trailingRightBelow: const SrsModeToggleWithHint(),
+                  ),
+                ),
+
+                const SizedBox(height: WordsLayout.gapBelowTop),
+
+                // FIX: Mittel + Levels scrollbar machen, damit nix überläuft
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
+                    child: Column(
+                      children: [
+                        LearningStatusPanel(
+                          percent: dailyPercent,
+                          percentLabel: '${(dailyPercent * 100).round()}%',
+                          newCount: 0,
+                          repeatsCount: 0,
+                          repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
+                          overallPercent: overallPercent,
+                          overallLabel: overallLabel,
+                        ),
+
+                        const SizedBox(height: WordsLayout.gapAboveBottom),
+                        Transform.translate(
+                          offset: const Offset(0, -24), // 🔼 nach oben
+                          child: SizedBox(
+                            height: WordsLayout.levelsCardH,
+                            child: LevelsCard(
+                              height: WordsLayout.levelsCardH,
+                              stages: stages,
+                              goalPerStage: 100,
+                              mode: mode,
+                              selectingSingle: selecting,
+                              visibleMask: mask,
+                              onSelectSingleStage: (stg) {
+                                ref.read(singleStageProvider.notifier).state = stg;
+                                ref.read(selectingSingleProvider.notifier).state = false;
+                              },
+                              onModeChanged: (m) async {
+                                ref.read(levelSelectionProvider.notifier).state = m;
+                                if (m == LevelSelectionMode.single) {
+                                  ref.read(selectingSingleProvider.notifier).state = true;
+                                } else {
+                                  ref.read(selectingSingleProvider.notifier).state = false;
+                                }
+                              },
+                              titleOffsetY: -15,
+                              onStartPressed: () async {
+                                await _startLearnMode();
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // SRS Countdown Overlay (wie in category_detail_screen)
+            if (srs.counting)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.75),
+                    alignment: const Alignment(0, -1.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'System wird auf Hybrid umgestellt',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          '${srs.count}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 96,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
