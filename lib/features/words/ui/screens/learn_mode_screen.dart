@@ -9,7 +9,10 @@ import 'package:talvori/features/words/ui/widgets/single_mode_switch_row.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/srs_visuals.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
-import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/application/word_list_controller.dart' show WordListFilter, WordFilterKind;
+import 'package:talvori/features/words/application/learn_navigation_origin.dart';
+import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 
 
 class LearnModeScreen extends ConsumerStatefulWidget {
@@ -19,6 +22,9 @@ class LearnModeScreen extends ConsumerStatefulWidget {
   // ⬇️ NEU: Custom Wheel für QuickSets
   final List<String>? customWheelLabels;
   final int? customWheelInitialIndex;
+  
+  // ⬇️ NEU: Navigation-Herkunft für Back-Button-Logik
+  final LearnNavigationOrigin? navigationOrigin;
 
   const LearnModeScreen({
     super.key,
@@ -26,6 +32,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
     required this.title,
     this.customWheelLabels,        // <— NEU
     this.customWheelInitialIndex,  // <— NEU
+    this.navigationOrigin,        // <— NEU
   });
 
   @override
@@ -41,6 +48,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   // ⬇️ NEU: State für Custom Wheel
   late List<String> _wheelLabels;
   late int _wheelIndex;
+  
+  // ⬇️ NEU: Track ob Wheel gedreht wurde (für Back-Button-Logik)
+  bool _wheelChanged = false;
 
   @override
   void initState() {
@@ -85,6 +95,101 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       case 4: return const WordListFilter(WordFilterKind.about, 'my-mix');
       default: return const WordListFilter(WordFilterKind.query, '');
     }
+  }
+
+  // ⬇️ NEU: Back-Button-Logik basierend auf Herkunft und Wheel-Status
+  void _handleBackNavigation(BuildContext context) {
+    final origin = widget.navigationOrigin;
+    
+    // Wenn keine Herkunft definiert → Standard-Navigation (pop)
+    if (origin == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    
+    // Wenn von Category kommt → zur aktuell ausgewählten Kategorie navigieren
+    if (origin.isFromCategory) {
+      // QuickSets-Sonderbehandlung
+      if (origin.isQuickSets) {
+        final originalIndex = origin.initialIndex ?? _wheelIndex;
+        final currentIndex = _wheelIndex;
+        
+        // Wenn sich der Index geändert hat → zur neuen QuickSets Detail Screen navigieren
+        if (currentIndex != originalIndex) {
+          // Pop LearnMode und die alte QuickSets Detail Screen
+          Navigator.of(context).pop(); // Pop LearnMode
+          Navigator.of(context).pop(); // Pop alte QuickSets Detail Screen
+          // Push neue QuickSets Detail Screen mit neuem Index
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => QuickSetsDetailScreen(initialIndex: currentIndex),
+            ),
+          );
+          return;
+        }
+        
+        // Fallback: Wenn keine Änderung → einfach zurück (pop)
+        Navigator.of(context).pop();
+        return;
+      }
+      
+      // Normale Category-Navigation (nicht QuickSets)
+      final state = ref.read(learnModeControllerProvider);
+      final categories = state.categories;
+      final selectedIndex = state.selectedCategoryIndex;
+      
+      // Wenn Kategorien vorhanden sind und Index gültig ist
+      if (categories.isNotEmpty && selectedIndex >= 0 && selectedIndex < categories.length) {
+        final currentCat = categories[selectedIndex];
+        final originalCatId = origin.categoryId;
+        
+        // Wenn die aktuelle Kategorie anders ist als die ursprüngliche → zur neuen Kategorie navigieren
+        if (originalCatId != null && currentCat.id != originalCatId) {
+          // Pop LearnMode und die alte Category Detail Screen
+          Navigator.of(context).pop(); // Pop LearnMode
+          Navigator.of(context).pop(); // Pop alte Category Detail Screen
+          // Push neue Category Detail Screen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CategoryDetailScreen(
+                title: currentCat.name,
+                categoryId: currentCat.id,
+                categorySlug: currentCat.slug,
+                listFilter: WordListFilter(WordFilterKind.category, currentCat.id),
+              ),
+            ),
+          );
+          return;
+        }
+      }
+      
+      // Fallback: Wenn keine Änderung oder gleiche Kategorie → einfach zurück (pop)
+      Navigator.of(context).pop();
+      return;
+    }
+    
+    // Wenn von Home kommt (nur für QuickSets relevant)
+    if (origin.isFromHome && widget.categoryId == 'quicksets') {
+      // Wenn Wheel auf "My words" (Index 1) UND nicht gedreht → zurück zu Home
+      if (_wheelIndex == 1 && !_wheelChanged) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return;
+      }
+      
+      // Wenn Wheel gedreht wurde oder nicht auf "My words" → zurück zu QuickSets-Detail
+      // Pop LearnMode, dann navigiere zu QuickSetsDetailScreen mit aktuellem Index
+      Navigator.of(context).pop(); // Pop LearnMode
+      // Nach pop sollten wir auf Home sein, dann navigiere zu QuickSetsDetailScreen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => QuickSetsDetailScreen(initialIndex: _wheelIndex),
+        ),
+      );
+      return;
+    }
+    
+    // Fallback: Standard pop
+    Navigator.of(context).pop();
   }
 
 
@@ -230,13 +335,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                   : null,
               customOnWheelChanged: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
                   ? (idx, label) {
-                      setState(() => _wheelIndex = idx);
+                      setState(() {
+                        _wheelIndex = idx;
+                        _wheelChanged = true; // ⬇️ NEU: Markiere dass Wheel gedreht wurde
+                      });
                       // ⬇️ NEU: Bei QuickSets Wörter neu laden mit neuem Filter
                       if (widget.categoryId == 'quicksets') {
                         _controller.loadWordsForQuickSets(idx);
                       }
                     }
                   : null,
+              // ⬇️ NEU: Custom Back-Button-Handler mit Navigation-Logik
+              onBack: () => _handleBackNavigation(context),
             ),
             const CardArea(),
             switchesRow,

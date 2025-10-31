@@ -12,6 +12,7 @@ import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/application/quick_sets_providers.dart';
+import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
 /// “Schnellzugriff”-Detailseite:
 /// Gleiche Optik wie CategoryDetailScreen, aber die Wheel hat NUR diese 5 Einträge:
@@ -96,6 +97,11 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
           title: _title,
           customWheelLabels: _labels,            // <— NEU
           customWheelInitialIndex: _selected,    // <— NEU
+          navigationOrigin: LearnNavigationOrigin.category(
+            categoryId: 'quicksets',
+            categoryTitle: _title,
+            initialIndex: _selected,              // <— Speichere aktuellen Tab-Index
+          ),
         ),
       ),
     );
