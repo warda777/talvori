@@ -15,6 +15,7 @@ import 'package:talvori/features/words/ui/theme/theme.dart';
 // removed srs_mode_provider import to avoid SrsSystem conflicts; we use controller enum
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
+import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 
@@ -239,6 +240,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                                         builder: (_) => LearnModeScreen(
                                           categoryId: currentId,
                                   title: cats.isNotEmpty ? cats[selIndex].name : widget.title,
+                                  navigationOrigin: LearnNavigationOrigin.category(
+                                    categoryId: currentId,
+                                    categoryTitle: cats.isNotEmpty ? cats[selIndex].name : widget.title,
+                                  ),
                                 ),
                               ));
                               await ref.read(categoryDetailControllerProvider.notifier).reload();

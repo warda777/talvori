@@ -13,6 +13,8 @@ import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/application/quick_sets_providers.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
+import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
+import 'package:talvori/features/words/application/mix/mix_navigation_controller.dart';
 
 /// “Schnellzugriff”-Detailseite:
 /// Gleiche Optik wie CategoryDetailScreen, aber die Wheel hat NUR diese 5 Einträge:
@@ -25,8 +27,15 @@ import 'package:talvori/features/words/application/learn_navigation_origin.dart'
 class QuickSetsDetailScreen extends ConsumerStatefulWidget {
   /// Optional: Welcher Tab zuerst ausgewählt sein soll (0..4)
   final int initialIndex;
+  
+  /// Navigation-Herkunft für Back-Button-Logik
+  final MixNavigationOrigin? navigationOrigin;
 
-  const QuickSetsDetailScreen({super.key, this.initialIndex = 0});
+  const QuickSetsDetailScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.navigationOrigin,
+  });
 
   @override
   ConsumerState<QuickSetsDetailScreen> createState() => _QuickSetsDetailScreenState();
@@ -42,11 +51,13 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
   ];
 
   int _selected = 0;
+  int? _initialQuickSetsIndex; // Track initial index für Back-Button-Logik
 
   @override
   void initState() {
     super.initState();
     _selected = widget.initialIndex.clamp(0, _labels.length - 1);
+    _initialQuickSetsIndex = widget.initialIndex;
   }
 
   // Mapping der Tabs auf WordList-Filter.
@@ -138,7 +149,33 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
                     categories: _labels,
                     selectedIndex: _selected,
                     onWheelChanged: (idx, _) => setState(() => _selected = idx),
-                    onBack: () => Navigator.of(context).pop(),
+                    onBack: () {
+                      // Wenn Wheel geändert wurde, zurück zur aktuellen Kategorie im Wheel
+                      // Sonst zurück zum vorherigen Screen (Mix Builder oder Category Popup)
+                      if (widget.navigationOrigin != null) {
+                        // Prüfe ob Wheel geändert wurde
+                        if (_selected != _initialQuickSetsIndex) {
+                          // Wheel wurde geändert: Aktualisiere den Origin mit neuem Index
+                          final updatedOrigin = MixNavigationOrigin.mixBuilder(
+                            quickSetsIndex: _selected,
+                          );
+                          MixNavigationController.handleBackNavigation(
+                            context,
+                            updatedOrigin,
+                            _selected,
+                          );
+                        } else {
+                          // Wheel nicht geändert: normale Back-Navigation
+                          MixNavigationController.handleBackNavigation(
+                            context,
+                            widget.navigationOrigin,
+                            _selected,
+                          );
+                        }
+                      } else {
+                        Navigator.of(context).pop();
+                      }
+                    },
                     onVocabs: _openWordList,
                     onAdd: () {},
                     onSettings: () {},

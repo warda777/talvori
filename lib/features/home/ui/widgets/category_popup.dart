@@ -3,6 +3,7 @@ import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
+import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
 
 typedef VoidSnack = void Function(String);
 
@@ -140,7 +141,11 @@ Future<void> showCategoryPopup({
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const MixBuilderScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const MixBuilderScreen(
+                            navigationOrigin: MixNavigationOrigin.categoryPopup(),
+                          ),
+                        ),
                       );
                     },
                     style: FilledButton.styleFrom(

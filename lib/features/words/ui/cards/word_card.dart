@@ -238,7 +238,7 @@ class WordCard extends ConsumerWidget {
                   Positioned(
                     bottom: 30, left: 0, right: 0,
                     child: GestureDetector(
-                      onTap: onMarkWords,
+                      onTap: onGo,  // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
                       behavior: HitTestBehavior.translucent,
                       child: SizedBox(
                         width: 100,

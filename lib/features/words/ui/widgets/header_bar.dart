@@ -10,12 +10,16 @@ class HeaderBar extends ConsumerWidget {
   final List<String>? customWheelLabels;
   final int? customWheelInitialIndex;
   final void Function(int index, String label)? customOnWheelChanged;
+  
+  // ⬇️ NEU: Custom Back-Button-Handler
+  final VoidCallback? onBack;
 
   const HeaderBar({
     super.key,
     this.customWheelLabels,
     this.customWheelInitialIndex,
     this.customOnWheelChanged,
+    this.onBack,
   });
 
   @override
@@ -35,7 +39,7 @@ class HeaderBar extends ConsumerWidget {
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(WordsUIConstants.borderRadius),
-            onTap: () => Navigator.of(context).pop(),
+            onTap: onBack ?? () => Navigator.of(context).pop(),
             child: const SizedBox(
               width: WordsUIConstants.iconSize,
               height: WordsUIConstants.iconSize,

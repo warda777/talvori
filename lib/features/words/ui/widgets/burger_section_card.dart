@@ -21,7 +21,7 @@ class BurgerSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final bg = background ?? cs.surfaceContainerHighest;
+    final bg = background ?? const Color(0xFF2D2D2E);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 18),
@@ -37,15 +37,21 @@ class BurgerSectionCard extends StatelessWidget {
                   child: Text(title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                 ),
-                TextButton(
-                  onPressed: onSelectAll,
-                  style: TextButton.styleFrom(
-                    foregroundColor: allSelected 
-                        ? Colors.white 
-                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                  child: const Text('Pick all'),
-                ),
+                // Nur "Pick all" anzeigen wenn mehr als 1 Item vorhanden ist
+                // Verwende SizedBox mit fester Breite, um Platz zu reservieren
+                if (items.length > 1)
+                  TextButton(
+                    onPressed: onSelectAll,
+                    style: TextButton.styleFrom(
+                      foregroundColor: allSelected 
+                          ? Colors.white 
+                          : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                    child: const Text('Pick all'),
+                  )
+                else
+                  // Platzhalter für konsistente Höhe wenn kein "Pick all" vorhanden
+                  const SizedBox(height: 40),
               ],
             ),
           ),
@@ -108,15 +114,20 @@ class _BurgerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    // Row hat KEINEN eigenen bg mehr – nur Padding & Inhalt
-    final row = InkWell(
-      onTap: () => onChanged(!selected),
-      child: AnimatedContainer(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onChanged(!selected),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        transform: Matrix4.translationValues(0, selected ? 2.0 : 0, 0),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF2F2F3A) : Colors.transparent,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -138,22 +149,8 @@ class _BurgerRow extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
-
-    // Inner-Shadow nur wenn selektiert - sonst flach ohne Effekte
-    if (selected) {
-      return CustomPaint(
-        painter: _InnerShadowPainter(
-          pressed: selected,
-          isTop: isTop,
-          isBottom: isBottom,
-          light: Colors.white.withOpacity(0.14),
-          dark: Colors.black.withOpacity(0.32),
-        ),
-        child: row,
-      );
-    }
-    return row;
   }
 }
 

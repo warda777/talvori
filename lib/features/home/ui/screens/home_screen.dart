@@ -6,6 +6,8 @@ import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
+import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
@@ -153,7 +155,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           },
                           onSpeak: () => _todo('Speak word'),
                           onMarkWords: () => _todo('Open Mark Words (web)'),
-                          onGo: () => _todo('Start: My Words practice'),
+                          onGo: () async {
+                            // ⬇️ NEU: Direkt in LearnMode "My words" starten (Index 1)
+                            const quickSetsLabels = [
+                              'All words',
+                              'My words',
+                              'Favorites',
+                              'Words I know',
+                              'My mix',
+                            ];
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => LearnModeScreen(
+                                  categoryId: 'quicksets',
+                                  title: 'My words',
+                                  customWheelLabels: quickSetsLabels,
+                                  customWheelInitialIndex: 1, // My words
+                                  navigationOrigin: const LearnNavigationOrigin.home(),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
