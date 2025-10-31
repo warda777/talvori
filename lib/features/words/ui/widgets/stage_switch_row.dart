@@ -24,6 +24,9 @@ class StageSwitchRowController {
   Future<void> blinkS0toS5() async => _state?._blinkIndices([0,1,2,3,4,5], repeats: 2);
   Future<void> blinkS1toS5() async => _state?._blinkIndices([1,2,3,4,5], repeats: 2);
   Future<void> blinkSequentialS1toS5() async => _state?._blinkIndices([1,2,3,4,5], repeats: 1, sequential: true);
+
+  // NEU: nur S0 einmal aufglühen lassen
+  Future<void> blinkS0Once() async => _state?._blinkIndices([0], repeats: 1);
 }
 
 class _KnobFeedback extends StatelessWidget {
@@ -68,6 +71,8 @@ class StageSwitchRow extends StatefulWidget {
   final List<bool>? visibleMask;         // ← NEU: List<bool> mit Länge 6
   final int? selectedStageHighlight;     // ← NEU: 1..5 (nur Single), null = keiner
   final void Function(int fromStage, int toStage, int count)? onStageDrop; // NEW
+  final bool? s0Locked;                // ← NEU
+  final VoidCallback? onTapS0;          // ← NEU
 
   const StageSwitchRow({
     super.key,
@@ -84,6 +89,8 @@ class StageSwitchRow extends StatefulWidget {
     this.visibleMask,                        // ← NEU: List<bool> mit Länge 6
     this.selectedStageHighlight,             // ← NEU: 1..5 (nur Single), null = keiner
     this.onStageDrop,
+    this.s0Locked,
+    this.onTapS0,
   });
 
   @override
@@ -203,13 +210,15 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       
       if (i == 0) {
         // S0 (New) Switch: nur Drop-Ziel
+        final bool locked = widget.s0Locked ?? false;
         switchBody = DragTarget<StageDrag>(
           onWillAccept: (data) => data != null && data.fromStage != 0,
           onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
           builder: (_, __, ___) => VerticalStageSwitch(
             count: s[0],
-            outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? Colors.red) : (widget.colors?.disabledOuter ?? Colors.white),
-            innerColor: widget.colors?.inner ?? Colors.grey,
+            outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? const Color(0xFFA05260))
+                         : (widget.colors?.disabledOuter ?? Colors.grey),
+            innerColor: widget.colors?.inner ?? const Color(0xFF2D2C2C),
             innerStrokeColor: widget.colors?.innerStroke,
             highlight: s[0] > 0,
             completed: false,
@@ -217,6 +226,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             note: widget.labels?.newNote ?? '0',
             isFirst: true,
             glow: _blinking.contains(0),
+            isLocked: locked,           // ← NEU: UI-Zustand
+            onTap: widget.onTapS0,      // ← NEU: toggelt Lock
           ),
         );
       } else {
@@ -313,6 +324,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       
       if (i == 0) {
         // S0 (New) Switch: nur Drop-Ziel
+        final bool locked = widget.s0Locked ?? false;
         switchBody = DragTarget<StageDrag>(
           onWillAccept: (data) => data != null && data.fromStage != 0,
           onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
@@ -326,6 +338,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             note: '0',
             isFirst: true,
             glow: _blinking.contains(0),
+            isLocked: locked,
+            onTap: widget.onTapS0,
           ),
         );
       } else {

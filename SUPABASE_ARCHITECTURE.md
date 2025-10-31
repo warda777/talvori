@@ -288,7 +288,12 @@ graph TD
 
 ## 📝 Changelog
 
-### Version 1.1 (Aktuell)
+### Version 1.2 (Januar 2025)
+
+- ✅ S0-Lock Feature: Client-seitige Sperrung der S0-Stufe (keine neuen Karten)
+- ✅ Keine Backend-Änderungen erforderlich (Client-seitige UI-Funktion)
+
+### Version 1.1
 
 - ✅ Grundlegende Tabellen-Struktur
 - ✅ SRS-Algorithmus implementiert

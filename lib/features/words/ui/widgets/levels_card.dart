@@ -5,6 +5,7 @@ import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/application/s0_lock_provider.dart';
 
 class LevelsCard extends ConsumerStatefulWidget {
   final double height;
@@ -81,9 +82,9 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
     final Color innerFill = () {
       switch (srs.mode) {
         case SrsSystem.time:
-          return Colors.black;
+          return const Color(0xFF1A1A1A);
         case SrsSystem.adaptive:
-          return const Color(0xFF3A3A3A);
+          return const Color(0xFF162743);
         case SrsSystem.hybrid:
           return const Color(0xFF2D2D2F);
       }
@@ -151,6 +152,17 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                     idlePulse: widget.mode == LevelSelectionMode.single && widget.selectingSingle, // ← NEU
                     selectedStageHighlight: (widget.mode == LevelSelectionMode.single) ? ref.read(singleStageProvider) : null, // ← NEU
                     // ✅ KEINE visibleMask hier im Kategorie-Screen
+                    s0Locked: ref.watch(s0LockedProvider),
+                    onTapS0: () async {
+                      final notifier = ref.read(s0LockedProvider.notifier);
+                      final wasLocked = notifier.state;
+                      notifier.state = !wasLocked;
+
+                      // NEU: Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
+                      if (wasLocked) {
+                        await _switchCtrl.blinkS0Once();
+                      }
+                    },
                     onSelectStage: (stg) {
                       // Nutzer hat S1..S5 gewählt:
                       widget.onSelectSingleStage?.call(stg); // ← wir fügen Props hinzu

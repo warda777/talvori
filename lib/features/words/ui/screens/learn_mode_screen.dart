@@ -8,6 +8,7 @@ import '../widgets/widgets.dart';
 import 'package:talvori/features/words/ui/widgets/single_mode_switch_row.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/srs_visuals.dart';
+import 'package:talvori/features/words/application/s0_lock_provider.dart';
 
 
 class LearnModeScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,8 @@ class LearnModeScreen extends ConsumerStatefulWidget {
 class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   // Controller (Business-Logik)
   late final LearnModeController _controller;
+  // Controller für Switch-Row Blink-Effekte
+  final _switchCtrl = StageSwitchRowController();
 
 
   @override
@@ -81,9 +84,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       final innerFill = () {
         switch (kind) {
           case SrsKind.tSrs:
-            return Colors.black;
+            return const Color(0xFF1A1A1A);
           case SrsKind.aSrs:
-            return const Color(0xFF3A3A3A);
+            return const Color(0xFF162743);
           case SrsKind.neutral:
             return const Color(0xFF2D2D2F);
         }
@@ -129,9 +132,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       final innerFill = () {
         switch (kind) {
           case SrsKind.tSrs:
-            return Colors.black;
+            return const Color(0xFF1A1A1A);
           case SrsKind.aSrs:
-            return const Color(0xFF3A3A3A);
+            return const Color(0xFF162743);
           case SrsKind.neutral:
             return const Color(0xFF2D2D2F);
         }
@@ -143,6 +146,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       };
 
       switchesRow = StageSwitchRow(
+        controller: _switchCtrl,
         counts: s, 
         goalPerStage: 100, 
         gap: 12, // kSwitchGap
@@ -156,6 +160,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
         ),
         labels: StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: prefix),
         visibleMask: mask,                        // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
+        s0Locked: ref.watch(s0LockedProvider),
+        onTapS0: () async {
+          final notifier = ref.read(s0LockedProvider.notifier);
+          final wasLocked = notifier.state;
+          notifier.state = !wasLocked;
+
+          // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
+          if (wasLocked) {
+            await _switchCtrl.blinkS0Once();
+          }
+        },
       );
     }
 

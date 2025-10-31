@@ -2,7 +2,7 @@
 
 ## 📁 Project Overview
 
-- **Total Dart Files**: 65+
+- **Total Dart Files**: 70+
 - **Architecture**: Feature-based with Clean Architecture principles
 - **State Management**: Riverpod (NotifierProvider)
 - **Backend**: Supabase
@@ -77,8 +77,13 @@ lib/features/words/
 │   ├── category_detail_controller.dart  # Category detail state management
 │   ├── category_detail_state.dart       # Category detail state model
 │   ├── learn_mode_controller.dart  # Main learning controller (NotifierProvider)
+│   ├── level_selection_controller.dart  # Level selection logic
+│   ├── level_selection_provider.dart    # Level selection state (S0-S5, S1-S5, Single)
+│   ├── learning_engine_provider.dart    # Learning engine toggle state
+│   ├── s0_lock_provider.dart           # S0 lock state (NEW: prevents new cards)
 │   ├── srs_config.dart      # Spaced Repetition System config
 │   ├── srs_logic.dart       # SRS algorithm implementation
+│   ├── srs_mode_controller.dart        # SRS mode (T-SRS, A-SRS, Hybrid)
 │   ├── timer_helpers.dart   # Timer utility functions
 │   └── word_providers.dart  # Riverpod providers for words
 ├── data/                     # Data layer
@@ -88,6 +93,7 @@ lib/features/words/
 │   ├── word_hub_taxonomy.dart
 │   └── words_store.dart
 ├── domain/                   # Domain models
+│   ├── srs_kind.dart        # SRS kind enum (tSrs, aSrs, neutral)
 │   └── word.dart            # Word entity
 ├── services/                 # Feature-specific services
 │   ├── services.dart        # Barrel file for services
@@ -122,16 +128,23 @@ lib/features/words/
         ├── glow_rect_tile.dart      # Glowing rectangular tile
         ├── header_bar.dart          # Top navigation bar
         ├── learning_status_panel.dart  # Progress & stats panel
-        ├── levels_card.dart         # SRS levels display card
+        ├── levels_card.dart         # SRS levels display card (with S0 lock support)
         ├── level_badge.dart         # CEFR level display (A1-C2)
+        ├── level_selector_buttons.dart  # Level selection buttons (S0-S5, S1-S5, Single)
         ├── menu_sheet.dart          # Context menu
+        ├── mode_toggle.dart         # Learning engine toggle (E-SRS/L-SRS)
         ├── play_pause_button.dart
         ├── progress_ring.dart       # Circular progress indicator
         ├── reset_button.dart        # Hold-to-reset button
-        ├── stage_switch_row.dart    # SRS stage indicators
+        ├── single_mode_switch_row.dart  # Single mode switch row (S{n}, SR1, SR2)
+        ├── single_stage_picker.dart     # Single stage picker widget
+        ├── stage_switch_row.dart    # SRS stage indicators (with S0 lock support)
         ├── stats_helpers.dart       # Statistics helper functions
+        ├── srs_mode_toggle.dart    # SRS mode toggle (T-SRS/A-SRS/Hybrid)
+        ├── srs_mode_toggle_with_hint.dart  # SRS mode toggle with hint
+        ├── srs_visuals.dart        # SRS visual helpers
         ├── timer_bar.dart           # Progress timer
-        ├── vertical_stage_switch.dart  # Individual stage switch
+        ├── vertical_stage_switch.dart  # Individual stage switch (with lock overlay)
         └── widgets.dart
 ```
 
@@ -184,9 +197,19 @@ lib/features/rewards/
 LearnModeScreen
 ├── HeaderBar (Back button + CategoryWheel)
 ├── CardArea (SwipeableWordCard + TimerBar)
-├── StageSwitchRow (S0-S5 indicators)
+├── StageSwitchRow (S0-S5 indicators with S0 lock support)
 └── BottomControls (Play/Pause/Reset/Menu)
 ```
+
+### 🔒 S0 Lock Feature
+
+The S0 (New) stage can be locked to prevent new cards from being added to the learning queue. The lock state is synchronized across Category Screen and Learn Mode Screen:
+
+- **Provider**: `s0LockedProvider` (StateProvider<bool>) in `application/s0_lock_provider.dart`
+- **UI Component**: `VerticalStageSwitch` shows lock overlay when `isLocked = true`
+- **Visual Feedback**: Locked switch is dimmed (45% opacity) with white lock icon overlay
+- **Blink Effect**: S0 briefly glows when unlocked via `StageSwitchRowController.blinkS0Once()`
+- **Business Logic**: When locked, new cards should be excluded from learning queue
 
 ## 🔧 Key Technical Features
 
@@ -196,6 +219,7 @@ LearnModeScreen
 - **Stage progression**: S0 (new) → S1-S5 (mastered)
 - **Smart queue management**: Balances new cards with reviews
 - **Gate logic**: Prevents overwhelming users with too many new cards
+- **S0 Lock**: Option to lock S0 stage to prevent new cards
 
 ### ⏱️ Timer System
 
@@ -215,6 +239,7 @@ LearnModeScreen
 - **Stage indicators**: Visual progress tracking
 - **Level badges**: CEFR level display with proper contrast
 - **Glow effects**: Visual emphasis for important elements
+- **Lock overlay**: White lock icon on locked S0 switch
 
 ## 📊 State Management
 
@@ -223,6 +248,9 @@ LearnModeScreen
 - **`learnModeControllerProvider`**: Main learning state (NotifierProvider.autoDispose)
 - **`categoryDetailControllerProvider`**: Category detail state management
 - **`homeControllerProvider`**: Home screen state management (NotifierProvider)
+- **`s0LockedProvider`**: S0 lock state (StateProvider<bool>)
+- **`levelSelectionProvider`**: Level selection mode (S0-S5, S1-S5, Single)
+- **`srsModeControllerProvider`**: SRS mode (T-SRS, A-SRS, Hybrid)
 - **Granular selectors**: `currentWordProvider`, `stagesProvider`, `isPlayingProvider`, etc.
 - **Auto-dispose**: Automatic cleanup when not needed
 - **Modern Riverpod**: Using NotifierProvider instead of StateNotifierProvider
@@ -278,6 +306,15 @@ LearnModeScreen
 
 ## 🆕 Recent Updates
 
+### 🔒 S0 Lock Feature (January 2025)
+
+- **New Provider**: `s0LockedProvider` for managing S0 lock state
+- **UI Enhancement**: Lock overlay on `VerticalStageSwitch` when S0 is locked
+- **Visual Feedback**: Dimmed switch (45% opacity) with white lock icon
+- **Blink Effect**: S0 briefly glows when unlocked
+- **Synchronization**: Lock state shared between Category Screen and Learn Mode Screen
+- **Integration**: `StageSwitchRow` and `LevelsCard` support S0 lock functionality
+
 ### 🎨 UI Loading & Performance Improvements
 
 - **Stale-While-Revalidate**: Implemented instant render pattern for better perceived performance
@@ -332,8 +369,9 @@ LearnModeScreen
 
 ---
 
-_Last updated: December 2024_
+_Last updated: January 2025_
 _Total files: 75+ Dart files_
 _Architecture: Feature-based Clean Architecture with Modern Riverpod_
 _Theme System: Centralized with ThemeExtension, Layout Constants, and Feature-specific Themes_
 _Home Feature: Fully refactored with Presentational UI, Centralized Theme & Strings_
+_S0 Lock Feature: Lock/unlock S0 stage to prevent new cards in learning queue_
