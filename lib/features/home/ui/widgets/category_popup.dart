@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
 
 typedef VoidSnack = void Function(String);
 
@@ -138,7 +139,9 @@ Future<void> showCategoryPopup({
                   child: FilledButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      onTodo('Make your own mix');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const MixBuilderScreen()),
+                      );
                     },
                     style: FilledButton.styleFrom(
                       backgroundColor: gold,
