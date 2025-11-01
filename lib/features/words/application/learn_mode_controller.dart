@@ -577,7 +577,7 @@ class LearnModeController extends Notifier<LearnModeState> {
                 ids.add(nextId);
               }
               // Wortobjekt nachladen (für CardArea)
-              final next = await fetchWordById(nextId);
+              final next = await _repo.fetchWordById(nextId);
               if (next != null) {
                 final q = List<WordUserView>.from(state.wordQueue);
                 if (i < q.length) {

@@ -121,34 +121,34 @@ class _BurgerRow extends StatelessWidget {
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         child: AnimatedContainer(
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2F2F3A) : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: cs.onSurface.withOpacity(0.86),
-                      fontWeight: FontWeight.w600,
-                    ),
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFF2F2F3A) : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: cs.onSurface.withOpacity(0.86),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
               ),
-            ),
-            MixDonutToggle(
-              value: selected,
-              onChanged: onChanged,
-              activeRing: Colors.white,
-              activeCore: const Color(0xFFF1C86B),
-              size: 26,
-            ),
-          ],
+              MixDonutToggle(
+                value: selected,
+                onChanged: onChanged,
+                activeRing: Colors.white,
+                activeCore: const Color(0xFFF1C86B),
+                size: 26,
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

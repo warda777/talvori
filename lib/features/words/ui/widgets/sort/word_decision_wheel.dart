@@ -5,12 +5,14 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 class WordDecisionWheel extends StatefulWidget {
   final List<WordUserView> words;
   final void Function(WordUserView crossedUp)? onCrossUp; // „über die Linie" gegangen
+  final void Function(WordUserView crossedDown)? onCrossDown; // 👈 neu: wieder unter die Linie
   final void Function(WordUserView center)? onCenterChange; // Haptik-Tick
 
   const WordDecisionWheel({
     super.key,
     required this.words,
     this.onCrossUp,
+    this.onCrossDown,
     this.onCenterChange,
   });
 
@@ -21,6 +23,7 @@ class WordDecisionWheel extends StatefulWidget {
 class _WordDecisionWheelState extends State<WordDecisionWheel> {
   late FixedExtentScrollController _c;
   int _center = 0;
+  final Map<String, bool> _wasAboveCenter = {}; // wordId -> vorher über Linie?
 
   @override
   void initState() {
@@ -37,6 +40,10 @@ class _WordDecisionWheelState extends State<WordDecisionWheel> {
   @override
   Widget build(BuildContext context) {
     final items = widget.words;
+    
+    // Map bereinigen: Nur IDs behalten, die noch in der Liste sind
+    final currentIds = items.map((w) => w.id).toSet();
+    _wasAboveCenter.removeWhere((id, _) => !currentIds.contains(id));
 
     return ListWheelScrollView.useDelegate(
       controller: _c,
@@ -45,21 +52,27 @@ class _WordDecisionWheelState extends State<WordDecisionWheel> {
       perspective: 0.002,
       diameterRatio: 2.2,
       onSelectedItemChanged: (idx) {
-        // Scrollrichtung bestimmen
         final old = _center;
         _center = idx;
         
-        // Haptik je nach Scrollrichtung
-        if (idx < old) {
-          // Nach oben gedreht → starke Haptik
-          HapticFeedback.selectionClick(); // Options: lightImpact(), mediumImpact(), heavyImpact()
-          // Wort, das zuvor im Zentrum war, liegt nun genau EINE Position darüber → „cross up"
-          if (widget.onCrossUp != null && old >= 0 && old < items.length) {
-            widget.onCrossUp!(items[old]);
+        // Alle Items prüfen auf Übergänge
+        for (int i = 0; i < items.length; i++) {
+          final w = items[i];
+          final nowAbove = i < _center; // Index kleiner = oberhalb der Linie
+          final prevAbove = _wasAboveCenter[w.id] ?? false;
+          
+          // Übergangslogik
+          if (!prevAbove && nowAbove) {
+            // Übergang von unten -> oben
+            widget.onCrossUp?.call(w);
+            HapticFeedback.mediumImpact();
+          } else if (prevAbove && !nowAbove) {
+            // Übergang von oben -> unten (rollback)
+            widget.onCrossDown?.call(w);
+            HapticFeedback.selectionClick();
           }
-        } else if (idx > old) {
-          // Nach unten gedreht → sehr leichte Haptik
-          HapticFeedback.mediumImpact(); // Sanfteste Option (schwächer als lightImpact)
+          
+          _wasAboveCenter[w.id] = nowAbove;
         }
         
         widget.onCenterChange?.call(items[idx]);
@@ -95,9 +108,11 @@ class _WordDecisionWheelState extends State<WordDecisionWheel> {
                         style: TextStyle(
                           fontSize: i == _center ? 24 : 20,
                           fontWeight: i == _center ? FontWeight.w800 : FontWeight.w700,
-                          color: passedUp
-                              ? const Color(0xFFF1C86B) // Gold
-                              : Colors.white.withOpacity(0.9),
+                          color: i == _center
+                              ? const Color(0xFFB0CCFE) // Farbe für Wort in der Box
+                              : passedUp
+                                  ? const Color(0xFFF1C86B) // Gold für Wörter oberhalb
+                                  : Colors.white.withOpacity(0.9),
                         ),
                       ),
                     ),

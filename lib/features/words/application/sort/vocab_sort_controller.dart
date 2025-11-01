@@ -16,6 +16,8 @@ class VocabSortState {
   final Set<String> currentCategoryWordIds;    // IDs dieser Kategorie
   final int categoryWordCount;           // Anzahl Wörter in der ausgewählten Kategorie
   final int remainingInCategory;       // ↓ zählt nur bei „hoch"
+  final String? centerWordId; // 👈 neu
+  final int overlayCounter; // 👈 Zähler in der Box (explizit gepflegt)
 
   const VocabSortState({
     required this.queue,
@@ -26,6 +28,8 @@ class VocabSortState {
     this.currentCategoryWordIds = const {},
     this.categoryWordCount = 0,
     this.remainingInCategory = 0,
+    this.centerWordId,
+    this.overlayCounter = 0,
   });
 
   int get knownCount => knownIds.length;
@@ -41,7 +45,16 @@ class VocabSortState {
   // ↓ Zahl zwischen ↑ ↓ : verbleibend „ungeprüft" in aktueller Kategorie,
   //   zählt NUR bei markUnknown() runter.
   int get betweenArrows {
-    final base = categoryWordCount == 0 ? queue.length : categoryWordCount;
+    // Nimm die größte verlässliche Basis:
+    // 1) categoryWordCount (Server-Count), sonst
+    // 2) currentCategoryWordIds.length (IDs aus der geladenen Liste), sonst
+    // 3) queue.length (Fallback)
+    final base = (categoryWordCount > 0)
+        ? categoryWordCount
+        : (currentCategoryWordIds.isNotEmpty
+            ? currentCategoryWordIds.length
+            : queue.length);
+
     final v = base - unknownInCurrentCategory;
     return v < 0 ? 0 : v;
   }
@@ -63,6 +76,8 @@ class VocabSortState {
     Set<String>? currentCategoryWordIds,
     int? categoryWordCount,
     int? remainingInCategory,
+    String? centerWordId,
+    int? overlayCounter,
   }) => VocabSortState(
     queue: queue ?? this.queue,
     knownIds: knownIds ?? this.knownIds,
@@ -72,6 +87,8 @@ class VocabSortState {
     currentCategoryWordIds: currentCategoryWordIds ?? this.currentCategoryWordIds,
     categoryWordCount: categoryWordCount ?? this.categoryWordCount,
     remainingInCategory: remainingInCategory ?? this.remainingInCategory,
+    centerWordId: centerWordId ?? this.centerWordId,
+    overlayCounter: overlayCounter ?? this.overlayCounter,
   );
 
   static const empty = VocabSortState(queue: [], knownIds: {}, unknownIds: {}, loading: true, remainingInCategory: 0);
@@ -80,6 +97,7 @@ class VocabSortState {
 class VocabSortController extends StateNotifier<VocabSortState> {
   VocabSortController(this._repo) : super(VocabSortState.empty);
   final SupabaseWordRepository _repo;
+  final List<_SortAction> _history = [];
 
   /// initial: „All words". Später per Wheel/Filter ersetzbar.
   Future<void> loadInitial() async {
@@ -105,17 +123,124 @@ class VocabSortController extends StateNotifier<VocabSortState> {
   void markUnknown(WordUserView w) {
     final nextQ = List<WordUserView>.from(state.queue)..removeWhere((x) => x.id == w.id);
     final nextU = Set<String>.from(state.unknownIds)..add(w.id);
-    final rest = (state.remainingInCategory > 0) ? state.remainingInCategory - 1 : 0;
     HapticFeedback.mediumImpact();
-    state = state.copy(queue: nextQ, unknownIds: nextU, remainingInCategory: rest);
+    state = state.copy(queue: nextQ, unknownIds: nextU);
   }
 
-  /// Beim „Über die Linie" NICHT aus der Queue löschen (nur für Wheel)
+  /// Wird vom Wheel bei Fokuswechsel gesetzt
+  void setCenter(WordUserView w) {
+    state = state.copy(centerWordId: w.id);
+  }
+
+  /// Wort ist ÜBER die Linie gewandert (hoch): abziehen
   void crossedUp(WordUserView w) {
-    // NICHT aus queue entfernen – nur markieren + Restzähler runter
     final nextU = Set<String>.from(state.unknownIds)..add(w.id);
-    final rest = state.remainingInCategory > 0 ? state.remainingInCategory - 1 : 0;
-    state = state.copy(unknownIds: nextU, remainingInCategory: rest);
+    final nextOverlay = (state.overlayCounter > 0) ? state.overlayCounter - 1 : 0;
+    HapticFeedback.selectionClick();
+    state = state.copy(unknownIds: nextU, overlayCounter: nextOverlay);
+  }
+
+  /// Wort ist WIEDER UNTER die Linie gewandert (runter): draufrechnen
+  void crossedDown(WordUserView w) {
+    final nextU = Set<String>.from(state.unknownIds)..remove(w.id);
+    state = state.copy(unknownIds: nextU, overlayCounter: state.overlayCounter + 1);
+  }
+
+  /// + Button: aktuelles Wort als "I know" (entfernt es aus dem Wheel, korrigiert Counter)
+  Future<void> addCenterToKnown() async {
+    final id = state.centerWordId;
+    if (id == null) return;
+
+    final idx = state.queue.indexWhere((x) => x.id == id);
+    if (idx == -1) return;
+
+    // Für Undo merken, ob der Eintrag „oben" markiert war
+    final wasUnknown = state.unknownIds.contains(id);
+    _history.add(_SortAction(id, idx, wasUnknown));
+
+    // Aus Queue entfernen, known erhöhen, unknown bereinigen
+    final nextQ = [...state.queue]..removeAt(idx);
+    final nextK = {...state.knownIds}..add(id);
+    final nextU = {...state.unknownIds}..remove(id);
+
+    // Kategoriezählung und Set der Kategorie-IDs anpassen
+    final nextCount = state.categoryWordCount > 0 ? state.categoryWordCount - 1 : 0;
+    final nextCatIds = {...state.currentCategoryWordIds}..remove(id);
+
+    // 👇 Wenn es NICHT als unknown markiert war, muss die Box trotzdem -1
+    final dec = wasUnknown ? 0 : 1;
+    final nextOverlay = (state.overlayCounter - dec).clamp(0, 1<<30);
+
+    // 👉 NEU: direkt die nächste Mitte setzen (ohne Rad zu drehen)
+    String? nextCenterId;
+    if (nextQ.isNotEmpty) {
+      final nextIndex = idx < nextQ.length ? idx : nextQ.length - 1;
+      nextCenterId = nextQ[nextIndex].id;
+    }
+
+    HapticFeedback.mediumImpact();
+    state = state.copy(
+      queue: nextQ,
+      knownIds: nextK,
+      unknownIds: nextU,
+      categoryWordCount: nextCount,
+      currentCategoryWordIds: nextCatIds,
+      centerWordId: nextCenterId, // ← sofort wieder + möglich
+      overlayCounter: nextOverlay,              // 👈 update
+    );
+
+    await _repo.markKnownBatch([id]);
+  }
+
+  /// Undo für den letzten Schritt
+  Future<void> undo() async {
+    if (_history.isEmpty) return;
+    final last = _history.removeLast();
+
+    // Wortdaten beschaffen (falls nicht mehr in Queue)
+    WordUserView? w = state.queue.firstWhere(
+      (x) => x.id == last.wordId,
+      orElse: () => WordUserView(id: last.wordId, text: '', translation: ''),
+    );
+    final fetched = await _repo.fetchWordById(last.wordId);
+    if (fetched != null) w = fetched;
+
+    // An alte Position einsetzen (clamped) - w ist garantiert nicht null
+    final nextQ = [...state.queue];
+    final pos = (last.oldIndex ?? nextQ.length).clamp(0, nextQ.length);
+    nextQ.insert(pos, w!);
+
+    // unknown-Status wiederherstellen, falls es beim + „oben" war
+    final nextU = {...state.unknownIds};
+    if (last.wasUnknownMarked) {
+      nextU.add(last.wordId);
+    } else {
+      nextU.remove(last.wordId);
+    }
+
+    // known entfernen (falls vorhanden)
+    final nextK = {...state.knownIds}..remove(last.wordId);
+
+    // Kategorie-Zähler & Set der Kategorie-IDs wieder erhöhen/hinzufügen
+    final nextCount = state.categoryWordCount + 1;
+    final nextCatIds = {...state.currentCategoryWordIds}..add(last.wordId);
+
+    // 👇 Wenn es vorher NICHT unknown war, haben wir bei + abgezogen → jetzt +1
+    final inc = last.wasUnknownMarked ? 0 : 1;
+    final nextOverlay = state.overlayCounter + inc;
+
+    // Mitte auf das zurückgelegte Wort setzen (sofort wieder + möglich)
+    state = state.copy(
+      queue: nextQ,
+      knownIds: nextK,
+      unknownIds: nextU,
+      categoryWordCount: nextCount,
+      currentCategoryWordIds: nextCatIds,
+      centerWordId: last.wordId,
+      overlayCounter: nextOverlay,             // 👈 update
+    );
+
+    HapticFeedback.selectionClick();
   }
 
   /// Alles „I know" persistieren (z. B. srs_stage_user >=1 oder known-flag)
@@ -153,13 +278,22 @@ class VocabSortController extends StateNotifier<VocabSortState> {
         count = words.length;
       }
 
+      // Fallback: Wenn count 0 ist, aber words vorhanden sind, nutze words.length
+      final finalCount = count > 0 ? count : words.length;
+      debugPrint('📊 loadForCategory: category=$categoryLabel, count=$count, words.length=${words.length}, finalCount=$finalCount');
+
       state = state.copy(
         queue: words,
         loading: false,
-        categoryWordCount: count,
-        remainingInCategory: count, // neu
+        categoryWordCount: finalCount,
         currentCategoryLabel: categoryLabel,
         currentCategoryWordIds: words.map((w) => w.id).toSet(),
+        // 👇 wichtig: sauber neu initialisieren
+        overlayCounter: finalCount,     // ← Box zeigt direkt die volle Zahl
+        remainingInCategory: finalCount,
+        knownIds: {},              // ← reset
+        unknownIds: {},            // ← reset
+        centerWordId: null,        // ← reset
       );
     } catch (e, stackTrace) {
       debugPrint('❌ loadForCategory error: $e');
@@ -169,9 +303,10 @@ class VocabSortController extends StateNotifier<VocabSortState> {
         queue: [],
         loading: false,
         categoryWordCount: 0,
-        remainingInCategory: 0,
         currentCategoryLabel: categoryLabel,
         currentCategoryWordIds: {},
+        overlayCounter: 0,
+        remainingInCategory: 0,
       );
     }
   }
@@ -208,3 +343,11 @@ final vocabSortControllerProvider =
   // Lazy load (Screen ruft explizit c.loadInitial())
   return c;
 });
+
+/// Hilfsklasse für Undo-History
+class _SortAction {
+  final String wordId;
+  final int? oldIndex;               // Position im Wheel
+  final bool wasUnknownMarked;       // war in unknownIds?
+  _SortAction(this.wordId, this.oldIndex, this.wasUnknownMarked);
+}

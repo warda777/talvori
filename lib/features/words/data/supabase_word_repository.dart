@@ -212,7 +212,9 @@ class SupabaseWordRepository {
     
     switch (filter.kind) {
       case WordFilterKind.category:
-        params['category_id'] = 'eq.${filter.value}';
+        // hier kommt künftig schon ein Slug an (s.u. Controller),
+        // deshalb direkt:
+        params['category_slug'] = 'eq.${filter.value}';
         break;
       case WordFilterKind.level:
         params['level'] = 'eq.${filter.value}';
@@ -279,6 +281,128 @@ class SupabaseWordRepository {
     return row['slug'] as String;
   }
 
+  /// Fetch WordUserViews (mit User-Flags) für Filter
+  Future<List<WordUserView>?> fetchWordUserViewsByFilter(
+    WordListFilter filter, {
+    int limit = 5000,
+    int offset = 0,
+    String? query,
+    SortMode? sort,
+  }) async {
+    try {
+      // Verwende Supabase SDK statt manueller HTTP-Requests
+      // WICHTIG: Filter müssen VOR order() und range() angewendet werden
+      dynamic query_builder = _sb
+          .from('v_words_user')
+          .select('id,text,translation,level,pos,category_slug,group_slug,'
+                  'in_my_words,favorite_user,picked_user,'
+                  'srs_stage_user,next_due_at_user,user_added_at');
+
+      // Filter anwenden (MUSS vor order/range kommen)
+      switch (filter.kind) {
+        case WordFilterKind.category:
+          // ⬇️ Category-Filter NICHT über v_words_user (dort gibt's keine Kategorie!),
+          //     sondern über words_view laufen lassen.
+          //     Wir nehmen die ID (du hast sie schon ermittelt), alternativ slug->id vorab auflösen.
+          {
+            // Ermittle category_id: value kann UUID oder Slug sein
+            String categoryId = filter.value;
+            final isUuidLike = RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(filter.value);
+            if (!isUuidLike) {
+              // Ist ein Slug, auflösen zu ID
+              final row = await _sb
+                  .from('categories')
+                  .select('id')
+                  .eq('slug', filter.value)
+                  .maybeSingle();
+              if (row != null && row['id'] != null) {
+                categoryId = row['id'] as String;
+              } else {
+                // Slug nicht gefunden, leer zurückgeben
+                return [];
+              }
+            }
+
+            final data = await _sb
+                .from('words_view')
+                .select('id,text,translation,level,pos,category_id')
+                .eq('category_id', categoryId)        // ✅ words_view hat category_id
+                .order('text', ascending: true);
+
+            final list = (data as List).cast<Map<String, dynamic>>();
+            // Map auf WordUserView (User-Flags fehlen hier bewusst → Defaults)
+            return list.map((j) => WordUserView(
+              id: (j['id'] as String?) ?? '',
+              text: (j['text'] as String?) ?? '',
+              translation: (j['translation'] as String?) ?? '',
+              level: j['level'] as String?,
+              inMyWords: false,
+              pickedUser: false,
+              favoriteUser: false,
+              srsStage: 0,
+              nextDueAt: null,
+              userAddedAt: null,
+            )).toList();
+          }
+        case WordFilterKind.level:
+          query_builder = query_builder.eq('level', filter.value);
+          break;
+        case WordFilterKind.pos:
+          query_builder = query_builder.eq('pos', filter.value);
+          break;
+        case WordFilterKind.domain:
+          query_builder = query_builder.eq('group_slug', filter.value);
+          break;
+        case WordFilterKind.about:
+          switch (filter.value) {
+            case 'my-words':
+              query_builder = query_builder.eq('in_my_words', true);
+              break;
+            case 'favorites':
+              query_builder = query_builder.eq('favorite_user', true);
+              break;
+            case 'known-words':
+              query_builder = query_builder.gte('srs_stage_user', 1);
+              break;
+            case 'my-mix':
+              query_builder = query_builder.eq('picked_user', true);
+              break;
+            default:
+              query_builder = query_builder.eq('category_slug', filter.value);
+          }
+          break;
+        case WordFilterKind.query:
+          break;
+      }
+
+      // Text-Suche (auch vor order/range)
+      if (query != null && query.trim().isNotEmpty) {
+        final q = query.trim();
+        query_builder = query_builder.or('text.ilike.%$q%,translation.ilike.%$q%');
+      }
+
+      // Sortierung (nach Filtern)
+      if (sort == SortMode.newest) {
+        query_builder = query_builder.order('user_added_at', ascending: false);
+      } else {
+        query_builder = query_builder.order('text', ascending: true);
+      }
+
+      debugPrint('🌐 Querying v_words_user with filter: ${filter.kind} = ${filter.value}');
+      
+      final data = await query_builder;
+      final List list = data as List;
+      
+      debugPrint('✅ Loaded ${list.length} words');
+      
+      return list.map((j) => WordUserView.fromJson(j as Map<String, dynamic>)).toList();
+    } catch (e, stackTrace) {
+      debugPrint('❌ fetchWordUserViewsByFilter error: $e');
+      debugPrint('Stack: $stackTrace');
+      rethrow;
+    }
+  }
+
   Future<List<Word>?> fetchByFilter(
     WordListFilter filter, {
     int limit = 50,
@@ -305,10 +429,10 @@ class SupabaseWordRepository {
     // Querystring aufbauen
     // ⬇️ NEU: User-Flags mit auswählen (für QuickSets-Filter)
     final params = <String>[
-      'select=id,text,translation,level,pos,created_at,category_id,in_my_words,favorite_user,srs_stage_user,picked_user',
+      'select=id,text,translation,level,pos,category_id,in_my_words,favorite_user,srs_stage_user,picked_user,user_added_at',
       'limit=$limit',
       'offset=$offset',
-      'order=${sort == SortMode.newest ? 'created_at.desc' : 'text.asc'}',
+      'order=${sort == SortMode.newest ? 'user_added_at.desc' : 'text.asc'}',
     ];
 
     // Filter (per eq)
@@ -399,18 +523,43 @@ class SupabaseWordRepository {
 
   // ⬇️ NEU: Count-APIs für QuickSets (nutzen HTTP-API wie fetchByFilter)
   Future<int> countByFilter(WordListFilter filter) async {
-    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    final isCategory = filter.kind == WordFilterKind.category;
+
+    final baseUrl = isCategory
+        ? '${dotenv.env['SUPABASE_URL']}/rest/v1/words_view'  // ✅
+        : '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+
     final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
-    
+
     final params = <String>[
       'select=id',
       'limit=1',
       'prefer=count=exact',
     ];
-    
-    final queryParams = _buildQueryParamsForFilter(filter);
-    params.addAll(queryParams.entries.map((e) => '${e.key}=${e.value}'));
-    
+
+    if (isCategory) {
+      // Ermittle category_id: value kann UUID oder Slug sein
+      String categoryId = filter.value;
+      final isUuidLike = RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(filter.value);
+      if (!isUuidLike) {
+        // Ist ein Slug, auflösen zu ID
+        final row = await _sb
+            .from('categories')
+            .select('id')
+            .eq('slug', filter.value)
+            .maybeSingle();
+        if (row != null && row['id'] != null) {
+          categoryId = row['id'] as String;
+        } else {
+          return 0; // Slug nicht gefunden
+        }
+      }
+      params.add('category_id=eq.$categoryId');           // ✅ words_view hat category_id
+    } else {
+      final qp = _buildQueryParamsForFilter(filter);
+      params.addAll(qp.entries.map((e) => '${e.key}=${e.value}'));
+    }
+
     final uri = Uri.parse('$baseUrl?${params.join('&')}');
     final headers = {
       'apikey': apiKey,
@@ -418,15 +567,12 @@ class SupabaseWordRepository {
       'Accept': 'application/json',
       'Prefer': 'count=exact',
     };
-    
+
     final resp = await http.head(uri, headers: headers);
-    final countHeader = resp.headers['content-range'];
-    if (countHeader != null) {
-      // Format: "0-0/123" -> 123
-      final match = RegExp(r'/(\d+)$').firstMatch(countHeader);
-      if (match != null) {
-        return int.parse(match.group(1)!);
-      }
+    final cr = resp.headers['content-range'];
+    if (cr != null) {
+      final m = RegExp(r'/(\d+)$').firstMatch(cr);
+      if (m != null) return int.parse(m.group(1)!);
     }
     return 0;
   }
@@ -551,6 +697,25 @@ class SupabaseWordRepository {
         .eq('word_id', wordId);
   }
 
+  /// Batch-Markierung: Setzt mehrere Wörter auf "known" (srs_stage_user = 1)
+  /// Nutzt die bestehende Update-Route (upsert auf user_words)
+  Future<void> markKnownBatch(List<String> wordIds) async {
+    final user = _sb.auth.currentUser;
+    if (user == null || wordIds.isEmpty) return;
+
+    // Batch-Upsert: Erstelle Records für alle wordIds mit srs_stage = 1
+    final records = wordIds.map((wordId) => {
+      'user_id': user.id,
+      'word_id': wordId,
+      'srs_stage': 1, // "known" = Stage 1
+    }).toList();
+
+    await _sb.from('user_words').upsert(
+      records,
+      onConflict: 'user_id,word_id',
+    );
+  }
+
   /// Optional: initiale Markierungen für eine Liste abfragen (Batch)
   Future<Set<String>> getPickedWordIds(Iterable<String> wordIds) async {
     final user = _sb.auth.currentUser;
@@ -601,8 +766,7 @@ extension MyWordsApi on SupabaseWordRepository {
         .select('word:words(*)')
         .eq('user_id', user.id)
         .eq('picked', true)
-        .order('created_at', ascending: false)
-        .range(offset, offset + limit - 1);
+        .order('created_at', ascending: false);
 
     // Map zu Word-Liste
     var items = (data as List)
@@ -637,6 +801,15 @@ extension MyWordsApi on SupabaseWordRepository {
 
     return (data as List).length;
   }
+
+  Future<WordUserView?> fetchWordById(String wordId) async {
+    final row = await _sb
+        .from('v_words_user')
+        .select()
+        .eq('id', wordId)
+        .maybeSingle();
+    return row == null ? null : WordUserView.fromJson(row);
+  }
 }
 
 // --- Kategorie-Resolver -----------------------------------------------
@@ -650,6 +823,15 @@ extension CategoryLookup on SupabaseWordRepository {
         .maybeSingle();
     if (row == null) return null;
     return row['id'] as String?;
+  }
+
+  Future<String?> findCategorySlugById(String id) async {
+    final row = await _sb
+        .from('categories')
+        .select('slug')
+        .eq('id', id)
+        .maybeSingle();
+    return row?['slug'] as String?;
   }
 }
 
@@ -775,13 +957,4 @@ Future<String?> singleNextWordId(String catId, int stage) async {
       .maybeSingle();
 
   return w == null ? null : wordId;
-}
-
-Future<WordUserView?> fetchWordById(String wordId) async {
-  final row = await _sb
-      .from('v_words_user')
-      .select()
-      .eq('id', wordId)
-      .maybeSingle();
-  return row == null ? null : WordUserView.fromJson(row);
 }

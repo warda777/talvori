@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 
 const double kWheelWidth = 280.0;
 const double kWheelHeight = 72.0;
@@ -168,6 +169,7 @@ class _CategoryWheelState extends State<CategoryWheel>
                           height: kWheelItemExtent - 6,
                           radius: kWheelPillRadius,
                           active: dist == 0,
+                          strokeColor: CategoryStrokeColors.getStrokeColor(cats[index]),
                         ),
                       ),
                     ),
@@ -177,43 +179,47 @@ class _CategoryWheelState extends State<CategoryWheel>
             ),
           ),
 
-          // rechte Pfeile
+          // rechte Pfeile + Counter dazwischen
           Positioned.fill(
             right: -kWheelArrowRightOut,
             child: IgnorePointer(
               ignoring: false,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: _showArrows ? 1.0 : 0.0,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: kWheelArrowNudge),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _ArrowIcon(
-                          up: true,
-                          flash: _flashUp,
-                          onTap: () => _ctrl.animateToItem(
-                            (_current - 1).clamp(0, cats.length - 1),
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeOut,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: kWheelArrowNudge),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: _showArrows ? 1.0 : 0.0,
+                            child: _ArrowIcon(
+                              up: true,
+                              flash: _flashUp,
+                              onTap: () => _ctrl.animateToItem(
+                                (_current - 1).clamp(0, cats.length - 1),
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOut,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        _ArrowIcon(
-                          up: false,
-                          flash: _flashDown,
-                          onTap: () => _ctrl.animateToItem(
-                            (_current + 1).clamp(0, cats.length - 1),
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeOut,
+                          const SizedBox(height: 8),
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: _showArrows ? 1.0 : 0.0,
+                            child: _ArrowIcon(
+                              up: false,
+                              flash: _flashDown,
+                              onTap: () => _ctrl.animateToItem(
+                                (_current + 1).clamp(0, cats.length - 1),
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOut,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
                 ),
               ),
             ),
@@ -230,6 +236,7 @@ class _AdaptivePill extends StatelessWidget {
   final double height;
   final double radius;
   final bool active;
+  final Color strokeColor;
 
   const _AdaptivePill({
     required this.text,
@@ -237,6 +244,7 @@ class _AdaptivePill extends StatelessWidget {
     required this.height,
     required this.radius,
     required this.active,
+    required this.strokeColor,
   });
 
   @override
@@ -247,11 +255,11 @@ class _AdaptivePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2D2C2C),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: strokeColor, width: 1.5),
         boxShadow: active && kWheelGlowBlur > 0
             ? [
                 BoxShadow(
-                  color: Colors.white.withOpacity(kWheelGlowOpacity),
+                  color: strokeColor.withOpacity(kWheelGlowOpacity),
                   blurRadius: kWheelGlowBlur,
                 ),
               ]
@@ -370,3 +378,4 @@ class _ArrowIcon extends StatelessWidget {
     );
   }
 }
+
