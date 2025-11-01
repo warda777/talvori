@@ -156,7 +156,7 @@ class VocabSortController extends StateNotifier<VocabSortState> {
 
     // Für Undo merken, ob der Eintrag „oben" markiert war
     final wasUnknown = state.unknownIds.contains(id);
-    _history.add(_SortAction(id, idx, wasUnknown));
+    _history.add(_SortAction.single(id, idx, wasUnknown));
 
     // Aus Queue entfernen, known erhöhen, unknown bereinigen
     final nextQ = [...state.queue]..removeAt(idx);
@@ -197,50 +197,135 @@ class VocabSortController extends StateNotifier<VocabSortState> {
     if (_history.isEmpty) return;
     final last = _history.removeLast();
 
-    // Wortdaten beschaffen (falls nicht mehr in Queue)
-    WordUserView? w = state.queue.firstWhere(
-      (x) => x.id == last.wordId,
-      orElse: () => WordUserView(id: last.wordId, text: '', translation: ''),
-    );
-    final fetched = await _repo.fetchWordById(last.wordId);
-    if (fetched != null) w = fetched;
+    if (last.isBatch) {
+      // Batch-Undo: ganze Kategorie zurücklegen
+      final batchWords = last.batchWords!;
+      if (batchWords.isEmpty) return;
 
-    // An alte Position einsetzen (clamped) - w ist garantiert nicht null
-    final nextQ = [...state.queue];
-    final pos = (last.oldIndex ?? nextQ.length).clamp(0, nextQ.length);
-    nextQ.insert(pos, w!);
+      // Alle Wörter wieder in die Queue einfügen (in ursprünglicher Reihenfolge)
+      final nextQ = List<WordUserView>.from(batchWords);
+      
+      // Alle IDs aus knownIds entfernen
+      final allIds = batchWords.map((w) => w.id).toSet();
+      final nextK = {...state.knownIds}..removeAll(allIds);
+      
+      // unknownIds bleibt leer (waren alle nicht als unknown markiert beim Batch-Add)
+      final nextU = <String>{};
+      
+      // Kategorie-Zähler wiederherstellen
+      final nextCount = last.oldCategoryCount ?? batchWords.length;
+      final nextCatIds = batchWords.map((w) => w.id).toSet();
+      
+      // overlayCounter wiederherstellen
+      final nextOverlay = last.oldOverlayCounter ?? batchWords.length;
+      
+      // Center auf erstes Wort setzen
+      final nextCenterId = batchWords.isNotEmpty ? batchWords[0].id : null;
 
-    // unknown-Status wiederherstellen, falls es beim + „oben" war
-    final nextU = {...state.unknownIds};
-    if (last.wasUnknownMarked) {
-      nextU.add(last.wordId);
+      state = state.copy(
+        queue: nextQ,
+        knownIds: nextK,
+        unknownIds: nextU,
+        categoryWordCount: nextCount,
+        currentCategoryWordIds: nextCatIds,
+        centerWordId: nextCenterId,
+        overlayCounter: nextOverlay,
+      );
+
+      HapticFeedback.selectionClick();
     } else {
-      nextU.remove(last.wordId);
+      // Einzelwort-Undo (wie bisher)
+      final wordId = last.wordId!;
+      
+      // Wortdaten beschaffen (falls nicht mehr in Queue)
+      WordUserView? w = state.queue.firstWhere(
+        (x) => x.id == wordId,
+        orElse: () => WordUserView(id: wordId, text: '', translation: ''),
+      );
+      final fetched = await _repo.fetchWordById(wordId);
+      if (fetched != null) w = fetched;
+
+      // An alte Position einsetzen (clamped) - w ist garantiert nicht null
+      final nextQ = [...state.queue];
+      final pos = (last.oldIndex ?? nextQ.length).clamp(0, nextQ.length);
+      nextQ.insert(pos, w!);
+
+      // unknown-Status wiederherstellen, falls es beim + „oben" war
+      final nextU = {...state.unknownIds};
+      if (last.wasUnknownMarked) {
+        nextU.add(wordId);
+      } else {
+        nextU.remove(wordId);
+      }
+
+      // known entfernen (falls vorhanden)
+      final nextK = {...state.knownIds}..remove(wordId);
+
+      // Kategorie-Zähler & Set der Kategorie-IDs wieder erhöhen/hinzufügen
+      final nextCount = state.categoryWordCount + 1;
+      final nextCatIds = {...state.currentCategoryWordIds}..add(wordId);
+
+      // 👇 Wenn es vorher NICHT unknown war, haben wir bei + abgezogen → jetzt +1
+      final inc = last.wasUnknownMarked ? 0 : 1;
+      final nextOverlay = state.overlayCounter + inc;
+
+      // Mitte auf das zurückgelegte Wort setzen (sofort wieder + möglich)
+      state = state.copy(
+        queue: nextQ,
+        knownIds: nextK,
+        unknownIds: nextU,
+        categoryWordCount: nextCount,
+        currentCategoryWordIds: nextCatIds,
+        centerWordId: wordId,
+        overlayCounter: nextOverlay,             // 👈 update
+      );
+
+      HapticFeedback.selectionClick();
     }
+  }
 
-    // known entfernen (falls vorhanden)
-    final nextK = {...state.knownIds}..remove(last.wordId);
+  /// Alle Wörter der aktuellen Kategorie als "I know" markieren
+  Future<void> addEntireCategoryToKnown() async {
+    if (state.queue.isEmpty) return;
 
-    // Kategorie-Zähler & Set der Kategorie-IDs wieder erhöhen/hinzufügen
-    final nextCount = state.categoryWordCount + 1;
-    final nextCatIds = {...state.currentCategoryWordIds}..add(last.wordId);
+    // Für Undo: komplette Queue vor dem Leeren speichern
+    final savedQueue = List<WordUserView>.from(state.queue);
+    final savedOverlayCounter = state.overlayCounter;
+    final savedCategoryCount = state.categoryWordCount;
+    _history.add(_SortAction.batch(savedQueue, savedOverlayCounter, savedCategoryCount));
 
-    // 👇 Wenn es vorher NICHT unknown war, haben wir bei + abgezogen → jetzt +1
-    final inc = last.wasUnknownMarked ? 0 : 1;
-    final nextOverlay = state.overlayCounter + inc;
-
-    // Mitte auf das zurückgelegte Wort setzen (sofort wieder + möglich)
+    // Alle IDs aus der Queue sammeln
+    final allWordIds = state.queue.map((w) => w.id).toList();
+    
+    // Alle zu knownIds hinzufügen
+    final nextK = {...state.knownIds}..addAll(allWordIds);
+    
+    // Queue leeren
+    final nextQ = <WordUserView>[];
+    
+    // unknownIds bereinigen (alle werden jetzt known)
+    final nextU = <String>{};
+    
+    // Kategorie-Zähler anpassen (alle Wörter entfernt)
+    final nextCount = 0;
+    final nextCatIds = <String>{};
+    
+    // overlayCounter auf 0 setzen (alle verarbeitet)
+    final nextOverlay = 0;
+    
+    HapticFeedback.mediumImpact();
     state = state.copy(
       queue: nextQ,
       knownIds: nextK,
       unknownIds: nextU,
       categoryWordCount: nextCount,
       currentCategoryWordIds: nextCatIds,
-      centerWordId: last.wordId,
-      overlayCounter: nextOverlay,             // 👈 update
+      overlayCounter: nextOverlay,
+      centerWordId: null,
     );
 
-    HapticFeedback.selectionClick();
+    // In Datenbank persistieren
+    await _repo.markKnownBatch(allWordIds);
   }
 
   /// Alles „I know" persistieren (z. B. srs_stage_user >=1 oder known-flag)
@@ -346,8 +431,24 @@ final vocabSortControllerProvider =
 
 /// Hilfsklasse für Undo-History
 class _SortAction {
-  final String wordId;
+  final String? wordId;               // Einzelnes Wort (für + Button)
+  final List<WordUserView>? batchWords; // Alle Wörter (für Add Button)
   final int? oldIndex;               // Position im Wheel
   final bool wasUnknownMarked;       // war in unknownIds?
-  _SortAction(this.wordId, this.oldIndex, this.wasUnknownMarked);
+  final int? oldOverlayCounter;      // Counter vor der Operation
+  final int? oldCategoryCount;       // Kategorie-Count vor der Operation
+  
+  // Einzelwort-Action
+  _SortAction.single(this.wordId, this.oldIndex, this.wasUnknownMarked)
+      : batchWords = null,
+        oldOverlayCounter = null,
+        oldCategoryCount = null;
+  
+  // Batch-Action (ganze Kategorie)
+  _SortAction.batch(this.batchWords, this.oldOverlayCounter, this.oldCategoryCount)
+      : wordId = null,
+        oldIndex = null,
+        wasUnknownMarked = false;
+  
+  bool get isBatch => batchWords != null;
 }

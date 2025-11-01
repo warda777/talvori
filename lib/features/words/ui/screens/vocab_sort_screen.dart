@@ -233,8 +233,7 @@ class _VocabSortScreenState extends ConsumerState<VocabSortScreen> {
                                 onPressed: ref.watch(addButtonLockedProvider)
                                     ? null
                                     : () async {
-                                        await ctrl.applyKnown(); // persist „I know"
-                                        if (mounted) Navigator.of(context).pop();
+                                        await ctrl.addEntireCategoryToKnown(); // gesamte Kategorie zu "I know"
                                       },
                                 style: FilledButton.styleFrom(
                                   backgroundColor: const Color(0xFF2F2F3A),
