@@ -101,26 +101,29 @@ class GlowSweepPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Draw the full ring background (subtle)
+    // Draw the full ring background (sehr subtil)
     final backgroundPaint = Paint()
-      ..color = color.withValues(alpha: 0.1)
+      ..color = color.withValues(alpha: 0.05)
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
-    // Add glow effect by drawing multiple strokes
-    for (int i = 0; i < 3; i++) {
-      final glowRadius = radius + (i * 2);
-      final glowAlpha = 0.8 - (i * 0.2);
-      final glowStrokeWidth = strokeWidth + (i * 2);
+    // Subtiler Glow-Effekt: nur 1-2 Layer statt 3
+    final glowLayers = strokeWidth < 3 ? 1 : 2; // Kleinere strokeWidth = weniger Layer
+    
+    for (int i = 0; i < glowLayers; i++) {
+      final glowRadius = radius + (i * 1.5); // Kleinerer Radius-Offset
+      final glowAlpha = (0.5 - (i * 0.15)).clamp(0.1, 1.0); // Subtileres Alpha
+      final glowStrokeWidth = strokeWidth + (i * 1); // Kleinere StrokeWidth-Erweiterung
       
       final paint = Paint()
         ..color = color.withValues(alpha: glowAlpha)
         ..strokeWidth = glowStrokeWidth
         ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = i == 0 ? const MaskFilter.blur(BlurStyle.normal, 2) : null; // Leichter Blur nur beim ersten Layer
 
       final sweepAngle = 2 * math.pi * progress;
       canvas.drawArc(

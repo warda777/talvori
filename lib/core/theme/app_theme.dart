@@ -9,10 +9,10 @@ class AppTheme {
       brightness: Brightness.dark,
     ).copyWith(
       // Farben für .tonal Buttons (IconButton.filledTonal, FilledButton.tonal)
-      secondaryContainer: const Color(0xFF2E335A),
+      secondaryContainer: const Color(0xFF2F2F3A), // Dunkles Grau für Button-Hintergründe
       onSecondaryContainer: Colors.white,
       // Farben für normale FilledButtons
-      primary: const Color(0xFF7C4DFF),
+      primary: const Color(0xFFB0CCFE), // Blau aus Word Wheel
       onPrimary: Colors.white,
     );
 

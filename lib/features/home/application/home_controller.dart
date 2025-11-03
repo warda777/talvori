@@ -61,10 +61,9 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
   // Data
   Future<void> refreshMyWordsCount() async {
     try {
-      final c = await _wordRepo.countMyWords();
-      debugPrint('🔢 My Words Count: $c');
+      final c = await _wordRepo.countMyWords(browserOnly: true); // ✅
       state = state.copyWith(myWordsCount: c);
-    } catch (_) {/* still */}
+    } catch (_) {}
   }
 
   Future<String?> handleIncomingShare(String rawText) async {

@@ -356,7 +356,26 @@ class SupabaseWordRepository {
         case WordFilterKind.about:
           switch (filter.value) {
             case 'my-words':
-              query_builder = query_builder.eq('in_my_words', true);
+              // Direkt aus user_words filtern (picked=true)
+              final user = _sb.auth.currentUser;
+              if (user == null) return [];
+              
+              // Hole word_ids aus user_words
+              final userWordsData = await _sb
+                  .from('user_words')
+                  .select('word_id')
+                  .eq('user_id', user.id)
+                  .eq('picked', true);
+              
+              final userWordsList = (userWordsData as List).cast<Map<String, dynamic>>();
+              if (userWordsList.isEmpty) return [];
+              
+              final wordIds = userWordsList
+                  .map((e) => e['word_id'] as String)
+                  .toList();
+              
+              // Filtere v_words_user nach diesen word_ids
+              query_builder = query_builder.inFilter('id', wordIds);
               break;
             case 'favorites':
               query_builder = query_builder.eq('favorite_user', true);
@@ -749,56 +768,55 @@ class SupabaseWordRepository {
 
 }
 
-// --- MyWords API: fetch + count --------------------------------------------
+// --- MyWords API: fetch + count (nur user_words) ---------------------------
 extension MyWordsApi on SupabaseWordRepository {
-  /// Gemerkte Wörter des aktuellen Users (Pagination). Optional clientseitige Suche.
   Future<List<Word>> fetchMyWords({
-    int limit = 50,
+    int? limit,
     int offset = 0,
     String? query,
+    bool browserOnly = true, // 👈 neu
   }) async {
     final user = _sb.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    // Join: user_words -> words (als "word")
-    final data = await _sb
+    dynamic queryBuilder = _sb
         .from('user_words')
         .select('word:words(*)')
         .eq('user_id', user.id)
-        .eq('picked', true)
-        .order('created_at', ascending: false);
+        .eq('picked', true);
+    if (browserOnly) queryBuilder = queryBuilder.eq('source', 'browser'); // 👈 neu
+    queryBuilder = queryBuilder.order('created_at', ascending: false);
+    if (limit != null) {
+      queryBuilder = queryBuilder.range(offset, offset + limit - 1);
+    } else {
+      queryBuilder = queryBuilder.range(offset, offset + 999999); // Kein Limit, aber große Range
+    }
+    final data = await queryBuilder;
 
-    // Map zu Word-Liste
     var items = (data as List)
-        .map((row) => Word.fromJson(
-              (row as Map<String, dynamic>)['word'] as Map<String, dynamic>,
-            ))
+        .map((row) => Word.fromJson((row as Map<String, dynamic>)['word'] as Map<String, dynamic>))
         .toList();
 
-    // Einfache clientseitige Suche
-    final q = query?.trim().toLowerCase();
-    if (q != null && q.isNotEmpty) {
-      items = items
-          .where((w) =>
-              w.text.toLowerCase().contains(q) ||
-              w.translation.toLowerCase().contains(q))
-          .toList();
+    final s = query?.trim().toLowerCase();
+    if (s != null && s.isNotEmpty) {
+      items = items.where((w) =>
+        w.text.toLowerCase().contains(s) || w.translation.toLowerCase().contains(s)).toList();
     }
-
     return items;
   }
 
-  /// Anzahl der gemerkten Wörter (einfach & robust).
-  Future<int> countMyWords() async {
+  Future<int> countMyWords({bool browserOnly = true}) async { // 👈 neu
     final user = _sb.auth.currentUser;
     if (user == null) return 0;
 
-    final data = await _sb
+    var q = _sb
         .from('user_words')
-        .select('word_id') // kein head/count – einfach zählen
+        .select('word_id') // lightweight
         .eq('user_id', user.id)
         .eq('picked', true);
+    if (browserOnly) q = q.eq('source', 'browser'); // 👈 neu
 
+    final data = await q;
     return (data as List).length;
   }
 

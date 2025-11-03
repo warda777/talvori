@@ -25,6 +25,7 @@ class HomeBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     const gold = Color(0xFFF1C86B);
+    const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -38,11 +39,11 @@ class HomeBottomNav extends StatelessWidget {
               fit: StackFit.expand, // Kinder füllen die ganze Fläche
               children: [
                 TapFlash(
-                  color: gold,
+                  color: gold, // Goldener Glow für Category-Button
                   shape: BoxShape.circle,
                   maxOpacity: 1.0,
-                  blur: 22,
-                  spread: 4,
+                  blur: 28,
+                  spread: 6,
                   duration: const Duration(milliseconds: 220),
                   onTapAfter: onCategories,
                   child: DecoratedBox(
@@ -64,7 +65,7 @@ class HomeBottomNav extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: gold, width: 2),
+                        border: Border.all(color: gold, width: 2), // Goldener Rand
                       ),
                     ),
                   ),
@@ -76,7 +77,7 @@ class HomeBottomNav extends StatelessWidget {
             width: 140,
             height: 52,
             child: TapFlash(
-              color: gold,                                          // Flash-Farbe
+              color: wheelBlue,                                          // Blau statt Gold
               shape: BoxShape.rectangle,
               borderRadius: const BorderRadius.all(Radius.circular(999)),
               onTapAfter: onPractice,                               // nach dem Flash ausführen
@@ -106,7 +107,7 @@ class HomeBottomNav extends StatelessWidget {
           SizedBox.square(
             dimension: 52,
             child: TapFlash(
-              color: cs.primary,                                    // Flash-Farbe
+              color: wheelBlue,                                    // Blau statt Primary
               shape: BoxShape.circle,
               onTapAfter: onProfile,                                // nach dem Flash ausführen
               child: Container(

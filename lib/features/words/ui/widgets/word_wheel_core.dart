@@ -1,0 +1,185 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/words/domain/word.dart';
+import 'package:talvori/features/home/application/application.dart';
+
+/// Kompaktes Word-Wheel für die HomeCard.
+/// Zeigt 3–4 Wörter aus „My Words", rechtsbündig und zentriert.
+/// Kein Counter, keine Box – nur Scroll-Logik + Text.
+class WordWheelCore extends ConsumerStatefulWidget {
+  final void Function(int index, WordUserView word)? onCenterChange;
+  final void Function(int total)? onTotalLoaded; // Callback für Gesamtanzahl
+
+  const WordWheelCore({super.key, this.onCenterChange, this.onTotalLoaded});
+
+  @override
+  ConsumerState<WordWheelCore> createState() => _WordWheelCoreState();
+}
+
+class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
+  late FixedExtentScrollController _controller;
+  List<WordUserView> _words = [];
+  int _center = 0;
+  bool _isLoading = true;
+  final _repo = SupabaseWordRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = FixedExtentScrollController();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final n = ref.read(homeControllerProvider).myWordsCount;
+      final take = n > 0 ? n : null; // ✅ kein Limit, wenn 0 -> null
+      final words = await _repo.fetchMyWords(
+        browserOnly: true,         // ✅ gleiche Filterquelle
+        limit: take,               // ✅ exakt n Items (oder alle, wenn null)
+      );
+      if (!mounted) return;
+      
+      debugPrint('🎡 WordWheelCore: Loaded ${words.length} words (take=$take)');
+      
+      final safe = words; // keine Assertion mehr
+      
+      setState(() {
+        _isLoading = false;
+        _words = safe
+            .map((w) => WordUserView(id: w.id, text: w.text, translation: w.translation))
+            .toList();
+      });
+      
+      if (_words.isNotEmpty) {
+        widget.onCenterChange?.call(0, _words[0]);
+        widget.onTotalLoaded?.call(_words.length);
+      } else {
+        widget.onTotalLoaded?.call(0);
+        debugPrint('⚠️ WordWheelCore: No words found in My Words');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ WordWheelCore._load error: $e');
+      debugPrint('Stack: $stackTrace');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        widget.onTotalLoaded?.call(0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Optional live-Refresh wenn sich der Counter ändert:
+    ref.listen<int>(
+      homeControllerProvider.select((s) => s.myWordsCount),
+      (previous, next) {
+        if (previous != next) {
+          _load();
+        }
+      },
+    );
+
+    if (_isLoading) {
+      return const SizedBox(
+        height: 120,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+
+    if (_words.isEmpty) {
+      return SizedBox(
+        height: 160,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 24),
+            child: Text(
+              'Mark your first word\nin the browser',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withOpacity(0.6),
+                height: 1.3,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 160,
+      child: Stack(
+        children: [
+          // Fade oben
+          Positioned.fill(
+            child: ShaderMask(
+              shaderCallback: (Rect rect) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black,
+                    Colors.black,
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.15, 0.85, 1.0],
+                ).createShader(rect);
+              },
+              blendMode: BlendMode.dstIn,
+              child: ListWheelScrollView.useDelegate(
+                controller: _controller,
+                physics: const FixedExtentScrollPhysics(),
+                itemExtent: 36,
+                diameterRatio: 2.4,
+                perspective: 0.002,
+                onSelectedItemChanged: (i) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _center = i);
+                  widget.onCenterChange?.call(i, _words[i]);
+                },
+                childDelegate: ListWheelChildBuilderDelegate(
+                  childCount: _words.length,
+                  builder: (context, i) {
+                    final isCenter = i == _center;
+                    final w = _words[i];
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 24),
+                        child: Text(
+                          w.text,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: isCenter ? 26 : 20,
+                            fontWeight: isCenter ? FontWeight.w800 : FontWeight.w600,
+                            color: isCenter
+                                ? const Color(0xFFB0CCFE)
+                                : Colors.white.withOpacity(0.85),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

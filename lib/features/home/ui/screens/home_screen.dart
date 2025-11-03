@@ -5,7 +5,6 @@ import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
-import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
@@ -15,6 +14,7 @@ import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 import 'package:talvori/features/push/data/daily_picks_store.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -104,65 +104,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         height: h,
                         child: wc.WordCard(
                           key: ValueKey((state.imageIsDark, state.imageExpanded)),
-                          initialWord: null, // WordCard verwendet lastSharedWordProvider
+                          initialWord: null, // lastSharedWordProvider regelt das
                           onQuickSend: () async {
-                            // Aktuelles Wort aus dem Provider holen
-                            final currentWord = await ref.read(lastSharedWordProvider.future) ?? 'to assume';
-                            final res = DailyPicksStore.I.add(currentWord);
+                            // Hole bis zu 5 Wörter aus My Words
+                            final repo = SupabaseWordRepository();
+                            final myWords = await repo.fetchMyWords(limit: 5);
                             
-                            // Context nach await prüfen
+                            if (myWords.isEmpty) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Keine Wörter in "My Words" gefunden')),
+                              );
+                              return;
+                            }
+                            
+                            int addedCount = 0;
+                            int duplicateCount = 0;
+                            
+                            for (final word in myWords) {
+                              final res = DailyPicksStore.I.add(word.text);
+                              if (res == AddResult.ok) {
+                                addedCount++;
+                              } else if (res == AddResult.duplicate) {
+                                duplicateCount++;
+                              }
+                            }
+                            
                             if (!context.mounted) return;
                             
-                            switch (res) {
-                              case AddResult.ok:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text(HomeStrings.added)),
-                                );
-                                break;
-                              case AddResult.duplicate:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text(HomeStrings.duplicate)),
-                                );
-                                break;
-                              case AddResult.full:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          '${HomeStrings.full} (${DailyPicksStore.I.maxCount})')),
-                                );
-                                break;
-                              case AddResult.invalid:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text(HomeStrings.invalid)),
-                                );
-                                break;
+                            if (addedCount > 0) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$addedCount Wort${addedCount > 1 ? 'er' : ''} hinzugefügt${duplicateCount > 0 ? ' ($duplicateCount bereits vorhanden)' : ''}'),
+                                ),
+                              );
+                            } else if (duplicateCount > 0) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Alle Wörter bereits in Today\'s Picks ($duplicateCount)')),
+                              );
                             }
                           },
                           isImageExpanded: state.imageExpanded,
                           onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
                           isImageDark: state.imageIsDark,
-                          onImageBrightnessChanged: (isDark) => ref.read(homeControllerProvider.notifier).setImageDark(isDark),
+                          onImageBrightnessChanged: (isDark) =>
+                              ref.read(homeControllerProvider.notifier).setImageDark(isDark),
                           contentPadding: HomeTheme.contentPadding,
 
                           userWordCount: state.myWordsCount,
                           onCountTap: () async {
-                            
-                            final nav = Navigator.of(context); // vor await
-                            await nav.push(
-                              MaterialPageRoute(builder: (_) => const MyWordsScreen()),
-                            );
+                            final nav = Navigator.of(context);
+                            await nav.push(MaterialPageRoute(builder: (_) => const MyWordsScreen()));
                             if (!context.mounted) return;
                           },
                           onSpeak: () => _todo('Speak word'),
                           onMarkWords: () => _todo('Open Mark Words (web)'),
                           onGo: () async {
-                            // ⬇️ NEU: Direkt in LearnMode "My words" starten (Index 1)
                             const quickSetsLabels = [
-                              'All words',
-                              'My words',
-                              'Favorites',
-                              'Words I know',
-                              'My mix',
+                              'All words','My words','Favorites','Words I know','My mix',
                             ];
                             await Navigator.of(context).push(
                               MaterialPageRoute(
@@ -170,7 +169,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   categoryId: 'quicksets',
                                   title: 'My words',
                                   customWheelLabels: quickSetsLabels,
-                                  customWheelInitialIndex: 1, // My words
+                                  customWheelInitialIndex: 1,
                                   navigationOrigin: const LearnNavigationOrigin.home(),
                                 ),
                               ),

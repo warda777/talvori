@@ -19,6 +19,7 @@ class ProgressPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
     final value = (selected / max).clamp(0.0, 1.0);
 
     final pill = Container(
@@ -51,7 +52,7 @@ class ProgressPill extends StatelessWidget {
                 minHeight: 10,
                 backgroundColor: cs.onSecondaryContainer.withValues(alpha: 0.25),
                 valueColor:
-                    AlwaysStoppedAnimation<Color>(cs.onSecondaryContainer),
+                    AlwaysStoppedAnimation<Color>(wheelBlue), // Blau statt SecondaryContainer
               ),
             ),
           ),

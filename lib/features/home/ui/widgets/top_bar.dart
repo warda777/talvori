@@ -179,6 +179,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
 
     return SizedBox(
       height: _dim,
@@ -188,7 +189,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
           SizedBox.square(
             dimension: _dim,
             child: TapFlash(
-              color: cs.primary, // Flash-Farbe
+              color: wheelBlue, // Blau statt Primary
               shape: BoxShape.circle,
               onTapAfter: widget.onAllWords,
               child: Container(
@@ -226,7 +227,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
                                 barWidth: 120,
                               )
                             : TapFlash(
-                                color: cs.secondary,
+                                color: wheelBlue, // Blau statt Secondary
                                 shape: BoxShape.rectangle,
                                 borderRadius: BorderRadius.circular(20),
                                 onTapAfter: widget.onProgressTap,
@@ -249,7 +250,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
             child: SizedBox.square(
               dimension: _dim,
               child: TapFlash(
-                color: cs.tertiary, // Akzent fürs Rewards
+                color: wheelBlue, // Blau statt Tertiary
                 shape: BoxShape.circle,
                 onTapAfter: () {
                   // kurzer Tap: wie bisher (Standard-Rewards öffnen)

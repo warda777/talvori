@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:share_handler/share_handler.dart';  // Temporär deaktiviert
 import 'dart:async';
 
 
@@ -8,55 +7,7 @@ class BrowserReturnService {
 
   /// Einmal in `main()` vor `runApp()` aufrufen.
   static Future<void> initShareListener() async {
-    // Temporär deaktiviert wegen iOS-Problemen mit share_handler
-    // TODO: Später wieder aktivieren wenn iOS-Probleme gelöst sind
-    /*
-    final handler = ShareHandlerPlatform.instance;
-
-    // App kalt über "Teilen" gestartet
-    final initial = await handler.getInitialSharedMedia();
-    if (initial != null) {
-      await _persistFromShared(initial);
-    }
-
-    // App offen und es kommt eine Share-Aktion rein
-    handler.sharedMediaStream.listen((SharedMedia media) async {
-      await _persistFromShared(media);
-    });
-    */
-  }
-
-  static Future<void> _persistFromShared(dynamic media) async {
-    String? url;
-
-    // 1) Textinhalt prüfen
-    final txt = media.content?.trim();
-    if (txt != null && (txt.startsWith('http') || _isLocalLike(txt))) {
-      url = txt;
-    }
-
-
-    // 2) Anhänge prüfen (temporär deaktiviert)
-    /*
-    if (url == null) {
-      for (final a in (media.attachments ?? const <SharedAttachment?>[])
-          .whereType<SharedAttachment>()) {
-        final p = a.path;
-        if (p.startsWith('http') || _isLocalLike(p)) {
-          url = p;
-          break;
-        }
-      }
-    }
-    */
-
-    if (url == null) return;
-
-    // 3) http/https normalisieren (Anker/Highlights bleiben erhalten)
-    if (url.startsWith('http')) {
-      url = _normalizeUrl(url);
-    }
-    await _saveUrl(url);
+    // share_handler wurde entfernt - Deep-Links werden über app_links gehandhabt
   }
 
   // Broadcast, wenn eine neue Quelle gespeichert wurde

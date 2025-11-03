@@ -9,12 +9,16 @@ import 'package:talvori/core/services/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
+import 'package:talvori/features/words/ui/cards/glow_orb.dart';
+import 'package:talvori/features/words/ui/cards/center_glow.dart';
+import 'package:talvori/features/home/application/application.dart';
 
 // ignore_for_file: use_build_context_synchronously
 // ignore_for_file: unnecessary_null_comparison
 
 
-class WordCard extends ConsumerWidget {
+class WordCard extends ConsumerStatefulWidget {
   // Aktionen
   final VoidCallback onSpeak;
   final VoidCallback onMarkWords;
@@ -67,22 +71,33 @@ class WordCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WordCard> createState() => _WordCardState();
+}
+
+class _WordCardState extends ConsumerState<WordCard> {
+  int _currentIndex = 0;
+  int _total = 0;
+  
+  // Blau-Farbe aus dem Word Wheel
+  static const Color _wheelBlue = Color(0xFFB0CCFE);
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final cardRadius = BorderRadius.circular(28);
-    final onImageFg = isImageDark ? Colors.white : Colors.black;          // helle/dunkle Schrift/Icons
-    final onImageIcon = isImageDark ? Colors.white : Colors.black87;      // Icons minimal kräftiger
+    final onImageFg = widget.isImageDark ? Colors.white : Colors.black;          // helle/dunkle Schrift/Icons
+    final onImageIcon = widget.isImageDark ? Colors.white : Colors.black87;      // Icons minimal kräftiger
     final asyncWord = ref.watch(lastSharedWordProvider);
     final displayWord = asyncWord.maybeWhen(
-      data: (v) => (v != null && v.trim().isNotEmpty) ? v.trim() : (initialWord ?? 'to assume'),
-      orElse: () => initialWord ?? 'to assume',
+      data: (v) => (v != null && v.trim().isNotEmpty) ? v.trim() : (widget.initialWord ?? 'to assume'),
+      orElse: () => widget.initialWord ?? 'to assume',
     );
 
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: height ?? 500,   // du nutzt im Home-Screen 570 – das passt
-        maxWidth:  maxWidth ?? 360,
+        minHeight: widget.height ?? 500,   // du nutzt im Home-Screen 570 – das passt
+        maxWidth:  widget.maxWidth ?? 360,
       ),
       child: ClipRRect(
         // sorgt dafür, dass die Rundung auch fürs große Bild gilt
@@ -91,21 +106,21 @@ class WordCard extends ConsumerWidget {
           fit: StackFit.expand,
           children: [
             // ───────────────── HINTERGRUND: großes Bild (nur Optik) ─────────────────
-            if (isImageExpanded)
+            if (widget.isImageExpanded)
               // Bild liegt UNTER dem Inhalt und füllt die Karte komplett aus
               GestureDetector(
-                onTap: onToggleImage ?? onImageTap,
-                child: _WordImageWithProbe(provider: wordImage, fit: BoxFit.cover, onLuma: onImageBrightnessChanged) // <- meldet true = dunkel, false = hell)
+                onTap: widget.onToggleImage ?? widget.onImageTap,
+                child: _WordImageWithProbe(provider: widget.wordImage, fit: BoxFit.cover, onLuma: widget.onImageBrightnessChanged) // <- meldet true = dunkel, false = hell)
               ),
 
             // ───────────────── VORDERGRUND (alles mit festen Pixelwerten) ─────────────────
             // Der gesamte Inhalt liegt über dem Bild und hat IMMER dasselbe Padding.
             Padding(
-              padding: contentPadding,
+              padding: widget.contentPadding,
               child: Stack(
                 children: [
                   // ─── KLEINES BILD (nur wenn NICHT erweitert) ───
-                  if (!isImageExpanded)
+                  if (!widget.isImageExpanded)
                     Positioned(
                       top: 16,       // Abstand von oben
                       left: 10,      // seitlicher Rand links
@@ -114,11 +129,11 @@ class WordCard extends ConsumerWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(22),
                         child: GestureDetector(
-                          onTap: onToggleImage ?? onImageTap,
+                          onTap: widget.onToggleImage ?? widget.onImageTap,
                           child: _WordImageWithProbe(
-                            provider: wordImage,
+                            provider: widget.wordImage,
                             fit: BoxFit.cover,
-                            onLuma: onImageBrightnessChanged, // <- meldet dunkel/hell auch im kleinen Bild
+                            onLuma: widget.onImageBrightnessChanged, // <- meldet dunkel/hell auch im kleinen Bild
                           ),
                         ),
                       ),
@@ -129,16 +144,32 @@ class WordCard extends ConsumerWidget {
                     top: 16, left: 0, right: 0,
                     child: Center(
                       child: TapFlash(
-                        color: Theme.of(context).colorScheme.primary, // Flash-Farbe
+                        color: _wheelBlue, // Blau aus Word Wheel
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(14),
-                        onTapAfter: onCountTap,
-                        child: CounterBadge(
-                          count: userWordCount,
-                          onTap: null,            // TapFlash übernimmt das Tippen
-                          color: Colors.black.withValues(alpha: 0.7), // Hintergrund
-                          textColor: onImageFg,   // Textfarbe
-                        ),
+                        onTapAfter: widget.onCountTap,
+                        child: _total > 0
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.7),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Text(
+                                  '$_currentIndex/$_total',
+                                  style: TextStyle(
+                                    color: onImageFg, // Weiß
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              )
+                            : CounterBadge(
+                                count: widget.userWordCount,
+                                onTap: null,            // TapFlash übernimmt das Tippen
+                                color: Colors.black.withValues(alpha: 0.7), // Hintergrund
+                                textColor: onImageFg,   // Weiß
+                              ),
                       ),
                     ),
                   ),
@@ -152,85 +183,57 @@ class WordCard extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          // <- NUR EINE Farbe und NICHT const außenrum:
-                          color: onImageFg, // <- immer dynamisch (hell/dunkel) – auch im kleinen Bild
+                          color: onImageFg, // Weiß
                           shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
                         ),
                       ),
                     ),
                   ),
 
-                  // ─── WORT (immer identisch) ───
+                  // ─── SPEAKER unter "My Words" ───
                   Positioned(
-                    top: 220, left: 0, right: 0,
-                    child: GestureDetector(
-                      onLongPress: () async {
-                        final controller = TextEditingController(text: displayWord);
-                        final ok = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Wort setzen'),
-                            content: TextField(
-                              controller: controller,
-                              autofocus: true,
-                              decoration: const InputDecoration(
-                                hintText: 'Neues Wort eingeben',
-                              ),
-                            ),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
-                              TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('OK')),
-                            ],
-                          ),
-                        ) ?? false;
-
-                        if (!ok || !context.mounted) return;
-                        final w = controller.text.trim();
-                        if (w.isEmpty) return;
-
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('last_shared_word', w);
-                        // Provider neu laden
-                        ref.invalidate(lastSharedWordProvider);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Gesetzt: $w')),
-                        );
-                      },
-                      child: Text(
-                        displayWord,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.w800,
-                          color: isImageExpanded ? onImageFg : cs.onSurface,
-                          shadows: isImageExpanded
-                              ? const [Shadow(color: Colors.black54, blurRadius: 8)]
-                              : const [],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // ─── SPEAKER (mit TapFlash) ───
-                  Positioned(
-                    top: 276, left: 0, right: 0, // 220 + 56
+                    top: 110, left: 0, right: 0,
                     child: SizedBox(
                       width: 44, height: 44,
                       child: TapFlash(
-                        color: Theme.of(context).colorScheme.primary, // Flash-Farbe
+                        color: _wheelBlue, // Blau aus Word Wheel
                         shape: BoxShape.circle,
-                        onTapAfter: onSpeak,                     // nach Flash ausführen
+                        onTapAfter: widget.onSpeak,
                         child: Container(
                           decoration: const BoxDecoration(shape: BoxShape.circle),
                           alignment: Alignment.center,
                           child: Icon(
                             Icons.volume_up,
                             size: 28,
-                            color: isImageExpanded ? onImageIcon : cs.onSurfaceVariant,
+                            color: widget.isImageExpanded ? onImageIcon : cs.onSurfaceVariant,
                           ),
                         ),
                       ),
+                    ),
+                  ),
+
+                  // ─── WORT (WordWheelCore) ───
+                  Positioned(
+                    top: 220, left: 0, right: 0,
+                    child: WordWheelCore(
+                      onCenterChange: (index, word) {
+                        // Aktualisiert den Counter synchron mit dem Wheel
+                        setState(() {
+                          _currentIndex = index + 1;
+                        });
+                      },
+                      onTotalLoaded: (total) {
+                        // Setzt die Gesamtanzahl beim ersten Laden
+                        setState(() {
+                          _total = total;
+                        });
+                        // Aktualisiere auch den My Words Count im HomeController
+                        if (total > 0) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ref.read(homeControllerProvider.notifier).refreshMyWordsCount();
+                          });
+                        }
+                      },
                     ),
                   ),
 
@@ -238,7 +241,7 @@ class WordCard extends ConsumerWidget {
                   Positioned(
                     bottom: 30, left: 0, right: 0,
                     child: GestureDetector(
-                      onTap: onGo,  // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
+                      onTap: widget.onGo,  // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
                       behavior: HitTestBehavior.translucent,
                       child: SizedBox(
                         width: 100,
@@ -246,14 +249,21 @@ class WordCard extends ConsumerWidget {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Glow: 1 Runden -> 5s Pause -> wiederholen
-                            GlowSweepRing(
+                            // Glow: Ovales Gold-Licht (rotierend)
+                            GlowOrb(
                               size: 100,
-                              strokeWidth: 5,
-                              duration: const Duration(milliseconds: 1200), // 1 Runde ≈ 1.2s
-                              cyclesPerBurst: 1,
-                              idle: const Duration(seconds: 5),
-                              loop: true,
+                              radius: 45, // Abstand vom Zentrum
+                              orbSize: 8, // Größe der Kugel
+                              duration: const Duration(milliseconds: 3000), // Langsame Rotation
+                              color: const Color(0xFFF1C86B), // Gold
+                              loop: false, // Nur eine Umdrehung, dann ausblenden
+                            ),
+
+                            // Center Glow: Statischer Glow im Zentrum (innerhalb des Play-Icons)
+                            CenterGlow(
+                              size: 100,
+                              glowSize: 18,
+                              duration: const Duration(milliseconds: 3000), // Gleiche Dauer wie GlowOrb
                               color: const Color(0xFFF1C86B), // Gold
                             ),
 
@@ -263,7 +273,7 @@ class WordCard extends ConsumerWidget {
                               width: 94,
                               height: 94,
                               colorFilter: ColorFilter.mode(
-                                isImageExpanded ? onImageIcon : cs.onSurface,
+                                widget.isImageExpanded ? onImageIcon : cs.onSurface,
                                 BlendMode.srcIn,
                               ),
                             ),
@@ -279,9 +289,9 @@ class WordCard extends ConsumerWidget {
                     child: SizedBox.square(
                       dimension: 52,
                       child: TapFlash(
-                        color: Theme.of(context).colorScheme.primary, // deine App-Farbe, NICHT Gold
+                        color: _wheelBlue, // Blau aus Word Wheel
                         shape: BoxShape.circle,
-                        onTapAfter: onQuickSend,
+                        onTapAfter: widget.onQuickSend,
                         child: Container(
                           decoration: const BoxDecoration(shape: BoxShape.circle),
                           alignment: Alignment.center,
@@ -289,7 +299,7 @@ class WordCard extends ConsumerWidget {
                             'assets/icons/cellphone_arrow_down_icon.svg',
                             width: 40, height: 40,
                             colorFilter: ColorFilter.mode(
-                              isImageExpanded ? onImageIcon : cs.onSurface,
+                              widget.isImageExpanded ? onImageIcon : cs.onSurface,
                               BlendMode.srcIn,
                             ),
                           ),
@@ -328,7 +338,7 @@ class WordCard extends ConsumerWidget {
                         child: SizedBox.square(
                           dimension: 52,
                           child: TapFlash(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: _wheelBlue, // Blau aus Word Wheel
                             shape: BoxShape.circle,
                             onTapAfter: () => onChromeButtonTap(context),
                             child: Container(
@@ -338,7 +348,7 @@ class WordCard extends ConsumerWidget {
                                 'assets/icons/line_chrome.svg',
                                 width: 56, height: 56,
                                 colorFilter: ColorFilter.mode(
-                                  isImageExpanded ? onImageIcon : cs.onSurface,
+                                  widget.isImageExpanded ? onImageIcon : cs.onSurface,
                                   BlendMode.srcIn,
                                 ),
                               ),
