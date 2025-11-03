@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:app_links/app_links.dart';
+// import 'package:share_handler/share_handler.dart';  // Temporär deaktiviert für iOS
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,17 +22,25 @@ class ShareIngestService {
     required void Function(String) onIncomingText,
     required void Function({required bool isPdf}) onSavedUrl,
   }) async {
-    // Initialer Link (App via Share geöffnet)
-    final initial = await _appLinks.getInitialLink();
-    final t = initial?.queryParameters['text']?.trim();
+    // 1) ANDROID: echte Share-Intents (ACTION_SEND) - temporär deaktiviert
+    // TODO: share_handler wieder aktivieren, wenn iOS-Build-Problem gelöst ist
+    // if (Platform.isAndroid) {
+    //   debugPrint('🔎 SHARE_INIT: Android share check aktiv');
+    //   final sh = ShareHandlerPlatform.instance;
+    //   // ... Android Share-Code
+    // }
+
+    // 2) Deep-Links (talvori://... oder https://... mit ?text=)
+    final initialLink = await _appLinks.getInitialLink();
+    final t = initialLink?.queryParameters['text']?.trim();
     if (t != null && t.isNotEmpty) onIncomingText(t);
 
-    // Laufende Links (App offen)
     _linksSub = _appLinks.uriLinkStream.listen((uri) {
       final text = uri.queryParameters['text']?.trim();
       if (text != null && text.isNotEmpty) onIncomingText(text);
     });
 
+    // 3) Browser-Return (PDF/Seitenposition)
     _savedUrlSub = BrowserReturnService.onSavedUrl.listen((url) {
       final isPdf = url.toLowerCase().trim().endsWith('.pdf');
       onSavedUrl(isPdf: isPdf);
