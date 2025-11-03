@@ -115,6 +115,27 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 
 ---
 
+### 6. `v_words_user` - Wörter mit User-Flags
+
+**Zweck:** Optimierte Sicht für Wörter mit allen User-bezogenen Informationen
+
+**Spalten:**
+
+- Basis-Wort-Daten: `id`, `text`, `translation`, `level`, `pos`
+- User-Flags: `in_my_words`, `favorite_user`, `picked_user`, `srs_stage_user`
+- Meta-Daten: `next_due_at_user`, `user_added_at`, `category_slug`, `group_slug`
+
+**Verwendung in der App:**
+
+- `fetchWordUserViewsByFilter()` - Gefilterte Wörter mit User-Flags
+- Quick Sets Filter: My Words, Favorites, Known Words, My Mix
+- Mix Feature: Multi-category word collections
+- Word List Screen: Alle Listen mit User-Status
+
+**Aktionen:** SELECT (mit komplexen Filtern und User-Flags)
+
+---
+
 ## ⚙️ RPC Functions (Stored Procedures)
 
 ### Lern-System Functions
@@ -271,9 +292,35 @@ graph TD
 | `fn_user_review`            | Hoch       | Kritisch     |
 | `fn_user_category_progress` | Hoch       | Kritisch     |
 | `words`                     | Hoch       | Kritisch     |
+| `v_words_user`              | Hoch       | Kritisch     |
 | `user_words`                | Mittel     | Wichtig      |
 | `categories`                | Mittel     | Wichtig      |
 | `words_view`                | Mittel     | Wichtig      |
+
+## 🎯 Filter-System
+
+### WordListFilter Types
+
+Die App unterstützt verschiedene Filter-Kategorien über `WordListFilter`:
+
+**Filter-Kategorien:**
+
+- **Category**: Filtern nach Kategorie (UUID oder Slug)
+- **Level**: CEFR-Level (A1, A2, B1, B2, C1, C2)
+- **POS**: Part of Speech (noun, verb, adjective, etc.)
+- **Domain**: Nach Gruppen-Domain (group_slug)
+- **About**: Quick Sets Filter
+  - `my-words`: In My Words markierte Wörter
+  - `favorites`: User's Favorites
+  - `known-words`: Wörter ab S1-Stufe
+  - `my-mix`: Custom word collections
+- **Query**: Textsuche (ilike auf text/translation)
+
+**Verwendung:**
+
+- `fetchWordUserViewsByFilter()` in SupabaseWordRepository
+- Word List Screen mit Pagination
+- Sort-Modi: Neueste, Alphabetisch
 
 ---
 
@@ -287,6 +334,13 @@ graph TD
 ---
 
 ## 📝 Changelog
+
+### Version 1.3 (Januar 2025)
+
+- ✅ Mix Feature: Custom word collections with search and multi-category support
+- ✅ Quick Sets: Fast access to predefined word sets (My Words, Favorites, Known Words, My Mix)
+- ✅ Word List Filter: Advanced filtering with category, level, POS, domain, and query filters
+- ✅ Enhanced Views: v_words_user with complete user flags support
 
 ### Version 1.2 (Januar 2025)
 

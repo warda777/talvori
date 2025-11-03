@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Update ERD.md",
+      "type": "shell",
+      "command": "./update_erd.sh",
+      "options": { "shell": { "executable": "/bin/bash", "args": ["-lc"] } },
+      "problemMatcher": []
+    },
+    {
+      "label": "Update Data Dictionary",
+      "type": "shell",
+      "command": "./update_dictionary.sh",
+      "options": { "shell": { "executable": "/bin/bash", "args": ["-lc"] } },
+      "problemMatcher": []
+    },
+    {
+      "label": "Update ERD + Dictionary",
+      "dependsOn": [
+        "Update ERD.md",
+        "Update Data Dictionary"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Generate DB PDF",
+      "type": "shell",
+      "command": "./generate_docs.sh",
+      "options": { "shell": { "executable": "/bin/bash", "args": ["-lc"] } },
+      "problemMatcher": []
+    },
+    {
+      "label": "Update DB Docs (All)",
+      "dependsOn": [
+        "Update ERD.md",
+        "Update Data Dictionary",
+        "Generate DB PDF"
+      ],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    }    
+  ]
+}

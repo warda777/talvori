@@ -2,12 +2,13 @@
 
 ## 📁 Project Overview
 
-- **Total Dart Files**: 70+
+- **Total Dart Files**: 140
 - **Architecture**: Feature-based with Clean Architecture principles
 - **State Management**: Riverpod (NotifierProvider)
 - **Backend**: Supabase
 - **UI Framework**: Flutter Material Design
 - **Theme System**: Centralized with ThemeExtension
+- **Platforms**: iOS, Android
 
 ## 🏗️ Core Architecture
 
@@ -68,30 +69,49 @@ lib/features/home/
         └── top_bar.dart
 ```
 
-#### 📚 Words Feature (`lib/features/words/`) - Main Learning Module
+#### 📚 Words Feature (`lib/features/words/`) - Main Learning Module (102 files)
 
 ```
 lib/features/words/
 ├── application/              # Business logic & state management
 │   ├── application.dart     # Barrel file for application layer
+│   ├── category_controller.dart        # Category state management
+│   ├── category_controller.g.dart      # Generated code
 │   ├── category_detail_controller.dart  # Category detail state management
 │   ├── category_detail_state.dart       # Category detail state model
-│   ├── learn_mode_controller.dart  # Main learning controller (NotifierProvider)
+│   ├── category_id_cache.dart          # Category ID caching
+│   ├── category_stats_provider.dart     # Category statistics
+│   ├── learn_mode_controller.dart       # Main learning controller (NotifierProvider)
+│   ├── learn_navigation_origin.dart     # Navigation origin tracking
+│   ├── learning_engine_provider.dart    # Learning engine toggle state
 │   ├── level_selection_controller.dart  # Level selection logic
 │   ├── level_selection_provider.dart    # Level selection state (S0-S5, S1-S5, Single)
-│   ├── learning_engine_provider.dart    # Learning engine toggle state
-│   ├── s0_lock_provider.dart           # S0 lock state (NEW: prevents new cards)
+│   ├── mix/                            # Mix feature controllers
+│   │   ├── mix_groups.dart             # Mix group definitions
+│   │   ├── mix_navigation_controller.dart
+│   │   ├── mix_navigation_origin.dart
+│   │   ├── mix_search_providers.dart
+│   │   └── mix_selection_controller.dart
+│   ├── quick_sets_providers.dart        # Quick sets feature
+│   ├── s0_lock_provider.dart           # S0 lock state (prevents new cards)
+│   ├── sort/                           # Sort feature controllers
+│   │   ├── add_button_lock_provider.dart
+│   │   ├── category_stroke_colors.dart
+│   │   └── vocab_sort_controller.dart
 │   ├── srs_config.dart      # Spaced Repetition System config
 │   ├── srs_logic.dart       # SRS algorithm implementation
 │   ├── srs_mode_controller.dart        # SRS mode (T-SRS, A-SRS, Hybrid)
 │   ├── timer_helpers.dart   # Timer utility functions
+│   ├── word_list_controller.dart       # Word list state management
+│   ├── word_list_controller.g.dart     # Generated code
 │   └── word_providers.dart  # Riverpod providers for words
 ├── data/                     # Data layer
-│   ├── last_shared_word_provider.dart
-│   ├── mock_word_repository.dart
-│   ├── supabase_word_repository.dart  # Supabase integration
-│   ├── word_hub_taxonomy.dart
-│   └── words_store.dart
+│   ├── category_repository.dart        # Category data access
+│   ├── last_shared_word_provider.dart  # Shared word tracking
+│   ├── mock_word_repository.dart       # Mock data for testing
+│   ├── supabase_word_repository.dart  # Supabase integration (RPC calls)
+│   ├── word_hub_taxonomy.dart         # Hub taxonomy definitions
+│   └── words_store.dart                # Local word storage
 ├── domain/                   # Domain models
 │   ├── srs_kind.dart        # SRS kind enum (tSrs, aSrs, neutral)
 │   └── word.dart            # Word entity
@@ -113,39 +133,61 @@ lib/features/words/
     ├── screens/             # Screen components
     │   ├── category_detail_screen.dart  # Refactored with controller
     │   ├── learn_mode_screen.dart    # Main learning interface
+    │   ├── mix_builder_screen.dart   # Mix builder interface
     │   ├── my_words_screen.dart
+    │   ├── quick_sets_detail_screen.dart  # Quick sets detail
     │   ├── vocab_sort_screen.dart
-    │   ├── word_hub_screen.dart
+    │   ├── word_hub_screen.dart      # Word hub with taxonomy
     │   └── word_list_screen.dart
-    └── widgets/             # UI widgets
-        ├── widgets.dart     # Barrel file for widgets
-        ├── bottom_controls.dart      # Play/Pause/Reset controls
-        ├── cancel_timer_button.dart
-        ├── card_area.dart           # Card display area
-        ├── category_header_capsule.dart  # Category header component
-        ├── category_wheel.dart      # Category selector
-        ├── glow_circle_button.dart  # Glowing circular button
-        ├── glow_rect_tile.dart      # Glowing rectangular tile
-        ├── header_bar.dart          # Top navigation bar
-        ├── learning_status_panel.dart  # Progress & stats panel
-        ├── levels_card.dart         # SRS levels display card (with S0 lock support)
-        ├── level_badge.dart         # CEFR level display (A1-C2)
-        ├── level_selector_buttons.dart  # Level selection buttons (S0-S5, S1-S5, Single)
-        ├── menu_sheet.dart          # Context menu
-        ├── mode_toggle.dart         # Learning engine toggle (E-SRS/L-SRS)
-        ├── play_pause_button.dart
-        ├── progress_ring.dart       # Circular progress indicator
-        ├── reset_button.dart        # Hold-to-reset button
-        ├── single_mode_switch_row.dart  # Single mode switch row (S{n}, SR1, SR2)
-        ├── single_stage_picker.dart     # Single stage picker widget
-        ├── stage_switch_row.dart    # SRS stage indicators (with S0 lock support)
-        ├── stats_helpers.dart       # Statistics helper functions
-        ├── srs_mode_toggle.dart    # SRS mode toggle (T-SRS/A-SRS/Hybrid)
-        ├── srs_mode_toggle_with_hint.dart  # SRS mode toggle with hint
-        ├── srs_visuals.dart        # SRS visual helpers
-        ├── timer_bar.dart           # Progress timer
-        ├── vertical_stage_switch.dart  # Individual stage switch (with lock overlay)
-        └── widgets.dart
+    ├── widgets/             # UI widgets (45+ widgets)
+    │   ├── widgets.dart     # Barrel file for widgets
+    │   ├── bottom_controls.dart      # Play/Pause/Reset controls
+    │   ├── burger_section_card.dart  # Section card for hub
+    │   ├── cancel_timer_button.dart
+    │   ├── card_area.dart           # Card display area
+    │   ├── category_card.dart       # Category display card
+    │   ├── category_header_capsule.dart  # Category header component
+    │   ├── category_wheel.dart      # Category selector
+    │   ├── category_wheel_example.dart
+    │   ├── empty_state.dart         # Empty state widget
+    │   ├── glow_circle_button.dart  # Glowing circular button
+    │   ├── glow_rect_tile.dart      # Glowing rectangular tile
+    │   ├── grid_section.dart        # Grid layout section
+    │   ├── header_bar.dart          # Top navigation bar
+    │   ├── learning_status_panel.dart  # Progress & stats panel
+    │   ├── level_badge.dart         # CEFR level display (A1-C2)
+    │   ├── level_selector_buttons.dart  # Level selection buttons (S0-S5, S1-S5, Single)
+    │   ├── levels_card.dart         # SRS levels display card (with S0 lock support)
+    │   ├── list_end_footer.dart     # List footer with loading
+    │   ├── menu_sheet.dart          # Context menu
+    │   ├── mini_badge.dart          # Mini badge component
+    │   ├── mix_donut_toggle.dart    # Mix donut toggle
+    │   ├── mix_pick_or_search_bar.dart   # Mix pick/search bar
+    │   ├── mix_search_result_tile.dart   # Mix search results
+    │   ├── mix_top_bar.dart         # Mix top bar
+    │   ├── mode_toggle.dart         # Learning engine toggle (E-SRS/L-SRS)
+    │   ├── play_pause_button.dart
+    │   ├── progress_ring.dart       # Circular progress indicator
+    │   ├── reset_button.dart        # Hold-to-reset button
+    │   ├── section_header.dart      # Section header
+    │   ├── shimmer_box.dart         # Shimmer loading box
+    │   ├── shimmer_list.dart        # Shimmer loading list
+    │   ├── single_mode_switch_row.dart  # Single mode switch row (S{n}, SR1, SR2)
+    │   ├── single_stage_picker.dart     # Single stage picker widget
+    │   ├── sort/                    # Sort-specific widgets
+    │   │   └── word_decision_wheel.dart
+    │   ├── stage_switch_row.dart    # SRS stage indicators (with S0 lock support)
+    │   ├── stats_helpers.dart       # Statistics helper functions
+    │   ├── srs_mode_toggle.dart    # SRS mode toggle (T-SRS/A-SRS/Hybrid)
+    │   ├── srs_mode_toggle_with_hint.dart  # SRS mode toggle with hint
+    │   ├── srs_visuals.dart        # SRS visual helpers
+    │   ├── timer_bar.dart           # Progress timer
+    │   ├── vertical_stage_switch.dart  # Individual stage switch (with lock overlay)
+    │   ├── vocab_sort_left_panel.dart  # Vocab sort left panel
+    │   ├── word_list_item.dart     # Word list item
+    │   ├── word_list_toolbar.dart  # Word list toolbar
+    │   └── widgets.dart
+    └── ui_constants.dart           # UI constants
 ```
 
 #### 🃏 Decks Feature (`lib/features/decks/`)
@@ -220,6 +262,23 @@ The S0 (New) stage can be locked to prevent new cards from being added to the le
 - **Smart queue management**: Balances new cards with reviews
 - **Gate logic**: Prevents overwhelming users with too many new cards
 - **S0 Lock**: Option to lock S0 stage to prevent new cards
+- **Multiple modes**: S0-S5, S1-S5, Single stage mode
+- **Three engines**: T-SRS (Traditional), A-SRS (Adaptive), Hybrid
+
+### 🎯 Mix Feature
+
+- **Custom word collections**: Build personalized word mixes
+- **Search integration**: Add words via search
+- **Multi-category support**: Combine words from different categories
+- **Donut toggle**: Visual selection interface
+
+### ⚡ Quick Sets
+
+- **Quick access**: Fast navigation to predefined word sets
+- **My Words**: Words marked by user
+- **Favorites**: User's favorite words
+- **Known Words**: Words in S1+ stages
+- **My Mix**: Custom word collections
 
 ### ⏱️ Timer System
 
@@ -306,6 +365,15 @@ The S0 (New) stage can be locked to prevent new cards from being added to the le
 
 ## 🆕 Recent Updates
 
+### 🎯 Mix & Quick Sets Features (January 2025)
+
+- **Mix Builder Screen**: Create custom word collections
+- **Mix Navigation**: Dedicated navigation for mix feature
+- **Mix Search**: Search and add words to mixes
+- **Mix Donut Toggle**: Visual selection interface
+- **Quick Sets**: Fast access to predefined word sets
+- **Quick Sets Detail**: Detailed view for quick sets
+
 ### 🔒 S0 Lock Feature (January 2025)
 
 - **New Provider**: `s0LockedProvider` for managing S0 lock state
@@ -370,8 +438,10 @@ The S0 (New) stage can be locked to prevent new cards from being added to the le
 ---
 
 _Last updated: January 2025_
-_Total files: 75+ Dart files_
+_Total files: 140 Dart files_
 _Architecture: Feature-based Clean Architecture with Modern Riverpod_
 _Theme System: Centralized with ThemeExtension, Layout Constants, and Feature-specific Themes_
+_Features: Words (102 files), Home (25 files), Mix, Quick Sets, Vocab Sort_
 _Home Feature: Fully refactored with Presentational UI, Centralized Theme & Strings_
 _S0 Lock Feature: Lock/unlock S0 stage to prevent new cards in learning queue_
+_Mix Feature: Custom word collections with search and multi-category support_

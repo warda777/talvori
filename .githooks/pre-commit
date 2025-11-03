@@ -1,0 +1,7 @@
+set -euo pipefail
+echo "↻ Updating ERD & Data Dictionary…"
+./update_erd.sh
+./update_dictionary.sh
+echo "↻ Building Database PDF…"
+./generate_docs.sh
+git add ERD.md DATA_DICTIONARY.md docs/erd.png docs/Database_Structure.md docs/Database_Structure.pdf

@@ -25,6 +25,8 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
+        leadingWidth: 56, // Standard Breite für Back-Button
       ),
       chipTheme: const ChipThemeData(side: BorderSide(color: Colors.transparent)),
 
@@ -37,7 +39,7 @@ class AppTheme {
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          backgroundColor: scheme.secondaryContainer,   // wirkt auf IconButton.filledTonal
+          // Kein backgroundColor für normale IconButtons - nur Icon, große Tapfläche
           foregroundColor: scheme.onSecondaryContainer,
         ),
       ),

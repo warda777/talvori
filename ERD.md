@@ -1,0 +1,143 @@
+```mermaid
+erDiagram
+  captures {
+    BIGINT id PK
+    UUID user_id
+    TEXT text
+    TEXT source_url
+    TEXT source_title
+    TEXT user_agent
+    TIMESTAMPTZ created_at
+  }
+
+  categories {
+    UUID id PK
+    TEXT name
+    TEXT slug
+    TEXT type
+    TIMESTAMPTZ created_at
+    INTEGER order_index
+    TEXT group_slug
+    TEXT group_name
+  }
+
+  entries {
+    UUID id PK
+    UUID user_id
+    TEXT term
+    TEXT lang
+    TEXT context
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
+    TSVECTOR fts
+    TEXT translation_de
+    ARRAY synonyms_en
+    TEXT source_url
+    TEXT source_title
+    TEXT user_agent
+  }
+
+  ingest_errors {
+    BIGINT id PK
+    TIMESTAMPTZ created_at
+    TEXT target
+    UUID user_id
+    JSONB payload
+    TEXT message
+  }
+
+  lesson_words {
+    UUID lesson_id PK
+    UUID word_id PK
+    INTEGER order_index
+  }
+
+  lessons {
+    UUID id PK
+    TEXT title
+    UUID category_id
+    INTEGER order_index
+    TIMESTAMPTZ created_at
+  }
+
+  profiles {
+    UUID id PK
+    TIMESTAMPTZ created_at
+    TEXT capture_key
+  }
+
+  single_session_items {
+    UUID user_id PK
+    UUID category_id PK
+    INTEGER stage PK
+    UUID word_id PK
+    TEXT bucket
+    TIMESTAMPTZ created_at
+  }
+
+  staging_words {
+    TEXT text
+    TEXT translation
+    TEXT from_lang
+    TEXT to_lang
+    TEXT level
+    TEXT pos
+    TEXT category_slug
+    TEXT subdomain
+  }
+
+  user_daily_picks {
+    UUID id PK
+    UUID user_id
+    UUID word_id
+    DATE scheduled_for
+    TIMESTAMPTZ sent_at
+    TIMESTAMPTZ created_at
+  }
+
+  user_words {
+    UUID user_id PK
+    UUID word_id PK
+    BOOLEAN picked
+    BOOLEAN favorite
+    TIMESTAMPTZ created_at
+    SMALLINT srs_stage
+    TIMESTAMPTZ next_due_at
+    TIMESTAMPTZ last_reviewed_at
+    BOOLEAN last_result
+    TEXT source
+  }
+
+  word_categories {
+    UUID word_id PK
+    UUID category_id PK
+    TIMESTAMPTZ created_at
+  }
+
+  words {
+    UUID id PK
+    TEXT text
+    TEXT translation
+    TEXT from_lang
+    TEXT to_lang
+    TEXT domain
+    TEXT pos
+    TEXT level
+    ARRAY tags
+    INTEGER srs_stage
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ due_at
+    TEXT translated_by
+    TIMESTAMPTZ translated_at
+    NUMERIC qa_score
+    TEXT qa_note
+  }
+  captures }o--|| profiles : "user_id → id"
+  lesson_words }o--|| lessons : "lesson_id → id"
+  lesson_words }o--|| words : "word_id → id"
+  lessons }o--|| categories : "category_id, category_id → id, id"
+  user_daily_picks }o--|| words : "word_id → id"
+  user_words }o--|| words : "word_id → id"
+  word_categories }o--|| categories : "category_id, category_id → id, id"
+  word_categories }o--|| words : "word_id → id"
+```
