@@ -1,10 +1,37 @@
 \usepackage{microtype}
-\emergencystretch=3em
-\tolerance=9999
+\usepackage{tgheros}            % saubere Sans-Serif (TeX Gyre Heros ~ Helvetica)
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{inconsolata}        % Monospace
+\PassOptionsToPackage{table}{xcolor}
+\usepackage{xcolor}
+\definecolor{TalvoriPrimary}{HTML}{2D2C2C}
+\definecolor{TalvoriAccent}{HTML}{B1CCFE}
+\definecolor{TalvoriLite}{HTML}{EEF4FF}
 
-\usepackage{longtable,booktabs}
-\AtBeginEnvironment{longtable}{\footnotesize}
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.02}
+\usepackage[margin=14mm,landscape]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\textcolor{TalvoriPrimary}{Talvori – Database Docs}}
+\fancyfoot[R]{\thepage}
 
-\usepackage{pdflscape}
+\usepackage{booktabs}
+\usepackage{longtable}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+
+\usepackage{titling}
+\pretitle{\begin{center}\vspace*{2cm}\fontsize{24}{28}\selectfont\textcolor{TalvoriPrimary}}
+\posttitle{\par\end{center}\vspace{0.8cm}}
+\preauthor{\begin{center}\large}
+\postauthor{\par\end{center}\vspace{0.4cm}}
+\predate{\begin{center}\small}
+\postdate{\par\end{center}\vspace{1.2cm}}
+
+\usepackage{sectsty}
+\sectionfont{\color{TalvoriPrimary}}
+\subsectionfont{\color{TalvoriPrimary}}
+
+\usepackage{pdfpages}
+% PDF-Einbindung erfolgt explizit in Database_Structure.md

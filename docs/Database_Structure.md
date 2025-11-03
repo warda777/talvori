@@ -1,12 +1,13 @@
 # Talvori – Database Structure
 
-![ERD](erd.png){ width=100% }
+\includepdf[pages=1,scale=0.85,landscape=true,pagecommand={}]{erd.pdf}
 
----
+\clearpage
+# Talvori – Data Dictionary (public)
 
 # Talvori – Data Dictionary (public)
 
-Generiert: 2025-11-03 09:22
+Generiert: 2025-11-03 16:57
 
 ## public.captures
 

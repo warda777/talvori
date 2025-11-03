@@ -1,0 +1,13 @@
+{
+  "theme": "default",
+  "themeVariables": {
+    "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+    "primaryColor": "#EEF4FF",
+    "primaryBorderColor": "#B1CCFE",
+    "primaryTextColor": "#2D2C2C",
+    "lineColor": "#8BAAE6",
+    "edgeLabelBackground": "#FFFFFF",
+    "tertiaryColor": "#F7FAFF",
+    "nodeBorder": "#B1CCFE"
+  }
+}
