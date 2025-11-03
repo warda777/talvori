@@ -1,38 +1,17 @@
-% === Allgemeines Layout ===
-\usepackage{microtype}
-\usepackage{fancyhdr}
-\usepackage{titlesec}
-\usepackage{longtable,booktabs}
-\usepackage{xcolor}
+% farbige Links
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=TalvoriPrimary,
+  urlcolor=TalvoriPrimary,
+  citecolor=TalvoriPrimary
+}
 
-\definecolor{TalvoriGold}{HTML}{E5B966}
-\definecolor{TalvoriGray}{HTML}{2D2C2C}
-
-\pagestyle{fancy}
-\fancyhf{}
-\fancyfoot[C]{\thepage}
-\fancyhead[L]{\textcolor{TalvoriGray}{Talvori – Database Structure}}
-\fancyhead[R]{\textcolor{TalvoriGold}{\today}}
-
-% Abschnittstitel dezenter
-\titleformat{\section}{\large\bfseries\color{TalvoriGray}}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalsize\bfseries\color{TalvoriGold}}{\thesubsection}{1em}{}
-
-% Tabellen kompakter
-\AtBeginEnvironment{longtable}{\small}
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.05}
-
-% Abstand oben/unten anpassen
-\setlength{\headheight}{14pt}
-\setlength{\footskip}{10mm}
-\setlength{\parskip}{4pt}
-
-% Titelseite
-\usepackage{titling}
-\pretitle{\begin{center}\Huge\color{TalvoriGray}}
-\posttitle{\par\end{center}\vskip 1em}
-\preauthor{\begin{center}\Large}
-\postauthor{\par\end{center}}
-\predate{\begin{center}\small\color{gray}}
-\postdate{\par\end{center}}
+% Code-Blöcke (falls vorhanden)
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{TalvoriLite},
+  frame=single,
+  rulecolor=\color{TalvoriAccent}
+}

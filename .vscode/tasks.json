@@ -42,6 +42,13 @@
       "dependsOrder": "sequence",
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": []
-    }    
+    },
+    {
+      "label": "Build DB PDF",
+      "type": "shell",
+      "command": "./generate_docs.sh",
+      "options": { "shell": { "executable": "/bin/bash", "args": ["-lc"] } },
+      "problemMatcher": []
+    }       
   ]
 }
