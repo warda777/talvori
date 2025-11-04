@@ -12,7 +12,7 @@ class HomeBottomNav extends ConsumerWidget {
   final VoidCallback onProfile;
   final bool categoriesActive;
   final bool practiceActive;
-
+  final GlobalKey? practiceButtonKey;  // <-- NEU: Key für Practice-Button
 
   const HomeBottomNav({
     super.key,
@@ -21,6 +21,7 @@ class HomeBottomNav extends ConsumerWidget {
     required this.onProfile,
     this.categoriesActive = false,
     this.practiceActive = false,
+    this.practiceButtonKey,  // <-- NEU
   });
 
   @override
@@ -99,6 +100,7 @@ class HomeBottomNav extends ConsumerWidget {
               duration: const Duration(milliseconds: 220),
               onTapAfter: onPractice,                               // nach dem Flash ausführen
               child: Container(
+                key: practiceButtonKey,  // <-- NEU: Key für Practice-Button
                 decoration: BoxDecoration(
                   color: buttonColor,                     // Button-Farbe
                   borderRadius: const BorderRadius.all(Radius.circular(999)),

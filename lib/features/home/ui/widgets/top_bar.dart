@@ -10,6 +10,7 @@ import 'package:talvori/features/home/ui/widgets/fireball_gesture_wrapper.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
+import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
 
 class HomeTopBar extends ConsumerStatefulWidget {
   final VoidCallback onAllWords;
@@ -20,17 +21,21 @@ class HomeTopBar extends ConsumerStatefulWidget {
   final bool showProgress;
   final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
   final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
+  final GlobalKey<FireballBounceAnimationState>? fireballKey; // GlobalKey für Fireball Bounce Animation
+  final GlobalKey buttonKey; // GlobalKey für den rechten Button
 
   const HomeTopBar({
     super.key,
     required this.onAllWords,
     required this.onRewards,
+    required this.buttonKey,
     this.onProgressTap,
     this.selected = 1,
     this.max = 5,
     this.showProgress = true,
     this.progressPillKey,
     this.crownButtonKey,
+    this.fireballKey,
   });
 
   @override
@@ -285,64 +290,59 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
             ),
           ),
 
-          // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select, SwipeDown = zukünftige Funktion) ─────────
-          FireballGestureWrapper(
-            onTap: () {
-              // Trigger Flash-Effekt
-              final flashState = _tapFlashKey.currentState;
-              flashState?.triggerFlash();
-              // Kurzer Tap: wie bisher (Standard-Rewards öffnen)
-              HapticFeedback.selectionClick();
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
-                  transitionsBuilder: (_, a, __, child) =>
-                      FadeTransition(opacity: a, child: child),
-                ),
-              );
-            },
-            onLongPress: () {
-              debugPrint('🔥 LongPress erkannt!');
-              // LongPress erkannt - zeige Quick-Select
-              _showRewardsQuick(context);
-            },
-            onSwipeDown: () {
-              debugPrint('🔥 SwipeDown erkannt!');
-              // Zukünftige Funktion: z.B. Pinball-Spiel öffnen
-              // Navigator.of(context).push(...);
-            },
-            child: SizedBox.square(
-              dimension: _dim,
-              child: _TapFlashWithoutGesture(
-                key: _tapFlashKey,
-                color: gold, // Gold für Krone
-                shape: BoxShape.circle,
-                maxOpacity: 1.0,
-                blur: 28,
-                spread: 6,
-                duration: const Duration(milliseconds: 220),
-                child: Container(
-                  key: widget.crownButtonKey ?? _crownKey, // Wichtig für die Overlay-Position
-                  decoration: BoxDecoration(
-                    color: buttonColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: gold, width: 2), // Goldener Rand
-                    boxShadow: glowEnabled ? [
-                      // Durchgehender goldener Glow
-                      BoxShadow(
-                        color: gold.withValues(alpha: 0.55),
-                        blurRadius: 20,
-                        spreadRadius: 1,
+          // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select, SwipeDown = Fireball) ─────────
+          Align(
+            alignment: Alignment.topRight,
+            child: _RightButtonWithDragAndLongPress(
+              onLongPress: () => _showRewardsQuick(context),
+              onDragDown: () => widget.fireballKey?.currentState?.triggerFromAnchor(),
+              child: SizedBox.square(
+                dimension: _dim,
+                child: _TapFlashWithoutGesture(
+                  key: _tapFlashKey,
+                  color: gold, // Gold für Krone
+                  shape: BoxShape.circle,
+                  maxOpacity: 1.0,
+                  blur: 28,
+                  spread: 6,
+                  duration: const Duration(milliseconds: 220),
+                  onTapAfter: () {
+                    // Trigger Flash-Effekt
+                    final flashState = _tapFlashKey.currentState;
+                    flashState?.triggerFlash();
+                    // Kurzer Tap: wie bisher (Standard-Rewards öffnen)
+                    HapticFeedback.selectionClick();
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
+                        transitionsBuilder: (_, a, __, child) =>
+                            FadeTransition(opacity: a, child: child),
                       ),
-                    ] : null,
-                  ),
-                  alignment: Alignment.center,
-                  child: AnimatedFireballIcon(
-                    size: 38,
-                    baseColor: gold, // Ursprungsfarbe (gold)
-                    animationColor: const Color(0xFFA05260), // #A05260
-                    animationInterval: const Duration(seconds: 5), // 5 Sekunden Abstand
-                    animationDuration: const Duration(seconds: 5), // 5 Sekunden Einfärbung und Flammen
+                    );
+                  },
+                  child: Container(
+                    key: widget.crownButtonKey ?? widget.buttonKey,
+                    decoration: BoxDecoration(
+                      color: buttonColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: gold, width: 2), // Goldener Rand
+                      boxShadow: glowEnabled ? [
+                        // Durchgehender goldener Glow
+                        BoxShadow(
+                          color: gold.withValues(alpha: 0.55),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: AnimatedFireballIcon(
+                      size: 38,
+                      baseColor: gold, // Ursprungsfarbe (gold)
+                      animationColor: const Color(0xFFA05260), // #A05260
+                      animationInterval: const Duration(seconds: 5), // 5 Sekunden Abstand
+                      animationDuration: const Duration(seconds: 5), // 5 Sekunden Einfärbung und Flammen
+                    ),
                   ),
                 ),
               ),
@@ -360,6 +360,62 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   }
 }
 
+/// Button mit Drag-Down und Long-Press Support
+class _RightButtonWithDragAndLongPress extends StatefulWidget {
+  const _RightButtonWithDragAndLongPress({
+    required this.child,
+    required this.onDragDown,
+    required this.onLongPress,
+  });
+
+  final Widget child;
+  final VoidCallback onDragDown;
+  final VoidCallback onLongPress;
+
+  @override
+  State<_RightButtonWithDragAndLongPress> createState() => _RightButtonWithDragAndLongPressState();
+}
+
+class _RightButtonWithDragAndLongPressState extends State<_RightButtonWithDragAndLongPress> {
+  bool _longPressActive = false;
+  Offset? _dragStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onLongPressStart: (_) {
+        _longPressActive = true;
+        widget.onLongPress();                   // 🔔 dein Long-Press bleibt erhalten
+      },
+      onLongPressEnd: (_) {
+        // kleine Entsperr-Verzögerung, damit Drag nicht sofort feuert
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted) _longPressActive = false;
+        });
+      },
+      onVerticalDragStart: (d) => _dragStart = d.localPosition,
+      onVerticalDragUpdate: (d) {
+        if (_longPressActive) return;           // ❌ Drag während Long-Press blocken
+        if (_dragStart == null) return;
+        final dy = d.localPosition.dy - _dragStart!.dy;
+        if (dy > 20) {                          // mehr Distanz, damit Long-Press nicht gestört wird
+          widget.onDragDown();
+          _dragStart = null;                    // nur einmal auslösen
+        }
+      },
+      onVerticalDragEnd: (d) {
+        if (_longPressActive) return;
+        if ((d.primaryVelocity ?? 0) > 500) {
+          widget.onDragDown();                  // schneller Wisch nach unten
+        }
+        _dragStart = null;
+      },
+      child: widget.child,
+    );
+  }
+}
+
 /// TapFlash ohne GestureDetector - nur visueller Effekt
 class _TapFlashWithoutGesture extends StatefulWidget {
   final Widget child;
@@ -369,6 +425,7 @@ class _TapFlashWithoutGesture extends StatefulWidget {
   final double blur;
   final double spread;
   final BoxShape shape;
+  final VoidCallback? onTapAfter;
 
   const _TapFlashWithoutGesture({
     super.key,
@@ -379,6 +436,7 @@ class _TapFlashWithoutGesture extends StatefulWidget {
     this.blur = 18,
     this.spread = 6,
     this.shape = BoxShape.circle,
+    this.onTapAfter,
   });
 
   @override
@@ -451,13 +509,16 @@ class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
       },
     );
     
-    return Stack(
-      fit: StackFit.passthrough,
-      alignment: Alignment.center,
-      children: [
-        widget.child,
-        Positioned.fill(child: glow),
-      ],
+    return GestureDetector(
+      onTap: widget.onTapAfter,
+      child: Stack(
+        fit: StackFit.passthrough,
+        alignment: Alignment.center,
+        children: [
+          widget.child,
+          Positioned.fill(child: glow),
+        ],
+      ),
     );
   }
 }

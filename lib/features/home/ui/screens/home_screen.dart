@@ -16,6 +16,8 @@ import 'package:talvori/features/home/ui/strings/strings.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
 import 'package:talvori/features/push/data/daily_picks_store.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -63,7 +65,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // GlobalKey für Progress Pill (für Flug-Animation)
   final GlobalKey _progressPillKey = GlobalKey();
-  final GlobalKey _crownButtonKey = GlobalKey(); // Für Fireball Start-Position (optional)
+  final GlobalKey _crownButtonKey = GlobalKey(); // Für Fireball Start-Position
+  final GlobalKey<FireballBounceAnimationState> _fireballKey = GlobalKey<FireballBounceAnimationState>();
+  final GlobalKey _rightButtonKey = GlobalKey(); // Für den rechten Button
+  final GlobalKey _practiceButtonKey = GlobalKey(); // <-- NEU: Für Practice-Button
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +78,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: HomeTheme.background,
       body: SafeArea(
         child: Stack(
+          fit: StackFit.expand, // wichtig: voller Bereich für die Animation
           children: [
+            // 🔥 Fireball HINTER dem Button
+            FireballBounceAnimation(
+              key: _fireballKey,
+              anchorKey: _crownButtonKey,
+              practiceKey: _practiceButtonKey,  // <-- NEU: Practice-Button Key
+              forceColor: const Color(0xFFA05260), // deine Farbe
+              child: SvgPicture.asset(
+                'assets/icons/fireball_black.svg',
+                width: 48,
+                height: 48,
+              ),
+              iconSize: 48,
+              anchorOffset: const Offset(0, 0), // Feintuning: falls 1-2px links, dann Offset(2, 0)
+            ),
             Padding(
               padding: HomeTheme.horizontal,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AnimatedBuilder(
                     animation: DailyPicksStore.I,
@@ -85,8 +106,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       final max = DailyPicksStore.I.maxCount;
 
                       return HomeTopBar(
+                        buttonKey: _rightButtonKey,
                         progressPillKey: _progressPillKey,
                         crownButtonKey: _crownButtonKey,
+                        fireballKey: _fireballKey,
                         onAllWords: () => Navigator.of(context).push(
                           MaterialPageRoute(builder: (_) => const VocabSortScreen()),
                         ),
@@ -98,94 +121,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                     },
                   ),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      child: LayoutBuilder(
+                        builder: (ctx, box) {
+                          final w = box.maxWidth;
+                          final h = w * (570 / 360);
 
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: LayoutBuilder(
-                    builder: (ctx, box) {
-                      final w = box.maxWidth;
-                      final h = w * (570 / 360);
-
-                      return SizedBox(
-                        width: w,
-                        height: h,
-                        child: wc.WordCard(
-                          key: ValueKey((state.imageIsDark, state.imageExpanded)),
-                          progressPillKey: _progressPillKey,
-                          initialWord: null, // lastSharedWordProvider regelt das
-                          onQuickSend: (String wordText) {
-                            // Füge nur das aktuell ausgewählte Wort hinzu
-                            final res = DailyPicksStore.I.add(wordText);
-                            
-                            if (!context.mounted) return res;
-                            
-                            switch (res) {
-                              case AddResult.ok:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Wort hinzugefügt')),
+                          return SizedBox(
+                            width: w,
+                            height: h,
+                            child: wc.WordCard(
+                              key: ValueKey((state.imageIsDark, state.imageExpanded)),
+                              progressPillKey: _progressPillKey,
+                              initialWord: null, // lastSharedWordProvider regelt das
+                              onQuickSend: (String wordText) {
+                                // Füge nur das aktuell ausgewählte Wort hinzu
+                                final res = DailyPicksStore.I.add(wordText);
+                                
+                                if (!context.mounted) return res;
+                                
+                                switch (res) {
+                                  case AddResult.ok:
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Wort hinzugefügt')),
+                                    );
+                                    break;
+                                  case AddResult.duplicate:
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Bereits in Today\'s Picks')),
+                                    );
+                                    break;
+                                  case AddResult.full:
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})')),
+                                    );
+                                    break;
+                                  case AddResult.invalid:
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Ungültiges Wort')),
+                                    );
+                                    break;
+                                }
+                                
+                                return res; // Gib das Ergebnis zurück
+                              },
+                              isImageExpanded: state.imageExpanded,
+                              onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
+                              isImageDark: state.imageIsDark,
+                              onImageBrightnessChanged: (isDark) =>
+                                  ref.read(homeControllerProvider.notifier).setImageDark(isDark),
+                              contentPadding: HomeTheme.contentPadding,
+                              userWordCount: state.myWordsCount,
+                              onCountTap: () async {
+                                final nav = Navigator.of(context);
+                                await nav.push(MaterialPageRoute(builder: (_) => const MyWordsScreen()));
+                                if (!context.mounted) return;
+                              },
+                              onSpeak: () => _todo('Speak word'),
+                              onMarkWords: () => _todo('Open Mark Words (web)'),
+                              onGo: () async {
+                                const quickSetsLabels = [
+                                  'All words','My words','Favorites','Words I know','My mix',
+                                ];
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => LearnModeScreen(
+                                      categoryId: 'quicksets',
+                                      title: 'My words',
+                                      customWheelLabels: quickSetsLabels,
+                                      customWheelInitialIndex: 1,
+                                      navigationOrigin: const LearnNavigationOrigin.home(),
+                                    ),
+                                  ),
                                 );
-                                break;
-                              case AddResult.duplicate:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Bereits in Today\'s Picks')),
-                                );
-                                break;
-                              case AddResult.full:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})')),
-                                );
-                                break;
-                              case AddResult.invalid:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Ungültiges Wort')),
-                                );
-                                break;
-                            }
-                            
-                            return res; // Gib das Ergebnis zurück
-                          },
-                          isImageExpanded: state.imageExpanded,
-                          onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
-                          isImageDark: state.imageIsDark,
-                          onImageBrightnessChanged: (isDark) =>
-                              ref.read(homeControllerProvider.notifier).setImageDark(isDark),
-                          contentPadding: HomeTheme.contentPadding,
-
-                          userWordCount: state.myWordsCount,
-                          onCountTap: () async {
-                            final nav = Navigator.of(context);
-                            await nav.push(MaterialPageRoute(builder: (_) => const MyWordsScreen()));
-                            if (!context.mounted) return;
-                          },
-                          onSpeak: () => _todo('Speak word'),
-                          onMarkWords: () => _todo('Open Mark Words (web)'),
-                          onGo: () async {
-                            const quickSetsLabels = [
-                              'All words','My words','Favorites','Words I know','My mix',
-                            ];
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => LearnModeScreen(
-                                  categoryId: 'quicksets',
-                                  title: 'My words',
-                                  customWheelLabels: quickSetsLabels,
-                                  customWheelInitialIndex: 1,
-                                  navigationOrigin: const LearnNavigationOrigin.home(),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
           ],
         ),
       ),
@@ -211,6 +232,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               MaterialPageRoute(builder: (_) => const ProfileScreen()),
             ),
             categoriesActive: state.categoriesActive,
+            practiceButtonKey: _practiceButtonKey,  // <-- NEU: Practice-Button Key
           ),
         ),
       ),
