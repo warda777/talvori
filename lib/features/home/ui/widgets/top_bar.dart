@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
+import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
+import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 
-class HomeTopBar extends StatefulWidget {
+class HomeTopBar extends ConsumerStatefulWidget {
   final VoidCallback onAllWords;
   final VoidCallback onRewards;         // bleibt für Kompatibilität, wird für Tap genutzt
   final VoidCallback? onProgressTap;
   final int selected;
   final int max;
   final bool showProgress;
+  final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
+  final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
 
   const HomeTopBar({
     super.key,
@@ -22,28 +28,41 @@ class HomeTopBar extends StatefulWidget {
     this.selected = 1,
     this.max = 5,
     this.showProgress = true,
+    this.progressPillKey,
+    this.crownButtonKey,
   });
 
   @override
-  State<HomeTopBar> createState() => _HomeTopBarState();
+  ConsumerState<HomeTopBar> createState() => _HomeTopBarState();
 }
 
-class _HomeTopBarState extends State<HomeTopBar> {
+class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   // Größen / Layout
   static const double _dim = 52.0;     // Durchmesser deiner Topbar-Buttons
-  static const double _quickBtnSize = 56.0; // Größe der Quick-Select-Buttons
+  static const double _quickBtnSize = 52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
   static const double _gap = 16.0;     // Abstand zwischen Krone und Quick-Buttons
 
   final GlobalKey _crownKey = GlobalKey();
+  final GlobalKey<_TapFlashWithoutGestureState> _tapFlashKey = GlobalKey();
   OverlayEntry? _rewardsOverlay;
   bool _quickOpen = false;
 
   void _showRewardsQuick(BuildContext context) {
-    if (_quickOpen) return;
+    debugPrint('🔥 _showRewardsQuick aufgerufen!');
+    if (_quickOpen) {
+      debugPrint('🔥 _quickOpen ist bereits true, überspringe');
+      return;
+    }
     final overlay = Overlay.of(context);
 
-    final rb = _crownKey.currentContext?.findRenderObject() as RenderBox?;
-    if (rb == null) return;
+    // Verwende entweder widget.crownButtonKey oder _crownKey
+    final keyToUse = widget.crownButtonKey ?? _crownKey;
+    final rb = keyToUse.currentContext?.findRenderObject() as RenderBox?;
+    if (rb == null) {
+      debugPrint('🔥 RenderBox ist null - Key nicht gefunden');
+      return;
+    }
+    debugPrint('🔥 RenderBox gefunden: ${rb.size}');
 
     final crownTopLeft = rb.localToGlobal(Offset.zero);
     final crownSize = rb.size;
@@ -179,7 +198,10 @@ class _HomeTopBarState extends State<HomeTopBar> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
     const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
+    const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
+    const gold = Color(0xFFF1C86B); // Gold für Krone
 
     return SizedBox(
       height: _dim,
@@ -189,13 +211,26 @@ class _HomeTopBarState extends State<HomeTopBar> {
           SizedBox.square(
             dimension: _dim,
             child: TapFlash(
-              color: wheelBlue, // Blau statt Primary
+              color: gold, // Gold für V-Button
               shape: BoxShape.circle,
+              maxOpacity: 1.0,
+              blur: 28,
+              spread: 6,
+              duration: const Duration(milliseconds: 220),
               onTapAfter: widget.onAllWords,
               child: Container(
                 decoration: BoxDecoration(
-                  color: cs.secondaryContainer,
+                  color: buttonColor,
                   shape: BoxShape.circle,
+                  border: Border.all(color: gold, width: 2), // Goldener Rand
+                  boxShadow: glowEnabled ? [
+                    // Durchgehender goldener Glow
+                    BoxShadow(
+                      color: gold.withValues(alpha: 0.55),
+                      blurRadius: 20,
+                      spreadRadius: 1,
+                    ),
+                  ] : null,
                 ),
                 alignment: Alignment.center,
                 child: SvgPicture.asset(
@@ -203,7 +238,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
                   width: 24,
                   height: 24,
                   colorFilter: ColorFilter.mode(
-                    cs.onSecondaryContainer,
+                    gold, // Gold statt weiß
                     BlendMode.srcIn,
                   ),
                 ),
@@ -222,16 +257,22 @@ class _HomeTopBarState extends State<HomeTopBar> {
                         ignoring: _quickOpen,
                         child: (widget.onProgressTap == null)
                             ? ProgressPill(
+                                key: widget.progressPillKey,
                                 selected: widget.selected,
                                 max: widget.max,
                                 barWidth: 120,
                               )
                             : TapFlash(
-                                color: wheelBlue, // Blau statt Secondary
+                                color: gold, // Gold für Progress Pill
                                 shape: BoxShape.rectangle,
                                 borderRadius: BorderRadius.circular(20),
+                                maxOpacity: 1.0,
+                                blur: 28,
+                                spread: 6,
+                                duration: const Duration(milliseconds: 220),
                                 onTapAfter: widget.onProgressTap,
                                 child: ProgressPill(
+                                  key: widget.progressPillKey,
                                   selected: widget.selected,
                                   max: widget.max,
                                   barWidth: 120,
@@ -245,39 +286,58 @@ class _HomeTopBarState extends State<HomeTopBar> {
 
           // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select) ─────────
           GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onLongPressStart: (_) => _showRewardsQuick(context),
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              // Trigger Flash-Effekt
+              final flashState = _tapFlashKey.currentState;
+              flashState?.triggerFlash();
+              // Kurzer Tap: wie bisher (Standard-Rewards öffnen)
+              HapticFeedback.selectionClick();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
+                  transitionsBuilder: (_, a, __, child) =>
+                      FadeTransition(opacity: a, child: child),
+                ),
+              );
+            },
+            onLongPress: () {
+              debugPrint('🔥 LongPress erkannt!');
+              // LongPress erkannt - zeige Quick-Select
+              _showRewardsQuick(context);
+            },
             child: SizedBox.square(
               dimension: _dim,
-              child: TapFlash(
-                color: wheelBlue, // Blau statt Tertiary
+              child: _TapFlashWithoutGesture(
+                key: _tapFlashKey,
+                color: gold, // Gold für Krone
                 shape: BoxShape.circle,
-                onTapAfter: () {
-                  // kurzer Tap: wie bisher (Standard-Rewards öffnen)
-                  HapticFeedback.selectionClick();
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
-                      transitionsBuilder: (_, a, __, child) =>
-                          FadeTransition(opacity: a, child: child),
-                    ),
-                  );
-                },
+                maxOpacity: 1.0,
+                blur: 28,
+                spread: 6,
+                duration: const Duration(milliseconds: 220),
                 child: Container(
-                  key: _crownKey, // wichtig für die Overlay-Position
+                  key: widget.crownButtonKey ?? _crownKey, // Wichtig für die Overlay-Position
                   decoration: BoxDecoration(
-                    color: cs.secondaryContainer,
+                    color: buttonColor,
                     shape: BoxShape.circle,
+                    border: Border.all(color: gold, width: 2), // Goldener Rand
+                    boxShadow: glowEnabled ? [
+                      // Durchgehender goldener Glow
+                      BoxShadow(
+                        color: gold.withValues(alpha: 0.55),
+                        blurRadius: 20,
+                        spreadRadius: 1,
+                      ),
+                    ] : null,
                   ),
                   alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    'assets/icons/crown.svg',
-                    width: 24,
-                    height: 19,
-                    colorFilter: ColorFilter.mode(
-                      cs.onSecondaryContainer,
-                      BlendMode.srcIn,
-                    ),
+                  child: AnimatedFireballIcon(
+                    size: 38,
+                    baseColor: gold, // Ursprungsfarbe (gold)
+                    animationColor: const Color(0xFFA05260), // #A05260
+                    animationInterval: const Duration(seconds: 5), // 5 Sekunden Abstand
+                    animationDuration: const Duration(seconds: 5), // 5 Sekunden Einfärbung und Flammen
                   ),
                 ),
               ),
@@ -292,5 +352,107 @@ class _HomeTopBarState extends State<HomeTopBar> {
   void dispose() {
     _hideRewardsQuick();
     super.dispose();
+  }
+}
+
+/// TapFlash ohne GestureDetector - nur visueller Effekt
+class _TapFlashWithoutGesture extends StatefulWidget {
+  final Widget child;
+  final Color color;
+  final Duration duration;
+  final double maxOpacity;
+  final double blur;
+  final double spread;
+  final BoxShape shape;
+
+  const _TapFlashWithoutGesture({
+    super.key,
+    required this.child,
+    required this.color,
+    this.duration = const Duration(milliseconds: 240),
+    this.maxOpacity = 0.85,
+    this.blur = 18,
+    this.spread = 6,
+    this.shape = BoxShape.circle,
+  });
+
+  @override
+  State<_TapFlashWithoutGesture> createState() => _TapFlashWithoutGestureState();
+}
+
+class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: widget.duration);
+  late final Animation<double> _animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  bool _running = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void triggerFlash() {
+    if (_running) return;
+    _running = true;
+    _controller.forward().then((_) {
+      if (mounted) {
+        _controller.reverse().then((_) {
+          if (mounted) {
+            _running = false;
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(20);
+    
+    final glow = AnimatedBuilder(
+      animation: _animation,
+      builder: (_, __) {
+        final opacity = _animation.value * widget.maxOpacity;
+        final color = widget.color.withValues(alpha: opacity);
+        
+        final decoration = widget.shape == BoxShape.circle
+            ? BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: color, blurRadius: widget.blur, spreadRadius: widget.spread),
+                ],
+              )
+            : BoxDecoration(
+                borderRadius: borderRadius,
+                boxShadow: [
+                  BoxShadow(color: color, blurRadius: widget.blur, spreadRadius: widget.spread),
+                ],
+              );
+        
+        return IgnorePointer(
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 1),
+            opacity: opacity > 0 ? 1 : 0,
+            child: Container(decoration: decoration),
+          ),
+        );
+      },
+    );
+    
+    return Stack(
+      fit: StackFit.passthrough,
+      alignment: Alignment.center,
+      children: [
+        widget.child,
+        Positioned.fill(child: glow),
+      ],
+    );
   }
 }

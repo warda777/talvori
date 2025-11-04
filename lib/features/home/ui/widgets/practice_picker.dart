@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
+import 'package:talvori/features/home/application/application.dart';
 
 Future<void> showPracticePicker(BuildContext context) {
   const double btnWidth = 140;
@@ -14,26 +16,21 @@ Future<void> showPracticePicker(BuildContext context) {
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (ctx) {
-      final cs = Theme.of(ctx).colorScheme;
+      return Consumer(
+        builder: (context, ref, _) {
+          final cs = Theme.of(ctx).colorScheme;
+          final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
 
-      final bottomInset = MediaQuery.of(ctx).padding.bottom;
-      const navBottomPadding = 12.0;
-      const overlapAdjust = 6.0;
-      final bottom = bottomInset + navBottomPadding + overlapAdjust;
+          final bottomInset = MediaQuery.of(ctx).padding.bottom;
+          const navBottomPadding = 12.0;
+          const overlapAdjust = 6.0;
+          final bottom = bottomInset + navBottomPadding + overlapAdjust;
 
-      final ButtonStyle pillTonal = FilledButton.styleFrom(
-        backgroundColor: cs.secondaryContainer,
-        foregroundColor: cs.onSecondaryContainer,
-        shape: const StadiumBorder(),
-        padding: EdgeInsets.zero,
-        minimumSize: const Size(btnWidth, btnHeight),
-        fixedSize: const Size(btnWidth, btnHeight),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-      );
+          const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
+          const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
 
       const TextStyle labelStyle =
-          TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0.2);
+          TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: 0.2, color: Colors.white);
 
       return Stack(
         children: [
@@ -53,21 +50,44 @@ Future<void> showPracticePicker(BuildContext context) {
                 SizedBox(
                   width: btnWidth,
                   height: btnHeight,
-                  child: FilledButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const CourseScreen()),
-                      );
-                    },
-                    style: pillTonal,
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.school_rounded, size: 22),
-                        SizedBox(width: 8),
-                        Text('course', style: labelStyle),
-                      ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: buttonColor,
+                      border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
+                      boxShadow: glowEnabled ? [
+                        // Durchgehender blauer Glow
+                        BoxShadow(
+                          color: wheelBlue.withValues(alpha: 0.55),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const CourseScreen()),
+                          );
+                        },
+                        child: Container(
+                          width: btnWidth,
+                          height: btnHeight,
+                          alignment: Alignment.center,
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.school_rounded, size: 22, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text('course', style: labelStyle),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -75,21 +95,44 @@ Future<void> showPracticePicker(BuildContext context) {
                 SizedBox(
                   width: btnWidth,
                   height: btnHeight,
-                  child: FilledButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const VocabScreen()),
-                      );
-                    },
-                    style: pillTonal,
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.menu_book_rounded, size: 22),
-                        SizedBox(width: 8),
-                        Text('vocab', style: labelStyle),
-                      ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: buttonColor,
+                      border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
+                      boxShadow: glowEnabled ? [
+                        // Durchgehender blauer Glow
+                        BoxShadow(
+                          color: wheelBlue.withValues(alpha: 0.55),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const VocabScreen()),
+                          );
+                        },
+                        child: Container(
+                          width: btnWidth,
+                          height: btnHeight,
+                          alignment: Alignment.center,
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.menu_book_rounded, size: 22, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text('vocab', style: labelStyle),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -97,6 +140,8 @@ Future<void> showPracticePicker(BuildContext context) {
             ),
           ),
         ],
+      );
+        },
       );
     },
   );

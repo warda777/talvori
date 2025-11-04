@@ -12,7 +12,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
 import 'package:talvori/features/words/ui/cards/glow_orb.dart';
 import 'package:talvori/features/words/ui/cards/center_glow.dart';
+import 'package:talvori/features/words/ui/cards/rotating_chrome_icon.dart';
+import 'package:talvori/features/words/ui/cards/multi_color_chrome_icon.dart';
+import 'package:talvori/features/words/ui/cards/animated_phone_icon.dart';
+import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
 import 'package:talvori/features/home/application/application.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
+import 'package:talvori/features/home/ui/widgets/glow_switch.dart';
+import 'package:talvori/features/push/data/daily_picks_store.dart';
 
 // ignore_for_file: use_build_context_synchronously
 // ignore_for_file: unnecessary_null_comparison
@@ -22,7 +29,7 @@ class WordCard extends ConsumerStatefulWidget {
   // Aktionen
   final VoidCallback onSpeak;
   final VoidCallback onMarkWords;
-  final VoidCallback onQuickSend;
+  final AddResult? Function(String word)? onQuickSend; // Nimmt das aktuelle Wort aus dem Wheel, gibt AddResult zurück
   final VoidCallback onGo;
 
   // Bild
@@ -48,6 +55,7 @@ class WordCard extends ConsumerStatefulWidget {
 
   final bool isImageDark;                           // <- NEU
   final ValueChanged<bool>? onImageBrightnessChanged; // <- NEU
+  final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
 
   const WordCard({
     super.key,
@@ -68,6 +76,7 @@ class WordCard extends ConsumerStatefulWidget {
     this.onToggleImage,
     this.isImageDark = false,
     this.onImageBrightnessChanged,
+    this.progressPillKey,
   });
 
   @override
@@ -77,9 +86,39 @@ class WordCard extends ConsumerStatefulWidget {
 class _WordCardState extends ConsumerState<WordCard> {
   int _currentIndex = 0;
   int _total = 0;
+  WordUserView? _currentWord; // Aktuell ausgewähltes Wort aus dem Wheel
+  
+  // GlobalKey für Handy-Icon (für Flug-Animation)
+  final GlobalKey _phoneIconKey = GlobalKey();
+  // GlobalKey für AnimatedPhoneIcon State (um den Pfeil auszublenden)
+  final GlobalKey _animatedPhoneIconKey = GlobalKey();
   
   // Blau-Farbe aus dem Word Wheel
   static const Color _wheelBlue = Color(0xFFB0CCFE);
+
+  void _startArrowFlyAnimation(BuildContext context) {
+    if (widget.progressPillKey == null) return;
+    
+    // Blende den Pfeil im Handy-Icon aus
+    final phoneIconState = _animatedPhoneIconKey.currentState;
+    if (phoneIconState != null && phoneIconState is State<AnimatedPhoneIcon>) {
+      // Verwende dynamic, um die hideArrow-Methode aufzurufen
+      (phoneIconState as dynamic).hideArrow();
+    }
+    
+    ArrowFlyService.startArrowFlyAnimation(
+      context: context,
+      phoneIconKey: _phoneIconKey,
+      progressPillKey: widget.progressPillKey!,
+      onComplete: () {
+        // Zeige den Pfeil wieder an, nachdem die Animation fertig ist
+        final phoneIconState = _animatedPhoneIconKey.currentState;
+        if (phoneIconState != null && phoneIconState is State<AnimatedPhoneIcon>) {
+          (phoneIconState as dynamic).showArrow();
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +131,7 @@ class _WordCardState extends ConsumerState<WordCard> {
       data: (v) => (v != null && v.trim().isNotEmpty) ? v.trim() : (widget.initialWord ?? 'to assume'),
       orElse: () => widget.initialWord ?? 'to assume',
     );
+    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
 
 
     return ConstrainedBox(
@@ -99,19 +139,40 @@ class _WordCardState extends ConsumerState<WordCard> {
         minHeight: widget.height ?? 500,   // du nutzt im Home-Screen 570 – das passt
         maxWidth:  widget.maxWidth ?? 360,
       ),
-      child: ClipRRect(
-        // sorgt dafür, dass die Rundung auch fürs große Bild gilt
-        borderRadius: cardRadius,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // ───────────────── HINTERGRUND: großes Bild (nur Optik) ─────────────────
-            if (widget.isImageExpanded)
-              // Bild liegt UNTER dem Inhalt und füllt die Karte komplett aus
-              GestureDetector(
-                onTap: widget.onToggleImage ?? widget.onImageTap,
-                child: _WordImageWithProbe(provider: widget.wordImage, fit: BoxFit.cover, onLuma: widget.onImageBrightnessChanged) // <- meldet true = dunkel, false = hell)
-              ),
+      child: Container(
+        decoration: (widget.isImageExpanded && glowEnabled) ? BoxDecoration(
+          borderRadius: cardRadius,
+          boxShadow: [
+            // Durchgehender weißer Glow für das erweiterte Bild
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.55),
+              blurRadius: 20,
+              spreadRadius: 1,
+            ),
+          ],
+        ) : null,
+        child: ClipRRect(
+          // sorgt dafür, dass die Rundung auch fürs große Bild gilt
+          borderRadius: cardRadius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // ───────────────── HINTERGRUND: großes Bild (nur Optik) ─────────────────
+              if (widget.isImageExpanded)
+                // Bild liegt UNTER dem Inhalt und füllt die Karte komplett aus
+                GestureDetector(
+                  onTap: widget.onToggleImage ?? widget.onImageTap,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2), // Weißer Rand
+                      borderRadius: cardRadius,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: cardRadius,
+                      child: _WordImageWithProbe(provider: widget.wordImage, fit: BoxFit.cover, onLuma: widget.onImageBrightnessChanged) // <- meldet true = dunkel, false = hell)
+                    ),
+                  ),
+                ),
 
             // ───────────────── VORDERGRUND (alles mit festen Pixelwerten) ─────────────────
             // Der gesamte Inhalt liegt über dem Bild und hat IMMER dasselbe Padding.
@@ -126,14 +187,28 @@ class _WordCardState extends ConsumerState<WordCard> {
                       left: 10,      // seitlicher Rand links
                       right: 10,     // seitlicher Rand rechts
                       height: 200,   // Höhe des kleinen Bildrahmens
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: GestureDetector(
-                          onTap: widget.onToggleImage ?? widget.onImageTap,
-                          child: _WordImageWithProbe(
-                            provider: widget.wordImage,
-                            fit: BoxFit.cover,
-                            onLuma: widget.onImageBrightnessChanged, // <- meldet dunkel/hell auch im kleinen Bild
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white, width: 2), // Weißer Rand
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: glowEnabled ? [
+                            // Durchgehender weißer Glow
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.55),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                            ),
+                          ] : null,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: GestureDetector(
+                            onTap: widget.onToggleImage ?? widget.onImageTap,
+                            child: _WordImageWithProbe(
+                              provider: widget.wordImage,
+                              fit: BoxFit.cover,
+                              onLuma: widget.onImageBrightnessChanged, // <- meldet dunkel/hell auch im kleinen Bild
+                            ),
                           ),
                         ),
                       ),
@@ -141,7 +216,7 @@ class _WordCardState extends ConsumerState<WordCard> {
 
                   // ─── COUNTER (mit TapFlash) ───
                   Positioned(
-                    top: 16, left: 0, right: 0,
+                    top: 24, left: 0, right: 0,
                     child: Center(
                       child: TapFlash(
                         color: _wheelBlue, // Blau aus Word Wheel
@@ -172,6 +247,12 @@ class _WordCardState extends ConsumerState<WordCard> {
                               ),
                       ),
                     ),
+                  ),
+
+                  // ─── GLOW SWITCH (rechts oben) ───
+                  Positioned(
+                    top: 18, right: 16,
+                    child: GlowSwitch(),
                   ),
 
                   // ─── "My Words" (immer identisch) ───
@@ -217,10 +298,17 @@ class _WordCardState extends ConsumerState<WordCard> {
                     top: 220, left: 0, right: 0,
                     child: WordWheelCore(
                       onCenterChange: (index, word) {
-                        // Aktualisiert den Counter synchron mit dem Wheel
+                        // Aktualisiert den Counter synchron mit dem Wheel und speichert das aktuelle Wort
                         setState(() {
                           _currentIndex = index + 1;
+                          _currentWord = word;
                         });
+                        
+                        // Triggert eine leichte Bewegung des Handy-Icons
+                        final phoneIconState = _animatedPhoneIconKey.currentState;
+                        if (phoneIconState != null && phoneIconState is State<AnimatedPhoneIcon>) {
+                          (phoneIconState as dynamic).triggerMovement();
+                        }
                       },
                       onTotalLoaded: (total) {
                         // Setzt die Gesamtanzahl beim ersten Laden
@@ -291,17 +379,27 @@ class _WordCardState extends ConsumerState<WordCard> {
                       child: TapFlash(
                         color: _wheelBlue, // Blau aus Word Wheel
                         shape: BoxShape.circle,
-                        onTapAfter: widget.onQuickSend,
+                        onTapAfter: () async {
+                          if (_currentWord != null && widget.onQuickSend != null) {
+                            // Führe QuickSend aus und prüfe das Ergebnis
+                            final result = widget.onQuickSend!(_currentWord!.text);
+                            
+                            // Starte Flug-Animation nur wenn erfolgreich hinzugefügt
+                            if (result == AddResult.ok) {
+                              _startArrowFlyAnimation(context);
+                            }
+                          }
+                        },
                         child: Container(
+                          key: _phoneIconKey,
                           decoration: const BoxDecoration(shape: BoxShape.circle),
                           alignment: Alignment.center,
-                          child: SvgPicture.asset(
-                            'assets/icons/cellphone_arrow_down_icon.svg',
-                            width: 40, height: 40,
-                            colorFilter: ColorFilter.mode(
-                              widget.isImageExpanded ? onImageIcon : cs.onSurface,
-                              BlendMode.srcIn,
-                            ),
+                          child: AnimatedPhoneIcon(
+                            key: _animatedPhoneIconKey,
+                            assetPath: 'assets/icons/cellphone_arrow_down_icon.svg',
+                            size: 52, // Gleiche Größe wie Container (damit Zentrierung identisch ist)
+                            colorFilter: widget.isImageExpanded ? onImageIcon : cs.onSurface,
+                            duration: const Duration(milliseconds: 1500),
                           ),
                         ),
                       ),
@@ -319,7 +417,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                             context: context,
                             builder: (ctx) => AlertDialog(
                               title: const Text('Gespeicherten Link löschen?'),
-                              content: const Text('Die „Zurück zum Browser“-Position wird zurückgesetzt.'),
+                              content: const Text('Die „Zurück zum Browser"-Position wird zurückgesetzt.'),
                               actions: [
                                 TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
                                 TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Löschen')),
@@ -344,12 +442,16 @@ class _WordCardState extends ConsumerState<WordCard> {
                             child: Container(
                               decoration: const BoxDecoration(shape: BoxShape.circle),
                               alignment: Alignment.center,
-                              child: SvgPicture.asset(
-                                'assets/icons/line_chrome.svg',
-                                width: 56, height: 56,
-                                colorFilter: ColorFilter.mode(
-                                  widget.isImageExpanded ? onImageIcon : cs.onSurface,
-                                  BlendMode.srcIn,
+                              child: RotatingChromeIcon(
+                                duration: const Duration(milliseconds: 3000), // Gleiche Dauer wie GlowOrb
+                                loop: false, // Synchronisiert mit GlowOrb
+                                icon: SvgPicture.asset(
+                                  'assets/icons/line_chrome.svg',
+                                  width: 56, height: 56,
+                                  colorFilter: ColorFilter.mode(
+                                    widget.isImageExpanded ? onImageIcon : cs.onSurface,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ),
@@ -365,6 +467,7 @@ class _WordCardState extends ConsumerState<WordCard> {
           ],
         ),
       ),
+      ), // <- Schließt den Container
     );
   }
 }

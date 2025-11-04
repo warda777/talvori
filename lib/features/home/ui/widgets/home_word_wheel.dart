@@ -16,6 +16,29 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
   int _centerIndex = 0;
   List<WordUserView> _words = [];
 
+  String _sanitize(String t) {
+    // Unicode-Whitespaces inkl. NBSP entfernen
+    t = t.replaceAll(RegExp(r'^[\s\u00A0]+|[\s\u00A0]+$'), '');
+
+    // HTML-Entities am Rand
+    t = t.replaceAll(RegExp(r'^&quot;|&quot;$'), '');
+
+    // Alle gängigen Quotes am Rand (beliebig viele, auch verschachtelt)
+    final edgeQuotes = RegExp(r'^[\"“"„‟‚''`´«»‹›＂]+|[\"“"„‟‚''`´«»‹›＂]+\$');
+    while (edgeQuotes.hasMatch(t)) {
+      t = t.replaceAll(edgeQuotes, '');
+    }
+
+    // Unsichtbare Zero-Width chars
+    t = t.replaceAll(RegExp(r'[\u200B-\u200D\uFEFF\u2060]'), '');
+
+    // Fallback: falls wirklich noch ein Quote übrig blieb → komplett raus
+    if (RegExp(r'[\"“"„‟‚''`´«»‹›＂]').hasMatch(t)) {
+      t = t.replaceAll(RegExp(r'[\"“"„‟‚''`´«»‹›＂]'), '');
+    }
+    return t.trim();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -27,9 +50,11 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
     final repo = SupabaseWordRepository();
     final items = await repo.fetchMyWords(limit: 50);
     if (mounted) {
-      setState(() => _words = items.map((e) => 
-        WordUserView(id: e.id, text: e.text, translation: e.translation)
-      ).toList());
+      setState(() => _words = items.map((e) => WordUserView(
+        id: e.id,
+        text: _sanitize(e.text),
+        translation: e.translation,
+      )).toList());
     }
   }
 
@@ -96,14 +121,14 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
                 childDelegate: ListWheelChildBuilderDelegate(
                   childCount: _words.length,
                   builder: (context, i) {
-                    final w = _words[i];
                     final isCenter = i == _centerIndex;
+                    final display = _sanitize(_words[i].text);
                     return Align(
                       alignment: Alignment.centerRight,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 24),
                         child: Text(
-                          w.text,
+                          display,
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             fontSize: isCenter ? 22 : 18,

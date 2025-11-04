@@ -26,6 +26,29 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
   bool _isLoading = true;
   final _repo = SupabaseWordRepository();
 
+  String _sanitize(String t) {
+    // Unicode-Whitespaces inkl. NBSP entfernen
+    t = t.replaceAll(RegExp(r'^[\s\u00A0]+|[\s\u00A0]+$'), '');
+
+    // HTML-Entities am Rand
+    t = t.replaceAll(RegExp(r'^&quot;|&quot;$'), '');
+
+    // Alle gängigen Quotes am Rand (beliebig viele, auch verschachtelt)
+    final edgeQuotes = RegExp(r'^[\"“"„‟‚''`´«»‹›＂]+|[\"“"„‟‚''`´«»‹›＂]+\$');
+    while (edgeQuotes.hasMatch(t)) {
+      t = t.replaceAll(edgeQuotes, '');
+    }
+
+    // Unsichtbare Zero-Width chars
+    t = t.replaceAll(RegExp(r'[\u200B-\u200D\uFEFF\u2060]'), '');
+
+    // Fallback: falls wirklich noch ein Quote übrig blieb → komplett raus
+    if (RegExp(r'[\"“"„‟‚''`´«»‹›＂]').hasMatch(t)) {
+      t = t.replaceAll(RegExp(r'[\"“"„‟‚''`´«»‹›＂]'), '');
+    }
+    return t.trim();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -49,9 +72,11 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
       
       setState(() {
         _isLoading = false;
-        _words = safe
-            .map((w) => WordUserView(id: w.id, text: w.text, translation: w.translation))
-            .toList();
+        _words = safe.map((e) => WordUserView(
+          id: e.id,
+          text: _sanitize(e.text),
+          translation: e.translation,
+        )).toList();
       });
       
       if (_words.isNotEmpty) {
@@ -121,64 +146,54 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
 
     return SizedBox(
       height: 160,
-      child: Stack(
-        children: [
-          // Fade oben
-          Positioned.fill(
-            child: ShaderMask(
-              shaderCallback: (Rect rect) {
-                return const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black,
-                    Colors.black,
-                    Colors.transparent,
-                  ],
-                  stops: [0.0, 0.15, 0.85, 1.0],
-                ).createShader(rect);
-              },
-              blendMode: BlendMode.dstIn,
-              child: ListWheelScrollView.useDelegate(
-                controller: _controller,
-                physics: const FixedExtentScrollPhysics(),
-                itemExtent: 36,
-                diameterRatio: 2.4,
-                perspective: 0.002,
-                onSelectedItemChanged: (i) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _center = i);
-                  widget.onCenterChange?.call(i, _words[i]);
-                },
-                childDelegate: ListWheelChildBuilderDelegate(
-                  childCount: _words.length,
-                  builder: (context, i) {
-                    final isCenter = i == _center;
-                    final w = _words[i];
-                    return Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 24),
-                        child: Text(
-                          w.text,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontSize: isCenter ? 26 : 20,
-                            fontWeight: isCenter ? FontWeight.w800 : FontWeight.w600,
-                            color: isCenter
-                                ? const Color(0xFFB0CCFE)
-                                : Colors.white.withOpacity(0.85),
-                          ),
-                        ),
+      child: ClipRect(
+        child: ShaderMask(
+          shaderCallback: (Rect r) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent],
+            stops: [0.00, 0.12, 0.88, 1.00],
+          ).createShader(r),
+          blendMode: BlendMode.dstIn, // nur Alpha zählt
+          child: ListWheelScrollView.useDelegate(
+            controller: _controller,
+            physics: const FixedExtentScrollPhysics(),
+            itemExtent: 36,
+            diameterRatio: 2.4,
+            perspective: 0.002,
+            overAndUnderCenterOpacity: 1.0, // ← Eigenfading aus
+            onSelectedItemChanged: (i) {
+              HapticFeedback.selectionClick();
+              setState(() => _center = i);
+              widget.onCenterChange?.call(i, _words[i]);
+            },
+            childDelegate: ListWheelChildBuilderDelegate(
+              childCount: _words.length,
+              builder: (context, i) {
+                final isCenter = i == _center;
+                final display = _sanitize(_words[i].text);
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 24),
+                    child: Text(
+                      display,
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: isCenter ? 26 : 20,
+                        fontWeight: isCenter ? FontWeight.w800 : FontWeight.w600,
+                        color: isCenter
+                            ? const Color(0xFFB0CCFE)
+                            : Colors.white.withOpacity(0.85),
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-        ],
+        ),
       ),
     );
   }

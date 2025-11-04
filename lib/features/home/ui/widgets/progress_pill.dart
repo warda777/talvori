@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/home/application/application.dart';
 
-class ProgressPill extends StatelessWidget {
+class ProgressPill extends ConsumerWidget {
   final int selected;          // z.B. 1
   final int max;               // z.B. 5 (später 1–20)
   final double barWidth;       // Breite des Balkens
@@ -17,28 +19,40 @@ class ProgressPill extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
     const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
+    const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
+    const gold = Color(0xFFF1C86B); // Gold für Progress Pill
     final value = (selected / max).clamp(0.0, 1.0);
 
     final pill = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: cs.secondaryContainer,
+        color: buttonColor,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: gold, width: 2), // Goldener Rand
+        boxShadow: glowEnabled ? [
+          // Durchgehender goldener Glow
+          BoxShadow(
+            color: gold.withValues(alpha: 0.55),
+            blurRadius: 20,
+            spreadRadius: 1,
+          ),
+        ] : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          leading ?? Icon(Icons.system_update_alt_rounded,
-              size: 16, color: cs.onSecondaryContainer),
+          leading ?? const Icon(Icons.system_update_alt_rounded,
+              size: 16, color: Colors.white),
           const SizedBox(width: 6),
           Text(
             '$selected/$max',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: cs.onSecondaryContainer,
+              color: Colors.white,
             ),
           ),
           const SizedBox(width: 8),
@@ -50,7 +64,7 @@ class ProgressPill extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: value,
                 minHeight: 10,
-                backgroundColor: cs.onSecondaryContainer.withValues(alpha: 0.25),
+                backgroundColor: Colors.white.withValues(alpha: 0.25),
                 valueColor:
                     AlwaysStoppedAnimation<Color>(wheelBlue), // Blau statt SecondaryContainer
               ),

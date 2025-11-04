@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
@@ -60,6 +61,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 
 
+  // GlobalKey für Progress Pill (für Flug-Animation)
+  final GlobalKey _progressPillKey = GlobalKey();
+  final GlobalKey _crownButtonKey = GlobalKey(); // Für Fireball Start-Position (optional)
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeControllerProvider);
@@ -67,28 +72,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: HomeTheme.background,
       body: SafeArea(
-        child: Padding(
-          padding: HomeTheme.horizontal,
-          child: Column(
-            children: [
-              AnimatedBuilder(
-                animation: DailyPicksStore.I,
-                builder: (context, _) {
-                  final count = DailyPicksStore.I.items.length;
-                  final max = DailyPicksStore.I.maxCount;
+        child: Stack(
+          children: [
+            Padding(
+              padding: HomeTheme.horizontal,
+              child: Column(
+                children: [
+                  AnimatedBuilder(
+                    animation: DailyPicksStore.I,
+                    builder: (context, _) {
+                      final count = DailyPicksStore.I.items.length;
+                      final max = DailyPicksStore.I.maxCount;
 
-                  return HomeTopBar(
-                    onAllWords: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const VocabSortScreen()),
-                    ),
-                    onRewards: () => _todo('Rewards/Leaderboard/Stats'),
-                    onProgressTap: () => _todo('Daily picks settings'),
-                    selected: count,
-                    max: max,
-                    showProgress: count < max,
-                  );
-                },
-              ),
+                      return HomeTopBar(
+                        progressPillKey: _progressPillKey,
+                        crownButtonKey: _crownButtonKey,
+                        onAllWords: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const VocabSortScreen()),
+                        ),
+                        onRewards: () => _todo('Rewards/Leaderboard/Stats'),
+                        onProgressTap: () => _todo('Daily picks settings'),
+                        selected: count,
+                        max: max,
+                        showProgress: count < max,
+                      );
+                    },
+                  ),
               const SizedBox(height: 16),
 
               Center(
@@ -104,45 +113,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         height: h,
                         child: wc.WordCard(
                           key: ValueKey((state.imageIsDark, state.imageExpanded)),
+                          progressPillKey: _progressPillKey,
                           initialWord: null, // lastSharedWordProvider regelt das
-                          onQuickSend: () async {
-                            // Hole bis zu 5 Wörter aus My Words
-                            final repo = SupabaseWordRepository();
-                            final myWords = await repo.fetchMyWords(limit: 5);
+                          onQuickSend: (String wordText) {
+                            // Füge nur das aktuell ausgewählte Wort hinzu
+                            final res = DailyPicksStore.I.add(wordText);
                             
-                            if (myWords.isEmpty) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Keine Wörter in "My Words" gefunden')),
-                              );
-                              return;
+                            if (!context.mounted) return res;
+                            
+                            switch (res) {
+                              case AddResult.ok:
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Wort hinzugefügt')),
+                                );
+                                break;
+                              case AddResult.duplicate:
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Bereits in Today\'s Picks')),
+                                );
+                                break;
+                              case AddResult.full:
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})')),
+                                );
+                                break;
+                              case AddResult.invalid:
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Ungültiges Wort')),
+                                );
+                                break;
                             }
                             
-                            int addedCount = 0;
-                            int duplicateCount = 0;
-                            
-                            for (final word in myWords) {
-                              final res = DailyPicksStore.I.add(word.text);
-                              if (res == AddResult.ok) {
-                                addedCount++;
-                              } else if (res == AddResult.duplicate) {
-                                duplicateCount++;
-                              }
-                            }
-                            
-                            if (!context.mounted) return;
-                            
-                            if (addedCount > 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('$addedCount Wort${addedCount > 1 ? 'er' : ''} hinzugefügt${duplicateCount > 0 ? ' ($duplicateCount bereits vorhanden)' : ''}'),
-                                ),
-                              );
-                            } else if (duplicateCount > 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Alle Wörter bereits in Today\'s Picks ($duplicateCount)')),
-                              );
-                            }
+                            return res; // Gib das Ergebnis zurück
                           },
                           isImageExpanded: state.imageExpanded,
                           onToggleImage: () => ref.read(homeControllerProvider.notifier).toggleImage(),
@@ -183,6 +185,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
           ),
+        ),
+          ],
         ),
       ),
       bottomNavigationBar: SafeArea(
