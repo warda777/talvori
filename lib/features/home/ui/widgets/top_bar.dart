@@ -20,6 +20,7 @@ class HomeTopBar extends ConsumerStatefulWidget {
   final int max;
   final bool showProgress;
   final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
+  final GlobalKey? counterKey; // <-- NEU: GlobalKey für Counter in Progress Pill
   final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
   final GlobalKey<FireballBounceAnimationState>? fireballKey; // GlobalKey für Fireball Bounce Animation
   final GlobalKey buttonKey; // GlobalKey für den rechten Button
@@ -34,6 +35,7 @@ class HomeTopBar extends ConsumerStatefulWidget {
     this.max = 5,
     this.showProgress = true,
     this.progressPillKey,
+    this.counterKey, // <-- NEU: Counter Key
     this.crownButtonKey,
     this.fireballKey,
   });
@@ -264,6 +266,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                         child: (widget.onProgressTap == null)
                             ? ProgressPill(
                                 key: widget.progressPillKey,
+                                counterKey: widget.counterKey, // <-- NEU: Counter Key
                                 selected: widget.selected,
                                 max: widget.max,
                                 barWidth: 120,
@@ -279,6 +282,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                                 onTapAfter: widget.onProgressTap,
                                 child: ProgressPill(
                                   key: widget.progressPillKey,
+                                  counterKey: widget.counterKey, // <-- NEU: Counter Key
                                   selected: widget.selected,
                                   max: widget.max,
                                   barWidth: 120,

@@ -65,6 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // GlobalKey für Progress Pill (für Flug-Animation)
   final GlobalKey _progressPillKey = GlobalKey();
+  final GlobalKey _counterKey = GlobalKey(); // <-- NEU: Für Counter in Progress Pill
   final GlobalKey _crownButtonKey = GlobalKey(); // Für Fireball Start-Position
   final GlobalKey<FireballBounceAnimationState> _fireballKey = GlobalKey<FireballBounceAnimationState>();
   final GlobalKey _rightButtonKey = GlobalKey(); // Für den rechten Button
@@ -108,6 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       return HomeTopBar(
                         buttonKey: _rightButtonKey,
                         progressPillKey: _progressPillKey,
+                        counterKey: _counterKey, // <-- NEU: Counter Key
                         crownButtonKey: _crownButtonKey,
                         fireballKey: _fireballKey,
                         onAllWords: () => Navigator.of(context).push(
@@ -133,9 +135,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           return SizedBox(
                             width: w,
                             height: h,
-                            child: wc.WordCard(
-                              key: ValueKey((state.imageIsDark, state.imageExpanded)),
-                              progressPillKey: _progressPillKey,
+                      child: wc.WordCard(
+                        key: ValueKey((state.imageIsDark, state.imageExpanded)),
+                        progressPillKey: _progressPillKey,
+                        counterKey: _counterKey, // <-- NEU: Counter Key
                               initialWord: null, // lastSharedWordProvider regelt das
                               onQuickSend: (String wordText) {
                                 // Füge nur das aktuell ausgewählte Wort hinzu

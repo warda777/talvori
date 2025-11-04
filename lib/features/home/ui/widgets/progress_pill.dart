@@ -8,6 +8,7 @@ class ProgressPill extends ConsumerWidget {
   final double barWidth;       // Breite des Balkens
   final VoidCallback? onTap;   // öffnet später dein Einstellungs-Sheet
   final Widget? leading;       // optional eigenes Icon/SVG
+  final GlobalKey? counterKey; // <-- NEU: Key für den Counter-Text
 
   const ProgressPill({
     super.key,
@@ -16,6 +17,7 @@ class ProgressPill extends ConsumerWidget {
     this.barWidth = 140,
     this.onTap,
     this.leading,
+    this.counterKey, // <-- NEU
   });
 
   @override
@@ -49,6 +51,7 @@ class ProgressPill extends ConsumerWidget {
               size: 16, color: Colors.white),
           const SizedBox(width: 6),
           Text(
+            key: counterKey, // <-- NEU: Key für den Counter
             '$selected/$max',
             style: const TextStyle(
               fontWeight: FontWeight.w700,

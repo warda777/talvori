@@ -56,6 +56,7 @@ class WordCard extends ConsumerStatefulWidget {
   final bool isImageDark;                           // <- NEU
   final ValueChanged<bool>? onImageBrightnessChanged; // <- NEU
   final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
+  final GlobalKey? counterKey; // <-- NEU: GlobalKey für Counter in Progress Pill
 
   const WordCard({
     super.key,
@@ -77,6 +78,7 @@ class WordCard extends ConsumerStatefulWidget {
     this.isImageDark = false,
     this.onImageBrightnessChanged,
     this.progressPillKey,
+    this.counterKey, // <-- NEU
   });
 
   @override
@@ -110,6 +112,7 @@ class _WordCardState extends ConsumerState<WordCard> {
       context: context,
       phoneIconKey: _phoneIconKey,
       progressPillKey: widget.progressPillKey!,
+      counterKey: widget.counterKey, // <-- NEU: Counter Key übergeben
       onComplete: () {
         // Zeige den Pfeil wieder an, nachdem die Animation fertig ist
         final phoneIconState = _animatedPhoneIconKey.currentState;
