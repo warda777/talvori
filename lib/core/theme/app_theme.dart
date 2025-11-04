@@ -44,6 +44,18 @@ class AppTheme {
         ),
       ),
       
+      // SnackBar Theme - transparent mit weißem Stroke und weißer Schrift
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: Colors.transparent,
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999), // Komplett runde Ecken
+          side: const BorderSide(color: Colors.white, width: 1),
+        ),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+      ),
+      
       // WordsColors ThemeExtension
       extensions: const [
         WordsColors(

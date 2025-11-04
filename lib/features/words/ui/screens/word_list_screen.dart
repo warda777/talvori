@@ -47,7 +47,6 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Wieder online'),
-              backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
               duration: Duration(seconds: 2),
             ),
