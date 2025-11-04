@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
+import 'package:talvori/features/home/ui/widgets/fireball_gesture_wrapper.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
@@ -284,9 +285,8 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
             ),
           ),
 
-          // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select) ─────────
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
+          // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select, SwipeDown = zukünftige Funktion) ─────────
+          FireballGestureWrapper(
             onTap: () {
               // Trigger Flash-Effekt
               final flashState = _tapFlashKey.currentState;
@@ -305,6 +305,11 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
               debugPrint('🔥 LongPress erkannt!');
               // LongPress erkannt - zeige Quick-Select
               _showRewardsQuick(context);
+            },
+            onSwipeDown: () {
+              debugPrint('🔥 SwipeDown erkannt!');
+              // Zukünftige Funktion: z.B. Pinball-Spiel öffnen
+              // Navigator.of(context).push(...);
             },
             child: SizedBox.square(
               dimension: _dim,
