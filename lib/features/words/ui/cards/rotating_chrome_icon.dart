@@ -103,6 +103,7 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
     with SingleTickerProviderStateMixin {
   late RotatingChromeIconController _internalController;
   RotatingChromeIconController? _controller;
+  bool _ownsController = false; // <— NEU
 
   @override
   void initState() {
@@ -111,6 +112,7 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
     // Verwende externen Controller oder erstelle internen
     if (widget.controller != null) {
       _controller = widget.controller;
+      _ownsController = false; // <— NEU
       // Initialisiere externen Controller, falls noch nicht geschehen
       if (!widget.controller!.controller.isAnimating) {
         widget.controller!.init(
@@ -122,6 +124,7 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
     } else {
       _internalController = RotatingChromeIconController();
       _controller = _internalController;
+      _ownsController = true; // <— NEU
       _controller!.init(
         vsync: this,
         rotationDuration: widget.duration,
@@ -132,9 +135,8 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
 
   @override
   void dispose() {
-    // Nur internen Controller dispose, externer wird extern verwaltet
-    if (_controller == _internalController) {
-      _controller!.dispose();
+    if (_ownsController) {
+      _controller!.dispose(); // nur eigenen Controller entsorgen
     }
     super.dispose();
   }

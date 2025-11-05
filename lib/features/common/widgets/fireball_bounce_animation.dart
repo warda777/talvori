@@ -38,10 +38,18 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
   Animation<double>? _r;
 
   bool _animating = false;
+  final ValueNotifier<bool> _animatingNotifier = ValueNotifier<bool>(false);
   Offset _spawn = const Offset(12, 12); // Startposition (wird aus Anchor berechnet)
   Offset? _dragStartLocal;
   bool _spawnComputed = false;
   Rect? _practiceRect;                      // <-- NEU: Practice-Button Geometrie
+  int _lastDirection = -1;                  // -1 = noch keine Richtung
+  // Richtungen: 0=links, 1=rechts, 2=oben, 3=unten, 4=schräg links-oben, 5=schräg rechts-oben, 6=schräg links-unten, 7=schräg rechts-unten
+  final math.Random _random = math.Random();
+  
+  // Öffentlicher Getter für Animationsstatus
+  bool get isAnimating => _animating;
+  ValueNotifier<bool> get animatingNotifier => _animatingNotifier;
 
   @override
   void initState() {
@@ -49,7 +57,11 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
     _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000)) // Länger für natürlichere Bewegung
       ..addStatusListener((s) {
         if (s == AnimationStatus.completed) {
-          setState(() => _animating = false);
+          // Wichtig: Notifier ZUERST aktualisieren, dann setState
+          _animatingNotifier.value = false; // Button wieder einblenden
+          setState(() {
+            _animating = false;
+          });
           _c.reset(); // respawn am Anchor (Position wird in build neu berechnet)
         }
       });
@@ -58,24 +70,35 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
       if (mounted && !_spawnComputed) {
         _recomputeSpawnInStack();
         _spawnComputed = true;
-      }
-    });
+        }
+      });
   }
 
   @override
   void dispose() {
+    _animatingNotifier.dispose();
     _c.dispose();
     super.dispose();
   }
 
 
   void _start(Animation<double> master, double fallDistance, double rollDistance) {
+    // ---- Zufällige Richtung wählen (nicht die letzte) ----
+    // 0=links, 1=rechts, 2=oben, 3=unten, 4=schräg links-oben, 5=schräg rechts-oben, 6=schräg links-unten, 7=schräg rechts-unten
+    int newDirection;
+    do {
+      newDirection = _random.nextInt(8); // 8 Richtungen (4 kardinal + 4 diagonal)
+    } while (newDirection == _lastDirection && _lastDirection != -1);
+    _lastDirection = newDirection;
+    
     // ---- Physik-Parameter (gefühlt realistisch, leicht anpassbar) ----
     const double tFall0 = 0.55;          // Sekunden für den ersten freien Fall (0 -> Boden)
     final double gPx = 2 * fallDistance / (tFall0 * tFall0); // "g" in Pixel/s^2
     const double e = 0.65;               // COR (Energieverlust pro Aufprall)
     const double mu = 0.88;              // seitliche Reibung pro Bounce (vx *= mu)
-    double vx = -(widget.iconSize * 2.2); // Start-vx (Pixel/s) nach erstem Aufprall, links langsam
+    
+    // Start-vx: IMMER nach links (negativ)
+    double vx = -(widget.iconSize * 2.2);
 
     // ---- Zeit-/Segmentbau: Fall + n Bounces + Ausrollen ----
     final List<TweenSequenceItem<double>> xItems = [];
@@ -110,20 +133,20 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
       // y: hoch (easeOut) bis Scheitel, dann runter (easeIn) bis Boden
       final double topY = fallDistance - (vUp * vUp) / (2 * gPx); // h = v^2/(2g)
       yItems.addAll([
-        TweenSequenceItem(
+      TweenSequenceItem(
           tween: Tween<double>(begin: fallDistance, end: topY)
-              .chain(CurveTween(curve: Curves.easeOut)),
+            .chain(CurveTween(curve: Curves.easeOut)),
           weight: tWeight(tUp),
-        ),
-        TweenSequenceItem(
+      ),
+      TweenSequenceItem(
           tween: Tween<double>(begin: topY, end: fallDistance)
-              .chain(CurveTween(curve: Curves.easeIn)),
+            .chain(CurveTween(curve: Curves.easeIn)),
           weight: tWeight(tDown),
-        ),
+      ),
       ]);
 
       xItems.add(
-        TweenSequenceItem(
+      TweenSequenceItem(
           tween: Tween<double>(begin: currentX, end: nextX)
               .chain(CurveTween(curve: Curves.linear)),
           weight: tWeight(tSeg),
@@ -136,94 +159,106 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
       vx *= mu;   // langsameres Rollen
     }
 
-    // 3) Statt sofort ausrollen: weiter nach links bis zum linken Radius, dann entlang des Radius runter
-    if (_practiceRect != null) {
-      // _practiceRect ist bereits in Stack-Koordinaten
-      // Radius des Practice Buttons (BorderRadius.circular(999) = sehr rund)
-      final double radius = 26.0; // halbe Höhe des Buttons (52/2) für sehr runde Ecken
-
-      // a) Weiter nach links rollen bis zum linken Radius des Practice Buttons
-      // Ziel: linke Seite des Buttons, wo der Radius beginnt (practiceLeft + radius)
-      final double tRollToLeft = 0.4;
-      final double leftEdgeX = _practiceRect!.left + radius - widget.iconSize * 0.5;
-      xItems.add(TweenSequenceItem(
-        tween: Tween<double>(begin: currentX, end: leftEdgeX).chain(CurveTween(curve: Curves.easeOut)),
-        weight: tWeight(tRollToLeft),
-      ));
-      yItems.add(TweenSequenceItem(
-        tween: ConstantTween<double>(fallDistance),
-        weight: tWeight(tRollToLeft),
-      ));
-      currentX = leftEdgeX;
-
-      // b) Entlang des linken oberen Radius nach unten rollen (Kurvenbewegung)
-      // Der Radius ist ein Viertelkreis von oben links
-      // Radius-Mittelpunkt: (practiceLeft + radius, practiceTop + radius)
-      final double tRadiusRoll = 0.45;
-      final double radiusCenterX = _practiceRect!.left + radius;
-      final double radiusCenterY = _practiceRect!.top + radius;
-      
-      // Start- und Endwinkel für den Kreisbogen (in Radians)
-      // Start: oben am Radius (Winkel 270° = 3π/2) - dort wo der Ball ankommt
-      // End: links am Radius (Winkel 180° = π) - dort wo der Ball den Radius verlässt
-      final double startAngle = 3 * math.pi / 2; // 270°
-      final double endAngle = math.pi; // 180°
-      
-      // Start- und Endpositionen auf dem Kreisbogen (in Stack-Koordinaten)
-      final double radiusStartX = radiusCenterX + radius * math.cos(startAngle);
-      final double radiusStartY = radiusCenterY + radius * math.sin(startAngle);
-      final double radiusEndX = radiusCenterX + radius * math.cos(endAngle);
-      final double radiusEndY = radiusCenterY + radius * math.sin(endAngle);
-      
-      // Kurvenbewegung: Kreisbogen mit easeInOut für natürliche Bewegung
-      xItems.add(TweenSequenceItem(
-        tween: Tween<double>(begin: currentX, end: radiusEndX - widget.iconSize * 0.5)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: tWeight(tRadiusRoll),
-      ));
-      yItems.add(TweenSequenceItem(
-        tween: Tween<double>(begin: fallDistance, end: radiusEndY - widget.iconSize * 0.5)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: tWeight(tRadiusRoll),
-      ));
-      currentX = radiusEndX - widget.iconSize * 0.5;
-
-      // c) Linear weiter nach unten fallen
-      final double tLinearFall = 0.6;
-      final double finalY = radiusEndY - widget.iconSize * 0.5 + (widget.iconSize * 2.0); // weiter nach unten
-      xItems.add(TweenSequenceItem(
-        tween: ConstantTween<double>(currentX),
-        weight: tWeight(tLinearFall),
-      ));
-      yItems.add(TweenSequenceItem(
-        tween: Tween<double>(begin: radiusEndY - widget.iconSize * 0.5, end: finalY)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: tWeight(tLinearFall),
-      ));
+    // 3) Ausrollen in zufällige Richtung basierend auf newDirection
+    // Berechne die verfügbare Bewegungsdistanz (Stack-Größe)
+    final box = context.findRenderObject() as RenderBox?;
+    final screenSize = box?.constraints.biggest ?? const Size(400, 800);
+    
+    // Zielpositionen berechnen
+    double finalX = currentX;
+    double finalY = fallDistance;
+    
+    // Für konsistente Geschwindigkeit: gleiche Distanz für alle Richtungen
+    // Verwende die maximale Distanz (diagonal) als Basis
+    final double maxDiagonal = math.sqrt(
+      math.pow(screenSize.width + widget.iconSize + 40.0, 2) +
+      math.pow(screenSize.height + widget.iconSize + 40.0, 2)
+    );
+    
+    // Basis-Geschwindigkeit (Pixel pro Sekunde) - gleiche Geschwindigkeit für alle Richtungen
+    final double baseSpeed = maxDiagonal / 0.8; // 0.8 Sekunden für maximale Distanz
+    
+    if (newDirection == 0) {
+      // Links: nach links verschwinden
+      finalX = -rollDistance;
+      finalY = fallDistance;
+    } else if (newDirection == 1) {
+      // Rechts: nach rechts verschwinden
+      finalX = screenSize.width + widget.iconSize + 40.0;
+      finalY = fallDistance;
+    } else if (newDirection == 2) {
+      // Oben: nach oben verschwinden
+      finalX = currentX;
+      finalY = -widget.iconSize - 40.0;
+    } else if (newDirection == 3) {
+      // Unten: nach unten verschwinden
+      finalX = currentX;
+      finalY = screenSize.height + widget.iconSize + 40.0;
+    } else if (newDirection == 4) {
+      // Schräg links-oben
+      final double distance = math.min(screenSize.width + widget.iconSize + 40.0, screenSize.height + widget.iconSize + 40.0);
+      finalX = currentX - distance;
+      finalY = fallDistance - distance;
+    } else if (newDirection == 5) {
+      // Schräg rechts-oben
+      final double distance = math.min(screenSize.width + widget.iconSize + 40.0, screenSize.height + widget.iconSize + 40.0);
+      finalX = currentX + distance;
+      finalY = fallDistance - distance;
+    } else if (newDirection == 6) {
+      // Schräg links-unten
+      final double distance = math.min(screenSize.width + widget.iconSize + 40.0, screenSize.height + widget.iconSize + 40.0);
+      finalX = currentX - distance;
+      finalY = fallDistance + distance;
     } else {
-      // Fallback: wie bisher ausrollen
-      final double tRoll = 0.8;
-      final double endX  = -rollDistance;
-      xItems.add(TweenSequenceItem(
-        tween: Tween<double>(begin: currentX, end: endX).chain(CurveTween(curve: Curves.easeOut)),
-        weight: tWeight(tRoll),
-      ));
-      yItems.add(TweenSequenceItem(
-        tween: ConstantTween<double>(fallDistance),
-        weight: tWeight(tRoll),
-      ));
+      // Schräg rechts-unten (7)
+      final double distance = math.min(screenSize.width + widget.iconSize + 40.0, screenSize.height + widget.iconSize + 40.0);
+      finalX = currentX + distance;
+      finalY = fallDistance + distance;
     }
+    
+    // Berechne tatsächliche Distanz und Zeit basierend auf Geschwindigkeit
+    final double actualDistance = math.sqrt(
+      math.pow(finalX - currentX, 2) + math.pow(finalY - fallDistance, 2)
+    );
+    final double tRoll = actualDistance / baseSpeed;
+    
+    // Füge Bewegungen hinzu
+    xItems.add(TweenSequenceItem(
+      tween: Tween<double>(begin: currentX, end: finalX).chain(CurveTween(curve: Curves.easeOut)),
+      weight: tWeight(tRoll),
+    ));
+    yItems.add(TweenSequenceItem(
+      tween: Tween<double>(begin: fallDistance, end: finalY).chain(CurveTween(curve: Curves.easeOut)),
+      weight: tWeight(tRoll),
+    ));
 
     // Zuweisung an Animations
     _x = TweenSequence<double>(xItems).animate(master);
     _y = TweenSequence<double>(yItems).animate(master);
 
-    // Rotation proportional zur Weglänge (≈ Rollrad): grob 1 Umdr./iconSize*π
-    final double turns = ( (rollDistance.abs() / (widget.iconSize * math.pi)) ).clamp(1.5, 6.0);
-    _r = Tween<double>(begin: 0.0, end: -2 * math.pi * turns)
+    // Rotation proportional zur Weglänge und Richtung
+    // Berechne Gesamtweg (X + Y)
+    final double totalDistanceX = (finalX - currentX).abs();
+    final double totalDistanceY = (finalY - fallDistance).abs();
+    final double totalDistance = totalDistanceX + totalDistanceY;
+    final double turns = (totalDistance / (widget.iconSize * math.pi)).clamp(1.5, 6.0);
+    
+    // Rotationsrichtung: 
+    // - Bounces: immer nach links (negativ)
+    // - Ausroll: basierend auf newDirection
+    double rotationDirection;
+    if (newDirection == 0 || newDirection == 4 || newDirection == 6) {
+      // Links, schräg links-oben, schräg links-unten: negativ
+      rotationDirection = -1.0;
+    } else {
+      // Rechts, oben, unten, schräg rechts-oben, schräg rechts-unten: positiv
+      rotationDirection = 1.0;
+    }
+    _r = Tween<double>(begin: 0.0, end: rotationDirection * 2 * math.pi * turns)
         .animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut));
 
     setState(() => _animating = true);
+    _animatingNotifier.value = true;
     _c.forward(from: 0.0);
   }
 
@@ -338,6 +373,16 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
                     final dy = _animating ? _y!.value : 0.0;
                     final dx = _animating ? _x!.value : 0.0;
                     final rot = _animating ? _r!.value : 0.0;
+
+                    // Wenn Animation completed ist, sicherstellen dass _animating false ist
+                    if (_c.status == AnimationStatus.completed && _animating) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() => _animating = false);
+                          _animatingNotifier.value = false;
+                        }
+                      });
+                    }
 
                     return Transform.translate(
                       offset: Offset(dx, dy),

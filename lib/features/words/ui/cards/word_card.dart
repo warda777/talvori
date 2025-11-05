@@ -20,6 +20,7 @@ import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/home/ui/widgets/glow_switch.dart';
 import 'package:talvori/features/push/data/daily_picks_store.dart';
+import 'package:talvori/features/words/ui/cards/spinning_chrome_button.dart';
 
 // ignore_for_file: use_build_context_synchronously
 // ignore_for_file: unnecessary_null_comparison
@@ -414,50 +415,50 @@ class _WordCardState extends ConsumerState<WordCard> {
                   // ─── RECHTES ICON Chrome Button(unten rechts) mit TapFlash ───
                   Positioned(
                     bottom: 16, right: 8,
-                    child: Tooltip(
-                      message: 'Zuletzt geteilte Quelle öffnen (Long-press: zurücksetzen)',
-                      child: GestureDetector( // ⬅️ NEU für Long-Press
-                        onLongPress: () async {
-                          final ok = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Gespeicherten Link löschen?'),
-                              content: const Text('Die „Zurück zum Browser"-Position wird zurückgesetzt.'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
-                                TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Löschen')),
-                              ],
-                            ),
-                          ) ?? false;
-
-                          if (!context.mounted) return;
-                          if (ok) {
-                            await BrowserReturnService.clear();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Zurück-Position gelöscht')),
-                            );
-                          }
-                        },
-                        child: SizedBox.square(
-                          dimension: 52,
-                          child: TapFlash(
-                            color: _wheelBlue, // Blau aus Word Wheel
-                            shape: BoxShape.circle,
-                            onTapAfter: () => onChromeButtonTap(context),
-                            child: Container(
-                              decoration: const BoxDecoration(shape: BoxShape.circle),
-                              alignment: Alignment.center,
-                              child: RotatingChromeIcon(
-                                duration: const Duration(milliseconds: 3000), // Gleiche Dauer wie GlowOrb
-                                loop: false, // Synchronisiert mit GlowOrb
-                                icon: SvgPicture.asset(
-                                  'assets/icons/line_chrome.svg',
-                                  width: 56, height: 56,
-                                  colorFilter: ColorFilter.mode(
-                                    widget.isImageExpanded ? onImageIcon : cs.onSurface,
-                                    BlendMode.srcIn,
+                    child: Semantics(
+                      label: 'Zuletzt geteilte Quelle öffnen (Long-press: zurücksetzen)',
+                      child: SizedBox.square(
+                        dimension: 52,
+                        child: TapFlash(
+                          color: _wheelBlue, // Blau aus Word Wheel
+                          shape: BoxShape.circle,
+                          onTapAfter: () => onChromeButtonTap(context),
+                          child: Container(
+                            decoration: const BoxDecoration(shape: BoxShape.circle),
+                            alignment: Alignment.center,
+                            child: GestureDetector( // ⬅️ Long-Press Handler (außerhalb von SpinningChromeButton)
+                              onLongPress: () async {
+                                final ok = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Gespeicherten Link löschen?'),
+                                    content: const Text('Die „Zurück zum Browser"-Position wird zurückgesetzt.'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Abbrechen')),
+                                      TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Löschen')),
+                                    ],
                                   ),
+                                ) ?? false;
+
+                                if (!context.mounted) return;
+                                if (ok) {
+                                  await BrowserReturnService.clear();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Zurück-Position gelöscht')),
+                                  );
+                                }
+                              },
+                              behavior: HitTestBehavior.translucent, // Erlaube Pan-Gesten durchzulassen
+                              child: SpinningChromeButton(
+                                svgAsset: 'assets/icons/line_chrome.svg',
+                                size: 56,
+                                baseRotationDuration: const Duration(milliseconds: 3000),
+                                loop: true, // deine Farbrotation darf weiterlaufen
+                                colorFilter: ColorFilter.mode(
+                                  widget.isImageExpanded ? onImageIcon : cs.onSurface,
+                                  BlendMode.srcIn,
                                 ),
+                                onTap: () => onChromeButtonTap(context), // wie zuvor
                               ),
                             ),
                           ),
