@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
 import 'package:talvori/features/home/ui/widgets/fireball_gesture_wrapper.dart';
+import 'package:talvori/features/home/ui/widgets/top_left_button.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
@@ -215,41 +216,17 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
       height: _dim,
       child: Row(
         children: [
-          // ───────── links: V-Button (rund) mit TapFlash ─────────
-          SizedBox.square(
-            dimension: _dim,
-            child: TapFlash(
-              color: gold, // Gold für V-Button
-              shape: BoxShape.circle,
-              maxOpacity: 1.0,
-              blur: 28,
-              spread: 6,
-              duration: const Duration(milliseconds: 220),
-              onTapAfter: widget.onAllWords,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: buttonColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: gold, width: 2), // Goldener Rand
-                  boxShadow: glowEnabled ? [
-                    // Durchgehender goldener Glow
-                    BoxShadow(
-                      color: gold.withValues(alpha: 0.55),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                  ] : null,
-                ),
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  'assets/icons/v.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    gold, // Gold statt weiß
-                    BlendMode.srcIn,
-                  ),
-                ),
+          // ───────── links: V-Button (rund) ─────────
+          TopLeftButton(
+            size: _dim,
+            onTap: widget.onAllWords,
+            icon: SvgPicture.asset(
+              'assets/icons/v.svg',
+              width: _dim * 0.55,
+              height: _dim * 0.55,
+              colorFilter: ColorFilter.mode(
+                TopLeftButton.gold,
+                BlendMode.srcIn,
               ),
             ),
           ),

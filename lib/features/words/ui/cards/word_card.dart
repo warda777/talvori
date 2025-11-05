@@ -331,44 +331,46 @@ class _WordCardState extends ConsumerState<WordCard> {
                   // ─── PLAY (nur Icon, unten mittig, fix) ───
                   Positioned(
                     bottom: 30, left: 0, right: 0,
-                    child: GestureDetector(
-                      onTap: widget.onGo,  // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
-                      behavior: HitTestBehavior.translucent,
-                      child: SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Glow: Ovales Gold-Licht (rotierend)
-                            GlowOrb(
-                              size: 100,
-                              radius: 45, // Abstand vom Zentrum
-                              orbSize: 8, // Größe der Kugel
-                              duration: const Duration(milliseconds: 3000), // Langsame Rotation
-                              color: const Color(0xFFF1C86B), // Gold
-                              loop: false, // Nur eine Umdrehung, dann ausblenden
-                            ),
-
-                            // Center Glow: Statischer Glow im Zentrum (innerhalb des Play-Icons)
-                            CenterGlow(
-                              size: 100,
-                              glowSize: 18,
-                              duration: const Duration(milliseconds: 3000), // Gleiche Dauer wie GlowOrb
-                              color: const Color(0xFFF1C86B), // Gold
-                            ),
-
-                            // Play-Icon
-                            SvgPicture.asset(
-                              'assets/icons/circle-play.svg',
-                              width: 94,
-                              height: 94,
-                              colorFilter: ColorFilter.mode(
-                                widget.isImageExpanded ? onImageIcon : cs.onSurface,
-                                BlendMode.srcIn,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: widget.onGo,  // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
+                        behavior: HitTestBehavior.opaque, // Genau die Größe des SizedBox, keine größere Tapfläche
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Glow: Ovales Gold-Licht (rotierend)
+                              GlowOrb(
+                                size: 100,
+                                radius: 45, // Abstand vom Zentrum
+                                orbSize: 8, // Größe der Kugel
+                                duration: const Duration(milliseconds: 3000), // Langsame Rotation
+                                color: const Color(0xFFF1C86B), // Gold
+                                loop: false, // Nur eine Umdrehung, dann ausblenden
                               ),
-                            ),
-                          ],
+
+                              // Center Glow: Statischer Glow im Zentrum (innerhalb des Play-Icons)
+                              CenterGlow(
+                                size: 100,
+                                glowSize: 18,
+                                duration: const Duration(milliseconds: 3000), // Gleiche Dauer wie GlowOrb
+                                color: const Color(0xFFF1C86B), // Gold
+                              ),
+
+                              // Play-Icon
+                              SvgPicture.asset(
+                                'assets/icons/circle-play.svg',
+                                width: 94,
+                                height: 94,
+                                colorFilter: ColorFilter.mode(
+                                  widget.isImageExpanded ? onImageIcon : cs.onSurface,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
