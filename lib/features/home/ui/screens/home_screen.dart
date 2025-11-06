@@ -28,6 +28,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   ProviderSubscription<HomeState>? _homeSub;
+  bool _progressAnimationRunning = false; // Verfolgt ob Progressbar-Animation noch läuft
 
   @override
   void initState() {
@@ -105,6 +106,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     builder: (context, _) {
                       final count = DailyPicksStore.I.items.length;
                       final max = DailyPicksStore.I.maxCount;
+                      
+                      // Wenn count >= max, aber Animation noch läuft, zeige Pill weiterhin
+                      final shouldShowProgress = count < max || _progressAnimationRunning;
 
                       return HomeTopBar(
                         buttonKey: _rightButtonKey,
@@ -119,7 +123,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         onProgressTap: () => _todo('Daily picks settings'),
                         selected: count,
                         max: max,
-                        showProgress: count < max,
+                        showProgress: shouldShowProgress,
+                        onProgressAnimationStart: () {
+                          // Animation gestartet - verzögere setState
+                          if (mounted) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  _progressAnimationRunning = true;
+                                });
+                              }
+                            });
+                          }
+                        },
+                        onProgressAnimationComplete: () {
+                          // Animation fertig - jetzt kann die Pill ausgeblendet werden
+                          // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                          if (mounted) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  _progressAnimationRunning = false;
+                                });
+                              }
+                            });
+                          }
+                        },
                       );
                     },
                   ),

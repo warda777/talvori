@@ -23,7 +23,7 @@ class VIconController {
 
   Future<void> handleVerticalDragEnd(DragEndDetails d, BuildContext context) async {
     if (d.velocity.pixelsPerSecond.dy > 200) {
-      FireworksService.show(context, duration: const Duration(seconds: 15));
+      FireworksService.show(context, duration: const Duration(seconds: 10));
       await _spin();
     }
   }

@@ -10,6 +10,7 @@ import 'package:talvori/features/home/ui/widgets/fireball_gesture_wrapper.dart';
 import 'package:talvori/features/home/ui/widgets/top_left_button.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
+import 'package:talvori/features/home/ui/widgets/glitch_disappear_effect.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
 
@@ -25,6 +26,8 @@ class HomeTopBar extends ConsumerStatefulWidget {
   final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
   final GlobalKey<FireballBounceAnimationState>? fireballKey; // GlobalKey für Fireball Bounce Animation
   final GlobalKey buttonKey; // GlobalKey für den rechten Button
+  final VoidCallback? onProgressAnimationStart; // Callback wenn Animation startet
+  final VoidCallback? onProgressAnimationComplete; // Callback wenn Animation fertig ist
 
   const HomeTopBar({
     super.key,
@@ -39,6 +42,8 @@ class HomeTopBar extends ConsumerStatefulWidget {
     this.counterKey, // <-- NEU: Counter Key
     this.crownButtonKey,
     this.fireballKey,
+    this.onProgressAnimationStart,
+    this.onProgressAnimationComplete,
   });
 
   @override
@@ -50,11 +55,13 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   static const double _dim = 52.0;     // Durchmesser deiner Topbar-Buttons
   static const double _quickBtnSize = 52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
   static const double _gap = 16.0;     // Abstand zwischen Krone und Quick-Buttons
+  static const Color gold = Color(0xFFF1C86B); // Gold für Progress Pill
 
   final GlobalKey _crownKey = GlobalKey();
   final GlobalKey<_TapFlashWithoutGestureState> _tapFlashKey = GlobalKey();
   OverlayEntry? _rewardsOverlay;
   bool _quickOpen = false;
+  bool _glitchEffectActive = false; // Verfolgt ob Glitch-Effekt aktiv ist
 
   void _showRewardsQuick(BuildContext context) {
     debugPrint('🔥 _showRewardsQuick aufgerufen!');
@@ -175,6 +182,97 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
     setState(() {}); // Progressbar einblenden
   }
 
+  // Baut die Progress Pill mit optionalem Glitch-Effekt
+  Widget _buildProgressPillWithGlitch() {
+    // Wenn Glitch-Effekt aktiv, verwende keinen Key (wird mehrfach gerendert)
+    final useKey = !_glitchEffectActive;
+    
+    final progressPill = (widget.onProgressTap == null)
+        ? ProgressPill(
+            key: useKey ? widget.progressPillKey : null,
+            counterKey: useKey ? widget.counterKey : null,
+            selected: widget.selected,
+            max: widget.max,
+            barWidth: 120,
+            onAnimationStart: widget.onProgressAnimationStart,
+            onAnimationComplete: () {
+              debugPrint('📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})');
+              widget.onProgressAnimationComplete?.call();
+              // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
+              if (widget.selected >= widget.max) {
+                debugPrint('🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    debugPrint('🚀 PROGRESS-PILL: Setze _glitchEffectActive = true');
+                    setState(() {
+                      _glitchEffectActive = true;
+                    });
+                  } else {
+                    debugPrint('⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten');
+                  }
+                });
+              } else {
+                debugPrint('ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt');
+              }
+            },
+          )
+        : TapFlash(
+            color: gold,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(20),
+            maxOpacity: 1.0,
+            blur: 28,
+            spread: 6,
+            duration: const Duration(milliseconds: 220),
+            onTapAfter: widget.onProgressTap,
+            child: ProgressPill(
+              key: useKey ? widget.progressPillKey : null,
+              counterKey: useKey ? widget.counterKey : null,
+              selected: widget.selected,
+              max: widget.max,
+              barWidth: 120,
+              onAnimationStart: widget.onProgressAnimationStart,
+              onAnimationComplete: () {
+                debugPrint('📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})');
+                widget.onProgressAnimationComplete?.call();
+                // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
+                if (widget.selected >= widget.max) {
+                  debugPrint('🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      debugPrint('🚀 PROGRESS-PILL: Setze _glitchEffectActive = true');
+                      setState(() {
+                        _glitchEffectActive = true;
+                      });
+                    } else {
+                      debugPrint('⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten');
+                    }
+                  });
+                } else {
+                  debugPrint('ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt');
+                }
+              },
+            ),
+          );
+
+    // Wenn Glitch-Effekt aktiv, wrappe die Pill mit dem Effekt
+    if (_glitchEffectActive) {
+      debugPrint('🔥 GLITCH-EFFEKT: Starte Glitch-Effekt für Pill (selected: ${widget.selected}, max: ${widget.max})');
+      return GlitchDisappearEffect(
+        duration: const Duration(milliseconds: 800),
+        onComplete: () {
+          debugPrint('🏁 GLITCH-EFFEKT: Glitch-Effekt abgeschlossen, Pill wird ausgeblendet');
+          setState(() {
+            _glitchEffectActive = false;
+          });
+        },
+        child: progressPill,
+      );
+    }
+
+    return progressPill;
+  }
+
   // runder Quick-Select-Button
   Widget _quickBtn({
     required Color color,
@@ -234,37 +332,13 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
           // ───────── Mitte: Progress-Pill (blendet aus, wenn Quick-Select offen) ─────────
           Expanded(
             child: Center(
-              child: widget.showProgress
+              child: (widget.showProgress || _glitchEffectActive)
                   ? AnimatedOpacity(
                       duration: const Duration(milliseconds: 120),
                       opacity: _quickOpen ? 0.0 : 1.0,
                       child: IgnorePointer(
-                        ignoring: _quickOpen,
-                        child: (widget.onProgressTap == null)
-                            ? ProgressPill(
-                                key: widget.progressPillKey,
-                                counterKey: widget.counterKey, // <-- NEU: Counter Key
-                                selected: widget.selected,
-                                max: widget.max,
-                                barWidth: 120,
-                              )
-                            : TapFlash(
-                                color: gold, // Gold für Progress Pill
-                                shape: BoxShape.rectangle,
-                                borderRadius: BorderRadius.circular(20),
-                                maxOpacity: 1.0,
-                                blur: 28,
-                                spread: 6,
-                                duration: const Duration(milliseconds: 220),
-                                onTapAfter: widget.onProgressTap,
-                                child: ProgressPill(
-                                  key: widget.progressPillKey,
-                                  counterKey: widget.counterKey, // <-- NEU: Counter Key
-                                  selected: widget.selected,
-                                  max: widget.max,
-                                  barWidth: 120,
-                                ),
-                              ),
+                        ignoring: _quickOpen || _glitchEffectActive,
+                        child: _buildProgressPillWithGlitch(),
                       ),
                     )
                   : const SizedBox.shrink(),
