@@ -148,3 +148,4 @@ Die vollständige Code-Dokumentation mit allen Dateien ist in `Programmliste.md`
 _Für strukturelle Details siehe: PROJECT_STRUCTURE.md_
 _Für Supabase-Architektur siehe: SUPABASE_ARCHITECTURE.md_
 
+

@@ -14,9 +14,9 @@ class SparkleParticleEffect extends StatefulWidget {
     super.key,
     required this.position,
     this.color = Colors.white,
-    this.particleCount = 20,
-    this.duration = const Duration(milliseconds: 1000),
-    this.spreadRadius = 60.0,
+    this.particleCount = 50, // Erhöht von 20 auf 50 für mehr Dichte
+    this.duration = const Duration(milliseconds: 1200), // Längere Dauer für größere Animation
+    this.spreadRadius = 100.0, // Erhöht von 60.0 auf 100.0 für größere Ausbreitung
     this.onComplete,
   });
 
@@ -43,9 +43,9 @@ class _SparkleParticleEffectState extends State<SparkleParticleEffect>
       widget.particleCount,
       (index) => _Particle(
         angle: random.nextDouble() * 2 * math.pi, // Zufälliger Winkel
-        distance: widget.spreadRadius * (0.3 + random.nextDouble() * 0.7), // Zufällige Distanz
-        size: 2.0 + random.nextDouble() * 4.0, // Zufällige Größe
-        speed: 0.5 + random.nextDouble() * 0.5, // Zufällige Geschwindigkeit
+        distance: widget.spreadRadius * (0.2 + random.nextDouble() * 0.8), // Größere Reichweite
+        size: 3.0 + random.nextDouble() * 6.0, // Größere Partikel (von 2-6 auf 3-9)
+        speed: 0.6 + random.nextDouble() * 0.7, // Etwas schnellere Geschwindigkeit
       ),
     );
 
@@ -132,8 +132,8 @@ class _SparklePainter extends CustomPainter {
         ..color = color.withOpacity(opacity)
         ..style = PaintingStyle.fill;
 
-      // Zeichne einen kleinen Stern/Sparkle
-      _drawSparkle(canvas, Offset(x, y), particle.size * (1.0 - progress * 0.5), paint);
+      // Zeichne einen größeren Stern/Sparkle (weniger Größenverlust während Animation)
+      _drawSparkle(canvas, Offset(x, y), particle.size * (1.0 - progress * 0.3), paint);
     }
   }
 

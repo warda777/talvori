@@ -165,9 +165,9 @@ class ArrowFlyService {
             SparkleParticleEffect(
               position: sparklePosition,
               color: const Color(0xFFF1C86B), // Goldene Farbe
-              particleCount: 25,
-              duration: const Duration(milliseconds: 1200),
-              spreadRadius: 50.0,
+              particleCount: 60, // Erhöht für mehr Dichte
+              duration: const Duration(milliseconds: 1500), // Längere Dauer
+              spreadRadius: 120.0, // Größere Ausbreitung
               onComplete: () {
                 sparkleEntry.remove();
               },

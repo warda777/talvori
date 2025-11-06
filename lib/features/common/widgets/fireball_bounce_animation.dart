@@ -46,6 +46,7 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
   int _lastDirection = -1;                  // -1 = noch keine Richtung
   // Richtungen: 0=links, 1=rechts, 2=oben, 3=unten, 4=schräg links-oben, 5=schräg rechts-oben, 6=schräg links-unten, 7=schräg rechts-unten
   final math.Random _random = math.Random();
+  List<int> _availableDirections = [];      // Pool für gleichmäßige Verteilung
   
   // Öffentlicher Getter für Animationsstatus
   bool get isAnimating => _animating;
@@ -83,12 +84,35 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
 
 
   void _start(Animation<double> master, double fallDistance, double rollDistance) {
-    // ---- Zufällige Richtung wählen (nicht die letzte) ----
+    // ---- Zufällige Richtung wählen mit gleichmäßiger Verteilung ----
     // 0=links, 1=rechts, 2=oben, 3=unten, 4=schräg links-oben, 5=schräg rechts-oben, 6=schräg links-unten, 7=schräg rechts-unten
-    int newDirection;
-    do {
-      newDirection = _random.nextInt(8); // 8 Richtungen (4 kardinal + 4 diagonal)
-    } while (newDirection == _lastDirection && _lastDirection != -1);
+    
+    // Pool-System: Wenn leer, neu auffüllen (alle 8 Richtungen)
+    if (_availableDirections.isEmpty) {
+      _availableDirections = [0, 1, 2, 3, 4, 5, 6, 7];
+    }
+    
+    // Entferne die letzte Richtung aus dem Pool (verhindert direkte Wiederholung)
+    if (_lastDirection != -1 && _availableDirections.contains(_lastDirection)) {
+      _availableDirections.remove(_lastDirection);
+    }
+    
+    // Wenn Pool zu klein wird (nur noch 1-2 Optionen), wieder auffüllen für mehr Abwechslung
+    if (_availableDirections.length <= 2) {
+      _availableDirections = [0, 1, 2, 3, 4, 5, 6, 7];
+      // Aber trotzdem die letzte Richtung entfernen
+      if (_lastDirection != -1) {
+        _availableDirections.remove(_lastDirection);
+      }
+    }
+    
+    // Zufällige Richtung aus dem Pool wählen
+    final int randomIndex = _random.nextInt(_availableDirections.length);
+    final int newDirection = _availableDirections[randomIndex];
+    
+    // Entferne die gewählte Richtung aus dem Pool
+    _availableDirections.removeAt(randomIndex);
+    
     _lastDirection = newDirection;
     
     // ---- Physik-Parameter (gefühlt realistisch, leicht anpassbar) ----
@@ -168,15 +192,12 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
     double finalX = currentX;
     double finalY = fallDistance;
     
-    // Für konsistente Geschwindigkeit: gleiche Distanz für alle Richtungen
-    // Verwende die maximale Distanz (diagonal) als Basis
-    final double maxDiagonal = math.sqrt(
-      math.pow(screenSize.width + widget.iconSize + 40.0, 2) +
-      math.pow(screenSize.height + widget.iconSize + 40.0, 2)
-    );
+    // Bestimme ob die Richtung nach unten geht (langsam) oder nicht (schnell)
+    final bool goesDown = newDirection == 3 || newDirection == 6 || newDirection == 7; // unten, schräg links-unten, schräg rechts-unten
     
-    // Basis-Geschwindigkeit (Pixel pro Sekunde) - gleiche Geschwindigkeit für alle Richtungen
-    final double baseSpeed = maxDiagonal / 0.8; // 0.8 Sekunden für maximale Distanz
+    // Geschwindigkeit: nach unten = langsam, sonst = schnell
+    final double fastSpeed = 1200.0; // Pixel pro Sekunde für schnelle Richtungen
+    final double slowSpeed = 200.0;  // Pixel pro Sekunde für nach unten (sehr langsam, wie runterkullern)
     
     if (newDirection == 0) {
       // Links: nach links verschwinden
@@ -220,15 +241,21 @@ class FireballBounceAnimationState extends State<FireballBounceAnimation>
     final double actualDistance = math.sqrt(
       math.pow(finalX - currentX, 2) + math.pow(finalY - fallDistance, 2)
     );
-    final double tRoll = actualDistance / baseSpeed;
+    final double speed = goesDown ? slowSpeed : fastSpeed;
+    final double tRoll = actualDistance / speed;
     
     // Füge Bewegungen hinzu
+    // Für "nach unten": easeIn (langsam starten, beschleunigen) für natürliches Runterkullern
+    // Für andere Richtungen: easeOut (schnell starten, abbremsen)
+    final Curve xCurve = goesDown ? Curves.easeIn : Curves.easeOut;
+    final Curve yCurve = goesDown ? Curves.easeIn : Curves.easeOut;
+    
     xItems.add(TweenSequenceItem(
-      tween: Tween<double>(begin: currentX, end: finalX).chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween<double>(begin: currentX, end: finalX).chain(CurveTween(curve: xCurve)),
       weight: tWeight(tRoll),
     ));
     yItems.add(TweenSequenceItem(
-      tween: Tween<double>(begin: fallDistance, end: finalY).chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween<double>(begin: fallDistance, end: finalY).chain(CurveTween(curve: yCurve)),
       weight: tWeight(tRoll),
     ));
 
