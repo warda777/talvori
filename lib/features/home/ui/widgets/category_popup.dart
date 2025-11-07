@@ -5,6 +5,7 @@ import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
 import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
+import 'package:talvori/features/home/ui/widgets/all_words_neural_bg.dart';
 
 typedef VoidSnack = void Function(String);
 
@@ -57,9 +58,7 @@ Future<void> showCategoryPopup({
                     openElevation: 0,
                     useRootNavigator:
                         true, // ⬅️ wichtig: öffnet oberhalb des Dialogs
-                    closedColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
+                    closedColor: cs.surfaceContainerHighest,
                     openColor: Theme.of(context).scaffoldBackgroundColor,
                     closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -68,13 +67,48 @@ Future<void> showCategoryPopup({
                     closedBuilder: (c, open) => SizedBox(
                       width: 129,
                       height: 90,
-                      child: FilledButton.tonal(
-                        onPressed: () {
-                          onBeginOpen();
-                          open();
-                        },
-                        style: pill(context),
-                        child: const Text('All words'),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            const NeuralGlowBackground(
+                              density: 12,
+                              nodeCount: 14,
+                              speed: 0.18,
+                              focus: Alignment.center,
+                              spread: 0.22,
+                              lineColor: Color(0xFFE6C27A),
+                              bgColor: Color(0xFF0D0F12),
+                            ),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  onBeginOpen();
+                                  open();
+                                },
+                                borderRadius: BorderRadius.circular(18),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Align(
+                                    alignment: Alignment.bottomLeft,
+                                    child: Text(
+                                      'All words',
+                                      style: Theme.of(c)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     openBuilder: (_, __) =>
@@ -86,9 +120,7 @@ Future<void> showCategoryPopup({
                     closedElevation: 0,
                     openElevation: 0,
                     useRootNavigator: true,
-                    closedColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
+                    closedColor: cs.surfaceContainerHighest,
                     openColor: Theme.of(context).scaffoldBackgroundColor,
                     closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -103,7 +135,7 @@ Future<void> showCategoryPopup({
                           onBeginOpen();
                           open();
                         },
-                        style: pill(context),
+                        style: pill(c),
                         child: const Text('My words'),
                       ),
                     ),
@@ -123,9 +155,7 @@ Future<void> showCategoryPopup({
                     closedElevation: 0,
                     openElevation: 0,
                     useRootNavigator: true,
-                    closedColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
+                    closedColor: cs.surfaceContainerHighest,
                     openColor: Theme.of(context).scaffoldBackgroundColor,
                     closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -139,7 +169,7 @@ Future<void> showCategoryPopup({
                           onBeginOpen();
                           open();
                         },
-                        style: pill(context),
+                        style: pill(c),
                         child: const Text('Favorites'),
                       ),
                     ),
@@ -152,9 +182,7 @@ Future<void> showCategoryPopup({
                     closedElevation: 0,
                     openElevation: 0,
                     useRootNavigator: true,
-                    closedColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
+                    closedColor: cs.surfaceContainerHighest,
                     openColor: Theme.of(context).scaffoldBackgroundColor,
                     closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -168,7 +196,7 @@ Future<void> showCategoryPopup({
                           onBeginOpen();
                           open();
                         },
-                        style: pill(context),
+                        style: pill(c),
                         child: const Text('Words I know'),
                       ),
                     ),
