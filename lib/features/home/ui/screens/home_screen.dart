@@ -116,9 +116,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         counterKey: _counterKey, // <-- NEU: Counter Key
                         crownButtonKey: _crownButtonKey,
                         fireballKey: _fireballKey,
-                        onAllWords: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const VocabSortScreen()),
-                        ),
+                        onAllWords: () {
+                          // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                        },
                         onRewards: () => _todo('Rewards/Leaderboard/Stats'),
                         onProgressTap: () => _todo('Daily picks settings'),
                         selected: count,

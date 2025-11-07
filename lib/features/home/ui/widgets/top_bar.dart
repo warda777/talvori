@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:animations/animations.dart';
 
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
@@ -13,6 +14,7 @@ import 'progress_pill.dart';
 import 'package:talvori/features/home/ui/widgets/glitch_disappear_effect.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
+import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 
 class HomeTopBar extends ConsumerStatefulWidget {
   final VoidCallback onAllWords;
@@ -315,18 +317,29 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
       child: Row(
         children: [
           // ───────── links: V-Button (rund) ─────────
-          TopLeftButton(
-            size: _dim,
-            onTap: widget.onAllWords,
-            icon: SvgPicture.asset(
-              'assets/icons/v.svg',
-              width: _dim * 0.55,
-              height: _dim * 0.55,
-              colorFilter: ColorFilter.mode(
-                TopLeftButton.gold,
-                BlendMode.srcIn,
+          OpenContainer(
+            transitionDuration: const Duration(milliseconds: 350),
+            transitionType: ContainerTransitionType.fadeThrough,
+            closedElevation: 0,
+            openElevation: 0,
+            closedColor: TopLeftButton.buttonColor,
+            openColor: Theme.of(context).scaffoldBackgroundColor,
+            middleColor: TopLeftButton.buttonColor,
+            closedShape: const CircleBorder(),
+            closedBuilder: (context, open) => TopLeftButton(
+              size: _dim,
+              onTap: open,
+              icon: SvgPicture.asset(
+                'assets/icons/v.svg',
+                width: _dim * 0.55,
+                height: _dim * 0.55,
+                colorFilter: ColorFilter.mode(
+                  TopLeftButton.gold,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
+            openBuilder: (context, _) => const VocabSortScreen(),
           ),
 
           // ───────── Mitte: Progress-Pill (blendet aus, wenn Quick-Select offen) ─────────

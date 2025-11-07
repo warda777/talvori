@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
@@ -26,7 +27,7 @@ Future<void> showCategoryPopup({
         visualDensity: VisualDensity.compact,
       );
 
-  Widget content(BuildContext context) => Material(
+  Widget content(BuildContext context, {required VoidCallback onBeginOpen}) => Material(
         color: cs.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
@@ -49,27 +50,50 @@ Future<void> showCategoryPopup({
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FilledButton.tonal(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 0)),
-                      );
-                    },
-                    style: pill(context),
-                    child: const Text('All words'),
+                  OpenContainer(
+                    transitionDuration: const Duration(milliseconds: 350),
+                    transitionType: ContainerTransitionType.fadeThrough,
+                    closedElevation: 0,
+                    openElevation: 0,
+                    useRootNavigator: true, // ⬅️ wichtig: öffnet oberhalb des Dialogs
+                    closedColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    openColor: Theme.of(context).scaffoldBackgroundColor,
+                    closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    tappable: false,
+                    closedBuilder: (c, open) => FilledButton.tonal(
+                      onPressed: () {
+                        // 1) Popup optisch ausblenden, aber im Tree lassen
+                        onBeginOpen();          // (dein lokales _hidden = true)
+
+                        // 2) OpenContainer starten
+                        open();
+                      },
+                      style: pill(context),
+                      child: const Text('All words'),
+                    ),
+                    openBuilder: (_, __) => const QuickSetsDetailScreen(initialIndex: 0),
                   ),
-                  FilledButton.tonal(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 1)),
-                      );
-                      await onRefreshMyWords();
-                    },
-                    style: pill(context),
-                    child: const Text('My words'),
-                  ),
+              OpenContainer(
+                transitionDuration: const Duration(milliseconds: 350),
+                transitionType: ContainerTransitionType.fadeThrough,
+                closedElevation: 0,
+                openElevation: 0,
+                useRootNavigator: true,
+                closedColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                tappable: false,
+                onClosed: (_) => onRefreshMyWords(),
+                closedBuilder: (c, open) => FilledButton.tonal(
+                  onPressed: () {
+                    onBeginOpen();
+                    open();
+                  },
+                  style: pill(context),
+                  child: const Text('My words'),
+                ),
+                openBuilder: (_, __) => const QuickSetsDetailScreen(initialIndex: 1),
+              ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -77,26 +101,46 @@ Future<void> showCategoryPopup({
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FilledButton.tonal(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 2)),
-                      );
-                    },
-                    style: pill(context),
-                    child: const Text('Favorites'),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const QuickSetsDetailScreen(initialIndex: 3)),
-                      );
-                    },
-                    style: pill(context),
-                    child: const Text('Words I know'),
-                  ),
+              OpenContainer(
+                transitionDuration: const Duration(milliseconds: 350),
+                transitionType: ContainerTransitionType.fadeThrough,
+                closedElevation: 0,
+                openElevation: 0,
+                useRootNavigator: true,
+                closedColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                tappable: false,
+                closedBuilder: (c, open) => FilledButton.tonal(
+                  onPressed: () {
+                    onBeginOpen();
+                    open();
+                  },
+                  style: pill(context),
+                  child: const Text('Favorites'),
+                ),
+                openBuilder: (_, __) => const QuickSetsDetailScreen(initialIndex: 2),
+              ),
+              OpenContainer(
+                transitionDuration: const Duration(milliseconds: 350),
+                transitionType: ContainerTransitionType.fadeThrough,
+                closedElevation: 0,
+                openElevation: 0,
+                useRootNavigator: true,
+                closedColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                tappable: false,
+                closedBuilder: (c, open) => FilledButton.tonal(
+                  onPressed: () {
+                    onBeginOpen();
+                    open();
+                  },
+                  style: pill(context),
+                  child: const Text('Words I know'),
+                ),
+                openBuilder: (_, __) => const QuickSetsDetailScreen(initialIndex: 3),
+              ),
                 ],
               ),
 
@@ -104,30 +148,40 @@ Future<void> showCategoryPopup({
 
               Align(
                 alignment: Alignment.center,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const WordHubScreen()),
-                    );
-                  },
-                  child: Container(
-                    width: 232,
-                    height: 103,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: const [BoxShadow(blurRadius: 12, color: Colors.black26)],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'Word hub',
-                      style: TextStyle(color: cs.onSurface.withValues(alpha: 0.9)),
-                    ),
+            child: OpenContainer(
+              transitionDuration: const Duration(milliseconds: 350),
+              transitionType: ContainerTransitionType.fadeThrough,
+              closedElevation: 0,
+              openElevation: 0,
+              useRootNavigator: true,
+              closedColor: cs.surfaceContainerHighest,
+              openColor: Theme.of(context).scaffoldBackgroundColor,
+              closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              tappable: false,
+              closedBuilder: (c, open) => InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () {
+                  onBeginOpen();
+                  open();
+                },
+                child: Container(
+                  width: 232,
+                  height: 103,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: const [BoxShadow(blurRadius: 12, color: Colors.black26)],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'Word hub',
+                    style: TextStyle(color: cs.onSurface.withValues(alpha: 0.9)),
                   ),
                 ),
+              ),
+              openBuilder: (_, __) => const WordHubScreen(),
+            ),
               ),
 
               const SizedBox(height: 24),
@@ -187,24 +241,57 @@ Future<void> showCategoryPopup({
       final safeLeft = posLeft.clamp(0.0, screen.width - 280);
       final safeBottom = posBottom.clamp(8.0, screen.height - 415 - 8);
 
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.pop(ctx),
-            ),
-          ),
-          Positioned(
-            left: safeLeft,
-            bottom: safeBottom,
-            child: SizedBox(
-              width: 280,
-              height: 415,
-              child: content(ctx),
-            ),
-          ),
-        ],
+      bool hidden = false; // lokale Dialog-Transparenz
+
+      return StatefulBuilder(
+        builder: (ctx, setLocalState) {
+          final nav = Navigator.of(ctx, rootNavigator: true);
+          final dialogRoute = ModalRoute.of(ctx);
+
+          Widget popupContent = Stack(
+            children: [
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.pop(ctx),
+                ),
+              ),
+              Positioned(
+                left: safeLeft,
+                bottom: safeBottom,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: hidden ? 0.0 : 1.0,
+                  child: IgnorePointer(
+                    ignoring: hidden,
+                    child: SizedBox(
+                      width: 280,
+                      height: 415,
+                      child: content(ctx, onBeginOpen: () {
+                        // wird beim Tap auf die Kachel gesetzt (vor open())
+                        setLocalState(() => hidden = true);
+                        Future.delayed(const Duration(milliseconds: 380), () {
+                          if (!nav.mounted) return;
+                          if (dialogRoute != null) {
+                            if (dialogRoute.isCurrent) {
+                              nav.pop();
+                            } else {
+                              nav.removeRoute(dialogRoute);
+                            }
+                          } else if (nav.canPop()) {
+                            nav.pop();
+                          }
+                        });
+                      }),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+
+          return popupContent;
+        },
       );
     },
   );
