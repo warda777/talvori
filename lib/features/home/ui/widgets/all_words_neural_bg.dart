@@ -12,7 +12,7 @@ class NeuralGlowBackground extends StatefulWidget {
     this.speed = 0.22,
     this.density = 10,
     this.nodeCount = 12,
-    this.bgColor = const Color(0xFF0D0F12),
+    this.bgColor = const Color(0xFF000000),
     this.lineColor = const Color(0xFFE6C27A),
     this.focus = Alignment.center, // Cluster-Position
     this.spread = 0.28,            // 0..1 – kleinere Werte = enger um den Fokus
