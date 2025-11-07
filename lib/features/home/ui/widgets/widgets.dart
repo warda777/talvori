@@ -1,6 +1,7 @@
 export 'bottom_nav.dart';
 export 'category_popup.dart';
 export 'counter_badge.dart';
+export 'food_bowl_bg.dart';
 export 'glow_sweep_ring.dart';
 export 'glow_switch.dart';
 export 'health_pulse_bg.dart';

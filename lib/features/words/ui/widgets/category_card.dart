@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
+import 'package:talvori/features/home/ui/widgets/food_bowl_bg.dart';
 import 'package:talvori/features/home/ui/widgets/health_pulse_bg.dart';
 import 'package:talvori/features/home/ui/widgets/home_silhouette_bg.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
@@ -63,6 +65,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
     final String normalizedLabel = widget.sub.label.toLowerCase().trim().replaceAll('&', 'and');
     final bool isHealth = normalizedLabel == 'health and fitness';
     final bool isHomeLiving = normalizedLabel == 'home and living';
+    final bool isFoodCooking = normalizedLabel == 'food and cooking';
 
     return Material(
       color: Colors.transparent,
@@ -96,7 +99,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: (isHealth || isHomeLiving)
+              color: (isHealth || isHomeLiving || isFoodCooking)
                   ? Colors.black
                   : t.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(18),
@@ -108,34 +111,41 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
                 fit: StackFit.expand,
                 children: [
                   if (isHealth) const HealthPulseBackground()
-                  else if (isHomeLiving) const HomeSilhouetteBackground(),
+                  else if (isHomeLiving) const HomeSilhouetteBackground()
+                  else if (isFoodCooking)
+                    const FoodBowlBackground(
+                      scale: 0.36,
+                      yAlign: 0.62,
+                      speed: 0.9,
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(children: [
-                          if (loading) const Expanded(child: ShimmerBox(height: 16, borderRadius: 999)),
-                          if (loading) const SizedBox(width: 8),
-                          if (!loading && stats != null) ...[
-                            MiniBadge(icon: Icons.refresh, label: '${stats.dueToday}'),
-                            const SizedBox(width: 6),
-                            MiniBadge(icon: Icons.fiber_new, label: '${stats.newTotal}'),
-                          ],
-                        ]),
+                        const SizedBox(height: 8),
+                        loading
+                            ? const ShimmerBox(height: 18, borderRadius: 6)
+                            : Text(widget.sub.label, style: t.textTheme.titleMedium),
                         const Spacer(),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (loading)
-                              const Expanded(child: ShimmerBox(height: 18, borderRadius: 6))
-                            else
-                              Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
-                            if (!loading && stats != null) Text('${stats.total}', style: t.textTheme.bodyMedium),
-                            if (loading) const SizedBox(width: 12),
-                            if (loading) const ShimmerBox(height: 14, borderRadius: 6),
-                          ],
-                        ),
+                        if (loading)
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: SizedBox(
+                              width: 36,
+                              child: const ShimmerBox(height: 14, borderRadius: 6),
+                            ),
+                          )
+                        else if (stats != null)
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              '${stats.total}',
+                              style: t.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
