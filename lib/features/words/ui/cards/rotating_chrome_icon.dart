@@ -3,11 +3,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 
 /// Controller für die Rotation des Chrome-Icons
-/// Synchronisiert mit der GlowOrb-Animation (gleiche Sequenz)
+/// Asynchron zur GlowOrb-Animation (eigene Sequenz)
 class RotatingChromeIconController {
   late AnimationController _controller;
   late Animation<double> _rotationAnimation;
   late Animation<double> _fadeAnimation;
+  static final math.Random _random = math.Random();
   
   AnimationController get controller => _controller;
   Animation<double> get rotationAnimation => _rotationAnimation;
@@ -18,7 +19,7 @@ class RotatingChromeIconController {
     Duration fadeInDuration = const Duration(milliseconds: 800),
     Duration rotationDuration = const Duration(milliseconds: 3000),
     Duration fadeOutDuration = const Duration(milliseconds: 800),
-    Duration pauseDuration = const Duration(milliseconds: 2000),
+    Duration pauseDuration = const Duration(seconds: 10),
     bool loop = true,
   }) {
     final totalDuration = fadeInDuration + rotationDuration + fadeOutDuration + pauseDuration;
@@ -28,14 +29,14 @@ class RotatingChromeIconController {
       vsync: vsync,
     );
     
-    // Rotation: während des gesamten sichtbaren Zeitraums (eine vollständige Umdrehung)
-    final visibleStart = 0.0;
-    final visibleEnd = (fadeInDuration.inMilliseconds + rotationDuration.inMilliseconds + fadeOutDuration.inMilliseconds) / totalDuration.inMilliseconds;
+    // Rotation: nur während der rotationDuration (eine vollständige Umdrehung)
+    final rotationStart = fadeInDuration.inMilliseconds / totalDuration.inMilliseconds;
+    final rotationEnd = (fadeInDuration.inMilliseconds + rotationDuration.inMilliseconds) / totalDuration.inMilliseconds;
     
     _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(visibleStart, visibleEnd, curve: Curves.linear),
+        curve: Interval(rotationStart, rotationEnd, curve: Curves.linear),
       ),
     );
     
@@ -63,8 +64,18 @@ class RotatingChromeIconController {
       ),
     ]).animate(_controller);
     
-    // Immer wiederholen (wie GlowOrb) - die Sequenz sorgt für die Pausen
-    _controller.repeat();
+    // Asynchroner Start: Zufällige Verzögerung zwischen 0 und 5 Sekunden
+    // damit es nicht synchron mit dem goldenen Glow des Play Buttons ist
+    if (loop) {
+      final randomDelay = Duration(milliseconds: _random.nextInt(5000));
+      Future.delayed(randomDelay, () {
+        try {
+          _controller.repeat();
+        } catch (e) {
+          // Controller wurde bereits disposed, ignoriere
+        }
+      });
+    }
   }
   
   void dispose() {
@@ -73,7 +84,7 @@ class RotatingChromeIconController {
 }
 
 /// Widget für das rotierende Chrome-Icon mit wechselnden Farben
-/// Synchronisiert mit der GlowOrb-Animation
+/// Asynchron zur GlowOrb-Animation (eigene Sequenz)
 class RotatingChromeIcon extends StatefulWidget {
   final Widget icon; // Das SvgPicture oder Icon
   final Duration duration; // Dauer einer Rotation (sollte mit GlowOrb übereinstimmen)
@@ -91,7 +102,6 @@ class RotatingChromeIcon extends StatefulWidget {
       Color(0xFFB1CCFE), // Hellblau
       Color(0xFFA05260), // Rötlich
       Color(0xFFE4B866), // Gelblich/Gold
-      Color(0xFF9FBDAF), // Grünlich
     ],
   });
 
@@ -146,8 +156,6 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
     return AnimatedBuilder(
       animation: _controller!.rotationAnimation,
       builder: (context, child) {
-        final rotation = _controller!.rotationAnimation.value * 2 * math.pi;
-        
         // Berechne die aktuelle Farbe basierend auf dem Rotationswert
         // Interpoliere sanft zwischen den Farben
         final rotationValue = _controller!.rotationAnimation.value;
@@ -164,14 +172,10 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
         ) ?? widget.colors[colorIndex];
         
         // Wende ColorFilter auf das Icon an
-        Widget coloredIcon = ColorFiltered(
+        // Die Rotation wird extern in spinning_chrome_button.dart angewendet
+        return ColorFiltered(
           colorFilter: ColorFilter.mode(currentColor, BlendMode.srcIn),
           child: widget.icon,
-        );
-        
-        return Transform.rotate(
-          angle: rotation,
-          child: coloredIcon,
         );
       },
     );
