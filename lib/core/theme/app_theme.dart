@@ -21,6 +21,14 @@ class AppTheme {
       colorScheme: scheme,
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.black,
+      cardTheme: const CardThemeData(
+        color: Colors.black,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(22)),
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,

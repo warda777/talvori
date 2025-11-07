@@ -9,6 +9,7 @@ import 'package:talvori/features/home/ui/widgets/all_words_neural_bg.dart';
 import 'package:talvori/features/home/ui/widgets/my_words_bg.dart';
 import 'package:talvori/features/home/ui/widgets/favorites_heart_bg.dart';
 import 'package:talvori/features/home/ui/widgets/words_i_know_puzzle_bg.dart';
+import 'package:talvori/features/home/ui/widgets/word_hub_rising_glow_bg.dart';
 
 typedef VoidSnack = void Function(String);
 
@@ -33,7 +34,7 @@ Future<void> showCategoryPopup({
 
   Widget content(BuildContext context, {required VoidCallback onBeginOpen}) =>
       Material(
-        color: cs.surface,
+        color: Colors.black,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: const BorderSide(color: gold, width: 1.6),
@@ -70,47 +71,64 @@ Future<void> showCategoryPopup({
                     closedBuilder: (c, open) => SizedBox(
                       width: 129,
                       height: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            const NeuralGlowBackground(
-                              density: 12,
-                              nodeCount: 14,
-                              speed: 0.18,
-                              focus: Alignment.center,
-                              spread: 0.22,
-                              lineColor: Color(0xFFE6C27A),
-                              bgColor: Color(0xFF0D0F12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.black,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xAAF1C86B),
+                              blurRadius: 34,
+                              spreadRadius: 6,
                             ),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  onBeginOpen();
-                                  open();
-                                },
-                                borderRadius: BorderRadius.circular(18),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: Text(
-                                      'All words',
-                                      style: Theme.of(c)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              const NeuralGlowBackground(
+                                density: 12,
+                                nodeCount: 14,
+                                speed: 0.20,
+                                focus: Alignment.center,
+                                spread: 0.24,
+                                lineColor: Color(0xFFE6C27A),
+                                bgColor: Color(0xFF0D0F12),
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  onTap: () {
+                                    onBeginOpen();
+                                    open();
+                                  },
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'All words',
+                                        style: Theme.of(c)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -133,34 +151,55 @@ Future<void> showCategoryPopup({
                     closedBuilder: (c, open) => SizedBox(
                       width: 129,
                       height: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: MyWordsBackground(
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                onBeginOpen();
-                                open();
-                              },
-                              borderRadius: BorderRadius.circular(18),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Align(
-                                  alignment: Alignment.bottomLeft,
-                                  child: Text(
-                                    'My words',
-                                    style: Theme.of(c)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.black,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xAAF1C86B),
+                              blurRadius: 34,
+                              spreadRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              const MyWordsBackground(),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  onTap: () {
+                                    onBeginOpen();
+                                    open();
+                                  },
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'My words',
+                                        style: Theme.of(c)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -190,39 +229,56 @@ Future<void> showCategoryPopup({
                     closedBuilder: (c, open) => SizedBox(
                       width: 129,
                       height: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            const FavoritesHeartBackground(),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  onBeginOpen();
-                                  open();
-                                },
-                                borderRadius: BorderRadius.circular(18),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: Text(
-                                      'Favorites',
-                                      style: Theme.of(c)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.black,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xAAF1C86B),
+                              blurRadius: 34,
+                              spreadRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              const FavoritesHeartBackground(),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  onTap: () {
+                                    onBeginOpen();
+                                    open();
+                                  },
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'Favorites',
+                                        style: Theme.of(c)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -244,39 +300,56 @@ Future<void> showCategoryPopup({
                     closedBuilder: (c, open) => SizedBox(
                       width: 129,
                       height: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            const WordsIKnowPuzzleBackground(),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  onBeginOpen();
-                                  open();
-                                },
-                                borderRadius: BorderRadius.circular(18),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: Text(
-                                      'Words I know',
-                                      style: Theme.of(c)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.black,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xAAF1C86B),
+                              blurRadius: 34,
+                              spreadRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              const WordsIKnowPuzzleBackground(),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  onTap: () {
+                                    onBeginOpen();
+                                    open();
+                                  },
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Text(
+                                        'Words I know',
+                                        style: Theme.of(c)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -299,33 +372,66 @@ Future<void> showCategoryPopup({
                   closedColor: cs.surfaceContainerHighest,
                   openColor: Theme.of(context).scaffoldBackgroundColor,
                   closedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(18),
                   ),
                   tappable: false,
                   closedBuilder: (c, open) => SizedBox(
                     width: 280,
                     height: 100,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: () {
-                        onBeginOpen();
-                        open();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(18),
-                          boxShadow: const [
-                            BoxShadow(blurRadius: 12, color: Colors.black26),
-                          ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'Word hub',
-                          style: TextStyle(
-                            color: cs.onSurface.withValues(alpha: 0.9),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        color: Colors.black,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xAAF1C86B),
+                            blurRadius: 34,
+                            spreadRadius: 8,
                           ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            const WordHubRisingGlowBackground(),
+                            Material(
+                              type: MaterialType.transparency,
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                onTap: () {
+                                  onBeginOpen();
+                                  open();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Align(
+                                    alignment: Alignment.bottomLeft,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Word hub',
+                                          style: Theme.of(c)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

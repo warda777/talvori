@@ -5,15 +5,11 @@ import 'dart:math' as math;
 /// Controller für die Rotation des Chrome-Icons
 /// Asynchron zur GlowOrb-Animation (eigene Sequenz)
 class RotatingChromeIconController {
-  late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _fadeAnimation;
+  late AnimationController ctrl;
+  late Animation<double> rotationAnimation;
+  late Animation<double> fadeAnimation;
   static final math.Random _random = math.Random();
-  
-  AnimationController get controller => _controller;
-  Animation<double> get rotationAnimation => _rotationAnimation;
-  Animation<double> get fadeAnimation => _fadeAnimation;
-  
+
   void init({
     required TickerProvider vsync,
     Duration fadeInDuration = const Duration(milliseconds: 800),
@@ -23,29 +19,27 @@ class RotatingChromeIconController {
     bool loop = true,
   }) {
     final totalDuration = fadeInDuration + rotationDuration + fadeOutDuration + pauseDuration;
-    
-    _controller = AnimationController(
+
+    ctrl = AnimationController(
       duration: totalDuration,
       vsync: vsync,
     );
-    
-    // Rotation: nur während der rotationDuration (eine vollständige Umdrehung)
+
     final rotationStart = fadeInDuration.inMilliseconds / totalDuration.inMilliseconds;
-    final rotationEnd = (fadeInDuration.inMilliseconds + rotationDuration.inMilliseconds) / totalDuration.inMilliseconds;
-    
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    final rotationEnd = (fadeInDuration.inMilliseconds + rotationDuration.inMilliseconds) /
+        totalDuration.inMilliseconds;
+
+    rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: ctrl,
         curve: Interval(rotationStart, rotationEnd, curve: Curves.linear),
       ),
     );
-    
-    // Fade-Animation: Fade-In, dann voll, dann Fade-Out, dann Pause
-    _fadeAnimation = TweenSequence<double>([
+
+    fadeAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 1.0).chain(
-          CurveTween(curve: Curves.easeIn),
-        ),
+        tween: Tween<double>(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
         weight: fadeInDuration.inMilliseconds / totalDuration.inMilliseconds,
       ),
       TweenSequenceItem(
@@ -53,33 +47,29 @@ class RotatingChromeIconController {
         weight: rotationDuration.inMilliseconds / totalDuration.inMilliseconds,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.0).chain(
-          CurveTween(curve: Curves.easeOut),
-        ),
+        tween: Tween<double>(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
         weight: fadeOutDuration.inMilliseconds / totalDuration.inMilliseconds,
       ),
       TweenSequenceItem(
         tween: ConstantTween<double>(0.0),
         weight: pauseDuration.inMilliseconds / totalDuration.inMilliseconds,
       ),
-    ]).animate(_controller);
-    
-    // Asynchroner Start: Zufällige Verzögerung zwischen 0 und 5 Sekunden
-    // damit es nicht synchron mit dem goldenen Glow des Play Buttons ist
+    ]).animate(ctrl);
+
     if (loop) {
       final randomDelay = Duration(milliseconds: _random.nextInt(5000));
       Future.delayed(randomDelay, () {
         try {
-          _controller.repeat();
-        } catch (e) {
-          // Controller wurde bereits disposed, ignoriere
-        }
+          ctrl.repeat();
+        } catch (_) {}
       });
     }
   }
-  
+
   void dispose() {
-    _controller.dispose();
+    if (ctrl.isAnimating) ctrl.stop();
+    ctrl.dispose();
   }
 }
 
@@ -120,21 +110,10 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
     super.initState();
     
     // Verwende externen Controller oder erstelle internen
-    if (widget.controller != null) {
-      _controller = widget.controller;
-      _ownsController = false; // <— NEU
-      // Initialisiere externen Controller, falls noch nicht geschehen
-      if (!widget.controller!.controller.isAnimating) {
-        widget.controller!.init(
-          vsync: this,
-          rotationDuration: widget.duration,
-          loop: widget.loop,
-        );
-      }
-    } else {
-      _internalController = RotatingChromeIconController();
-      _controller = _internalController;
-      _ownsController = true; // <— NEU
+    _controller = widget.controller ?? RotatingChromeIconController();
+    _ownsController = widget.controller == null;
+
+    if (_ownsController) {
       _controller!.init(
         vsync: this,
         rotationDuration: widget.duration,
@@ -146,7 +125,7 @@ class _RotatingChromeIconState extends State<RotatingChromeIcon>
   @override
   void dispose() {
     if (_ownsController) {
-      _controller!.dispose(); // nur eigenen Controller entsorgen
+      _controller?.dispose();
     }
     super.dispose();
   }
