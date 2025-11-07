@@ -73,9 +73,9 @@ class _RisingGlowPainter extends CustomPainter {
     final blueGlow = Paint()
       ..shader = RadialGradient(
         center: center,
-        radius: 1.15,
+        radius: 1.25,
         colors: [
-          blue.withOpacity(0.16),
+          blue.withOpacity(0.20),
           Colors.transparent,
         ],
         stops: const [0.0, 1.0],
@@ -86,26 +86,27 @@ class _RisingGlowPainter extends CustomPainter {
     final goldGlow = Paint()
       ..shader = RadialGradient(
         center: center,
-        radius: 0.95,
+        radius: 1.10,
         colors: [
-          gold.withOpacity(0.38),
-          gold.withOpacity(0.10),
+          gold.withOpacity(0.48),
+          gold.withOpacity(0.16),
           Colors.transparent,
         ],
-        stops: const [0.0, 0.35, 1.0],
+        stops: const [0.0, 0.42, 1.0],
       ).createShader(rect);
     canvas.drawRect(rect, goldGlow);
 
-    // Goldener Kern nahe Unterkante (kleiner, intensiver)
+    // Goldener Kern nahe Unterkante (größer, intensiver)
     final core = Paint()
       ..shader = RadialGradient(
         center: center,
-        radius: 0.42,
+        radius: 0.62,
         colors: [
-          gold.withOpacity(0.55),
+          gold.withOpacity(0.68),
+          gold.withOpacity(0.22),
           Colors.transparent,
         ],
-        stops: const [0.0, 1.0],
+        stops: const [0.0, 0.55, 1.0],
       ).createShader(rect);
     canvas.drawRect(rect, core);
 

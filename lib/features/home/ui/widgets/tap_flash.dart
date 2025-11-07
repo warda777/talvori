@@ -14,6 +14,8 @@ class TapFlash extends StatefulWidget {
   final double spread;           // Ausbreitung (Pixel)
   final BoxShape shape;          // circle / rectangle
   final BorderRadius? borderRadius; // für rectangle
+  final VoidCallback? onTapBefore;
+  final bool holdForward;        // true = onTapAfter direkt nach Forward, Reverse erst danach
 
   const TapFlash({
     super.key,
@@ -26,6 +28,8 @@ class TapFlash extends StatefulWidget {
     this.spread = 6,
     this.shape = BoxShape.rectangle,
     this.borderRadius,
+    this.onTapBefore,
+    this.holdForward = false,
   });
 
   @override
@@ -53,10 +57,21 @@ class _TapFlashState extends State<TapFlash> with SingleTickerProviderStateMixin
     if (_running) return;
     _running = true;
     try {
+      final before = widget.onTapBefore;
+      if (before != null) {
+        before();
+      }
       await _c.forward();
-      if (mounted) await _c.reverse();
+
       final cb = widget.onTapAfter;
-      if (cb != null) await cb();
+
+      if (widget.holdForward) {
+        if (cb != null) await cb();
+        if (mounted) await _c.reverse();
+      } else {
+        if (mounted) await _c.reverse();
+        if (cb != null) await cb();
+      }
     } finally {
       _running = false;
     }

@@ -60,48 +60,69 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
     final loading = asyncStats.isLoading && stats == null; // 👈 nur dann "echt" laden
 
     return Material(
-      color: t.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.none,
       child: InkWell(
-        onTap: () { 
-          HapticFeedback.selectionClick(); 
-          if (widget.onTap != null) widget.onTap!(); 
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          if (widget.onTap != null) widget.onTap!();
         },
-        overlayColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
+        overlayColor: WidgetStatePropertyAll(
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+        ),
         splashFactory: InkRipple.splashFactory,
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            border: Border.all(color: t.colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              if (loading) const Expanded(child: ShimmerBox(height: 16, borderRadius: 999)),
-              if (loading) const SizedBox(width: 8),
-              if (!loading && stats != null) ...[
-                MiniBadge(icon: Icons.refresh, label: '${stats.dueToday}'),
-                const SizedBox(width: 6),
-                MiniBadge(icon: Icons.fiber_new, label: '${stats.newTotal}'),
-              ],
-            ]),
-              const Spacer(),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (loading)
-                    const Expanded(child: ShimmerBox(height: 18, borderRadius: 6))
-                  else
-                    Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
-                  if (!loading && stats != null) Text('${stats.total}', style: t.textTheme.bodyMedium),
-                  if (loading) const SizedBox(width: 12),
-                  if (loading) const ShimmerBox(height: 14, borderRadius: 6),
-                ],
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFAFCCFE).withOpacity(0.55),
+                blurRadius: 28,
+                spreadRadius: 3,
+              ),
+              BoxShadow(
+                color: const Color(0xFFAFCCFE).withOpacity(0.35),
+                blurRadius: 46,
+                spreadRadius: 10,
               ),
             ],
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: t.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFAFCCFE).withOpacity(0.85), width: 2),
+            ),
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  if (loading) const Expanded(child: ShimmerBox(height: 16, borderRadius: 999)),
+                  if (loading) const SizedBox(width: 8),
+                  if (!loading && stats != null) ...[
+                    MiniBadge(icon: Icons.refresh, label: '${stats.dueToday}'),
+                    const SizedBox(width: 6),
+                    MiniBadge(icon: Icons.fiber_new, label: '${stats.newTotal}'),
+                  ],
+                ]),
+                const Spacer(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (loading)
+                      const Expanded(child: ShimmerBox(height: 18, borderRadius: 6))
+                    else
+                      Expanded(child: Text(widget.sub.label, style: t.textTheme.titleMedium)),
+                    if (!loading && stats != null) Text('${stats.total}', style: t.textTheme.bodyMedium),
+                    if (loading) const SizedBox(width: 12),
+                    if (loading) const ShimmerBox(height: 14, borderRadius: 6),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -10,12 +10,12 @@ class NeuralGlowBackground extends StatefulWidget {
     super.key,
     this.seed = 11,
     this.speed = 0.22,
-    this.density = 10,
-    this.nodeCount = 12,
+    this.density = 14,
+    this.nodeCount = 20,
     this.bgColor = const Color(0xFF000000),
     this.lineColor = const Color(0xFFE6C27A),
     this.focus = Alignment.center, // Cluster-Position
-    this.spread = 0.28,            // 0..1 – kleinere Werte = enger um den Fokus
+    this.spread = 0.34,            // 0..1 – kleinere Werte = enger um den Fokus
   });
 
   final int seed;
@@ -50,20 +50,29 @@ class _NeuralGlowBackgroundState extends State<NeuralGlowBackground>
         animation: _ctrl,
         builder: (_, __) {
           final t = DateTime.now().millisecondsSinceEpoch / 1000.0;
-          return CustomPaint(
-            painter: _NeuralGlowPainter(
-              t: t,
-              seed: widget.seed,
-              speed: widget.speed,
-              density: widget.density,
-              nodeCount: widget.nodeCount,
-              bgColor: widget.bgColor,
-              lineColor: widget.lineColor,
-              focus: widget.focus,
-              spread: widget.spread,
+          return ColoredBox(
+            color: widget.bgColor,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CustomPaint(
+                  painter: _NeuralGlowPainter(
+                    t: t,
+                    seed: widget.seed,
+                    speed: widget.speed,
+                    density: widget.density,
+                    nodeCount: widget.nodeCount,
+                    bgColor: widget.bgColor,
+                    lineColor: widget.lineColor,
+                    focus: widget.focus,
+                    spread: widget.spread,
+                  ),
+                  isComplex: true,
+                  willChange: true,
+                ),
+                Container(color: Colors.black.withOpacity(0.35)),
+              ],
             ),
-            isComplex: true,
-            willChange: true,
           );
         },
       ),
@@ -101,33 +110,23 @@ class _NeuralGlowPainter extends CustomPainter {
 
     final rnd = Random(seed);
 
-    // Sehr sanfte Vignette
-    final vignette = Paint()
-      ..shader = ui.Gradient.radial(
-        size.center(Offset.zero),
-        size.longestSide * 0.85,
-        [Colors.transparent, Colors.black.withOpacity(0.28)],
-        [0.65, 1.0],
-      );
-    canvas.drawRect(Offset.zero & size, vignette);
-
     // Mal-Objekte (extrem fein, zurückhaltend)
     final hairline = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.65
-      ..color = lineColor.withOpacity(0.12)
+      ..strokeWidth = 1.05
+      ..color = lineColor.withOpacity(0.18)
       ..isAntiAlias = true;
 
     final subtleGlow = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.9
-      ..color = lineColor.withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.2)
+      ..strokeWidth = 1.6
+      ..color = lineColor.withOpacity(0.26)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.4)
       ..isAntiAlias = true;
 
     final nodeCore = Paint()
       ..style = PaintingStyle.fill
-      ..color = lineColor.withOpacity(0.35);
+      ..color = lineColor.withOpacity(0.45);
 
     // Fokuspunkt in der Mitte (oder wo "focus" zeigt)
     final fx = (focus.x + 1) * 0.5;
@@ -160,30 +159,29 @@ class _NeuralGlowPainter extends CustomPainter {
       return safeRect.contains(p) ? p : Offset.lerp(p, center, 0.6)!;
     });
 
-    // Sehr dezente Node-Halos
+    // Node-Kerne ohne zusätzlichen Glow
     for (var i = 0; i < nodes.length; i++) {
       final p = nodes[i];
-      final pulse = 0.35 + 0.25 * sin(t * 0.6 + i * 0.9);
-      final r = 1.0 + pulse * 1.0; // sehr klein
+      final pulse = 0.45 + 0.3 * sin(t * 0.6 + i * 0.9);
+      final r = 1.5 + pulse * 1.4; // größerer Radius
       final halo = ui.Gradient.radial(
         p,
-        r * 8,
-        [lineColor.withOpacity(0.10), Colors.transparent],
+        r * 10,
+        [lineColor.withOpacity(0.16), Colors.transparent],
         [0.0, 1.0],
       );
       canvas.drawCircle(
         p,
-        r * 8,
+        r * 10,
         Paint()..shader = halo..blendMode = BlendMode.plus,
       );
-      // Kernpunkt minimal
-      canvas.drawCircle(p, 0.8, nodeCore);
+      canvas.drawCircle(p, 1.6, nodeCore);
     }
 
     // ARC-Parameter (fein & dezent) - center wurde bereits oben berechnet
     for (var i = 0; i < density; i++) {
-      final baseR = size.shortestSide * (0.22 + rnd.nextDouble() * 0.16);
-      final rJit = baseR * (0.06 + rnd.nextDouble() * 0.10);
+      final baseR = size.shortestSide * (0.28 + rnd.nextDouble() * 0.16);
+      final rJit = baseR * (0.08 + rnd.nextDouble() * 0.14);
       final r = baseR + (rnd.nextBool() ? rJit : -rJit);
 
       final a0 = rnd.nextDouble() * 2 * pi;
@@ -212,7 +210,6 @@ class _NeuralGlowPainter extends CustomPainter {
 
       // zeichnen (dezent)
       canvas.drawPath(path, hairline);
-      canvas.drawPath(path, subtleGlow);
 
       // winziger Laufpunkt entlang des Bogens
       final metrics = path.computeMetrics();
@@ -222,18 +219,18 @@ class _NeuralGlowPainter extends CustomPainter {
 
         final comet = ui.Gradient.radial(
           pos,
-          9,
-          [lineColor.withOpacity(0.16), Colors.transparent],
+          12,
+          [lineColor.withOpacity(0.24), Colors.transparent],
           [0.0, 1.0],
         );
         canvas.drawCircle(
           pos,
-          1.0,
-          Paint()..color = lineColor.withOpacity(0.25),
+          1.6,
+          Paint()..color = lineColor.withOpacity(0.32),
         );
         canvas.drawCircle(
           pos,
-          9,
+          12,
           Paint()..shader = comet..blendMode = BlendMode.plus,
         );
       }

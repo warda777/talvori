@@ -66,8 +66,22 @@ class WordHubScreen extends ConsumerWidget {
                 },
                 decoration: InputDecoration(
                   hintText: 'Suchen',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  prefixIcon: const Icon(Icons.search, color: Color(0xFFF1C86B)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: BorderSide(color: const Color(0xFFF1C86B).withOpacity(0.85), width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: const BorderSide(color: Color(0xFFF1C86B), width: 1.6),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: const BorderSide(color: Color(0xFFF1C86B), width: 2.2),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.28),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 ),
               ),
             ),
