@@ -1,22 +1,46 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:async';
 import 'dart:math' as math;
 
-/// Animiertes Fireball-Icon mit periodischer Färbung und Flammen-Animation
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class AnimatedFireballIconController {
+  _AnimatedFireballIconState? _state;
+
+  bool get isAnimating => _state?._isPlaying ?? false;
+
+  void play() => _state?._playFromController();
+
+  void _attach(_AnimatedFireballIconState state) {
+    _state = state;
+  }
+
+  void _detach(_AnimatedFireballIconState state) {
+    if (_state == state) {
+      _state = null;
+    }
+  }
+}
+
+/// Animiertes Fireball-Icon mit optionalem Auto-Play
 class AnimatedFireballIcon extends StatefulWidget {
   final double size;
   final Color baseColor; // Ursprungsfarbe (z.B. gold)
   final Color animationColor; // Farbe während der Animation (#A05260)
-  final Duration animationInterval; // Intervall zwischen Animationen (z.B. 2 Sekunden)
+  final Duration animationInterval; // Intervall zwischen Auto-Animationen
   final Duration animationDuration; // Dauer der Animation
+  final bool autoPlay;
+  final AnimatedFireballIconController? controller;
 
   const AnimatedFireballIcon({
     super.key,
     required this.size,
     required this.baseColor,
-    this.animationColor = const Color(0xFFA05260), // #A05260
+    this.animationColor = const Color(0xFFA05260),
     this.animationInterval = const Duration(seconds: 2),
     this.animationDuration = const Duration(milliseconds: 800),
+    this.autoPlay = true,
+    this.controller,
   });
 
   @override
@@ -25,132 +49,159 @@ class AnimatedFireballIcon extends StatefulWidget {
 
 class _AnimatedFireballIconState extends State<AnimatedFireballIcon>
     with TickerProviderStateMixin {
-  late AnimationController _colorController;
-  late AnimationController _flameController;
-  late AnimationController _wobbleController; // Controller für Wackeln
-  late AnimationController _repaintController; // Controller für kontinuierliches Repaint
-  late Animation<Color?> _colorAnimation;
-  late Animation<double> _flameAnimation;
-  late Animation<double> _wobbleAnimation; // Animation für Hin-und-Her-Wackeln
+  late final AnimationController _colorController;
+  late final AnimationController _flameController;
+  late final AnimationController _wobbleController;
+  late final AnimationController _repaintController;
+  late final Animation<Color?> _colorAnimation;
+  late final Animation<double> _flameAnimation;
+  late final Animation<double> _wobbleAnimation;
+
+  AnimatedFireballIconController? _externalController;
+  Timer? _autoPlayTimer;
+  bool _autoPlayEnabled = false;
+  bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Controller für Farb-Animation
     _colorController = AnimationController(
       duration: widget.animationDuration,
       vsync: this,
     );
-
-    // Controller für Flammen-Animation
     _flameController = AnimationController(
       duration: widget.animationDuration,
       vsync: this,
     );
-
-    // Controller für Wackeln (läuft kontinuierlich während der Flammen sichtbar sind)
     _wobbleController = AnimationController(
-      duration: const Duration(milliseconds: 800), // Langsameres Wackeln
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
-    // Controller für kontinuierliches Repaint (für Zeit-basierte Animation)
     _repaintController = AnimationController(
-      duration: const Duration(milliseconds: 50), // Sehr schnell für flüssige Animation
+      duration: const Duration(milliseconds: 50),
       vsync: this,
-    );
-    _repaintController.repeat(); // Läuft kontinuierlich
+    )..repeat();
 
-    // Farb-Animation: Einfärben → 5 Sekunden halten → Ausfärben
     _colorAnimation = TweenSequence<Color?>([
-      // Einfärben (0.5 Sekunden)
       TweenSequenceItem(
-        tween: ColorTween(begin: widget.baseColor, end: widget.animationColor)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 0.1, // 10% der Zeit = 0.5 Sekunden
+        tween: ColorTween(
+          begin: widget.baseColor,
+          end: widget.animationColor,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 0.1,
       ),
-      // Halten bei animationColor (4 Sekunden)
       TweenSequenceItem(
         tween: ConstantTween<Color?>(widget.animationColor),
-        weight: 0.8, // 80% der Zeit = 4 Sekunden
+        weight: 0.8,
       ),
-      // Ausfärben (0.5 Sekunden)
       TweenSequenceItem(
-        tween: ColorTween(begin: widget.animationColor, end: widget.baseColor)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 0.1, // 10% der Zeit = 0.5 Sekunden
+        tween: ColorTween(
+          begin: widget.animationColor,
+          end: widget.baseColor,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 0.1,
       ),
     ]).animate(_colorController);
 
-    // Flammen-Animation: Erscheinen → 5 Sekunden sichtbar → Verschwinden
     _flameAnimation = TweenSequence<double>([
-      // Erscheinen (0.3 Sekunden)
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 0.06, // 6% der Zeit = 0.3 Sekunden
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 0.06,
       ),
-      // Sichtbar bleiben (4.4 Sekunden)
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 0.88),
       TweenSequenceItem(
-        tween: ConstantTween<double>(1.0),
-        weight: 0.88, // 88% der Zeit = 4.4 Sekunden
-      ),
-      // Verschwinden (0.3 Sekunden)
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 0.06, // 6% der Zeit = 0.3 Sekunden
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 0.06,
       ),
     ]).animate(_flameController);
 
-    // Wackel-Animation: Hin und Her während Flammen sichtbar sind
     _wobbleAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _wobbleController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _wobbleController, curve: Curves.easeInOut),
     );
 
-    // Starte periodische Animation
-    _startPeriodicAnimation();
+    _attachController(widget.controller);
+    _autoPlayEnabled = widget.autoPlay;
+    if (_autoPlayEnabled) {
+      _scheduleNextAutoPlay(immediate: true);
+    }
   }
 
-  void _startPeriodicAnimation() {
-    Future.delayed(widget.animationInterval, () {
+  void _attachController(AnimatedFireballIconController? controller) {
+    if (controller == _externalController) return;
+    _externalController?._detach(this);
+    _externalController = controller;
+    _externalController?._attach(this);
+  }
+
+  void _scheduleNextAutoPlay({bool immediate = false}) {
+    if (!_autoPlayEnabled) return;
+    _autoPlayTimer?.cancel();
+    final delay = immediate ? Duration.zero : widget.animationInterval;
+    _autoPlayTimer = Timer(delay, () {
+      if (!mounted || !_autoPlayEnabled) return;
+      _runAnimation(scheduleNext: true);
+    });
+  }
+
+  void _runAnimation({bool scheduleNext = false}) {
+    if (!mounted || _isPlaying) return;
+    _isPlaying = true;
+
+    _colorController.forward(from: 0.0).whenComplete(() {
       if (!mounted) return;
-      
-      // Starte beide Animationen gleichzeitig - beide laufen forward und bleiben dann 5 Sekunden
-      _colorController.forward().then((_) {
-        if (mounted) {
-          _colorController.reset();
-          // Starte die nächste Animation nach dem Intervall
-          _startPeriodicAnimation();
-        }
-      });
-      
-      _flameController.forward().then((_) {
-        if (mounted) {
-          _flameController.reset();
-          _wobbleController.stop();
-        }
-      });
-      
-      // Starte Wackeln wenn Flammen erscheinen
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted && _flameController.isAnimating) {
-          _wobbleController.repeat(reverse: true);
-        }
-      });
+      _colorController.reset();
+      _isPlaying = false;
+      if (_autoPlayEnabled && scheduleNext) {
+        _scheduleNextAutoPlay();
+      }
+    });
+
+    _flameController.forward(from: 0.0).whenComplete(() {
+      if (!mounted) return;
+      _flameController.reset();
+      _wobbleController.stop();
+    });
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted && _flameController.isAnimating) {
+        _wobbleController.repeat(reverse: true);
+      }
     });
   }
 
   @override
+  void didUpdateWidget(covariant AnimatedFireballIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.controller != oldWidget.controller) {
+      _attachController(widget.controller);
+    }
+
+    if (widget.autoPlay != oldWidget.autoPlay) {
+      _autoPlayEnabled = widget.autoPlay;
+      if (_autoPlayEnabled) {
+        _scheduleNextAutoPlay(immediate: true);
+      } else {
+        _autoPlayTimer?.cancel();
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    _autoPlayTimer?.cancel();
     _colorController.dispose();
     _flameController.dispose();
     _wobbleController.dispose();
     _repaintController.dispose();
+    _externalController?._detach(this);
     super.dispose();
   }
 
@@ -159,10 +210,9 @@ class _AnimatedFireballIconState extends State<AnimatedFireballIcon>
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Fireball Icon mit Farb-Animation
         AnimatedBuilder(
           animation: _colorAnimation,
-          builder: (context, child) {
+          builder: (_, __) {
             return SvgPicture.asset(
               'assets/icons/fireball_black.svg',
               width: widget.size,
@@ -174,19 +224,19 @@ class _AnimatedFireballIconState extends State<AnimatedFireballIcon>
             );
           },
         ),
-        
-        // Flammen-Animation (mehrere Partikel um das Icon)
         AnimatedBuilder(
           animation: Listenable.merge([
-            _flameAnimation, 
+            _flameAnimation,
             _wobbleAnimation,
-            _repaintController, // Für kontinuierliches Repaint
+            _repaintController,
           ]),
-          builder: (context, child) {
-            if (_flameAnimation.value <= 0) return const SizedBox.shrink();
-            
+          builder: (_, __) {
+            if (_flameAnimation.value <= 0) {
+              return const SizedBox.shrink();
+            }
+
             return CustomPaint(
-              size: Size(widget.size * 2.5, widget.size * 2.5), // Größer, geht über Button hinaus
+              size: Size(widget.size * 2.5, widget.size * 2.5),
               painter: _FlamePainter(
                 opacity: _flameAnimation.value,
                 wobble: _wobbleAnimation.value,
@@ -198,12 +248,14 @@ class _AnimatedFireballIconState extends State<AnimatedFireballIcon>
       ],
     );
   }
+
+  // Schnittstelle für den Controller
+  void _playFromController() => _runAnimation(scheduleNext: _autoPlayEnabled);
 }
 
-/// Custom Painter für die Flammen-Animation
 class _FlamePainter extends CustomPainter {
   final double opacity;
-  final double wobble; // -1.0 bis 1.0 für Hin-und-Her-Wackeln
+  final double wobble;
   final Color color;
 
   _FlamePainter({
@@ -215,34 +267,26 @@ class _FlamePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    
-    // Zeit-basierte Variation für dynamischere Flammen
     final time = DateTime.now().millisecondsSinceEpoch / 100.0;
 
-    // Zeichne mehrere Flammen-Partikel um das Icon mit verschiedenen Bewegungen
     for (int i = 0; i < 12; i++) {
       final baseAngle = (i * 2 * math.pi) / 12;
-      
-      // Wackeln: Jede Flamme bewegt sich leicht hin und her
-      final wobbleOffset = wobble * 8.0 * math.sin(baseAngle * 2); // Mehr Wackeln
+      final wobbleOffset = wobble * 8.0 * math.sin(baseAngle * 2);
       final angle = baseAngle + wobbleOffset * 0.1;
-      
-      // Dynamische Distanz (Flammen bewegen sich raus und rein) - langsamer
+
       final baseDistance = size.width * 0.35;
-      final dynamicDistance = baseDistance + 
-          math.sin(time * 0.5 + i * 0.5) * size.width * 0.1; // Langsamer: time * 0.5
-      
+      final dynamicDistance =
+          baseDistance + math.sin(time * 0.5 + i * 0.5) * size.width * 0.1;
+
       final x = center.dx + math.cos(angle) * dynamicDistance;
       final y = center.dy + math.sin(angle) * dynamicDistance;
-      
-      // Dynamische Größe (Flammen pulsieren) - langsamer
+
       final baseWidth = size.width * 0.12;
       final baseHeight = size.width * 0.2;
-      final pulse = 1.0 + math.sin(time + i) * 0.3; // Langsamer: time statt time * 2
+      final pulse = 1.0 + math.sin(time + i) * 0.3;
       final flameWidth = baseWidth * opacity * pulse;
       final flameHeight = baseHeight * opacity * pulse;
-      
-      // Gradient für Flammen-Effekt
+
       final gradient = RadialGradient(
         colors: [
           color.withOpacity(opacity * 0.9),
@@ -252,7 +296,7 @@ class _FlamePainter extends CustomPainter {
         ],
         stops: const [0.0, 0.3, 0.7, 1.0],
       );
-      
+
       final paint = Paint()
         ..shader = gradient.createShader(
           Rect.fromCenter(
@@ -262,8 +306,7 @@ class _FlamePainter extends CustomPainter {
           ),
         )
         ..style = PaintingStyle.fill;
-      
-      // Flammenform (ovales Partikel)
+
       final flamePath = Path()
         ..addOval(
           Rect.fromCenter(
@@ -272,18 +315,17 @@ class _FlamePainter extends CustomPainter {
             height: flameHeight,
           ),
         );
-      
+
       canvas.drawPath(flamePath, paint);
-      
-      // Zusätzliche kleine Partikel für mehr Dynamik
+
       if (i % 2 == 0) {
         final smallX = x + math.cos(angle + math.pi / 4) * flameWidth * 0.3;
         final smallY = y + math.sin(angle + math.pi / 4) * flameHeight * 0.3;
-        
+
         final smallPaint = Paint()
           ..color = color.withOpacity(opacity * 0.5)
           ..style = PaintingStyle.fill;
-        
+
         canvas.drawCircle(
           Offset(smallX, smallY),
           flameWidth * 0.15,
@@ -295,8 +337,6 @@ class _FlamePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_FlamePainter oldDelegate) {
-    // Immer repaint, damit die Zeit-basierte Animation funktioniert
     return true;
   }
 }
-

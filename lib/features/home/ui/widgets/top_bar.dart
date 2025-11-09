@@ -18,18 +18,24 @@ import 'package:talvori/features/words/ui/screens/vocab_sort_screen.dart';
 
 class HomeTopBar extends ConsumerStatefulWidget {
   final VoidCallback onAllWords;
-  final VoidCallback onRewards;         // bleibt für Kompatibilität, wird für Tap genutzt
+  final VoidCallback
+  onRewards; // bleibt für Kompatibilität, wird für Tap genutzt
   final VoidCallback? onProgressTap;
   final int selected;
   final int max;
   final bool showProgress;
-  final GlobalKey? progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
-  final GlobalKey? counterKey; // <-- NEU: GlobalKey für Counter in Progress Pill
+  final GlobalKey?
+  progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
+  final GlobalKey?
+  counterKey; // <-- NEU: GlobalKey für Counter in Progress Pill
   final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
-  final GlobalKey<FireballBounceAnimationState>? fireballKey; // GlobalKey für Fireball Bounce Animation
+  final GlobalKey<FireballBounceAnimationState>?
+  fireballKey; // GlobalKey für Fireball Bounce Animation
   final GlobalKey buttonKey; // GlobalKey für den rechten Button
-  final VoidCallback? onProgressAnimationStart; // Callback wenn Animation startet
-  final VoidCallback? onProgressAnimationComplete; // Callback wenn Animation fertig ist
+  final VoidCallback?
+  onProgressAnimationStart; // Callback wenn Animation startet
+  final VoidCallback?
+  onProgressAnimationComplete; // Callback wenn Animation fertig ist
 
   const HomeTopBar({
     super.key,
@@ -54,9 +60,10 @@ class HomeTopBar extends ConsumerStatefulWidget {
 
 class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   // Größen / Layout
-  static const double _dim = 52.0;     // Durchmesser deiner Topbar-Buttons
-  static const double _quickBtnSize = 52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
-  static const double _gap = 16.0;     // Abstand zwischen Krone und Quick-Buttons
+  static const double _dim = 52.0; // Durchmesser deiner Topbar-Buttons
+  static const double _quickBtnSize =
+      52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
+  static const double _gap = 16.0; // Abstand zwischen Krone und Quick-Buttons
   static const Color gold = Color(0xFFF1C86B); // Gold für Progress Pill
 
   final GlobalKey _crownKey = GlobalKey();
@@ -64,6 +71,8 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   OverlayEntry? _rewardsOverlay;
   bool _quickOpen = false;
   bool _glitchEffectActive = false; // Verfolgt ob Glitch-Effekt aktiv ist
+  final AnimatedFireballIconController _fireballIconController =
+      AnimatedFireballIconController();
 
   void _showRewardsQuick(BuildContext context) {
     debugPrint('🔥 _showRewardsQuick aufgerufen!');
@@ -71,6 +80,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
       debugPrint('🔥 _quickOpen ist bereits true, überspringe');
       return;
     }
+    _fireballIconController.play();
     final overlay = Overlay.of(context);
 
     // Verwende entweder widget.crownButtonKey oder _crownKey
@@ -92,24 +102,26 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
     _rewardsOverlay = OverlayEntry(
       builder: (ctx) {
         // Basis-Positionen
-        double redLeft  = crownTopLeft.dx - _gap - _quickBtnSize;                 // Leaderboard (rot) links
-        double blueLeft = crownTopLeft.dx + crownSize.width + _gap;               // Stats (blau) rechts
+        double redLeft =
+            crownTopLeft.dx - _gap - _quickBtnSize; // Leaderboard (rot) links
+        double blueLeft =
+            crownTopLeft.dx + crownSize.width + _gap; // Stats (blau) rechts
         final top = crownTopLeft.dy + (crownSize.height - _quickBtnSize) / 2;
 
         // Sichtbarkeits-Checks
         final roomRightForBlue = blueLeft + _quickBtnSize <= screenW - 8;
-        final roomLeftForRed   = redLeft >= 8;
+        final roomLeftForRed = redLeft >= 8;
 
         if (!roomRightForBlue && roomLeftForRed) {
           // Kein Platz rechts -> beide auf die linke Seite
           blueLeft = crownTopLeft.dx - (_gap * 2) - (_quickBtnSize * 2);
         } else if (!roomLeftForRed && roomRightForBlue) {
           // Kein Platz links -> beide auf die rechte Seite
-          redLeft  = crownTopLeft.dx + crownSize.width + _gap;
+          redLeft = crownTopLeft.dx + crownSize.width + _gap;
           blueLeft = redLeft + _gap + _quickBtnSize;
         } else if (!roomLeftForRed && !roomRightForBlue) {
           // Extrem eng (sehr kleiner Screen) -> packe Buttons rechts an den Rand
-          redLeft  = screenW - _quickBtnSize - 8 - _gap - _quickBtnSize;
+          redLeft = screenW - _quickBtnSize - 8 - _gap - _quickBtnSize;
           blueLeft = screenW - _quickBtnSize - 8;
         }
 
@@ -176,7 +188,6 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
     setState(() {}); // ProgressPill ausblenden
   }
 
-
   void _hideRewardsQuick() {
     _rewardsOverlay?.remove();
     _rewardsOverlay = null;
@@ -188,7 +199,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   Widget _buildProgressPillWithGlitch() {
     // Wenn Glitch-Effekt aktiv, verwende keinen Key (wird mehrfach gerendert)
     final useKey = !_glitchEffectActive;
-    
+
     final progressPill = (widget.onProgressTap == null)
         ? ProgressPill(
             key: useKey ? widget.progressPillKey : null,
@@ -198,23 +209,33 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
             barWidth: 120,
             onAnimationStart: widget.onProgressAnimationStart,
             onAnimationComplete: () {
-              debugPrint('📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})');
+              debugPrint(
+                '📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})',
+              );
               widget.onProgressAnimationComplete?.call();
               // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
               if (widget.selected >= widget.max) {
-                debugPrint('🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback');
+                debugPrint(
+                  '🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback',
+                );
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    debugPrint('🚀 PROGRESS-PILL: Setze _glitchEffectActive = true');
+                    debugPrint(
+                      '🚀 PROGRESS-PILL: Setze _glitchEffectActive = true',
+                    );
                     setState(() {
                       _glitchEffectActive = true;
                     });
                   } else {
-                    debugPrint('⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten');
+                    debugPrint(
+                      '⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten',
+                    );
                   }
                 });
               } else {
-                debugPrint('ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt');
+                debugPrint(
+                  'ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt',
+                );
               }
             },
           )
@@ -235,23 +256,33 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
               barWidth: 120,
               onAnimationStart: widget.onProgressAnimationStart,
               onAnimationComplete: () {
-                debugPrint('📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})');
+                debugPrint(
+                  '📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})',
+                );
                 widget.onProgressAnimationComplete?.call();
                 // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
                 if (widget.selected >= widget.max) {
-                  debugPrint('🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback');
+                  debugPrint(
+                    '🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback',
+                  );
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted) {
-                      debugPrint('🚀 PROGRESS-PILL: Setze _glitchEffectActive = true');
+                      debugPrint(
+                        '🚀 PROGRESS-PILL: Setze _glitchEffectActive = true',
+                      );
                       setState(() {
                         _glitchEffectActive = true;
                       });
                     } else {
-                      debugPrint('⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten');
+                      debugPrint(
+                        '⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten',
+                      );
                     }
                   });
                 } else {
-                  debugPrint('ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt');
+                  debugPrint(
+                    'ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt',
+                  );
                 }
               },
             ),
@@ -259,11 +290,15 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
 
     // Wenn Glitch-Effekt aktiv, wrappe die Pill mit dem Effekt
     if (_glitchEffectActive) {
-      debugPrint('🔥 GLITCH-EFFEKT: Starte Glitch-Effekt für Pill (selected: ${widget.selected}, max: ${widget.max})');
+      debugPrint(
+        '🔥 GLITCH-EFFEKT: Starte Glitch-Effekt für Pill (selected: ${widget.selected}, max: ${widget.max})',
+      );
       return GlitchDisappearEffect(
         duration: const Duration(milliseconds: 800),
         onComplete: () {
-          debugPrint('🏁 GLITCH-EFFEKT: Glitch-Effekt abgeschlossen, Pill wird ausgeblendet');
+          debugPrint(
+            '🏁 GLITCH-EFFEKT: Glitch-Effekt abgeschlossen, Pill wird ausgeblendet',
+          );
           setState(() {
             _glitchEffectActive = false;
           });
@@ -307,7 +342,9 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
+    final glowEnabled = ref.watch(
+      homeControllerProvider.select((s) => s.glowEnabled),
+    );
     const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
     const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
     const gold = Color(0xFFF1C86B); // Gold für Krone
@@ -362,8 +399,14 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
           Align(
             alignment: Alignment.topRight,
             child: _RightButtonWithDragAndLongPress(
-              onLongPress: () => _showRewardsQuick(context),
-              onDragDown: () => widget.fireballKey?.currentState?.triggerFromAnchor(),
+              onLongPress: () {
+                _fireballIconController.play();
+                _showRewardsQuick(context);
+              },
+              onDragDown: () {
+                _fireballIconController.play();
+                widget.fireballKey?.currentState?.triggerFromAnchor();
+              },
               child: SizedBox.square(
                 dimension: _dim,
                 child: _TapFlashWithoutGesture(
@@ -378,11 +421,13 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                     // Trigger Flash-Effekt
                     final flashState = _tapFlashKey.currentState;
                     flashState?.triggerFlash();
+                    _fireballIconController.play();
                     // Kurzer Tap: wie bisher (Standard-Rewards öffnen)
                     HapticFeedback.selectionClick();
                     Navigator.of(context).push(
                       PageRouteBuilder(
-                        pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
+                        pageBuilder: (_, __, ___) =>
+                            const RewardsCenterScreen(),
                         transitionsBuilder: (_, a, __, child) =>
                             FadeTransition(opacity: a, child: child),
                       ),
@@ -393,15 +438,20 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                     decoration: BoxDecoration(
                       color: buttonColor,
                       shape: BoxShape.circle,
-                      border: Border.all(color: gold, width: 2), // Goldener Rand
-                      boxShadow: glowEnabled ? [
-                        // Durchgehender goldener Glow
-                        BoxShadow(
-                          color: gold.withValues(alpha: 0.55),
-                          blurRadius: 20,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
+                      border: Border.all(
+                        color: gold,
+                        width: 2,
+                      ), // Goldener Rand
+                      boxShadow: glowEnabled
+                          ? [
+                              // Durchgehender goldener Glow
+                              BoxShadow(
+                                color: gold.withValues(alpha: 0.55),
+                                blurRadius: 20,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
                     ),
                     alignment: Alignment.center,
                     child: Builder(
@@ -415,11 +465,19 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                               return Opacity(
                                 opacity: isAnimating ? 0.0 : 1.0,
                                 child: AnimatedFireballIcon(
+                                  controller: _fireballIconController,
+                                  autoPlay: false,
                                   size: 38,
                                   baseColor: gold, // Ursprungsfarbe (gold)
-                                  animationColor: const Color(0xFFA05260), // #A05260
-                                  animationInterval: const Duration(seconds: 5), // 5 Sekunden Abstand
-                                  animationDuration: const Duration(seconds: 5), // 5 Sekunden Einfärbung und Flammen
+                                  animationColor: const Color(
+                                    0xFFA05260,
+                                  ), // #A05260
+                                  animationInterval: const Duration(
+                                    seconds: 5,
+                                  ), // 5 Sekunden Abstand
+                                  animationDuration: const Duration(
+                                    seconds: 5,
+                                  ), // 5 Sekunden Einfärbung und Flammen
                                 ),
                               );
                             },
@@ -427,11 +485,17 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                         }
                         // Fallback: Button normal anzeigen wenn fireballKey noch nicht verfügbar
                         return AnimatedFireballIcon(
+                          controller: _fireballIconController,
+                          autoPlay: false,
                           size: 38,
                           baseColor: gold, // Ursprungsfarbe (gold)
                           animationColor: const Color(0xFFA05260), // #A05260
-                          animationInterval: const Duration(seconds: 5), // 5 Sekunden Abstand
-                          animationDuration: const Duration(seconds: 5), // 5 Sekunden Einfärbung und Flammen
+                          animationInterval: const Duration(
+                            seconds: 5,
+                          ), // 5 Sekunden Abstand
+                          animationDuration: const Duration(
+                            seconds: 5,
+                          ), // 5 Sekunden Einfärbung und Flammen
                         );
                       },
                     ),
@@ -465,10 +529,12 @@ class _RightButtonWithDragAndLongPress extends StatefulWidget {
   final VoidCallback onLongPress;
 
   @override
-  State<_RightButtonWithDragAndLongPress> createState() => _RightButtonWithDragAndLongPressState();
+  State<_RightButtonWithDragAndLongPress> createState() =>
+      _RightButtonWithDragAndLongPressState();
 }
 
-class _RightButtonWithDragAndLongPressState extends State<_RightButtonWithDragAndLongPress> {
+class _RightButtonWithDragAndLongPressState
+    extends State<_RightButtonWithDragAndLongPress> {
   bool _longPressActive = false;
   Offset? _dragStart;
 
@@ -478,7 +544,7 @@ class _RightButtonWithDragAndLongPressState extends State<_RightButtonWithDragAn
       behavior: HitTestBehavior.translucent,
       onLongPressStart: (_) {
         _longPressActive = true;
-        widget.onLongPress();                   // 🔔 dein Long-Press bleibt erhalten
+        widget.onLongPress(); // 🔔 dein Long-Press bleibt erhalten
       },
       onLongPressEnd: (_) {
         // kleine Entsperr-Verzögerung, damit Drag nicht sofort feuert
@@ -488,18 +554,19 @@ class _RightButtonWithDragAndLongPressState extends State<_RightButtonWithDragAn
       },
       onVerticalDragStart: (d) => _dragStart = d.localPosition,
       onVerticalDragUpdate: (d) {
-        if (_longPressActive) return;           // ❌ Drag während Long-Press blocken
+        if (_longPressActive) return; // ❌ Drag während Long-Press blocken
         if (_dragStart == null) return;
         final dy = d.localPosition.dy - _dragStart!.dy;
-        if (dy > 20) {                          // mehr Distanz, damit Long-Press nicht gestört wird
+        if (dy > 20) {
+          // mehr Distanz, damit Long-Press nicht gestört wird
           widget.onDragDown();
-          _dragStart = null;                    // nur einmal auslösen
+          _dragStart = null; // nur einmal auslösen
         }
       },
       onVerticalDragEnd: (d) {
         if (_longPressActive) return;
         if ((d.primaryVelocity ?? 0) > 500) {
-          widget.onDragDown();                  // schneller Wisch nach unten
+          widget.onDragDown(); // schneller Wisch nach unten
         }
         _dragStart = null;
       },
@@ -532,13 +599,16 @@ class _TapFlashWithoutGesture extends StatefulWidget {
   });
 
   @override
-  State<_TapFlashWithoutGesture> createState() => _TapFlashWithoutGestureState();
+  State<_TapFlashWithoutGesture> createState() =>
+      _TapFlashWithoutGestureState();
 }
 
 class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: widget.duration);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: widget.duration,
+  );
   late final Animation<double> _animation = CurvedAnimation(
     parent: _controller,
     curve: Curves.easeOutCubic,
@@ -570,27 +640,35 @@ class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(20);
-    
+
     final glow = AnimatedBuilder(
       animation: _animation,
       builder: (_, __) {
         final opacity = _animation.value * widget.maxOpacity;
         final color = widget.color.withValues(alpha: opacity);
-        
+
         final decoration = widget.shape == BoxShape.circle
             ? BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: color, blurRadius: widget.blur, spreadRadius: widget.spread),
+                  BoxShadow(
+                    color: color,
+                    blurRadius: widget.blur,
+                    spreadRadius: widget.spread,
+                  ),
                 ],
               )
             : BoxDecoration(
                 borderRadius: borderRadius,
                 boxShadow: [
-                  BoxShadow(color: color, blurRadius: widget.blur, spreadRadius: widget.spread),
+                  BoxShadow(
+                    color: color,
+                    blurRadius: widget.blur,
+                    spreadRadius: widget.spread,
+                  ),
                 ],
               );
-        
+
         return IgnorePointer(
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 1),
@@ -600,7 +678,7 @@ class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
         );
       },
     );
-    
+
     return GestureDetector(
       onTap: widget.onTapAfter,
       child: Stack(

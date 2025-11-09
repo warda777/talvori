@@ -149,3 +149,4 @@ _Für strukturelle Details siehe: PROJECT_STRUCTURE.md_
 _Für Supabase-Architektur siehe: SUPABASE_ARCHITECTURE.md_
 
 
+
