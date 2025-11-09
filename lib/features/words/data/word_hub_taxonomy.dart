@@ -8,17 +8,19 @@ class HubSubcat {
 class HubSection {
   final String key;
   final String title;
-  final String focus;
   final List<HubSubcat> subcats;
-  const HubSection({required this.key, required this.title, required this.focus, required this.subcats});
+  const HubSection({
+    required this.key,
+    required this.title,
+    required this.subcats,
+  });
 }
 
-// Acht Bereiche + Tabs (Labels = deine neuen Kategorien)
+// Acht Bereiche + Tabs (Labels = Kategorien)
 const hubSections = <HubSection>[
   HubSection(
     key: 'life_daily_flow',
     title: 'Life & Daily Flow',
-    focus: 'Alltag & Routinen',
     subcats: [
       HubSubcat(key: 'health_fitness', label: 'Health & Fitness'),
       HubSubcat(key: 'home_living', label: 'Home & Living'),
@@ -30,7 +32,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'people_mind',
     title: 'People & Mind',
-    focus: 'Zwischenmenschliches, Emotionen',
     subcats: [
       HubSubcat(key: 'personality', label: 'Personality'),
       HubSubcat(key: 'feelings', label: 'Feelings'),
@@ -41,7 +42,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'society_systems',
     title: 'Society & Systems',
-    focus: 'Welt, Arbeit, Bildung',
     subcats: [
       HubSubcat(key: 'tech_innovation', label: 'Tech & Innovation'),
       HubSubcat(key: 'work_careers', label: 'Work & Careers'),
@@ -53,7 +53,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'nature_beyond',
     title: 'Nature & Beyond',
-    focus: 'Umwelt, Tiere, Wissenschaft',
     subcats: [
       HubSubcat(key: 'environment', label: 'Environment'),
       HubSubcat(key: 'animals', label: 'Animals'),
@@ -65,7 +64,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'action_adventure',
     title: 'Action & Adventure',
-    focus: 'Bewegung & Reisen',
     subcats: [
       HubSubcat(key: 'sports', label: 'Sports'),
       HubSubcat(key: 'travel', label: 'Travel'),
@@ -76,7 +74,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'culture_creativity',
     title: 'Culture & Creativity',
-    focus: 'Ausdruck & Kunst',
     subcats: [
       HubSubcat(key: 'music_entertainment', label: 'Music & Entertainment'),
       HubSubcat(key: 'art_literature', label: 'Art & Literature'),
@@ -85,7 +82,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'language_tools',
     title: 'Language Tools',
-    focus: 'Lernhilfen & Grammatik',
     subcats: [
       HubSubcat(key: 'top_500', label: 'Top 500 Words'),
       HubSubcat(key: 'phrases_idioms', label: 'Phrases & Idioms'),
@@ -96,7 +92,6 @@ const hubSections = <HubSection>[
   HubSection(
     key: 'levels_progress',
     title: 'Levels & Progress',
-    focus: 'Sprachstufen & Lernpfade',
     subcats: [
       HubSubcat(key: 'a1', label: 'A1'),
       HubSubcat(key: 'a2', label: 'A2'),

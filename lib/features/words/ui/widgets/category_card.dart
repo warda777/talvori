@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
-import 'package:talvori/features/home/ui/widgets/food_bowl_bg.dart';
-import 'package:talvori/features/home/ui/widgets/health_pulse_bg.dart';
-import 'package:talvori/features/home/ui/widgets/home_silhouette_bg.dart';
+import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
+import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/application/category_stats_provider.dart';
-import 'mini_badge.dart';
 import 'shimmer_box.dart';
 
 class CategoryCard extends ConsumerStatefulWidget {
@@ -28,7 +26,8 @@ class CategoryCard extends ConsumerStatefulWidget {
   ConsumerState<CategoryCard> createState() => _CategoryCardState();
 }
 
-class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBindingObserver {
+class _CategoryCardState extends ConsumerState<CategoryCard>
+    with WidgetsBindingObserver {
   StreamSubscription<String>? _resetSubscription;
 
   @override
@@ -61,11 +60,16 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
     final t = Theme.of(context);
     final asyncStats = ref.watch(categoryStatsProvider(widget.sub));
     final stats = asyncStats.value; // kann schon befüllt sein
-    final loading = asyncStats.isLoading && stats == null; // 👈 nur dann "echt" laden
-    final String normalizedLabel = widget.sub.label.toLowerCase().trim().replaceAll('&', 'and');
-    final bool isHealth = normalizedLabel == 'health and fitness';
-    final bool isHomeLiving = normalizedLabel == 'home and living';
-    final bool isFoodCooking = normalizedLabel == 'food and cooking';
+    final loading =
+        asyncStats.isLoading && stats == null; // 👈 nur dann "echt" laden
+    final String normalizedLabel = widget.sub.label
+        .toLowerCase()
+        .trim()
+        .replaceAll('&', 'and');
+    final Color strokeColor = CategoryStrokeColors.getStrokeColor(
+      widget.sub.label,
+    );
+    final glowEnabled = ref.watch(wordHubGlowProvider);
 
     return Material(
       color: Colors.transparent,
@@ -84,40 +88,35 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFAFCCFE).withOpacity(0.55),
-                blurRadius: 28,
-                spreadRadius: 3,
-              ),
-              BoxShadow(
-                color: const Color(0xFFAFCCFE).withOpacity(0.35),
-                blurRadius: 46,
-                spreadRadius: 10,
-              ),
-            ],
+            boxShadow: glowEnabled
+                ? [
+                    BoxShadow(
+                      color: strokeColor.withOpacity(0.32),
+                      blurRadius: 22,
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: strokeColor.withOpacity(0.18),
+                      blurRadius: 36,
+                      spreadRadius: 8,
+                    ),
+                  ]
+                : const [],
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: (isHealth || isHomeLiving || isFoodCooking)
-                  ? Colors.black
-                  : t.colorScheme.surfaceContainerHighest,
+              color: const Color(0xFF040404),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFAFCCFE).withOpacity(0.85), width: 2),
+              border: Border.all(
+                color: strokeColor.withOpacity(0.85),
+                width: 2,
+              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (isHealth) const HealthPulseBackground()
-                  else if (isHomeLiving) const HomeSilhouetteBackground()
-                  else if (isFoodCooking)
-                    const FoodBowlBackground(
-                      scale: 0.36,
-                      yAlign: 0.62,
-                      speed: 0.9,
-                    ),
                   Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(
@@ -126,14 +125,20 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
                         const SizedBox(height: 8),
                         loading
                             ? const ShimmerBox(height: 18, borderRadius: 6)
-                            : Text(widget.sub.label, style: t.textTheme.titleMedium),
+                            : Text(
+                                widget.sub.label,
+                                style: t.textTheme.titleMedium,
+                              ),
                         const Spacer(),
                         if (loading)
                           Align(
                             alignment: Alignment.bottomRight,
                             child: SizedBox(
                               width: 36,
-                              child: const ShimmerBox(height: 14, borderRadius: 6),
+                              child: const ShimmerBox(
+                                height: 14,
+                                borderRadius: 6,
+                              ),
                             ),
                           )
                         else if (stats != null)
@@ -143,6 +148,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard> with WidgetsBinding
                               '${stats.total}',
                               style: t.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: const Color(0xFFF1C86B),
                               ),
                             ),
                           ),

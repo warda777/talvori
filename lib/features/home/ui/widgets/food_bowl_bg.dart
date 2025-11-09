@@ -34,12 +34,12 @@ class _FoodBowlBackgroundState extends State<FoodBowlBackground>
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: AnimatedBuilder(
-        animation: _c,
-        builder: (_, __) => CustomPaint(
-          painter: _BowlPainter(
-            t: _c.value * widget.speed,
-            gold: widget.gold,
-            glow: widget.glow,
+      animation: _c,
+      builder: (_, __) => CustomPaint(
+        painter: _BowlPainter(
+          t: _c.value * widget.speed,
+          gold: widget.gold,
+          glow: widget.glow,
             scale: widget.scale,
             yAlign: widget.yAlign,
           ),
@@ -182,7 +182,7 @@ class _BowlPainter extends CustomPainter {
           final sw = baseStroke * (0.9 + 0.55 * flicker) * (1 - p * 0.4);
 
           final segPaint = Paint()
-            ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
             ..strokeWidth = sw
             ..color = gold.withOpacity(opacity.clamp(0.0, 1.0))

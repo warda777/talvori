@@ -130,7 +130,7 @@ class _PulsePainter extends CustomPainter {
       if (i == 0) {
         path.moveTo(x, y);
       } else {
-        path.lineTo(x, y);
+      path.lineTo(x, y);
       }
     }
 

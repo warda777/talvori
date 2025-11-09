@@ -70,7 +70,7 @@ class _TapFlashState extends State<TapFlash> with SingleTickerProviderStateMixin
         if (mounted) await _c.reverse();
       } else {
         if (mounted) await _c.reverse();
-        if (cb != null) await cb();
+      if (cb != null) await cb();
       }
     } finally {
       _running = false;

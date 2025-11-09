@@ -257,39 +257,39 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
         final glowIntensity = shouldShowGlow ? (1.0 - colorProgress) : 0.0; // 1.0 = maximaler Glow bei Orange, 0.0 = kein Glow bei Blau
         final glowOpacity = glowIntensity * 0.9; // Maximal 90% Opacity für starken Glow
 
-        final pill = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: buttonColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: gold, width: 2), // Goldener Rand
-            boxShadow: glowEnabled ? [
-              // Durchgehender goldener Glow
-              BoxShadow(
-                color: gold.withValues(alpha: 0.55),
-                blurRadius: 20,
-                spreadRadius: 1,
-              ),
-            ] : null,
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: buttonColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: gold, width: 2), // Goldener Rand
+        boxShadow: glowEnabled ? [
+          // Durchgehender goldener Glow
+          BoxShadow(
+            color: gold.withValues(alpha: 0.55),
+            blurRadius: 20,
+            spreadRadius: 1,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        ] : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
               widget.leading ?? const Icon(Icons.system_update_alt_rounded,
-                  size: 16, color: Colors.white),
-              const SizedBox(width: 6),
-              Text(
+              size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
                 key: widget.counterKey, // <-- NEU: Key für den Counter
                 '$_displayedSelected/${widget.max}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
                 width: widget.barWidth,
-                height: 10,
+            height: 10,
                 child: Stack(
                   children: [
                     // Hintergrund
@@ -328,14 +328,14 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
 
         return widget.onTap == null
-            ? pill
+        ? pill
             : InkWell(borderRadius: BorderRadius.circular(20), onTap: widget.onTap, child: pill);
       },
     );
