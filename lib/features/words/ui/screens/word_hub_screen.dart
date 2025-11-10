@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
@@ -23,38 +22,12 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _frontButtonWidth = 120.0;
   static const double _maxReveal = 90.0;
   static const double _laneWidth = _frontButtonWidth + _maxReveal;
-  static const Duration _hintInterval = Duration(seconds: 5);
 
   final SlideHintController _slideCtrl = SlideHintController();
-  Timer? _hintTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _slideCtrl.nudge(by: 24);
-      _startHintTimer();
-    });
-  }
-
-  @override
-  void dispose() {
-    _hintTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startHintTimer() {
-    _hintTimer?.cancel();
-    _hintTimer = Timer(_hintInterval, () async {
-      await _slideCtrl.nudge(by: 20);
-      _startHintTimer();
-    });
-  }
 
   void _handleGlowToggle(bool glowEnabled) {
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
     _slideCtrl.close();
-    _startHintTimer();
   }
 
   Widget _buildFrontButton() {
@@ -127,6 +100,10 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   buttonWidth: _frontButtonWidth,
                   reveal: _maxReveal,
                   enableDrag: true,
+                  autoHint: true,
+                  firstHintDelay: const Duration(milliseconds: 500),
+                  hintInterval: const Duration(seconds: 5),
+                  hintFraction: 2 / 3,
                   child: _buildFrontButton(),
                 ),
               ),
