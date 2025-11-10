@@ -10,6 +10,7 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/ui/widgets/category_card.dart';
 import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
+import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
 
 class WordHubScreen extends ConsumerStatefulWidget {
   const WordHubScreen({super.key});
@@ -18,146 +19,42 @@ class WordHubScreen extends ConsumerStatefulWidget {
   ConsumerState<WordHubScreen> createState() => _WordHubScreenState();
 }
 
-class _WordHubScreenState extends ConsumerState<WordHubScreen>
-    with TickerProviderStateMixin {
-  static const double _laneWidth = 210.0;
-  static const double _frontButtonWidth = 150.0;
-  static const double _maxReveal = _laneWidth - _frontButtonWidth;
-  static const Duration _bounceInterval = Duration(seconds: 5);
-  static const Duration _bounceOutDuration = Duration(milliseconds: 120);
-  static const Duration _bounceBackDuration = Duration(milliseconds: 180);
-  static const double _bounceOffset = -40.0;
+class _WordHubScreenState extends ConsumerState<WordHubScreen> {
+  static const double _frontButtonWidth = 120.0;
+  static const double _maxReveal = 90.0;
+  static const double _laneWidth = _frontButtonWidth + _maxReveal;
+  static const Duration _hintInterval = Duration(seconds: 5);
 
-  double _offset = 0.0;
-  bool _dragging = false;
-  late final AnimationController _slideController;
-  Animation<double>? _slideAnimation;
-  Timer? _bounceTimer;
-  Timer? _autoCloseTimer;
-
-  bool get _atRest => !_dragging && _offset.abs() < 0.5;
+  final SlideHintController _slideCtrl = SlideHintController();
+  Timer? _hintTimer;
 
   @override
   void initState() {
     super.initState();
-    _slideController =
-        AnimationController(
-          vsync: this,
-          duration: const Duration(milliseconds: 260),
-        )..addListener(() {
-          if (_slideAnimation != null && !_dragging) {
-            setState(() {
-              _offset = _slideAnimation!.value;
-            });
-          }
-        });
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startBounceTimer(initial: true);
+      _slideCtrl.nudge(by: 24);
+      _startHintTimer();
     });
   }
 
   @override
   void dispose() {
-    _bounceTimer?.cancel();
-    _autoCloseTimer?.cancel();
-    _slideController.dispose();
+    _hintTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _animateTo(
-    double target, {
-    Duration duration = const Duration(milliseconds: 260),
-    Curve curve = Curves.easeOut,
-  }) async {
-    target = target.clamp(-_maxReveal, 0.0);
-    if ((_offset - target).abs() < 0.5) {
-      setState(() => _offset = target);
-      return;
-    }
-
-    _slideController.stop();
-    _slideController.duration = duration;
-    _slideAnimation = Tween<double>(
-      begin: _offset,
-      end: target,
-    ).chain(CurveTween(curve: curve)).animate(_slideController);
-
-    final completer = Completer<void>();
-    void statusListener(AnimationStatus status) {
-      if (status == AnimationStatus.completed ||
-          status == AnimationStatus.dismissed) {
-        _slideController.removeStatusListener(statusListener);
-        _slideAnimation = null;
-        completer.complete();
-      }
-    }
-
-    _slideController.addStatusListener(statusListener);
-    _slideController.forward(from: 0);
-    await completer.future;
-    if (_offset.abs() < 0.5) {
-      setState(() => _offset = 0.0);
-    }
-  }
-
-  Future<void> _runBounce() async {
-    if (!_atRest || _dragging) return;
-    await _animateTo(
-      _bounceOffset,
-      duration: _bounceOutDuration,
-      curve: Curves.easeOut,
-    );
-    if (_dragging) {
-      return;
-    }
-    await _animateTo(
-      0,
-      duration: _bounceBackDuration,
-      curve: Curves.easeOutBack,
-    );
-  }
-
-  void _startBounceTimer({bool initial = false}) {
-    _bounceTimer?.cancel();
-
-    void scheduleNext() {
-      _bounceTimer = Timer(_bounceInterval, () async {
-        await _runBounce();
-        scheduleNext();
-      });
-    }
-
-    if (initial) {
-      _bounceTimer = Timer(const Duration(milliseconds: 900), () async {
-        await _runBounce();
-        scheduleNext();
-      });
-    } else {
-      scheduleNext();
-    }
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    _hintTimer = Timer(_hintInterval, () async {
+      await _slideCtrl.nudge(by: 20);
+      _startHintTimer();
+    });
   }
 
   void _handleGlowToggle(bool glowEnabled) {
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
-    _animateTo(
-      0,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutBack,
-    );
-    _startBounceTimer();
-  }
-
-  void _scheduleAutoClose() {
-    _autoCloseTimer?.cancel();
-    _autoCloseTimer = Timer(const Duration(seconds: 2), () {
-      if (_dragging) return;
-      _animateTo(
-        0,
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutBack,
-      ).then((_) => _startBounceTimer());
-    });
+    _slideCtrl.close();
+    _startHintTimer();
   }
 
   Widget _buildFrontButton() {
@@ -168,7 +65,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen>
         onPressed: () {},
         style: TextButton.styleFrom(
           backgroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           shape: const StadiumBorder(),
           foregroundColor: const Color(0xFFAFCCFE),
           textStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -202,78 +99,40 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen>
           onPressed: () => Navigator.of(context).pop(),
           tooltip: 'Close',
         ),
-        title: const FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text('Word Hub'),
-        ),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: SizedBox(
-              width: _laneWidth,
-              height: 40,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GlowToggleButton(
-                      glowEnabled: glowEnabled,
-                      onToggle: () => _handleGlowToggle(glowEnabled),
-                    ),
-                  ),
-                  _SlidingFrontButton(
-                    offset: _offset,
-                    maxReveal: _maxReveal,
-                    laneWidth: _laneWidth,
-                    childWidth: _frontButtonWidth,
-                    child: _buildFrontButton(),
-                    onOffsetUpdate: (delta) {
-                      setState(() {
-                        _offset = (_offset + delta).clamp(-_maxReveal, 0.0);
-                      });
-                    },
-                    onDragStart: () {
-                      _dragging = true;
-                      _bounceTimer?.cancel();
-                      _autoCloseTimer?.cancel();
-                      _slideController.stop();
-                      _slideAnimation = null;
-                    },
-                    onDragEnd: (velocity) {
-                      _dragging = false;
-                      final bool shouldReveal =
-                          _offset < -_maxReveal * 0.55 || velocity < -400;
-                      if (shouldReveal) {
-                        _animateTo(
-                          -_maxReveal,
-                          curve: Curves.easeOut,
-                        ).then((_) => _scheduleAutoClose());
-                      } else {
-                        _animateTo(
-                          0,
-                          duration: const Duration(milliseconds: 320),
-                          curve: Curves.easeOutBack,
-                        ).then((_) => _startBounceTimer());
-                      }
-                    },
-                    onTapClosed: () {
-                      if (_offset < 0 && !_dragging) {
-                        _animateTo(
-                          0,
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeOutBack,
-                        ).then((_) => _startBounceTimer());
-                      }
-                    },
-                  ),
-                ],
+        titleSpacing: 8,
+        title: SizedBox(
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Positioned.fill(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Word Hub', overflow: TextOverflow.ellipsis),
+                ),
               ),
-            ),
+              Positioned(
+                right: 12,
+                top: 8,
+                child: GlowToggleButton(
+                  glowEnabled: glowEnabled,
+                  onToggle: () => _handleGlowToggle(glowEnabled),
+                ),
+              ),
+              Positioned(
+                right: 12,
+                top: 6,
+                child: SlideHintButton(
+                  controller: _slideCtrl,
+                  buttonWidth: _frontButtonWidth,
+                  reveal: _maxReveal,
+                  enableDrag: true,
+                  child: _buildFrontButton(),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       body: CustomScrollView(
         slivers: [
@@ -415,63 +274,6 @@ class _SectionHeader extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
         child: Text(title, style: Theme.of(context).textTheme.titleMedium),
-      ),
-    );
-  }
-}
-
-class _SlidingFrontButton extends StatelessWidget {
-  final double offset;
-  final double maxReveal;
-  final double laneWidth;
-  final double childWidth;
-  final Widget child;
-  final ValueChanged<double> onOffsetUpdate;
-  final VoidCallback onDragStart;
-  final void Function(double velocity) onDragEnd;
-  final VoidCallback onTapClosed;
-
-  const _SlidingFrontButton({
-    required this.offset,
-    required this.maxReveal,
-    required this.laneWidth,
-    required this.childWidth,
-    required this.child,
-    required this.onOffsetUpdate,
-    required this.onDragStart,
-    required this.onDragEnd,
-    required this.onTapClosed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final double revealPx = (-offset).clamp(0.0, maxReveal);
-    final bool revealOpen = revealPx >= maxReveal * 0.85;
-
-    return Align(
-      alignment: Alignment.centerRight,
-      child: SizedBox(
-        width: laneWidth,
-        child: Padding(
-          padding: EdgeInsets.only(right: revealPx),
-          child: Opacity(
-            opacity: revealOpen ? 0.35 : 1.0,
-            child: SizedBox(
-              width: childWidth,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragStart: (_) => onDragStart(),
-                onHorizontalDragUpdate: (details) =>
-                    onOffsetUpdate(details.delta.dx),
-                onHorizontalDragEnd: (details) =>
-                    onDragEnd(details.primaryVelocity ?? 0),
-                onHorizontalDragCancel: () => onDragEnd(0),
-                onTap: onTapClosed,
-                child: child,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
