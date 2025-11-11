@@ -24,10 +24,14 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _laneWidth = _frontButtonWidth + _maxReveal;
 
   final SlideHintController _slideCtrl = SlideHintController();
+  bool _allowHints = true;
 
-  void _handleGlowToggle(bool glowEnabled) {
+  Future<void> _handleGlowToggle(bool glowEnabled) async {
+    if (mounted) setState(() => _allowHints = false);
+
+    await _slideCtrl.close();
+
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
-    _slideCtrl.close();
   }
 
   Widget _buildFrontButton() {
@@ -86,25 +90,27 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
               ),
               Positioned(
                 right: 12,
-                top: 8,
-                child: GlowToggleButton(
-                  glowEnabled: glowEnabled,
-                  onToggle: () => _handleGlowToggle(glowEnabled),
-                ),
-              ),
-              Positioned(
-                right: 12,
                 top: 6,
                 child: SlideHintButton(
                   controller: _slideCtrl,
                   buttonWidth: _frontButtonWidth,
                   reveal: _maxReveal,
                   enableDrag: true,
-                  autoHint: true,
-                  firstHintDelay: const Duration(milliseconds: 500),
+                  autoHint: _allowHints,
+                  firstHintDelay: const Duration(milliseconds: 800),
                   hintInterval: const Duration(seconds: 5),
                   hintFraction: 2 / 3,
+                  hintOutDuration: const Duration(milliseconds: 1200),
+                  hintBackDuration: const Duration(milliseconds: 600),
                   child: _buildFrontButton(),
+                ),
+              ),
+              Positioned(
+                right: 12,
+                top: 8,
+                child: GlowToggleButton(
+                  glowEnabled: glowEnabled,
+                  onToggle: () => _handleGlowToggle(glowEnabled),
                 ),
               ),
             ],
