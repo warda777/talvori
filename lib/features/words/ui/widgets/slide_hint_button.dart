@@ -31,7 +31,7 @@ class SlideHintController {
     s._userInteracted = true;
     s._hintTimer?.cancel();
     s._hintTimer = null;
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await Future<void>.delayed(const Duration(milliseconds: 80));
     s._closing = false;
   }
 

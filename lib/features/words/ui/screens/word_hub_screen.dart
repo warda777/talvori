@@ -22,6 +22,8 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _frontButtonWidth = 120.0;
   static const double _maxReveal = 90.0;
   static const double _laneWidth = _frontButtonWidth + _maxReveal;
+  static const double _toggleWidth = 40.0;
+  static const double _gap = 8.0;
 
   final SlideHintController _slideCtrl = SlideHintController();
   bool _allowHints = true;
@@ -89,9 +91,10 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                 ),
               ),
               Positioned(
-                right: 12,
+                right: 12 + _toggleWidth + _gap,
                 top: 6,
                 child: SlideHintButton(
+                  key: ValueKey(_allowHints),
                   controller: _slideCtrl,
                   buttonWidth: _frontButtonWidth,
                   reveal: _maxReveal,
