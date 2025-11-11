@@ -110,7 +110,7 @@ class _WheelCore extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0B0B0D),
         shape: BoxShape.circle,
-        border: Border.all(color: activeColor.withOpacity(.85), width: 2),
+        border: Border.all(color: Colors.white12, width: 1.4),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(.55), blurRadius: 24),
         ],
@@ -130,6 +130,7 @@ class _WheelCore extends StatelessWidget {
             ),
           ),
           _RadialTools(
+            ringKey: ringKey,
             radiusFactor: 0.35,
             onTap: (tool) {
               if (tool == RadialTool.scope) {
@@ -147,7 +148,17 @@ class _WheelCore extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white12,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(
+                    color: activeColor.withOpacity(.9),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: activeColor.withOpacity(.35),
+                      blurRadius: 18,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
                 child: IconButton(
                   icon: const Icon(
@@ -168,10 +179,12 @@ class _WheelCore extends StatelessWidget {
 
 class _RadialTools extends StatelessWidget {
   const _RadialTools({
+    required this.ringKey,
     required this.onTap,
     this.radiusFactor = 0.35,
   });
 
+  final GlobalKey<_RotaryColorRingState> ringKey;
   final void Function(RadialTool tool) onTap;
   final double radiusFactor;
 
@@ -209,10 +222,15 @@ class _RadialTools extends StatelessWidget {
               top: posBtn.dy - 28,
               width: 56,
               height: 56,
-              child: _ToolButton(
-                tool: items[i].$1,
-                icon: items[i].$2,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanStart: (d) =>
+                    ringKey.currentState?.handleExternalPanStart(d),
+                onPanUpdate: (d) =>
+                    ringKey.currentState?.handleExternalPanUpdate(d),
+                onPanEnd: (d) => ringKey.currentState?.handleExternalPanEnd(d),
                 onTap: () => onTap(items[i].$1),
+                child: _ToolButton(icon: items[i].$2),
               ),
             ),
           );
@@ -224,32 +242,23 @@ class _RadialTools extends StatelessWidget {
   }
 }
 
-class _ToolButton extends ConsumerWidget {
-  const _ToolButton({
-    required this.tool,
-    required this.icon,
-    required this.onTap,
-  });
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({required this.icon});
 
-  final RadialTool tool;
   final IconData icon;
-  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: onTap,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: const Color(0x151FFFFFF),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white24),
-        ),
-        child: SizedBox(
-          width: 56,
-          height: 56,
-          child: Center(child: Icon(icon, color: Colors.white, size: 24)),
-        ),
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0x151FFFFFF),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24),
+      ),
+      child: SizedBox(
+        width: 56,
+        height: 56,
+        child: Center(child: Icon(icon, color: Colors.white, size: 24)),
       ),
     );
   }
@@ -279,6 +288,8 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
     with SingleTickerProviderStateMixin {
   double _angle = 0.0;
   double _dragStartAngle = 0.0;
+  Offset _center = Offset.zero;
+  int _paletteIndex = 0;
   late final AnimationController _momentum = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 800),
@@ -288,17 +299,72 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
   int _activeIndex = -1;
   double _hueShift = 0.0;
 
-  List<Color> _vividDistinct(int n) => List<Color>.generate(n, (i) {
-    final h = ((i + _hueShift) * 360 / n) % 360;
-    return HSLColor.fromAHSL(1, h.toDouble(), 0.85, 0.50).toColor();
-  });
+  static const List<
+    ({
+      double saturation,
+      double lightness,
+      double satJitter,
+      double lightJitter,
+      double hueOffset,
+    })
+  >
+  _paletteModes = [
+    (
+      saturation: .92,
+      lightness: .52,
+      satJitter: .06,
+      lightJitter: .05,
+      hueOffset: 0,
+    ),
+    (
+      saturation: .72,
+      lightness: .66,
+      satJitter: .04,
+      lightJitter: .08,
+      hueOffset: 10,
+    ),
+    (
+      saturation: .64,
+      lightness: .44,
+      satJitter: .05,
+      lightJitter: .06,
+      hueOffset: 18,
+    ),
+    (
+      saturation: .48,
+      lightness: .76,
+      satJitter: .05,
+      lightJitter: .07,
+      hueOffset: 28,
+    ),
+  ];
+
+  List<Color> _paletteColors(int n) {
+    final mode = _paletteModes[_paletteIndex % _paletteModes.length];
+    return List<Color>.generate(n, (i) {
+      final t = i / n;
+      final hue = ((i + _hueShift + mode.hueOffset) * 360 / n) % 360;
+      final sat = (mode.saturation + mode.satJitter * math.sin(t * 2 * math.pi))
+          .clamp(0.05, 1.0);
+      final light =
+          (mode.lightness + mode.lightJitter * math.cos(t * 2 * math.pi)).clamp(
+            0.05,
+            0.95,
+          );
+      return HSLColor.fromAHSL(1, hue.toDouble(), sat, light).toColor();
+    });
+  }
 
   void switchPalette() {
-    setState(() => _hueShift = (_hueShift + widget.count / 6) % widget.count);
+    setState(() {
+      _paletteIndex = (_paletteIndex + 1) % _paletteModes.length;
+      _hueShift = (_hueShift + widget.count / 4) % widget.count;
+      _selectedIndex = null;
+    });
     HapticFeedback.selectionClick();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final colors = _vividDistinct(widget.count);
+      final colors = _paletteColors(widget.count);
       final idx = (_activeIndex >= 0 && _activeIndex < colors.length)
           ? _activeIndex
           : 0;
@@ -314,17 +380,23 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
     }
   }
 
-  void _onPanStart(DragStartDetails d, Offset c) {
+  void _onPanStart(DragStartDetails d) {
     _momentum.stop();
     _dragStartAngle =
-        math.atan2(d.localPosition.dy - c.dy, d.localPosition.dx - c.dx) -
+        math.atan2(
+          d.localPosition.dy - _center.dy,
+          d.localPosition.dx - _center.dx,
+        ) -
         _angle;
   }
 
-  void _onPanUpdate(DragUpdateDetails d, Offset c) {
+  void _onPanUpdate(DragUpdateDetails d) {
     setState(
       () => _angle =
-          math.atan2(d.localPosition.dy - c.dy, d.localPosition.dx - c.dx) -
+          math.atan2(
+            d.localPosition.dy - _center.dy,
+            d.localPosition.dx - _center.dx,
+          ) -
           _dragStartAngle,
     );
   }
@@ -341,6 +413,36 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
       ..forward();
   }
 
+  void handleExternalPanStart(DragStartDetails d) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final local = box.globalToLocal(d.globalPosition);
+    _onPanStart(
+      DragStartDetails(
+        globalPosition: d.globalPosition,
+        localPosition: local,
+        kind: d.kind,
+      ),
+    );
+  }
+
+  void handleExternalPanUpdate(DragUpdateDetails d) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final local = box.globalToLocal(d.globalPosition);
+    _onPanUpdate(
+      DragUpdateDetails(
+        globalPosition: d.globalPosition,
+        localPosition: local,
+        delta: d.delta,
+        primaryDelta: d.primaryDelta,
+        sourceTimeStamp: d.sourceTimeStamp,
+      ),
+    );
+  }
+
+  void handleExternalPanEnd(DragEndDetails d) => _onPanEnd(d);
+
   @override
   void dispose() {
     _momentum.dispose();
@@ -349,10 +451,11 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
 
   @override
   Widget build(BuildContext context) {
-    final colors = _vividDistinct(widget.count);
+    final colors = _paletteColors(widget.count);
     return LayoutBuilder(
       builder: (_, c) {
         final center = Offset(c.maxWidth / 2, c.maxHeight / 2);
+        _center = center;
         final radius = widget.absoluteRadius;
         final base = widget.bubbleSize;
         const twelve = -math.pi / 2;
@@ -365,8 +468,8 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onPanStart: (d) => _onPanStart(d, center),
-              onPanUpdate: (d) => _onPanUpdate(d, center),
+              onPanStart: _onPanStart,
+              onPanUpdate: _onPanUpdate,
               onPanEnd: _onPanEnd,
               child: const SizedBox.expand(),
             ),
@@ -387,9 +490,9 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
           }
 
           final near = (1.0 - (absDelta / step)).clamp(0, 1);
-          final centerScale = 1.0 + 0.25 * near;
+          final centerScale = 1.0 + 0.6 * near;
           final isSelected = _selectedIndex == i;
-          final scale = isSelected ? 1.8 : centerScale;
+          final scale = isSelected ? 2.2 : centerScale;
 
           final pos = Offset(
             center.dx + radius * math.cos(a),
