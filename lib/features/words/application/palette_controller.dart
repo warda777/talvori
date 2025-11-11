@@ -71,4 +71,11 @@ class PaletteController extends _$PaletteController {
     await _repo.saveGlobalColor(null);
     state = state.copyWith(globalColor: null);
   }
+
+  /// Setzt alle Einstellungen auf Werkzustand zurück.
+  Future<void> resetToDefaults() async {
+    await _repo.saveCategoryOverrides({});
+    await _repo.saveGlobalColor(null);
+    state = PaletteState.initial();
+  }
 }

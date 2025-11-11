@@ -67,6 +67,17 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
                       .toggleScope(),
                   onSwitchPalette: () => _ringKey.currentState?.switchPalette(),
                   onClose: widget.onClose,
+                  onCenterToggleScope: () => ref
+                      .read(paletteControllerProvider.notifier)
+                      .toggleScope(),
+                  onCenterReset: () => ref
+                      .read(paletteControllerProvider.notifier)
+                      .resetToDefaults(),
+                  isAll:
+                      ref.watch(
+                        paletteControllerProvider.select((s) => s.scope),
+                      ) ==
+                      ApplyScope.all,
                 ),
               ),
             ),
@@ -86,6 +97,9 @@ class _WheelCore extends StatelessWidget {
     required this.onToggleScope,
     required this.onSwitchPalette,
     required this.onClose,
+    required this.onCenterToggleScope,
+    required this.onCenterReset,
+    required this.isAll,
   });
 
   final GlobalKey<_RotaryColorRingState> ringKey;
@@ -95,6 +109,9 @@ class _WheelCore extends StatelessWidget {
   final VoidCallback onToggleScope;
   final VoidCallback onSwitchPalette;
   final VoidCallback onClose;
+  final VoidCallback onCenterToggleScope;
+  final VoidCallback onCenterReset;
+  final bool isAll;
 
   @override
   Widget build(BuildContext context) {
@@ -141,33 +158,183 @@ class _WheelCore extends StatelessWidget {
             },
           ),
           Center(
-            child: SizedBox(
-              width: 112,
-              height: 112,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white12,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: activeColor.withOpacity(.9),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: activeColor.withOpacity(.35),
-                      blurRadius: 18,
-                      spreadRadius: 2,
-                    ),
-                  ],
+            child: ScopeSwitchButton(
+              diameter: 112,
+              ringColor: activeColor,
+              isAll: isAll,
+              onTapToggle: onCenterToggleScope,
+              onConfirmHold: onCenterReset,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ScopeSwitchButton extends StatefulWidget {
+  const ScopeSwitchButton({
+    super.key,
+    required this.diameter,
+    required this.ringColor,
+    required this.isAll,
+    required this.onTapToggle,
+    required this.onConfirmHold,
+    this.holdDuration = const Duration(milliseconds: 2500),
+  });
+
+  final double diameter;
+  final Color ringColor;
+  final bool isAll;
+  final VoidCallback onTapToggle;
+  final VoidCallback onConfirmHold;
+  final Duration holdDuration;
+
+  @override
+  State<ScopeSwitchButton> createState() => _ScopeSwitchButtonState();
+}
+
+class _ScopeSwitchButtonState extends State<ScopeSwitchButton>
+    with TickerProviderStateMixin {
+  late final AnimationController _hold = AnimationController(
+    vsync: this,
+    duration: widget.holdDuration,
+  );
+  late final AnimationController _spin = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 260),
+  );
+  bool _holding = false;
+  double _angleTurns = 0.0;
+
+  @override
+  void dispose() {
+    _hold.dispose();
+    _spin.dispose();
+    super.dispose();
+  }
+
+  void _startHold(LongPressStartDetails _) {
+    _holding = true;
+    _hold.forward(from: 0);
+    HapticFeedback.selectionClick();
+  }
+
+  Future<void> _endHold([_]) async {
+    if (!_holding) return;
+    _holding = false;
+    if (_hold.status == AnimationStatus.completed) {
+      HapticFeedback.heavyImpact();
+      widget.onConfirmHold();
+    } else {
+      await _hold.reverse();
+    }
+  }
+
+  Future<void> _tap() async {
+    if (_holding) return;
+    HapticFeedback.selectionClick();
+    _angleTurns += 0.25;
+    await _spin.forward(from: 0);
+    widget.onTapToggle();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final d = widget.diameter;
+    final arrowIcon = widget.isAll
+        ? Icons.arrow_upward_rounded
+        : Icons.arrow_downward_rounded;
+
+    return GestureDetector(
+      onTap: _tap,
+      onLongPressStart: _startHold,
+      onLongPressUp: _endHold,
+      onLongPressEnd: _endHold,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: d,
+            height: d,
+            decoration: BoxDecoration(
+              color: const Color(0x1AFFFFFF),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white24),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.ringColor.withOpacity(.35),
+                  blurRadius: 18,
+                  spreadRadius: 2,
                 ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.color_lens_rounded,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  onPressed: onSwitchPalette,
+              ],
+            ),
+          ),
+          SizedBox(
+            width: d,
+            height: d,
+            child: AnimatedBuilder(
+              animation: _hold,
+              builder: (_, __) => CustomPaint(
+                painter: _RingPainter(
+                  progress: _hold.value,
+                  color: widget.ringColor,
                 ),
+              ),
+            ),
+          ),
+          AnimatedBuilder(
+            animation: _spin,
+            builder: (_, __) {
+              final t = CurvedAnimation(
+                parent: _spin,
+                curve: Curves.easeOutCubic,
+              ).value;
+              return Transform.rotate(
+                angle: (_angleTurns * 2 * math.pi) * t,
+                child: SizedBox(
+                  width: d * 0.70,
+                  height: d * 0.70,
+                  child: CustomPaint(
+                    painter: _SpinnerPainter(color: widget.ringColor),
+                  ),
+                ),
+              );
+            },
+          ),
+          Container(
+            width: d * 0.58,
+            height: d * 0.58,
+            decoration: BoxDecoration(
+              color: const Color(0x33000000),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white24),
+            ),
+            child: Icon(
+              widget.isAll
+                  ? Icons.arrow_upward_rounded
+                  : Icons.arrow_downward_rounded,
+              color: Colors.white,
+              size: d * 0.28,
+            ),
+          ),
+          Positioned(
+            top: 10,
+            child: Text(
+              'ALL',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Colors.white70,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            child: Text(
+              'ONE',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Colors.white70,
+                letterSpacing: 1.0,
               ),
             ),
           ),
@@ -175,6 +342,82 @@ class _WheelCore extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RingPainter extends CustomPainter {
+  _RingPainter({required this.progress, required this.color});
+
+  final double progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = size.width / 2 - 3;
+    final c = Offset(size.width / 2, size.height / 2);
+
+    final bg = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Colors.white12;
+    canvas.drawCircle(c, r, bg);
+
+    final fg = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round
+      ..color = color.withOpacity(.95);
+
+    final start = -math.pi / 2;
+    final sweep = 2 * math.pi * progress.clamp(0.0, 1.0);
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      start,
+      sweep,
+      false,
+      fg,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter old) =>
+      old.progress != progress || old.color != color;
+}
+
+class _SpinnerPainter extends CustomPainter {
+  _SpinnerPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    final bg = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Colors.white10;
+    canvas.drawCircle(c, r, bg);
+
+    final fg = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 4
+      ..color = color.withOpacity(.95);
+
+    const sweep = 2 * math.pi * 0.33;
+    const start = -math.pi / 2;
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      start,
+      sweep,
+      false,
+      fg,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpinnerPainter old) => old.color != color;
 }
 
 class _RadialTools extends StatelessWidget {
@@ -290,14 +533,20 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
   double _dragStartAngle = 0.0;
   Offset _center = Offset.zero;
   int _paletteIndex = 0;
-  late final AnimationController _momentum = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 800),
-  );
+  late final AnimationController _momentum;
   Animation<double>? _fling;
   int? _selectedIndex;
   int _activeIndex = -1;
   double _hueShift = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _momentum = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+  }
 
   static const List<
     ({
@@ -458,10 +707,6 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
         _center = center;
         final radius = widget.absoluteRadius;
         final base = widget.bubbleSize;
-        const twelve = -math.pi / 2;
-
-        int active = 0;
-        double minDelta = double.infinity;
         final children = <Widget>[];
 
         children.add(
@@ -476,56 +721,79 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
           ),
         );
 
-        for (int i = 0; i < colors.length; i++) {
-          final step = (2 * math.pi) / colors.length;
-          final a = _angle + i * step;
+        final trapezDepth = 34.0;
+        final gapDeg = 2.0;
+        final gapRad = gapDeg * math.pi / 180;
+        final step = (2 * math.pi) / colors.length;
+        const twelve = -math.pi / 2;
 
+        // Finde das Segment, das sich bei 12 Uhr befindet (aktives Segment)
+        int active = 0;
+        double minDelta = double.infinity;
+        for (int i = 0; i < colors.length; i++) {
+          final a = _angle + i * step;
           var delta = (a - twelve) % (2 * math.pi);
           if (delta > math.pi) delta -= 2 * math.pi;
-
           final absDelta = delta.abs();
           if (absDelta < minDelta) {
             minDelta = absDelta;
             active = i;
           }
+        }
 
-          final near = (1.0 - (absDelta / step)).clamp(0, 1);
-          final centerScale = 1.0 + 0.6 * near;
+        // Segmente sollen außerhalb des inneren Bereichs (Tool Buttons) liegen
+        // Näher zum Kreis hin, aber immer noch außerhalb
+        final baseInnerR = radius - 15.0;
+        final baseOuterR = radius - 15.0 + trapezDepth;
+
+        for (int i = 0; i < colors.length; i++) {
+          final a = _angle + i * step;
+          final isActive = active == i;
           final isSelected = _selectedIndex == i;
-          final scale = isSelected ? 2.2 : centerScale;
 
-          final pos = Offset(
-            center.dx + radius * math.cos(a),
-            center.dy + radius * math.sin(a),
-          );
-          final size = base * scale;
+          // Aktives Segment (bei 12 Uhr) hat Vorrang: größer und mit Lücke
+          final gapSize = isActive ? gapRad : 0.0;
+          final lift = isActive ? 15.0 : (isSelected ? 20.0 : 0.0);
+
+          final innerR = baseInnerR;
+          final outerR = baseOuterR + lift;
+          final angleWidth = step - gapSize;
 
           children.add(
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: true,
+                child: _ColorWedge(
+                  center: center,
+                  baseAngle: a,
+                  angleWidth: angleWidth,
+                  innerR: innerR,
+                  outerR: outerR,
+                  color: colors[i],
+                  shadow: 10,
+                ),
+              ),
+            ),
+          );
+
+          final hitR = baseInnerR + trapezDepth / 2;
+          final hitPos = Offset(
+            center.dx + hitR * math.cos(a),
+            center.dy + hitR * math.sin(a),
+          );
+          children.add(
             Positioned(
-              left: pos.dx - size / 2,
-              top: pos.dy - size / 2,
-              width: size,
-              height: size,
+              left: hitPos.dx - 24,
+              top: hitPos.dy - 24,
+              width: 48,
+              height: 48,
               child: GestureDetector(
                 onTap: () {
                   setState(() => _selectedIndex = i);
                   widget.onPick(colors[i]);
                 },
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [colors[i], colors[i].withOpacity(.65)],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors[i].withOpacity(.35),
-                        blurRadius: 10,
-                      ),
-                    ],
-                    border: Border.all(color: Colors.white12),
-                  ),
-                ),
+                behavior: HitTestBehavior.translucent,
+                child: const SizedBox.expand(),
               ),
             ),
           );
@@ -539,4 +807,109 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
       },
     );
   }
+}
+
+class _ColorWedge extends StatelessWidget {
+  const _ColorWedge({
+    required this.center,
+    required this.baseAngle,
+    required this.angleWidth,
+    required this.innerR,
+    required this.outerR,
+    required this.color,
+    this.shadow = 8,
+  });
+
+  final Offset center;
+  final double baseAngle;
+  final double angleWidth;
+  final double innerR;
+  final double outerR;
+  final Color color;
+  final double shadow;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _WedgePainter(
+        center: center,
+        baseAngle: baseAngle,
+        angleWidth: angleWidth,
+        innerR: innerR,
+        outerR: outerR,
+        color: color,
+        shadow: shadow,
+      ),
+    );
+  }
+}
+
+class _WedgePainter extends CustomPainter {
+  _WedgePainter({
+    required this.center,
+    required this.baseAngle,
+    required this.angleWidth,
+    required this.innerR,
+    required this.outerR,
+    required this.color,
+    required this.shadow,
+  });
+
+  final Offset center;
+  final double baseAngle;
+  final double angleWidth;
+  final double innerR;
+  final double outerR;
+  final Color color;
+  final double shadow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+    final a0 = baseAngle - angleWidth / 2;
+    final a1 = baseAngle + angleWidth / 2;
+
+    final rectInner = Rect.fromCircle(center: center, radius: innerR);
+    final rectOuter = Rect.fromCircle(center: center, radius: outerR);
+
+    final p0 = center + Offset(innerR * math.cos(a0), innerR * math.sin(a0));
+    final p1 = center + Offset(outerR * math.cos(a0), outerR * math.sin(a0));
+    final p2 = center + Offset(outerR * math.cos(a1), outerR * math.sin(a1));
+    final p3 = center + Offset(innerR * math.cos(a1), innerR * math.sin(a1));
+
+    path.moveTo(p0.dx, p0.dy);
+    path.arcTo(rectInner, a0, angleWidth, false);
+    path.lineTo(p2.dx, p2.dy);
+    path.arcTo(rectOuter, a1, -angleWidth, false);
+    path.close();
+
+    if (shadow > 0) {
+      final shadowPaint = Paint()
+        ..color = color.withOpacity(0.35)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadow);
+      canvas.drawPath(path, shadowPaint);
+    }
+
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [color, color.withOpacity(.75)],
+      ).createShader(Rect.fromCircle(center: center, radius: outerR))
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, paint);
+
+    final stroke = Paint()
+      ..color = Colors.white12
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawPath(path, stroke);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WedgePainter old) =>
+      old.baseAngle != baseAngle ||
+      old.angleWidth != angleWidth ||
+      old.innerR != innerR ||
+      old.outerR != outerR ||
+      old.color != color ||
+      old.center != center;
 }
