@@ -10,6 +10,7 @@ import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/ui/widgets/category_card.dart';
 import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
+import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
 
 class WordHubScreen extends ConsumerStatefulWidget {
   const WordHubScreen({super.key});
@@ -24,6 +25,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _laneWidth = _frontButtonWidth + _maxReveal;
 
   final SlideHintController _slideCtrl = SlideHintController();
+  final ScrollController _scroll = ScrollController();
   bool _allowHints = true;
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
@@ -121,123 +123,137 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
           ),
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          // Suche
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                textInputAction: TextInputAction.search,
-                onSubmitted: (q) {
-                  final query = q.trim();
-                  if (query.isEmpty) return;
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => WordListScreen(
-                        filter: WordListFilter(WordFilterKind.query, query),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              // Suche
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (q) {
+                      final query = q.trim();
+                      if (query.isEmpty) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => WordListScreen(
+                            filter: WordListFilter(WordFilterKind.query, query),
+                          ),
+                        ),
+                      );
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Suchen',
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFFF1C86B),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: BorderSide(
+                          color: const Color(0xFFF1C86B).withOpacity(0.85),
+                          width: 2,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFF1C86B),
+                          width: 1.6,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFF1C86B),
+                          width: 2.2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
                       ),
                     ),
-                  );
-                },
-                decoration: InputDecoration(
-                  hintText: 'Suchen',
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Color(0xFFF1C86B),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(999),
-                    borderSide: BorderSide(
-                      color: const Color(0xFFF1C86B).withOpacity(0.85),
-                      width: 2,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(999),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFF1C86B),
-                      width: 1.6,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(999),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFF1C86B),
-                      width: 2.2,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.12),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
                   ),
                 ),
               ),
-            ),
-          ),
 
-          // Sektionen
-          for (final section in hubSections) ...[
-            _SectionHeader(section.title),
-            _GridSection(
-              sectionKey: section.key,
-              subs: section.subcats,
-              repo: repo,
-              onTapSub: (sub) async {
-                String? catId;
-                try {
-                  catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
-                      ? sub.supabaseId
-                      : await repo.findCategoryIdByName(sub.label);
-                } catch (_) {
-                  catId = null;
-                }
+              // Sektionen
+              for (final section in hubSections) ...[
+                _SectionHeader(section.title),
+                _GridSection(
+                  sectionKey: section.key,
+                  subs: section.subcats,
+                  repo: repo,
+                  onTapSub: (sub) async {
+                    String? catId;
+                    try {
+                      catId =
+                          (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
+                          ? sub.supabaseId
+                          : await repo.findCategoryIdByName(sub.label);
+                    } catch (_) {
+                      catId = null;
+                    }
 
-                if (!context.mounted) return;
-                if (catId == null && sub.supabaseId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
-                      ),
-                    ),
-                  );
-                }
-
-                if (catId != null) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CategoryDetailScreen(
-                        title: sub.label,
-                        categoryId: catId!,
-                        categorySlug: null,
-                        listFilter: WordListFilter(
-                          WordFilterKind.category,
-                          catId,
+                    if (!context.mounted) return;
+                    if (catId == null && sub.supabaseId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                } else {
-                  final (kind, value) = _mapToFilter(section.key, sub.label);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CategoryDetailScreen(
-                        title: sub.label,
-                        categoryId: null,
-                        categorySlug: _slugifyLocal(sub.label),
-                        listFilter: WordListFilter(kind, value),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                      );
+                    }
 
-          SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
+                    if (catId != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => CategoryDetailScreen(
+                            title: sub.label,
+                            categoryId: catId!,
+                            categorySlug: null,
+                            listFilter: WordListFilter(
+                              WordFilterKind.category,
+                              catId,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      final (kind, value) = _mapToFilter(
+                        section.key,
+                        sub.label,
+                      );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => CategoryDetailScreen(
+                            title: sub.label,
+                            categoryId: null,
+                            categorySlug: _slugifyLocal(sub.label),
+                            listFilter: WordListFilter(kind, value),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+
+              SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
+            ],
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: FloatingPaletteButton(scrollController: _scroll),
+          ),
         ],
       ),
     );

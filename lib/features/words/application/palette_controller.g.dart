@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'category_controller.dart';
+part of 'palette_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoryControllerHash() =>
-    r'0001846a0aa595301f06a62712668bd6bc4e670e';
+String _$paletteControllerHash() => r'85d22dfcd02dacacddb8a31d6f61c4cd843c3ec0';
 
-/// See also [CategoryController].
-@ProviderFor(CategoryController)
-final categoryControllerProvider =
-    AutoDisposeNotifierProvider<CategoryController, CategoryState>.internal(
-      CategoryController.new,
-      name: r'categoryControllerProvider',
+/// See also [PaletteController].
+@ProviderFor(PaletteController)
+final paletteControllerProvider =
+    AutoDisposeNotifierProvider<PaletteController, PaletteState>.internal(
+      PaletteController.new,
+      name: r'paletteControllerProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$categoryControllerHash,
+          : _$paletteControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$CategoryController = AutoDisposeNotifier<CategoryState>;
+typedef _$PaletteController = AutoDisposeNotifier<PaletteState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
