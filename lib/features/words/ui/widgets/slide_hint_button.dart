@@ -10,32 +10,55 @@ class SlideHintController {
     final s = _s;
     if (s == null) return;
 
+    s._lockClosedUntil = DateTime.now().add(const Duration(milliseconds: 900));
+    s._suppressFor(const Duration(milliseconds: 900));
+    s._freezeFor(const Duration(milliseconds: 900));
+    s._userInteracted = true;
     s._closing = true;
     s._stopHints();
 
     if (s._ac.isAnimating) s._ac.stop();
 
-    if (s._offset < -0.5) {
-      await s._animateTo(
-        0,
-        d: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    } else {
-      s._offset = 0;
-      s._from = 0;
-      s._to = 0;
-      s.setState(() {});
-    }
+    await s._animateTo(
+      0,
+      d: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
 
-    s._userInteracted = true;
+    s._offset = 0;
+    s._from = 0;
+    s._to = 0;
+    s.setState(() {});
+
     s._hintTimer?.cancel();
     s._hintTimer = null;
-    await Future<void>.delayed(const Duration(milliseconds: 80));
     s._closing = false;
   }
 
   Future<void> nudge({double by = 24}) async => _s!._nudge(by: by);
+  Future<void> closeAndFreeze([
+    Duration freeze = const Duration(milliseconds: 800),
+  ]) async {
+    final s = _s;
+    if (s == null) return;
+
+    s._suppressFor(freeze);
+    s._freezeFor(freeze);
+    s._stopHints();
+
+    if (s._ac.isAnimating) s._ac.stop();
+
+    await s._animateTo(
+      0,
+      d: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+
+    s._offset = 0;
+    s._from = 0;
+    s._to = 0;
+    s.setState(() {});
+  }
 
   double get offset => _s?._offset ?? 0;
 }
@@ -48,6 +71,7 @@ class SlideHintButton extends StatefulWidget {
     required this.reveal,
     this.enableDrag = false,
     this.controller,
+    this.onUnderlayTap,
     // Hint-Steuerung
     this.autoHint = false,
     this.firstHintDelay = const Duration(milliseconds: 600),
@@ -64,6 +88,7 @@ class SlideHintButton extends StatefulWidget {
   final double reveal;
   final bool enableDrag;
   final SlideHintController? controller;
+  final VoidCallback? onUnderlayTap;
 
   // Auto-Hint
   final bool autoHint;
@@ -96,6 +121,19 @@ class _SlideHintButtonState extends State<SlideHintButton>
   double _from = 0.0;
   double _to = 0.0;
   bool _closing = false;
+  DateTime? _lockClosedUntil;
+  DateTime? _freezeUntil;
+  DateTime? _suppressUntil;
+
+  bool get _isLocked =>
+      _lockClosedUntil != null && DateTime.now().isBefore(_lockClosedUntil!);
+  bool get _isFrozen =>
+      _freezeUntil != null && DateTime.now().isBefore(_freezeUntil!);
+  bool get _canOpen =>
+      _suppressUntil == null || DateTime.now().isAfter(_suppressUntil!);
+
+  void _suppressFor(Duration d) => _suppressUntil = DateTime.now().add(d);
+  void _freezeFor(Duration d) => _freezeUntil = DateTime.now().add(d);
 
   @override
   void initState() {
@@ -118,10 +156,32 @@ class _SlideHintButtonState extends State<SlideHintButton>
     }
 
     if (oldWidget.autoHint != widget.autoHint) {
-      if (widget.autoHint) {
-        if (!_userInteracted) _scheduleHints();
+      if (widget.autoHint && !_userInteracted && !_isLocked && !_isFrozen) {
+        _scheduleHints();
       } else {
         _stopHints();
+      }
+    }
+
+    if (_isFrozen) {
+      _stopHints();
+      if (_offset != 0) {
+        if (_ac.isAnimating) _ac.stop();
+        _offset = 0;
+        _from = 0;
+        _to = 0;
+        setState(() {});
+      }
+    }
+
+    if (_isLocked) {
+      _stopHints();
+      if (_offset != 0) {
+        if (_ac.isAnimating) _ac.stop();
+        _offset = 0;
+        _from = 0;
+        _to = 0;
+        setState(() {});
       }
     }
   }
@@ -195,7 +255,13 @@ class _SlideHintButtonState extends State<SlideHintButton>
   }
 
   void _scheduleHints() {
-    if (!widget.autoHint || _userInteracted || _closing) return;
+    if (!widget.autoHint ||
+        _userInteracted ||
+        _closing ||
+        _isFrozen ||
+        !_canOpen) {
+      return;
+    }
     if (_hintTimer != null) return;
 
     _hintTimer = Timer(widget.firstHintDelay, () async {
@@ -214,7 +280,9 @@ class _SlideHintButtonState extends State<SlideHintButton>
   }
 
   Future<void> _runOneHint() async {
-    if (!mounted || _userInteracted || _closing) return;
+    if (!mounted || _userInteracted || _closing || _isFrozen || !_canOpen) {
+      return;
+    }
     if (_hintAnimating) return;
     if (_offset.abs() >= 0.5) return;
 
@@ -242,7 +310,8 @@ class _SlideHintButtonState extends State<SlideHintButton>
 
   @override
   Widget build(BuildContext context) {
-    final revealPx = (-_offset).clamp(0.0, widget.reveal);
+    final revealPxRaw = (-_offset).clamp(0.0, widget.reveal);
+    final revealPx = _isFrozen ? 0.0 : revealPxRaw;
     final progress = (revealPx / widget.reveal).clamp(0.0, 1.0);
 
     final core = Listener(
@@ -253,13 +322,21 @@ class _SlideHintButtonState extends State<SlideHintButton>
         child: widget.enableDrag
             ? GestureDetector(
                 behavior: HitTestBehavior.deferToChild,
-                onHorizontalDragStart: (_) => _stopHints(),
+                onHorizontalDragStart: (_) {
+                  _stopHints();
+                  if (_isFrozen || !_canOpen) return;
+                },
                 onHorizontalDragUpdate: (d) {
+                  if (_isFrozen || !_canOpen) return;
                   setState(() {
                     _offset = (_offset + d.delta.dx).clamp(-widget.reveal, 0.0);
                   });
                 },
                 onHorizontalDragEnd: (d) {
+                  if (_isFrozen || !_canOpen) {
+                    _animateTo(0, d: const Duration(milliseconds: 200));
+                    return;
+                  }
                   final v = d.primaryVelocity ?? 0;
                   final open = _offset < -widget.reveal * 0.55 || v < -400;
                   _animateTo(
@@ -284,7 +361,29 @@ class _SlideHintButtonState extends State<SlideHintButton>
       height: 40,
       child: Stack(
         clipBehavior: Clip.none,
-        children: [Positioned(right: 0, top: 2, bottom: 2, child: moving)],
+        children: [
+          Positioned(right: 0, top: 2, bottom: 2, child: moving),
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: widget.reveal,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async {
+                _stopHints();
+                _suppressFor(const Duration(milliseconds: 900));
+                _freezeFor(const Duration(milliseconds: 900));
+                widget.onUnderlayTap?.call();
+                await _animateTo(
+                  0,
+                  d: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

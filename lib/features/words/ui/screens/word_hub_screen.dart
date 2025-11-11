@@ -22,17 +22,13 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _frontButtonWidth = 120.0;
   static const double _maxReveal = 90.0;
   static const double _laneWidth = _frontButtonWidth + _maxReveal;
-  static const double _toggleWidth = 40.0;
-  static const double _gap = 8.0;
 
   final SlideHintController _slideCtrl = SlideHintController();
   bool _allowHints = true;
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
     if (mounted) setState(() => _allowHints = false);
-
-    await _slideCtrl.close();
-
+    await _slideCtrl.closeAndFreeze();
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
   }
 
@@ -91,7 +87,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                 ),
               ),
               Positioned(
-                right: 12 + _toggleWidth + _gap,
+                right: 12,
+                top: 8,
+                child: GlowToggleButton(
+                  glowEnabled: glowEnabled,
+                  onToggle: () => _handleGlowToggle(glowEnabled),
+                ),
+              ),
+              Positioned(
+                right: 12,
                 top: 6,
                 child: SlideHintButton(
                   key: ValueKey(_allowHints),
@@ -105,15 +109,12 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   hintFraction: 2 / 3,
                   hintOutDuration: const Duration(milliseconds: 1200),
                   hintBackDuration: const Duration(milliseconds: 600),
+                  onUnderlayTap: () {
+                    if (mounted) setState(() => _allowHints = false);
+                    final glow = ref.read(wordHubGlowProvider);
+                    ref.read(wordHubGlowProvider.notifier).state = !glow;
+                  },
                   child: _buildFrontButton(),
-                ),
-              ),
-              Positioned(
-                right: 12,
-                top: 8,
-                child: GlowToggleButton(
-                  glowEnabled: glowEnabled,
-                  onToggle: () => _handleGlowToggle(glowEnabled),
                 ),
               ),
             ],
