@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'scope_switch_button.dart';
 import 'rotary_color_ring.dart';
 import 'radial_palette_tools.dart';
 import '../../application/palette_state.dart';
+import '../../application/radial_palette_controller.dart' show radialPaletteProvider;
 
-class RadialPaletteWheel extends StatelessWidget {
+class RadialPaletteWheel extends ConsumerWidget {
   const RadialPaletteWheel({
     super.key,
     required this.ringKey,
@@ -36,7 +38,10 @@ class RadialPaletteWheel extends StatelessWidget {
   final ValueChanged<PaletteTarget> onTargetSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = ref.watch(radialPaletteProvider);
+    final hasActiveTool = palette.activeTool != null;
+
     const double coreSize = 280.0;
     const double toolsRadiusFactor = 0.35;
 
@@ -73,34 +78,27 @@ class RadialPaletteWheel extends StatelessWidget {
             ),
           ),
 
-          // Tool-Buttons im ursprünglichen coreSize
+          // Center-Button (vor RadialTools, damit RadialTools darüber liegt)
+          IgnorePointer(
+            ignoring: hasActiveTool, // 🔹 bei aktivem Tool keine Hit-Tests
+            child: Center(
+              child: ScopeSwitchButton(
+                size: 112,
+                ringColor: activeColor,
+                onConfirmColor: () {
+                  onPickColor(activeColor);
+                },
+                isInteractive: !hasActiveTool, // 🔹 nur ohne aktives Tool klickbar
+              ),
+            ),
+          ),
+
+          // Tools (7 Buttons oder aktive Tool-Fläche) - liegt OBEN, fängt Taps
           SizedBox(
             width: coreSize,
             height: coreSize,
             child: RadialTools(
               ringKey: ringKey,
-              radiusFactor: toolsRadiusFactor,
-              activeTarget: activeTarget,
-              onTap: (tool, target) {
-                if (tool == RadialTool.scope) {
-                  onToggleScope();
-                } else if (tool == RadialTool.palette) {
-                  onSwitchPalette();
-                } else if (target != null) {
-                  onTargetSelected(target);
-                }
-              },
-            ),
-          ),
-
-          // Center-Button
-          Center(
-            child: ScopeSwitchButton(
-              diameter: 112,
-              ringColor: activeColor,
-              isAll: isAll,
-              onTapToggle: onCenterToggleScope,
-              onConfirmHold: onCenterReset,
             ),
           ),
 

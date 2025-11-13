@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/palette_controller.dart';
 import '../../application/palette_state.dart';
+import '../../application/radial_palette_controller.dart';
 import 'radial_palette_wheel.dart';
 import 'rotary_color_ring.dart';
 
@@ -34,6 +35,7 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
   Widget build(BuildContext context) {
     final paletteState = ref.watch(paletteControllerProvider);
     final ctrl = ref.read(paletteControllerProvider.notifier);
+    final radialPalette = ref.watch(radialPaletteProvider);
 
     return Material(
       type: MaterialType.transparency,
@@ -44,6 +46,12 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
             dismissible: true,
             onDismiss: widget.onClose,
           ),
+          if (radialPalette.overlayVisible)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.6),
+              ),
+            ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
