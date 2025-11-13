@@ -1,6 +1,6 @@
 # 📁 Projektstruktur (Talvori)
 
-Letzte Aktualisierung: 2025-10-30
+Letzte Aktualisierung: 2025-01-27
 
 ## Layering
 
@@ -22,6 +22,11 @@ Letzte Aktualisierung: 2025-10-30
 - `ui/widgets/level_selector_buttons.dart` – Buttons: S0–S5, S1–S5, Single
 - `ui/widgets/single_mode_switch_row.dart` – UI-Reihe für Single-Session (SRC, SR1, SR2)
 - `ui/widgets/single_stage_picker.dart` – BottomSheet für S1–S5 Auswahl
+- `ui/widgets/radial_palette_sheet.dart` – Radiale Farbpalette mit rotierbarem Ring, Tool-Buttons und Farbauswahl
+  - `_WheelCore` – Hauptcontainer mit schwarzer Scheibe, Tool-Buttons, Center-Button und Farbring
+  - `_RotaryColorRing` – Rotierbarer Farbring mit 24 Keilen, vereinheitlichte Gestenbehandlung für Rotation und Picking
+  - `_RadialTools` – Tool-Buttons um den Center-Button herum
+  - `_WedgePainter` – CustomPainter für die Farbkeile
 
 ### Application
 
@@ -53,6 +58,13 @@ Letzte Aktualisierung: 2025-10-30
 
 ## Letzte Änderungen
 
+- **Radiale Farbpalette refactored** (2025-01-27):
+  - Separater Rotation-Layer entfernt, vereinheitlichte Gestenbehandlung in Keil-GestureDetectors
+  - Verbesserte Farbauswahl: Bubble erscheint sofort beim Tippen und folgt dem Finger
+  - Farbwechsel beim Ziehen über andere Keile behoben
+  - Scheibe und Ring größer gemacht, Tool-Buttons bleiben an ursprünglicher Position
+  - Perfekte Rundheit durch `AspectRatio`-Wrapper gewährleistet
+  - Ring liegt oben am Rand der schwarzen Scheibe (ringOuterRadius = discRadius)
 - Single-Mode UI vereinheitlicht, `SingleModeSwitchRow` nutzt identische Farben wie S0–S5
 - `singleNextWordId` auf RPC `fn_single_session_next` umgestellt, robustere Antwortverarbeitung
 - `singleMove` Parameter zu `p_correct` (Boolean) geändert

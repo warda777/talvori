@@ -1,6 +1,7 @@
 # 📋 Programmliste - Vollständiger Code aller Dateien
 
-> **Erstellt:** 11.11.2025
+> **Erstellt:** 11.11.2025  
+> **Letzte Aktualisierung:** 27.01.2025
 
 Diese Datei enthält den vollständigen Codeinhalt aller relevanten Projektdateien.
 
