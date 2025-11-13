@@ -41,17 +41,18 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
       type: MaterialType.transparency,
       child: Stack(
         children: [
-          ModalBarrier(
-            color: Colors.black54,
-            dismissible: true,
-            onDismiss: widget.onClose,
-          ),
-          if (radialPalette.overlayVisible)
+          if (radialPalette.overlayVisible) ...[
+            ModalBarrier(
+              color: Colors.black54,
+              dismissible: true,
+              onDismiss: widget.onClose,
+            ),
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.6),
               ),
             ),
+          ],
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(

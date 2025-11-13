@@ -117,7 +117,14 @@ class RadialPaletteWheel extends ConsumerWidget {
                   bubbleSize: bubbleSize,
                   count: 24,
                   onActiveColorChanged: onActiveColorChanged,
-                  onPick: onPickColor,
+                  onPick: (color) {
+                    // 1) Bisheriges Verhalten beibehalten (z.B. Preview im Ring etc.)
+                    onPickColor(color);
+
+                    // 2) NEU: Farbe auf aktuelles Target anwenden,
+                    //    abhängig von Tool + ALL/ONE
+                    ref.read(radialPaletteProvider.notifier).applyColorToCurrentTarget(color);
+                  },
                   ringLift: 0.0,
                   hitPadInner: 8.0,
                   hitPadOuter: 8.0,

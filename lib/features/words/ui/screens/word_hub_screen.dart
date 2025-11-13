@@ -8,6 +8,8 @@ import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/ui/widgets/category_card.dart';
+// ⬇️ NEU
+import 'package:talvori/features/words/application/radial_palette_controller.dart';
 import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
 import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
@@ -34,11 +36,12 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
   }
 
-  Widget _buildFrontButton() {
+  Widget _buildFrontButton({Key? key}) {
     return SizedBox(
       width: _frontButtonWidth,
       height: 36,
       child: TextButton(
+        key: key,
         onPressed: () {},
         style: TextButton.styleFrom(
           backgroundColor: Colors.black,
@@ -64,6 +67,43 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final repo = ref.read(wordHubControllerProvider.notifier).repo;
     final glowEnabled = ref.watch(wordHubGlowProvider);
 
+    // Keys für Header-Elemente
+    final titleKey = GlobalKey();
+    final backKey = GlobalKey();
+    final unlockKey = GlobalKey();
+    final searchKey = GlobalKey();
+
+    // Header-Targets registrieren
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final headerTargets = <PaletteTarget>[
+        PaletteTarget(
+          id: 'wordHub.title',
+          key: titleKey,
+          kind: TargetKind.header,
+          tools: {PaletteTool.text},
+        ),
+        PaletteTarget(
+          id: 'wordHub.backButton',
+          key: backKey,
+          kind: TargetKind.icon,
+          tools: {PaletteTool.icon, PaletteTool.stroke},
+        ),
+        PaletteTarget(
+          id: 'wordHub.unlockButton',
+          key: unlockKey,
+          kind: TargetKind.button,
+          tools: {PaletteTool.stroke, PaletteTool.fill, PaletteTool.text},
+        ),
+        PaletteTarget(
+          id: 'wordHub.search',
+          key: searchKey,
+          kind: TargetKind.searchBar,
+          tools: {PaletteTool.stroke, PaletteTool.fill},
+        ),
+      ];
+      ref.read(radialPaletteProvider.notifier).registerTargets(headerTargets);
+    });
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -72,6 +112,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         elevation: 0,
         toolbarHeight: 56,
         leading: IconButton(
+          key: backKey,
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
           tooltip: 'Close',
@@ -82,10 +123,14 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              const Positioned.fill(
+              Positioned.fill(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Word Hub', overflow: TextOverflow.ellipsis),
+                  child: Text(
+                    'Word Hub',
+                    key: titleKey,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
               Positioned(
@@ -116,7 +161,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     final glow = ref.read(wordHubGlowProvider);
                     ref.read(wordHubGlowProvider.notifier).state = !glow;
                   },
-                  child: _buildFrontButton(),
+                  child: _buildFrontButton(key: unlockKey),
                 ),
               ),
             ],
@@ -133,6 +178,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: TextField(
+                    key: searchKey,
                     textInputAction: TextInputAction.search,
                     onSubmitted: (q) {
                       final query = q.trim();
@@ -185,7 +231,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
               // Sektionen
               for (final section in hubSections) ...[
-                _SectionHeader(section.title),
+                _SectionHeader(section.title, section.key),
                 _GridSection(
                   sectionKey: section.key,
                   subs: section.subcats,
@@ -267,22 +313,45 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   return (WordFilterKind.about, label);
 }
 
-class _SectionHeader extends StatelessWidget {
+class _SectionHeader extends ConsumerWidget {
   final String title;
-  const _SectionHeader(this.title);
+  final String sectionKey;
+  
+  const _SectionHeader(this.title, this.sectionKey);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final titleKey = GlobalKey();
+    
+    // Target registrieren
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(radialPaletteProvider.notifier).registerTargets([
+        PaletteTarget(
+          id: 'wordHub.sectionTitle.$sectionKey',
+          key: titleKey,
+          kind: TargetKind.sectionTitle,
+          tools: {
+            PaletteTool.text,
+            PaletteTool.glow,
+          },
+        ),
+      ]);
+    });
+    
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        child: Text(
+          title,
+          key: titleKey,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
       ),
     );
   }
 }
 
-class _GridSection extends StatelessWidget {
+class _GridSection extends ConsumerWidget {
   final String sectionKey;
   final List<HubSubcat> subs;
   final SupabaseWordRepository repo;
@@ -296,16 +365,54 @@ class _GridSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 1) Für jede Subkategorie einen Key anlegen
+    final keys = List.generate(subs.length, (_) => GlobalKey());
+
+    // 2) Zu JEDEM Sub eine PaletteTarget-ID + Key anlegen
+    final targets = <PaletteTarget>[];
+    for (var i = 0; i < subs.length; i++) {
+      final sub = subs[i];
+      final id = 'wordHub.$sectionKey.${sub.key}';
+      targets.add(PaletteTarget(
+        id: id,
+        key: keys[i],
+        kind: TargetKind.tile,
+        tools: {
+          PaletteTool.stroke,
+          PaletteTool.fill,
+          PaletteTool.text,
+          PaletteTool.icon,
+          PaletteTool.image,
+          PaletteTool.glow,
+        },
+      ));
+    }
+
+    // 3) Targets nach dem Frame einmalig registrieren
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (targets.isEmpty) return;
+      ref.read(radialPaletteProvider.notifier).registerTargets(targets);
+    });
+
+    // 4) Grid ganz normal bauen, aber die vorbereiteten Keys verwenden
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
-          (context, i) => CategoryCard(
-            sectionKey: sectionKey,
-            sub: subs[i],
-            onTap: onTapSub == null ? null : () => onTapSub!(subs[i]),
-          ),
+          (context, i) {
+            final sub = subs[i];
+            final id = 'wordHub.$sectionKey.${sub.key}';
+            return _HighlightableTarget(
+              id: id,
+              child: CategoryCard(
+                key: keys[i],
+                sectionKey: sectionKey,
+                sub: sub,
+                onTap: onTapSub == null ? null : () => onTapSub!(sub),
+              ),
+            );
+          },
           childCount: subs.length,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -314,6 +421,185 @@ class _GridSection extends StatelessWidget {
           crossAxisSpacing: 16,
           childAspectRatio: 1.1,
         ),
+      ),
+    );
+  }
+}
+
+class _HighlightableTarget extends ConsumerWidget {
+  const _HighlightableTarget({
+    super.key,
+    required this.id,
+    required this.child,
+  });
+
+  final String id;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final palette = ref.watch(radialPaletteProvider);
+
+    bool isFocused = false;
+    if (palette.targets.isNotEmpty &&
+        palette.focusedIndex >= 0 &&
+        palette.focusedIndex < palette.targets.length) {
+      final focused = palette.targets[palette.focusedIndex];
+      isFocused = focused.id == id;
+    }
+
+    if (!isFocused) {
+      return child;
+    }
+
+    const gold = Color(0xFFFFC66A);
+    final tool = palette.activeTool;
+
+    Widget overlay;
+
+    switch (tool) {
+      case PaletteTool.stroke:
+        // 🔹 Nur Rahmen + Glow → verdeutlicht: hier geht es um Stroke
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: gold, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: gold.withOpacity(0.9),
+                blurRadius: 26,
+                spreadRadius: 3,
+              ),
+            ],
+          ),
+        );
+        break;
+
+      case PaletteTool.fill:
+      case PaletteTool.hubBackground:
+      case PaletteTool.image:
+        // 🔹 Halbdurchsichtiger Gold-Overlay + leichter Rahmen:
+        //     „du änderst den Hintergrund / Inhalt"
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: gold.withOpacity(0.22),
+            border: Border.all(color: gold.withOpacity(0.9), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: gold.withOpacity(0.8),
+                blurRadius: 24,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+        );
+        break;
+
+      case PaletteTool.text:
+        // 🔹 Kleine TEXT-Badge oben links → „du änderst Text"
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: gold.withOpacity(0.7), width: 1.6),
+          ),
+          alignment: Alignment.topLeft,
+          padding: const EdgeInsets.all(6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'TEXT',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      case PaletteTool.icon:
+        // 🔹 ICON-Badge oben rechts
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: gold.withOpacity(0.7), width: 1.6),
+          ),
+          alignment: Alignment.topRight,
+          padding: const EdgeInsets.all(6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'ICON',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                letterSpacing: 0.8,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      case PaletteTool.glow:
+        // 🔹 Nur äußerer Glow, kein Rahmen → „Glow/Light"
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: gold.withOpacity(0.95),
+                blurRadius: 32,
+                spreadRadius: 6,
+              ),
+            ],
+          ),
+        );
+        break;
+
+      default:
+        // Fallback: wie Stroke
+        overlay = Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: gold, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: gold.withOpacity(0.9),
+                blurRadius: 26,
+                spreadRadius: 3,
+              ),
+            ],
+          ),
+        );
+        break;
+    }
+
+    return AnimatedScale(
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      scale: 1.04,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          child,
+          // 🔹 Highlight-Layer legt sich oben drauf
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 120),
+            child: overlay,
+          ),
+        ],
       ),
     );
   }

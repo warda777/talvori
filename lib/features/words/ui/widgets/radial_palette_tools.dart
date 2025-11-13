@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // für HapticFeedback
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/radial_palette_controller.dart';
@@ -251,30 +252,27 @@ class _FocusSelectorRing extends ConsumerStatefulWidget {
 }
 
 class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
-  double? _dragAngle; // Winkel während des Drags (null = kein Drag)
+  double? _dragAngle; // aktueller, kontinuierlicher Winkel des Balls
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(radialPaletteProvider);
     final ctrl = ref.read(radialPaletteProvider.notifier);
+    final state = ref.watch(radialPaletteProvider);
 
-    final total = state.targets.length;
-    final effectiveTotal = total == 0 ? 12 : total; // 🔹 Fallback, damit sich die Kugel auch
-                                                   //    ohne Targets schon sichtbar bewegt
+    final visible = ctrl.visibleTargets;
+    final total = visible.isNotEmpty ? visible.length : 12;
+
+    // sichtbarer Index (nicht globaler Index!)
+    final visibleIndex = ctrl.currentVisibleIndex.clamp(0, total - 1);
+
+    final angleStep = (2 * math.pi) / total;
+
+    // Wenn gerade gezogen wird, verwenden wir _dragAngle (smooth),
+    // sonst den gesnappten Winkel des aktuellen Fokus.
+    final angle = _dragAngle ??
+        (-math.pi / 2 + angleStep * visibleIndex); // Start oben (-90°)
 
     final ringRadius = widget.size / 2 - 80;
-
-    // Während des Drags: verwende _dragAngle, sonst berechne aus Index
-    double angle;
-    if (_dragAngle != null) {
-      angle = _dragAngle!;
-    } else {
-      final index = state.focusedIndex;
-      final normalizedIndex = index % effectiveTotal;
-      final angleStep = (2 * math.pi) / effectiveTotal;
-      // Start: oben (–90°), im Uhrzeigersinn
-      angle = -math.pi / 2 + angleStep * normalizedIndex;
-    }
 
     final ballOffset = Offset(
       ringRadius * math.cos(angle),
@@ -284,55 +282,12 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
-        // Berechne Winkel basierend auf Startposition
-        final box = context.findRenderObject() as RenderBox?;
-        if (box == null) return;
-        final localPos = box.globalToLocal(details.globalPosition);
-        final center = Offset(box.size.width / 2, box.size.height / 2);
-        final offset = localPos - center;
-        final distance = offset.distance;
-        
-        // Nur starten, wenn Finger nahe am Ring ist (Toleranz: ±30px)
-        final minRadius = ringRadius - 30;
-        final maxRadius = ringRadius + 30;
-        if (distance < minRadius || distance > maxRadius) return;
-        
-        final startAngle = math.atan2(offset.dy, offset.dx);
-        setState(() {
-          _dragAngle = startAngle;
-        });
+        _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
       onPanUpdate: (details) {
-        // Nur updaten, wenn Drag bereits gestartet wurde
-        if (_dragAngle == null) return;
-        
-        // Berechne Winkel basierend auf aktueller Fingerposition
-        final box = context.findRenderObject() as RenderBox?;
-        if (box == null) return;
-        final localPos = box.globalToLocal(details.globalPosition);
-        final center = Offset(box.size.width / 2, box.size.height / 2);
-        final offset = localPos - center;
-        final currentAngle = math.atan2(offset.dy, offset.dx);
-        setState(() {
-          _dragAngle = currentAngle;
-        });
+        _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
-      onPanEnd: (details) {
-        // Setze finalen Index basierend auf Winkel
-        if (_dragAngle == null) return;
-        
-        final currentState = ref.read(radialPaletteProvider);
-        final effectiveTotal = currentState.targets.isEmpty ? 12 : currentState.targets.length;
-        final angleStep = (2 * math.pi) / effectiveTotal;
-        
-        // Normalisiere Winkel auf [0, 2*pi) und verschiebe um -90° (Start oben)
-        var normalizedAngle = (_dragAngle! + math.pi / 2) % (2 * math.pi);
-        if (normalizedAngle < 0) normalizedAngle += 2 * math.pi;
-        
-        // Berechne Index aus Winkel
-        final newIndex = ((normalizedAngle / angleStep) % effectiveTotal).round();
-        
-        ref.read(radialPaletteProvider.notifier).moveFocusToIndex(newIndex);
+      onPanEnd: (_) {
         setState(() {
           _dragAngle = null;
         });
@@ -351,7 +306,6 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
             child: Transform.translate(
               offset: ballOffset,
               child: Container(
-                // 🔹 Kugel 4× so groß wie vorher (14 → 56)
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
@@ -376,6 +330,45 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
         ),
       ),
     );
+  }
+
+  void _updateFromPosition(
+    BuildContext context,
+    Offset globalPos,
+    int total,
+    RadialPaletteController ctrl,
+  ) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final local = box.globalToLocal(globalPos);
+    final center = Offset(box.size.width / 2, box.size.height / 2);
+    final offset = local - center;
+
+    final ringRadius = widget.size / 2 - 80;
+    final distance = offset.distance;
+    final minRadius = ringRadius - 40;
+    final maxRadius = ringRadius + 40;
+
+    // nur reagieren, wenn Finger in der Nähe des Rings ist
+    if (distance < minRadius || distance > maxRadius) return;
+
+    // Winkel berechnen (–PI..PI)
+    var angle = math.atan2(offset.dy, offset.dx);
+
+    setState(() {
+      _dragAngle = angle; // Ball folgt dem Finger SMOOTH
+    });
+
+    // jetzt auf [0, 2*PI) normalisieren und "oben" als Start definieren
+    angle += math.pi / 2;
+    angle = angle % (2 * math.pi);
+    if (angle < 0) angle += 2 * math.pi;
+
+    final angleStep = (2 * math.pi) / total;
+    final visibleIndex = (angle / angleStep).round().clamp(0, total - 1);
+
+    ctrl.moveFocusToVisibleIndex(visibleIndex);
   }
 }
 
