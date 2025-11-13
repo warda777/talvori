@@ -22,11 +22,17 @@ Letzte Aktualisierung: 2025-01-27
 - `ui/widgets/level_selector_buttons.dart` – Buttons: S0–S5, S1–S5, Single
 - `ui/widgets/single_mode_switch_row.dart` – UI-Reihe für Single-Session (SRC, SR1, SR2)
 - `ui/widgets/single_stage_picker.dart` – BottomSheet für S1–S5 Auswahl
-- `ui/widgets/radial_palette_sheet.dart` – Radiale Farbpalette mit rotierbarem Ring, Tool-Buttons und Farbauswahl
-  - `_WheelCore` – Hauptcontainer mit schwarzer Scheibe, Tool-Buttons, Center-Button und Farbring
-  - `_RotaryColorRing` – Rotierbarer Farbring mit 24 Keilen, vereinheitlichte Gestenbehandlung für Rotation und Picking
-  - `_RadialTools` – Tool-Buttons um den Center-Button herum
+- `ui/widgets/radial_palette_sheet.dart` – Dünner Wrapper für die radiale Farbpalette
+- `ui/widgets/radial_palette_wheel.dart` – Hauptcontainer mit schwarzer Scheibe, Tool-Buttons, Center-Button und Farbring
+- `ui/widgets/rotary_color_ring.dart` – Rotierbarer Farbring mit 24 Keilen, vereinheitlichte Gestenbehandlung für Rotation und Picking
+  - `RotaryColorRing` / `RotaryColorRingState` – Hauptwidget mit Rotation, Farbauswahl und Bubble-Drag
   - `_WedgePainter` – CustomPainter für die Farbkeile
+  - `_WedgeClipper` – CustomClipper für die Hit-Zone der Keile
+  - `_AnnulusClipper` – CustomClipper für den Ring-Bereich
+- `ui/widgets/radial_palette_tools.dart` – Tool-Buttons um den Center-Button herum
+  - `RadialTools` – Tool-Button-Widget mit RadialTool-Enum
+- `ui/widgets/scope_switch_button.dart` – Center-Button mit Scope-Switch-Funktionalität
+  - `ScopeSwitchButton` – Button mit Ring-Design und Hold-to-Reset
 
 ### Application
 
@@ -59,7 +65,14 @@ Letzte Aktualisierung: 2025-01-27
 ## Letzte Änderungen
 
 - **Radiale Farbpalette refactored** (2025-01-27):
-  - Separater Rotation-Layer entfernt, vereinheitlichte Gestenbehandlung in Keil-GestureDetectors
+  - Komponenten in separate Dateien ausgelagert:
+    - `scope_switch_button.dart` – Center-Button isoliert
+    - `rotary_color_ring.dart` – Farbring isoliert
+    - `radial_palette_tools.dart` – Tool-Buttons isoliert
+    - `radial_palette_wheel.dart` – Hauptcontainer isoliert
+  - `radial_palette_sheet.dart` ist jetzt ein dünner Wrapper
+  - Verbesserte Hit-Zone: Keile haben erweiterte Hit-Zone nach innen (24px), sichtbare Darstellung bleibt gleich
+  - Tap beendet Pick-Modus: `onTapUp` und `onTapCancel` beenden den Pick-Modus sauber
   - Verbesserte Farbauswahl: Bubble erscheint sofort beim Tippen und folgt dem Finger
   - Farbwechsel beim Ziehen über andere Keile behoben
   - Scheibe und Ring größer gemacht, Tool-Buttons bleiben an ursprünglicher Position

@@ -287,25 +287,6 @@ class RotaryColorRingState extends State<RotaryColorRing>
                     widget.onPick(colors[i]);
                     HapticFeedback.lightImpact();
                   },
-                  // Nach einem normalen Tap Modus wieder verlassen
-                  onTapUp: (_) {
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _picking = false;
-                        _dragColor = null;
-                        _dragPos = null;
-                      });
-                    }
-                  },
-                  onTapCancel: () {
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _picking = false;
-                        _dragColor = null;
-                        _dragPos = null;
-                      });
-                    }
-                  },
                   onPanStart: (d) {
                     final box = _stackKey.currentContext?.findRenderObject()
                         as RenderBox?;
