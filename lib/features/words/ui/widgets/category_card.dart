@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
-import 'package:talvori/features/words/application/category_illustrations.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/application/category_stats_provider.dart';
@@ -71,7 +70,6 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
       widget.sub.label,
     );
     final glowEnabled = ref.watch(wordHubGlowProvider);
-    final iconData = CategoryIllustrations.iconFor(widget.sub.key);
 
     return Material(
       color: Colors.transparent,
@@ -116,67 +114,42 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (iconData != null)
-                    Positioned.fill(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double targetSize =
-                              constraints.maxHeight * 0.66;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Icon(
-                                iconData,
-                                size: targetSize,
-                                color: strokeColor.withOpacity(0.35),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        loading
-                            ? const ShimmerBox(height: 18, borderRadius: 6)
-                            : Text(
-                                widget.sub.label,
-                                style: t.textTheme.titleMedium,
-                              ),
-                        const Spacer(),
-                        if (loading)
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: SizedBox(
-                              width: 36,
-                              child: const ShimmerBox(
-                                height: 14,
-                                borderRadius: 6,
-                              ),
-                            ),
-                          )
-                        else if (stats != null)
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                              '${stats.total}',
-                              style: t.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFFF1C86B),
-                              ),
-                            ),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    loading
+                        ? const ShimmerBox(height: 18, borderRadius: 6)
+                        : Text(
+                            widget.sub.label,
+                            style: t.textTheme.titleMedium,
                           ),
-                      ],
-                    ),
-                  ),
-                ],
+                    const Spacer(),
+                    if (loading)
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: SizedBox(
+                          width: 36,
+                          child: const ShimmerBox(
+                            height: 14,
+                            borderRadius: 6,
+                          ),
+                        ),
+                      )
+                    else if (stats != null)
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Text(
+                          '${stats.total}',
+                          style: t.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFF1C86B),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

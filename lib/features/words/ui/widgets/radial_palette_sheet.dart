@@ -115,48 +115,81 @@ class _WheelCore extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const coreSize = 280.0;
-    final coreRadius = coreSize / 2 - 1;
-    const bubbleSize = 30.0;
-    const gapOutside = 4.0;
-    final ringRadius = coreRadius + gapOutside + bubbleSize / 2;
+    // WICHTIG:
+    // coreSize bleibt 280 -> Center + Tool-Buttons bleiben exakt wie jetzt
+    const double coreSize = 280.0;
 
-    return Container(
-      width: coreSize,
-      height: coreSize,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0B0B0D),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white12, width: 1.4),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(.55), blurRadius: 24),
-        ],
-      ),
+    // Tool-Buttons sind bei radiusFactor 0.35
+    // → Radius der Button-Mitte ~ 98, mit 28er Radius → 70–126 px
+    const double toolsRadiusFactor = 0.35;
+
+    // NEU: große schwarze Scheibe (deutlich größer als 280)
+    const double discRadius = 180.0; // 360 px Durchmesser
+    const double discSize = discRadius * 2;
+
+    // NEU: Farbring außerhalb der Tool-Buttons, aber noch im Rad
+    // Tool-Buttons gehen bis ~126px, also Ring z.B. 135–169px
+    const double ringInnerRadius = 135.0;
+    const double trapezDepth = 34.0;
+
+    // etwas Extra-Platz für den Ring-Widget-Rahmen
+    const double overshoot = 24.0;
+    const double bubbleSize = 30.0;
+
+    return SizedBox(
+      width: discSize,   // Groß genug für die Scheibe
+      height: discSize,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          Positioned.fill(
-            child: _RotaryColorRing(
-              key: ringKey,
-              absoluteRadius: ringRadius,
-              bubbleSize: bubbleSize,
-              count: 24,
-              onActiveColorChanged: onActiveColorChanged,
-              onPick: onPickColor,
+          // GROßE SCHWARZE SCHEIBE (nur visuell)
+          Container(
+            width: discSize,
+            height: discSize,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B0B0D),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white12, width: 1.4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.55),
+                  blurRadius: 24,
+                ),
+              ],
             ),
           ),
-          _RadialTools(
-            ringKey: ringKey,
-            radiusFactor: 0.35,
-            onTap: (tool) {
-              if (tool == RadialTool.scope) {
-                onToggleScope();
-              } else if (tool == RadialTool.palette) {
-                onSwitchPalette();
-              }
-            },
+
+          // TOOL-BUTTONS -> in coreSize-Container für ursprüngliche Position
+          SizedBox(
+            width: coreSize,
+            height: coreSize,
+            child: Consumer(
+              builder: (context, ref, _) {
+                final active = ref.watch(
+                  paletteControllerProvider.select((s) => s.target),
+                );
+                return _RadialTools(
+                  ringKey: ringKey,
+                  radiusFactor: toolsRadiusFactor,
+                  activeTarget: active,
+                  onTap: (tool, target) {
+                    if (tool == RadialTool.scope) {
+                      onToggleScope();
+                    } else if (tool == RadialTool.palette) {
+                      onSwitchPalette();
+                    } else if (target != null) {
+                      ref
+                          .read(paletteControllerProvider.notifier)
+                          .setTarget(target);
+                    }
+                  },
+                );
+              },
+            ),
           ),
+
+          // MITTLERER BUTTON -> unverändert
           Center(
             child: ScopeSwitchButton(
               diameter: 112,
@@ -164,6 +197,26 @@ class _WheelCore extends StatelessWidget {
               isAll: isAll,
               onTapToggle: onCenterToggleScope,
               onConfirmHold: onCenterReset,
+            ),
+          ),
+
+          // FARB-RING: komplett im Rad, mit Luft zu den Tool-Buttons
+          Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: discSize + overshoot * 2,
+              height: discSize + overshoot * 2,
+              child: _RotaryColorRing(
+                key: ringKey,
+                absoluteRadius: ringInnerRadius, // <- Start-Radius des Rings
+                bubbleSize: bubbleSize,
+                count: 24,
+                onActiveColorChanged: onActiveColorChanged,
+                onPick: onPickColor,
+                ringLift: 0.0,
+                hitPadInner: 8.0,
+                hitPadOuter: 8.0,
+              ),
             ),
           ),
         ],
@@ -247,6 +300,7 @@ class _ScopeSwitchButtonState extends State<ScopeSwitchButton>
         : Icons.arrow_downward_rounded;
 
     return GestureDetector(
+      behavior: HitTestBehavior.deferToChild, // Nur Events im eigenen Bereich abfangen
       onTap: _tap,
       onLongPressStart: _startHold,
       onLongPressUp: _endHold,
@@ -424,21 +478,23 @@ class _RadialTools extends StatelessWidget {
   const _RadialTools({
     required this.ringKey,
     required this.onTap,
+    required this.activeTarget,
     this.radiusFactor = 0.35,
   });
 
   final GlobalKey<_RotaryColorRingState> ringKey;
-  final void Function(RadialTool tool) onTap;
+  final void Function(RadialTool tool, PaletteTarget? target) onTap;
   final double radiusFactor;
+  final PaletteTarget activeTarget;
 
-  final List<(RadialTool, IconData)> items = const [
-    (RadialTool.stroke, Icons.border_style_rounded),
-    (RadialTool.glow, Icons.waves_rounded),
-    (RadialTool.background, Icons.layers_rounded),
-    (RadialTool.icons, Icons.brush_rounded),
-    (RadialTool.scope, Icons.groups_2_rounded),
-    (RadialTool.palette, Icons.color_lens_rounded),
-    (RadialTool.image, Icons.add_photo_alternate),
+  final List<(RadialTool, IconData, PaletteTarget?)> items = const [
+    (RadialTool.stroke, Icons.border_style_rounded, PaletteTarget.stroke),
+    (RadialTool.glow, Icons.waves_rounded, PaletteTarget.glow),
+    (RadialTool.background, Icons.layers_rounded, PaletteTarget.tileBg),
+    (RadialTool.icons, Icons.brush_rounded, PaletteTarget.icons),
+    (RadialTool.scope, Icons.groups_2_rounded, null),
+    (RadialTool.palette, Icons.color_lens_rounded, null),
+    (RadialTool.image, Icons.add_photo_alternate, PaletteTarget.image),
   ];
 
   @override
@@ -465,15 +521,17 @@ class _RadialTools extends StatelessWidget {
               top: posBtn.dy - 28,
               width: 56,
               height: 56,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
+              child: _ToolHitCircle(
+                onTap: () => onTap(items[i].$1, items[i].$3),
                 onPanStart: (d) =>
                     ringKey.currentState?.handleExternalPanStart(d),
                 onPanUpdate: (d) =>
                     ringKey.currentState?.handleExternalPanUpdate(d),
                 onPanEnd: (d) => ringKey.currentState?.handleExternalPanEnd(d),
-                onTap: () => onTap(items[i].$1),
-                child: _ToolButton(icon: items[i].$2),
+                child: _ToolButton(
+                  icon: items[i].$2,
+                  active: items[i].$3 != null && items[i].$3 == activeTarget,
+                ),
               ),
             ),
           );
@@ -485,18 +543,69 @@ class _RadialTools extends StatelessWidget {
   }
 }
 
+class _ToolHitCircle extends StatelessWidget {
+  const _ToolHitCircle({
+    required this.child,
+    required this.onTap,
+    required this.onPanStart,
+    required this.onPanUpdate,
+    required this.onPanEnd,
+  });
+
+  final Widget child;
+  final VoidCallback onTap;
+  final GestureDragStartCallback onPanStart;
+  final GestureDragUpdateCallback onPanUpdate;
+  final GestureDragEndCallback onPanEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.deferToChild,
+      onPanStart: onPanStart,
+      onPanUpdate: onPanUpdate,
+      onPanEnd: onPanEnd,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkResponse(
+          onTap: onTap,
+          containedInkWell: true,
+          customBorder: const CircleBorder(),
+          radius: 28,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 class _ToolButton extends StatelessWidget {
-  const _ToolButton({required this.icon});
+  const _ToolButton({required this.icon, this.active = false});
 
   final IconData icon;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0x151FFFFFF),
+        color: active ? const Color(0x33FFFFFF) : const Color(0x151FFFFFF),
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white24),
+        border: Border.all(
+          color: active ? Colors.white70 : Colors.white24,
+          width: active ? 1.6 : 1.0,
+        ),
+        boxShadow: active
+            ? [
+                const BoxShadow(
+                  color: Colors.white24,
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
       ),
       child: SizedBox(
         width: 56,
@@ -515,6 +624,9 @@ class _RotaryColorRing extends StatefulWidget {
     this.count = 36,
     this.bubbleSize = 22,
     required this.absoluteRadius,
+    this.ringLift = 0.0,
+    this.hitPadInner = 0.0,
+    this.hitPadOuter = 0.0,
   });
 
   final ValueChanged<Color> onPick;
@@ -522,6 +634,9 @@ class _RotaryColorRing extends StatefulWidget {
   final int count;
   final double bubbleSize;
   final double absoluteRadius;
+  final double ringLift;
+  final double hitPadInner;
+  final double hitPadOuter;
 
   @override
   State<_RotaryColorRing> createState() => _RotaryColorRingState();
@@ -532,12 +647,20 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
   double _angle = 0.0;
   double _dragStartAngle = 0.0;
   Offset _center = Offset.zero;
+
   int _paletteIndex = 0;
+  double _hueShift = 0.0;
+  int _activeIndex = -1;
+  int? _selectedIndex;
+
+  bool _picking = false;
+  Color? _dragColor;
+  Offset? _dragPos;
+
+  final GlobalKey _stackKey = GlobalKey();
+
   late final AnimationController _momentum;
   Animation<double>? _fling;
-  int? _selectedIndex;
-  int _activeIndex = -1;
-  double _hueShift = 0.0;
 
   @override
   void initState() {
@@ -610,7 +733,7 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
       _hueShift = (_hueShift + widget.count / 4) % widget.count;
       _selectedIndex = null;
     });
-    HapticFeedback.selectionClick();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final colors = _paletteColors(widget.count);
@@ -619,20 +742,22 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
           : 0;
       widget.onActiveColorChanged(colors[idx]);
     });
+    HapticFeedback.selectionClick();
   }
 
   void _maybeTick(int idx, List<Color> colors) {
     if (idx != _activeIndex) {
       _activeIndex = idx;
-      HapticFeedback.selectionClick();
       widget.onActiveColorChanged(colors[idx]);
+      HapticFeedback.selectionClick();
     }
   }
 
+  // ---------- Rotation ----------
+
   void _onPanStart(DragStartDetails d) {
     _momentum.stop();
-    _dragStartAngle =
-        math.atan2(
+    _dragStartAngle = math.atan2(
           d.localPosition.dy - _center.dy,
           d.localPosition.dx - _center.dx,
         ) -
@@ -640,14 +765,13 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
   }
 
   void _onPanUpdate(DragUpdateDetails d) {
-    setState(
-      () => _angle =
-          math.atan2(
+    setState(() {
+      _angle = math.atan2(
             d.localPosition.dy - _center.dy,
             d.localPosition.dx - _center.dx,
           ) -
-          _dragStartAngle,
-    );
+          _dragStartAngle;
+    });
   }
 
   void _onPanEnd(DragEndDetails d) {
@@ -656,11 +780,16 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
     final start = _angle;
     _fling = Tween(begin: 0.0, end: v * 2 * math.pi).animate(
       CurvedAnimation(parent: _momentum, curve: Curves.decelerate),
-    )..addListener(() => setState(() => _angle = start + _fling!.value));
+    )..addListener(() {
+        if (!mounted) return;
+        setState(() => _angle = start + _fling!.value);
+      });
     _momentum
       ..reset()
       ..forward();
   }
+
+  // Von außen drehbar (Buttons geben Pan weiter)
 
   void handleExternalPanStart(DragStartDetails d) {
     final box = context.findRenderObject() as RenderBox?;
@@ -692,6 +821,23 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
 
   void handleExternalPanEnd(DragEndDetails d) => _onPanEnd(d);
 
+  // ---------- Tap → Farbkeil ----------
+
+  int _indexAt(Offset p, {required Offset center, required double step}) {
+    // Winkel des Taps
+    final ang = math.atan2(p.dy - center.dy, p.dx - center.dx);
+
+    // Keil i wird mit baseAngle = _angle + i * step gezeichnet und
+    // deckt [baseAngle - step/2, baseAngle + step/2] ab.
+    // → um step/2 verschieben, damit floor() exakt in die Mitte fällt.
+    var rel = ang - _angle + step / 2;
+    rel = rel % (2 * math.pi);
+    if (rel < 0) rel += 2 * math.pi;
+
+    final idx = (rel / step).floor() % widget.count;
+    return idx;
+  }
+
   @override
   void dispose() {
     _momentum.dispose();
@@ -701,109 +847,215 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
   @override
   Widget build(BuildContext context) {
     final colors = _paletteColors(widget.count);
+
     return LayoutBuilder(
-      builder: (_, c) {
-        final center = Offset(c.maxWidth / 2, c.maxHeight / 2);
+      builder: (_, constraints) {
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+        final size = math.min(w, h);
+
+        // Lokales Zentrum des Rings
+        final center = Offset(w / 2, h / 2);
         _center = center;
-        final radius = widget.absoluteRadius;
-        final base = widget.bubbleSize;
+
+        const double trapezDepth = 34.0;
+
+        // 👉 Ring-Geometrie aus widget.absoluteRadius
+        final double innerR = widget.absoluteRadius;
+        final double outerR = innerR + trapezDepth;
+
+        final step = (2 * math.pi) / colors.length;
+
         final children = <Widget>[];
 
-        children.add(
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanStart: _onPanStart,
-              onPanUpdate: _onPanUpdate,
-              onPanEnd: _onPanEnd,
-              child: const SizedBox.expand(),
-            ),
-          ),
-        );
-
-        final trapezDepth = 34.0;
-        final gapDeg = 2.0;
-        final gapRad = gapDeg * math.pi / 180;
-        final step = (2 * math.pi) / colors.length;
-        const twelve = -math.pi / 2;
-
-        // Finde das Segment, das sich bei 12 Uhr befindet (aktives Segment)
-        int active = 0;
-        double minDelta = double.infinity;
+        // Keile mit GestureDetector pro Keil (Rotation + Bubble)
         for (int i = 0; i < colors.length; i++) {
-          final a = _angle + i * step;
-          var delta = (a - twelve) % (2 * math.pi);
-          if (delta > math.pi) delta -= 2 * math.pi;
-          final absDelta = delta.abs();
-          if (absDelta < minDelta) {
-            minDelta = absDelta;
-            active = i;
-          }
-        }
-
-        // Segmente sollen außerhalb des inneren Bereichs (Tool Buttons) liegen
-        // Näher zum Kreis hin, aber immer noch außerhalb
-        final baseInnerR = radius - 15.0;
-        final baseOuterR = radius - 15.0 + trapezDepth;
-
-        for (int i = 0; i < colors.length; i++) {
-          final a = _angle + i * step;
-          final isActive = active == i;
-          final isSelected = _selectedIndex == i;
-
-          // Aktives Segment (bei 12 Uhr) hat Vorrang: größer und mit Lücke
-          final gapSize = isActive ? gapRad : 0.0;
-          final lift = isActive ? 15.0 : (isSelected ? 20.0 : 0.0);
-
-          final innerR = baseInnerR;
-          final outerR = baseOuterR + lift;
-          final angleWidth = step - gapSize;
+          final adjustedAngle = _angle + i * step;
+          final angleWidth = step;
 
           children.add(
             Positioned.fill(
-              child: IgnorePointer(
-                ignoring: true,
-                child: _ColorWedge(
-                  center: center,
-                  baseAngle: a,
+              child: ClipPath(
+                clipper: _WedgeClipper(
+                  baseAngle: adjustedAngle,
                   angleWidth: angleWidth,
                   innerR: innerR,
                   outerR: outerR,
-                  color: colors[i],
-                  shadow: 10,
+                ),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+
+                  // Tap -> Bubble erscheint sofort
+                  onTapDown: (d) {
+                    if (_picking && _selectedIndex != i) return;
+
+                    final box = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+                    if (box == null) return;
+                    final localPos = box.globalToLocal(d.globalPosition);
+
+                    setState(() {
+                      _picking = true;
+                      _selectedIndex = i;
+                      _dragColor = colors[i];
+                      _dragPos = localPos;
+                    });
+                    widget.onPick(colors[i]);
+                    HapticFeedback.lightImpact();
+                  },
+
+                  // Start der Geste: entweder Bubble-Drag ODER Rotation
+                  onPanStart: (d) {
+                    final box = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+                    if (box == null) return;
+                    final localPos = box.globalToLocal(d.globalPosition);
+
+                    if (_picking && _selectedIndex == i) {
+                      // bereits am Picken -> sofort Bubble bewegen können
+                      setState(() {
+                        _dragPos = localPos;
+                      });
+                      return;
+                    }
+
+                    // noch nicht im Pick-Modus -> Ring drehen
+                    _onPanStart(
+                      DragStartDetails(
+                        globalPosition: d.globalPosition,
+                        localPosition: localPos,
+                        kind: d.kind,
+                      ),
+                    );
+                  },
+
+                  onPanUpdate: (d) {
+                    final box = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+                    if (box == null) return;
+                    final localPos = box.globalToLocal(d.globalPosition);
+
+                    if (_picking && _selectedIndex == i) {
+                      // Bubble folgt dem Finger
+                      setState(() {
+                        _dragPos = localPos;
+                      });
+                    } else {
+                      // Ring drehen
+                      _onPanUpdate(
+                        DragUpdateDetails(
+                          globalPosition: d.globalPosition,
+                          localPosition: localPos,
+                          delta: d.delta,
+                          primaryDelta: d.primaryDelta,
+                          sourceTimeStamp: d.sourceTimeStamp,
+                        ),
+                      );
+                    }
+                  },
+
+                  onPanEnd: (d) {
+                    if (_picking && _selectedIndex == i) {
+                      // Pick-Geste fertig -> Bubble weg
+                      setState(() {
+                        _picking = false;
+                        _dragColor = null;
+                        _dragPos = null;
+                      });
+                    } else {
+                      // Rotation mit Momentum beenden
+                      _onPanEnd(d);
+                    }
+                  },
+
+                  onPanCancel: () {
+                    if (_picking && _selectedIndex == i) {
+                      setState(() {
+                        _picking = false;
+                        _dragColor = null;
+                        _dragPos = null;
+                      });
+                    }
+                  },
+                  child: CustomPaint(
+                    painter: _WedgePainter(
+                      baseAngle: adjustedAngle,
+                      angleWidth: angleWidth,
+                      innerR: innerR,
+                      outerR: outerR,
+                      color: colors[i],
+                      shadow: 10,
+                    ),
+                  ),
                 ),
               ),
             ),
           );
+        }
 
-          final hitR = baseInnerR + trapezDepth / 2;
-          final hitPos = Offset(
-            center.dx + hitR * math.cos(a),
-            center.dy + hitR * math.sin(a),
-          );
+        // 3) aktiven Keil bestimmen (bei 12 Uhr) → Tick/Haptik beim Drehen
+        // NUR wenn nicht am Picken, damit die ausgewählte Farbe nicht geändert wird
+        if (!_picking) {
+          const twelve = -math.pi / 2;
+          int active = 0;
+          double minDelta = double.infinity;
+          for (int i = 0; i < colors.length; i++) {
+            final a = _angle + i * step;
+            var delta = (a - twelve) % (2 * math.pi);
+            if (delta > math.pi) delta -= 2 * math.pi;
+            final d = delta.abs();
+            if (d < minDelta) {
+              minDelta = d;
+              active = i;
+            }
+          }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _maybeTick(active, colors);
+          });
+        }
+
+        // 4) Bubble vor dem Finger anzeigen
+        if (_dragColor != null && _dragPos != null) {
+          final v = (_dragPos! - center);
+          final len = v.distance == 0 ? 1.0 : v.distance;
+          final dir = v / len;
+          const ahead = 50.0;
+          final p = _dragPos! + dir * ahead;
+
           children.add(
             Positioned(
-              left: hitPos.dx - 24,
-              top: hitPos.dy - 24,
-              width: 48,
-              height: 48,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => _selectedIndex = i);
-                  widget.onPick(colors[i]);
-                },
-                behavior: HitTestBehavior.translucent,
-                child: const SizedBox.expand(),
+              left: p.dx - 18,
+              top: p.dy - 18,
+              width: 36,
+              height: 36,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        _dragColor!,
+                        _dragColor!.withOpacity(.65),
+                      ],
+                    ),
+                    border: Border.all(color: Colors.white70, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _dragColor!.withOpacity(.45),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
         }
 
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => _maybeTick(active, colors),
+        return Stack(
+          key: _stackKey,
+          clipBehavior: Clip.none,
+          children: children,
         );
-
-        return Stack(clipBehavior: Clip.none, children: children);
       },
     );
   }
@@ -811,7 +1063,6 @@ class _RotaryColorRingState extends State<_RotaryColorRing>
 
 class _ColorWedge extends StatelessWidget {
   const _ColorWedge({
-    required this.center,
     required this.baseAngle,
     required this.angleWidth,
     required this.innerR,
@@ -820,7 +1071,6 @@ class _ColorWedge extends StatelessWidget {
     this.shadow = 8,
   });
 
-  final Offset center;
   final double baseAngle;
   final double angleWidth;
   final double innerR;
@@ -832,7 +1082,6 @@ class _ColorWedge extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _WedgePainter(
-        center: center,
         baseAngle: baseAngle,
         angleWidth: angleWidth,
         innerR: innerR,
@@ -846,7 +1095,6 @@ class _ColorWedge extends StatelessWidget {
 
 class _WedgePainter extends CustomPainter {
   _WedgePainter({
-    required this.center,
     required this.baseAngle,
     required this.angleWidth,
     required this.innerR,
@@ -855,7 +1103,6 @@ class _WedgePainter extends CustomPainter {
     required this.shadow,
   });
 
-  final Offset center;
   final double baseAngle;
   final double angleWidth;
   final double innerR;
@@ -865,23 +1112,19 @@ class _WedgePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path();
+    final c = Offset(size.width / 2, size.height / 2); // ← lokale Mitte
     final a0 = baseAngle - angleWidth / 2;
     final a1 = baseAngle + angleWidth / 2;
 
-    final rectInner = Rect.fromCircle(center: center, radius: innerR);
-    final rectOuter = Rect.fromCircle(center: center, radius: outerR);
+    final rectInner = Rect.fromCircle(center: c, radius: innerR);
+    final rectOuter = Rect.fromCircle(center: c, radius: outerR);
 
-    final p0 = center + Offset(innerR * math.cos(a0), innerR * math.sin(a0));
-    final p1 = center + Offset(outerR * math.cos(a0), outerR * math.sin(a0));
-    final p2 = center + Offset(outerR * math.cos(a1), outerR * math.sin(a1));
-    final p3 = center + Offset(innerR * math.cos(a1), innerR * math.sin(a1));
-
-    path.moveTo(p0.dx, p0.dy);
-    path.arcTo(rectInner, a0, angleWidth, false);
-    path.lineTo(p2.dx, p2.dy);
-    path.arcTo(rectOuter, a1, -angleWidth, false);
-    path.close();
+    final path = Path()
+      ..moveTo(c.dx + innerR * math.cos(a0), c.dy + innerR * math.sin(a0))
+      ..arcTo(rectInner, a0, angleWidth, false)
+      ..lineTo(c.dx + outerR * math.cos(a1), c.dy + outerR * math.sin(a1))
+      ..arcTo(rectOuter, a1, -angleWidth, false)
+      ..close();
 
     if (shadow > 0) {
       final shadowPaint = Paint()
@@ -891,9 +1134,7 @@ class _WedgePainter extends CustomPainter {
     }
 
     final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [color, color.withOpacity(.75)],
-      ).createShader(Rect.fromCircle(center: center, radius: outerR))
+      ..color = color
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
 
@@ -910,6 +1151,106 @@ class _WedgePainter extends CustomPainter {
       old.angleWidth != angleWidth ||
       old.innerR != innerR ||
       old.outerR != outerR ||
-      old.color != color ||
-      old.center != center;
+      old.color != color;
+}
+
+class _TrapezHitAreaPainter extends CustomPainter {
+  _TrapezHitAreaPainter({
+    required this.baseAngle,
+    required this.angleWidth,
+    required this.innerR,
+    required this.outerR,
+  });
+
+  final double baseAngle;
+  final double angleWidth;
+  final double innerR;
+  final double outerR;
+  Size _size = Size.zero;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _size = size; // Speichere size für hitTest()
+  }
+
+  @override
+  bool hitTest(Offset position, {required bool isPointerDown}) {
+    final c = Offset(_size.width / 2, _size.height / 2); // ← lokale Mitte
+    final dist = (position - c).distance;
+    if (dist < innerR || dist > outerR) return false;
+
+    final ang = math.atan2(position.dy - c.dy, position.dx - c.dx);
+    var diff = (ang - baseAngle) % (2 * math.pi);
+    if (diff > math.pi) diff -= 2 * math.pi;
+    return diff.abs() <= angleWidth / 2;
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrapezHitAreaPainter old) =>
+      old.baseAngle != baseAngle ||
+      old.angleWidth != angleWidth ||
+      old.innerR != innerR ||
+      old.outerR != outerR;
+}
+
+class _WedgeClipper extends CustomClipper<Path> {
+  _WedgeClipper({
+    required this.baseAngle,
+    required this.angleWidth,
+    required this.innerR,
+    required this.outerR,
+  });
+
+  final double baseAngle;
+  final double angleWidth;
+  final double innerR;
+  final double outerR;
+
+  @override
+  Path getClip(Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final a0 = baseAngle - angleWidth / 2;
+    final a1 = baseAngle + angleWidth / 2;
+
+    final rectInner = Rect.fromCircle(center: center, radius: innerR);
+    final rectOuter = Rect.fromCircle(center: center, radius: outerR);
+
+    final p0 = center + Offset(innerR * math.cos(a0), innerR * math.sin(a0));
+    final p2 = center + Offset(outerR * math.cos(a1), outerR * math.sin(a1));
+
+    final path = Path()
+      ..moveTo(p0.dx, p0.dy)
+      ..arcTo(rectInner, a0, angleWidth, false)
+      ..lineTo(p2.dx, p2.dy)
+      ..arcTo(rectOuter, a1, -angleWidth, false)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_WedgeClipper old) =>
+      old.baseAngle != baseAngle ||
+      old.angleWidth != angleWidth ||
+      old.innerR != innerR ||
+      old.outerR != outerR;
+}
+
+class _AnnulusClipper extends CustomClipper<Path> {
+  _AnnulusClipper({required this.innerR, required this.outerR});
+
+  final double innerR;
+  final double outerR;
+
+  @override
+  Path getClip(Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final outer = Path()..addOval(Rect.fromCircle(center: c, radius: outerR));
+    final inner = Path()..addOval(Rect.fromCircle(center: c, radius: innerR));
+    return Path.combine(PathOperation.difference, outer, inner);
+  }
+
+  @override
+  bool shouldReclip(covariant _AnnulusClipper old) =>
+      old.innerR != innerR || old.outerR != outerR;
 }

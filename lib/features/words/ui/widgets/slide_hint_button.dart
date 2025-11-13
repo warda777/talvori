@@ -118,6 +118,7 @@ class _SlideHintButtonState extends State<SlideHintButton>
   Timer? _hintTimer;
   bool _userInteracted = false;
   bool _hintAnimating = false;
+  int _hintCount = 0; // Zähler für die Anzahl der Hints
   double _from = 0.0;
   double _to = 0.0;
   bool _closing = false;
@@ -259,18 +260,19 @@ class _SlideHintButtonState extends State<SlideHintButton>
         _userInteracted ||
         _closing ||
         _isFrozen ||
-        !_canOpen) {
+        !_canOpen ||
+        _hintCount >= 3) {
       return;
     }
     if (_hintTimer != null) return;
 
     _hintTimer = Timer(widget.firstHintDelay, () async {
-      if (!_userInteracted) await _runOneHint();
-      if (_userInteracted) return;
+      if (!_userInteracted && _hintCount < 3) await _runOneHint();
+      if (_userInteracted || _hintCount >= 3) return;
 
       _hintTimer?.cancel();
       _hintTimer = Timer.periodic(widget.hintInterval, (_) async {
-        if (!mounted || _userInteracted || _closing) {
+        if (!mounted || _userInteracted || _closing || _hintCount >= 3) {
           _stopHints();
           return;
         }
@@ -285,6 +287,12 @@ class _SlideHintButtonState extends State<SlideHintButton>
     }
     if (_hintAnimating) return;
     if (_offset.abs() >= 0.5) return;
+
+    // Stoppe nach 3 Hints
+    if (_hintCount >= 3) {
+      _stopHints();
+      return;
+    }
 
     _hintAnimating = true;
     try {
@@ -303,6 +311,14 @@ class _SlideHintButtonState extends State<SlideHintButton>
         d: widget.hintBackDuration,
         curve: widget.hintBackCurve,
       );
+
+      // Zähler erhöhen nach erfolgreichem Hint
+      _hintCount++;
+
+      // Stoppe nach 3 Hints
+      if (_hintCount >= 3) {
+        _stopHints();
+      }
     } finally {
       _hintAnimating = false;
     }

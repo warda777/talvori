@@ -27,6 +27,8 @@ class PaletteController extends _$PaletteController {
   // UI-Events
   void setSelectedColor(Color c) => state = state.copyWith(selectedColor: c);
 
+  void setTarget(PaletteTarget t) => state = state.copyWith(target: t);
+
   void toggleScope() {
     final next = state.scope == ApplyScope.single
         ? ApplyScope.all
@@ -41,8 +43,37 @@ class PaletteController extends _$PaletteController {
   void hoverCategory(String? categoryId) =>
       state = state.copyWith(hoveredCategoryId: categoryId);
 
+  /// zentrale Stelle fürs Anwenden – später füllen wir die Fälle aus
+  void applyColor(Color c) {
+    switch (state.target) {
+      case PaletteTarget.stroke:
+        /* TODO: Rahmen/Kachel + ggf. Icon-Stroke */
+        break;
+      case PaletteTarget.glow:
+        /* TODO */
+        break;
+      case PaletteTarget.tileBg:
+        /* TODO */
+        break;
+      case PaletteTarget.hubBg:
+        /* TODO: WordHub-Hintergrund */
+        break;
+      case PaletteTarget.icons:
+        /* TODO */
+        break;
+      case PaletteTarget.text:
+        /* TODO: Schriftfarben */
+        break;
+      case PaletteTarget.image:
+        /* handled separat */
+        break;
+    }
+  }
+
   /// Drop: wendet die aktuell gewählte Farbe an
   Future<void> dropOn({String? categoryId}) async {
+    applyColor(state.selectedColor);
+
     final color = state.selectedColor;
 
     if (state.scope == ApplyScope.all) {
