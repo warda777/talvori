@@ -99,6 +99,7 @@ class RadialPaletteWheel extends ConsumerWidget {
             height: coreSize,
             child: RadialTools(
               ringKey: ringKey,
+              discSize: discSize,
             ),
           ),
 

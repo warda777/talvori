@@ -93,11 +93,18 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
   // Wird aufgerufen, wenn du das Rad oder die Scroll-Fläche drehst
   void moveFocus(int delta) {
-    if (state.targets.isEmpty) return;
+    final effectiveTotal = state.targets.isEmpty ? 12 : state.targets.length;
     var next = state.focusedIndex + delta;
     if (next < 0) next = 0;
-    if (next >= state.targets.length) next = state.targets.length - 1;
+    if (next >= effectiveTotal) next = effectiveTotal - 1;
     state = state.copyWith(focusedIndex: next);
+  }
+
+  // Setzt den Index direkt (z. B. nach Drag)
+  void moveFocusToIndex(int index) {
+    final effectiveTotal = state.targets.isEmpty ? 12 : state.targets.length;
+    final clampedIndex = index.clamp(0, effectiveTotal - 1);
+    state = state.copyWith(focusedIndex: clampedIndex);
   }
 }
 
