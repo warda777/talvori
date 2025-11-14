@@ -118,12 +118,18 @@ class RadialPaletteWheel extends ConsumerWidget {
                   count: 24,
                   onActiveColorChanged: onActiveColorChanged,
                   onPick: (color) {
-                    // 1) Bisheriges Verhalten beibehalten (z.B. Preview im Ring etc.)
-                    onPickColor(color);
+                    final ctrl = ref.read(radialPaletteProvider.notifier);
+                    
+                    // 🔴 Kugel einfärben, solange gelockt
+                    ctrl.setBallColor(color);
 
-                    // 2) NEU: Farbe auf aktuelles Target anwenden,
-                    //    abhängig von Tool + ALL/ONE
-                    ref.read(radialPaletteProvider.notifier).applyColorToCurrentTarget(color);
+                    // Farbe auf aktuelles/gelocktes Target anwenden
+                    ctrl.applyColorToCurrentTarget(color);
+                  },
+                  onPickEnd: () {
+                    final ctrl = ref.read(radialPaletteProvider.notifier);
+                    // 🔴 Finger losgelassen → Lock lösen
+                    ctrl.releaseLockAfterColorPick();
                   },
                   ringLift: 0.0,
                   hitPadInner: 8.0,

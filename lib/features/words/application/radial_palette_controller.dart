@@ -55,6 +55,11 @@ class RadialPaletteState {
   final bool overlayVisible;
   final Set<String> focusedIds;   // IDs der aktuell fokussierten Targets
 
+  // 🔴 NEU: Kugel-Lock-State
+  final bool isBallLocked;          // Kugel „eingerastet"?
+  final int? lockedIndex;           // auf welches Target ist sie gelockt?
+  final Color? lastPickedColor;     // zuletzt gepickte Farbe (für Kugel-Fill)
+
   const RadialPaletteState({
     this.scope = PaletteScope.all,
     this.activeTool,
@@ -62,6 +67,9 @@ class RadialPaletteState {
     this.targets = const [],
     this.overlayVisible = true,
     this.focusedIds = const {},
+    this.isBallLocked = false,
+    this.lockedIndex,
+    this.lastPickedColor,
   });
 
   RadialPaletteState copyWith({
@@ -72,6 +80,11 @@ class RadialPaletteState {
     bool? overlayVisible,
     bool clearActiveTool = false, // 🔹 Flag um explizit auf null zu setzen
     Set<String>? focusedIds,
+    bool? isBallLocked,
+    int? lockedIndex,
+    bool clearLockedIndex = false,
+    Color? lastPickedColor,
+    bool clearLastPickedColor = false,
   }) {
     return RadialPaletteState(
       scope: scope ?? this.scope,
@@ -80,6 +93,10 @@ class RadialPaletteState {
       targets: targets ?? this.targets,
       overlayVisible: overlayVisible ?? this.overlayVisible,
       focusedIds: focusedIds ?? this.focusedIds,
+      isBallLocked: isBallLocked ?? this.isBallLocked,
+      lockedIndex: clearLockedIndex ? null : (lockedIndex ?? this.lockedIndex),
+      lastPickedColor:
+          clearLastPickedColor ? null : (lastPickedColor ?? this.lastPickedColor),
     );
   }
 }
@@ -91,6 +108,54 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
   
   /// Callback, der die aktuell fokussierten Target-IDs meldet
   void Function(Set<String> ids)? onFocusChange;
+
+  // 🔴 Kugel-Lock toggeln (Tap auf die Kugel)
+  void toggleFocusLock() {
+    if (state.targets.isEmpty) return;
+
+    if (!state.isBallLocked) {
+      // Lock aktivieren → aktuellen Fokus merken
+      final idx = state.focusedIndex.clamp(0, state.targets.length - 1);
+      state = state.copyWith(
+        isBallLocked: true,
+        lockedIndex: idx,
+      );
+      debugPrint('[RadialPalette] Ball locked on index=$idx');
+    } else {
+      // Lock lösen
+      state = state.copyWith(
+        isBallLocked: false,
+        clearLockedIndex: true,
+        clearLastPickedColor: true,
+      );
+      debugPrint('[RadialPalette] Ball unlocked');
+    }
+  }
+
+  // 🔴 Farbe für Kugel anzeigen, während gepickt wird
+  void setBallColor(Color color) {
+    state = state.copyWith(lastPickedColor: color);
+  }
+
+  int _effectiveIndex() {
+    if (state.targets.isEmpty) return 0;
+    if (state.isBallLocked && state.lockedIndex != null) {
+      return state.lockedIndex!.clamp(0, state.targets.length - 1);
+    }
+    return state.focusedIndex.clamp(0, state.targets.length - 1);
+  }
+
+  // 🔴 Lock lösen nach Farbanwendung (wird beim Loslassen aufgerufen)
+  void releaseLockAfterColorPick() {
+    if (state.isBallLocked) {
+      state = state.copyWith(
+        isBallLocked: false,
+        clearLockedIndex: true,
+        clearLastPickedColor: true,
+      );
+      debugPrint('[RadialPalette] Finger losgelassen, ball released');
+    }
+  }
 
   // Center-Button: All <-> One
   void toggleScope() {
@@ -288,25 +353,25 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
   void applyColorToCurrentTarget(Color color) {
     final tool = state.activeTool;
     if (tool == null) {
-      // Kein Tool aktiv → wir machen hier (noch) nichts.
-      // (Dein bisheriger globaler Theme-Change bleibt separat über onPickColor.)
+      // kein Tool → Farbrad wirkt nur global auf Theme, nicht auf Targets
       return;
     }
 
-    // Nichts registriert → raus
     if (state.targets.isEmpty) return;
 
     if (state.scope == PaletteScope.all) {
-      // ALL → auf alle Targets anwenden, die einen Callback haben
+      // ALL → alle Targets einfärben
       for (final t in state.targets) {
         t.onApply?.call(tool, color, state.scope);
       }
     } else {
-      // ONE → nur auf das aktuell fokussierte Target anwenden
-      final idx = state.focusedIndex.clamp(0, state.targets.length - 1);
+      // ONE → nur aktuelles/gelocktes Target
+      final idx = _effectiveIndex();
       final t = state.targets[idx];
       t.onApply?.call(tool, color, state.scope);
     }
+
+    // ❌ KEIN Auto-Unlock mehr hier - wird erst beim Loslassen gelöst
   }
 }
 

@@ -7,6 +7,7 @@ class RotaryColorRing extends StatefulWidget {
     super.key,
     required this.onPick,
     required this.onActiveColorChanged,
+    this.onPickEnd,
     this.count = 36,
     this.bubbleSize = 22,
     required this.absoluteRadius,
@@ -17,6 +18,7 @@ class RotaryColorRing extends StatefulWidget {
 
   final ValueChanged<Color> onPick;
   final ValueChanged<Color> onActiveColorChanged;
+  final VoidCallback? onPickEnd;
   final int count;
   final double bubbleSize;
   final double absoluteRadius;
@@ -337,6 +339,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
                         _dragColor = null;
                         _dragPos = null;
                       });
+                      // 🔴 Callback für Pick-Ende (Finger losgelassen)
+                      widget.onPickEnd?.call();
                     } else {
                       _onPanEnd(d);
                     }
@@ -348,6 +352,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
                         _dragColor = null;
                         _dragPos = null;
                       });
+                      // 🔴 Callback für Pick-Ende (auch bei Cancel)
+                      widget.onPickEnd?.call();
                     }
                   },
                   child: CustomPaint(

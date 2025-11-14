@@ -264,6 +264,11 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     final visible = ctrl.visibleTargets;
     final total = visible.isNotEmpty ? visible.length : 12;
 
+    final isLocked = state.isBallLocked;
+    final ballColor = (isLocked && state.lastPickedColor != null)
+        ? state.lastPickedColor!
+        : Colors.white;
+
     // sichtbarer Index (nicht globaler Index!)
     final visibleIndex = ctrl.currentVisibleIndex.clamp(0, total - 1);
 
@@ -284,6 +289,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
+        if (isLocked) return; // Kugel eingerastet → nicht bewegen
         // Hysterese zurücksetzen, damit der aktuelle Fokus sofort gesnappt wird
         setState(() {
           _lastSnappedIndex = null;
@@ -292,6 +298,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
         _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
       onPanUpdate: (details) {
+        if (isLocked) return;
         _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
       onPanEnd: (_) {
@@ -313,26 +320,57 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
         height: widget.size,
         child: CustomPaint(
           painter: _FocusRingPainter(ringRadius: ringRadius),
-          child: Center(
-            child: Transform.translate(
-              offset: ballOffset,
-              child: Container(
+          child: Transform.translate(
+            offset: ballOffset,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                // 🔴 Kugel ein-/ausrasten
+                ctrl.toggleFocusLock();
+                // optional: kleines Haptic
+                HapticFeedback.selectionClick();
+              },
+              child: SizedBox(
                 width: 56,
                 height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.6),
-                      blurRadius: 10,
-                      spreadRadius: 1,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ballColor,
+                        border: Border.all(
+                          color: isLocked ? Colors.redAccent : Colors.transparent,
+                          width: isLocked ? 3 : 0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.6),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.6),
+                            blurRadius: 12,
+                            spreadRadius: 0.5,
+                          ),
+                        ],
+                      ),
                     ),
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.6),
-                      blurRadius: 12,
-                      spreadRadius: 0.5,
-                    ),
+                    // 🔼 animierter Pfeil IN der Kugel, zeigt zum Ring
+                    if (isLocked)
+                      IgnorePointer(
+                        child: Center(
+                          child: Transform.rotate(
+                            angle: angle + math.pi / 2, // Pfeil zeigt radial nach außen
+                            child: _ArrowToRing(ballColor: ballColor),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -432,6 +470,58 @@ class _FocusRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _FocusRingPainter oldDelegate) =>
       oldDelegate.ringRadius != ringRadius;
+}
+
+class _ArrowToRing extends StatefulWidget {
+  final Color ballColor;
+  
+  const _ArrowToRing({required this.ballColor});
+  
+  @override
+  State<_ArrowToRing> createState() => _ArrowToRingState();
+}
+
+class _ArrowToRingState extends State<_ArrowToRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) {
+        // Animation: bewegt sich von unten nach oben (zum Ring hin)
+        // _c.value geht von 0.0 bis 1.0 und zurück (wegen reverse: true)
+        final progress = _c.value;
+        // Bewegt sich von +10px (unten) nach -10px (oben) - größerer Bereich
+        final yOffset = 10.0 - (progress * 20.0);
+        
+        // Farbwechsel für bessere Sichtbarkeit während Animation
+        final opacity = 0.7 + (progress * 0.3); // von 0.7 bis 1.0
+        
+        return Transform.translate(
+          offset: Offset(0, yOffset),
+          child: Icon(
+            Icons.arrow_upward,
+            // Wenn Kugel hell ist, verwende dunklere Farbe für Kontrast
+            color: widget.ballColor.computeLuminance() > 0.5
+                ? Colors.black87.withOpacity(opacity)
+                : Colors.white.withOpacity(opacity),
+            size: 20,
+          ),
+        );
+      },
+    );
+  }
 }
 
 class RadialDebugBanner extends ConsumerWidget {
