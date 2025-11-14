@@ -11,7 +11,7 @@ enum PaletteTool {
   fill,           // 2. Hintergrund Button/Kachel
   text,           // 3. Schrift
   hubBackground,  // 4. Word Hub Background + Top
-  glow,           // 5. Glow an/aus + Farbe
+  paint,          // 5. Paint - Farbpaletten wechseln
   icon,           // 6. Icon-Farbe
   image,          // 7. Bild in Kachel
 }
@@ -60,6 +60,9 @@ class RadialPaletteState {
   final int? lockedIndex;           // auf welches Target ist sie gelockt?
   final Color? lastPickedColor;     // zuletzt gepickte Farbe (für Kugel-Fill)
 
+  // 🔴 Glow-System: Dynamische Glow-Farbe basierend auf Palette-State
+  final Color? selectionGlowColor;
+
   const RadialPaletteState({
     this.scope = PaletteScope.all,
     this.activeTool,
@@ -70,6 +73,7 @@ class RadialPaletteState {
     this.isBallLocked = false,
     this.lockedIndex,
     this.lastPickedColor,
+    this.selectionGlowColor,
   });
 
   RadialPaletteState copyWith({
@@ -85,6 +89,8 @@ class RadialPaletteState {
     bool clearLockedIndex = false,
     Color? lastPickedColor,
     bool clearLastPickedColor = false,
+    Color? selectionGlowColor,
+    bool clearSelectionGlow = false,
   }) {
     return RadialPaletteState(
       scope: scope ?? this.scope,
@@ -97,6 +103,7 @@ class RadialPaletteState {
       lockedIndex: clearLockedIndex ? null : (lockedIndex ?? this.lockedIndex),
       lastPickedColor:
           clearLastPickedColor ? null : (lastPickedColor ?? this.lastPickedColor),
+      selectionGlowColor: clearSelectionGlow ? null : (selectionGlowColor ?? this.selectionGlowColor),
     );
   }
 }
@@ -160,7 +167,22 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
   // Center-Button: All <-> One
   void toggleScope() {
     final next = state.scope == PaletteScope.all ? PaletteScope.one : PaletteScope.all;
-    state = state.copyWith(scope: next);
+    
+    // Wenn zu ALL gewechselt wird und ein Tool aktiv ist, alle passenden Targets selektieren
+    if (next == PaletteScope.all && state.activeTool != null && state.targets.isNotEmpty) {
+      final focusedIds = state.targets
+          .where((t) => t.tools.contains(state.activeTool))
+          .map((t) => t.id)
+          .toSet();
+      
+      state = state.copyWith(scope: next, focusedIds: focusedIds);
+      onFocusChange?.call(focusedIds);
+    } else if (next == PaletteScope.one && state.activeTool != null) {
+      // Bei ONE: nur aktuelles Target selektieren
+      _updateFocusedIds(state.focusedIndex);
+    } else {
+      state = state.copyWith(scope: next);
+    }
   }
 
   // Longpress auf Center: alles auf Werkseinstellung
@@ -196,9 +218,30 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     } else {
       // Neues Tool aktiv → andere 6 verschwinden, Overlay für Fokus ausblenden
       state = state.copyWith(activeTool: tool, overlayVisible: false);
-      // Fokus-IDs aktualisieren
+      
+      // Fokus-IDs aktualisieren basierend auf Scope
       if (state.targets.isNotEmpty) {
-        _updateFocusedIds(state.focusedIndex);
+        if (state.scope == PaletteScope.all) {
+          // Bei ALL: alle passenden Targets selektieren
+          final focusedIds = state.targets
+              .where((t) => t.tools.contains(tool))
+              .map((t) => t.id)
+              .toSet();
+          state = state.copyWith(focusedIds: focusedIds);
+          onFocusChange?.call(focusedIds);
+        } else {
+          // Bei ONE: erstes sichtbares Target finden und fokussieren
+          final visibleIndices = _visibleIndices();
+          if (visibleIndices.isNotEmpty) {
+            // Erstes sichtbares Target fokussieren
+            final firstVisibleIndex = visibleIndices[0];
+            _updateFocusedIds(firstVisibleIndex);
+          } else {
+            // Kein sichtbares Target → Fokus zurücksetzen
+            state = state.copyWith(focusedIndex: 0, focusedIds: {});
+            onFocusChange?.call({});
+          }
+        }
       }
     }
   }
@@ -244,11 +287,21 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
   }
 
   // Welche Indizes in state.targets sind "sichtbar" für das aktuelle Tool?
-  // Wenn du Tools noch nicht pro Target hinterlegt hast:
-  //   → erstmal ALLE Targets sichtbar lassen.
+  // Filtert nur Targets, die das aktive Tool unterstützen
   List<int> _visibleIndices() {
-    // TODO: später hier nach activeTool + Target-Typ filtern
-    return List<int>.generate(state.targets.length, (i) => i);
+    if (state.activeTool == null) {
+      // Kein Tool aktiv → alle Targets sichtbar
+      return List<int>.generate(state.targets.length, (i) => i);
+    }
+    
+    // Nur Targets zurückgeben, die das aktive Tool unterstützen
+    final visible = <int>[];
+    for (int i = 0; i < state.targets.length; i++) {
+      if (state.targets[i].tools.contains(state.activeTool)) {
+        visible.add(i);
+      }
+    }
+    return visible;
   }
 
   List<PaletteTarget> get visibleTargets {
@@ -267,8 +320,9 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
   // Wird bei "Kugel schieben" in Steps benutzt (z.B. Pfeil-nach-oben/-unten)
   void moveFocus(int delta) {
-    // Nur funktionieren, wenn ein Tool aktiv ist
+    // Nur funktionieren, wenn ein Tool aktiv ist UND im ONE-Modus
     if (state.activeTool == null) return;
+    if (state.scope == PaletteScope.all) return; // Navigation deaktiviert im ALL-Modus
 
     final indices = _visibleIndices();
     if (indices.isEmpty) return;
@@ -288,8 +342,9 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
   // Direkter Sprung auf einen "sichtbaren" Index vom Ring aus
   void moveFocusToVisibleIndex(int visibleIndex) {
-    // Nur funktionieren, wenn ein Tool aktiv ist
+    // Nur funktionieren, wenn ein Tool aktiv ist UND im ONE-Modus
     if (state.activeTool == null) return;
+    if (state.scope == PaletteScope.all) return; // Navigation deaktiviert im ALL-Modus
 
     final indices = _visibleIndices();
     if (indices.isEmpty) return;
@@ -325,6 +380,32 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
     final clampedIndex = globalIndex.clamp(0, state.targets.length - 1);
     final focusedTarget = state.targets[clampedIndex];
+    
+    // Prüfe, ob das Target das aktive Tool unterstützt
+    if (!focusedTarget.tools.contains(state.activeTool)) {
+      // Target unterstützt das Tool nicht → erstes sichtbares Target finden
+      final visibleIndices = _visibleIndices();
+      if (visibleIndices.isNotEmpty) {
+        final firstVisibleIndex = visibleIndices[0];
+        final firstVisibleTarget = state.targets[firstVisibleIndex];
+        final focusedIds = {firstVisibleTarget.id};
+        
+        if (state.focusedIds != focusedIds || state.focusedIndex != firstVisibleIndex) {
+          state = state.copyWith(
+            focusedIndex: firstVisibleIndex,
+            focusedIds: focusedIds,
+          );
+          onFocusChange?.call(focusedIds);
+        }
+        return;
+      } else {
+        // Kein sichtbares Target → Fokus zurücksetzen
+        state = state.copyWith(focusedIndex: 0, focusedIds: {});
+        onFocusChange?.call({});
+        return;
+      }
+    }
+    
     final focusedIds = {focusedTarget.id};
 
     // Nur updaten, wenn sich die IDs wirklich geändert haben
@@ -360,15 +441,31 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     if (state.targets.isEmpty) return;
 
     if (state.scope == PaletteScope.all) {
-      // ALL → alle Targets einfärben
-      for (final t in state.targets) {
-        t.onApply?.call(tool, color, state.scope);
+      // ALL → alle fokussierten Targets einfärben (die das Tool unterstützen)
+      // Zusätzlich prüfen, dass das Target das aktive Tool auch wirklich unterstützt
+      for (final id in state.focusedIds) {
+        final t = state.targets.firstWhere(
+          (target) => target.id == id && target.tools.contains(tool),
+          orElse: () => state.targets.firstWhere(
+            (target) => target.id == id,
+            orElse: () => state.targets.first, // Fallback, sollte nicht passieren
+          ),
+        );
+        // Prüfe, ob das Target das Tool unterstützt
+        if (t.tools.contains(tool)) {
+          t.onApply?.call(tool, color, state.scope);
+        }
       }
     } else {
       // ONE → nur aktuelles/gelocktes Target
       final idx = _effectiveIndex();
-      final t = state.targets[idx];
-      t.onApply?.call(tool, color, state.scope);
+      if (idx >= 0 && idx < state.targets.length) {
+        final t = state.targets[idx];
+        // Prüfe, ob das Target das Tool unterstützt
+        if (t.tools.contains(tool)) {
+          t.onApply?.call(tool, color, state.scope);
+        }
+      }
     }
 
     // ❌ KEIN Auto-Unlock mehr hier - wird erst beim Loslassen gelöst

@@ -22,7 +22,7 @@ Widget debugBorder(Widget child, {bool focused = false}) {
   return child;
 }
 
-class FocusGlow extends StatelessWidget {
+class FocusGlow extends ConsumerWidget {
   final bool isFocused;
   final Widget child;
   final BorderRadius? borderRadius;
@@ -37,7 +37,7 @@ class FocusGlow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (!isFocused) return child;
 
     final radius = borderRadius ?? BorderRadius.circular(16);
@@ -54,13 +54,7 @@ class FocusGlow extends StatelessWidget {
           color: Colors.white,
           width: 2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.55),
-            blurRadius: 18,
-            spreadRadius: 1.5,
-          ),
-        ],
+        boxShadow: [], // Kein Glow mehr, nur Rahmen
       ),
       child: child,
     );
@@ -86,10 +80,20 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   bool _callbackSet = false; // Flag um zu verhindern, dass Callback mehrfach gesetzt wird
   bool _headerTargetsRegistered = false; // Flag um zu verhindern, dass Header-Targets mehrfach registriert werden
   
+  // Farb-Overrides für Header-Elemente
+  Color? _searchFieldStrokeColor;
+  Color? _searchFieldFillColor;
+  Color? _searchFieldIconColor;
+  Color? _unlockButtonStrokeColor;
+  Color? _unlockButtonFillColor;
+  Color? _unlockButtonTextColor;
+  Color? _hubBackgroundColor;
+  
   // Keys für Auto-Scroll
   final _keysById = <String, GlobalKey>{
     'wordHub.title': GlobalKey(),
     'wordHub.search': GlobalKey(),
+    'wordHub.searchIcon': GlobalKey(),
     'wordHub.unlockButton': GlobalKey(),
   };
   String? _lastPrimaryId;
@@ -99,6 +103,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   late final GlobalKey _backKey = GlobalKey();
   late final GlobalKey _unlockKey = GlobalKey();
   late final GlobalKey _searchKey = GlobalKey();
+  late final GlobalKey _searchIconKey = GlobalKey();
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
     if (mounted) setState(() => _allowHints = false);
@@ -272,12 +277,66 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             key: _unlockKey,
             kind: TargetKind.button,
             tools: {PaletteTool.stroke, PaletteTool.fill, PaletteTool.text},
+            onApply: (tool, color, scope) {
+              if (mounted) {
+                setState(() {
+                  if (tool == PaletteTool.stroke) {
+                    _unlockButtonStrokeColor = color;
+                  } else if (tool == PaletteTool.fill) {
+                    _unlockButtonFillColor = color;
+                  } else if (tool == PaletteTool.text) {
+                    _unlockButtonTextColor = color;
+                  }
+                });
+              }
+            },
           ),
           PaletteTarget(
             id: 'wordHub.search',
             key: _searchKey,
             kind: TargetKind.searchBar,
             tools: {PaletteTool.stroke, PaletteTool.fill},
+            onApply: (tool, color, scope) {
+              if (mounted) {
+                setState(() {
+                  if (tool == PaletteTool.stroke) {
+                    _searchFieldStrokeColor = color;
+                  } else if (tool == PaletteTool.fill) {
+                    _searchFieldFillColor = color;
+                  }
+                });
+              }
+            },
+          ),
+          PaletteTarget(
+            id: 'wordHub.searchIcon',
+            key: _searchIconKey,
+            kind: TargetKind.icon,
+            tools: {PaletteTool.icon, PaletteTool.stroke},
+            onApply: (tool, color, scope) {
+              if (mounted) {
+                setState(() {
+                  if (tool == PaletteTool.icon) {
+                    _searchFieldIconColor = color;
+                  }
+                });
+              }
+            },
+          ),
+          PaletteTarget(
+            id: 'wordHub.background',
+            key: GlobalKey(), // Hintergrund braucht keinen Key für Scroll
+            kind: TargetKind.hubBackground,
+            tools: {PaletteTool.hubBackground},
+            onApply: (tool, color, scope) {
+              if (mounted) {
+                setState(() {
+                  if (tool == PaletteTool.hubBackground) {
+                    _hubBackgroundColor = color;
+                  }
+                });
+              }
+            },
           ),
         ];
         ref.read(radialPaletteProvider.notifier).registerTargets(headerTargets);
@@ -349,10 +408,10 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: _hubBackgroundColor ?? Colors.black,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.black87,
+        backgroundColor: _hubBackgroundColor?.withOpacity(0.87) ?? Colors.black87,
         elevation: 0,
         toolbarHeight: 56,
         leading: IconButton(
@@ -468,33 +527,42 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                           },
                           decoration: InputDecoration(
                             hintText: 'Suchen',
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: Color(0xFFF1C86B),
+                            prefixIcon: KeyedSubtree(
+                              key: _keysById['wordHub.searchIcon'],
+                              child: FocusGlow(
+                                isFocused: focusedIds.contains('wordHub.searchIcon'),
+                                borderRadius: BorderRadius.circular(999),
+                                padding: EdgeInsets.zero,
+                                child: Icon(
+                                  Icons.search,
+                                  key: _searchIconKey,
+                                  color: _searchFieldIconColor ?? const Color(0xFFF1C86B),
+                                ),
+                              ),
                             ),
+                            filled: true,
+                            fillColor: _searchFieldFillColor ?? Colors.white.withOpacity(0.12),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),
                               borderSide: BorderSide(
-                                color: const Color(0xFFF1C86B).withOpacity(0.85),
+                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B).withOpacity(0.85),
                                 width: 2,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFF1C86B),
+                              borderSide: BorderSide(
+                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B),
                                 width: 1.6,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFF1C86B),
+                              borderSide: BorderSide(
+                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B),
                                 width: 2.2,
                               ),
                             ),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.12),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 18,
                               vertical: 14,
@@ -587,6 +655,7 @@ class _SectionHeader extends ConsumerStatefulWidget {
 class _SectionHeaderState extends ConsumerState<_SectionHeader> {
   final _titleKey = GlobalKey();
   bool _registered = false;
+  Color? _textColor; // Override-Farbe für diesen Section Header
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +676,14 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
             kind: TargetKind.sectionTitle,
             tools: {
               PaletteTool.text,
-              PaletteTool.glow,
+              PaletteTool.paint,
+            },
+            onApply: (tool, color, scope) {
+              if (tool == PaletteTool.text && mounted) {
+                setState(() {
+                  _textColor = color;
+                });
+              }
             },
           ),
         ]);
@@ -624,7 +700,7 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
             widget.title,
             key: _titleKey,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white, // immer weiß, auch wenn fokussiert
+              color: _textColor ?? Colors.white,
             ),
           ),
         ),
@@ -683,7 +759,17 @@ class _GridSectionState extends ConsumerState<_GridSection> {
           PaletteTool.fill,
           PaletteTool.icon,
           PaletteTool.image,
-          PaletteTool.glow,
+          PaletteTool.paint,
+          // Text-Tool wird NICHT unterstützt - nur Titel und Counter haben Text-Tool
+        },
+        onApply: (tool, color, scope) {
+          if (tool == PaletteTool.stroke) {
+            ref.read(wordHubTileOverridesProvider.notifier)
+                .setStrokeColor(baseId, color);
+          } else if (tool == PaletteTool.fill) {
+            ref.read(wordHubTileOverridesProvider.notifier)
+                .setFillColor(baseId, color);
+          }
         },
       ));
 
@@ -694,7 +780,7 @@ class _GridSectionState extends ConsumerState<_GridSection> {
         kind: TargetKind.text,
         tools: {
           PaletteTool.text,
-          PaletteTool.glow,
+          PaletteTool.paint,
         },
         onApply: (tool, color, scope) {
           if (tool == PaletteTool.text) {
@@ -711,7 +797,7 @@ class _GridSectionState extends ConsumerState<_GridSection> {
         kind: TargetKind.text,
         tools: {
           PaletteTool.text,
-          PaletteTool.glow,
+          PaletteTool.paint,
         },
         onApply: (tool, color, scope) {
           if (tool == PaletteTool.text) {
@@ -781,17 +867,24 @@ class _HighlightableTarget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = ref.watch(radialPaletteProvider);
 
+    final glowColor = palette.selectionGlowColor ?? Colors.white.withOpacity(0.6);
     bool isFocused = false;
-    if (palette.targets.isNotEmpty &&
-        palette.focusedIndex >= 0 &&
-        palette.focusedIndex < palette.targets.length) {
-      final focused = palette.targets[palette.focusedIndex];
-      isFocused = focused.id == id;
+
+    if (palette.activeTool != null) {
+      // Bei ONE: nur aktuelles Target
+      // Bei ALL: alle Targets, die das Tool unterstützen (werden in toggleScope() gesetzt)
+      isFocused = palette.focusedIds.contains(id);
     }
 
     if (!isFocused) {
       return child;
     }
+
+    // Bei ONE und ALL: nur Rahmen, kein Glow
+    final showGlow = false; // Kein Glow mehr, nur Rahmen
+    
+    // Rahmenfarbe: Rot wenn gelockt, sonst weiß
+    final borderColor = palette.isBallLocked ? Colors.redAccent : Colors.white;
 
     return Stack(
       children: [
@@ -800,12 +893,21 @@ class _HighlightableTarget extends ConsumerWidget {
           child: IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24), // Angepasst an Kachel-Radius
                 border: Border.all(
-                  color: Colors.white,
-                  width: 6,
+                  color: borderColor, // Rot wenn gelockt, sonst weiß
+                  width: 6, // Deutlich fetterer Rahmen
                 ),
-                color: Colors.white.withOpacity(0.08),
+                boxShadow: showGlow
+                    ? [
+                        BoxShadow(
+                          color: glowColor.withOpacity(0.5),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : [], // Leere Liste statt null, damit kein Glow angezeigt wird
+                color: Colors.transparent,
               ),
             ),
           ),

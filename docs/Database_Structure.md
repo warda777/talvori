@@ -7,7 +7,7 @@
 
 # Talvori – Data Dictionary (public)
 
-Generiert: 2025-11-14 15:21
+Generiert: 2025-11-14 19:40
 
 ## public.captures
 

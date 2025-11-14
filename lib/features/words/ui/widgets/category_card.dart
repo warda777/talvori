@@ -74,7 +74,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
         .toLowerCase()
         .trim()
         .replaceAll('&', 'and');
-    final Color strokeColor = CategoryStrokeColors.getStrokeColor(
+    final Color defaultStrokeColor = CategoryStrokeColors.getStrokeColor(
       widget.sub.label,
     );
     final glowEnabled = ref.watch(wordHubGlowProvider);
@@ -85,6 +85,8 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
         : null;
     final titleColor = overrides?.titleColor ?? Colors.white;
     final countColor = overrides?.countColor ?? const Color(0xFFF1C86B);
+    final strokeColor = overrides?.strokeColor ?? defaultStrokeColor;
+    final fillColor = overrides?.fillColor ?? const Color(0xFF040404);
     
     // Fokus-IDs auslesen
     final palette = ref.watch(radialPaletteProvider);
@@ -114,12 +116,12 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: strokeColor.withOpacity(0.32),
+                      color: (overrides?.strokeColor ?? defaultStrokeColor).withOpacity(0.32),
                       blurRadius: 22,
                       spreadRadius: 2,
                     ),
                     BoxShadow(
-                      color: strokeColor.withOpacity(0.18),
+                      color: (overrides?.strokeColor ?? defaultStrokeColor).withOpacity(0.18),
                       blurRadius: 36,
                       spreadRadius: 8,
                     ),
@@ -128,7 +130,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF040404),
+              color: fillColor,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: strokeColor.withOpacity(0.85),
@@ -144,7 +146,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                   children: [
                     loading
                         ? const ShimmerBox(height: 18, borderRadius: 6)
-                        : _buildTitle(t, titleColor, isTitleFocused),
+                        : _buildTitle(t, titleColor, isTitleFocused, ref),
                     const Spacer(),
                     if (loading)
                       Align(
@@ -160,7 +162,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                       else if (stats != null)
                       Align(
                         alignment: Alignment.bottomRight,
-                        child: _buildCount(stats.total, countColor, isCountFocused),
+                        child: _buildCount(stats.total, countColor, isCountFocused, ref),
                       ),
                   ],
                 ),
@@ -172,7 +174,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     );
   }
 
-  Widget _buildTitle(ThemeData t, Color titleColor, bool isTitleFocused) {
+  Widget _buildTitle(ThemeData t, Color titleColor, bool isTitleFocused, WidgetRef ref) {
     Widget title = Text(
       widget.sub.label,
       key: widget.titleKey, // 🔹 der Key, damit das Target gemessen werden kann
@@ -190,13 +192,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
             color: Colors.white,
             width: 2,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white.withOpacity(0.6),
-              blurRadius: 18,
-              spreadRadius: 2,
-            ),
-          ],
+          boxShadow: [], // Kein Glow mehr, nur Rahmen
         ),
         child: title,
       );
@@ -205,13 +201,13 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     return title;
   }
 
-  Widget _buildCount(int count, Color countColor, bool isCountFocused) {
+  Widget _buildCount(int count, Color countColor, bool isCountFocused, WidgetRef ref) {
     Widget countWidget = Text(
       '$count',
       key: widget.countKey, // 🔹 Key für das Counter-Target
       style: TextStyle(
         fontWeight: FontWeight.w600,
-        color: Colors.white, // Weiße Zahl, kein goldener Hintergrund
+        color: countColor, // Verwendet Override-Farbe oder Standard-Farbe
       ),
     );
 
@@ -224,13 +220,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
             color: Colors.white,
             width: 2,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white.withOpacity(0.6),
-              blurRadius: 18,
-              spreadRadius: 2,
-            ),
-          ],
+          boxShadow: [], // Kein Glow mehr, nur Rahmen
         ),
         child: countWidget,
       );

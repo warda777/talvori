@@ -21,7 +21,7 @@ class CurvedToolLabel extends StatelessWidget {
       PaletteTool.fill => 'FILL',
       PaletteTool.text => 'TEXT',
       PaletteTool.hubBackground => 'BACKGROUND',
-      PaletteTool.glow => 'GLOW',
+      PaletteTool.paint => 'PAINT',
       PaletteTool.icon => 'ICON',
       PaletteTool.image => 'IMAGE',
     };

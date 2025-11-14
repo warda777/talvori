@@ -5,19 +5,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class TileColorOverrides {
   final Color? titleColor;
   final Color? countColor;
+  final Color? strokeColor;
+  final Color? fillColor;
 
   const TileColorOverrides({
     this.titleColor,
     this.countColor,
+    this.strokeColor,
+    this.fillColor,
   });
 
   TileColorOverrides copyWith({
     Color? titleColor,
     Color? countColor,
+    Color? strokeColor,
+    Color? fillColor,
   }) {
     return TileColorOverrides(
       titleColor: titleColor ?? this.titleColor,
       countColor: countColor ?? this.countColor,
+      strokeColor: strokeColor ?? this.strokeColor,
+      fillColor: fillColor ?? this.fillColor,
     );
   }
 }
@@ -78,6 +86,30 @@ class WordHubTileOverridesController
   void setCountColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(countColor: color);
+    state = state.copyWith(
+      overrides: {
+        ...state.overrides,
+        paletteId: updated,
+      },
+    );
+  }
+
+  /// Setzt Stroke-Farbe für eine Kachel
+  void setStrokeColor(String paletteId, Color color) {
+    final current = state.overrides[paletteId] ?? const TileColorOverrides();
+    final updated = current.copyWith(strokeColor: color);
+    state = state.copyWith(
+      overrides: {
+        ...state.overrides,
+        paletteId: updated,
+      },
+    );
+  }
+
+  /// Setzt Fill-Farbe für eine Kachel
+  void setFillColor(String paletteId, Color color) {
+    final current = state.overrides[paletteId] ?? const TileColorOverrides();
+    final updated = current.copyWith(fillColor: color);
     state = state.copyWith(
       overrides: {
         ...state.overrides,

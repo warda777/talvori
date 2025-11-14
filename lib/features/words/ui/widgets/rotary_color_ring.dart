@@ -139,7 +139,106 @@ class RotaryColorRingState extends State<RotaryColorRing>
     ),
   ];
 
+  // 🔴 Feste Farbpaletten (eine pro Paint-Kugel)
+  static final List<List<Color>> _fixedPalettes = [
+    // Palette 0: Teal-Palette (unverändert)
+    [
+      const Color(0xFF05181A), // sehr dunkles Teal
+      const Color(0xFF072E33), // dunkles Teal
+      const Color(0xFF0C7075), // mittel-dunkles Teal
+      const Color(0xFF0F969C), // vibrantes Teal
+      const Color(0xFF6DA5C0), // helles Blau-Grau
+      const Color(0xFF294D61), // dunkles Blau-Grau
+    ],
+    // Palette 1: Lila/Blau zu Teal (5 Farben)
+    [
+      const Color(0xFF4A2C4A), // dunkles Lila/Aubergine
+      const Color(0xFF3D2C5C), // dunkles Indigo/blau-violett
+      const Color(0xFF2C3A4F), // dunkles, gedämpftes Marineblau
+      const Color(0xFF5A7A8C), // mittleres, etwas entsättigtes Blau
+      const Color(0xFF4ECDC4), // helles, mittleres Teal/Aqua-Blau
+    ],
+    // Palette 2: Erdige Töne
+    [
+      const Color(0xFF2D4354), // dunkles, gedämpftes Blau
+      const Color(0xFF73766A), // gedämpftes, graugrünes Olivgrau
+      const Color(0xFFFED7A5), // helles, cremiges Beige
+      const Color(0xFF9E6752), // mittleres, gedämpftes rötlich-braun
+      const Color(0xFF534145), // dunkles, gedämpftes Pflaume
+      const Color(0xFF20212B), // sehr dunkles, fast schwarzes, gedämpftes Blau
+    ],
+    // Palette 3: Pastellige Töne
+    [
+      const Color(0xFF99CDD8), // helles, gedämpftes Pastellblau
+      const Color(0xFFDABEB3), // sehr helles, entsättigtes Beige
+      const Color(0xFFFDEBD3), // weiches, blasses Pfirsich
+      const Color(0xFFF3CBB2), // gedämpftes, etwas dunkleres Rosen
+      const Color(0xFFC7D8C4), // helles, entsättigtes Salbeigrün
+      const Color(0xFF657166), // dunkleres, gedämpftes Olivgrün
+    ],
+    // Palette 4: Blau/Pink Töne
+    [
+      const Color(0xFF0D1E4C), // sehr dunkles Marineblau
+      const Color(0xFFC48CB3), // gedämpftes, staubiges Rosen/Mauve-Pink
+      const Color(0xFFFFE5E5), // sehr helles, blasses Pink (korrigiert von #E5C907)
+      const Color(0xFF83A6CE), // mittleres, etwas entsättigtes Himmelblau
+      const Color(0xFF26415E), // dunkles Schieferblau
+      const Color(0xFF0B1B32), // sehr dunkles Marineblau
+    ],
+    // Palette 5: Blau/Grau Töne (Interior)
+    [
+      const Color(0xFF050B10), // sehr dunkles, fast schwarzes Marineblau
+      const Color(0xFF3F5B69), // mittleres, gedämpftes Blau-Grau
+      const Color(0xFF46779B), // mittleres Blau
+      const Color(0xFF618FA1), // helleres, entsättigtes Blau-Grau
+      const Color(0xFFB29876), // warmes, mittleres Tan/Beige
+    ],
+    // Palette 6: Lila/Grau Gradient
+    [
+      const Color(0xFF190019), // sehr dunkles, tiefes Lila-Schwarz
+      const Color(0xFF2B124C), // dunkles, gedämpftes Indigo/tiefes Pflaume
+      const Color(0xFF522B5B), // mittel-dunkles, entsättigtes Lila-Grau/Taupe
+      const Color(0xFF854F6C), // mittleres, entsättigtes rosig-braun/warmes Grau
+      const Color(0xFFDFB6B2), // helles, entsättigtes Lavendel-Grau/blasses Taupe
+      const Color(0xFFFBE4D8), // sehr helles, warmes Off-White/Creme
+    ],
+    // Palette 7: Warme/Erdige Töne
+    [
+      const Color(0xFF5C3D2E), // tiefes, reiches Schokoladenbraun
+      const Color(0xFFC97D60), // warmes, erdiges Terrakotta/verbranntes Orange
+      const Color(0xFFF5E6D3), // helles, cremiges Beige/Off-White
+      const Color(0xFFFFD4C4), // weiches, gedämpftes Pfirsich/helles Lachs-Pink
+      const Color(0xFFB8B8C8), // kühles, mittleres Grau mit leichtem Lavendel/Blau-Unterton
+      const Color(0xFF1A4D5E), // dunkles Teal/tiefes Blau-Grün
+    ],
+    // Palette 8: Teal zu Rot-Braun
+    [
+      const Color(0xFF1F313B), // sehr dunkles Teal/Schieferblau
+      const Color(0xFF383852), // gedämpftes Indigo/dunkles Lila
+      const Color(0xFF7B4259), // staubiges Rosen/Mauve, tendiert zu gedämpftem rötlich-Lila
+      const Color(0xFFB94E56), // gedämpftes Korallen/Lachs-Pink
+      const Color(0xFFBE4039), // verbranntes Orange/Terrakotta-Rot
+      const Color(0xFF8B3B3B), // tiefes rötlich-Braun/Maroon
+    ],
+  ];
+
   List<Color> _paletteColors(int n) {
+    // Wenn _paletteIndex >= _paletteModes.length, verwende feste Palette
+    if (_paletteIndex >= _paletteModes.length && _paletteIndex < _paletteModes.length + _fixedPalettes.length) {
+      final fixedPaletteIndex = _paletteIndex - _paletteModes.length;
+      final fixedPalette = _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
+      // Interpoliere die feste Palette auf n Farben
+      return List<Color>.generate(n, (i) {
+        final t = i / (n - 1);
+        final paletteIndex = (t * (fixedPalette.length - 1)).clamp(0, fixedPalette.length - 1).toInt();
+        final nextIndex = (paletteIndex + 1).clamp(0, fixedPalette.length - 1);
+        final localT = (t * (fixedPalette.length - 1)) - paletteIndex;
+        // Interpoliere zwischen den beiden nächsten Farben
+        return Color.lerp(fixedPalette[paletteIndex], fixedPalette[nextIndex], localT)!;
+      });
+    }
+    
+    // Standard-Palette-Modus
     final mode = _paletteModes[_paletteIndex % _paletteModes.length];
     return List<Color>.generate(n, (i) {
       final t = i / n;
@@ -152,6 +251,26 @@ class RotaryColorRingState extends State<RotaryColorRing>
         0.95,
       );
       return HSLColor.fromAHSL(1, hue.toDouble(), sat, light).toColor();
+    });
+  }
+
+  /// Öffentliche Methode, um die aktuellen Palette-Farben zu erhalten
+  List<Color> getCurrentPaletteColors(int n) {
+    return _paletteColors(n);
+  }
+
+  /// Rotiert den Ring zu einem bestimmten Winkel
+  void rotateToAngle(double targetAngle) {
+    setState(() {
+      _angle = targetAngle;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final colors = _paletteColors(widget.count);
+      final idx = (_activeIndex >= 0 && _activeIndex < colors.length)
+          ? _activeIndex
+          : 0;
+      widget.onActiveColorChanged(colors[idx]);
     });
   }
 
@@ -171,6 +290,57 @@ class RotaryColorRingState extends State<RotaryColorRing>
       widget.onActiveColorChanged(colors[idx]);
     });
     HapticFeedback.selectionClick();
+  }
+
+  /// Setzt die Palette direkt auf einen bestimmten Index
+  void setPaletteIndex(int index) {
+    final totalPalettes = _paletteModes.length + _fixedPalettes.length;
+    if (index < 0 || index >= totalPalettes) return;
+    setState(() {
+      _paletteIndex = index;
+      _hueShift = (_hueShift + widget.count / 4) % widget.count;
+      _selectedIndex = null;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final colors = _paletteColors(widget.count);
+      final idx = (_activeIndex >= 0 && _activeIndex < colors.length)
+          ? _activeIndex
+          : 0;
+      widget.onActiveColorChanged(colors[idx]);
+    });
+    HapticFeedback.selectionClick();
+  }
+
+  /// Gibt die Anzahl der verfügbaren Paletten zurück
+  int get paletteCount => _paletteModes.length + _fixedPalettes.length;
+
+  /// Gibt den aktuellen Palette-Index zurück
+  int get currentPaletteIndex => _paletteIndex;
+
+  /// Gibt eine repräsentative Farbe für eine Palette zurück (z.B. für Kugeln)
+  Color getPaletteColor(int paletteIndex) {
+    if (paletteIndex < 0) paletteIndex = 0;
+    
+    // Feste Palette
+    if (paletteIndex >= _paletteModes.length && paletteIndex < _paletteModes.length + _fixedPalettes.length) {
+      final fixedPaletteIndex = paletteIndex - _paletteModes.length;
+      final fixedPalette = _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
+      // Hauptfarbe (erste Farbe) der Palette zurückgeben
+      return fixedPalette[0];
+    }
+    
+    // Standard-Palette
+    if (paletteIndex >= _paletteModes.length) {
+      paletteIndex = 0;
+    }
+    final mode = _paletteModes[paletteIndex];
+    // Erste Farbe der Palette als Repräsentant verwenden
+    final hue = (mode.hueOffset * 360 / widget.count) % 360;
+    final sat = mode.saturation.clamp(0.05, 1.0);
+    final light = mode.lightness.clamp(0.05, 0.95);
+    return HSLColor.fromAHSL(1, hue, sat, light).toColor();
   }
 
   void _maybeTick(int idx, List<Color> colors) {

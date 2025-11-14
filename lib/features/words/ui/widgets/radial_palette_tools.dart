@@ -64,8 +64,8 @@ class RadialTools extends ConsumerWidget {
                 ),
                 _toolAtAngle(
                   context,
-                  icon: Icons.brightness_5,
-                  tool: PaletteTool.glow,
+                  icon: Icons.palette,
+                  tool: PaletteTool.paint,
                   angleDeg: 118,
                   palette: palette,
                   ctrl: ctrl,
@@ -140,7 +140,7 @@ class RadialTools extends ConsumerWidget {
       PaletteTool.fill => Icons.crop_square,
       PaletteTool.text => Icons.text_fields,
       PaletteTool.hubBackground => Icons.layers,
-      PaletteTool.glow => Icons.brightness_5,
+      PaletteTool.paint => Icons.palette,
       PaletteTool.icon => Icons.star,
       PaletteTool.image => Icons.image,
     };
@@ -153,7 +153,10 @@ class RadialTools extends ConsumerWidget {
           alignment: Alignment.center,
           children: <Widget>[
             // 🔹 Dünner Ring mit Kugel, der durch die Targets steppt
-            _FocusSelectorRing(size: discSize),
+            _FocusSelectorRing(
+              size: discSize,
+              ringKey: ringKey,
+            ),
 
             // 🔹 Mittleres Tool-Icon zum Abwählen
             GestureDetector(
@@ -242,10 +245,12 @@ class _FocusSelectorRing extends ConsumerStatefulWidget {
   const _FocusSelectorRing({
     super.key,
     required this.size,
+    this.ringKey,
   });
 
   // size: normalerweise die Größe deines Wheels (z. B. discSize)
   final double size;
+  final GlobalKey<RotaryColorRingState>? ringKey;
 
   @override
   ConsumerState<_FocusSelectorRing> createState() => _FocusSelectorRingState();
@@ -261,16 +266,134 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     final ctrl = ref.read(radialPaletteProvider.notifier);
     final state = ref.watch(radialPaletteProvider);
 
+    // 🎨 PAINT-Modus: Ring komplett mit Kugeln füllen (eine pro Farbe im Ring)
+    // WICHTIG: Wenn Paint aktiv ist, KEINE normale Navigation-Kugel anzeigen!
+    debugPrint('🔍 _FocusSelectorRing.build: activeTool = ${state.activeTool}, paint = ${PaletteTool.paint}');
+    if (state.activeTool == PaletteTool.paint) {
+      debugPrint('🎨 PAINT-Modus aktiv - normale Navigation-Kugel wird NICHT angezeigt');
+      // Wenn Paint aktiv ist, KEINE normale Navigation-Kugel anzeigen
+      // Warte auf ringState, wenn es noch nicht verfügbar ist
+      if (widget.ringKey != null) {
+        final ringState = widget.ringKey!.currentState;
+        debugPrint('🎨 ringState: ${ringState != null ? "vorhanden" : "NULL"}');
+        if (ringState != null) {
+          // Anzahl der Kugeln: 12 (wie vorher)
+          final colorCount = 12;
+          debugPrint('🎨 Paint-Kugeln werden gerendert - $colorCount Kugeln');
+          final ringRadius = widget.size / 2 - 80;
+          final angleStep = (2 * math.pi) / colorCount;
+
+          return SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: CustomPaint(
+              painter: _FocusRingPainter(ringRadius: ringRadius),
+              child: Stack(
+                alignment: Alignment.center, // 🔴 Zentrieren!
+                children: List.generate(colorCount, (index) {
+                  final angle = -math.pi / 2 + angleStep * index; // Start oben (-90°)
+                  final ballOffset = Offset(
+                    ringRadius * math.cos(angle),
+                    ringRadius * math.sin(angle),
+                  );
+                  
+                  // 🔴 Jede Kugel verwendet eine andere Palette (modulo für Wiederholung)
+                  final paletteIndex = index % ringState.paletteCount;
+                  final ballColor = ringState.getPaletteColor(paletteIndex);
+                  
+                  // 🔴 Aktive Palette hat weißen Rand
+                  final isActive = ringState.currentPaletteIndex == paletteIndex;
+
+                  return Transform.translate(
+                    offset: ballOffset,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        // 🔴 Palette auf dem Ring setzen (verwende paletteIndex statt index)
+                        ringState.setPaletteIndex(paletteIndex);
+                        HapticFeedback.selectionClick();
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ballColor, // 🔴 Hauptfarbe der Palette
+                          border: Border.all(
+                            color: isActive 
+                                ? Colors.white 
+                                : Colors.white.withOpacity(0.4),
+                            width: isActive ? 2.5 : 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                            if (isActive)
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.8),
+                                blurRadius: 12,
+                                spreadRadius: 2,
+                              ),
+                            BoxShadow(
+                              color: ballColor.withOpacity(0.6),
+                              blurRadius: 10,
+                              spreadRadius: 1.5,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          );
+        } else {
+          debugPrint('🎨 PAINT-Modus: ringState ist null - leeres Widget zurückgeben');
+          // WICHTIG: Auch wenn ringState null ist, KEINE normale Navigation-Kugel anzeigen!
+          return SizedBox(width: widget.size, height: widget.size);
+        }
+      } else {
+        debugPrint('🎨 PAINT-Modus: ringKey ist null - leeres Widget zurückgeben');
+        // WICHTIG: Auch wenn ringKey null ist, KEINE normale Navigation-Kugel anzeigen!
+        return SizedBox(width: widget.size, height: widget.size);
+      }
+    }
+
+    // Normale Navigation-Modus: Eine weiße Kugel für Target-Navigation
+    // WICHTIG: Diese Kugel wird NUR angezeigt, wenn Paint NICHT aktiv ist!
+    debugPrint('📍 Normale Navigation-Modus - Paint ist NICHT aktiv: ${state.activeTool}');
+    
     final visible = ctrl.visibleTargets;
     final total = visible.isNotEmpty ? visible.length : 12;
 
-    final isLocked = state.isBallLocked;
-    final ballColor = (isLocked && state.lastPickedColor != null)
-        ? state.lastPickedColor!
-        : Colors.white;
-
     // sichtbarer Index (nicht globaler Index!)
     final visibleIndex = ctrl.currentVisibleIndex.clamp(0, total - 1);
+
+    final isLocked = state.isBallLocked;
+    
+    // 🔴 Kugel-Farbe:
+    // - Wenn gelockt UND auf gelockter Kachel UND Farbe gepickt → gepickte Farbe
+    // - Sonst immer weiß (nur der Rahmen wird rot, nicht die Kugel)
+    Color ballColor = Colors.white; // Immer weiß, nur Rahmen wird rot
+    if (isLocked && state.lockedIndex != null) {
+      // Prüfe, ob das gelockte Target das aktuell fokussierte ist
+      final lockedTargetId = state.targets.isNotEmpty && state.lockedIndex! < state.targets.length
+          ? state.targets[state.lockedIndex!].id
+          : null;
+      final currentTargetId = visible.isNotEmpty && visibleIndex < visible.length
+          ? visible[visibleIndex].id
+          : null;
+      
+      // Wenn auf gelockter Kachel UND Farbe gepickt → gepickte Farbe
+      if (lockedTargetId != null && currentTargetId == lockedTargetId && state.lastPickedColor != null) {
+        ballColor = state.lastPickedColor!;
+      }
+      // Sonst bleibt ballColor = Colors.white
+    }
 
     final angleStep = (2 * math.pi) / total;
 
@@ -290,6 +413,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
         if (isLocked) return; // Kugel eingerastet → nicht bewegen
+        if (state.scope == PaletteScope.all) return; // Navigation deaktiviert im ALL-Modus
         // Hysterese zurücksetzen, damit der aktuelle Fokus sofort gesnappt wird
         setState(() {
           _lastSnappedIndex = null;
@@ -299,6 +423,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
       },
       onPanUpdate: (details) {
         if (isLocked) return;
+        if (state.scope == PaletteScope.all) return; // Navigation deaktiviert im ALL-Modus
         _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
       onPanEnd: (_) {
@@ -536,7 +661,7 @@ class RadialDebugBanner extends ConsumerWidget {
       PaletteTool.fill => 'Kachel-Hintergrund',
       PaletteTool.text => 'Text',
       PaletteTool.hubBackground => 'WordHub-Background',
-      PaletteTool.glow => 'Glow',
+      PaletteTool.paint => 'Paint',
       PaletteTool.icon => 'Icon',
       PaletteTool.image => 'Bild',
       null => 'kein Tool aktiv',
