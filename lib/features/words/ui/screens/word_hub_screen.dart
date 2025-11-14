@@ -10,6 +10,7 @@ import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/ui/widgets/category_card.dart';
 // ⬇️ NEU
 import 'package:talvori/features/words/application/radial_palette_controller.dart';
+import 'package:talvori/features/words/application/word_hub_tile_overrides_provider.dart';
 import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_tools.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_sheet.dart';
@@ -148,31 +149,47 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     if (primaryId == null || primaryId == _lastPrimaryId) return;
     _lastPrimaryId = primaryId;
 
-    // 2) Passenden PaletteTarget über die ID finden
+    // 2) Basis-ID extrahieren (falls es .title oder .count ist, zur Kachel-ID zurückfallen)
+    final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
+
+    // 3) Passenden PaletteTarget über die Basis-ID finden (immer die Kachel, nicht Titel/Counter)
     final paletteState = ref.read(radialPaletteProvider);
 
     PaletteTarget? target;
     for (final t in paletteState.targets) {
-      if (t.id == primaryId) {
+      // Suche nach der Basis-Kachel-ID (ohne .title/.count)
+      if (t.id == baseId && t.kind == TargetKind.tile) {
         target = t;
         break;
       }
     }
+    
+    // Fallback: Falls keine Tile gefunden wurde, versuche die ursprüngliche ID
+    if (target == null) {
+      for (final t in paletteState.targets) {
+        if (t.id == primaryId) {
+          target = t;
+          break;
+        }
+      }
+    }
+    
     if (target == null) return;
 
     final key = target.key;
 
-    // 3) Scrollen, so dass das Element VOR dem Rad sichtbar ist
+    // 4) Scrollen, so dass das Element VOR dem Rad sichtbar ist (smooth Animation)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_isRadialOpen) return;
       final ctx = key.currentContext;
       if (ctx == null) return;
 
       try {
+        // Smooth Animation mit längerer Duration und besserer Curve
         Scrollable.ensureVisible(
           ctx,
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 200), // Längere Duration für smooth Animation
+          curve: Curves.easeInOutCubic, // Smooth, fließende Kurve
           // 0 = ganz oben, 1 = ganz unten
           // etwas über der Mitte, damit es nicht vom Rad verdeckt wird
           alignment: 0.18,
@@ -216,12 +233,21 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final radialPalette = ref.watch(radialPaletteProvider);
     final focusedIds = radialPalette.focusedIds;
 
-    // Extra Platz nur, wenn der Fokus wirklich am Ende der Liste ist
-    final totalTargets = radialPalette.targets.length;
-    final bool isNearBottom =
-        _isRadialOpen &&
-        totalTargets > 0 &&
-        radialPalette.focusedIndex >= totalTargets - 6; // letzte ~6 Targets (ab Index 41 bei 46 Targets)
+    // Extra Platz nur, wenn der Fokus auf einer der letzten Kacheln ist (Levels & Progress)
+    final bool isNearBottom = _isRadialOpen && focusedIds.isNotEmpty && () {
+      // Basis-ID extrahieren (ohne .title oder .count)
+      final primaryId = focusedIds.first;
+      final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
+      
+      // Prüfen, ob es eine Levels & Progress Kachel ist (a1, a2, b1, b2, c1, c2)
+      final lastTileKeys = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
+      for (final key in lastTileKeys) {
+        if (baseId.endsWith('levels_progress.$key')) {
+          return true;
+        }
+      }
+      return false;
+    }();
 
     // Header-Targets registrieren (nur einmal)
     if (!_headerTargetsRegistered) {
@@ -350,7 +376,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     key: _keysById['wordHub.title'],
                     child: FocusGlow(
                       isFocused: focusedIds.contains('wordHub.title'),
-                      borderRadius: BorderRadius.circular(999), // pill
+                      borderRadius: BorderRadius.circular(12), // kleine Radien an den Ecken
                       child: Text(
                         'Word Hub',
                         key: _titleKey,
@@ -593,7 +619,7 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
         child: FocusGlow(
           isFocused: isFocused,
-          borderRadius: BorderRadius.circular(999), // abgerundete Enden
+          borderRadius: BorderRadius.circular(12), // kleine Radien an den Ecken
           child: Text(
             widget.title,
             key: _titleKey,
@@ -625,34 +651,73 @@ class _GridSection extends ConsumerStatefulWidget {
 }
 
 class _GridSectionState extends ConsumerState<_GridSection> {
-  late final List<GlobalKey> _keys;
+  late final List<GlobalKey> _tileKeys;
+  late final List<GlobalKey> _titleKeys;
+  late final List<GlobalKey> _countKeys;
   bool _registered = false;
 
   @override
   void initState() {
     super.initState();
-    // Keys nur einmal erstellen
-    _keys = List.generate(widget.subs.length, (_) => GlobalKey());
+    final len = widget.subs.length;
+    _tileKeys  = List.generate(len, (_) => GlobalKey());
+    _titleKeys = List.generate(len, (_) => GlobalKey());
+    _countKeys = List.generate(len, (_) => GlobalKey());
   }
 
   @override
   Widget build(BuildContext context) {
-    // 2) Zu JEDEM Sub eine PaletteTarget-ID + Key anlegen
+    // 2) Zu JEDEM Sub: Tile + Titel + Counter als eigene Targets
     final targets = <PaletteTarget>[];
     for (var i = 0; i < widget.subs.length; i++) {
       final sub = widget.subs[i];
-      final id = 'wordHub.${widget.sectionKey}.${sub.key}';
+      final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+
+      // a) Ganze Kachel
       targets.add(PaletteTarget(
-        id: id,
-        key: _keys[i],
+        id: baseId,
+        key: _tileKeys[i],
         kind: TargetKind.tile,
         tools: {
           PaletteTool.stroke,
           PaletteTool.fill,
-          PaletteTool.text,
           PaletteTool.icon,
           PaletteTool.image,
           PaletteTool.glow,
+        },
+      ));
+
+      // b) Titel-Text in der Kachel
+      targets.add(PaletteTarget(
+        id: '$baseId.title',
+        key: _titleKeys[i],
+        kind: TargetKind.text,
+        tools: {
+          PaletteTool.text,
+          PaletteTool.glow,
+        },
+        onApply: (tool, color, scope) {
+          if (tool == PaletteTool.text) {
+            ref.read(wordHubTileOverridesProvider.notifier)
+                .setTitleColor(baseId, color);
+          }
+        },
+      ));
+
+      // c) Counter-Zahl in der Kachel
+      targets.add(PaletteTarget(
+        id: '$baseId.count',
+        key: _countKeys[i],
+        kind: TargetKind.text,
+        tools: {
+          PaletteTool.text,
+          PaletteTool.glow,
+        },
+        onApply: (tool, color, scope) {
+          if (tool == PaletteTool.text) {
+            ref.read(wordHubTileOverridesProvider.notifier)
+                .setCountColor(baseId, color);
+          }
         },
       ));
     }
@@ -673,13 +738,18 @@ class _GridSectionState extends ConsumerState<_GridSection> {
         delegate: SliverChildBuilderDelegate(
           (context, i) {
             final sub = widget.subs[i];
-            final id = 'wordHub.${widget.sectionKey}.${sub.key}';
+            final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+
             return _HighlightableTarget(
-              id: id,
+              id: baseId, // ganze Kachel
               child: CategoryCard(
-                key: _keys[i],
+                key: _tileKeys[i],
+                paletteId: baseId,
                 sectionKey: widget.sectionKey,
                 sub: sub,
+                // 🔽 NEU: Keys für Titel & Counter in die Kachel hineinreichen
+                titleKey: _titleKeys[i],
+                countKey: _countKeys[i],
                 onTap: widget.onTapSub == null ? null : () => widget.onTapSub!(sub),
               ),
             );
@@ -730,19 +800,12 @@ class _HighlightableTarget extends ConsumerWidget {
           child: IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
-                // passt sich der Kartenform an (leicht größer, aber gleich rund)
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: Colors.white,
-                  width: 2,
+                  width: 6,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.5),
-                    blurRadius: 12, // reduziert von 18
-                    spreadRadius: 0.5, // reduziert von 1.5
-                  ),
-                ],
+                color: Colors.white.withOpacity(0.08),
               ),
             ),
           ),

@@ -253,6 +253,8 @@ class _FocusSelectorRing extends ConsumerStatefulWidget {
 
 class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
   double? _dragAngle; // aktueller, kontinuierlicher Winkel des Balls
+  int? _lastSnappedIndex; // letzter gesnappter Index
+  double? _lastSnappedAngle; // letzter gesnappter Winkel (normalisiert auf [0, 2*PI))
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +284,11 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
+        // Hysterese zurücksetzen, damit der aktuelle Fokus sofort gesnappt wird
+        setState(() {
+          _lastSnappedIndex = null;
+          _lastSnappedAngle = null;
+        });
         _updateFromPosition(context, details.globalPosition, total, ctrl);
       },
       onPanUpdate: (details) {
@@ -290,11 +297,15 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
       onPanEnd: (_) {
         setState(() {
           _dragAngle = null;
+          _lastSnappedIndex = null;
+          _lastSnappedAngle = null;
         });
       },
       onPanCancel: () {
         setState(() {
           _dragAngle = null;
+          _lastSnappedIndex = null;
+          _lastSnappedAngle = null;
         });
       },
       child: SizedBox(
@@ -366,9 +377,38 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
     if (angle < 0) angle += 2 * math.pi;
 
     final angleStep = (2 * math.pi) / total;
-    final visibleIndex = (angle / angleStep).round().clamp(0, total - 1);
-
-    ctrl.moveFocusToVisibleIndex(visibleIndex);
+    
+    // Hysterese: Nur wechseln, wenn sich der Winkel um mindestens 60% eines Slots geändert hat
+    final hysteresisThreshold = angleStep * 0.6;
+    
+    // Initialisierung beim ersten Mal
+    if (_lastSnappedAngle == null || _lastSnappedIndex == null) {
+      final visibleIndex = (angle / angleStep).round().clamp(0, total - 1);
+      _lastSnappedIndex = visibleIndex;
+      _lastSnappedAngle = angle;
+      ctrl.moveFocusToVisibleIndex(visibleIndex);
+      return;
+    }
+    
+    // Berechne die Winkel-Differenz (berücksichtige Überlauf bei 0/2*PI)
+    var angleDiff = angle - _lastSnappedAngle!;
+    if (angleDiff > math.pi) {
+      angleDiff -= 2 * math.pi;
+    } else if (angleDiff < -math.pi) {
+      angleDiff += 2 * math.pi;
+    }
+    
+    // Nur wechseln, wenn die Differenz den Schwellenwert überschreitet
+    if (angleDiff.abs() >= hysteresisThreshold) {
+      final visibleIndex = (angle / angleStep).round().clamp(0, total - 1);
+      
+      // Nur aktualisieren, wenn sich der Index wirklich geändert hat
+      if (visibleIndex != _lastSnappedIndex) {
+        _lastSnappedIndex = visibleIndex;
+        _lastSnappedAngle = angle;
+        ctrl.moveFocusToVisibleIndex(visibleIndex);
+      }
+    }
   }
 }
 

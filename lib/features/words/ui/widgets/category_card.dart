@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
+import 'package:talvori/features/words/application/word_hub_tile_overrides_provider.dart';
+import 'package:talvori/features/words/application/radial_palette_controller.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/application/category_stats_provider.dart';
 import 'shimmer_box.dart';
@@ -14,11 +16,17 @@ class CategoryCard extends ConsumerStatefulWidget {
   final String sectionKey;
   final HubSubcat sub;
   final VoidCallback? onTap;
+  final String? paletteId; // Eindeutige ID für Farb-Overrides
+  final GlobalKey? titleKey; // Key für Titel-Target
+  final GlobalKey? countKey; // Key für Counter-Target
 
   const CategoryCard({
     required this.sectionKey,
     required this.sub,
     this.onTap,
+    this.paletteId,
+    this.titleKey,
+    this.countKey,
     super.key,
   });
 
@@ -70,6 +78,21 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
       widget.sub.label,
     );
     final glowEnabled = ref.watch(wordHubGlowProvider);
+    
+    // Farb-Overrides lesen
+    final overrides = widget.paletteId != null
+        ? ref.watch(wordHubTileOverridesProvider)[widget.paletteId!]
+        : null;
+    final titleColor = overrides?.titleColor ?? Colors.white;
+    final countColor = overrides?.countColor ?? const Color(0xFFF1C86B);
+    
+    // Fokus-IDs auslesen
+    final palette = ref.watch(radialPaletteProvider);
+    final focusedIds = palette.focusedIds;
+    
+    final baseId = widget.paletteId ?? 'wordHub.${widget.sectionKey}.${widget.sub.key}';
+    final isTitleFocused = focusedIds.contains('$baseId.title');
+    final isCountFocused = focusedIds.contains('$baseId.count');
 
     return Material(
       color: Colors.transparent,
@@ -121,10 +144,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                   children: [
                     loading
                         ? const ShimmerBox(height: 18, borderRadius: 6)
-                        : Text(
-                            widget.sub.label,
-                            style: t.textTheme.titleMedium,
-                          ),
+                        : _buildTitle(t, titleColor, isTitleFocused),
                     const Spacer(),
                     if (loading)
                       Align(
@@ -137,16 +157,10 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                           ),
                         ),
                       )
-                    else if (stats != null)
+                      else if (stats != null)
                       Align(
                         alignment: Alignment.bottomRight,
-                        child: Text(
-                          '${stats.total}',
-                          style: t.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFF1C86B),
-                          ),
-                        ),
+                        child: _buildCount(stats.total, countColor, isCountFocused),
                       ),
                   ],
                 ),
@@ -156,5 +170,72 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
         ),
       ),
     );
+  }
+
+  Widget _buildTitle(ThemeData t, Color titleColor, bool isTitleFocused) {
+    Widget title = Text(
+      widget.sub.label,
+      key: widget.titleKey, // 🔹 der Key, damit das Target gemessen werden kann
+      style: t.textTheme.titleMedium?.copyWith(
+        color: titleColor,
+      ),
+    );
+
+    if (isTitleFocused) {
+      title = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12), // kleine Radien an den Ecken
+          border: Border.all(
+            color: Colors.white,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.6),
+              blurRadius: 18,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: title,
+      );
+    }
+
+    return title;
+  }
+
+  Widget _buildCount(int count, Color countColor, bool isCountFocused) {
+    Widget countWidget = Text(
+      '$count',
+      key: widget.countKey, // 🔹 Key für das Counter-Target
+      style: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: Colors.white, // Weiße Zahl, kein goldener Hintergrund
+      ),
+    );
+
+    if (isCountFocused) {
+      countWidget = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: Colors.white,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.6),
+              blurRadius: 18,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: countWidget,
+      );
+    }
+
+    return countWidget;
   }
 }
