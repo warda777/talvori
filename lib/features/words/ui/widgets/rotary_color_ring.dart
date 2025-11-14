@@ -33,7 +33,7 @@ class RotaryColorRing extends StatefulWidget {
 }
 
 class RotaryColorRingState extends State<RotaryColorRing>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   double _angle = 0.0;
   double _dragStartAngle = 0.0;
   Offset _center = Offset.zero;
@@ -51,6 +51,10 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   late final AnimationController _momentum;
   Animation<double>? _fling;
+  
+  // 🔴 Animation für Welle über Farbkeile
+  late final AnimationController _waveController;
+  late final Animation<double> _waveAnimation;
 
   @override
   void initState() {
@@ -59,6 +63,42 @@ class RotaryColorRingState extends State<RotaryColorRing>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
+    
+    // Welle-Animation: einmal um den Kreis in 2 Sekunden
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _waveAnimation = Tween<double>(begin: 0.0, end: 2 * math.pi).animate(
+      CurvedAnimation(parent: _waveController, curve: Curves.linear),
+    );
+    
+    // Welle starten wenn gelockt, stoppen wenn nicht gelockt
+    if (widget.isLocked) {
+      _waveController.repeat();
+    }
+  }
+  
+  @override
+  void didUpdateWidget(RotaryColorRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Welle starten/stoppen basierend auf isLocked
+    if (widget.isLocked && !oldWidget.isLocked) {
+      // Nur starten wenn nicht gerade gepickt wird
+      if (!_picking) {
+        _waveController.repeat();
+      }
+    } else if (!widget.isLocked && oldWidget.isLocked) {
+      _waveController.stop();
+      _waveController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _momentum.dispose();
+    _waveController.dispose();
+    super.dispose();
   }
 
   static const List<
@@ -223,12 +263,6 @@ class RotaryColorRingState extends State<RotaryColorRing>
   }
 
   @override
-  void dispose() {
-    _momentum.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = _paletteColors(widget.count);
 
@@ -291,6 +325,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
                       _dragColor = colors[i];
                       _dragPos = localPos;
                     });
+                    // 🔴 Welle sofort stoppen wenn Farbe gepickt wird
+                    _waveController.stop();
                     widget.onPick(colors[i]);
                     HapticFeedback.lightImpact();
                   },
@@ -344,6 +380,10 @@ class RotaryColorRingState extends State<RotaryColorRing>
                         _dragColor = null;
                         _dragPos = null;
                       });
+                      // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
+                      if (widget.isLocked && !_waveController.isAnimating) {
+                        _waveController.repeat();
+                      }
                       // 🔴 Callback für Pick-Ende (Finger losgelassen)
                       widget.onPickEnd?.call();
                     } else {
@@ -357,19 +397,46 @@ class RotaryColorRingState extends State<RotaryColorRing>
                         _dragColor = null;
                         _dragPos = null;
                       });
+                      // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
+                      if (widget.isLocked && !_waveController.isAnimating) {
+                        _waveController.repeat();
+                      }
                       // 🔴 Callback für Pick-Ende (auch bei Cancel)
                       widget.onPickEnd?.call();
                     }
                   },
-                  child: CustomPaint(
-                    painter: _WedgePainter(
-                      baseAngle: adjustedAngle,
-                      angleWidth: angleWidth,
-                      innerR: innerR,
-                      outerR: outerR,
-                      color: colors[i],
-                      shadow: 10,
-                    ),
+                  child: AnimatedBuilder(
+                    animation: _waveAnimation,
+                    builder: (context, _) {
+                      // Welle-Position neu berechnen für jeden Frame
+                      final currentWaveAngle = widget.isLocked ? _waveAnimation.value : null;
+                      bool currentIsInWave = false;
+                      if (currentWaveAngle != null) {
+                        var normalizedWedgeAngle = adjustedAngle % (2 * math.pi);
+                        if (normalizedWedgeAngle < 0) normalizedWedgeAngle += 2 * math.pi;
+                        var normalizedWaveAngle = currentWaveAngle % (2 * math.pi);
+                        if (normalizedWaveAngle < 0) normalizedWaveAngle += 2 * math.pi;
+                        
+                        const waveWidth = math.pi / 3;
+                        var angleDiff = (normalizedWedgeAngle - normalizedWaveAngle).abs();
+                        if (angleDiff > math.pi) angleDiff = 2 * math.pi - angleDiff;
+                        
+                        currentIsInWave = angleDiff < waveWidth / 2;
+                      }
+                      
+                      return CustomPaint(
+                        painter: _WedgePainter(
+                          baseAngle: adjustedAngle,
+                          angleWidth: angleWidth,
+                          innerR: innerR,
+                          outerR: outerR,
+                          color: colors[i],
+                          shadow: 10,
+                          waveAngle: currentWaveAngle,
+                          isInWave: currentIsInWave,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -453,6 +520,8 @@ class _WedgePainter extends CustomPainter {
     required this.outerR,
     required this.color,
     required this.shadow,
+    this.waveAngle,
+    this.isInWave = false,
   });
 
   final double baseAngle;
@@ -461,6 +530,8 @@ class _WedgePainter extends CustomPainter {
   final double outerR;
   final Color color;
   final double shadow;
+  final double? waveAngle;
+  final bool isInWave;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -490,6 +561,35 @@ class _WedgePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
 
+    // 🔴 Welle-Effekt: Glow wenn von Welle getroffen
+    if (isInWave && waveAngle != null) {
+      // Intensität basierend auf Entfernung zur Wellenmitte
+      var normalizedWedgeAngle = baseAngle % (2 * math.pi);
+      if (normalizedWedgeAngle < 0) normalizedWedgeAngle += 2 * math.pi;
+      final waveAngleValue = waveAngle!; // Null-Check bereits oben
+      var normalizedWaveAngle = waveAngleValue % (2 * math.pi);
+      if (normalizedWaveAngle < 0) normalizedWaveAngle += 2 * math.pi;
+      
+      var angleDiff = (normalizedWedgeAngle - normalizedWaveAngle).abs();
+      if (angleDiff > math.pi) angleDiff = 2 * math.pi - angleDiff;
+      
+      const waveWidth = math.pi / 3; // ~60 Grad
+      final intensity = 1.0 - (angleDiff / (waveWidth / 2)).clamp(0.0, 1.0);
+      
+      // Goldener Glow für die Welle
+      final wavePaint = Paint()
+        ..color = const Color(0xFFFFC66A).withOpacity(0.6 * intensity)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 15 * intensity);
+      canvas.drawPath(path, wavePaint);
+      
+      // Heller Rand
+      final waveStroke = Paint()
+        ..color = const Color(0xFFFFC66A).withOpacity(0.9 * intensity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2 * intensity;
+      canvas.drawPath(path, waveStroke);
+    }
+
     final stroke = Paint()
       ..color = Colors.white12
       ..style = PaintingStyle.stroke
@@ -503,7 +603,9 @@ class _WedgePainter extends CustomPainter {
       old.angleWidth != angleWidth ||
       old.innerR != innerR ||
       old.outerR != outerR ||
-      old.color != color;
+      old.color != color ||
+      old.waveAngle != waveAngle ||
+      old.isInWave != isInWave;
 }
 
 class _WedgeClipper extends CustomClipper<Path> {

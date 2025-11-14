@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'scope_switch_button.dart';
 import 'rotary_color_ring.dart';
 import 'radial_palette_tools.dart';
+import 'curved_tool_label.dart';
 import '../../application/palette_state.dart';
 import '../../application/radial_palette_controller.dart' show radialPaletteProvider;
 
@@ -111,30 +112,48 @@ class RadialPaletteWheel extends ConsumerWidget {
               child: SizedBox(
                 width: discSize + overshoot * 2,
                 height: discSize + overshoot * 2,
-                child: RotaryColorRing(
-                  key: ringKey,
-                  absoluteRadius: ringInnerRadius,
-                  bubbleSize: bubbleSize,
-                  count: 24,
-                  isLocked: palette.isBallLocked, // 🔴 Nur picken wenn gelockt
-                  onActiveColorChanged: onActiveColorChanged,
-                  onPick: (color) {
-                    final ctrl = ref.read(radialPaletteProvider.notifier);
-                    
-                    // 🔴 Kugel einfärben, solange gelockt
-                    ctrl.setBallColor(color);
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    RotaryColorRing(
+                      key: ringKey,
+                      absoluteRadius: ringInnerRadius,
+                      bubbleSize: bubbleSize,
+                      count: 24,
+                      isLocked: palette.isBallLocked, // 🔴 Nur picken wenn gelockt
+                      onActiveColorChanged: onActiveColorChanged,
+                      onPick: (color) {
+                        final ctrl = ref.read(radialPaletteProvider.notifier);
+                        
+                        // 🔴 Kugel einfärben, solange gelockt
+                        ctrl.setBallColor(color);
 
-                    // Farbe auf aktuelles/gelocktes Target anwenden
-                    ctrl.applyColorToCurrentTarget(color);
-                  },
-                  onPickEnd: () {
-                    final ctrl = ref.read(radialPaletteProvider.notifier);
-                    // 🔴 Finger losgelassen → Lock lösen
-                    ctrl.releaseLockAfterColorPick();
-                  },
-                  ringLift: 0.0,
-                  hitPadInner: 8.0,
-                  hitPadOuter: 8.0,
+                        // Farbe auf aktuelles/gelocktes Target anwenden
+                        ctrl.applyColorToCurrentTarget(color);
+                      },
+                      onPickEnd: () {
+                        final ctrl = ref.read(radialPaletteProvider.notifier);
+                        // 🔴 Finger losgelassen → Lock lösen
+                        ctrl.releaseLockAfterColorPick();
+                      },
+                      ringLift: 0.0,
+                      hitPadInner: 8.0,
+                      hitPadOuter: 8.0,
+                    ),
+                    // 🔴 Gebogener Tool-Label in der schwarzen Scheibe zwischen Farbring und Focus-Ring
+                    if (palette.activeTool != null)
+                      IgnorePointer(
+                        child: CurvedToolLabel(
+                          size: discSize + overshoot * 2,
+                          // Radius zwischen Farbring-Außenrand und Focus-Ring
+                          // Farbring endet bei: discRadius = 180
+                          // Focus-Ring ist bei: discSize/2 - 80 = 180 - 80 = 100
+                          // Text-Position: näher zum Focus-Ring (30% vom Focus-Ring entfernt statt 50%)
+                          radius: (discSize / 2 - 80) + ((discRadius - (discSize / 2 - 80)) * 0.3),
+                          tool: palette.activeTool,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
