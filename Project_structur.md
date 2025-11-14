@@ -31,14 +31,29 @@ Letzte Aktualisierung: 2025-01-27
   - `_AnnulusClipper` – CustomClipper für den Ring-Bereich
 - `ui/widgets/radial_palette_tools.dart` – Tool-Buttons um den Center-Button herum
   - `RadialTools` – Tool-Button-Widget mit RadialTool-Enum
+  - `_FocusSelectorRing` – Dünner Ring mit Kugel für Fokus-Navigation durch Targets
+  - `RadialDebugBanner` – Debug-Banner für aktives Tool und Fokus-Index
 - `ui/widgets/scope_switch_button.dart` – Center-Button mit Scope-Switch-Funktionalität
   - `ScopeSwitchButton` – Button mit Ring-Design und Hold-to-Reset
+- `ui/widgets/category_card.dart` – Kategorie-Kacheln im Word Hub
+  - BorderRadius von 18 auf 24 erhöht für konsistentes Design
+- `ui/screens/word_hub_screen.dart` – Word Hub Hauptscreen
+  - `FocusGlow` – Widget für weißes Glow-Highlight mit optionalem Padding und BorderRadius
+  - `_HighlightableTarget` – Wrapper für fokussierbare Elemente mit weißem Rahmen und Glow
+  - `_SectionHeader` – Section-Header mit Target-Registrierung
+  - `_GridSection` – Grid-Sektion mit Target-Registrierung für alle Kacheln
 
 ### Application
 
 - `application/learn_mode_controller.dart` – Learn-Flow, Antworten-Logik, Queue-Management, Single-Session Hooks
 - `application/level_selection_provider.dart` – Riverpod-State: `levelSelectionProvider`, `singleStageProvider`, `selectingSingleProvider`, `allowedStagesProvider`, `singleSessionCountsProvider`
 - `application/level_selection_controller.dart` – Zentrale Handler für Mode-Wechsel und Stage-Picker
+- `application/radial_palette_controller.dart` – Riverpod StateNotifier für radiale Palette
+  - `RadialPaletteState` – State mit activeTool, scope, targets, focusedIndex, focusedIds
+  - `RadialPaletteController` – Controller mit selectTool, registerTargets, moveFocus, moveFocusToVisibleIndex, applyColorToCurrentTarget
+  - `PaletteTarget` – Target-Definition mit id, key, kind, tools, onApply callback
+  - `TargetKind` – Enum für verschiedene Target-Typen (tile, text, button, icon, header, sectionTitle, searchBar, hubBackground)
+  - `visibleTargets` – Getter für tool-spezifisch gefilterte Targets
 
 ### Data
 
@@ -63,6 +78,23 @@ Letzte Aktualisierung: 2025-01-27
 - Sichtbarkeits-Maske nur im Learn-Mode anwenden (nicht in Kategorie-Screen)
 
 ## Letzte Änderungen
+
+- **Radiale Farbpalette Focus-System** (2025-01-27):
+  - Riverpod State Management: `RadialPaletteController` mit globalem State
+  - Target-Registrierung: Alle UI-Elemente (Kacheln, Titel, Buttons, Suchfeld, Section-Header) als `PaletteTarget`s registriert
+  - Tool-spezifische Filterung: `visibleTargets` filtert Targets basierend auf aktivem Tool
+  - Focus-Navigation: Dünner Ring mit Kugel für Navigation durch fokussierbare Elemente
+  - Smooth Drag: Kugel folgt dem Finger kontinuierlich, Highlight snappt auf Slots
+  - Auto-Scroll: Fokussierte Elemente werden automatisch vor das Rad gescrollt
+  - Dynamisches Bottom-Padding: Extra Platz nur wenn Fokus bei letzten ~6 Targets
+  - Weißes Glow-System: Alle Highlights verwenden weißes Glow statt Gold/Magenta
+  - `FocusGlow` Widget: Wiederverwendbares Widget mit optionalem Padding und BorderRadius
+  - Pill-förmige Rahmen für Texte (Titel, Section-Header)
+  - Karten-Radius erhöht: Von 18 auf 24 für konsistentes Design
+  - Subtiler Glow für Kacheln: WhatsApp-Style mit reduziertem blurRadius (12) und spreadRadius (0.5)
+  - Section-Header bleiben weiß bei Fokus (kein gelber Text mehr)
+  - Close-Button deaktiviert wenn Radial Palette offen
+  - Focus wird beim Schließen der Palette zurückgesetzt
 
 - **Radiale Farbpalette refactored** (2025-01-27):
   - Komponenten in separate Dateien ausgelagert:

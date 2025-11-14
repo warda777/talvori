@@ -45893,3 +45893,125 @@ class CategoryIllustrations {
   static IconData? iconFor(String key) => _iconByKey[key];
 }
 ```
+
+---
+
+## 🎨 Radiale Farbpalette Focus-System (2025-01-27)
+
+### Übersicht
+
+Das radiale Farbpalette-System wurde um ein umfassendes Focus-Management erweitert, das es ermöglicht, durch alle UI-Elemente im Word Hub zu navigieren und diese visuell hervorzuheben.
+
+### Hauptkomponenten
+
+#### `lib/features/words/application/radial_palette_controller.dart`
+
+**Riverpod StateNotifier für globale Palette-State-Verwaltung:**
+
+- `RadialPaletteState`: State-Klasse mit:
+  - `activeTool`: Aktuell ausgewähltes Tool (stroke, fill, text, etc.)
+  - `scope`: ALL oder ONE
+  - `targets`: Liste aller registrierten `PaletteTarget`s
+  - `focusedIndex`: Aktueller Fokus-Index
+  - `focusedIds`: Set von fokussierten Target-IDs
+  - `overlayVisible`: Sichtbarkeit des dunklen Overlays
+
+- `RadialPaletteController`: StateNotifier mit Methoden:
+  - `selectTool(PaletteTool)`: Tool auswählen/abwählen
+  - `registerTargets(List<PaletteTarget>)`: Targets registrieren (merge statt replace)
+  - `moveFocus(int delta)`: Fokus um delta verschieben
+  - `moveFocusToVisibleIndex(int index)`: Fokus auf sichtbaren Index setzen
+  - `applyColorToCurrentTarget(Color)`: Farbe auf fokussiertes Target anwenden
+  - `clearFocus()`: Fokus zurücksetzen
+  - `visibleTargets`: Getter für tool-spezifisch gefilterte Targets
+
+- `PaletteTarget`: Target-Definition mit:
+  - `id`: Eindeutige ID (z.B. "wordHub.title", "wordHub.tile.life_daily_flow.health_fitness")
+  - `key`: GlobalKey für Auto-Scroll
+  - `kind`: TargetKind (tile, text, button, icon, header, sectionTitle, searchBar, hubBackground)
+  - `tools`: Set von PaletteTool-Capabilities
+  - `onApply`: Optionaler Callback für Farbanwendung
+
+- `TargetKind`: Enum für verschiedene Target-Typen
+
+#### `lib/features/words/ui/widgets/radial_palette_tools.dart`
+
+**Erweiterte Tool-Buttons mit Focus-Navigation:**
+
+- `_FocusSelectorRing`: Dünner Ring mit weißer Kugel für Fokus-Navigation
+  - Smooth Drag: Kugel folgt dem Finger kontinuierlich
+  - Slot-Snapping: Highlight snappt auf nächsten Slot
+  - Radius-basierte Hit-Test: Reagiert nur wenn Finger nahe am Ring
+  - Verwendet `visibleTargets` für tool-spezifische Navigation
+
+- `RadialDebugBanner`: Debug-Banner für aktives Tool und Fokus-Index
+  - Zeigt: "Tool: [Tool-Name]" und "Fokus: [Index] / [Total]"
+
+#### `lib/features/words/ui/screens/word_hub_screen.dart`
+
+**Word Hub Screen mit vollständiger Target-Integration:**
+
+- `FocusGlow`: Wiederverwendbares Widget für weißes Glow-Highlight
+  - Optionales `padding` (Standard: horizontal 8, vertical 4)
+  - Optionales `borderRadius` (Standard: 16, Pill: 999)
+  - Weißer Rahmen (2px) und weißer Glow (blurRadius: 18, spreadRadius: 1.5)
+
+- `_HighlightableTarget`: Wrapper für fokussierbare Elemente
+  - Weißer Rahmen (2px) und weißer Glow für Kacheln
+  - BorderRadius: 24 (passt zur Kartenform)
+  - Reduzierter Glow: blurRadius 12, spreadRadius 0.5 (WhatsApp-Style)
+
+- `_SectionHeader`: Section-Header mit Target-Registrierung
+  - Registriert sich als `TargetKind.sectionTitle`
+  - Tools: text, glow
+  - Pill-förmiger Rahmen (BorderRadius.circular(999))
+  - Text bleibt weiß bei Fokus (kein gelber Text mehr)
+
+- `_GridSection`: Grid-Sektion mit Target-Registrierung
+  - Registriert alle Kacheln als `PaletteTarget`s
+  - TargetKind: tile
+  - Tools: stroke, fill, text, icon, image, glow
+  - Verwendet `_HighlightableTarget` für visuelles Feedback
+
+- Auto-Scroll: Fokussierte Elemente werden automatisch vor das Rad gescrollt
+- Dynamisches Bottom-Padding: Extra Platz (260px) nur wenn Fokus bei letzten ~6 Targets
+- Close-Button deaktiviert wenn Radial Palette offen
+- Focus wird beim Schließen der Palette zurückgesetzt
+
+#### `lib/features/words/ui/widgets/category_card.dart`
+
+**Kategorie-Kacheln mit konsistentem Design:**
+
+- BorderRadius von 18 auf 24 erhöht
+- Passt jetzt exakt zum selektierten Rahmen-Radius
+- Konsistentes Design im gesamten Word Hub
+
+### Design-Entscheidungen
+
+1. **Weißes Glow-System**: Alle Highlights verwenden weißes Glow statt Gold/Magenta für konsistentes Design
+2. **Pill-förmige Rahmen**: Texte (Titel, Section-Header) haben abgerundete Enden (BorderRadius.circular(999))
+3. **Subtiler Glow**: Kacheln haben WhatsApp-Style subtilen Glow (blurRadius: 12, spreadRadius: 0.5)
+4. **Konsistente Radien**: Alle Kacheln verwenden BorderRadius 24
+5. **Dynamisches Padding**: Extra Platz nur wenn benötigt (bei letzten Targets)
+
+### Workflow
+
+1. Tool auswählen → Tool erscheint in der Mitte, Overlay verschwindet
+2. Ring mit Kugel erscheint → Navigation durch sichtbare Targets
+3. Kugel drehen → Fokus bewegt sich durch Targets
+4. Auto-Scroll → Fokussiertes Element wird vor das Rad gescrollt
+5. Farbe auswählen → Farbe wird auf fokussiertes Target angewendet (basierend auf Tool und Scope)
+6. Tool abwählen → Alle 7 Tool-Buttons erscheinen wieder, Overlay wird sichtbar
+
+### Technische Details
+
+- **State Management**: Riverpod StateNotifier für globalen State
+- **Target-Registrierung**: Merge-basiert (keine Überschreibung)
+- **Tool-Filterung**: `visibleTargets` filtert basierend auf `activeTool`
+- **Focus-Navigation**: Smooth Drag mit Slot-Snapping
+- **Auto-Scroll**: `Scrollable.ensureVisible` mit alignment 0.18
+- **Performance**: Logging nur bei "voll sichtbaren" Zustandsübergängen
+
+---
+
+_Letzte Aktualisierung: 2025-01-27_
