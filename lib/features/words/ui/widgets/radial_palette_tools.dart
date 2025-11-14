@@ -393,3 +393,50 @@ class _FocusRingPainter extends CustomPainter {
   bool shouldRepaint(covariant _FocusRingPainter oldDelegate) =>
       oldDelegate.ringRadius != ringRadius;
 }
+
+class RadialDebugBanner extends ConsumerWidget {
+  const RadialDebugBanner({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(radialPaletteProvider);
+
+    final toolLabel = switch (state.activeTool) {
+      PaletteTool.stroke => 'Rahmen',
+      PaletteTool.fill => 'Kachel-Hintergrund',
+      PaletteTool.text => 'Text',
+      PaletteTool.hubBackground => 'WordHub-Background',
+      PaletteTool.glow => 'Glow',
+      PaletteTool.icon => 'Icon',
+      PaletteTool.image => 'Bild',
+      null => 'kein Tool aktiv',
+    };
+
+    final total = state.targets.length;
+    final index = state.focusedIndex.clamp(0, total == 0 ? 0 : total - 1);
+
+    return Positioned(
+      left: 16,
+      bottom: 16,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(
+              'Tool: $toolLabel\nFokus: $index / ${total == 0 ? 0 : total - 1}',
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

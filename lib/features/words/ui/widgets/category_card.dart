@@ -73,10 +73,10 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(24),
       clipBehavior: Clip.none,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         onTap: () {
           HapticFeedback.selectionClick();
           if (widget.onTap != null) widget.onTap!();
@@ -87,7 +87,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
         splashFactory: InkRipple.splashFactory,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
@@ -106,14 +106,14 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xFF040404),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: strokeColor.withOpacity(0.85),
                 width: 2,
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(24),
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(

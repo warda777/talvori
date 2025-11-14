@@ -11,8 +11,60 @@ import 'package:talvori/features/words/ui/widgets/category_card.dart';
 // ⬇️ NEU
 import 'package:talvori/features/words/application/radial_palette_controller.dart';
 import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
+import 'package:talvori/features/words/ui/widgets/radial_palette_tools.dart';
+import 'package:talvori/features/words/ui/widgets/radial_palette_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
 import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
+
+Widget debugBorder(Widget child, {bool focused = false}) {
+  // nur noch Platzhalter – Fokus wird komplett von FocusGlow übernommen
+  return child;
+}
+
+class FocusGlow extends StatelessWidget {
+  final bool isFocused;
+  final Widget child;
+  final BorderRadius? borderRadius;
+  final EdgeInsets? padding; // 🔹 optionales Padding
+
+  const FocusGlow({
+    super.key,
+    required this.isFocused,
+    required this.child,
+    this.borderRadius,
+    this.padding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isFocused) return child;
+
+    final radius = borderRadius ?? BorderRadius.circular(16);
+    // Standard-Padding für Texte, aber überschreibbar für Buttons/Suchfeld
+    final effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      padding: effectivePadding,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border.all(
+          color: Colors.white,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.55),
+            blurRadius: 18,
+            spreadRadius: 1.5,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
 
 class WordHubScreen extends ConsumerStatefulWidget {
   const WordHubScreen({super.key});
@@ -29,11 +81,106 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   final SlideHintController _slideCtrl = SlideHintController();
   final ScrollController _scroll = ScrollController();
   bool _allowHints = true;
+  bool _isRadialOpen = false;
+  bool _callbackSet = false; // Flag um zu verhindern, dass Callback mehrfach gesetzt wird
+  bool _headerTargetsRegistered = false; // Flag um zu verhindern, dass Header-Targets mehrfach registriert werden
+  
+  // Keys für Auto-Scroll
+  final _keysById = <String, GlobalKey>{
+    'wordHub.title': GlobalKey(),
+    'wordHub.search': GlobalKey(),
+    'wordHub.unlockButton': GlobalKey(),
+  };
+  String? _lastPrimaryId;
+  
+  // Header-Keys (werden nur einmal erstellt)
+  late final GlobalKey _titleKey = GlobalKey();
+  late final GlobalKey _backKey = GlobalKey();
+  late final GlobalKey _unlockKey = GlobalKey();
+  late final GlobalKey _searchKey = GlobalKey();
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
     if (mounted) setState(() => _allowHints = false);
     await _slideCtrl.closeAndFreeze();
     ref.read(wordHubGlowProvider.notifier).state = !glowEnabled;
+  }
+
+  void _toggleRadial() {
+    setState(() {
+      if (_isRadialOpen) {
+        _closeRadial();
+      } else {
+        _isRadialOpen = true;
+        _callbackSet = false;
+        // Callback setzen, wenn Rad geöffnet wird (nur einmal)
+        if (!_callbackSet) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _isRadialOpen && !_callbackSet) {
+              ref.read(radialPaletteProvider.notifier).onFocusChange = _handleFocusChange;
+              _callbackSet = true;
+            }
+          });
+        }
+      }
+    });
+  }
+
+  void _closeRadial() {
+    // 1) Fokus im Controller komplett löschen
+    final ctrl = ref.read(radialPaletteProvider.notifier);
+    ctrl.clearFocus();
+    ctrl.onFocusChange = null;
+
+    // 2) Lokalen State zurücksetzen
+    if (!mounted) return;
+    setState(() {
+      _isRadialOpen = false;
+      _lastPrimaryId = null;
+      _callbackSet = false;
+    });
+  }
+
+  void _handleFocusChange(Set<String> ids) {
+    if (!mounted || !_isRadialOpen) return;
+
+    // 1) Primäre ID bestimmen
+    final String? primaryId = ids.isEmpty ? null : ids.first;
+    if (primaryId == null || primaryId == _lastPrimaryId) return;
+    _lastPrimaryId = primaryId;
+
+    // 2) Passenden PaletteTarget über die ID finden
+    final paletteState = ref.read(radialPaletteProvider);
+
+    PaletteTarget? target;
+    for (final t in paletteState.targets) {
+      if (t.id == primaryId) {
+        target = t;
+        break;
+      }
+    }
+    if (target == null) return;
+
+    final key = target.key;
+
+    // 3) Scrollen, so dass das Element VOR dem Rad sichtbar ist
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_isRadialOpen) return;
+      final ctx = key.currentContext;
+      if (ctx == null) return;
+
+      try {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          // 0 = ganz oben, 1 = ganz unten
+          // etwas über der Mitte, damit es nicht vom Rad verdeckt wird
+          alignment: 0.18,
+        );
+      } catch (_) {
+        // Scroll-Fehler ignorieren
+      }
+    });
   }
 
   Widget _buildFrontButton({Key? key}) {
@@ -66,43 +213,114 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final repo = ref.read(wordHubControllerProvider.notifier).repo;
     final glowEnabled = ref.watch(wordHubGlowProvider);
+    final radialPalette = ref.watch(radialPaletteProvider);
+    final focusedIds = radialPalette.focusedIds;
 
-    // Keys für Header-Elemente
-    final titleKey = GlobalKey();
-    final backKey = GlobalKey();
-    final unlockKey = GlobalKey();
-    final searchKey = GlobalKey();
+    // Extra Platz nur, wenn der Fokus wirklich am Ende der Liste ist
+    final totalTargets = radialPalette.targets.length;
+    final bool isNearBottom =
+        _isRadialOpen &&
+        totalTargets > 0 &&
+        radialPalette.focusedIndex >= totalTargets - 6; // letzte ~6 Targets (ab Index 41 bei 46 Targets)
 
-    // Header-Targets registrieren
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final headerTargets = <PaletteTarget>[
-        PaletteTarget(
-          id: 'wordHub.title',
-          key: titleKey,
-          kind: TargetKind.header,
-          tools: {PaletteTool.text},
-        ),
-        PaletteTarget(
-          id: 'wordHub.backButton',
-          key: backKey,
-          kind: TargetKind.icon,
-          tools: {PaletteTool.icon, PaletteTool.stroke},
-        ),
-        PaletteTarget(
-          id: 'wordHub.unlockButton',
-          key: unlockKey,
-          kind: TargetKind.button,
-          tools: {PaletteTool.stroke, PaletteTool.fill, PaletteTool.text},
-        ),
-        PaletteTarget(
-          id: 'wordHub.search',
-          key: searchKey,
-          kind: TargetKind.searchBar,
-          tools: {PaletteTool.stroke, PaletteTool.fill},
-        ),
-      ];
-      ref.read(radialPaletteProvider.notifier).registerTargets(headerTargets);
-    });
+    // Header-Targets registrieren (nur einmal)
+    if (!_headerTargetsRegistered) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _headerTargetsRegistered) return;
+        _headerTargetsRegistered = true;
+        final headerTargets = <PaletteTarget>[
+          PaletteTarget(
+            id: 'wordHub.title',
+            key: _titleKey,
+            kind: TargetKind.header,
+            tools: {PaletteTool.text},
+          ),
+          PaletteTarget(
+            id: 'wordHub.backButton',
+            key: _backKey,
+            kind: TargetKind.icon,
+            tools: {PaletteTool.icon, PaletteTool.stroke},
+          ),
+          PaletteTarget(
+            id: 'wordHub.unlockButton',
+            key: _unlockKey,
+            kind: TargetKind.button,
+            tools: {PaletteTool.stroke, PaletteTool.fill, PaletteTool.text},
+          ),
+          PaletteTarget(
+            id: 'wordHub.search',
+            key: _searchKey,
+            kind: TargetKind.searchBar,
+            tools: {PaletteTool.stroke, PaletteTool.fill},
+          ),
+        ];
+        ref.read(radialPaletteProvider.notifier).registerTargets(headerTargets);
+      });
+    }
+
+    // Sektionen-Widgets erstellen
+    final sectionWidgets = <Widget>[];
+    for (final section in hubSections) {
+      sectionWidgets.add(_SectionHeader(section.title, section.key));
+      sectionWidgets.add(_GridSection(
+        sectionKey: section.key,
+        subs: section.subcats,
+        repo: repo,
+        onTapSub: (sub) async {
+          String? catId;
+          try {
+            catId =
+                (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
+                ? sub.supabaseId
+                : await repo.findCategoryIdByName(sub.label);
+          } catch (_) {
+            catId = null;
+          }
+
+          if (!context.mounted) return;
+          if (catId == null && sub.supabaseId == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
+                ),
+              ),
+            );
+          }
+
+          if (catId != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CategoryDetailScreen(
+                  title: sub.label,
+                  categoryId: catId!,
+                  categorySlug: null,
+                  listFilter: WordListFilter(
+                    WordFilterKind.category,
+                    catId,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            final (kind, value) = _mapToFilter(
+              section.key,
+              sub.label,
+            );
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => CategoryDetailScreen(
+                  title: sub.label,
+                  categoryId: null,
+                  categorySlug: _slugifyLocal(sub.label),
+                  listFilter: WordListFilter(kind, value),
+                ),
+              ),
+            );
+          }
+        },
+      ));
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -112,9 +330,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         elevation: 0,
         toolbarHeight: 56,
         leading: IconButton(
-          key: backKey,
+          key: _backKey,
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _isRadialOpen
+              ? null // 🔒 gesperrt, solange das Rad offen ist
+              : () => Navigator.of(context).pop(),
           tooltip: 'Close',
         ),
         titleSpacing: 8,
@@ -126,10 +346,17 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
               Positioned.fill(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Word Hub',
-                    key: titleKey,
-                    overflow: TextOverflow.ellipsis,
+                  child: KeyedSubtree(
+                    key: _keysById['wordHub.title'],
+                    child: FocusGlow(
+                      isFocused: focusedIds.contains('wordHub.title'),
+                      borderRadius: BorderRadius.circular(999), // pill
+                      child: Text(
+                        'Word Hub',
+                        key: _titleKey,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -161,7 +388,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     final glow = ref.read(wordHubGlowProvider);
                     ref.read(wordHubGlowProvider.notifier).state = !glow;
                   },
-                  child: _buildFrontButton(key: unlockKey),
+                  child: KeyedSubtree(
+                    key: _keysById['wordHub.unlockButton'],
+                    child: FocusGlow(
+                      isFocused: focusedIds.contains('wordHub.unlockButton'),
+                      borderRadius: BorderRadius.circular(999), // Button-Form (Stadium)
+                      padding: EdgeInsets.zero, // kein Padding für Buttons
+                      child: _buildFrontButton(key: _unlockKey),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -170,137 +405,137 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       ),
       body: Stack(
         children: [
-          CustomScrollView(
-            controller: _scroll,
-            slivers: [
-              // Suche
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: TextField(
-                    key: searchKey,
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (q) {
-                      final query = q.trim();
-                      if (query.isEmpty) return;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => WordListScreen(
-                            filter: WordListFilter(WordFilterKind.query, query),
+          // 1) Inhalt (Kacheln, Header, etc.)
+          IgnorePointer(
+            ignoring: _isRadialOpen,
+            child: AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              // nur wenn der Fokus am Ende ist, schaffen wir unten extra Platz
+              padding: EdgeInsets.only(bottom: isNearBottom ? 260.0 : 0.0),
+              child: CustomScrollView(
+                controller: _scroll,
+                slivers: [
+                // Suche
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: KeyedSubtree(
+                      key: _keysById['wordHub.search'],
+                      child: FocusGlow(
+                        isFocused: focusedIds.contains('wordHub.search'),
+                        borderRadius: BorderRadius.circular(999), // gleiche Pill-Form wie Feld
+                        padding: EdgeInsets.zero, // kein Padding für Suchfeld
+                        child: TextField(
+                          key: _searchKey,
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (q) {
+                            final query = q.trim();
+                            if (query.isEmpty) return;
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => WordListScreen(
+                                  filter: WordListFilter(WordFilterKind.query, query),
+                                ),
+                              ),
+                            );
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Suchen',
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xFFF1C86B),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(999),
+                              borderSide: BorderSide(
+                                color: const Color(0xFFF1C86B).withOpacity(0.85),
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(999),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFF1C86B),
+                                width: 1.6,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(999),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFF1C86B),
+                                width: 2.2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 14,
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Suchen',
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: Color(0xFFF1C86B),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide(
-                          color: const Color(0xFFF1C86B).withOpacity(0.85),
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFF1C86B),
-                          width: 1.6,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFF1C86B),
-                          width: 2.2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.12),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 14,
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // Sektionen
-              for (final section in hubSections) ...[
-                _SectionHeader(section.title, section.key),
-                _GridSection(
-                  sectionKey: section.key,
-                  subs: section.subcats,
-                  repo: repo,
-                  onTapSub: (sub) async {
-                    String? catId;
-                    try {
-                      catId =
-                          (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
-                          ? sub.supabaseId
-                          : await repo.findCategoryIdByName(sub.label);
-                    } catch (_) {
-                      catId = null;
-                    }
+                // Sektionen
+                ...sectionWidgets,
 
-                    if (!context.mounted) return;
-                    if (catId == null && sub.supabaseId == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (catId != null) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CategoryDetailScreen(
-                            title: sub.label,
-                            categoryId: catId!,
-                            categorySlug: null,
-                            listFilter: WordListFilter(
-                              WordFilterKind.category,
-                              catId,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      final (kind, value) = _mapToFilter(
-                        section.key,
-                        sub.label,
-                      );
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CategoryDetailScreen(
-                            title: sub.label,
-                            categoryId: null,
-                            categorySlug: _slugifyLocal(sub.label),
-                            listFilter: WordListFilter(kind, value),
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: bottomInset + (isNearBottom ? 260 : 10),
+                  ),
                 ),
               ],
+              ),
+            ),
+          ),
 
-              SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
-            ],
-          ),
+          // 2) Overlay zum Schließen – fängt Taps außerhalb des Rades ab
+          if (_isRadialOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _closeRadial,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+
+          // 3) Rad selbst (liegt über Overlay, damit Drag noch funktioniert)
+          if (_isRadialOpen)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: RadialPaletteSheet(
+                  onClose: _closeRadial,
+                  heroTag: 'floating-palette',
+                ),
+              ),
+            ),
+
+          // 4) Toggle-Button unten rechts – immer ganz oben
           Positioned(
-            right: 0,
-            bottom: 0,
-            child: FloatingPaletteButton(scrollController: _scroll),
+            right: 24,
+            bottom: 24,
+            child: _buildRadialToggleButton(),
           ),
+
+          const RadialDebugBanner(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRadialToggleButton() {
+    return FloatingActionButton(
+      onPressed: _toggleRadial,
+      backgroundColor: Colors.black,
+      child: Icon(
+        _isRadialOpen ? Icons.close : Icons.palette_outlined,
+        color: Colors.white,
       ),
     );
   }
@@ -313,45 +548,66 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   return (WordFilterKind.about, label);
 }
 
-class _SectionHeader extends ConsumerWidget {
+class _SectionHeader extends ConsumerStatefulWidget {
   final String title;
   final String sectionKey;
   
   const _SectionHeader(this.title, this.sectionKey);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final titleKey = GlobalKey();
+  ConsumerState<_SectionHeader> createState() => _SectionHeaderState();
+}
+
+class _SectionHeaderState extends ConsumerState<_SectionHeader> {
+  final _titleKey = GlobalKey();
+  bool _registered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = ref.watch(radialPaletteProvider);
+    final focusedIds = palette.focusedIds;
+    final sectionId = 'wordHub.sectionTitle.${widget.sectionKey}';
+    final isFocused = focusedIds.contains(sectionId);
     
-    // Target registrieren
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(radialPaletteProvider.notifier).registerTargets([
-        PaletteTarget(
-          id: 'wordHub.sectionTitle.$sectionKey',
-          key: titleKey,
-          kind: TargetKind.sectionTitle,
-          tools: {
-            PaletteTool.text,
-            PaletteTool.glow,
-          },
-        ),
-      ]);
-    });
+    // Target registrieren (nur einmal)
+    if (!_registered) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _registered) return;
+        _registered = true;
+        ref.read(radialPaletteProvider.notifier).registerTargets([
+          PaletteTarget(
+            id: sectionId,
+            key: _titleKey,
+            kind: TargetKind.sectionTitle,
+            tools: {
+              PaletteTool.text,
+              PaletteTool.glow,
+            },
+          ),
+        ]);
+      });
+    }
     
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-        child: Text(
-          title,
-          key: titleKey,
-          style: Theme.of(context).textTheme.titleMedium,
+        child: FocusGlow(
+          isFocused: isFocused,
+          borderRadius: BorderRadius.circular(999), // abgerundete Enden
+          child: Text(
+            widget.title,
+            key: _titleKey,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white, // immer weiß, auch wenn fokussiert
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-class _GridSection extends ConsumerWidget {
+class _GridSection extends ConsumerStatefulWidget {
   final String sectionKey;
   final List<HubSubcat> subs;
   final SupabaseWordRepository repo;
@@ -365,18 +621,30 @@ class _GridSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 1) Für jede Subkategorie einen Key anlegen
-    final keys = List.generate(subs.length, (_) => GlobalKey());
+  ConsumerState<_GridSection> createState() => _GridSectionState();
+}
 
+class _GridSectionState extends ConsumerState<_GridSection> {
+  late final List<GlobalKey> _keys;
+  bool _registered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Keys nur einmal erstellen
+    _keys = List.generate(widget.subs.length, (_) => GlobalKey());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // 2) Zu JEDEM Sub eine PaletteTarget-ID + Key anlegen
     final targets = <PaletteTarget>[];
-    for (var i = 0; i < subs.length; i++) {
-      final sub = subs[i];
-      final id = 'wordHub.$sectionKey.${sub.key}';
+    for (var i = 0; i < widget.subs.length; i++) {
+      final sub = widget.subs[i];
+      final id = 'wordHub.${widget.sectionKey}.${sub.key}';
       targets.add(PaletteTarget(
         id: id,
-        key: keys[i],
+        key: _keys[i],
         kind: TargetKind.tile,
         tools: {
           PaletteTool.stroke,
@@ -390,10 +658,13 @@ class _GridSection extends ConsumerWidget {
     }
 
     // 3) Targets nach dem Frame einmalig registrieren
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (targets.isEmpty) return;
-      ref.read(radialPaletteProvider.notifier).registerTargets(targets);
-    });
+    if (!_registered) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _registered || targets.isEmpty) return;
+        _registered = true;
+        ref.read(radialPaletteProvider.notifier).registerTargets(targets);
+      });
+    }
 
     // 4) Grid ganz normal bauen, aber die vorbereiteten Keys verwenden
     return SliverPadding(
@@ -401,19 +672,19 @@ class _GridSection extends ConsumerWidget {
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
           (context, i) {
-            final sub = subs[i];
-            final id = 'wordHub.$sectionKey.${sub.key}';
+            final sub = widget.subs[i];
+            final id = 'wordHub.${widget.sectionKey}.${sub.key}';
             return _HighlightableTarget(
               id: id,
               child: CategoryCard(
-                key: keys[i],
-                sectionKey: sectionKey,
+                key: _keys[i],
+                sectionKey: widget.sectionKey,
                 sub: sub,
-                onTap: onTapSub == null ? null : () => onTapSub!(sub),
+                onTap: widget.onTapSub == null ? null : () => widget.onTapSub!(sub),
               ),
             );
           },
-          childCount: subs.length,
+          childCount: widget.subs.length,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -452,155 +723,31 @@ class _HighlightableTarget extends ConsumerWidget {
       return child;
     }
 
-    const gold = Color(0xFFFFC66A);
-    final tool = palette.activeTool;
-
-    Widget overlay;
-
-    switch (tool) {
-      case PaletteTool.stroke:
-        // 🔹 Nur Rahmen + Glow → verdeutlicht: hier geht es um Stroke
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: gold, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: gold.withOpacity(0.9),
-                blurRadius: 26,
-                spreadRadius: 3,
-              ),
-            ],
-          ),
-        );
-        break;
-
-      case PaletteTool.fill:
-      case PaletteTool.hubBackground:
-      case PaletteTool.image:
-        // 🔹 Halbdurchsichtiger Gold-Overlay + leichter Rahmen:
-        //     „du änderst den Hintergrund / Inhalt"
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: gold.withOpacity(0.22),
-            border: Border.all(color: gold.withOpacity(0.9), width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: gold.withOpacity(0.8),
-                blurRadius: 24,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-        );
-        break;
-
-      case PaletteTool.text:
-        // 🔹 Kleine TEXT-Badge oben links → „du änderst Text"
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: gold.withOpacity(0.7), width: 1.6),
-          ),
-          alignment: Alignment.topLeft,
-          padding: const EdgeInsets.all(6),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'TEXT',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                letterSpacing: 0.8,
-                fontWeight: FontWeight.w600,
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                // passt sich der Kartenform an (leicht größer, aber gleich rund)
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white,
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.5),
+                    blurRadius: 12, // reduziert von 18
+                    spreadRadius: 0.5, // reduziert von 1.5
+                  ),
+                ],
               ),
             ),
           ),
-        );
-        break;
-
-      case PaletteTool.icon:
-        // 🔹 ICON-Badge oben rechts
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: gold.withOpacity(0.7), width: 1.6),
-          ),
-          alignment: Alignment.topRight,
-          padding: const EdgeInsets.all(6),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'ICON',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                letterSpacing: 0.8,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        );
-        break;
-
-      case PaletteTool.glow:
-        // 🔹 Nur äußerer Glow, kein Rahmen → „Glow/Light"
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: gold.withOpacity(0.95),
-                blurRadius: 32,
-                spreadRadius: 6,
-              ),
-            ],
-          ),
-        );
-        break;
-
-      default:
-        // Fallback: wie Stroke
-        overlay = Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: gold, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: gold.withOpacity(0.9),
-                blurRadius: 26,
-                spreadRadius: 3,
-              ),
-            ],
-          ),
-        );
-        break;
-    }
-
-    return AnimatedScale(
-      duration: const Duration(milliseconds: 140),
-      curve: Curves.easeOut,
-      scale: 1.04,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          child,
-          // 🔹 Highlight-Layer legt sich oben drauf
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 120),
-            child: overlay,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

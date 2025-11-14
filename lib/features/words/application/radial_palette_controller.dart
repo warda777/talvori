@@ -53,6 +53,7 @@ class RadialPaletteState {
   final int focusedIndex;          // Index im Target-Array
   final List<PaletteTarget> targets;
   final bool overlayVisible;
+  final Set<String> focusedIds;   // IDs der aktuell fokussierten Targets
 
   const RadialPaletteState({
     this.scope = PaletteScope.all,
@@ -60,6 +61,7 @@ class RadialPaletteState {
     this.focusedIndex = 0,
     this.targets = const [],
     this.overlayVisible = true,
+    this.focusedIds = const {},
   });
 
   RadialPaletteState copyWith({
@@ -69,6 +71,7 @@ class RadialPaletteState {
     List<PaletteTarget>? targets,
     bool? overlayVisible,
     bool clearActiveTool = false, // 🔹 Flag um explizit auf null zu setzen
+    Set<String>? focusedIds,
   }) {
     return RadialPaletteState(
       scope: scope ?? this.scope,
@@ -76,12 +79,18 @@ class RadialPaletteState {
       focusedIndex: focusedIndex ?? this.focusedIndex,
       targets: targets ?? this.targets,
       overlayVisible: overlayVisible ?? this.overlayVisible,
+      focusedIds: focusedIds ?? this.focusedIds,
     );
   }
 }
 
 class RadialPaletteController extends StateNotifier<RadialPaletteState> {
   RadialPaletteController() : super(const RadialPaletteState());
+
+  int _lastFocusVis = -1; // neu
+  
+  /// Callback, der die aktuell fokussierten Target-IDs meldet
+  void Function(Set<String> ids)? onFocusChange;
 
   // Center-Button: All <-> One
   void toggleScope() {
@@ -95,16 +104,37 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     state = const RadialPaletteState();
   }
 
+  /// Wird aufgerufen, wenn das Rad komplett geschlossen wird.
+  /// Entfernt den Fokus von allen Targets.
+  void clearFocus() {
+    if (state.focusedIds.isEmpty && state.focusedIndex == 0) {
+      return; // nichts zu tun
+    }
+
+    state = state.copyWith(
+      focusedIndex: 0,
+      focusedIds: {},
+    );
+
+    // UI (WordHubScreen etc.) informieren
+    onFocusChange?.call({});
+  }
+
   // 7 Tool-Buttons
   void selectTool(PaletteTool tool) {
     // Tool togglen
     final isSame = state.activeTool == tool;
     if (isSame) {
       // Tool wieder schließen → alle 7 Buttons sichtbar
-      state = state.copyWith(clearActiveTool: true, overlayVisible: true);
+      state = state.copyWith(clearActiveTool: true, overlayVisible: true, focusedIds: {});
+      onFocusChange?.call({});
     } else {
       // Neues Tool aktiv → andere 6 verschwinden, Overlay für Fokus ausblenden
       state = state.copyWith(activeTool: tool, overlayVisible: false);
+      // Fokus-IDs aktualisieren
+      if (state.targets.isNotEmpty) {
+        _updateFocusedIds(state.focusedIndex);
+      }
     }
   }
 
@@ -131,6 +161,17 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
       targets: merged,
       focusedIndex: newFocused,
     );
+
+    // Fokus-IDs aktualisieren NUR wenn ein Tool aktiv ist
+    if (state.activeTool != null && merged.isNotEmpty) {
+      _updateFocusedIds(newFocused);
+    } else {
+      // Kein Tool aktiv → keine Fokus-IDs setzen
+      if (state.focusedIds.isNotEmpty) {
+        state = state.copyWith(focusedIds: {});
+        onFocusChange?.call({});
+      }
+    }
 
     debugPrint(
       '[RadialPalette] registerTargets: +${targets.length}, total=${merged.length}',
@@ -161,6 +202,9 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
   // Wird bei "Kugel schieben" in Steps benutzt (z.B. Pfeil-nach-oben/-unten)
   void moveFocus(int delta) {
+    // Nur funktionieren, wenn ein Tool aktiv ist
+    if (state.activeTool == null) return;
+
     final indices = _visibleIndices();
     if (indices.isEmpty) return;
 
@@ -170,7 +214,7 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     if (nextPos >= indices.length) nextPos = indices.length - 1;
 
     final newGlobalIndex = indices[nextPos];
-    state = state.copyWith(focusedIndex: newGlobalIndex);
+    _updateFocusedIds(newGlobalIndex);
 
     debugPrint(
       '[RadialPalette] Fokus (step) → vis=$nextPos / ${indices.length - 1} (global=$newGlobalIndex)',
@@ -179,6 +223,9 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
 
   // Direkter Sprung auf einen "sichtbaren" Index vom Ring aus
   void moveFocusToVisibleIndex(int visibleIndex) {
+    // Nur funktionieren, wenn ein Tool aktiv ist
+    if (state.activeTool == null) return;
+
     final indices = _visibleIndices();
     if (indices.isEmpty) return;
 
@@ -187,11 +234,54 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     if (pos >= indices.length) pos = indices.length - 1;
 
     final newGlobalIndex = indices[pos];
-    state = state.copyWith(focusedIndex: newGlobalIndex);
+    _updateFocusedIds(newGlobalIndex);
 
-    debugPrint(
-      '[RadialPalette] Fokus (ring) → vis=$pos / ${indices.length - 1} (global=$newGlobalIndex)',
+    final total = indices.length - 1;
+    _onFocusChanged(pos, newGlobalIndex, total);
+  }
+
+  void _updateFocusedIds(int globalIndex) {
+    // Nur fokussieren, wenn ein Tool aktiv ist
+    if (state.activeTool == null) {
+      // Kein Tool aktiv → keine Fokus-IDs setzen
+      if (state.focusedIds.isNotEmpty) {
+        state = state.copyWith(focusedIds: {});
+        onFocusChange?.call({});
+      }
+      return;
+    }
+
+    if (state.targets.isEmpty) {
+      if (state.focusedIds.isEmpty) return; // Keine Änderung
+      state = state.copyWith(focusedIndex: globalIndex, focusedIds: {});
+      onFocusChange?.call({});
+      return;
+    }
+
+    final clampedIndex = globalIndex.clamp(0, state.targets.length - 1);
+    final focusedTarget = state.targets[clampedIndex];
+    final focusedIds = {focusedTarget.id};
+
+    // Nur updaten, wenn sich die IDs wirklich geändert haben
+    if (state.focusedIds == focusedIds && state.focusedIndex == clampedIndex) {
+      return; // Keine Änderung, kein Callback
+    }
+
+    state = state.copyWith(
+      focusedIndex: clampedIndex,
+      focusedIds: focusedIds,
     );
+
+    onFocusChange?.call(focusedIds);
+  }
+
+  void _onFocusChanged(int vis, int global, int total) {
+    // Nur loggen, wenn wir gerade von "nicht voll" -> "voll" wechseln
+    if (vis == total && _lastFocusVis != total) {
+      debugPrint('[RadialPalette] Fokus (ring) voll sichtbar: $vis / $total');
+    }
+
+    _lastFocusVis = vis;
   }
 
   /// Wird vom Farbring aufgerufen, um die aktuelle Farbe auf das/alle Targets anzuwenden.
