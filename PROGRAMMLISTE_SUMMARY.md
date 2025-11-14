@@ -152,3 +152,4 @@ _Für Supabase-Architektur siehe: SUPABASE_ARCHITECTURE.md_
 
 
 
+

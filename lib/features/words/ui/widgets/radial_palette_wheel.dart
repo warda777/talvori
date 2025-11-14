@@ -101,6 +101,8 @@ class RadialPaletteWheel extends ConsumerWidget {
             child: RadialTools(
               ringKey: ringKey,
               discSize: discSize,
+              onPickColor: onPickColor,
+              activeColor: activeColor,
             ),
           ),
 
@@ -121,6 +123,7 @@ class RadialPaletteWheel extends ConsumerWidget {
                       bubbleSize: bubbleSize,
                       count: 24,
                       isLocked: palette.isBallLocked, // 🔴 Nur picken wenn gelockt
+                      customColor: palette.customColor, // Custom-Farbe für Verlauf
                       onActiveColorChanged: onActiveColorChanged,
                       onPick: (color) {
                         final ctrl = ref.read(radialPaletteProvider.notifier);

@@ -369,9 +369,11 @@ class _WordCardState extends ConsumerState<WordCard> {
                           // Aktualisiere auch den My Words Count im HomeController
                           if (total > 0) {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              ref
-                                  .read(homeControllerProvider.notifier)
-                                  .refreshMyWordsCount();
+                              if (mounted) {
+                                ref
+                                    .read(homeControllerProvider.notifier)
+                                    .refreshMyWordsCount();
+                              }
                             });
                           }
                         },

@@ -15,6 +15,7 @@ class RotaryColorRing extends StatefulWidget {
     this.ringLift = 0.0,
     this.hitPadInner = 0.0,
     this.hitPadOuter = 0.0,
+    this.customColor, // Custom-Farbe für Verlauf
   });
 
   final ValueChanged<Color> onPick;
@@ -27,6 +28,7 @@ class RotaryColorRing extends StatefulWidget {
   final double ringLift;
   final double hitPadInner;
   final double hitPadOuter;
+  final Color? customColor; // Custom-Farbe für Verlauf
 
   @override
   State<RotaryColorRing> createState() => RotaryColorRingState();
@@ -223,6 +225,30 @@ class RotaryColorRingState extends State<RotaryColorRing>
   ];
 
   List<Color> _paletteColors(int n) {
+    // Wenn Custom-Farbe gesetzt ist, erstelle Verlauf basierend auf dieser Farbe
+    if (widget.customColor != null) {
+      final customColor = widget.customColor!;
+      final hsl = HSLColor.fromColor(customColor);
+      
+      // Erstelle einen Verlauf um die Custom-Farbe herum
+      return List<Color>.generate(n, (i) {
+        final t = i / n;
+        // Hue-Variation: ±60 Grad um die Custom-Farbe
+        final hueVariation = (t - 0.5) * 120; // -60 bis +60
+        final hue = (hsl.hue + hueVariation) % 360;
+        
+        // Saturation: von niedrig zu hoch und zurück
+        final satVariation = math.sin(t * 2 * math.pi) * 0.3;
+        final sat = (hsl.saturation + satVariation).clamp(0.1, 1.0);
+        
+        // Lightness: von hell zu dunkel und zurück
+        final lightVariation = math.cos(t * 2 * math.pi) * 0.4;
+        final light = (hsl.lightness + lightVariation).clamp(0.1, 0.9);
+        
+        return HSLColor.fromAHSL(1, hue, sat, light).toColor();
+      });
+    }
+    
     // Wenn _paletteIndex >= _paletteModes.length, verwende feste Palette
     if (_paletteIndex >= _paletteModes.length && _paletteIndex < _paletteModes.length + _fixedPalettes.length) {
       final fixedPaletteIndex = _paletteIndex - _paletteModes.length;

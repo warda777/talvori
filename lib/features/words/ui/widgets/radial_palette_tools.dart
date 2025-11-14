@@ -5,16 +5,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/radial_palette_controller.dart';
 import 'rotary_color_ring.dart';
+import 'custom_color_picker_dialog.dart';
 
 class RadialTools extends ConsumerWidget {
   const RadialTools({
     super.key,
     required this.ringKey,
     required this.discSize,
+    this.onPickColor,
+    this.activeColor,
   });
 
   final GlobalKey<RotaryColorRingState> ringKey;
   final double discSize;
+  final ValueChanged<Color>? onPickColor;
+  final Color? activeColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,7 +96,15 @@ class RadialTools extends ConsumerWidget {
                 ),
               ],
             )
-          : _buildActiveToolMode(context, palette, ctrl, ringKey, discSize),
+          : _buildActiveToolMode(
+              context,
+              palette,
+              ctrl,
+              ringKey,
+              discSize,
+              onPickColor: onPickColor,
+              activeColor: activeColor,
+            ),
     );
   }
 
@@ -131,8 +144,10 @@ class RadialTools extends ConsumerWidget {
     RadialPaletteState palette,
     RadialPaletteController ctrl,
     GlobalKey<RotaryColorRingState> ringKey,
-    double discSize,
-  ) {
+    double discSize, {
+    ValueChanged<Color>? onPickColor,
+    Color? activeColor,
+  }) {
     final tool = palette.activeTool!;
 
     final icon = switch (tool) {
@@ -156,16 +171,18 @@ class RadialTools extends ConsumerWidget {
             _FocusSelectorRing(
               size: discSize,
               ringKey: ringKey,
+              onPickColor: onPickColor,
+              activeColor: activeColor,
             ),
 
             // 🔹 Mittleres Tool-Icon zum Abwählen
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => ctrl.selectTool(tool), // Tool wieder schließen
+              onTap: () => ctrl.selectTool(tool),
               child: _RoundIcon(
                 icon: icon,
                 isActive: true,
-                onTap: () => ctrl.selectTool(tool), // doppelt ist okay
+                onTap: () => ctrl.selectTool(tool),
                 ringKey: ringKey,
               ),
             ),
@@ -246,11 +263,15 @@ class _FocusSelectorRing extends ConsumerStatefulWidget {
     super.key,
     required this.size,
     this.ringKey,
+    this.onPickColor,
+    this.activeColor,
   });
 
   // size: normalerweise die Größe deines Wheels (z. B. discSize)
   final double size;
   final GlobalKey<RotaryColorRingState>? ringKey;
+  final ValueChanged<Color>? onPickColor;
+  final Color? activeColor;
 
   @override
   ConsumerState<_FocusSelectorRing> createState() => _FocusSelectorRingState();
@@ -297,33 +318,69 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                     ringRadius * math.sin(angle),
                   );
                   
-                  // 🔴 Jede Kugel verwendet eine andere Palette (modulo für Wiederholung)
-                  final paletteIndex = index % ringState.paletteCount;
-                  final ballColor = ringState.getPaletteColor(paletteIndex);
+                  // 🔴 Die Kugel auf 12 Uhr (index 0) ist Custom-Ball
+                  final isCustomBall = index == 0;
                   
-                  // 🔴 Aktive Palette hat weißen Rand
-                  final isActive = ringState.currentPaletteIndex == paletteIndex;
+                  // Für andere Kugeln: Palette-Index berechnen (verschoben um 1, da index 0 Custom ist)
+                  final paletteIndex = isCustomBall ? 0 : ((index - 1) % ringState.paletteCount);
+                  
+                  // Custom-Ball zeigt die gewählte Farbe, sonst schwarz
+                  final state = ref.watch(radialPaletteProvider);
+                  final customColor = state.customColor;
+                  final ballColor = isCustomBall 
+                      ? (customColor ?? Colors.black)
+                      : ringState.getPaletteColor(paletteIndex);
+                  
+                  // 🔴 Aktive Palette hat weißen Rand (Custom-Ball nie aktiv im Sinne von Palette)
+                  final isActive = !isCustomBall && ringState.currentPaletteIndex == paletteIndex;
+                  final isCustomActive = isCustomBall && customColor != null;
 
                   return Transform.translate(
                     offset: ballOffset,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
-                        // 🔴 Palette auf dem Ring setzen (verwende paletteIndex statt index)
-                        ringState.setPaletteIndex(paletteIndex);
-                        HapticFeedback.selectionClick();
+                        // 🔴 Kugel auf 12 Uhr → Custom-Farbwähler öffnen
+                        if (isCustomBall && widget.onPickColor != null) {
+                          final currentColor = customColor ?? widget.activeColor ?? const Color(0xFFFFC66A);
+                          showDialog(
+                            context: context,
+                            builder: (dialogContext) => CustomColorPickerDialog(
+                              initialColor: currentColor,
+                              onColorChanged: (color) {
+                                widget.onPickColor!(color);
+                                // Custom-Farbe speichern
+                                final ctrl = ref.read(radialPaletteProvider.notifier);
+                                ctrl.setCustomColor(color);
+                                // Farbe auch direkt auf das Target anwenden (verzögert, um Provider-Fehler zu vermeiden)
+                                Future.microtask(() {
+                                  ctrl.applyColorToCurrentTarget(color);
+                                });
+                              },
+                            ),
+                          );
+                        } else {
+                          // 🔴 Normale Palette auf dem Ring setzen
+                          // Custom-Farbe löschen wenn normale Palette gewählt wird
+                          final ctrl = ref.read(radialPaletteProvider.notifier);
+                          if (ctrl.state.customColor != null) {
+                            ctrl.state = ctrl.state.copyWith(clearCustomColor: true);
+                          }
+                          ringState.setPaletteIndex(paletteIndex);
+                          HapticFeedback.selectionClick();
+                        }
                       },
                       child: Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: ballColor, // 🔴 Hauptfarbe der Palette
+                          color: isCustomBall ? Colors.black : ballColor,
                           border: Border.all(
-                            color: isActive 
+                            color: isCustomActive || isActive
                                 ? Colors.white 
                                 : Colors.white.withOpacity(0.4),
-                            width: isActive ? 2.5 : 1.5,
+                            width: (isCustomActive || isActive) ? 2.5 : 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -331,19 +388,32 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                               blurRadius: 8,
                               spreadRadius: 1,
                             ),
-                            if (isActive)
+                            if (isCustomActive || isActive)
                               BoxShadow(
                                 color: Colors.white.withOpacity(0.8),
                                 blurRadius: 12,
                                 spreadRadius: 2,
                               ),
-                            BoxShadow(
-                              color: ballColor.withOpacity(0.6),
-                              blurRadius: 10,
-                              spreadRadius: 1.5,
-                            ),
+                            if (!isCustomBall)
+                              BoxShadow(
+                                color: ballColor.withOpacity(0.6),
+                                blurRadius: 10,
+                                spreadRadius: 1.5,
+                              ),
                           ],
                         ),
+                        child: isCustomBall
+                            ? Center(
+                                child: Text(
+                                  'C',
+                                  style: TextStyle(
+                                    color: customColor ?? Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : null,
                       ),
                     ),
                   );
