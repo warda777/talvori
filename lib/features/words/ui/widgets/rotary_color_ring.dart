@@ -8,6 +8,7 @@ class RotaryColorRing extends StatefulWidget {
     required this.onPick,
     required this.onActiveColorChanged,
     this.onPickEnd,
+    this.isLocked = false, // 🔴 Nur wenn true, kann Farbe gepickt werden
     this.count = 36,
     this.bubbleSize = 22,
     required this.absoluteRadius,
@@ -19,6 +20,7 @@ class RotaryColorRing extends StatefulWidget {
   final ValueChanged<Color> onPick;
   final ValueChanged<Color> onActiveColorChanged;
   final VoidCallback? onPickEnd;
+  final bool isLocked;
   final int count;
   final double bubbleSize;
   final double absoluteRadius;
@@ -273,6 +275,9 @@ class RotaryColorRingState extends State<RotaryColorRing>
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapDown: (d) {
+                    // 🔴 Nur picken, wenn Kugel gelockt ist
+                    if (!widget.isLocked) return;
+                    
                     if (_picking && _selectedIndex != i) return;
 
                     final box = _stackKey.currentContext?.findRenderObject()

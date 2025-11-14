@@ -116,6 +116,7 @@ class RadialPaletteWheel extends ConsumerWidget {
                   absoluteRadius: ringInnerRadius,
                   bubbleSize: bubbleSize,
                   count: 24,
+                  isLocked: palette.isBallLocked, // 🔴 Nur picken wenn gelockt
                   onActiveColorChanged: onActiveColorChanged,
                   onPick: (color) {
                     final ctrl = ref.read(radialPaletteProvider.notifier);
