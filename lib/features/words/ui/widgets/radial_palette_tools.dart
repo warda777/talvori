@@ -318,26 +318,31 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                     ringRadius * math.sin(angle),
                   );
                   
-                  // 🔴 Die Kugel auf 12 Uhr (index 0) ist Custom-Ball
-                  final isCustomBall = index == 0;
+                  // 🔴 Index 0 = Custom-Ball (12 Uhr), Index 1 = Roter Ball (1 Uhr), Index 2-11 = Custom-Bälle
+                  final isCustomBall = index == 0 || index >= 2; // Alle außer Index 1 (roter Ball)
+                  final isRedBall = index == 1; // Roter Ball auf 1 Uhr bleibt normal
                   
-                  // Für andere Kugeln: Palette-Index berechnen (verschoben um 1, da index 0 Custom ist)
-                  final paletteIndex = isCustomBall ? 0 : ((index - 1) % ringState.paletteCount);
+                  // Für normale Bälle: Palette-Index berechnen (nur für roten Ball)
+                  final paletteIndex = isRedBall ? 0 : ((index - 1) % ringState.paletteCount);
                   
-                  // Custom-Ball zeigt die gewählte Farbe, sonst schwarz
+                  // Custom-Ball zeigt seine individuelle gewählte Farbe, sonst schwarz
                   final state = ref.watch(radialPaletteProvider);
-                  final customColor = state.customColor;
+                  final ballCustomColor = state.customColors[index]; // Individuelle Farbe für diesen Ball
                   final ballColor = isCustomBall 
-                      ? (customColor ?? Colors.black)
-                      : ringState.getPaletteColor(paletteIndex);
+                      ? (ballCustomColor ?? Colors.black)
+                      : (isRedBall 
+                          ? Colors.redAccent // Roter Ball auf 1 Uhr
+                          : ringState.getPaletteColor(paletteIndex));
                   
                   // 🔴 Aktive Palette hat weißen Rand
                   // Wenn Custom-Palette aktiv ist, sind normale Bälle nicht aktiv
-                  final isActive = !isCustomBall && 
+                  final isActive = isRedBall && 
                       !state.isCustomPaletteActive && 
                       ringState.currentPaletteIndex == paletteIndex;
-                  // Custom-Ball ist nur aktiv, wenn Custom-Palette aktiv ist (nicht dauerhaft)
-                  final isCustomActive = isCustomBall && state.isCustomPaletteActive;
+                  // Custom-Ball ist nur aktiv, wenn Custom-Palette aktiv ist und dieser Ball aktiv ist
+                  final isCustomActive = isCustomBall && 
+                      state.isCustomPaletteActive && 
+                      state.activeCustomBallIndex == index;
 
                   return Transform.translate(
                     offset: ballOffset,
@@ -346,10 +351,9 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                       onTap: () {
                         // 🔴 Custom-Ball: Normaler Tap = nur selektieren (wie andere Bälle)
                         if (isCustomBall) {
-                          // Custom-Palette aktivieren (Farbkreis zeigt Verlauf basierend auf Custom-Farbe)
-                          // Custom-Farbe bleibt erhalten, Farbkreis zeigt Verlauf
-                          // Wenn keine Custom-Farbe gesetzt ist, öffne Dialog
-                          if (customColor == null && widget.onPickColor != null) {
+                          // Custom-Palette für diesen spezifischen Ball aktivieren
+                          // Wenn keine Custom-Farbe für diesen Ball gesetzt ist, öffne Dialog
+                          if (ballCustomColor == null && widget.onPickColor != null) {
                             final currentColor = widget.activeColor ?? const Color(0xFFFFC66A);
                             showDialog(
                               context: context,
@@ -357,9 +361,9 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                                 initialColor: currentColor,
                                 onColorChanged: (color) {
                                   widget.onPickColor!(color);
-                                  // Custom-Farbe speichern
+                                  // Custom-Farbe für diesen spezifischen Ball speichern
                                   final ctrl = ref.read(radialPaletteProvider.notifier);
-                                  ctrl.setCustomColor(color);
+                                  ctrl.setCustomColorForBall(index, color);
                                   // Farbe auch direkt auf das Target anwenden (verzögert, um Provider-Fehler zu vermeiden)
                                   Future.microtask(() {
                                     ctrl.applyColorToCurrentTarget(color);
@@ -368,19 +372,18 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                               ),
                             );
                           } else {
-                            // Custom-Farbe ist gesetzt → Custom-Palette aktivieren
+                            // Custom-Farbe für diesen Ball ist gesetzt → Custom-Palette aktivieren
                             final ctrl = ref.read(radialPaletteProvider.notifier);
-                            // Aktiviere Custom-Palette (Farbkreis zeigt Custom-Verlauf)
-                            ctrl.setCustomPaletteActive(true);
-                            if (customColor != null) {
-                              widget.onPickColor?.call(customColor);
+                            // Aktiviere Custom-Palette für diesen spezifischen Ball (Farbkreis zeigt Custom-Verlauf)
+                            ctrl.setCustomPaletteActive(true, ballIndex: index);
+                            if (ballCustomColor != null) {
+                              widget.onPickColor?.call(ballCustomColor);
                             }
                             HapticFeedback.selectionClick();
                           }
-                        } else {
-                          // 🔴 Normale Palette auf dem Ring setzen
-                          // Custom-Farbe NICHT löschen - sie bleibt gespeichert
-                          // Aber Custom-Palette deaktivieren, damit normale Palette angezeigt wird
+                        } else if (isRedBall) {
+                          // 🔴 Roter Ball: Normale Palette auf dem Ring setzen
+                          // Custom-Palette deaktivieren, damit normale Palette angezeigt wird
                           final ctrl = ref.read(radialPaletteProvider.notifier);
                           ctrl.setCustomPaletteActive(false);
                           ringState.setPaletteIndex(paletteIndex);
@@ -388,9 +391,9 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                         }
                       },
                       onLongPress: () {
-                        // 🔴 Custom-Ball: Longpress = Custom-Dialog öffnen
+                        // 🔴 Custom-Ball: Longpress = Custom-Dialog öffnen für diesen spezifischen Ball
                         if (isCustomBall && widget.onPickColor != null) {
-                          final currentColor = customColor ?? widget.activeColor ?? const Color(0xFFFFC66A);
+                          final currentColor = ballCustomColor ?? widget.activeColor ?? const Color(0xFFFFC66A);
                           HapticFeedback.mediumImpact();
                           showDialog(
                             context: context,
@@ -398,9 +401,9 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                               initialColor: currentColor,
                               onColorChanged: (color) {
                                 widget.onPickColor!(color);
-                                // Custom-Farbe speichern
+                                // Custom-Farbe für diesen spezifischen Ball speichern
                                 final ctrl = ref.read(radialPaletteProvider.notifier);
-                                ctrl.setCustomColor(color);
+                                ctrl.setCustomColorForBall(index, color);
                                 // Farbe auch direkt auf das Target anwenden (verzögert, um Provider-Fehler zu vermeiden)
                                 Future.microtask(() {
                                   ctrl.applyColorToCurrentTarget(color);
@@ -416,7 +419,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isCustomBall 
-                              ? (customColor ?? Colors.black)
+                              ? (ballCustomColor ?? Colors.black)
                               : ballColor,
                           border: Border.all(
                             color: isCustomActive || isActive
@@ -437,29 +440,14 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                                 spreadRadius: 2,
                               ),
                             BoxShadow(
-                              color: (isCustomBall ? (customColor ?? Colors.black) : ballColor).withOpacity(0.6),
+                              color: (isCustomBall ? (ballCustomColor ?? Colors.black) : ballColor).withOpacity(0.6),
                               blurRadius: 10,
                               spreadRadius: 1.5,
                             ),
                           ],
                         ),
-                        child: isCustomBall
-                            ? Center(
-                                child: Text(
-                                  'C',
-                                  style: TextStyle(
-                                    // Wenn Custom-Farbe gesetzt ist, verwende kontrastierende Farbe
-                                    color: customColor != null
-                                        ? (customColor!.computeLuminance() > 0.5 
-                                            ? Colors.black 
-                                            : Colors.white)
-                                        : Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )
-                            : null,
+                        // Kein "C" mehr, da alle Bälle außer dem roten Custom-Bälle sind
+                        child: null,
                       ),
                     ),
                   );

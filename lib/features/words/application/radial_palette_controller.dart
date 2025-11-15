@@ -59,7 +59,8 @@ class RadialPaletteState {
   final bool isBallLocked;          // Kugel „eingerastet"?
   final int? lockedIndex;           // auf welches Target ist sie gelockt?
   final Color? lastPickedColor;     // zuletzt gepickte Farbe (für Kugel-Fill)
-  final Color? customColor;          // Gewählte Farbe aus Custom-Dialog
+  final Map<int, Color> customColors; // Individuelle Custom-Farben für jeden Ball (Index -> Color)
+  final int? activeCustomBallIndex;  // Index des aktuell aktiven Custom-Balls
   final bool isCustomPaletteActive;  // Ist Custom-Palette aktiv (Farbkreis zeigt Custom-Verlauf)?
 
   // 🔴 Glow-System: Dynamische Glow-Farbe basierend auf Palette-State
@@ -75,7 +76,8 @@ class RadialPaletteState {
     this.isBallLocked = false,
     this.lockedIndex,
     this.lastPickedColor,
-    this.customColor,
+    this.customColors = const {},
+    this.activeCustomBallIndex,
     this.isCustomPaletteActive = false,
     this.selectionGlowColor,
   });
@@ -93,8 +95,9 @@ class RadialPaletteState {
     bool clearLockedIndex = false,
     Color? lastPickedColor,
     bool clearLastPickedColor = false,
-    Color? customColor,
-    bool clearCustomColor = false,
+    Map<int, Color>? customColors,
+    int? activeCustomBallIndex,
+    bool clearActiveCustomBallIndex = false,
     bool? isCustomPaletteActive,
     Color? selectionGlowColor,
     bool clearSelectionGlow = false,
@@ -110,7 +113,8 @@ class RadialPaletteState {
       lockedIndex: clearLockedIndex ? null : (lockedIndex ?? this.lockedIndex),
       lastPickedColor:
           clearLastPickedColor ? null : (lastPickedColor ?? this.lastPickedColor),
-      customColor: clearCustomColor ? null : (customColor ?? this.customColor),
+      customColors: customColors ?? this.customColors,
+      activeCustomBallIndex: clearActiveCustomBallIndex ? null : (activeCustomBallIndex ?? this.activeCustomBallIndex),
       isCustomPaletteActive: isCustomPaletteActive ?? this.isCustomPaletteActive,
       selectionGlowColor: clearSelectionGlow ? null : (selectionGlowColor ?? this.selectionGlowColor),
     );
@@ -153,14 +157,23 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
     state = state.copyWith(lastPickedColor: color);
   }
 
-  // 🔴 Custom-Farbe speichern
-  void setCustomColor(Color color) {
-    state = state.copyWith(customColor: color, isCustomPaletteActive: true);
+  // 🔴 Custom-Farbe für einen spezifischen Ball speichern
+  void setCustomColorForBall(int ballIndex, Color color) {
+    final updatedColors = Map<int, Color>.from(state.customColors);
+    updatedColors[ballIndex] = color;
+    state = state.copyWith(
+      customColors: updatedColors,
+      activeCustomBallIndex: ballIndex,
+      isCustomPaletteActive: true,
+    );
   }
 
   // 🔴 Custom-Palette aktivieren/deaktivieren
-  void setCustomPaletteActive(bool active) {
-    state = state.copyWith(isCustomPaletteActive: active);
+  void setCustomPaletteActive(bool active, {int? ballIndex}) {
+    state = state.copyWith(
+      isCustomPaletteActive: active,
+      activeCustomBallIndex: active ? (ballIndex ?? state.activeCustomBallIndex) : null,
+    );
   }
 
   int _effectiveIndex() {
