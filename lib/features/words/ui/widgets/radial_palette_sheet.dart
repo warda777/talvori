@@ -12,9 +12,21 @@ class RadialPaletteSheet extends ConsumerStatefulWidget {
     super.key,
     required this.onClose,
     required this.heroTag,
+    this.onToolReset,
+    this.onToolResetStart,
+    this.onToolResetEnd,
+    this.onResetAll, // NEU: Callback für kompletten Reset
+    this.onResetAllStart, // NEU: Callback für Reset-Start
+    this.onResetAllEnd, // NEU: Callback für Reset-Ende
   });
   final VoidCallback onClose;
   final String heroTag;
+  final ValueChanged<PaletteTool>? onToolReset;
+  final void Function(VoidCallback)? onToolResetStart; // Callback erhält onComplete-Funktion
+  final VoidCallback? onToolResetEnd;
+  final VoidCallback? onResetAll; // NEU: Callback für kompletten Reset
+  final VoidCallback? onResetAllStart; // NEU: Callback für Reset-Start
+  final VoidCallback? onResetAllEnd; // NEU: Callback für Reset-Ende
 
   @override
   ConsumerState<RadialPaletteSheet> createState() => _RadialPaletteSheetState();
@@ -24,11 +36,33 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
   Color _activeColor = const Color(0xFFFFC66A);
   final GlobalKey<RotaryColorRingState> _ringKey =
       GlobalKey<RotaryColorRingState>();
+  bool _isResetting = false;
+  PaletteTool? _resettingTool;
+  bool _isResettingAll = false; // NEU: Flag für All/One Reset
 
   @override
   void initState() {
     super.initState();
     _activeColor = ref.read(paletteControllerProvider).selectedColor;
+  }
+
+  String _getResetMessage(PaletteTool tool) {
+    switch (tool) {
+      case PaletteTool.stroke:
+        return 'Die Rahmen werden jetzt vollständig gelöscht.';
+      case PaletteTool.fill:
+        return 'Die Hintergründe werden jetzt vollständig gelöscht.';
+      case PaletteTool.text:
+        return 'Die Texte werden jetzt vollständig gelöscht.';
+      case PaletteTool.hubBackground:
+        return 'Die Hintergründe werden jetzt vollständig gelöscht.';
+      case PaletteTool.icon:
+        return 'Die Icons werden jetzt vollständig gelöscht.';
+      case PaletteTool.paint:
+        return 'Die Custom Einstellungen werden jetzt vollständig gelöscht.';
+      case PaletteTool.image:
+        return '';
+    }
   }
 
   @override
@@ -53,6 +87,58 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
               ),
             ),
           ],
+          // Nachricht oberhalb des Rads für Tool-Reset (gleiche Position wie All/One Reset)
+          if (_isResetting && _resettingTool != null)
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.15, // NEU: Gleiche Position wie All/One Reset
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24, width: 1),
+                  ),
+                  child: Text(
+                    _getResetMessage(_resettingTool!),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          // NEU: Nachricht weiter oben für All/One Reset
+          if (_isResettingAll)
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.15, // Weiter oben
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24, width: 1),
+                  ),
+                  child: const Text(
+                    'Alles wird auf Werkseinstellung zurückgesetzt.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -74,8 +160,36 @@ class _RadialPaletteSheetState extends ConsumerState<RadialPaletteSheet> {
                   onToggleScope: ctrl.toggleScope,
                   onCenterToggleScope: ctrl.toggleScope,
                   onCenterReset: ctrl.resetToDefaults,
+                  onToolReset: widget.onToolReset,
+                  onToolResetStart: (onComplete) {
+                    setState(() {
+                      _isResetting = true;
+                      _resettingTool = radialPalette.activeTool;
+                    });
+                    widget.onToolResetStart?.call(onComplete);
+                  },
+                  onToolResetEnd: () {
+                    setState(() {
+                      _isResetting = false;
+                      _resettingTool = null;
+                    });
+                    widget.onToolResetEnd?.call();
+                  },
                   onSwitchPalette: () => _ringKey.currentState?.switchPalette(),
                   onTargetSelected: ctrl.setTarget,
+                  onResetAll: widget.onResetAll, // NEU: Callback für kompletten Reset
+                  onResetAllStart: () {
+                    setState(() {
+                      _isResettingAll = true;
+                    });
+                    widget.onResetAllStart?.call();
+                  },
+                  onResetAllEnd: () {
+                    setState(() {
+                      _isResettingAll = false;
+                    });
+                    widget.onResetAllEnd?.call();
+                  },
                 ),
               ),
             ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -88,6 +91,81 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   Color? _unlockButtonFillColor;
   Color? _unlockButtonTextColor;
   Color? _hubBackgroundColor;
+
+  static const String _headerOverridesKey = 'word_hub_header_overrides';
+
+  /// Lädt die gespeicherten Header-Overrides aus SharedPreferences
+  Future<void> _loadHeaderOverrides() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final overridesJson = prefs.getString(_headerOverridesKey);
+      
+      if (overridesJson != null) {
+        final Map<String, dynamic> overridesMap = json.decode(overridesJson);
+        
+        if (mounted) {
+          setState(() {
+            _searchFieldStrokeColor = overridesMap['searchFieldStrokeColor'] != null
+                ? Color(int.parse(overridesMap['searchFieldStrokeColor'] as String))
+                : null;
+            _searchFieldFillColor = overridesMap['searchFieldFillColor'] != null
+                ? Color(int.parse(overridesMap['searchFieldFillColor'] as String))
+                : null;
+            _searchFieldIconColor = overridesMap['searchFieldIconColor'] != null
+                ? Color(int.parse(overridesMap['searchFieldIconColor'] as String))
+                : null;
+            _unlockButtonStrokeColor = overridesMap['unlockButtonStrokeColor'] != null
+                ? Color(int.parse(overridesMap['unlockButtonStrokeColor'] as String))
+                : null;
+            _unlockButtonFillColor = overridesMap['unlockButtonFillColor'] != null
+                ? Color(int.parse(overridesMap['unlockButtonFillColor'] as String))
+                : null;
+            _unlockButtonTextColor = overridesMap['unlockButtonTextColor'] != null
+                ? Color(int.parse(overridesMap['unlockButtonTextColor'] as String))
+                : null;
+            _hubBackgroundColor = overridesMap['hubBackgroundColor'] != null
+                ? Color(int.parse(overridesMap['hubBackgroundColor'] as String))
+                : null;
+          });
+        }
+      }
+    } catch (e) {
+    }
+  }
+
+  /// Speichert die Header-Overrides in SharedPreferences
+  Future<void> _saveHeaderOverrides() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final Map<String, dynamic> overridesMap = {};
+      
+      if (_searchFieldStrokeColor != null) {
+        overridesMap['searchFieldStrokeColor'] = _searchFieldStrokeColor!.value.toString();
+      }
+      if (_searchFieldFillColor != null) {
+        overridesMap['searchFieldFillColor'] = _searchFieldFillColor!.value.toString();
+      }
+      if (_searchFieldIconColor != null) {
+        overridesMap['searchFieldIconColor'] = _searchFieldIconColor!.value.toString();
+      }
+      if (_unlockButtonStrokeColor != null) {
+        overridesMap['unlockButtonStrokeColor'] = _unlockButtonStrokeColor!.value.toString();
+      }
+      if (_unlockButtonFillColor != null) {
+        overridesMap['unlockButtonFillColor'] = _unlockButtonFillColor!.value.toString();
+      }
+      if (_unlockButtonTextColor != null) {
+        overridesMap['unlockButtonTextColor'] = _unlockButtonTextColor!.value.toString();
+      }
+      if (_hubBackgroundColor != null) {
+        overridesMap['hubBackgroundColor'] = _hubBackgroundColor!.value.toString();
+      }
+      
+      final overridesJson = json.encode(overridesMap);
+      await prefs.setString(_headerOverridesKey, overridesJson);
+    } catch (e) {
+    }
+  }
   
   // Keys für Auto-Scroll
   final _keysById = <String, GlobalKey>{
@@ -95,6 +173,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     'wordHub.search': GlobalKey(),
     'wordHub.searchIcon': GlobalKey(),
     'wordHub.unlockButton': GlobalKey(),
+    'wordHub.glowToggle': GlobalKey(), // NEU: Key für GlowToggleButton
   };
   String? _lastPrimaryId;
   
@@ -104,6 +183,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   late final GlobalKey _unlockKey = GlobalKey();
   late final GlobalKey _searchKey = GlobalKey();
   late final GlobalKey _searchIconKey = GlobalKey();
+  late final GlobalKey _glowToggleKey = GlobalKey(); // NEU: Key für GlowToggleButton
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
     if (mounted) setState(() => _allowHints = false);
@@ -147,15 +227,57 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   }
 
   void _handleFocusChange(Set<String> ids) {
-    if (!mounted || !_isRadialOpen) return;
+    if (!mounted || !_isRadialOpen) {
+      return;
+    }
 
     // 1) Primäre ID bestimmen
     final String? primaryId = ids.isEmpty ? null : ids.first;
-    if (primaryId == null || primaryId == _lastPrimaryId) return;
-    _lastPrimaryId = primaryId;
-
+    
+    // WICHTIG: Wenn leere IDs gesendet werden, setze _lastPrimaryId zurück (für Position-Wiederherstellung)
+    if (primaryId == null) {
+      _lastPrimaryId = null;
+      return;
+    }
+    
     // 2) Basis-ID extrahieren (falls es .title oder .count ist, zur Kachel-ID zurückfallen)
     final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
+    
+    // WICHTIG: Wenn die ID gleich _lastPrimaryId ist, prüfe ob wir trotzdem scrollen sollten
+    // (z.B. wenn die Position wiederhergestellt wurde und das Widget noch nicht gerendert ist)
+    final bool shouldScroll = primaryId != _lastPrimaryId;
+    if (!shouldScroll) {
+      // Prüfe, ob das Widget bereits gerendert ist
+      final paletteState = ref.read(radialPaletteProvider);
+      PaletteTarget? target;
+      for (final t in paletteState.targets) {
+        if (t.id == baseId && t.kind == TargetKind.tile) {
+          target = t;
+          break;
+        }
+      }
+      if (target == null) {
+        for (final t in paletteState.targets) {
+          if (t.id == primaryId) {
+            target = t;
+            break;
+          }
+        }
+      }
+      if (target != null) {
+        final ctx = target.key.currentContext;
+        if (ctx == null) {
+          // Widget noch nicht gerendert - trotzdem scrollen versuchen
+          // Setze _lastPrimaryId zurück, damit das Scrollen ausgelöst wird
+          _lastPrimaryId = null;
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+    _lastPrimaryId = primaryId;
 
     // 3) Passenden PaletteTarget über die Basis-ID finden (immer die Kachel, nicht Titel/Counter)
     final paletteState = ref.read(radialPaletteProvider);
@@ -179,29 +301,90 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       }
     }
     
-    if (target == null) return;
+    if (target == null) {
+      return;
+    }
 
     final key = target.key;
 
     // 4) Scrollen, so dass das Element VOR dem Rad sichtbar ist (smooth Animation)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_isRadialOpen) return;
+    // WICHTIG: Wenn die Kachel nicht gerendert ist, zuerst zum Section-Title scrollen
+    void _tryScroll(int attempt, {bool scrolledToSectionTitle = false}) {
+      if (!mounted || !_isRadialOpen) {
+        return;
+      }
+      
       final ctx = key.currentContext;
-      if (ctx == null) return;
+      if (ctx == null) {
+        // Widget noch nicht gerendert
+        if (!scrolledToSectionTitle && attempt < 3) {
+          // Versuche zuerst zum Section-Title zu scrollen, damit die Kachel in den Viewport kommt
+          // baseId ist z.B. "wordHub.society_systems.school_studies" -> Section-Title ist "wordHub.sectionTitle.society_systems"
+          final parts = baseId.split('.');
+          if (parts.length >= 3) {
+            final sectionKey = parts[1]; // z.B. "society_systems"
+            final sectionTitleId = 'wordHub.sectionTitle.$sectionKey';
+            
+            final paletteState = ref.read(radialPaletteProvider);
+            PaletteTarget? sectionTitleTarget;
+            for (final t in paletteState.targets) {
+              if (t.id == sectionTitleId) {
+                sectionTitleTarget = t;
+                break;
+              }
+            }
+            
+            if (sectionTitleTarget != null) {
+              final sectionTitleCtx = sectionTitleTarget.key.currentContext;
+              if (sectionTitleCtx != null) {
+                try {
+                  Scrollable.ensureVisible(
+                    sectionTitleCtx,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOutCubic,
+                    alignment: 0.18,
+                  );
+                  // Nach kurzer Verzögerung erneut versuchen, zur Kachel zu scrollen
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    _tryScroll(attempt + 1, scrolledToSectionTitle: true);
+                  });
+                  return;
+                } catch (e) {
+                  // Fehler ignorieren
+                }
+              }
+            }
+          }
+        }
+        
+        if (attempt < 20) {
+          // Widget noch nicht gerendert - erneut versuchen nach längerer Verzögerung
+          final delay = (attempt < 5) ? 100 : (attempt < 10) ? 200 : 300;
+          Future.delayed(Duration(milliseconds: delay), () {
+            _tryScroll(attempt + 1, scrolledToSectionTitle: scrolledToSectionTitle);
+          });
+        }
+        return;
+      }
 
       try {
         // Smooth Animation mit längerer Duration und besserer Curve
         Scrollable.ensureVisible(
           ctx,
-          duration: const Duration(milliseconds: 200), // Längere Duration für smooth Animation
+          duration: const Duration(milliseconds: 300), // Längere Duration für smooth Animation
           curve: Curves.easeInOutCubic, // Smooth, fließende Kurve
           // 0 = ganz oben, 1 = ganz unten
           // etwas über der Mitte, damit es nicht vom Rad verdeckt wird
           alignment: 0.18,
         );
-      } catch (_) {
+      } catch (e) {
         // Scroll-Fehler ignorieren
       }
+    }
+    
+    // Starte den ersten Versuch nach einem Frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tryScroll(0);
     });
   }
 
@@ -254,6 +437,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       return false;
     }();
 
+    // Header-Overrides beim ersten Build laden
+    if (!_headerTargetsRegistered) {
+      _loadHeaderOverrides();
+    }
+
     // Header-Targets registrieren (nur einmal)
     if (!_headerTargetsRegistered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -272,9 +460,17 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             kind: TargetKind.icon,
             tools: {PaletteTool.icon, PaletteTool.stroke},
           ),
+          // "Alles freischalten" Button ist NICHT selektierbar (keine Tools)
           PaletteTarget(
             id: 'wordHub.unlockButton',
             key: _unlockKey,
+            kind: TargetKind.button,
+            tools: {}, // NEU: Keine Tools, nicht selektierbar
+          ),
+          // NEU: GlowToggleButton ist selektierbar
+          PaletteTarget(
+            id: 'wordHub.glowToggle',
+            key: _glowToggleKey,
             kind: TargetKind.button,
             tools: {PaletteTool.stroke, PaletteTool.fill, PaletteTool.text},
             onApply: (tool, color, scope) {
@@ -288,6 +484,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     _unlockButtonTextColor = color;
                   }
                 });
+                _saveHeaderOverrides();
               }
             },
           ),
@@ -305,6 +502,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     _searchFieldFillColor = color;
                   }
                 });
+                _saveHeaderOverrides();
               }
             },
           ),
@@ -320,6 +518,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     _searchFieldIconColor = color;
                   }
                 });
+                _saveHeaderOverrides();
               }
             },
           ),
@@ -335,6 +534,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     _hubBackgroundColor = color;
                   }
                 });
+                _saveHeaderOverrides();
               }
             },
           ),
@@ -448,9 +648,21 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
               Positioned(
                 right: 12,
                 top: 8,
-                child: GlowToggleButton(
-                  glowEnabled: glowEnabled,
-                  onToggle: () => _handleGlowToggle(glowEnabled),
+                child: KeyedSubtree(
+                  key: _keysById['wordHub.glowToggle'],
+                  child: FocusGlow(
+                    isFocused: focusedIds.contains('wordHub.glowToggle'),
+                    borderRadius: BorderRadius.circular(24), // Gleiche Form wie Button
+                    padding: EdgeInsets.zero, // kein Padding für Buttons
+                    child: GlowToggleButton(
+                      key: _glowToggleKey,
+                      glowEnabled: glowEnabled,
+                      onToggle: () => _handleGlowToggle(glowEnabled),
+                      strokeColor: _unlockButtonStrokeColor, // NEU: Override-Farbe für Border
+                      fillColor: _unlockButtonFillColor, // NEU: Override-Farbe für Fill
+                      textColor: _unlockButtonTextColor, // NEU: Override-Farbe für Icon
+                    ),
+                  ),
                 ),
               ),
               Positioned(
@@ -475,12 +687,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   },
                   child: KeyedSubtree(
                     key: _keysById['wordHub.unlockButton'],
-                    child: FocusGlow(
-                      isFocused: focusedIds.contains('wordHub.unlockButton'),
-                      borderRadius: BorderRadius.circular(999), // Button-Form (Stadium)
-                      padding: EdgeInsets.zero, // kein Padding für Buttons
-                      child: _buildFrontButton(key: _unlockKey),
-                    ),
+                    child: _buildFrontButton(key: _unlockKey), // NEU: Kein FocusGlow mehr, nicht selektierbar
                   ),
                 ),
               ),
@@ -606,6 +813,61 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                 child: RadialPaletteSheet(
                   onClose: _closeRadial,
                   heroTag: 'floating-palette',
+                  onToolReset: (tool) {
+                    // Header-Elemente zurücksetzen basierend auf Tool
+                    if (mounted) {
+                      setState(() {
+                        switch (tool) {
+                          case PaletteTool.stroke:
+                            _searchFieldStrokeColor = null;
+                            _unlockButtonStrokeColor = null;
+                            break;
+                          case PaletteTool.fill:
+                            _searchFieldFillColor = null;
+                            _unlockButtonFillColor = null;
+                            break;
+                          case PaletteTool.text:
+                            _unlockButtonTextColor = null;
+                            break;
+                          case PaletteTool.icon:
+                            _searchFieldIconColor = null;
+                            break;
+                          case PaletteTool.hubBackground:
+                            _hubBackgroundColor = null;
+                            break;
+                          case PaletteTool.paint:
+                          case PaletteTool.image:
+                            break;
+                        }
+                      });
+                      _saveHeaderOverrides();
+                    }
+                  },
+                  onResetAll: () {
+                    // NEU: Alle Overrides und Header-Elemente zurücksetzen
+                    if (mounted) {
+                      // Alle Tile-Overrides zurücksetzen
+                      ref.read(wordHubTileOverridesProvider.notifier).resetAllOverrides();
+                      
+                      // Alle Header-Elemente zurücksetzen
+                      setState(() {
+                        _searchFieldStrokeColor = null;
+                        _searchFieldFillColor = null;
+                        _searchFieldIconColor = null;
+                        _unlockButtonStrokeColor = null;
+                        _unlockButtonFillColor = null;
+                        _unlockButtonTextColor = null;
+                        _hubBackgroundColor = null;
+                      });
+                      _saveHeaderOverrides();
+                    }
+                  },
+                  onResetAllStart: () {
+                    // NEU: Reset-Start (Label wird angezeigt)
+                  },
+                  onResetAllEnd: () {
+                    // NEU: Reset-Ende (Label wird ausgeblendet)
+                  },
                 ),
               ),
             ),
@@ -730,7 +992,9 @@ class _GridSectionState extends ConsumerState<_GridSection> {
   late final List<GlobalKey> _tileKeys;
   late final List<GlobalKey> _titleKeys;
   late final List<GlobalKey> _countKeys;
-  bool _registered = false;
+  late final List<GlobalKey> _iconKeys; // NEU: Keys für Icons/Emojis
+  Map<String, bool>? _lastIconEmojiState; // NEU: Speichert vorherigen Zustand der Icons/Emojis
+  bool _registered = false; // NEU: Flag für einmalige Registrierung
 
   @override
   void initState() {
@@ -739,15 +1003,42 @@ class _GridSectionState extends ConsumerState<_GridSection> {
     _tileKeys  = List.generate(len, (_) => GlobalKey());
     _titleKeys = List.generate(len, (_) => GlobalKey());
     _countKeys = List.generate(len, (_) => GlobalKey());
+    _iconKeys = List.generate(len, (_) => GlobalKey()); // NEU: Keys für Icons/Emojis
+  }
+
+  // Hilfsmethode zum Vergleichen von Maps
+  bool _mapsEqual(Map<String, bool> map1, Map<String, bool> map2) {
+    if (map1.length != map2.length) return false;
+    for (final key in map1.keys) {
+      if (map1[key] != map2[key]) return false;
+    }
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Aktuelle Overrides lesen, um zu prüfen, welche Kacheln Icons/Emojis haben
+    final overrides = ref.watch(wordHubTileOverridesProvider);
+    
+    // NEU: Prüfe, ob sich der Icon/Emoji-Zustand geändert hat
+    final currentIconEmojiState = <String, bool>{};
+    for (var i = 0; i < widget.subs.length; i++) {
+      final sub = widget.subs[i];
+      final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+      final tileOverrides = overrides[baseId];
+      currentIconEmojiState[baseId] = tileOverrides?.icon != null || tileOverrides?.emoji != null;
+    }
+    
+    final iconEmojiStateChanged = _lastIconEmojiState == null || 
+        !_mapsEqual(_lastIconEmojiState!, currentIconEmojiState);
+    
     // 2) Zu JEDEM Sub: Tile + Titel + Counter als eigene Targets
     final targets = <PaletteTarget>[];
     for (var i = 0; i < widget.subs.length; i++) {
       final sub = widget.subs[i];
       final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+      final tileOverrides = overrides[baseId];
+      final hasIconOrEmoji = tileOverrides?.icon != null || tileOverrides?.emoji != null;
 
       // a) Ganze Kachel
       targets.add(PaletteTarget(
@@ -757,12 +1048,14 @@ class _GridSectionState extends ConsumerState<_GridSection> {
         tools: {
           PaletteTool.stroke,
           PaletteTool.fill,
-          PaletteTool.icon,
+          // PaletteTool.icon wird NICHT unterstützt - nur Icon-Targets haben Icon-Tool
+          // Tile-Targets werden nur zum Platzieren von Icons/Emojis verwendet, nicht zum Einfärben
           PaletteTool.image,
           PaletteTool.paint,
           // Text-Tool wird NICHT unterstützt - nur Titel und Counter haben Text-Tool
         },
         onApply: (tool, color, scope) {
+          // WICHTIG: Tile-Targets unterstützen nur stroke und fill, NICHT icon!
           if (tool == PaletteTool.stroke) {
             ref.read(wordHubTileOverridesProvider.notifier)
                 .setStrokeColor(baseId, color);
@@ -771,7 +1064,35 @@ class _GridSectionState extends ConsumerState<_GridSection> {
                 .setFillColor(baseId, color);
           }
         },
+        onApplyIcon: (icon, scope) {
+          ref.read(wordHubTileOverridesProvider.notifier)
+              .setIcon(baseId, icon);
+        },
+        onApplyEmoji: (emoji, scope) {
+          ref.read(wordHubTileOverridesProvider.notifier)
+              .setEmoji(baseId, emoji);
+        },
+        onClearIconEmoji: (scope) {
+          ref.read(wordHubTileOverridesProvider.notifier)
+              .clearIconEmoji(baseId);
+        },
       ));
+
+      // NEU: d) Icon/Emoji in der Kachel (nur wenn vorhanden)
+      if (hasIconOrEmoji) {
+        targets.add(PaletteTarget(
+          id: '$baseId.icon',
+          key: _iconKeys[i],
+          kind: TargetKind.icon,
+          tools: {PaletteTool.icon}, // Nur Icon Tool unterstützt
+          onApply: (tool, color, scope) {
+            if (tool == PaletteTool.icon) {
+              ref.read(wordHubTileOverridesProvider.notifier)
+                  .setIconColor(baseId, color);
+            }
+          },
+        ));
+      }
 
       // b) Titel-Text in der Kachel
       targets.add(PaletteTarget(
@@ -808,12 +1129,19 @@ class _GridSectionState extends ConsumerState<_GridSection> {
       ));
     }
 
-    // 3) Targets nach dem Frame einmalig registrieren
-    if (!_registered) {
+    // 3) Targets nach dem Frame registrieren (nur wenn sich etwas geändert hat)
+    if (!_registered || iconEmojiStateChanged) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || _registered || targets.isEmpty) return;
-        _registered = true;
+        if (!mounted || targets.isEmpty) return;
         ref.read(radialPaletteProvider.notifier).registerTargets(targets);
+        if (!_registered) {
+          _registered = true;
+        }
+        if (iconEmojiStateChanged) {
+          _lastIconEmojiState = Map<String, bool>.from(currentIconEmojiState);
+          // WICHTIG: Fokus NICHT aktualisieren, damit der Selektor auf der aktuellen Kachel bleibt
+          // Die Icon-Targets werden automatisch erkannt, wenn sie hinzugefügt werden
+        }
       });
     }
 
@@ -836,6 +1164,7 @@ class _GridSectionState extends ConsumerState<_GridSection> {
                 // 🔽 NEU: Keys für Titel & Counter in die Kachel hineinreichen
                 titleKey: _titleKeys[i],
                 countKey: _countKeys[i],
+                iconKey: _iconKeys[i], // NEU: Icon-Key übergeben
                 onTap: widget.onTapSub == null ? null : () => widget.onTapSub!(sub),
               ),
             );

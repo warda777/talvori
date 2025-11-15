@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'icon_picker_dialog.dart';
 
 class RotaryColorRing extends StatefulWidget {
   const RotaryColorRing({
@@ -8,6 +9,9 @@ class RotaryColorRing extends StatefulWidget {
     required this.onPick,
     required this.onActiveColorChanged,
     this.onPickEnd,
+    this.onPickIcon, // Callback für Icon-Auswahl
+    this.onPickEmoji, // Callback für Emoji-Auswahl
+    this.onClearIconEmoji, // Callback zum Löschen von Icons/Emojis
     this.isLocked = false, // 🔴 Nur wenn true, kann Farbe gepickt werden
     this.count = 36,
     this.bubbleSize = 22,
@@ -16,11 +20,16 @@ class RotaryColorRing extends StatefulWidget {
     this.hitPadInner = 0.0,
     this.hitPadOuter = 0.0,
     this.customColor, // Custom-Farbe für Verlauf
+    this.selectedIcon, // Ausgewähltes Icon
+    this.selectedEmoji, // Ausgewähltes Emoji
   });
 
   final ValueChanged<Color> onPick;
   final ValueChanged<Color> onActiveColorChanged;
   final VoidCallback? onPickEnd;
+  final ValueChanged<IconData>? onPickIcon; // Callback für Icon-Auswahl
+  final ValueChanged<String>? onPickEmoji; // Callback für Emoji-Auswahl
+  final VoidCallback? onClearIconEmoji; // Callback zum Löschen von Icons/Emojis
   final bool isLocked;
   final int count;
   final double bubbleSize;
@@ -29,6 +38,8 @@ class RotaryColorRing extends StatefulWidget {
   final double hitPadInner;
   final double hitPadOuter;
   final Color? customColor; // Custom-Farbe für Verlauf
+  final IconData? selectedIcon; // Ausgewähltes Icon
+  final String? selectedEmoji; // Ausgewähltes Emoji
 
   @override
   State<RotaryColorRing> createState() => RotaryColorRingState();
@@ -39,6 +50,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
   double _angle = 0.0;
   double _dragStartAngle = 0.0;
   Offset _center = Offset.zero;
+  String? _lastSelectedEmoji;
+  IconData? _lastSelectedIcon;
 
   int _paletteIndex = 0;
   double _hueShift = 0.0;
@@ -84,6 +97,16 @@ class RotaryColorRingState extends State<RotaryColorRing>
   @override
   void didUpdateWidget(RotaryColorRing oldWidget) {
     super.didUpdateWidget(oldWidget);
+    
+    // State zurücksetzen, wenn sich isLocked ändert (Fokuswechsel)
+    if (widget.isLocked != oldWidget.isLocked) {
+      setState(() {
+        _picking = false;
+        _selectedIndex = null;
+        _dragColor = null;
+      });
+    }
+    
     // Welle starten/stoppen basierend auf isLocked
     if (widget.isLocked && !oldWidget.isLocked) {
       // Nur starten wenn nicht gerade gepickt wird
@@ -460,7 +483,56 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   @override
   Widget build(BuildContext context) {
-    final colors = _paletteColors(widget.count);
+    // Prüfe, ob Icons/Emojis angezeigt werden sollen
+    final bool showIcons = widget.selectedIcon != null;
+    final bool showEmojis = widget.selectedEmoji != null;
+    final bool showIconMode = showIcons || showEmojis;
+    
+    // State zurücksetzen, wenn sich das ausgewählte Emoji/Icon ändert
+    if (showIconMode) {
+      if (showEmojis && widget.selectedEmoji != _lastSelectedEmoji) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _picking = false;
+              _selectedIndex = null;
+              _dragColor = null;
+              _lastSelectedEmoji = widget.selectedEmoji;
+            });
+          }
+        });
+      } else if (showIcons && widget.selectedIcon != _lastSelectedIcon) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _picking = false;
+              _selectedIndex = null;
+              _dragColor = null;
+              _lastSelectedIcon = widget.selectedIcon;
+            });
+          }
+        });
+      }
+    }
+    
+    // Liste der Icons/Emojis für den Ring
+    List<dynamic> iconEmojiList = [];
+    int selectedIndex = 0;
+    
+    if (showIconMode) {
+      if (showEmojis) {
+        iconEmojiList = IconPickerDialog.emojis;
+        selectedIndex = iconEmojiList.indexOf(widget.selectedEmoji!);
+      } else if (showIcons) {
+        iconEmojiList = IconPickerDialog.icons;
+        selectedIndex = iconEmojiList.indexOf(widget.selectedIcon!);
+      }
+      
+      // Wenn nicht gefunden, auf 0 setzen
+      if (selectedIndex < 0) selectedIndex = 0;
+    }
+    
+    final colors = showIconMode ? List<Color>.generate(widget.count, (_) => Colors.transparent) : _paletteColors(widget.count);
 
     return LayoutBuilder(
       builder: (_, constraints) {
@@ -487,33 +559,225 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
         final step = (2 * math.pi) / colors.length;
 
+        // Berechne die Icons/Emojis für den Ring
+        List<dynamic> ringItems = [];
+        final int ringCount = widget.count;
+        final int halfCount = ringCount ~/ 2;
+        
+        // Spezielles "X" Symbol zum Löschen (wird als spezielles Objekt markiert)
+        const String clearSymbol = '__CLEAR__';
+        // Feste Position für das "X" im Ring (z.B. Position 0, was 6 Uhr entspricht)
+        const int clearPosition = 0; // Feste Position im Ring
+        
+        if (showIconMode && iconEmojiList.isNotEmpty) {
+          // Das ausgewählte Icon/Emoji soll auf 12 Uhr sein
+          // Berechne die Nachbarn um das ausgewählte Icon/Emoji
+          // Reduziere die Anzahl um 1, um Platz für das "X" zu schaffen
+          
+          // Starte mit dem ausgewählten Item und füge Nachbarn hinzu
+          // Wir nehmen einen weniger, damit Platz für das "X" ist
+          for (int i = -halfCount + 1; i <= halfCount - 1; i++) {
+            int listIndex = (selectedIndex + i) % iconEmojiList.length;
+            if (listIndex < 0) listIndex += iconEmojiList.length;
+            ringItems.add(iconEmojiList[listIndex]);
+          }
+          
+          // Füge das "X" an fester Position ein
+          ringItems.insert(clearPosition, clearSymbol);
+        }
+
         final children = <Widget>[];
 
+        // Für Icon-Modus: Berechne Winkel-Offset, damit das ausgewählte Icon/Emoji auf 12 Uhr ist
+        double iconModeAngleOffset = 0.0;
+        if (showIconMode && iconEmojiList.isNotEmpty) {
+          // Das ausgewählte Icon/Emoji ist auf Index halfCount-1 in ringItems (Mitte des Rings, da wir ein Element weniger haben)
+          // Wir wollen, dass dieser Index auf 12 Uhr (-pi/2) ist
+          const targetAngle = -math.pi / 2; // 12 Uhr
+          // Aktueller Winkel von Index halfCount-1 ohne Offset (da wir ein Element weniger haben)
+          final adjustedHalfCount = halfCount - 1;
+          final currentAngleOfSelected = _angle + adjustedHalfCount * step;
+          // Offset berechnen, damit es auf 12 Uhr landet
+          iconModeAngleOffset = targetAngle - currentAngleOfSelected;
+        }
+
+        // Für Icon-Modus: Icons/Emojis ZUERST hinzufügen (damit sie unter den GestureDetector-Bereichen liegen)
+        if (showIconMode && ringItems.isNotEmpty) {
+          for (int i = 0; i < ringItems.length && i < colors.length; i++) {
+            final adjustedAngle = _angle + i * step + iconModeAngleOffset;
+            final angleWidth = step;
+            final midAngle = adjustedAngle + angleWidth / 2;
+            final midRadius = (innerR + outerR) / 2;
+            
+            // Position relativ zum Stack
+            final iconX = midRadius * math.cos(midAngle);
+            final iconY = midRadius * math.sin(midAngle);
+            
+            final item = ringItems[i];
+            final isClearSymbol = item == clearSymbol;
+            final isEmoji = item is String && !isClearSymbol;
+            final isIcon = item is IconData;
+            
+            children.add(
+              Positioned(
+                left: center.dx + iconX - 20,
+                top: center.dy + iconY - 20,
+                width: 40,
+                height: 40,
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: Center(
+                    child: isClearSymbol
+                        ? Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          )
+                        : isEmoji
+                            ? Text(
+                                item as String,
+                                style: const TextStyle(fontSize: 28),
+                                textAlign: TextAlign.center,
+                              )
+                            : isIcon
+                                ? Icon(
+                                    item as IconData,
+                                    color: Colors.white,
+                                    size: 28,
+                                  )
+                                : const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+
+        // Dann die GestureDetector-Bereiche hinzufügen (für Drehung) - diese liegen ÜBER den Icons
         for (int i = 0; i < colors.length; i++) {
-          final adjustedAngle = _angle + i * step;
+          final adjustedAngle = _angle + i * step + iconModeAngleOffset;
           final angleWidth = step;
+          final finalAngle = adjustedAngle;
 
           children.add(
             Positioned.fill(
               child: ClipPath(
                 clipper: _WedgeClipper(
-                  baseAngle: adjustedAngle,
+                  baseAngle: finalAngle,
                   angleWidth: angleWidth,
                   innerR: hitInnerR,
                   outerR: hitOuterR,
                 ),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
+                child: Container(
+                  color: showIconMode ? Colors.white.withOpacity(0.01) : Colors.transparent,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                   onTapDown: (d) {
-                    // 🔴 Nur picken, wenn Kugel gelockt ist
-                    if (!widget.isLocked) return;
-                    
-                    if (_picking && _selectedIndex != i) return;
-
                     final box = _stackKey.currentContext?.findRenderObject()
                         as RenderBox?;
                     if (box == null) return;
                     final localPos = box.globalToLocal(d.globalPosition);
+
+                    // Wenn Icon-Modus aktiv, Icon/Emoji picken statt Farbe
+                    if (showIconMode && ringItems.isNotEmpty) {
+                      // Verwende die tatsächliche Tap-Position, um das nächste Item zu finden
+                      final dx = localPos.dx - _center.dx;
+                      final dy = localPos.dy - _center.dy;
+                      final distance = math.sqrt(dx * dx + dy * dy);
+                      
+                      // Prüfe, ob der Tap innerhalb des Rings ist
+                      final midRadius = (innerR + outerR) / 2;
+                      if (distance < innerR - 10 || distance > outerR + 10) {
+                        // Außerhalb des Rings, ignoriere
+                        return;
+                      }
+                      
+                      // Berechne den Winkel des getappten Punktes
+                      double tapAngle = math.atan2(dy, dx);
+                      // Normalisiere auf 0..2π
+                      if (tapAngle < 0) tapAngle += 2 * math.pi;
+                      
+                      // Finde das nächste Item basierend auf dem Winkel
+                      int ringItemIndex = -1;
+                      double minAngleDiff = double.infinity;
+                      
+                      for (int j = 0; j < ringItems.length; j++) {
+                        // Berechne den Winkel für jedes Item im Ring
+                        final itemAngle = _angle + j * step + iconModeAngleOffset;
+                        final itemMidAngle = itemAngle + step / 2;
+                        // Normalisiere auf 0..2π
+                        double normalizedItemAngle = itemMidAngle % (2 * math.pi);
+                        if (normalizedItemAngle < 0) normalizedItemAngle += 2 * math.pi;
+                        
+                        // Berechne die Winkeldifferenz (berücksichtige Wraparound)
+                        double angleDiff = (tapAngle - normalizedItemAngle).abs();
+                        if (angleDiff > math.pi) {
+                          angleDiff = 2 * math.pi - angleDiff;
+                        }
+                        
+                        if (angleDiff < minAngleDiff) {
+                          minAngleDiff = angleDiff;
+                          ringItemIndex = j;
+                        }
+                      }
+                      
+                      if (ringItemIndex >= 0 && ringItemIndex < ringItems.length) {
+                        final item = ringItems[ringItemIndex];
+                        
+                        // Prüfe, ob das "X" zum Löschen getappt wurde
+                        // Das "X" funktioniert immer, wenn Icon-Modus aktiv ist (auch ohne Lock)
+                        if (item == clearSymbol) {
+                          widget.onClearIconEmoji?.call();
+                          HapticFeedback.lightImpact();
+                          return;
+                        }
+                        
+                        // Für normale Icons/Emojis: Nur picken, wenn Kugel gelockt ist
+                        if (!widget.isLocked) return;
+                        
+                        // State zurücksetzen, bevor neues Item gepickt wird
+                        setState(() {
+                          _picking = false;
+                          _selectedIndex = null;
+                          _dragColor = null;
+                        });
+                        
+                        setState(() {
+                          _picking = true;
+                          _selectedIndex = i;
+                          _dragPos = localPos;
+                        });
+                        _waveController.stop();
+                        
+                        if (item is String) {
+                          // Emoji
+                          widget.onPickEmoji?.call(item);
+                        } else if (item is IconData) {
+                          // Icon
+                          widget.onPickIcon?.call(item);
+                        }
+                        HapticFeedback.lightImpact();
+                        return;
+                      }
+                    }
+                    
+                    // Für Farben: Nur picken, wenn Kugel gelockt ist
+                    if (!widget.isLocked) return;
+                    
+                    if (_picking && _selectedIndex != i) return;
 
                     setState(() {
                       _picking = true;
@@ -608,7 +872,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
                       final currentWaveAngle = widget.isLocked ? _waveAnimation.value : null;
                       bool currentIsInWave = false;
                       if (currentWaveAngle != null) {
-                        var normalizedWedgeAngle = adjustedAngle % (2 * math.pi);
+                        var normalizedWedgeAngle = finalAngle % (2 * math.pi);
                         if (normalizedWedgeAngle < 0) normalizedWedgeAngle += 2 * math.pi;
                         var normalizedWaveAngle = currentWaveAngle % (2 * math.pi);
                         if (normalizedWaveAngle < 0) normalizedWaveAngle += 2 * math.pi;
@@ -620,9 +884,26 @@ class RotaryColorRingState extends State<RotaryColorRing>
                         currentIsInWave = angleDiff < waveWidth / 2;
                       }
                       
+                      // Wenn Icon-Modus aktiv, zeige transparenten Hintergrund statt Farbkeil
+                      // (die GestureDetector funktionieren auch mit transparenten Bereichen)
+                      if (showIconMode) {
+                        return CustomPaint(
+                          painter: _WedgePainter(
+                            baseAngle: finalAngle,
+                            angleWidth: angleWidth,
+                            innerR: innerR,
+                            outerR: outerR,
+                            color: Colors.transparent,
+                            shadow: 0,
+                            waveAngle: null,
+                            isInWave: false,
+                          ),
+                        );
+                      }
+                      
                       return CustomPaint(
                         painter: _WedgePainter(
-                          baseAngle: adjustedAngle,
+                          baseAngle: finalAngle,
                           angleWidth: angleWidth,
                           innerR: innerR,
                           outerR: outerR,
@@ -637,7 +918,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
                 ),
               ),
             ),
-          );
+          ),
+        );
         }
 
         if (!_picking) {
@@ -645,7 +927,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
           int active = 0;
           double minDelta = double.infinity;
           for (int i = 0; i < colors.length; i++) {
-            final a = _angle + i * step;
+            final a = _angle + i * step + iconModeAngleOffset;
             var delta = (a - twelve) % (2 * math.pi);
             if (delta > math.pi) delta -= 2 * math.pi;
             final d = delta.abs();

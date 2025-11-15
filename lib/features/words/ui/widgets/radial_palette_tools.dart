@@ -4,8 +4,116 @@ import 'package:flutter/services.dart'; // für HapticFeedback
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/radial_palette_controller.dart';
+import '../../application/word_hub_tile_overrides_provider.dart';
 import 'rotary_color_ring.dart';
 import 'custom_color_picker_dialog.dart';
+import 'icon_picker_dialog.dart';
+
+class _CenterToolButton extends ConsumerStatefulWidget {
+  final PaletteTool tool;
+  final Widget? centerWidget;
+  final IconData? icon;
+  final RadialPaletteController ctrl;
+  final GlobalKey<RotaryColorRingState>? ringKey;
+  final ValueChanged<PaletteTool>? onToolReset;
+  final void Function(VoidCallback)? onToolResetStart; // Callback erhält onComplete-Funktion
+  final VoidCallback? onToolResetEnd;
+
+  const _CenterToolButton({
+    required this.tool,
+    this.centerWidget,
+    this.icon,
+    required this.ctrl,
+    this.ringKey,
+    this.onToolReset,
+    this.onToolResetStart,
+    this.onToolResetEnd,
+  });
+
+  @override
+  ConsumerState<_CenterToolButton> createState() => _CenterToolButtonState();
+}
+
+class _CenterToolButtonState extends ConsumerState<_CenterToolButton> {
+  bool _isLongPressing = false;
+
+  void _handleLongPressStart() {
+    setState(() {
+      _isLongPressing = true;
+    });
+    HapticFeedback.mediumImpact();
+    // Starte visuellen Effekt am ScopeSwitchButton mit Callback für automatischen Reset
+    widget.onToolResetStart?.call(() {
+      // Wird aufgerufen, wenn Animation bei 100% ist
+      if (_isLongPressing) {
+        setState(() {
+          _isLongPressing = false;
+        });
+        
+        // Reset durchführen
+        widget.ctrl.resetTool(widget.tool);
+        ref.read(wordHubTileOverridesProvider.notifier)
+            .resetToolOverrides(widget.tool);
+        
+        // Header-Elemente zurücksetzen über Callback
+        widget.onToolReset?.call(widget.tool);
+        
+        // Stoppe visuellen Effekt am ScopeSwitchButton
+        widget.onToolResetEnd?.call();
+        
+        HapticFeedback.heavyImpact();
+      }
+    });
+  }
+
+  void _handleLongPressEnd() {
+    if (_isLongPressing) {
+      setState(() {
+        _isLongPressing = false;
+      });
+      
+      // Stoppe visuellen Effekt am ScopeSwitchButton
+      widget.onToolResetEnd?.call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.ctrl.selectTool(widget.tool),
+      onLongPressStart: (_) => _handleLongPressStart(),
+      onLongPressEnd: (_) => _handleLongPressEnd(),
+      onLongPressCancel: () {
+        setState(() {
+          _isLongPressing = false;
+        });
+        widget.onToolResetEnd?.call();
+      },
+      child: widget.centerWidget != null
+          ? Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 2.0,
+                ),
+              ),
+              child: widget.centerWidget,
+            )
+          : _RoundIcon(
+              icon: widget.icon!,
+              isActive: true,
+              onTap: () => widget.ctrl.selectTool(widget.tool),
+              ringKey: widget.ringKey,
+              hasStroke: widget.tool == PaletteTool.icon,
+            ),
+    );
+  }
+}
 
 class RadialTools extends ConsumerWidget {
   const RadialTools({
@@ -14,12 +122,18 @@ class RadialTools extends ConsumerWidget {
     required this.discSize,
     this.onPickColor,
     this.activeColor,
+    this.onToolReset,
+    this.onToolResetStart,
+    this.onToolResetEnd,
   });
 
   final GlobalKey<RotaryColorRingState> ringKey;
   final double discSize;
   final ValueChanged<Color>? onPickColor;
   final Color? activeColor;
+  final ValueChanged<PaletteTool>? onToolReset;
+  final void Function(VoidCallback)? onToolResetStart; // Callback erhält onComplete-Funktion
+  final VoidCallback? onToolResetEnd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,6 +198,23 @@ class RadialTools extends ConsumerWidget {
                   palette: palette,
                   ctrl: ctrl,
                   ringKey: ringKey,
+                  onLongPress: () {
+                    // Longpress-Funktion für Icon Tool-Button - öffnet Icon-Picker
+                    HapticFeedback.mediumImpact();
+                    showDialog(
+                      context: context,
+                      builder: (context) => IconPickerDialog(
+                        selectedIcon: palette.selectedIcon,
+                        selectedEmoji: palette.selectedEmoji,
+                        onIconSelected: (icon) {
+                          ctrl.selectIcon(icon);
+                        },
+                        onEmojiSelected: (emoji) {
+                          ctrl.selectEmoji(emoji);
+                        },
+                      ),
+                    );
+                  },
                 ),
                 _toolAtAngle(
                   context,
@@ -104,6 +235,9 @@ class RadialTools extends ConsumerWidget {
               discSize,
               onPickColor: onPickColor,
               activeColor: activeColor,
+              onToolReset: onToolReset,
+              onToolResetStart: onToolResetStart,
+              onToolResetEnd: onToolResetEnd,
             ),
     );
   }
@@ -116,6 +250,7 @@ class RadialTools extends ConsumerWidget {
     required RadialPaletteState palette,
     required RadialPaletteController ctrl,
     required GlobalKey<RotaryColorRingState> ringKey,
+    VoidCallback? onLongPress,
   }) {
     final rad = angleDeg * 3.1415926535 / 180;
     const r = 110.0;
@@ -134,6 +269,8 @@ class RadialTools extends ConsumerWidget {
           isActive: palette.activeTool == tool,
           onTap: () => ctrl.selectTool(tool),
           ringKey: ringKey,
+          onLongPress: onLongPress,
+          hasStroke: tool == PaletteTool.icon,
         ),
       ),
     );
@@ -147,10 +284,35 @@ class RadialTools extends ConsumerWidget {
     double discSize, {
     ValueChanged<Color>? onPickColor,
     Color? activeColor,
+    ValueChanged<PaletteTool>? onToolReset,
+    void Function(VoidCallback)? onToolResetStart,
+    VoidCallback? onToolResetEnd,
   }) {
     final tool = palette.activeTool!;
 
-    final icon = switch (tool) {
+    // Wenn Icon Tool aktiv ist und ein Icon/Emoji ausgewählt wurde, dieses anzeigen
+    Widget? centerWidget;
+    if (tool == PaletteTool.icon) {
+      if (palette.selectedEmoji != null) {
+        // Emoji anzeigen
+        centerWidget = Center(
+          child: Text(
+            palette.selectedEmoji!,
+            style: const TextStyle(fontSize: 32),
+          ),
+        );
+      } else if (palette.selectedIcon != null) {
+        // Icon anzeigen
+        centerWidget = Icon(
+          palette.selectedIcon,
+          color: Colors.white,
+          size: 32,
+        );
+      }
+    }
+
+    // Fallback: Standard-Icon für das Tool
+    final icon = centerWidget == null ? (switch (tool) {
       PaletteTool.stroke => Icons.border_all,
       PaletteTool.fill => Icons.crop_square,
       PaletteTool.text => Icons.text_fields,
@@ -158,7 +320,7 @@ class RadialTools extends ConsumerWidget {
       PaletteTool.paint => Icons.palette,
       PaletteTool.icon => Icons.star,
       PaletteTool.image => Icons.image,
-    };
+    }) : null;
 
     return Center(
       child: SizedBox(
@@ -168,6 +330,7 @@ class RadialTools extends ConsumerWidget {
           alignment: Alignment.center,
           children: <Widget>[
             // 🔹 Dünner Ring mit Kugel, der durch die Targets steppt
+            // Dieser leitet die Gesten an den RotaryColorRing weiter, wenn Icons/Emojis angezeigt werden
             _FocusSelectorRing(
               size: discSize,
               ringKey: ringKey,
@@ -175,16 +338,16 @@ class RadialTools extends ConsumerWidget {
               activeColor: activeColor,
             ),
 
-            // 🔹 Mittleres Tool-Icon zum Abwählen
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => ctrl.selectTool(tool),
-              child: _RoundIcon(
-                icon: icon,
-                isActive: true,
-                onTap: () => ctrl.selectTool(tool),
-                ringKey: ringKey,
-              ),
+            // 🔹 Mittleres Tool-Icon/Emoji zum Abwählen mit Longpress-Reset
+            _CenterToolButton(
+              tool: tool,
+              centerWidget: centerWidget,
+              icon: icon,
+              ctrl: ctrl,
+              ringKey: ringKey,
+              onToolReset: onToolReset,
+              onToolResetStart: onToolResetStart,
+              onToolResetEnd: onToolResetEnd,
             ),
           ],
         ),
@@ -199,17 +362,21 @@ class _RoundIcon extends StatelessWidget {
     required this.isActive,
     required this.onTap,
     this.ringKey,
+    this.onLongPress,
+    this.hasStroke = false,
   });
 
   final IconData icon;
   final bool isActive;
   final VoidCallback onTap;
   final GlobalKey<RotaryColorRingState>? ringKey;
+  final VoidCallback? onLongPress;
+  final bool hasStroke;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.deferToChild,
+      behavior: HitTestBehavior.translucent, // Ändere zu translucent, damit Pan-Gesten durchgehen
       onPanStart: ringKey != null
           ? (d) => ringKey!.currentState?.handleExternalPanStart(d)
           : null,
@@ -219,10 +386,12 @@ class _RoundIcon extends StatelessWidget {
       onPanEnd: ringKey != null
           ? (d) => ringKey!.currentState?.handleExternalPanEnd(d)
           : null,
+      onLongPress: onLongPress,
       child: Material(
         type: MaterialType.transparency,
         child: InkResponse(
           onTap: onTap,
+          onLongPress: onLongPress,
           containedInkWell: true,
           customBorder: const CircleBorder(),
           radius: 28,
@@ -233,8 +402,12 @@ class _RoundIcon extends StatelessWidget {
               color: isActive ? const Color(0x33FFFFFF) : const Color(0x151FFFFFF),
               shape: BoxShape.circle,
               border: Border.all(
-                color: isActive ? Colors.white70 : Colors.white24,
-                width: isActive ? 1.6 : 1.0,
+                color: hasStroke 
+                    ? Colors.white 
+                    : (isActive ? Colors.white70 : Colors.white24),
+                width: hasStroke 
+                    ? 2.0 
+                    : (isActive ? 1.6 : 1.0),
               ),
               boxShadow: isActive
                   ? [
@@ -289,20 +462,21 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
 
     // 🎨 PAINT-Modus: Ring komplett mit Kugeln füllen (eine pro Farbe im Ring)
     // WICHTIG: Wenn Paint aktiv ist, KEINE normale Navigation-Kugel anzeigen!
-    debugPrint('🔍 _FocusSelectorRing.build: activeTool = ${state.activeTool}, paint = ${PaletteTool.paint}');
     if (state.activeTool == PaletteTool.paint) {
-      debugPrint('🎨 PAINT-Modus aktiv - normale Navigation-Kugel wird NICHT angezeigt');
       // Wenn Paint aktiv ist, KEINE normale Navigation-Kugel anzeigen
       // Warte auf ringState, wenn es noch nicht verfügbar ist
       if (widget.ringKey != null) {
         final ringState = widget.ringKey!.currentState;
-        debugPrint('🎨 ringState: ${ringState != null ? "vorhanden" : "NULL"}');
         if (ringState != null) {
           // Anzahl der Kugeln: 12 (wie vorher)
           final colorCount = 12;
-          debugPrint('🎨 Paint-Kugeln werden gerendert - $colorCount Kugeln');
           final ringRadius = widget.size / 2 - 80;
           final angleStep = (2 * math.pi) / colorCount;
+          
+          // State einmal außerhalb der Schleife lesen
+          final customColors = state.customColors;
+          final isCustomPaletteActive = state.isCustomPaletteActive;
+          final activeCustomBallIndex = state.activeCustomBallIndex;
 
           return SizedBox(
             width: widget.size,
@@ -326,8 +500,7 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                   final paletteIndex = isRedBall ? 0 : ((index - 1) % ringState.paletteCount);
                   
                   // Custom-Ball zeigt seine individuelle gewählte Farbe, sonst schwarz
-                  final state = ref.watch(radialPaletteProvider);
-                  final ballCustomColor = state.customColors[index]; // Individuelle Farbe für diesen Ball
+                  final ballCustomColor = customColors[index]; // Individuelle Farbe für diesen Ball
                   final ballColor = isCustomBall 
                       ? (ballCustomColor ?? Colors.black)
                       : (isRedBall 
@@ -337,12 +510,12 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                   // 🔴 Aktive Palette hat weißen Rand
                   // Wenn Custom-Palette aktiv ist, sind normale Bälle nicht aktiv
                   final isActive = isRedBall && 
-                      !state.isCustomPaletteActive && 
+                      !isCustomPaletteActive && 
                       ringState.currentPaletteIndex == paletteIndex;
                   // Custom-Ball ist nur aktiv, wenn Custom-Palette aktiv ist und dieser Ball aktiv ist
                   final isCustomActive = isCustomBall && 
-                      state.isCustomPaletteActive && 
-                      state.activeCustomBallIndex == index;
+                      isCustomPaletteActive && 
+                      activeCustomBallIndex == index;
 
                   return Transform.translate(
                     offset: ballOffset,
@@ -456,12 +629,10 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
             ),
           );
         } else {
-          debugPrint('🎨 PAINT-Modus: ringState ist null - leeres Widget zurückgeben');
           // WICHTIG: Auch wenn ringState null ist, KEINE normale Navigation-Kugel anzeigen!
           return SizedBox(width: widget.size, height: widget.size);
         }
       } else {
-        debugPrint('🎨 PAINT-Modus: ringKey ist null - leeres Widget zurückgeben');
         // WICHTIG: Auch wenn ringKey null ist, KEINE normale Navigation-Kugel anzeigen!
         return SizedBox(width: widget.size, height: widget.size);
       }
@@ -469,7 +640,6 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
 
     // Normale Navigation-Modus: Eine weiße Kugel für Target-Navigation
     // WICHTIG: Diese Kugel wird NUR angezeigt, wenn Paint NICHT aktiv ist!
-    debugPrint('📍 Normale Navigation-Modus - Paint ist NICHT aktiv: ${state.activeTool}');
     
     final visible = ctrl.visibleTargets;
     final total = visible.isNotEmpty ? visible.length : 12;

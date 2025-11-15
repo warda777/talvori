@@ -7,9 +7,9 @@ import 'rotary_color_ring.dart';
 import 'radial_palette_tools.dart';
 import 'curved_tool_label.dart';
 import '../../application/palette_state.dart';
-import '../../application/radial_palette_controller.dart' show radialPaletteProvider;
+import '../../application/radial_palette_controller.dart' show radialPaletteProvider, PaletteTool;
 
-class RadialPaletteWheel extends ConsumerWidget {
+class RadialPaletteWheel extends ConsumerStatefulWidget {
   const RadialPaletteWheel({
     super.key,
     required this.ringKey,
@@ -23,6 +23,12 @@ class RadialPaletteWheel extends ConsumerWidget {
     required this.onCenterToggleScope,
     required this.onCenterReset,
     required this.onTargetSelected,
+    this.onToolReset,
+    this.onToolResetStart,
+    this.onToolResetEnd,
+    this.onResetAll, // NEU: Callback für kompletten Reset
+    this.onResetAllStart, // NEU: Callback für Reset-Start
+    this.onResetAllEnd, // NEU: Callback für Reset-Ende
   });
 
   final GlobalKey<RotaryColorRingState> ringKey;
@@ -37,11 +43,35 @@ class RadialPaletteWheel extends ConsumerWidget {
   final VoidCallback onCenterToggleScope;
   final VoidCallback onCenterReset;
   final ValueChanged<PaletteTarget> onTargetSelected;
+  final ValueChanged<PaletteTool>? onToolReset;
+  final void Function(VoidCallback)? onToolResetStart; // Callback erhält onComplete-Funktion
+  final VoidCallback? onToolResetEnd;
+  final VoidCallback? onResetAll; // NEU: Callback für kompletten Reset
+  final VoidCallback? onResetAllStart; // NEU: Callback für Reset-Start
+  final VoidCallback? onResetAllEnd; // NEU: Callback für Reset-Ende
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RadialPaletteWheel> createState() => _RadialPaletteWheelState();
+}
+
+class _RadialPaletteWheelState extends ConsumerState<RadialPaletteWheel> {
+  final ScopeSwitchButtonController _toolResetController = ScopeSwitchButtonController();
+
+  void handleToolResetStart(VoidCallback onComplete) {
+    _toolResetController.startResetAnimation(onComplete);
+    widget.onToolResetStart?.call(onComplete);
+  }
+
+  void handleToolResetEnd() {
+    _toolResetController.endResetAnimation();
+    widget.onToolResetEnd?.call();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final palette = ref.watch(radialPaletteProvider);
     final hasActiveTool = palette.activeTool != null;
+    final activeColor = widget.activeColor;
 
     const double coreSize = 280.0;
     const double toolsRadiusFactor = 0.35;
@@ -87,9 +117,13 @@ class RadialPaletteWheel extends ConsumerWidget {
                 size: 112,
                 ringColor: activeColor,
                 onConfirmColor: () {
-                  onPickColor(activeColor);
+                  widget.onPickColor(activeColor);
                 },
                 isInteractive: !hasActiveTool, // 🔹 nur ohne aktives Tool klickbar
+                toolResetController: _toolResetController,
+                onResetAll: widget.onResetAll, // NEU: Callback für kompletten Reset
+                onResetAllStart: widget.onResetAllStart, // NEU: Callback für Reset-Start
+                onResetAllEnd: widget.onResetAllEnd, // NEU: Callback für Reset-Ende
               ),
             ),
           ),
@@ -99,10 +133,13 @@ class RadialPaletteWheel extends ConsumerWidget {
             width: coreSize,
             height: coreSize,
             child: RadialTools(
-              ringKey: ringKey,
+              ringKey: widget.ringKey,
               discSize: discSize,
-              onPickColor: onPickColor,
+              onPickColor: widget.onPickColor,
               activeColor: activeColor,
+              onToolReset: widget.onToolReset,
+              onToolResetStart: handleToolResetStart,
+              onToolResetEnd: handleToolResetEnd,
             ),
           ),
 
@@ -118,7 +155,7 @@ class RadialPaletteWheel extends ConsumerWidget {
                   alignment: Alignment.center,
                   children: [
                     RotaryColorRing(
-                      key: ringKey,
+                      key: widget.ringKey,
                       absoluteRadius: ringInnerRadius,
                       bubbleSize: bubbleSize,
                       count: 24,
@@ -126,7 +163,9 @@ class RadialPaletteWheel extends ConsumerWidget {
                       customColor: palette.isCustomPaletteActive && palette.activeCustomBallIndex != null
                           ? palette.customColors[palette.activeCustomBallIndex]
                           : null, // Custom-Farbe für Verlauf nur wenn aktiv
-                      onActiveColorChanged: onActiveColorChanged,
+                      selectedIcon: palette.selectedIcon, // Ausgewähltes Icon
+                      selectedEmoji: palette.selectedEmoji, // Ausgewähltes Emoji
+                      onActiveColorChanged: widget.onActiveColorChanged,
                       onPick: (color) {
                         final ctrl = ref.read(radialPaletteProvider.notifier);
                         
@@ -135,11 +174,33 @@ class RadialPaletteWheel extends ConsumerWidget {
 
                         // Farbe auf aktuelles/gelocktes Target anwenden
                         ctrl.applyColorToCurrentTarget(color);
+                        
+                        // 🔴 Lock sofort lösen nach Farbauswahl
+                        ctrl.releaseLockAfterColorPick();
                       },
                       onPickEnd: () {
                         final ctrl = ref.read(radialPaletteProvider.notifier);
                         // 🔴 Finger losgelassen → Lock lösen
                         ctrl.releaseLockAfterColorPick();
+                      },
+                      onPickIcon: (icon) {
+                        final ctrl = ref.read(radialPaletteProvider.notifier);
+                        // Icon auf aktuelles/gelocktes Target anwenden
+                        ctrl.applyIconToCurrentTarget(icon);
+                        // 🔴 Lock lösen nach Icon-Anwendung
+                        ctrl.releaseLockAfterColorPick();
+                      },
+                      onPickEmoji: (emoji) {
+                        final ctrl = ref.read(radialPaletteProvider.notifier);
+                        // Emoji auf aktuelles/gelocktes Target anwenden
+                        ctrl.applyEmojiToCurrentTarget(emoji);
+                        // 🔴 Lock lösen nach Emoji-Anwendung
+                        ctrl.releaseLockAfterColorPick();
+                      },
+                      onClearIconEmoji: () {
+                        final ctrl = ref.read(radialPaletteProvider.notifier);
+                        // Icons/Emojis vom aktuellen/gelockten Target löschen
+                        ctrl.clearIconEmojiFromCurrentTarget();
                       },
                       ringLift: 0.0,
                       hitPadInner: 8.0,

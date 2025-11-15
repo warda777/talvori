@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,7 @@ class CategoryCard extends ConsumerStatefulWidget {
   final String? paletteId; // Eindeutige ID für Farb-Overrides
   final GlobalKey? titleKey; // Key für Titel-Target
   final GlobalKey? countKey; // Key für Counter-Target
+  final GlobalKey? iconKey; // NEU: Key für Icon/Emoji-Target
 
   const CategoryCard({
     required this.sectionKey,
@@ -27,6 +29,7 @@ class CategoryCard extends ConsumerStatefulWidget {
     this.paletteId,
     this.titleKey,
     this.countKey,
+    this.iconKey, // NEU
     super.key,
   });
 
@@ -87,6 +90,9 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     final countColor = overrides?.countColor ?? const Color(0xFFF1C86B);
     final strokeColor = overrides?.strokeColor ?? defaultStrokeColor;
     final fillColor = overrides?.fillColor ?? const Color(0xFF040404);
+    final icon = overrides?.icon;
+    final emoji = overrides?.emoji;
+    final iconColor = overrides?.iconColor; // NEU: Icon-Farbe (nur wenn gesetzt)
     
     // Fokus-IDs auslesen
     final palette = ref.watch(radialPaletteProvider);
@@ -95,6 +101,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     final baseId = widget.paletteId ?? 'wordHub.${widget.sectionKey}.${widget.sub.key}';
     final isTitleFocused = focusedIds.contains('$baseId.title');
     final isCountFocused = focusedIds.contains('$baseId.count');
+    final isIconFocused = focusedIds.contains('$baseId.icon'); // NEU: Icon-Fokus prüfen
 
     return Material(
       color: Colors.transparent,
@@ -139,33 +146,55 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    loading
-                        ? const ShimmerBox(height: 18, borderRadius: 6)
-                        : _buildTitle(t, titleColor, isTitleFocused, ref),
-                    const Spacer(),
-                    if (loading)
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: SizedBox(
-                          width: 36,
-                          child: const ShimmerBox(
-                            height: 14,
-                            borderRadius: 6,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final cardSize = math.min(constraints.maxWidth, constraints.maxHeight);
+                  final iconSize = cardSize * 0.67; // Ca. 2/3 der Kachel
+                  
+                  return Stack(
+                    children: [
+                      // Icon/Emoji in der Mitte (hinter Text/Counter)
+                      if (icon != null || emoji != null)
+                        Positioned.fill(
+                          child: Center(
+                            child: KeyedSubtree(
+                              key: widget.iconKey, // NEU: Key für Icon-Target
+                              child: _buildIcon(icon, emoji, iconColor, iconSize, isIconFocused),
+                            ),
                           ),
                         ),
-                      )
-                      else if (stats != null)
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: _buildCount(stats.total, countColor, isCountFocused, ref),
+                      // Text/Counter oben drauf
+                      Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            loading
+                                ? const ShimmerBox(height: 18, borderRadius: 6)
+                                : _buildTitle(t, titleColor, isTitleFocused, ref),
+                            const Spacer(),
+                            if (loading)
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: SizedBox(
+                                  width: 36,
+                                  child: const ShimmerBox(
+                                    height: 14,
+                                    borderRadius: 6,
+                                  ),
+                                ),
+                              )
+                              else if (stats != null)
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: _buildCount(stats.total, countColor, isCountFocused, ref),
+                              ),
+                          ],
+                        ),
                       ),
-                  ],
-                ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -199,6 +228,68 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     }
 
     return title;
+  }
+
+  Widget _buildIcon(IconData? icon, String? emoji, Color? iconColor, double iconSize, bool isIconFocused) {
+    Widget iconWidget = icon != null
+        ? Icon(
+            icon,
+            color: iconColor ?? Colors.white, // Standard weiß für Icons
+            size: iconSize,
+          )
+        : iconColor != null
+            ? Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Originales Emoji mit reduzierter Opazität als Basis
+                  Text(
+                    emoji!,
+                    style: TextStyle(
+                      fontSize: iconSize,
+                      color: Colors.white.withOpacity(0.3), // Leicht transparent für Konturen
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  // Gefärbtes Emoji darüber mit BlendMode.modulate
+                  ColorFiltered(
+                    // BlendMode.modulate multipliziert die Farben, behält aber die Struktur
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.modulate),
+                    child: Text(
+                      emoji!,
+                      style: TextStyle(
+                        fontSize: iconSize,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                // NEU: Kein ColorFilter, wenn iconColor nicht gesetzt ist
+                emoji!,
+                style: TextStyle(
+                  fontSize: iconSize,
+                ),
+                textAlign: TextAlign.center,
+              );
+
+    // NEU: Border wenn Icon fokussiert ist
+    if (isIconFocused) {
+      iconWidget = Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white,
+            width: 2,
+          ),
+        ),
+        child: iconWidget,
+      );
+    }
+
+    return iconWidget;
   }
 
   Widget _buildCount(int count, Color countColor, bool isCountFocused, WidgetRef ref) {

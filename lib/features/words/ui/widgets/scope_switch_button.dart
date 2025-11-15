@@ -5,14 +5,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/radial_palette_controller.dart';
 
+class ScopeSwitchButtonController {
+  void Function(VoidCallback)? _startResetAnimation;
+  VoidCallback? _endResetAnimation;
+
+  void setCallbacks(void Function(VoidCallback) start, VoidCallback end) {
+    _startResetAnimation = start;
+    _endResetAnimation = end;
+  }
+
+  void startResetAnimation(VoidCallback onComplete) => _startResetAnimation?.call(onComplete);
+  void endResetAnimation() => _endResetAnimation?.call();
+}
+
 class ScopeSwitchButton extends ConsumerStatefulWidget {
   const ScopeSwitchButton({
     super.key,
     this.size = 72,
-    this.holdDuration = const Duration(milliseconds: 2500),
+    this.holdDuration = const Duration(milliseconds: 3000), // 3 Sekunden
     this.onConfirmColor,
     this.ringColor,
     this.isInteractive = true,
+    this.toolResetController,
+    this.onResetAll, // NEU: Callback für kompletten Reset
+    this.onResetAllStart, // NEU: Callback für Reset-Start
+    this.onResetAllEnd, // NEU: Callback für Reset-Ende
   });
 
   final double size;
@@ -20,6 +37,10 @@ class ScopeSwitchButton extends ConsumerStatefulWidget {
   final VoidCallback? onConfirmColor;
   final Color? ringColor;
   final bool isInteractive;
+  final ScopeSwitchButtonController? toolResetController;
+  final VoidCallback? onResetAll; // NEU: Callback für kompletten Reset
+  final VoidCallback? onResetAllStart; // NEU: Callback für Reset-Start
+  final VoidCallback? onResetAllEnd; // NEU: Callback für Reset-Ende
 
   @override
   ConsumerState<ScopeSwitchButton> createState() => _ScopeSwitchButtonState();
@@ -35,31 +56,92 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
     vsync: this,
     duration: const Duration(milliseconds: 260),
   );
+  late final AnimationController _toolReset = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3000), // 3 Sekunden
+  );
   bool _holding = false;
+  bool _toolResetting = false;
   double _angleTurns = 0.0;
+  VoidCallback? _onToolResetComplete;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listener für Tool-Reset Animation Completion
+    _toolReset.addStatusListener((status) {
+      if (status == AnimationStatus.completed && _toolResetting) {
+        // Animation bei 100% → automatisch Reset ausführen
+        _onToolResetComplete?.call();
+        setState(() {
+          _toolResetting = false;
+        });
+        _toolReset.reset();
+      }
+    });
+    
+    // Listener für All/One Reset Animation Completion
+    _hold.addStatusListener((status) {
+      if (status == AnimationStatus.completed && _holding) {
+        // Animation bei 100% → automatisch Reset ausführen
+        HapticFeedback.heavyImpact();
+        ref.read(radialPaletteProvider.notifier).resetAll();
+        widget.onResetAll?.call();
+        widget.onResetAllEnd?.call();
+        setState(() {
+          _holding = false;
+        });
+        _hold.reset();
+      }
+    });
+    
+    // Verbinde Controller mit internen Methoden
+    widget.toolResetController?.setCallbacks(
+      (onComplete) {
+        if (_toolResetting) return;
+        _onToolResetComplete = onComplete;
+        setState(() {
+          _toolResetting = true;
+        });
+        _toolReset.forward(from: 0); // Einmalig, nicht wiederholt
+      },
+      () {
+        if (!_toolResetting) return;
+        setState(() {
+          _toolResetting = false;
+        });
+        _toolReset.stop();
+        _toolReset.reset();
+        _onToolResetComplete = null;
+      },
+    );
+  }
 
   @override
   void dispose() {
     _hold.dispose();
     _spin.dispose();
+    _toolReset.dispose();
     super.dispose();
   }
 
   void _startHold(LongPressStartDetails _) {
     _holding = true;
-    _hold.forward(from: 0);
+    _hold.forward(from: 0); // Einmalig, nicht wiederholt
     HapticFeedback.mediumImpact();
+    // NEU: Reset-Start Callback aufrufen
+    widget.onResetAllStart?.call();
   }
 
   Future<void> _endHold([_]) async {
     if (!_holding) return;
     _holding = false;
-    if (_hold.status == AnimationStatus.completed) {
-      HapticFeedback.heavyImpact();
-      ref.read(radialPaletteProvider.notifier).resetAll();
-    } else {
+    // Wenn Animation noch nicht abgeschlossen, abbrechen
+    if (_hold.status != AnimationStatus.completed) {
       await _hold.reverse();
+      widget.onResetAllEnd?.call();
     }
+    // Wenn Animation bereits abgeschlossen, wurde Reset bereits automatisch ausgeführt
   }
 
   Future<void> _tap() async {
@@ -100,6 +182,10 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
   }
 
   Widget _buildVisual(BuildContext context, bool isAll, String label, double d, Color ringColor) {
+    // Text-Styles für ALL/ONE
+    // Wenn Tool aktiv: aktives Element größer und in Goldfarbe, sonst beide gleich groß
+    const goldColor = Color(0xFFFFC66A); // Gold wie An/Aus Button unter "Alles freischalten"
+    
     final children = <Widget>[
       Container(
         width: d,
@@ -117,6 +203,20 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
           ],
         ),
       ),
+      // NEU: Animierter Reset-Kreis für Tool-Reset
+      if (_toolResetting)
+        AnimatedBuilder(
+          animation: _toolReset,
+          builder: (context, child) {
+            return CustomPaint(
+              size: Size(d, d),
+              painter: _ResetCirclePainter(
+                progress: _toolReset.value,
+                color: goldColor, // Gold statt ringColor
+              ),
+            );
+          },
+        ),
       SizedBox(
         width: d,
         height: d,
@@ -151,10 +251,6 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
       ),
     ];
 
-    // Text-Styles für ALL/ONE
-    // Wenn Tool aktiv: aktives Element größer und in Goldfarbe, sonst beide gleich groß
-    const goldColor = Color(0xFFFFC66A); // Gold wie An/Aus Button unter "Alles freischalten"
-    
     // Mittleren Label-Text nur anzeigen, wenn Button interaktiv ist (kein Tool aktiv)
     if (widget.isInteractive) {
       children.add(
@@ -338,4 +434,38 @@ class _SpinnerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SpinnerPainter old) => old.color != color;
+}
+
+class _ResetCirclePainter extends CustomPainter {
+  _ResetCirclePainter({required this.progress, required this.color});
+
+  final double progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = size.width / 2 - 3;
+    final c = Offset(size.width / 2, size.height / 2);
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round
+      ..color = color.withOpacity(.95);
+
+    // Zeichne einen Kreis, der sich einmal um den Button dreht
+    final start = -math.pi / 2;
+    final sweep = 2 * math.pi * progress.clamp(0.0, 1.0);
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      start,
+      sweep,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ResetCirclePainter old) =>
+      old.progress != progress || old.color != color;
 }
