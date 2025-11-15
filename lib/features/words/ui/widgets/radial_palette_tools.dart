@@ -331,18 +331,67 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                       ? (customColor ?? Colors.black)
                       : ringState.getPaletteColor(paletteIndex);
                   
-                  // 🔴 Aktive Palette hat weißen Rand (Custom-Ball nie aktiv im Sinne von Palette)
-                  final isActive = !isCustomBall && ringState.currentPaletteIndex == paletteIndex;
-                  final isCustomActive = isCustomBall && customColor != null;
+                  // 🔴 Aktive Palette hat weißen Rand
+                  // Wenn Custom-Palette aktiv ist, sind normale Bälle nicht aktiv
+                  final isActive = !isCustomBall && 
+                      !state.isCustomPaletteActive && 
+                      ringState.currentPaletteIndex == paletteIndex;
+                  // Custom-Ball ist nur aktiv, wenn Custom-Palette aktiv ist (nicht dauerhaft)
+                  final isCustomActive = isCustomBall && state.isCustomPaletteActive;
 
                   return Transform.translate(
                     offset: ballOffset,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
-                        // 🔴 Kugel auf 12 Uhr → Custom-Farbwähler öffnen
+                        // 🔴 Custom-Ball: Normaler Tap = nur selektieren (wie andere Bälle)
+                        if (isCustomBall) {
+                          // Custom-Palette aktivieren (Farbkreis zeigt Verlauf basierend auf Custom-Farbe)
+                          // Custom-Farbe bleibt erhalten, Farbkreis zeigt Verlauf
+                          // Wenn keine Custom-Farbe gesetzt ist, öffne Dialog
+                          if (customColor == null && widget.onPickColor != null) {
+                            final currentColor = widget.activeColor ?? const Color(0xFFFFC66A);
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => CustomColorPickerDialog(
+                                initialColor: currentColor,
+                                onColorChanged: (color) {
+                                  widget.onPickColor!(color);
+                                  // Custom-Farbe speichern
+                                  final ctrl = ref.read(radialPaletteProvider.notifier);
+                                  ctrl.setCustomColor(color);
+                                  // Farbe auch direkt auf das Target anwenden (verzögert, um Provider-Fehler zu vermeiden)
+                                  Future.microtask(() {
+                                    ctrl.applyColorToCurrentTarget(color);
+                                  });
+                                },
+                              ),
+                            );
+                          } else {
+                            // Custom-Farbe ist gesetzt → Custom-Palette aktivieren
+                            final ctrl = ref.read(radialPaletteProvider.notifier);
+                            // Aktiviere Custom-Palette (Farbkreis zeigt Custom-Verlauf)
+                            ctrl.setCustomPaletteActive(true);
+                            if (customColor != null) {
+                              widget.onPickColor?.call(customColor);
+                            }
+                            HapticFeedback.selectionClick();
+                          }
+                        } else {
+                          // 🔴 Normale Palette auf dem Ring setzen
+                          // Custom-Farbe NICHT löschen - sie bleibt gespeichert
+                          // Aber Custom-Palette deaktivieren, damit normale Palette angezeigt wird
+                          final ctrl = ref.read(radialPaletteProvider.notifier);
+                          ctrl.setCustomPaletteActive(false);
+                          ringState.setPaletteIndex(paletteIndex);
+                          HapticFeedback.selectionClick();
+                        }
+                      },
+                      onLongPress: () {
+                        // 🔴 Custom-Ball: Longpress = Custom-Dialog öffnen
                         if (isCustomBall && widget.onPickColor != null) {
                           final currentColor = customColor ?? widget.activeColor ?? const Color(0xFFFFC66A);
+                          HapticFeedback.mediumImpact();
                           showDialog(
                             context: context,
                             builder: (dialogContext) => CustomColorPickerDialog(
@@ -359,15 +408,6 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                               },
                             ),
                           );
-                        } else {
-                          // 🔴 Normale Palette auf dem Ring setzen
-                          // Custom-Farbe löschen wenn normale Palette gewählt wird
-                          final ctrl = ref.read(radialPaletteProvider.notifier);
-                          if (ctrl.state.customColor != null) {
-                            ctrl.state = ctrl.state.copyWith(clearCustomColor: true);
-                          }
-                          ringState.setPaletteIndex(paletteIndex);
-                          HapticFeedback.selectionClick();
                         }
                       },
                       child: Container(
@@ -375,7 +415,9 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                         height: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isCustomBall ? Colors.black : ballColor,
+                          color: isCustomBall 
+                              ? (customColor ?? Colors.black)
+                              : ballColor,
                           border: Border.all(
                             color: isCustomActive || isActive
                                 ? Colors.white 
@@ -394,12 +436,11 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                                 blurRadius: 12,
                                 spreadRadius: 2,
                               ),
-                            if (!isCustomBall)
-                              BoxShadow(
-                                color: ballColor.withOpacity(0.6),
-                                blurRadius: 10,
-                                spreadRadius: 1.5,
-                              ),
+                            BoxShadow(
+                              color: (isCustomBall ? (customColor ?? Colors.black) : ballColor).withOpacity(0.6),
+                              blurRadius: 10,
+                              spreadRadius: 1.5,
+                            ),
                           ],
                         ),
                         child: isCustomBall
@@ -407,7 +448,12 @@ class _FocusSelectorRingState extends ConsumerState<_FocusSelectorRing> {
                                 child: Text(
                                   'C',
                                   style: TextStyle(
-                                    color: customColor ?? Colors.white,
+                                    // Wenn Custom-Farbe gesetzt ist, verwende kontrastierende Farbe
+                                    color: customColor != null
+                                        ? (customColor!.computeLuminance() > 0.5 
+                                            ? Colors.black 
+                                            : Colors.white)
+                                        : Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
