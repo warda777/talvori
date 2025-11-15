@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 /// All = alles einfärben, One = jeweils nur ein Element
 enum PaletteScope { all, one }
@@ -122,12 +123,69 @@ class RadialPaletteState {
 }
 
 class RadialPaletteController extends StateNotifier<RadialPaletteState> {
-  RadialPaletteController() : super(const RadialPaletteState());
+  RadialPaletteController() : super(const RadialPaletteState()) {
+    _loadCustomColors();
+  }
 
   int _lastFocusVis = -1; // neu
   
   /// Callback, der die aktuell fokussierten Target-IDs meldet
   void Function(Set<String> ids)? onFocusChange;
+
+  static const String _customColorsKey = 'radial_palette_custom_colors';
+
+  /// Lädt die gespeicherten Custom-Farben aus SharedPreferences
+  Future<void> _loadCustomColors() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final colorsJson = prefs.getString(_customColorsKey);
+      
+      if (colorsJson != null) {
+        final Map<String, dynamic> colorsMap = json.decode(colorsJson);
+        final Map<int, Color> loadedColors = {};
+        
+        colorsMap.forEach((key, value) {
+          final index = int.tryParse(key);
+          if (index != null && value is String) {
+            // Hex-String zu Color konvertieren
+            final hexString = value.replaceFirst('#', '').padLeft(6, '0');
+            final colorValue = int.tryParse(hexString, radix: 16);
+            if (colorValue != null) {
+              loadedColors[index] = Color(colorValue | 0xFF000000); // Alpha auf FF setzen
+            }
+          }
+        });
+        
+        if (loadedColors.isNotEmpty) {
+          state = state.copyWith(customColors: loadedColors);
+          debugPrint('[RadialPalette] Loaded ${loadedColors.length} custom colors from storage');
+        }
+      }
+    } catch (e) {
+      debugPrint('[RadialPalette] Error loading custom colors: $e');
+    }
+  }
+
+  /// Speichert die Custom-Farben in SharedPreferences
+  Future<void> _saveCustomColors(Map<int, Color> colors) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final Map<String, String> colorsMap = {};
+      
+      colors.forEach((index, color) {
+        // Color zu Hex-String konvertieren (ohne Alpha)
+        final argb = color.toARGB32();
+        final hex = (argb & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase();
+        colorsMap[index.toString()] = '#$hex';
+      });
+      
+      final colorsJson = json.encode(colorsMap);
+      await prefs.setString(_customColorsKey, colorsJson);
+      debugPrint('[RadialPalette] Saved ${colors.length} custom colors to storage');
+    } catch (e) {
+      debugPrint('[RadialPalette] Error saving custom colors: $e');
+    }
+  }
 
   // 🔴 Kugel-Lock toggeln (Tap auf die Kugel)
   void toggleFocusLock() {
@@ -166,6 +224,8 @@ class RadialPaletteController extends StateNotifier<RadialPaletteState> {
       activeCustomBallIndex: ballIndex,
       isCustomPaletteActive: true,
     );
+    // Farben dauerhaft speichern
+    _saveCustomColors(updatedColors);
   }
 
   // 🔴 Custom-Palette aktivieren/deaktivieren
