@@ -21,12 +21,32 @@ class SrsModeToggleWithHint extends ConsumerStatefulWidget {
 class _SrsModeToggleWithHintState extends ConsumerState<SrsModeToggleWithHint> {
   bool _show = false;
   Timer? _timer;
+  bool _hasShownInitialHint = false;
 
   void _flash() {
     _timer?.cancel();
     setState(() => _show = true);
     _timer = Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _show = false);
+    });
+  }
+
+  void _showInitialHint() {
+    if (_hasShownInitialHint) return;
+    _hasShownInitialHint = true;
+    _timer?.cancel();
+    setState(() => _show = true);
+    _timer = Timer(const Duration(seconds: 10), () {
+      if (mounted) setState(() => _show = false);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Zeige den Hinweis automatisch beim ersten Betreten für 10 Sekunden
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showInitialHint();
     });
   }
 

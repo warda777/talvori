@@ -1,6 +1,6 @@
 # Talvori – Data Dictionary (public)
 
-Generiert: 2025-11-15 15:17
+Generiert: 2025-12-27 14:10
 
 ## public.captures
 

@@ -61,7 +61,7 @@ class LearningStatusPanel extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
           _OverallProgressBar(percent: overallPercent, label: overallLabel),
         ],
       ),
@@ -110,12 +110,15 @@ class _OverallProgressBar extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Overall Progress',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(color: Colors.white)),
-          const SizedBox(height: 8),
+          Transform.translate(
+            offset: const Offset(0, 16),
+            child: Text('Overall Progress',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: Colors.white)),
+          ),
+          const SizedBox(height: 16),
           Row(children: [
             Expanded(
               child: ClipRRect(                            // ⬅️ NEU

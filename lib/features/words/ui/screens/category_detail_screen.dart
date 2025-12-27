@@ -119,7 +119,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
 
     final cats = s.categories;
     final selIndex = s.selectedIndex;
-    final currentId = cats.isNotEmpty ? cats[selIndex].id : '';
+    // Sicherstellen, dass selIndex gültig ist
+    final validSelIndex = cats.isNotEmpty && selIndex >= 0 && selIndex < cats.length 
+        ? selIndex 
+        : 0;
+    final currentId = cats.isNotEmpty && validSelIndex < cats.length 
+        ? cats[validSelIndex].id 
+        : (widget.categoryId ?? '');
 
     // Fix 4: Loader nur zeigen, wenn wirklich leer
     if (loading && s.categories.isEmpty) {
@@ -136,127 +142,140 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
         child: Stack(
           children: [
             Column(
-                  children: [
-            // FIX: fester Header – kein Flexible
-            SizedBox(
-              height: WordsLayout.topCapsuleH,
-              child: CategoryHeaderCapsule(
-                height: WordsLayout.topCapsuleH,
-                title: cats.isNotEmpty ? cats[selIndex].name : widget.title,
-                vocabsCount: s.vocabsTotal,
-                categories: cats.map((e)=>e.name).toList(),
-                selectedIndex: cats.isEmpty ? 0 : selIndex.clamp(0, cats.length - 1),
-                onWheelChanged: (idx, _) => ref.read(categoryDetailControllerProvider.notifier).switchTo(idx),
-                      onBack: () => Navigator.of(context).pop(),
-                      onVocabs: () {
-                        if (currentId.isEmpty) return;
-                        final currentName = cats.isNotEmpty ? cats[selIndex].name : widget.title;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => WordListScreen(
-                              filter: widget.listFilter,
-                              overrideCategoryId: currentId,
-                              overrideCategoryLabel: currentName,
-                            ),
+              children: [
+                // FIX: fester Header
+                SizedBox(
+                  height: WordsLayout.topCapsuleH,
+                  child: CategoryHeaderCapsule(
+                    height: WordsLayout.topCapsuleH,
+                    title: cats.isNotEmpty && validSelIndex < cats.length ? cats[validSelIndex].name : widget.title,
+                    vocabsCount: s.vocabsTotal,
+                    categories: cats.map((e)=>e.name).toList(),
+                    selectedIndex: cats.isEmpty ? 0 : validSelIndex.clamp(0, cats.length - 1),
+                    onWheelChanged: (idx, _) => ref.read(categoryDetailControllerProvider.notifier).switchTo(idx),
+                    onBack: () => Navigator.of(context).pop(),
+                    onVocabs: () {
+                      if (currentId.isEmpty) return;
+                      final currentName = cats.isNotEmpty && validSelIndex < cats.length ? cats[validSelIndex].name : widget.title;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => WordListScreen(
+                            filter: widget.listFilter,
+                            overrideCategoryId: currentId,
+                            overrideCategoryLabel: currentName,
                           ),
-                        );
-                      },
-                        onAdd: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Add tapped')),
-                          );
-                        },
-                        onSettings: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Settings tapped')),
-                          );
-                        },
-                // Offsets wie im Learn-Mode:
-                wheelOffsetX: WordsLayout.wheelOffsetX,
-                wheelOffsetY: WordsLayout.wheelOffsetY,
-                rowOffsetX: WordsLayout.rowOffsetX,
-                rowOffsetY: WordsLayout.rowOffsetY,
-                vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
-                vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
-                rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
-                rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
-                wheelBottomGap: WordsLayout.wheelBottomGap,
-                accentColor: kAccentBlue,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                trailingRightBelow: const SrsModeToggleWithHint(),
-              ),
-            ),
-
-            const SizedBox(height: WordsLayout.gapBelowTop),
-
-            // FIX: Mittel + Levels scrollbar machen, damit nix überläuft
-          Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
-            child: Column(
-                        children: [
-                    LearningStatusPanel(
-                                percent: dailyPercent,
-                      percentLabel: '${(dailyPercent*100).round()}%',
-                      newCount: s.dailyNew,
-                      repeatsCount: s.dailyRepeats,
-                      repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
-                      overallPercent: overallPercent,
-                      overallLabel: overallLabel,
-                          ),
-
-                          const SizedBox(height: WordsLayout.gapAboveBottom),
-                          Transform.translate(
-                            offset: const Offset(0, -24), // 🔼 nach oben (spiel mit -16…-32)
-                            child: SizedBox(
-                              height: WordsLayout.levelsCardH,
-                              child: LevelsCard(
-                                height: WordsLayout.levelsCardH,
-                                  stages: stages,
-                                  goalPerStage: 100,
-                                  mode: mode,
-                                  selectingSingle: selecting,                         // ← NEU
-                                  visibleMask: mask,                                 // ← NEU
-                                  onSelectSingleStage: (stg) {                        // ← NEU
-                                    ref.read(singleStageProvider.notifier).state = stg;      // 1..5
-                                    ref.read(selectingSingleProvider.notifier).state = false; // Pulse stoppen
-                                  },
-                                  onModeChanged: (m) async {
-                                    ref.read(levelSelectionProvider.notifier).state = m;
-                                    if (m == LevelSelectionMode.single) {
-                                      // 1× sequentiell blinken (S1..S5), dann Idle-Pulse starten
-                                      // await _switchCtrl.blinkSequentialS1toS5();     // du hast den Controller schon in LevelsCard; hier aufrufen, falls exposed
-                                      ref.read(selectingSingleProvider.notifier).state = true;
-                                    } else {
-                                      ref.read(selectingSingleProvider.notifier).state = false;
-                                    }
-                                  },
-                                  titleOffsetY: -15, // Buttons höher positionieren
-                                  onStartPressed: () async {
-                            if (currentId.isEmpty) return;
-                            await ref.read(categoryDetailControllerProvider.notifier).seedForStart(currentId);
-                            if (mounted) {
-                              await Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (_) => LearnModeScreen(
-                                          categoryId: currentId,
-                                  title: cats.isNotEmpty ? cats[selIndex].name : widget.title,
-                                  navigationOrigin: LearnNavigationOrigin.category(
-                                    categoryId: currentId,
-                                    categoryTitle: cats.isNotEmpty ? cats[selIndex].name : widget.title,
-                                  ),
-                                ),
-                              ));
-                              await ref.read(categoryDetailControllerProvider.notifier).reload();
-                            }
-                          },
                         ),
-                      ),
-                      ),
-                    ],
+                      );
+                    },
+                    onAdd: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Add tapped')),
+                      );
+                    },
+                    onSettings: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Settings tapped')),
+                      );
+                    },
+                    // Offsets wie im Learn-Mode:
+                    wheelOffsetX: WordsLayout.wheelOffsetX,
+                    wheelOffsetY: WordsLayout.wheelOffsetY,
+                    rowOffsetX: WordsLayout.rowOffsetX,
+                    rowOffsetY: WordsLayout.rowOffsetY,
+                    vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+                    vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+                    rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+                    rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+                    wheelBottomGap: WordsLayout.wheelBottomGap,
+                    accentColor: kAccentBlue,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    trailingRightBelow: const SrsModeToggleWithHint(),
                   ),
-              ),
-            ),
-          ],
+                ),
+
+                const SizedBox(height: WordsLayout.gapBelowTop),
+
+                // Daily Progress - mit reduziertem Padding
+                Flexible(
+                  child: LearningStatusPanel(
+                    percent: dailyPercent,
+                    percentLabel: '${(dailyPercent*100).round()}%',
+                    newCount: s.dailyNew,
+                    repeatsCount: s.dailyRepeats,
+                    repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
+                    overallPercent: overallPercent,
+                    overallLabel: overallLabel,
+                  ),
+                ),
+
+                // Reduzierter Abstand zwischen Overall Progress und Level-Selection-Buttons
+                const SizedBox(height: 17),
+
+                // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
+                SizedBox(
+                  height: WordsLayout.levelsCardH,
+                  child: LevelsCard(
+                    height: WordsLayout.levelsCardH,
+                    stages: stages,
+                    goalPerStage: 100,
+                    mode: mode,
+                    selectingSingle: selecting,
+                    visibleMask: mask,
+                    onSelectSingleStage: (stg) {
+                      ref.read(singleStageProvider.notifier).state = stg;
+                      ref.read(selectingSingleProvider.notifier).state = false;
+                    },
+                    onModeChanged: (m) async {
+                      ref.read(levelSelectionProvider.notifier).state = m;
+                      if (m == LevelSelectionMode.single) {
+                        ref.read(selectingSingleProvider.notifier).state = true;
+                      } else {
+                        ref.read(selectingSingleProvider.notifier).state = false;
+                      }
+                    },
+                    titleOffsetY: -15,
+                    onStartPressed: () async {
+                      if (currentId.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Kategorie konnte nicht geladen werden')),
+                        );
+                        return;
+                      }
+                      try {
+                        await ref.read(categoryDetailControllerProvider.notifier).seedForStart(currentId);
+                        if (mounted) {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => LearnModeScreen(
+                              categoryId: currentId,
+                              title: cats.isNotEmpty && validSelIndex < cats.length 
+                                  ? cats[validSelIndex].name 
+                                  : widget.title,
+                              navigationOrigin: LearnNavigationOrigin.category(
+                                categoryId: currentId,
+                                categoryTitle: cats.isNotEmpty && validSelIndex < cats.length 
+                                    ? cats[validSelIndex].name 
+                                    : widget.title,
+                              ),
+                            ),
+                          ));
+                          if (mounted) {
+                            await ref.read(categoryDetailControllerProvider.notifier).reload();
+                          }
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Fehler beim Starten: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+                
+                // Minimales Padding am Ende
+                const SizedBox(height: 5),
+              ],
             ),
 
             if (srs.counting) Positioned.fill(
