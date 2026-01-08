@@ -15,8 +15,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final bool selectedHighlight; // NEU: für Single-Modus Hervorhebung
   final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
   final Widget Function(Widget knob)? knobWrapper; // optionaler Wrapper nur um den Knopf
-  final bool isLocked;              // ← NEU
-  final VoidCallback? onTap;        // ← NEU
+  final bool isLocked;              // ← NEU: nur für Opacity (Switch ausgrauen)
 
   const VerticalStageSwitch({
     super.key,
@@ -34,7 +33,6 @@ class VerticalStageSwitch extends StatelessWidget {
     this.innerStrokeColor,
     this.knobWrapper,
     this.isLocked = false,          // ← NEU (Default)
-    this.onTap,                     // ← NEU
   });
 
   double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
@@ -50,152 +48,131 @@ class VerticalStageSwitch extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          GestureDetector(
-            onTap: onTap, // ← nur gesetzt, wenn übergeben (bei S0)
-            child: Stack(
-              children: [
-                // Die Switch selbst mit Opacity (wird ausgebleicht)
-                Opacity(
-                  opacity: isLocked ? 0.45 : 1.0,     // 45% sichtbar, Ursprung bleibt erkennbar
-                  child: Container(
-                    width: WordsUIConstants.stageSwitchWidth,
-                    height: WordsUIConstants.stageSwitchHeight,
-                    decoration: BoxDecoration(
-                      color: outerColor,
-                      borderRadius: BorderRadius.circular(WordsUIConstants.stageSwitchRadius),
-                      boxShadow: badgeGlow,
-                      border: Border.all(color: Colors.black.withOpacity(0.2), width: 1),
-                    ),
-                    child: Stack(
-                      children: [
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 300),
-                          left: 2,
-                          right: 2,
-                          top: _getSwitchPosition(),
-                          child: pulseAnimation != null
-                              ? AnimatedBuilder(
-                                  animation: pulseAnimation!,
-                                  builder: (context, child) {
-                                    final double soft = 0.15 + 0.35 * pulseAnimation!.value; // 0.15..0.5
-                                    final Color glowColor = const Color(0xFF00FF88);
-                                    final Color accentColor = const Color(0xFF6FD3FF); // hellblau für "gewählt"
-                                    final List<BoxShadow>? boxShadow = glow
-                                        ? [
-                                            BoxShadow(
-                                              color: glowColor.withOpacity(0.85),
-                                              blurRadius: 16,
-                                              spreadRadius: 1.5,
-                                            ),
-                                          ]
-                                        : (selectedHighlight
-                                            ? [
-                                                BoxShadow(
-                                                  color: accentColor.withOpacity(0.5),
-                                                  blurRadius: 14,
-                                                  spreadRadius: 1,
-                                                ),
-                                              ]
-                                            : [
-                                                BoxShadow(
-                                                  color: glowColor.withOpacity(soft),
-                                                  blurRadius: 18,
-                                                  spreadRadius: 2.0,
-                                                ),
-                                              ]);
-
-                                    final Widget knobCore = AnimatedContainer(
-                                      duration: const Duration(milliseconds: 120),
-                                      width: 38,
-                                      height: 52,
-                                      decoration: BoxDecoration(
-                                        color: innerColor,
-                                        borderRadius: BorderRadius.circular(21),
-                                        border: glow
-                                            ? Border.all(color: glowColor, width: 1)
-                                            : (selectedHighlight
-                                                ? Border.all(color: accentColor, width: 1)
-                                                : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
-                                        boxShadow: boxShadow,
+          // Die Switch selbst mit Opacity (wird ausgegraut wenn gelockt)
+          Opacity(
+            opacity: isLocked ? 0.45 : 1.0,     // 45% sichtbar, Ursprung bleibt erkennbar
+            child: Container(
+              width: WordsUIConstants.stageSwitchWidth,
+              height: WordsUIConstants.stageSwitchHeight,
+              decoration: BoxDecoration(
+                color: outerColor,
+                borderRadius: BorderRadius.circular(WordsUIConstants.stageSwitchRadius),
+                boxShadow: badgeGlow,
+                border: Border.all(color: Colors.black.withOpacity(0.2), width: 1),
+              ),
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    left: 2,
+                    right: 2,
+                    top: _getSwitchPosition(),
+                    child: pulseAnimation != null
+                        ? AnimatedBuilder(
+                            animation: pulseAnimation!,
+                            builder: (context, child) {
+                              final double soft = 0.15 + 0.35 * pulseAnimation!.value; // 0.15..0.5
+                              final Color glowColor = const Color(0xFF00FF88);
+                              final Color accentColor = const Color(0xFF6FD3FF); // hellblau für "gewählt"
+                              final List<BoxShadow>? boxShadow = glow
+                                  ? [
+                                      BoxShadow(
+                                        color: glowColor.withOpacity(0.85),
+                                        blurRadius: 16,
+                                        spreadRadius: 1.5,
                                       ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        '$count',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    );
-                                    final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
-                                    return knob;
-                                  },
-                                )
-                              : () {
-                                  final Widget knobCore = AnimatedContainer(
-                                  duration: const Duration(milliseconds: 120),
-                                  width: 38,
-                                  height: 52,
-                                  decoration: BoxDecoration(
-                                    color: innerColor,
-                                    borderRadius: BorderRadius.circular(21),
-                                    border: glow
-                                        ? Border.all(color: const Color(0xFF00FF88), width: 1)
-                                        : (selectedHighlight
-                                            ? Border.all(color: const Color(0xFF6FD3FF), width: 1)
-                                            : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
-                                    boxShadow: glow
-                                        ? [
-                                            BoxShadow(
-                                              color: const Color(0xFF00FF88).withOpacity(0.85), // Grün-Glow
-                                              blurRadius: 16,
-                                              spreadRadius: 1.5,
-                                            ),
-                                          ]
-                                        : (selectedHighlight
-                                            ? [
-                                                BoxShadow(
-                                                  color: const Color(0xFF6FD3FF).withOpacity(0.5),
-                                                  blurRadius: 14,
-                                                  spreadRadius: 1,
-                                                ),
-                                              ]
-                                            : null),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$count',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  );
-                                  final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
-                                  return knob;
-                                }(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                                    ]
+                                  : (selectedHighlight
+                                      ? [
+                                          BoxShadow(
+                                            color: accentColor.withOpacity(0.5),
+                                            blurRadius: 14,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : [
+                                          BoxShadow(
+                                            color: glowColor.withOpacity(soft),
+                                            blurRadius: 18,
+                                            spreadRadius: 2.0,
+                                          ),
+                                        ]);
 
-                // NEU: Schloss-Overlay (zentriert ÜBER der ganzen Switch, außerhalb des Opacity)
-                if (isLocked)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Center(
-                        child: const Icon(
-                          Icons.lock_rounded,
-                          size: 36,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                              final Widget knobCore = AnimatedContainer(
+                                duration: const Duration(milliseconds: 120),
+                                width: 38,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: innerColor,
+                                  borderRadius: BorderRadius.circular(21),
+                                  border: glow
+                                      ? Border.all(color: glowColor, width: 1)
+                                      : (selectedHighlight
+                                          ? Border.all(color: accentColor, width: 1)
+                                          : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
+                                  boxShadow: boxShadow,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$count',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                              final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
+                              return knob;
+                            },
+                          )
+                        : () {
+                            final Widget knobCore = AnimatedContainer(
+                            duration: const Duration(milliseconds: 120),
+                            width: 38,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: innerColor,
+                              borderRadius: BorderRadius.circular(21),
+                              border: glow
+                                  ? Border.all(color: const Color(0xFF00FF88), width: 1)
+                                  : (selectedHighlight
+                                      ? Border.all(color: const Color(0xFF6FD3FF), width: 1)
+                                      : Border.all(color: innerStrokeColor ?? Colors.white24, width: 1.6)),
+                              boxShadow: glow
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFF00FF88).withOpacity(0.85), // Grün-Glow
+                                        blurRadius: 16,
+                                        spreadRadius: 1.5,
+                                      ),
+                                    ]
+                                  : (selectedHighlight
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xFF6FD3FF).withOpacity(0.5),
+                                            blurRadius: 14,
+                                            spreadRadius: 1,
+                                          ),
+                                        ]
+                                      : null),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$count',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            );
+                            final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
+                            return knob;
+                          }(),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 8),

@@ -307,16 +307,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
         labels: StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: prefix),
         visibleMask: mask,                        // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
         s0Locked: ref.watch(s0LockedProvider),
-        onTapS0: () async {
-          final notifier = ref.read(s0LockedProvider.notifier);
-          final wasLocked = notifier.state;
-          notifier.state = !wasLocked;
-
-          // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
-          if (wasLocked) {
-            await _switchCtrl.blinkS0Once();
-          }
-      },
+        onTapS0: null, // Icon ist im Category Detail Screen, hier nicht benötigt
     );
   }
 

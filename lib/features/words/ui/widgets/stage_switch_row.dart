@@ -226,8 +226,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             note: widget.labels?.newNote ?? '0',
             isFirst: true,
             glow: _blinking.contains(0),
-            isLocked: locked,           // ← NEU: UI-Zustand
-            onTap: widget.onTapS0,      // ← NEU: toggelt Lock
+            isLocked: locked,           // ← Switch ausgrauen wenn gelockt
           ),
         );
       } else {
@@ -338,8 +337,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             note: '0',
             isFirst: true,
             glow: _blinking.contains(0),
-            isLocked: locked,
-            onTap: widget.onTapS0,
+            isLocked: locked,           // ← Switch ausgrauen wenn gelockt
           ),
         );
       } else {

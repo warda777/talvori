@@ -153,16 +153,7 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                     selectedStageHighlight: (widget.mode == LevelSelectionMode.single) ? ref.read(singleStageProvider) : null, // ← NEU
                     // ✅ KEINE visibleMask hier im Kategorie-Screen
                     s0Locked: ref.watch(s0LockedProvider),
-                    onTapS0: () async {
-                      final notifier = ref.read(s0LockedProvider.notifier);
-                      final wasLocked = notifier.state;
-                      notifier.state = !wasLocked;
-
-                      // NEU: Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
-                      if (wasLocked) {
-                        await _switchCtrl.blinkS0Once();
-                      }
-                    },
+                    onTapS0: null, // Icon ist jetzt in der LevelsCard, nicht mehr in der Switch
                     onSelectStage: (stg) {
                       // Nutzer hat S1..S5 gewählt:
                       widget.onSelectSingleStage?.call(stg); // ← wir fügen Props hinzu
@@ -175,23 +166,80 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
             const SizedBox(height: 12),
             Transform.translate(
               offset: Offset(widget.startBtnOffsetX, widget.startBtnOffsetY),
-              child: Center(
-                child: SizedBox(
-                  width: 138,
-                  height: 48,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF2D2D2F),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        side: const BorderSide(color: Colors.black, width: 1),
-                      ),
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  const buttonW = 138.0;
+                  const gap = 12.0;          // Abstand zwischen Schloss und Button
+                  const iconBoxW = 60.0;     // grob: Padding + Icon
+
+                  final stackW = c.maxWidth;
+                  final buttonLeft = (stackW - buttonW) / 2;
+
+                  const stackH = 60.0;
+                  const buttonH = 48.0;
+                  const buttonTop = (stackH - buttonH) / 2; // Zentriert vertikal: 6
+                  
+                  return SizedBox(
+                    width: stackW,
+                    height: stackH,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          left: buttonLeft,
+                          top: buttonTop, // Gleiche vertikale Position wie Button
+                          child: SizedBox(
+                            width: buttonW,
+                            height: buttonH,
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF2D2D2F),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  side: const BorderSide(color: Colors.black, width: 1),
+                                ),
+                              ),
+                              onPressed: widget.onStartPressed,
+                              child: const Text('Start'),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: buttonLeft - gap - iconBoxW,
+                          top: buttonTop + (buttonH - 40) / 2 - 10, // Zentriert vertikal mit Button (Icon ist 40px + 10px padding oben/unten)
+                          child: Transform.translate(
+                            offset: const Offset(-20, 0), // X nach links
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final notifier = ref.read(s0LockedProvider.notifier);
+                                  final wasLocked = notifier.state;
+                                  notifier.state = !wasLocked;
+
+                                  // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
+                                  if (wasLocked) {
+                                    await _switchCtrl.blinkS0Once();
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(25),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10), // Größerer Tap-Bereich
+                                  child: Icon(
+                                    ref.watch(s0LockedProvider) ? Icons.lock_rounded : Icons.lock_open_rounded,
+                                    size: 40,
+                                    color: ref.watch(s0LockedProvider) ? Colors.white : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: widget.onStartPressed,
-                    child: const Text('Start'),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
