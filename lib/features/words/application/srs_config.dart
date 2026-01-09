@@ -93,3 +93,42 @@ SrsConfig computeSrsConfig({
 }
 
 int _clampInt(int v, int min, int max) => v < min ? min : (v > max ? max : v);
+
+/// Default-Config für transparente Popups + Startwerte.
+/// Diese Werte sind bewusst konservativ und später feinjustierbar.
+class SrsUiConfig {
+  /// Maximale neue Wörter pro Tag (S0) im Traditional-Modus.
+  static const int tSrsDailyNewLimit = 10;
+
+  /// Wie viele erfolgreiche Wiederholungen in T-SRS nötig sind, um in die nächste Stage zu wechseln.
+  /// Hinweis: S0->S1 ist "erste erfolgreiche Bearbeitung" (0 = sofortiger Einstieg).
+  static const Map<int, int> tRepeatsToAdvance = {
+    0: 0,
+    1: 2, // S1 -> S2: 2 Erfolge
+    2: 1, // S2 -> S3: 1 Erfolg
+    3: 1, // S3 -> S4: 1 Erfolg
+    4: 1, // S4 -> S5: 1 Erfolg
+    5: 0, // S5 ist Zielstufe
+  };
+
+  /// Basis-Intervalle (T-SRS) in Tagen für die nächste Fälligkeit nach einem erfolgreichen Review.
+  /// Wichtig: 2-6-19 ist hier als Kern sichtbar.
+  static const Map<int, String> tNextIntervalLabel = {
+    0: "heute",        // S0: direkt / heute
+    1: "heute (kurz)", // S1: später am Tag / kurz
+    2: "2 Tage",       // S2: 2
+    3: "6 Tage",       // S3: 6
+    4: "19 Tage",      // S4: 19
+    5: "45–90 Tage",   // S5: Langzeitpflege
+  };
+
+  /// Stufen-Namen (UI) – kurz, merkbar.
+  static const Map<int, String> stageTitle = {
+    0: "Neu",
+    1: "Einstieg",
+    2: "Stabilisieren",
+    3: "Festigen",
+    4: "Sicher",
+    5: "Langzeit",
+  };
+}

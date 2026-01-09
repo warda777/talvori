@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/ui/widgets/stage_words_dialog.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
+import 'package:talvori/features/words/application/srs_logic.dart';
+import 'package:talvori/features/words/application/srs_config.dart';
 
 class LevelsCard extends ConsumerStatefulWidget {
   final double height;
@@ -14,6 +17,7 @@ class LevelsCard extends ConsumerStatefulWidget {
   final Future<void> Function() onStartPressed;
   final LevelSelectionMode mode;
   final void Function(LevelSelectionMode) onModeChanged;
+  final String? categoryId; // ← NEU: Für Dialog mit Wörtern
 
   // Layout-Knobs (standard-Werte wie vorher)
   final double outerPadL;
@@ -39,6 +43,7 @@ class LevelsCard extends ConsumerStatefulWidget {
     required this.onStartPressed,
     required this.mode,
     required this.onModeChanged,
+    this.categoryId, // ← NEU
     this.outerPadL = 20.0,
     this.outerPadT = 8.0,
     this.outerPadR = 20.0,
@@ -61,6 +66,29 @@ class LevelsCard extends ConsumerStatefulWidget {
 
 class _LevelsCardState extends ConsumerState<LevelsCard> {
   final _switchCtrl = StageSwitchRowController();
+
+  // Adapter-Funktionen: Map interne Enums zu Popup-Enums
+  SrsPopupMode _mapPopupMode(SrsSystem mode) {
+    switch (mode) {
+      case SrsSystem.time:
+        return SrsPopupMode.tSrs;
+      case SrsSystem.adaptive:
+        return SrsPopupMode.aSrs;
+      case SrsSystem.hybrid:
+        return SrsPopupMode.hybrid;
+    }
+  }
+
+  SrsPopupRange _mapPopupRange(LevelSelectionMode mode) {
+    switch (mode) {
+      case LevelSelectionMode.s0toS5:
+        return SrsPopupRange.s0toS5;
+      case LevelSelectionMode.s1toS5:
+        return SrsPopupRange.s1toS5;
+      case LevelSelectionMode.single:
+        return SrsPopupRange.single;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +186,36 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                       // Nutzer hat S1..S5 gewählt:
                       widget.onSelectSingleStage?.call(stg); // ← wir fügen Props hinzu
                     },
+                    onTapStage: widget.categoryId != null ? (stage) {
+                      // Öffne Dialog mit Wörtern für diesen Stage
+                      final stageLabel = prefix.isEmpty 
+                          ? 'S$stage' 
+                          : '$prefix$stage';
+                      final wordCount = stage < s.length ? s[stage] : 0;
+                      
+                      // Adapter: Map interne Enums zu Popup-Enums
+                      final internalMode = ref.read(srsModeControllerProvider);
+                      final internalRange = ref.read(levelSelectionProvider);
+                      final s0Locked = ref.read(s0LockedProvider);
+                      
+                      final popupMode = _mapPopupMode(internalMode.mode);
+                      final popupRange = _mapPopupRange(internalRange);
+                      
+                      showDialog(
+                        context: context,
+                        builder: (context) => StageWordsDialog(
+                          categoryId: widget.categoryId!,
+                          stage: stage,
+                          stageLabel: stageLabel,
+                          wordCount: wordCount,
+                          popupMode: popupMode,
+                          popupRange: popupRange,
+                          s0Locked: s0Locked,
+                          dailyNewLimit: SrsUiConfig.tSrsDailyNewLimit,
+                          learnedTodayFromS0: null, // Optional: später aus fn_user_workload_today
+                        ),
+                      );
+                    } : null,
                   ),
                 ),
               ),

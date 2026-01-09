@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
 import '../widgets/level_badge.dart';
+import '../widgets/card_glow_painter.dart';
 
 typedef SwipeDecision = Future<void> Function(bool correct);
 
@@ -15,6 +16,9 @@ class SwipeableWordCard extends StatefulWidget {
   final Widget? footer;              // TimerBar etc.
   final SwipeDecision onSwipe;       // true = right/correct, false = left/incorrect
   final VoidCallback onFlip;         // UI -> Controller.toggleFlip()
+  final void Function(double dx)? onDragUpdate; // ← NEU: für Plasma-Link (dx für Stage-Berechnung)
+  final VoidCallback? onDragEnd;     // ← NEU: für Plasma-Link verstecken
+  final VoidCallback? onDragReturn;  // ← NEU: für Plasma-Link wieder anzeigen wenn Karte zurückkommt
 
   const SwipeableWordCard({
     super.key,
@@ -26,6 +30,9 @@ class SwipeableWordCard extends StatefulWidget {
     required this.onSwipe,
     required this.onFlip,
     this.footer,
+    this.onDragUpdate,                // ← NEU
+    this.onDragEnd,                   // ← NEU
+    this.onDragReturn,                // ← NEU
   });
 
   @override
@@ -81,6 +88,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
     final endX = correct ? width * 1.5 : -width * 1.5;
 
     HapticFeedback.mediumImpact();
+    widget.onDragEnd?.call(); // Plasma-Link verstecken beim Commit
     setState(() {
       _offset = Offset(endX, _offset.dy - 100);
       _rotation = correct ? 0.5 : -0.5;
@@ -119,12 +127,16 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           _offset += d.delta;
           _rotation = (_offset.dx / 1000).clamp(-0.26, 0.26);
         });
+        // Plasma-Link Update: Weitergeben des dx-Werts für Stage-Berechnung
+        widget.onDragUpdate?.call(_offset.dx);
       },
       onPanEnd: (_) {
         if (!_dragging) return;
         setState(() => _dragging = false);
+        widget.onDragEnd?.call(); // Plasma-Link verstecken
         if (!widget.gesturesEnabled) {
           _resetPos();
+          widget.onDragReturn?.call(); // Karte kommt zurück
           return;
         }
         if (_offset.dx > threshold) {
@@ -133,6 +145,10 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           _animateAway(false);
         } else {
           _resetPos();
+          // Karte kommt zurück - Link wieder anzeigen nach Animation
+          Future.delayed(const Duration(milliseconds: 300), () {
+            widget.onDragReturn?.call();
+          });
         }
       },
       child: AnimatedContainer(
@@ -214,24 +230,85 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   }
 }
 
-/// re-usable Shell
-class _CardShell extends StatelessWidget {
+/// re-usable Shell mit animiertem Glow-Effekt
+class _CardShell extends StatefulWidget {
   final Widget child;
   final bool dark;
   const _CardShell({required this.child, this.dark = false});
 
   @override
+  State<_CardShell> createState() => _CardShellState();
+}
+
+class _CardShellState extends State<_CardShell> with SingleTickerProviderStateMixin {
+  late AnimationController _glowController;
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000), // Langsame, sanfte Pulsierung
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.78,
-      height: MediaQuery.of(context).size.height * 0.52,
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF3A3939) : WordsUIConstants.cardBackground,
-        borderRadius: BorderRadius.circular(WordsUIConstants.borderRadius),
-        border: Border.all(color: Colors.white24),
-        boxShadow: WordsUIConstants.cardShadow,
-      ),
-      child: child,
+    final cardWidth = MediaQuery.of(context).size.width * 0.78;
+    final cardHeight = MediaQuery.of(context).size.height * 0.52;
+    final borderRadius = WordsUIConstants.borderRadius;
+
+    return AnimatedBuilder(
+      animation: _glowController,
+      builder: (context, child) {
+        final pulse = 0.5 + 0.5 * math.sin(_glowController.value * 2 * math.pi);
+        final glowSpread = 12.0 + (48.0 - 12.0) * pulse;
+        
+        return Container(
+          width: cardWidth,
+          height: cardHeight,
+          decoration: BoxDecoration(
+            color: widget.dark ? const Color(0xFF3A3939) : WordsUIConstants.cardBackground,
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: const Color(0xFFB16CFF).withOpacity(0.6), // Plasma-Link-Farbe
+              width: 1.5,
+            ),
+            boxShadow: [
+              // Ursprüngliche Schatten beibehalten
+              ...WordsUIConstants.cardShadow,
+              // Animierter Glow-Effekt
+              BoxShadow(
+                color: const Color(0xFFB16CFF).withOpacity(0.25 * (0.6 + 0.4 * pulse)),
+                blurRadius: (60 + glowSpread * 2.0).clamp(0.0, 100.0),
+                spreadRadius: glowSpread * 1.5,
+              ),
+              BoxShadow(
+                color: const Color(0xFF9B7CFF).withOpacity(0.30 * (0.5 + 0.5 * pulse)),
+                blurRadius: (45 + glowSpread * 1.5).clamp(0.0, 100.0),
+                spreadRadius: glowSpread * 1.2,
+              ),
+              BoxShadow(
+                color: const Color(0xFF7B5CFF).withOpacity(0.35 * (0.5 + 0.5 * pulse)),
+                blurRadius: (35 + glowSpread * 1.2).clamp(0.0, 100.0),
+                spreadRadius: glowSpread * 0.9,
+              ),
+              BoxShadow(
+                color: const Color(0xFFEFE9FF).withOpacity(0.45 * (0.3 + 0.7 * pulse)),
+                blurRadius: (18 + glowSpread * 0.5).clamp(0.0, 100.0),
+                spreadRadius: glowSpread * 0.3,
+              ),
+            ],
+          ),
+          child: widget.child,
+        );
+      },
     );
   }
 }

@@ -73,6 +73,8 @@ class StageSwitchRow extends StatefulWidget {
   final void Function(int fromStage, int toStage, int count)? onStageDrop; // NEW
   final bool? s0Locked;                // ← NEU
   final VoidCallback? onTapS0;          // ← NEU
+  final void Function(int stage)? onTapStage; // ← NEU: Callback bei Tap auf Switch (außer S0)
+  final Map<int, GlobalKey>? switchKeys; // ← NEU: Keys für Plasma-Link
 
   const StageSwitchRow({
     super.key,
@@ -91,6 +93,8 @@ class StageSwitchRow extends StatefulWidget {
     this.onStageDrop,
     this.s0Locked,
     this.onTapS0,
+    this.onTapStage,                         // ← NEU
+    this.switchKeys,                         // ← NEU
   });
 
   @override
@@ -215,6 +219,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           onWillAccept: (data) => data != null && data.fromStage != 0,
           onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
           builder: (_, __, ___) => VerticalStageSwitch(
+            containerKey: widget.switchKeys?[0],
             count: s[0],
             outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? const Color(0xFFA05260))
                          : (widget.colors?.disabledOuter ?? Colors.grey),
@@ -240,6 +245,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         final bool isSelected = (widget.selectedStageHighlight != null) && (stage == widget.selectedStageHighlight);
 
         Widget knobbed = VerticalStageSwitch(
+          containerKey: widget.switchKeys?[stage],
           count: s[stage],
           outerColor: s[stage] > 0 ? (widget.colors?.stageOuter ?? Colors.yellow) : (widget.colors?.disabledOuter ?? Colors.white),
           innerColor: widget.colors?.inner ?? Colors.grey,
@@ -269,8 +275,9 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         );
       }
 
-      // Falls selektierbar (Single-Mode), Tap/LongPress wie gehabt:
+      // Tap-Handler für Switches
       if (widget.selectable && i >= 1) {
+        // Single-Mode: Tap wählt Stage (nur S1-S5)
         switchBody = GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -279,6 +286,15 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           },
           onLongPress: () {
             // TODO: später Karten verschieben
+          },
+          child: switchBody,
+        );
+      } else if (widget.onTapStage != null) {
+        // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
+        switchBody = GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            widget.onTapStage?.call(i);
           },
           child: switchBody,
         );
@@ -328,6 +344,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           onWillAccept: (data) => data != null && data.fromStage != 0,
           onAccept: (data) => widget.onStageDrop?.call(data.fromStage, 0, data.count),
           builder: (_, __, ___) => VerticalStageSwitch(
+            containerKey: widget.switchKeys?[0],
             count: stages[0],
             outerColor: stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive,
             innerColor: WordsUIConstants.stageInnerDark,
@@ -344,6 +361,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         // S1-S5 Switches
         final stage = i;
         Widget knobbed = VerticalStageSwitch(
+          containerKey: widget.switchKeys?[stage],
           count: stages[stage],
           outerColor: stages[stage] > 0 ? WordsUIConstants.stageOuter : WordsUIConstants.stageInactive,
           innerColor: WordsUIConstants.stageInner,
@@ -370,8 +388,9 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         );
       }
 
-      // Falls selektierbar (Single-Mode), Tap/LongPress wie gehabt:
+      // Tap-Handler für Switches
       if (widget.selectable && i >= 1) {
+        // Single-Mode: Tap wählt Stage (nur S1-S5)
         switchBody = GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -380,6 +399,15 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           },
           onLongPress: () {
             // TODO: später Karten verschieben
+          },
+          child: switchBody,
+        );
+      } else if (widget.onTapStage != null) {
+        // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
+        switchBody = GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            widget.onTapStage?.call(i);
           },
           child: switchBody,
         );

@@ -1,12 +1,15 @@
 # Talvori - Flutter App Project Structure
 
-> Aktualisiert am 11.11.2025
+> Aktualisiert am 27.01.2025
 
 ## 📁 Projektübersicht
 
-- **Total Dart Files**: 185
+- **Total Dart Files**: 212
 - **Architektur**: Feature-basiert (Riverpod)
 - **Backend**: Supabase & Edge Functions
+- **Neue Features**: 
+  - Stage Words Dialog mit modus-spezifischen Erklärungen
+  - Visuelle Feedback-Systeme (Card Glow, Plasma Link, Switch Pulse)
 
 ## 📂 Verzeichnisstruktur (`lib/`)
 
@@ -104,6 +107,11 @@
 │           ├── screens/
 │           ├── theme/
 │           ├── widgets/
+│           │   ├── stage_words_dialog.dart
+│           │   ├── card_glow_painter.dart
+│           │   ├── plasma_link_painter.dart
+│           │   ├── switch_pulse_painter.dart
+│           │   └── ...
 │           └── ui_constants.dart
 ├── ui/
 │   └── common/

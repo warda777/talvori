@@ -11,6 +11,7 @@ import 'package:talvori/features/words/services/sfx_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 
@@ -544,6 +545,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   Future<void> _handleAnswer({required bool correct}) async {
     final mode = ref.read(levelSelectionProvider);
+    final srsSystem = ref.read(srsModeControllerProvider).mode;
     
         // Progress-Update basierend auf Modus
         if (mode == LevelSelectionMode.single) {
@@ -636,7 +638,11 @@ class LearnModeController extends Notifier<LearnModeState> {
       
       // Server-Update
       try {
-        final result = await submitReview(currentId, correct);
+        final result = await submitReview(
+          currentId,
+          correct,
+          srsSystem: srsSystem,
+        );
         final serverStage = result.$1;
         final serverDue = result.$2;
         
@@ -716,7 +722,11 @@ class LearnModeController extends Notifier<LearnModeState> {
     int serverStage = newStage; // Fallback auf lokale Schätzung
     DateTime? serverDue;
     try {
-      final result = await submitReview(currentId, correct);
+      final result = await submitReview(
+        currentId,
+        correct,
+        srsSystem: srsSystem,
+      );
       serverStage = result.$1;
       serverDue = result.$2;
       print('🗂 Server says: word=$currentId -> stage=$serverStage, due=$serverDue (old=$oldStage, correct=$correct)');

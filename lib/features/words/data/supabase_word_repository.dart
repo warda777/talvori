@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // falls noch nicht
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 
 class StageCount {
@@ -148,10 +149,21 @@ Future<List<WordUserView>> fetchLearnQueueForMode(
 
 
 /// Review-Ergebnis senden (true = richtig, false = falsch)
-Future<(int stage, DateTime due)> submitReview(String wordId, bool correct) async {
-  final rows = await _sb.rpc('fn_user_review', params: {
+Future<(int stage, DateTime due)> submitReview(
+  String wordId,
+  bool correct, {
+  required SrsSystem srsSystem,
+}) async {
+  final modeStr = switch (srsSystem) {
+    SrsSystem.time => 'time',
+    SrsSystem.adaptive => 'adaptive',
+    SrsSystem.hybrid => 'hybrid',
+  };
+
+  final rows = await _sb.rpc('fn_user_review_mode', params: {
     'p_word': wordId,
     'p_result': correct,
+    'p_mode': modeStr,
   });
 
   final list = (rows as List).cast<Map<String, dynamic>>();
@@ -163,13 +175,6 @@ Future<(int stage, DateTime due)> submitReview(String wordId, bool correct) asyn
 
   return (stage, due);
 }
-
-/// Convenience:
-Future<(int stage, DateTime due)> reviewCorrect(String wordId) =>
-    submitReview(wordId, true);
-
-Future<(int stage, DateTime due)> reviewWrong(String wordId) =>
-    submitReview(wordId, false);
 
 class CategoryProgress {
   final int total;
@@ -975,4 +980,151 @@ Future<String?> singleNextWordId(String catId, int stage) async {
       .maybeSingle();
 
   return w == null ? null : wordId;
+}
+
+/// Lädt Wörter für einen bestimmten Stage einer Kategorie
+Future<List<WordUserView>> fetchWordsByStage(String categoryId, int stage) async {
+  try {
+    final user = _sb.auth.currentUser;
+    if (user == null) return [];
+
+    // Hole category_id wenn nötig (kann UUID oder Slug sein)
+    String catId = categoryId;
+    final isUuidLike = RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(categoryId);
+    if (!isUuidLike) {
+      final row = await _sb
+          .from('categories')
+          .select('id')
+          .eq('slug', categoryId)
+          .maybeSingle();
+      if (row != null && row['id'] != null) {
+        catId = row['id'] as String;
+      } else {
+        return [];
+      }
+    }
+
+    // Hole alle Wörter dieser Kategorie über word_categories Join
+    // Zuerst: Hole word_ids aus word_categories
+    final wordCategoriesData = await _sb
+        .from('word_categories')
+        .select('word_id')
+        .eq('category_id', catId);
+
+    final wordCategoryIds = (wordCategoriesData as List)
+        .cast<Map<String, dynamic>>()
+        .map((wc) => wc['word_id'] as String)
+        .toList();
+
+    if (wordCategoryIds.isEmpty) {
+      debugPrint('🔍 fetchWordsByStage: Keine Wörter in Kategorie $catId gefunden');
+      return [];
+    }
+
+    // Dann: Hole die Wort-Details aus words Tabelle
+    final wordsData = await _sb
+        .from('words')
+        .select('id,text,translation,level,pos')
+        .inFilter('id', wordCategoryIds)
+        .order('text', ascending: true);
+
+    final wordsList = (wordsData as List).cast<Map<String, dynamic>>();
+    if (wordsList.isEmpty) {
+      debugPrint('🔍 fetchWordsByStage: Keine Wort-Details gefunden für ${wordCategoryIds.length} word_ids');
+      return [];
+    }
+
+    final wordIds = wordsList.map((w) => w['id'] as String).toList();
+    debugPrint('🔍 fetchWordsByStage: ${wordsList.length} Wörter gefunden für Stage $stage');
+
+    if (stage == 0) {
+      // Stage 0: Alle Wörter, die KEINEN user_words Eintrag haben ODER srs_stage = 0 haben
+      // WICHTIG: Wenn wordIds leer ist oder zu groß, müssen wir anders vorgehen
+      if (wordIds.isEmpty) {
+        return [];
+      }
+
+      // Hole alle user_words Einträge für diesen User und diese Wörter
+      // Verwende inFilter mit Chunking falls nötig (Supabase Limit: ~1000 Werte)
+      final userWordsMap = <String, Map<String, dynamic>>{};
+      
+      // Chunking für große Listen (falls mehr als 1000 Wörter)
+      const chunkSize = 1000;
+      for (var i = 0; i < wordIds.length; i += chunkSize) {
+        final chunk = wordIds.skip(i).take(chunkSize).toList();
+        final userWordsData = await _sb
+            .from('user_words')
+            .select('word_id,srs_stage,next_due_at')
+            .eq('user_id', user.id)
+            .inFilter('word_id', chunk);
+        
+        for (var uw in (userWordsData as List).cast<Map<String, dynamic>>()) {
+          final wordId = uw['word_id'] as String;
+          userWordsMap[wordId] = uw;
+        }
+      }
+
+      // Filtere: Alle Wörter, die NICHT in user_words sind ODER srs_stage = 0 haben
+      final result = wordsList
+          .where((w) {
+            final wordId = w['id'] as String;
+            final userWord = userWordsMap[wordId];
+            // In Stage 0 wenn: kein user_words Eintrag ODER srs_stage = 0
+            return userWord == null || (userWord['srs_stage'] as int? ?? 0) == 0;
+          })
+          .map((word) {
+            final wordId = word['id'] as String;
+            final userWord = userWordsMap[wordId];
+            return WordUserView(
+              id: wordId,
+              text: word['text'] as String? ?? '',
+              translation: word['translation'] as String? ?? '',
+              level: word['level'] as String?,
+              srsStage: 0,
+              nextDueAt: userWord?['next_due_at'] != null
+                  ? DateTime.parse(userWord!['next_due_at'])
+                  : null,
+            );
+          })
+          .toList();
+
+      debugPrint('🔍 fetchWordsByStage(S0): ${wordsList.length} Wörter in Kategorie, ${userWordsMap.length} in user_words, ${result.length} in Stage 0');
+      
+      return result;
+    } else {
+      // Stage 1-5: Wörter mit entsprechendem srs_stage
+      final userWordsData = await _sb
+          .from('user_words')
+          .select('word_id,srs_stage,next_due_at,last_reviewed_at')
+          .eq('user_id', user.id)
+          .inFilter('word_id', wordIds)
+          .eq('srs_stage', stage);
+
+      final userWordsMap = <String, Map<String, dynamic>>{};
+      for (var uw in (userWordsData as List).cast<Map<String, dynamic>>()) {
+        userWordsMap[uw['word_id'] as String] = uw;
+      }
+
+      return wordsList
+          .where((w) => userWordsMap.containsKey(w['id'] as String))
+          .map((word) {
+            final wordId = word['id'] as String;
+            final userWord = userWordsMap[wordId]!;
+            return WordUserView(
+              id: wordId,
+              text: word['text'] as String? ?? '',
+              translation: word['translation'] as String? ?? '',
+              level: word['level'] as String?,
+              srsStage: (userWord['srs_stage'] as int?) ?? 0,
+              nextDueAt: userWord['next_due_at'] != null
+                  ? DateTime.parse(userWord['next_due_at'])
+                  : null,
+            );
+          })
+          .toList();
+    }
+  } catch (e) {
+    debugPrint('Error fetching words by stage: $e');
+    return [];
+  }
 }

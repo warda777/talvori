@@ -1,13 +1,13 @@
 # 📋 Programmliste - Aktualisierte Übersicht
 
-> **Letzte Aktualisierung:** Januar 2025  
-> **Version:** 1.1  
+> **Letzte Aktualisierung:** 27. Januar 2025  
+> **Version:** 1.4  
 > **Status:** ✅ Aktualisiert
 
 ## 📊 Projekt-Statistiken
 
-- **Total Dart Files**: 140
-- **Words Feature**: 102 Dateien
+- **Total Dart Files**: 212
+- **Words Feature**: 138 Dateien
 - **Home Feature**: 25 Dateien
 - **Core**: 5 Dateien
 
@@ -29,24 +29,24 @@
 - **Screens**: Home, Course, Profile, Vocab, Category
 - **Widgets**: BottomNav, CategoryPopup, PracticePicker, TopBar
 
-#### 📚 Words (102 Dateien)
+#### 📚 Words (138 Dateien)
 
 - **Application**:
   - Controllers: LearnMode, Category, WordList, CategoryDetail
   - Mix Feature: Navigation, Search, Selection Controllers
   - Sort Feature: VocabSortController
   - Providers: S0Lock, LearningEngine, LevelSelection, SRSMode
-  - SRS: Config, Logic
+  - SRS: Config, Logic, SrsPopupText (Dialog-Helper)
 - **Data**:
-  - SupabaseWordRepository (Komplette RPC-Integration)
+  - SupabaseWordRepository (Komplette RPC-Integration, fetchWordsByStage)
   - CategoryRepository
   - WordHubTaxonomy (8 Sections: Life, People, Society, Nature, Action, Culture, Language, Levels)
 - **Domain**: Word, SRSKind
 - **Services**: SFXService
 - **UI**:
   - Screens: LearnMode, CategoryDetail, WordHub, WordList, MixBuilder, QuickSets, MyWords, VocabSort
-  - Cards: SwipeableWordCard, WordCard
-  - Widgets: 45+ Widgets (Controls, Indicators, Badges, etc.)
+  - Cards: SwipeableWordCard (mit animiertem Glow-Effekt), WordCard
+  - Widgets: 63+ Widgets (StageWordsDialog, Controls, Indicators, Badges, PlasmaLinkPainter, CardGlowPainter, SwitchPulsePainter, etc.)
 
 #### 🃏 Decks (1 Datei)
 
@@ -68,6 +68,34 @@
 - **Modi**: S0-S5, S1-S5, Single Stage
 - **Engines**: T-SRS, A-SRS, Hybrid
 - **S0 Lock**: Optional Sperre für neue Karten
+- **Stage Words Dialog**: 
+  - Popup mit allen Wörtern eines Stages
+  - Modus-spezifische Erklärungen (T-SRS, A-SRS, Hybrid)
+  - T-SRS Erklärung (2-6-19 System)
+  - Aufstieg/Abstieg-Regeln
+  - Farben & Feedback-Legende
+  - Nummerierung (z.B. "1/35") bei jedem Wort
+  - Automatisch erscheinender Scrollbar
+
+### Visuelle Feedback-Systeme
+
+- **Card Glow Animation**: 
+  - Pulsierender, nebeliger Glow-Effekt um die Karte
+  - Mehrschichtige Animation mit Plasma-Link-Farben
+  - Dynamische Pulsierung (größer/kleiner werdend)
+  - Animierte Partikel-Effekte an Ecken und Kanten
+  
+- **Plasma Link Animation**:
+  - Verbindet Karte mit Ziel-Stage-Switch während Drag-Geste
+  - Mehrere animierte Fäden zwischen Karten-Unterkante und Switch-Oberkante
+  - Bündelung in der Mitte für organischen Look
+  - Erscheint erst nach Karten-Animation (500ms Delay)
+  - Verschwindet beim Drag, erscheint wieder wenn Karte zurückkommt
+  
+- **Switch Pulse Animation**:
+  - Corona-Effekt um Ziel-Stage-Switch bei erfolgreichem Swipe
+  - Expandierender, pulsierender Glow
+  - Mehrschichtige Animation für Tiefe
 
 ### Mix Feature
 
@@ -112,13 +140,19 @@
 - `fn_user_stage_counts`
 - `fn_user_workload_today`
 - `fn_user_learn_queue_mode`
-- `fn_user_review`
+- `fn_user_review_mode`: Review mit SRS-Modus-Unterstützung (time/adaptive/hybrid)
 - `fn_user_category_progress`
 - `fn_single_session_seed`
 - `fn_single_session_counts`
 - `fn_single_session_move`
 - `fn_single_session_reset`
 - `fn_single_session_next`
+
+### Repository Functions
+
+- `fetchWordsByStage()`: Lädt alle Wörter für einen bestimmten Stage einer Kategorie
+- `submitReview()`: Erweitert um SRS-Modus-Parameter (time/adaptive/hybrid)
+- `fetchWordsByStage()`: Lädt alle Wörter für einen bestimmten Stage einer Kategorie
 
 ### Views
 

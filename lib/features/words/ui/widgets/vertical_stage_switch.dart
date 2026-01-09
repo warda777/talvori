@@ -17,8 +17,11 @@ class VerticalStageSwitch extends StatelessWidget {
   final Widget Function(Widget knob)? knobWrapper; // optionaler Wrapper nur um den Knopf
   final bool isLocked;              // ← NEU: nur für Opacity (Switch ausgrauen)
 
+  final Key? containerKey; // Key für den äußeren Container (für Plasma-Link Positionierung)
+  
   const VerticalStageSwitch({
     super.key,
+    this.containerKey,
     required this.count,
     required this.outerColor,
     required this.innerColor,
@@ -52,6 +55,7 @@ class VerticalStageSwitch extends StatelessWidget {
           Opacity(
             opacity: isLocked ? 0.45 : 1.0,     // 45% sichtbar, Ursprung bleibt erkennbar
             child: Container(
+              key: containerKey ?? key, // Key auf dem äußeren Container (für Plasma-Link Positionierung)
               width: WordsUIConstants.stageSwitchWidth,
               height: WordsUIConstants.stageSwitchHeight,
               decoration: BoxDecoration(

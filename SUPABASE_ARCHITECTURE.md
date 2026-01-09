@@ -1,7 +1,7 @@
 # 🗄️ Supabase Architecture Documentation
 
-> **Letzte Aktualisierung:** $(date)  
-> **Version:** 1.0  
+> **Letzte Aktualisierung:** 27.01.2025  
+> **Version:** 1.5  
 > **Status:** ✅ Aktive Entwicklung
 
 ## 📋 Übersicht
@@ -173,15 +173,20 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
   **Rückgabe:** Liste von `WordUserView`
   **Verwendung:** `fetchLearnQueueForMode()` - Modus-basierte Lern-Queue
 
-#### `fn_user_review`
+#### `fn_user_review_mode`
 
-**Zweck:** Review-Ergebnis verarbeiten
+**Zweck:** Review-Ergebnis verarbeiten mit SRS-Modus-Unterstützung
 **Parameter:**
 
 - `p_word` (String) - Wort-ID
 - `p_result` (Boolean) - Richtig/Falsch
+- `p_mode` (String) - SRS-Modus: 'time', 'adaptive', 'hybrid'
   **Rückgabe:** `srs_stage` (Integer), `next_due_at` (String)
-  **Verwendung:** `submitReview()` - SRS-Algorithmus
+  **Verwendung:** `submitReview()` - SRS-Algorithmus mit modus-spezifischer Logik
+
+#### `fn_user_review` (veraltet)
+
+**Hinweis:** Diese Funktion wurde durch `fn_user_review_mode` ersetzt. Die neue Funktion unterstützt modus-spezifische SRS-Logik.
 
 #### `fn_user_category_progress`
 
@@ -244,6 +249,22 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 **Parameter:** `p_category_id` (String) - Kategorie-ID
 **Rückgabe:** Anzahl Wörter
 **Verwendung:** `getCategoryWordCount()` - Kategorie-Statistiken
+
+### Stage-Wörter Abfrage
+
+#### `fetchWordsByStage`
+
+**Zweck:** Lädt alle Wörter für einen bestimmten Stage einer Kategorie
+**Parameter:** 
+- `categoryId` (String) - Kategorie-ID (UUID oder Slug)
+- `stage` (Integer) - Stage (0-5)
+**Rückgabe:** Liste von `WordUserView`
+**Verwendung:** `StageWordsDialog` - Popup mit allen Wörtern eines Stages
+
+**Logik:**
+- **Stage 0:** Alle Wörter ohne `user_words` Eintrag ODER mit `srs_stage = 0` in `user_words`
+- **Stage 1-5:** Alle Wörter mit entsprechendem `srs_stage` in `user_words`
+- Unterstützt Chunking für große Listen (>1000 Wörter)
 
 ---
 
@@ -334,6 +355,27 @@ Die App unterstützt verschiedene Filter-Kategorien über `WordListFilter`:
 ---
 
 ## 📝 Changelog
+
+### Version 1.5 (27. Januar 2025)
+
+- ✅ Stage Words Dialog erweitert: Modus-spezifische Erklärungen (T-SRS, A-SRS, Hybrid)
+- ✅ `SrsPopupText`: Neue Helper-Klasse für kontextuelle Dialog-Texte
+- ✅ `SrsUiConfig`: Konfiguration für UI-Texte und T-SRS Parameter
+- ✅ `submitReview()` erweitert: Unterstützt jetzt SRS-Modus (time/adaptive/hybrid)
+- ✅ `fn_user_review_mode`: Neue RPC-Funktion mit modus-spezifischer Logik
+- ✅ Nummerierung in Wortliste: Zeigt Position (z.B. "1/35") bei jedem Wort
+- ✅ Scrollbar: Automatisch erscheinend/verschwindend beim Scrollen
+- ✅ Card Glow Animation: Pulsierender nebeliger Glow-Effekt um die Karte
+- ✅ Plasma Link Animation: Animierte Verbindung zwischen Karte und Stage-Switch
+- ✅ Switch Pulse Animation: Corona-Effekt bei erfolgreichem Swipe
+- ✅ Drag Return Callback: Link erscheint wieder wenn Karte zurückkommt
+
+### Version 1.5 (27. Januar 2025)
+
+- ✅ Stage Words Dialog: Popup-Fenster mit allen Wörtern eines Stages
+- ✅ `fetchWordsByStage()`: Neue Repository-Funktion zum Laden von Wörtern nach Stage
+- ✅ T-SRS Erklärung: Erklärung des 2-6-19 Systems im Dialog
+- ✅ Tap-Handler für Switches: Öffnet Dialog mit Stage-Wörtern
 
 ### Version 1.3 (Januar 2025)
 

@@ -221,6 +221,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                     mode: mode,
                     selectingSingle: selecting,
                     visibleMask: mask,
+                    categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
                     onSelectSingleStage: (stg) {
                       ref.read(singleStageProvider.notifier).state = stg;
                       ref.read(selectingSingleProvider.notifier).state = false;
