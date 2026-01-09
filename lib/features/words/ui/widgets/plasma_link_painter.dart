@@ -140,7 +140,7 @@ class PlasmaBandPainter extends CustomPainter {
     return mid + n * wobble + upVector;
   }
 
-  // Pfad pro Faden (breit → eng → breit) mit zusätzlicher Welle im oberen Bereich
+  // Pfad pro Faden (breit → eng → breit) mit wandernder Welle entlang des Links
   Path _bundledFlow(Offset a, Offset b, Offset n, double t, int seed, double startSpread, double endSpread) {
     final m = _bundlePoint(a, b, t, n);
 
@@ -154,11 +154,23 @@ class PlasmaBandPainter extends CustomPainter {
     final arcHeight = -25.0;
     final upOffset = Offset(0, arcHeight);
 
-    // Sanfte Wellen mit reduzierten Amplituden
-    final wave1 = sin(t + seed) * 4.0;
-    final wave2 = sin(t * 0.8 + seed * 1.2) * 3.0;
-    final wave3 = sin(t * 1.2 + seed * 0.7) * 2.0;
-    final combinedWave = (wave1 + wave2 + wave3) / 3.0;
+    // Wandernde Welle: Die Phase bewegt sich entlang des Pfades (0.0 an der Karte -> 1.0 an der Switch)
+    // Geschwindigkeit der wandernden Welle (wie schnell sie sich entlang des Links bewegt)
+    final waveSpeed = 2.0; // Wie viele Wellen pro Sekunde entlang des Links wandern
+    final wavePhase = (t * waveSpeed) % (2 * pi); // Phase der wandernden Welle
+
+    // Helper-Funktion: Berechnet die lokale Welle basierend auf der Position entlang des Pfades
+    double getLocalWave(double pathPosition) {
+      // pathPosition: 0.0 = an der Karte, 1.0 = an der Switch
+      // Die Welle wandert von der Karte zur Switch
+      final localPhase = wavePhase - pathPosition * 2 * pi; // Welle läuft von 0 nach 1
+      
+      // Mehrere überlagerte Wellen für komplexeres Muster
+      final wave1 = sin(localPhase + seed) * 4.0;
+      final wave2 = sin(localPhase * 0.8 + seed * 1.2) * 3.0;
+      final wave3 = sin(localPhase * 1.2 + seed * 0.7) * 2.0;
+      return (wave1 + wave2 + wave3) / 3.0;
+    }
 
     // Drei Segmente für zusätzliche Welle: a2 -> m1 -> m2 -> b2
     // m1 bei 1/3 (oberer Bereich, wo nach unten geht)
@@ -167,11 +179,14 @@ class PlasmaBandPainter extends CustomPainter {
     final m2 = Offset.lerp(a2, b2, 0.67)!; // Bei zwei Dritteln
 
     // Erste Kurve: a2 -> m1 (nach oben)
-    final c1a = Offset.lerp(a2, m1, 0.25)! + n * (combinedWave * 0.6) + upOffset * 0.2;
-    // Sehr starke Bewegung nach oben in der Mitte
-    final c1b = Offset.lerp(a2, m1, 0.75)! + n * (combinedWave * 0.6) + upOffset * 1.0;
+    // Position entlang des Pfades: 0.0 - 0.33
+    final c1aPos = 0.125; // 0.25 * 0.5 (Mitte zwischen a2 und m1)
+    final c1bPos = 0.25;  // 0.75 * 0.33 (Mitte zwischen a2 und m1)
+    final c1a = Offset.lerp(a2, m1, 0.25)! + n * (getLocalWave(c1aPos) * 0.6) + upOffset * 0.2;
+    final c1b = Offset.lerp(a2, m1, 0.75)! + n * (getLocalWave(c1bPos) * 0.6) + upOffset * 1.0;
 
     // Zweite Kurve: m1 -> m2 (nach unten, dann wieder nach oben)
+    // Position entlang des Pfades: 0.33 - 0.67
     // Tangentialer Übergang: c1b, m1, c2a müssen kollinear sein
     final downOffset = Offset(0, 15.0); // Nach unten für die Welle
     
@@ -180,22 +195,25 @@ class PlasmaBandPainter extends CustomPainter {
     final dirAtM1Len = dirAtM1.distance;
     final dirAtM1Norm = dirAtM1Len > 0.001 ? dirAtM1 / dirAtM1Len : Offset(0, -1);
     // c2a liegt auf der Verlängerung von c1b -> m1 für tangentialen Übergang
-    // Sehr starke Bewegung nach oben
-    final c2a = m1 + dirAtM1Norm * 25.0 + n * (combinedWave * 1.1) + downOffset * 0.3;
-    final c2b = Offset.lerp(m1, m2, 0.75)! + n * (combinedWave * 1.1) + upOffset * 0.9;
+    final c2aPos = 0.42; // 0.33 + 0.25 * (0.67 - 0.33)
+    final c2bPos = 0.58; // 0.33 + 0.75 * (0.67 - 0.33)
+    final c2a = m1 + dirAtM1Norm * 25.0 + n * (getLocalWave(c2aPos) * 1.1) + downOffset * 0.3;
+    final c2b = Offset.lerp(m1, m2, 0.75)! + n * (getLocalWave(c2bPos) * 1.1) + upOffset * 0.9;
 
     // Dritte Kurve: m2 -> b2 (nach oben zur Switch)
+    // Position entlang des Pfades: 0.67 - 1.0
     // Tangentialer Übergang: c2b, m2, c3a müssen kollinear sein
     final dirAtM2 = m2 - c2b;
     final dirAtM2Len = dirAtM2.distance;
     final dirAtM2Norm = dirAtM2Len > 0.001 ? dirAtM2 / dirAtM2Len : Offset(0, -1);
     // c3a liegt auf der Verlängerung von c2b -> m2 für tangentialen Übergang
-    // Sehr starke Bewegung nach oben
-    final c3a = m2 + dirAtM2Norm * 25.0 + n * (combinedWave * 1.0) + upOffset * 1.0;
+    final c3aPos = 0.75; // 0.67 + 0.25 * (1.0 - 0.67)
+    final c3a = m2 + dirAtM2Norm * 25.0 + n * (getLocalWave(c3aPos) * 1.0) + upOffset * 1.0;
     
     // Größerer Bogen nach oben kurz vor der Switch
     final largeArcOffset = Offset(0, -40.0); // Größerer Bogen nach oben
-    final c3b = Offset.lerp(m2, b2, 0.80)! + n * (combinedWave * 0.6) + largeArcOffset;
+    final c3bPos = 0.87; // 0.67 + 0.80 * (1.0 - 0.67)
+    final c3b = Offset.lerp(m2, b2, 0.80)! + n * (getLocalWave(c3bPos) * 0.6) + largeArcOffset;
 
     return Path()
       ..moveTo(a2.dx, a2.dy)
