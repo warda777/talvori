@@ -1,6 +1,6 @@
 # Talvori - Flutter App Project Structure
 
-> Aktualisiert am 27.01.2025
+> Aktualisiert am 28.01.2025
 
 ## 📁 Projektübersicht
 
@@ -10,6 +10,9 @@
 - **Neue Features**: 
   - Stage Words Dialog mit modus-spezifischen Erklärungen
   - Visuelle Feedback-Systeme (Card Glow, Plasma Link, Switch Pulse)
+  - Card Glow Settings (persistente Slider-Einstellungen)
+  - Primary Language Einstellung (universell für alle Kategorien)
+  - SVG-Icon Integration für Slider-Steuerung
 
 ## 📂 Verzeichnisstruktur (`lib/`)
 
@@ -68,6 +71,7 @@
 │       │   ├── mix/
 │       │   ├── sort/
 │       │   ├── application.dart
+│       │   ├── card_glow_settings_provider.dart
 │       │   ├── category_controller.dart
 │       │   ├── category_controller.g.dart
 │       │   ├── category_detail_controller.dart
@@ -80,6 +84,7 @@
 │       │   ├── learning_engine_provider.dart
 │       │   ├── level_selection_controller.dart
 │       │   ├── level_selection_provider.dart
+│       │   ├── primary_language_provider.dart
 │       │   ├── quick_sets_providers.dart
 │       │   ├── s0_lock_provider.dart
 │       │   ├── srs_config.dart
@@ -108,6 +113,7 @@
 │           ├── theme/
 │           ├── widgets/
 │           │   ├── stage_words_dialog.dart
+│           │   ├── category_settings_dialog.dart
 │           │   ├── card_glow_painter.dart
 │           │   ├── plasma_link_painter.dart
 │           │   ├── switch_pulse_painter.dart
@@ -131,7 +137,37 @@
 
 ## 📁 Sonstige wichtige Verzeichnisse
 
-- `assets/` – Icons, Bilder, Sounds
+- `assets/` – Icons (inkl. SVG: low_sun-line.svg, bright_sun-line.svg, impulse.svg), Bilder, Sounds
 - `sql/` – Data Dictionary & SQL-Skripte
 - `docs/` – Generierte Dokumentation (ERD, PDF)
 - `test/` – Widget Tests & Regression Checks
+
+## 🔧 Provider & State Management
+
+### Card Glow Settings Provider
+- **Datei**: `lib/features/words/application/card_glow_settings_provider.dart`
+- **Typ**: NotifierProvider
+- **Speicherung**: SharedPreferences
+- **Zweck**: Persistente Einstellungen für Glow-Intensität und Pulsierungsgeschwindigkeit
+
+### Primary Language Provider
+- **Datei**: `lib/features/words/application/primary_language_provider.dart`
+- **Typ**: NotifierProvider
+- **Speicherung**: SharedPreferences
+- **Zweck**: Universelle Spracheinstellung (Englisch/Deutsch) für alle Kategorien
+
+## 🎨 UI Komponenten
+
+### SwipeableWordCard
+- **Datei**: `lib/features/words/ui/cards/swipeable_word_card.dart`
+- **Features**:
+  - Animierter Glow-Effekt (BoxShadow-basiert)
+  - Zwei horizontale Slider für Glow-Intensität und Pulsierungsgeschwindigkeit
+  - SVG-Icons mit präziser Positionierung (Transform.translate)
+  - Slider nur auf Vorderseite sichtbar
+  - Persistente Einstellungen über CardGlowSettingsProvider
+
+### Category Settings Dialog
+- **Datei**: `lib/features/words/ui/widgets/category_settings_dialog.dart`
+- **Zweck**: Einstellung der Primary Language
+- **Integration**: Über Settings-Button in CategoryDetailScreen

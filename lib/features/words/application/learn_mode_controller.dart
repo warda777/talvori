@@ -235,6 +235,11 @@ class LearnModeController extends Notifier<LearnModeState> {
     _set(showTranslation: !state.showTranslation);
   }
   
+  /// Setzt showTranslation explizit (z.B. nach Wischen zurück zur Hauptsprache)
+  void setShowTranslation(bool value) {
+    _set(showTranslation: value);
+  }
+  
   /// Prüft, ob Interaktionen erlaubt sind (nicht pausiert)
   bool _canInteract() {
     return !state.timerPaused;

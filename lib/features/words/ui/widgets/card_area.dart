@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/application.dart';
+import 'package:talvori/features/words/application/primary_language_provider.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/widgets/timer_bar.dart';
 
@@ -27,23 +28,34 @@ class CardArea extends ConsumerWidget {
     final isPaused = ref.watch(isPausedProvider);
     final s = ref.watch(learnModeControllerProvider);
     final c = ref.read(learnModeControllerProvider.notifier);
-
+    final primaryLanguage = ref.watch(primaryLanguageProvider);
 
     final word = current?.text ?? (s.shuffledWordIds.isEmpty ? 'Keine Wörter\nverfügbar' : '—');
     final translation = current?.translation ?? '';
+
+    // Hauptsprache bestimmt, welche Sprache auf der Vorderseite ist
+    final frontText = primaryLanguage == PrimaryLanguage.english ? word : translation;
+    final backText = primaryLanguage == PrimaryLanguage.english ? translation : word;
+    
+    // showTranslation: true = zeigt Rückseite (Nebensprache), false = zeigt Vorderseite (Hauptsprache)
+    // Wenn Hauptsprache Deutsch ist und showTranslation true, dann zeigt es Englisch (Rückseite)
+    // Wenn Hauptsprache Englisch ist und showTranslation true, dann zeigt es Deutsch (Rückseite)
+    // Die Logik bleibt gleich, nur frontText/backText werden getauscht
 
     return Expanded(
       child: Center(
         child: SwipeableWordCard(
           key: cardKey,
-          frontText: word,
-          backText: translation,
+          frontText: frontText,
+          backText: backText,
           level: current?.level,
           showTranslation: s.showTranslation,
           gesturesEnabled: !isPaused,
           footer: TimerBar(s: s),
           onSwipe: (correct) async {
             onSwipeCommit?.call(correct); // Pulse-Animation triggern
+            // Nach dem Wischen: Zurück zur Hauptsprache (showTranslation = false)
+            c.setShowTranslation(false);
             if (correct) {
               c.onSwipeRight();
             } else {

@@ -69,8 +69,8 @@ class PlasmaBandPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (!visible || cardRect == null || switchRect == null) return;
 
-    final t = phase * 2 * pi * 1.0; // doppelt so schnell wie vorher (0.50 -> 1.0)
-    final fromPts = cardBottomBand(cardRect!, count: 10, widthFactor: 0.40); // 40% Breite - enger gebündelt oben
+    final t = phase * 2 * pi * 2.0; // Doppelt so schnell wie vorher (1.0 -> 2.0)
+    final fromPts = cardBottomBand(cardRect!, count: 10, widthFactor: 0.20); // 20% Breite - enger gebündelt am Kartenrand
     final toPts = switchTopArcTight(
       switchRect!,
       count: 10,
@@ -124,13 +124,23 @@ class PlasmaBandPainter extends CustomPainter {
   }
 
   // Bundle-Punkt: liegt zwischen Karte und Switch, etwas näher an der Switch
+  // Mit sanfterem Bogen nach oben, um Switches nicht zu berühren
   Offset _bundlePoint(Offset a, Offset b, double t, Offset n) {
     final mid = Offset.lerp(a, b, 0.62)!; // näher zur Switch
-    final wobble = sin(t) * 6.0;          // ganz leichte Bewegung
-    return mid + n * wobble;
+    
+    // Sanftere Bewegung mit mehreren Wellen
+    final wobble1 = sin(t) * 3.0;
+    final wobble2 = sin(t * 0.9 + 1.5) * 2.0;
+    final wobble = (wobble1 + wobble2) / 2.0; // Durchschnitt für sanftere Bewegung
+    
+    // Sanfterer Bogen nach oben
+    final verticalOffset = -20.0;
+    final upVector = Offset(0, verticalOffset);
+    
+    return mid + n * wobble + upVector;
   }
 
-  // Pfad pro Faden (breit → eng → breit)
+  // Pfad pro Faden (breit → eng → breit) mit zusätzlicher Welle im oberen Bereich
   Path _bundledFlow(Offset a, Offset b, Offset n, double t, int seed, double startSpread, double endSpread) {
     final m = _bundlePoint(a, b, t, n);
 
@@ -140,18 +150,58 @@ class PlasmaBandPainter extends CustomPainter {
     // Endpunkt fächert breit (entlang Arc-Samples kommt sowieso Variation)
     final b2 = b + n * endSpread;
 
-    // Kurve 1: a2 -> m
-    final c1 = Offset.lerp(a2, m, 0.35)! + n * (sin(t + seed) * 10);
-    final c2 = Offset.lerp(a2, m, 0.75)! + n * (sin(t * 0.7 + seed * 1.3) * 6);
+    // Sanfter Bogen nach oben
+    final arcHeight = -25.0;
+    final upOffset = Offset(0, arcHeight);
 
-    // Kurve 2: m -> b2
-    final c3 = Offset.lerp(m, b2, 0.25)! + n * (sin(t * 0.9 + seed * 0.8) * 6);
-    final c4 = Offset.lerp(m, b2, 0.70)! + n * (sin(t + seed * 0.6) * 10);
+    // Sanfte Wellen mit reduzierten Amplituden
+    final wave1 = sin(t + seed) * 4.0;
+    final wave2 = sin(t * 0.8 + seed * 1.2) * 3.0;
+    final wave3 = sin(t * 1.2 + seed * 0.7) * 2.0;
+    final combinedWave = (wave1 + wave2 + wave3) / 3.0;
+
+    // Drei Segmente für zusätzliche Welle: a2 -> m1 -> m2 -> b2
+    // m1 bei 1/3 (oberer Bereich, wo nach unten geht)
+    // m2 bei 2/3 (dann wieder nach oben)
+    final m1 = Offset.lerp(a2, b2, 0.33)!; // Bei einem Drittel
+    final m2 = Offset.lerp(a2, b2, 0.67)!; // Bei zwei Dritteln
+
+    // Erste Kurve: a2 -> m1 (nach oben)
+    final c1a = Offset.lerp(a2, m1, 0.25)! + n * (combinedWave * 0.6) + upOffset * 0.2;
+    // Sehr starke Bewegung nach oben in der Mitte
+    final c1b = Offset.lerp(a2, m1, 0.75)! + n * (combinedWave * 0.6) + upOffset * 1.0;
+
+    // Zweite Kurve: m1 -> m2 (nach unten, dann wieder nach oben)
+    // Tangentialer Übergang: c1b, m1, c2a müssen kollinear sein
+    final downOffset = Offset(0, 15.0); // Nach unten für die Welle
+    
+    // Richtung am Ende der ersten Kurve (von c1b zu m1)
+    final dirAtM1 = m1 - c1b;
+    final dirAtM1Len = dirAtM1.distance;
+    final dirAtM1Norm = dirAtM1Len > 0.001 ? dirAtM1 / dirAtM1Len : Offset(0, -1);
+    // c2a liegt auf der Verlängerung von c1b -> m1 für tangentialen Übergang
+    // Sehr starke Bewegung nach oben
+    final c2a = m1 + dirAtM1Norm * 25.0 + n * (combinedWave * 1.1) + downOffset * 0.3;
+    final c2b = Offset.lerp(m1, m2, 0.75)! + n * (combinedWave * 1.1) + upOffset * 0.9;
+
+    // Dritte Kurve: m2 -> b2 (nach oben zur Switch)
+    // Tangentialer Übergang: c2b, m2, c3a müssen kollinear sein
+    final dirAtM2 = m2 - c2b;
+    final dirAtM2Len = dirAtM2.distance;
+    final dirAtM2Norm = dirAtM2Len > 0.001 ? dirAtM2 / dirAtM2Len : Offset(0, -1);
+    // c3a liegt auf der Verlängerung von c2b -> m2 für tangentialen Übergang
+    // Sehr starke Bewegung nach oben
+    final c3a = m2 + dirAtM2Norm * 25.0 + n * (combinedWave * 1.0) + upOffset * 1.0;
+    
+    // Größerer Bogen nach oben kurz vor der Switch
+    final largeArcOffset = Offset(0, -40.0); // Größerer Bogen nach oben
+    final c3b = Offset.lerp(m2, b2, 0.80)! + n * (combinedWave * 0.6) + largeArcOffset;
 
     return Path()
       ..moveTo(a2.dx, a2.dy)
-      ..cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, m.dx, m.dy)
-      ..cubicTo(c3.dx, c3.dy, c4.dx, c4.dy, b2.dx, b2.dy);
+      ..cubicTo(c1a.dx, c1a.dy, c1b.dx, c1b.dy, m1.dx, m1.dy)
+      ..cubicTo(c2a.dx, c2a.dy, c2b.dx, c2b.dy, m2.dx, m2.dy)
+      ..cubicTo(c3a.dx, c3a.dy, c3b.dx, c3b.dy, b2.dx, b2.dy);
   }
 
   void _dockFan(Canvas canvas, Offset p, double t, {double strength = 1.0}) {

@@ -1,7 +1,7 @@
 # 📋 Programmliste - Aktualisierte Übersicht
 
-> **Letzte Aktualisierung:** 27. Januar 2025  
-> **Version:** 1.4  
+> **Letzte Aktualisierung:** 28. Januar 2025  
+> **Version:** 1.5  
 > **Status:** ✅ Aktualisiert
 
 ## 📊 Projekt-Statistiken
@@ -35,7 +35,7 @@
   - Controllers: LearnMode, Category, WordList, CategoryDetail
   - Mix Feature: Navigation, Search, Selection Controllers
   - Sort Feature: VocabSortController
-  - Providers: S0Lock, LearningEngine, LevelSelection, SRSMode
+  - Providers: S0Lock, LearningEngine, LevelSelection, SRSMode, CardGlowSettings, PrimaryLanguage
   - SRS: Config, Logic, SrsPopupText (Dialog-Helper)
 - **Data**:
   - SupabaseWordRepository (Komplette RPC-Integration, fetchWordsByStage)
@@ -45,8 +45,8 @@
 - **Services**: SFXService
 - **UI**:
   - Screens: LearnMode, CategoryDetail, WordHub, WordList, MixBuilder, QuickSets, MyWords, VocabSort
-  - Cards: SwipeableWordCard (mit animiertem Glow-Effekt), WordCard
-  - Widgets: 63+ Widgets (StageWordsDialog, Controls, Indicators, Badges, PlasmaLinkPainter, CardGlowPainter, SwitchPulsePainter, etc.)
+  - Cards: SwipeableWordCard (mit animiertem Glow-Effekt, Slider-Steuerung), WordCard
+  - Widgets: 63+ Widgets (StageWordsDialog, CategorySettingsDialog, Controls, Indicators, Badges, PlasmaLinkPainter, CardGlowPainter, SwitchPulsePainter, etc.)
 
 #### 🃏 Decks (1 Datei)
 
@@ -84,17 +84,26 @@
   - Mehrschichtige Animation mit Plasma-Link-Farben
   - Dynamische Pulsierung (größer/kleiner werdend)
   - Animierte Partikel-Effekte an Ecken und Kanten
+  - **Slider-Steuerung**:
+    - Glow-Intensitäts-Slider (horizontal): Von komplett aus bis sehr stark
+    - Pulsierungsgeschwindigkeit-Slider (horizontal): Von statisch bis sehr schnell
+    - SVG-Icons: `low_sun-line.svg` / `bright_sun-line.svg` (Glow), `Icons.remove` / `impulse.svg` (Pulsierung)
+    - Präzise Icon-Positionierung mit `Transform.translate` für symmetrischen Abstand
+    - Persistente Einstellungen via `CardGlowSettingsProvider` (SharedPreferences)
+    - Slider nur auf der Vorderseite der Karte sichtbar
   
 - **Plasma Link Animation**:
   - Verbindet Karte mit Ziel-Stage-Switch während Drag-Geste
-  - Mehrere animierte Fäden zwischen Karten-Unterkante und Switch-Oberkante
+  - Mehrere animierte Fäden zwischen Karten-Unterkante (20% Breite) und Switch-Oberkante
   - Bündelung in der Mitte für organischen Look
+  - Dynamische Kurven mit tangentialen Übergängen, größerer Bogen nach oben
   - Erscheint erst nach Karten-Animation (500ms Delay)
   - Verschwindet beim Drag, erscheint wieder wenn Karte zurückkommt
+  - Doppelte Animationsgeschwindigkeit für flüssigere Bewegung
   
 - **Switch Pulse Animation**:
   - Corona-Effekt um Ziel-Stage-Switch bei erfolgreichem Swipe
-  - Expandierender, pulsierender Glow
+  - Expandierender, pulsierender Glow (2 Sekunden Dauer)
   - Mehrschichtige Animation für Tiefe
 
 ### Mix Feature
@@ -150,9 +159,8 @@
 
 ### Repository Functions
 
-- `fetchWordsByStage()`: Lädt alle Wörter für einen bestimmten Stage einer Kategorie
+- `fetchWordsByStage()`: Lädt alle Wörter für einen bestimmten Stage einer Kategorie (inkl. Stage 0 mit korrekter Logik)
 - `submitReview()`: Erweitert um SRS-Modus-Parameter (time/adaptive/hybrid)
-- `fetchWordsByStage()`: Lädt alle Wörter für einen bestimmten Stage einer Kategorie
 
 ### Views
 
@@ -172,6 +180,26 @@
 - **Layout**: WordsLayout (zentrale Konstanten)
 - **Home Theme**: Feature-spezifische Themes
 - **Dynamic Colors**: Kontrast-Anpassung
+
+## ⚙️ Benutzereinstellungen
+
+### Card Glow Settings
+- **Provider**: `CardGlowSettingsProvider` (NotifierProvider)
+- **Speicherung**: SharedPreferences (persistent)
+- **Einstellungen**:
+  - `intensity`: Glow-Intensität (0.0 - 1.0)
+  - `pulseSpeed`: Pulsierungsgeschwindigkeit (0.0 - 1.0)
+- **Verwendung**: Universell für alle Karten, bleibt erhalten bis geändert
+
+### Primary Language
+- **Provider**: `PrimaryLanguageProvider` (NotifierProvider)
+- **Speicherung**: SharedPreferences (persistent)
+- **Einstellungen**: Englisch oder Deutsch
+- **Verwendung**: 
+  - Universell für alle Kategorien
+  - Bestimmt Vorder- und Rückseite der Karten
+  - Nach Swipe wird Karte immer in Primary Language angezeigt
+- **UI**: `CategorySettingsDialog` (über Settings-Button in CategoryDetailScreen)
 
 ## 📝 Vollständige Code-Dokumentation
 

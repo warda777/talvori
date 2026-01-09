@@ -231,12 +231,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     // Animation Controller initialisieren - sehr langsame Animation
     fx = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 30000), // 30 Sekunden Animation
+      duration: const Duration(milliseconds: 10000), // 10 Sekunden Animation (3x schneller)
     )..repeat();
     
     pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: const Duration(milliseconds: 2000), // Doppelt so langer Bounce-Effekt
     );
     
     // ⬇️ NEU: Wheel-Labels initialisieren (ganz am Anfang)
@@ -593,7 +593,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   return CustomPaint(
                     painter: SwitchPulsePainter(
                       rect: _rectInStack(k!),
-                      t: Curves.easeOut.transform(pulse.value),
+                      t: Curves.easeOutCubic.transform(pulse.value), // Sanfterer, längerer Effekt
                     ),
                     size: Size.infinite,
                   );

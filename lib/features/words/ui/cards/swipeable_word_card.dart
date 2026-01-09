@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
+import 'package:talvori/features/words/application/card_glow_settings_provider.dart';
 import '../widgets/level_badge.dart';
 import '../widgets/card_glow_painter.dart';
 
@@ -193,10 +196,6 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
       child: Stack(
         children: [
           Positioned(top: 12, right: 12, child: LevelBadge(level: widget.level)),
-          const Positioned(
-            top: 12, left: 12,
-            child: Icon(Icons.rocket_launch_rounded, color: Colors.white70, size: 20),
-          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
@@ -231,24 +230,25 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
 }
 
 /// re-usable Shell mit animiertem Glow-Effekt
-class _CardShell extends StatefulWidget {
+class _CardShell extends ConsumerStatefulWidget {
   final Widget child;
   final bool dark;
   const _CardShell({required this.child, this.dark = false});
 
   @override
-  State<_CardShell> createState() => _CardShellState();
+  ConsumerState<_CardShell> createState() => _CardShellState();
 }
 
-class _CardShellState extends State<_CardShell> with SingleTickerProviderStateMixin {
+class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProviderStateMixin {
   late AnimationController _glowController;
 
   @override
   void initState() {
     super.initState();
+    // Feste Dauer für kontinuierliche Atmung (wie vorher)
     _glowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000), // Langsame, sanfte Pulsierung
+      duration: const Duration(milliseconds: 3000), // Langsame, sanfte Pulsierung wie Atmung
     )..repeat();
   }
 
@@ -263,17 +263,34 @@ class _CardShellState extends State<_CardShell> with SingleTickerProviderStateMi
     final cardWidth = MediaQuery.of(context).size.width * 0.78;
     final cardHeight = MediaQuery.of(context).size.height * 0.52;
     final borderRadius = WordsUIConstants.borderRadius;
+    
+    // Lade persistente Einstellungen aus Provider (außerhalb von AnimatedBuilder)
+    final settings = ref.watch(cardGlowSettingsProvider);
+    final settingsNotifier = ref.read(cardGlowSettingsProvider.notifier);
 
     return AnimatedBuilder(
       animation: _glowController,
       builder: (context, child) {
-        final pulse = 0.5 + 0.5 * math.sin(_glowController.value * 2 * math.pi);
+        // Kontinuierliche Atmung: Animation läuft immer mit konstanter Geschwindigkeit
+        // Die Amplitude wird mit pulseSpeed multipliziert für smooth Übergang
+        final baseValue = _glowController.value;
+        
+        // Phase bleibt konstant (kontinuierliche Atmung)
+        final pulseValue = baseValue * 2 * math.pi;
+        
+        // Amplitude wird mit pulseSpeed multipliziert: 
+        // - Bei speed = 0: Amplitude = 0 → pulse = 0.5 (statisch)
+        // - Bei speed > 0: Amplitude steigt smooth → pulse atmet smooth
+        final pulse = 0.5 + 0.5 * math.sin(pulseValue) * settings.pulseSpeed;
+        
         final glowSpread = 12.0 + (48.0 - 12.0) * pulse;
         
-        return Container(
-          width: cardWidth,
-          height: cardHeight,
-          decoration: BoxDecoration(
+        return Stack(
+          children: [
+            Container(
+              width: cardWidth,
+              height: cardHeight,
+              decoration: BoxDecoration(
             color: widget.dark ? const Color(0xFF3A3939) : WordsUIConstants.cardBackground,
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
@@ -283,30 +300,151 @@ class _CardShellState extends State<_CardShell> with SingleTickerProviderStateMi
             boxShadow: [
               // Ursprüngliche Schatten beibehalten
               ...WordsUIConstants.cardShadow,
-              // Animierter Glow-Effekt
+              // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
               BoxShadow(
-                color: const Color(0xFFB16CFF).withOpacity(0.25 * (0.6 + 0.4 * pulse)),
-                blurRadius: (60 + glowSpread * 2.0).clamp(0.0, 100.0),
-                spreadRadius: glowSpread * 1.5,
+                color: const Color(0xFFB16CFF).withOpacity(0.25 * (0.6 + 0.4 * pulse) * settings.intensity),
+                blurRadius: (60 + glowSpread * 2.0).clamp(0.0, 100.0) * settings.intensity,
+                spreadRadius: glowSpread * 1.5 * settings.intensity,
               ),
               BoxShadow(
-                color: const Color(0xFF9B7CFF).withOpacity(0.30 * (0.5 + 0.5 * pulse)),
-                blurRadius: (45 + glowSpread * 1.5).clamp(0.0, 100.0),
-                spreadRadius: glowSpread * 1.2,
+                color: const Color(0xFF9B7CFF).withOpacity(0.30 * (0.5 + 0.5 * pulse) * settings.intensity),
+                blurRadius: (45 + glowSpread * 1.5).clamp(0.0, 100.0) * settings.intensity,
+                spreadRadius: glowSpread * 1.2 * settings.intensity,
               ),
               BoxShadow(
-                color: const Color(0xFF7B5CFF).withOpacity(0.35 * (0.5 + 0.5 * pulse)),
-                blurRadius: (35 + glowSpread * 1.2).clamp(0.0, 100.0),
-                spreadRadius: glowSpread * 0.9,
+                color: const Color(0xFF7B5CFF).withOpacity(0.35 * (0.5 + 0.5 * pulse) * settings.intensity),
+                blurRadius: (35 + glowSpread * 1.2).clamp(0.0, 100.0) * settings.intensity,
+                spreadRadius: glowSpread * 0.9 * settings.intensity,
               ),
               BoxShadow(
-                color: const Color(0xFFEFE9FF).withOpacity(0.45 * (0.3 + 0.7 * pulse)),
-                blurRadius: (18 + glowSpread * 0.5).clamp(0.0, 100.0),
-                spreadRadius: glowSpread * 0.3,
+                color: const Color(0xFFEFE9FF).withOpacity(0.45 * (0.3 + 0.7 * pulse) * settings.intensity),
+                blurRadius: (18 + glowSpread * 0.5).clamp(0.0, 100.0) * settings.intensity,
+                spreadRadius: glowSpread * 0.3 * settings.intensity,
               ),
             ],
           ),
           child: widget.child,
+        ),
+            // Slider (nur auf Vorderseite, nicht auf Rückseite)
+            if (!widget.dark) ...[
+              // Glow-Intensitäts-Slider (horizontal) mit Icons
+              Positioned(
+                top: 12,
+                left: 12,
+                width: (cardWidth * 0.5 - 24) * 1.5, // 1.5x so lang wie ursprünglich
+                child: Row(
+                  children: [
+                    // Links: Schwaches Licht-Icon
+                    Transform.translate(
+                      offset: const Offset(8, 0), // Nach rechts verschieben, um näher zum Slider zu kommen
+                      child: SvgPicture.asset(
+                        'assets/icons/low_sun-line.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white54,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                    // Slider
+                    Expanded(
+                      child: Transform.translate(
+                        offset: const Offset(-8, 0), // Nach links verschieben, um näher zum Icon zu kommen
+                        child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: const Color(0xFFB16CFF),
+                          inactiveTrackColor: Colors.white24,
+                          thumbColor: const Color(0xFFB16CFF),
+                          overlayColor: const Color(0xFFB16CFF).withOpacity(0.2),
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                          trackHeight: 2,
+                        ),
+                        child: Slider(
+                          value: settings.intensity,
+                          min: 0.0,
+                          max: 1.0,
+                          onChanged: (value) {
+                            settingsNotifier.setIntensity(value);
+                          },
+                        ),
+                        ),
+                      ),
+                    ),
+                    // Rechts: Starkes Licht-Icon
+                    Transform.translate(
+                      offset: const Offset(-24, 0), // Nach links verschieben, um näher zum Slider zu kommen
+                      child: SvgPicture.asset(
+                        'assets/icons/bright_sun-line.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white54,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Pulsierungsgeschwindigkeit-Slider (mit größerem Abstand zum oberen Slider) mit Icons
+              Positioned(
+                top: 50, // Größerer Abstand (vorher 40)
+                left: 12,
+                width: (cardWidth * 0.5 - 24) * 1.5, // 1.5x so lang wie ursprünglich
+                child: Row(
+                  children: [
+                    // Links: Einfacher Strich (statisch, kein Pochen)
+                    Transform.translate(
+                      offset: const Offset(8, 0), // Nach rechts verschieben, um näher zum Slider zu kommen
+                      child: Icon(
+                        Icons.remove,
+                        color: Colors.white54,
+                        size: 16,
+                      ),
+                    ),
+                    // Slider
+                    Expanded(
+                      child: Transform.translate(
+                        offset: const Offset(-8, 0), // Nach links verschieben, um näher zum Icon zu kommen
+                        child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: const Color(0xFF7B5CFF),
+                          inactiveTrackColor: Colors.white24,
+                          thumbColor: const Color(0xFF7B5CFF),
+                          overlayColor: const Color(0xFF7B5CFF).withOpacity(0.2),
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                          trackHeight: 2,
+                        ),
+                        child: Slider(
+                          value: settings.pulseSpeed,
+                          min: 0.0,
+                          max: 1.0,
+                          onChanged: (value) {
+                            settingsNotifier.setPulseSpeed(value);
+                          },
+                        ),
+                        ),
+                      ),
+                    ),
+                    // Rechts: EKG/Rhythmus-Linie (Pochen)
+                    Transform.translate(
+                      offset: const Offset(-24, 0), // Nach links verschieben, um näher zum Slider zu kommen
+                      child: SvgPicture.asset(
+                        'assets/icons/impulse.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white54,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         );
       },
     );

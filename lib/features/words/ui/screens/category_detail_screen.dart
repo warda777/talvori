@@ -17,6 +17,7 @@ import 'package:talvori/features/words/ui/widgets/srs_mode_toggle.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/ui/widgets/category_settings_dialog.dart';
 
 
 
@@ -173,8 +174,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                       );
                     },
                     onSettings: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Settings tapped')),
+                      showDialog(
+                        context: context,
+                        builder: (_) => const CategorySettingsDialog(),
                       );
                     },
                     // Offsets wie im Learn-Mode:
