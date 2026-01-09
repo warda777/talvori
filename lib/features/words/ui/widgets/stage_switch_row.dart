@@ -360,6 +360,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       } else {
         // S1-S5 Switches
         final stage = i;
+        final prefix = widget.labels?.stagePrefix ?? 'S';
         Widget knobbed = VerticalStageSwitch(
           containerKey: widget.switchKeys?[stage],
           count: stages[stage],
@@ -367,8 +368,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           innerColor: WordsUIConstants.stageInner,
           highlight: stages[stage] > 0 && stages[stage] < WordsUIConstants.stageGoal,
           completed: stages[stage] >= WordsUIConstants.stageGoal,
-          label: 'S$stage',
-          note: '$stage',
+          label: '$prefix$stage',
+          note: '$prefix$stage',
           glow: _blinking.contains(stage),
           knobWrapper: (knob) => LongPressDraggable<StageDrag>(
             data: StageDrag(stage, count: 1),

@@ -124,7 +124,7 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
         case SrsSystem.adaptive:
           return 'A';
         case SrsSystem.hybrid:
-          return '';
+          return 'H';
       }
     }();
 

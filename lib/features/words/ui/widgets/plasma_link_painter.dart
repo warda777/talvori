@@ -69,8 +69,8 @@ class PlasmaBandPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (!visible || cardRect == null || switchRect == null) return;
 
-    final t = phase * 2 * pi * 2.0; // Doppelt so schnell wie vorher (1.0 -> 2.0)
-    final fromPts = cardBottomBand(cardRect!, count: 10, widthFactor: 0.20); // 20% Breite - enger gebündelt am Kartenrand
+    final t = phase * 2 * pi * 1.0; // Halbierte Geschwindigkeit (von 2.0 auf 1.0)
+    final fromPts = cardBottomBand(cardRect!, count: 10, widthFactor: 0.10); // 10% Breite - sehr eng gebündelt am Kartenrand
     final toPts = switchTopArcTight(
       switchRect!,
       count: 10,

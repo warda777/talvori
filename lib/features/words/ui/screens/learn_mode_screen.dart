@@ -60,6 +60,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     4: GlobalKey(),
     5: GlobalKey(),
   };
+  
+  // Keys für Single-Modus Switches (SRC, R1, R2)
+  final Map<String, GlobalKey> singleSwitchKeys = {
+    'SRC': GlobalKey(),
+    'R1': GlobalKey(),
+    'R2': GlobalKey(),
+  };
 
   Rect? cardRect;
   Rect? switchRect;
@@ -67,7 +74,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   late final AnimationController fx;
   late final AnimationController pulse;
-  int? pulseStage;
+  int? pulseStage; // Für normale Stages (0-5)
+  String? pulseSingleBucket; // Für Single-Modus ('SRC', 'R1', 'R2')
 
   // Koordinaten-Helper: Global → Stack-lokal
   Offset _centerInStack(GlobalKey key) {
@@ -110,8 +118,19 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     return localTopLeft & box.size;
   }
 
-  void _updateLink(int targetStage) {
-    final targetKey = switchKeys[targetStage];
+  void _updateLink(int? targetStage) {
+    // Im Single-Modus verwenden wir singleSwitchKeys
+    final mode = ref.read(levelSelectionProvider);
+    GlobalKey? targetKey;
+    
+    if (mode == LevelSelectionMode.single && targetStage == -1) {
+      // Single-Modus: zeige auf SRC-Switch
+      targetKey = singleSwitchKeys['SRC'];
+    } else if (targetStage != null && targetStage >= 0 && targetStage <= 5) {
+      // Normal-Modus: verwende switchKeys
+      targetKey = switchKeys[targetStage];
+    }
+    
     if (cardKey.currentContext == null || targetKey?.currentContext == null) return;
     setState(() {
       cardRect = _rectInStack(cardKey);
@@ -126,7 +145,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void _hideLink() => setState(() => linkVisible = false);
 
   void triggerPulse(int stage) {
-    setState(() => pulseStage = stage);
+    setState(() {
+      pulseStage = stage;
+      pulseSingleBucket = null; // Normal-Modus
+    });
+    pulse.forward(from: 0);
+  }
+
+  void triggerPulseSingle(String bucket) {
+    setState(() {
+      pulseSingleBucket = bucket;
+      pulseStage = null; // Single-Modus
+    });
     pulse.forward(from: 0);
   }
 
@@ -134,6 +164,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final threshold = MediaQuery.of(context).size.width * 0.35;
     if (dx.abs() < threshold) {
       _hideLink();
+      return;
+    }
+
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single) {
+      // Im Single-Modus zeigen wir immer auf den SRC-Switch
+      _updateLink(-1);
       return;
     }
 
@@ -167,23 +204,62 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _handleSwipeCommit(bool correct) {
-    final current = ref.read(currentWordProvider);
-    if (current == null) return;
-
-    int targetStage;
-    if (correct) {
-      // Rechts = Correct = Stage hoch
-      targetStage = (current.srsStage + 1).clamp(0, 5);
-    } else {
-      // Links = Incorrect = Stage runter
-      targetStage = (current.srsStage - 1).clamp(0, 5);
-    }
-
+    final mode = ref.read(levelSelectionProvider);
+    
     // Link sofort verstecken, weil Karte fliegt raus
     _hideLink();
 
-    // Pulse-Animation beim Commit
-    triggerPulse(targetStage);
+    if (mode == LevelSelectionMode.single) {
+      // Im Single-Modus: Bestimme den Ziel-Bucket basierend auf correct
+      // Die Counts werden im Controller aktualisiert, wir müssen darauf warten
+      final countsBefore = ref.read(singleSessionCountsProvider);
+      
+      // Verwende ref.listen, um auf Counts-Änderungen zu reagieren
+      // Aber nur einmal, deshalb verwenden wir einen Timer
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (!mounted) return;
+        
+        final countsAfter = ref.read(singleSessionCountsProvider);
+        
+        // Bestimme, welcher Bucket größer geworden ist
+        String? targetBucket;
+        if (correct) {
+          // Correct: Wort geht zu R1 oder R2
+          if (countsAfter.sr1 > countsBefore.sr1) {
+            targetBucket = 'R1';
+          } else if (countsAfter.sr2 > countsBefore.sr2) {
+            targetBucket = 'R2';
+          } else {
+            // Fallback: Wenn sich nichts geändert hat, zeige auf R1
+            targetBucket = 'R1';
+          }
+        } else {
+          // Incorrect: Wort bleibt in SRC oder geht zurück zu SRC
+          targetBucket = 'SRC';
+        }
+        
+        // Pulse-Animation auf den Ziel-Bucket
+        if (targetBucket != null && mounted) {
+          triggerPulseSingle(targetBucket);
+        }
+      });
+    } else {
+      // Normal-Modus
+      final current = ref.read(currentWordProvider);
+      if (current == null) return;
+
+      int targetStage;
+      if (correct) {
+        // Rechts = Correct = Stage hoch
+        targetStage = (current.srsStage + 1).clamp(0, 5);
+      } else {
+        // Links = Incorrect = Stage runter
+        targetStage = (current.srsStage - 1).clamp(0, 5);
+      }
+
+      // Pulse-Animation beim Commit
+      triggerPulse(targetStage);
+    }
 
     // Nach dem Swipe-Commit: Link für neue Karte aktivieren, NACH der Karten-Animation
     // Karten-Animation: 300ms (raus) + 50ms (delay) + 400ms (rein) = 750ms
@@ -198,8 +274,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   /// Ziel-Stage für Idle-Karte (noch nicht geswiped)
-  /// Zeigt auf die aktuelle Stage des Wortes (S0..S5)
-  int _targetStageForIdleCard() {
+  /// Zeigt auf die aktuelle Stage des Wortes (S0..S5) oder im Single-Modus auf 'SRC'
+  int? _targetStageForIdleCard() {
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single) {
+      // Im Single-Modus zeigen wir immer auf den SRC-Switch
+      // Wir verwenden einen speziellen Wert (-1) um zu signalisieren, dass es Single-Modus ist
+      return -1; // Spezieller Wert für Single-Modus
+    }
     final current = ref.read(currentWordProvider);
     return current?.srsStage ?? 0; // Fallback: Stage 0
   }
@@ -448,10 +530,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       final prefix = switch (kind) {
         SrsKind.tSrs => 'T',
         SrsKind.aSrs => 'A',
-        SrsKind.neutral => '', // Hybrid
+        SrsKind.neutral => 'H', // Hybrid
       };
-      final stageLabelText = prefix.isEmpty ? 'S$st' : '$prefix$st';
-      final srPrefix = prefix; // '' => Hybrid zeigt 'R1/R2'
+      final stageLabelText = '$prefix$st';
+      final srPrefix = prefix; // 'H' => Hybrid zeigt 'HR1/HR2'
 
       switchesRow = SingleModeSwitchRow(
         stageLabel: stageLabelText,
@@ -461,6 +543,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         srPrefix: srPrefix,               // ← NEU
         innerStrokeColor: stroke,         // ← NEU
         innerFillColor: innerFill,        // ← NEU
+        switchKeys: singleSwitchKeys,     // ← NEU: Keys für Plasma-Link
       );
     } else {
       // Non-Single: S0–S5 / S1–S5
@@ -496,7 +579,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       final prefix = switch (kind) {
         SrsKind.tSrs => 'T',
         SrsKind.aSrs => 'A',
-        SrsKind.neutral => '',
+        SrsKind.neutral => 'H',
       };
 
       switchesRow = StageSwitchRow(
@@ -586,13 +669,22 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               child: AnimatedBuilder(
                 animation: pulse,
                 builder: (_, __) {
-                  if (pulseStage == null) return const SizedBox.shrink();
-                  final k = switchKeys[pulseStage!];
-                  if (k?.currentContext == null) return const SizedBox.shrink();
+                  GlobalKey? targetKey;
+                  
+                  // Prüfe ob Single-Modus oder Normal-Modus
+                  if (pulseSingleBucket != null) {
+                    // Single-Modus: verwende singleSwitchKeys
+                    targetKey = singleSwitchKeys[pulseSingleBucket];
+                  } else if (pulseStage != null) {
+                    // Normal-Modus: verwende switchKeys
+                    targetKey = switchKeys[pulseStage!];
+                  }
+                  
+                  if (targetKey?.currentContext == null) return const SizedBox.shrink();
 
                   return CustomPaint(
                     painter: SwitchPulsePainter(
-                      rect: _rectInStack(k!),
+                      rect: _rectInStack(targetKey!),
                       t: Curves.easeOutCubic.transform(pulse.value), // Sanfterer, längerer Effekt
                     ),
                     size: Size.infinite,

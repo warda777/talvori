@@ -191,6 +191,16 @@ enum SrsPopupMode { tSrs, aSrs, hybrid }
 enum SrsPopupRange { s0toS5, s1toS5, single }
 
 class SrsPopupText {
+  // Hilfsfunktion: Gibt die modusabhängige Stage-Bezeichnung zurück (T0-T5, A0-A5, H0-H5)
+  static String stageLabel(int stage, SrsPopupMode mode) {
+    final prefix = switch (mode) {
+      SrsPopupMode.tSrs => "T",
+      SrsPopupMode.aSrs => "A",
+      SrsPopupMode.hybrid => "H",
+    };
+    return "$prefix$stage";
+  }
+
   static String stageHeader(int stage, SrsPopupMode mode) {
     final title = SrsUiConfig.stageTitle[stage] ?? "Stufe $stage";
     final modeLabel = switch (mode) {
@@ -198,34 +208,45 @@ class SrsPopupText {
       SrsPopupMode.aSrs => "A-SRS",
       SrsPopupMode.hybrid => "Hybrid",
     };
-    return "S$stage – $title • $modeLabel";
+    final sl = stageLabel(stage, mode);
+    return "$sl – $title • $modeLabel";
   }
 
-  static String rangeLabel(SrsPopupRange range) {
+  static String rangeLabel(SrsPopupRange range, SrsPopupMode mode) {
+    final s1ToS5Label = switch (mode) {
+      SrsPopupMode.tSrs => "T1–T5",
+      SrsPopupMode.aSrs => "A1–A5",
+      SrsPopupMode.hybrid => "H1–H5",
+    };
+    
     return switch (range) {
-      SrsPopupRange.s0toS5 => "Bereich: S0–S5 (Neu + Wiederholen)",
-      SrsPopupRange.s1toS5 => "Bereich: S1–S5 (nur Wiederholen)",
-      SrsPopupRange.single => "Bereich: Single (gezieltes Training ohne Stage-Wechsel)",
+      SrsPopupRange.s0toS5 => "Bereich: AUTO (Neu + Wiederholen)",
+      SrsPopupRange.s1toS5 => "Bereich: $s1ToS5Label (nur Wiederholen)",
+      SrsPopupRange.single => "Bereich: SINGLE (gezieltes Training ohne Stage-Wechsel)",
     };
   }
 
-  static String whatIs(int stage) {
+  static String whatIs(int stage, SrsPopupMode mode) {
+    final sl = stageLabel(stage, mode);
     return switch (stage) {
-      0 => "S0 enthält neue Wörter, die noch nicht in den Wiederholungs-Kreislauf eingestuft sind.",
-      1 => "S1 ist die Einstiegsstufe: Wörter sind begonnen, aber noch unsicher.",
-      2 => "S2 bedeutet: erste Stabilität, aber noch nicht zuverlässig abrufbar.",
-      3 => "S3 festigt den Abruf über größere Abstände.",
-      4 => "S4 steht für hohe Sicherheit; Wiederholungen prüfen die Langzeit-Stabilität.",
-      5 => "S5 ist die Langzeitstufe: seltene Wiederholungen zur Auffrischung.",
-      _ => "Stufe $stage beschreibt den aktuellen Lern- und Stabilitätsgrad.",
+      0 => "$sl enthält neue Wörter, die noch nicht in den Wiederholungs-Kreislauf eingestuft sind.",
+      1 => "$sl ist die Einstiegsstufe: Wörter sind begonnen, aber noch unsicher.",
+      2 => "$sl bedeutet: erste Stabilität, aber noch nicht zuverlässig abrufbar.",
+      3 => "$sl festigt den Abruf über größere Abstände.",
+      4 => "$sl steht für hohe Sicherheit; Wiederholungen prüfen die Langzeit-Stabilität.",
+      5 => "$sl ist die Langzeitstufe: seltene Wiederholungen zur Auffrischung.",
+      _ => "Stufe $sl beschreibt den aktuellen Lern- und Stabilitätsgrad.",
     };
   }
 
-  static String tSrsLogicForStage(int stage, {required bool s0Locked}) {
+  static String tSrsLogicForStage(int stage, {required bool s0Locked, required SrsPopupMode mode}) {
+    final sl = stageLabel(stage, mode);
     if (stage == 0) {
       if (s0Locked) {
-        return "S0 ist aktuell gesperrt. Dadurch werden keine neuen Wörter eingeführt. "
-            "Nutze S1–S5, um vorhandene Wörter zu festigen.";
+        final t1Label = stageLabel(1, mode);
+        final t5Label = stageLabel(5, mode);
+        return "$sl ist aktuell gesperrt. Dadurch werden keine neuen Wörter eingeführt. "
+            "Nutze $t1Label–$t5Label, um vorhandene Wörter zu festigen.";
       }
       return "T-SRS arbeitet mit festen Stufen und klaren Regeln. "
           "Neue Wörter werden bewusst begrenzt, damit Wiederholungen nicht verdrängt werden.";
@@ -235,12 +256,13 @@ class SrsPopupText {
     final nextLabel = SrsUiConfig.tNextIntervalLabel[stage + 1] ?? "später";
 
     if (stage >= 1 && stage <= 4) {
+      final nextStageLabel = stageLabel(stage + 1, mode);
       return "In T-SRS steigt ein Wort nach klaren Kriterien auf. "
-          "Nach $need erfolgreichen Wiederholungen wechselt es in S${stage + 1}. "
+          "Nach $need erfolgreichen Wiederholungen wechselt es in $nextStageLabel. "
           "Dort liegt der nächste typische Abstand bei: $nextLabel.";
     }
 
-    return "S5 ist die Zielstufe im T-SRS. Wörter bleiben hier langfristig und werden nur selten geprüft.";
+    return "$sl ist die Zielstufe im T-SRS. Wörter bleiben hier langfristig und werden nur selten geprüft.";
   }
 
   static String aSrsLogicForStage(int stage) {
@@ -250,9 +272,10 @@ class SrsPopupText {
         "Die App versucht, dich möglichst nah am optimalen Zeitpunkt vor dem Vergessen zu trainieren.";
   }
 
-  static String hybridLogicForStage(int stage) {
+  static String hybridLogicForStage(int stage, SrsPopupMode mode) {
+    final sl = stageLabel(stage, mode);
     return "Hybrid kombiniert beides: "
-        "Die Stufenlogik bleibt klar wie im T-SRS (du weißt, warum ein Wort in S$stage ist), "
+        "Die Stufenlogik bleibt klar wie im T-SRS (du weißt, warum ein Wort in $sl ist), "
         "aber Timing und Wiederholungsabstände werden wie im A-SRS feinjustiert (früher/später je nach Stabilität).";
   }
 
@@ -264,22 +287,25 @@ class SrsPopupText {
   }) {
     // Single: explizit keine Stage-Änderung – laut Architektur.
     if (range == SrsPopupRange.single) {
-      return "Single-Modus: Dieses Training verändert keine SRS-Stufe. "
+      return "SINGLE-Modus: Dieses Training verändert keine SRS-Stufe. "
           "Es dient dem gezielten Üben innerhalb einer Stufe, ohne Auf-/Abstieg.";
     }
 
     if (mode == SrsPopupMode.tSrs) {
+      final sl = stageLabel(stage, mode);
       if (stage == 0) {
+        final t1Label = stageLabel(1, mode);
         return s0Locked
-            ? "S0 ist gesperrt. Keine neuen Wörter werden eingeführt."
-            : "S0 → S1: Ein Wort wird eingestuft, sobald es erstmals erfolgreich bearbeitet wurde.";
+            ? "$sl ist gesperrt. Keine neuen Wörter werden eingeführt."
+            : "$sl → $t1Label: Ein Wort wird eingestuft, sobald es erstmals erfolgreich bearbeitet wurde.";
       }
       if (stage >= 1 && stage <= 4) {
         final need = SrsUiConfig.tRepeatsToAdvance[stage] ?? 1;
-        return "Aufstieg: Nach $need erfolgreichen Wiederholungen → S${stage + 1}. "
+        final nextStageLabel = stageLabel(stage + 1, mode);
+        return "Aufstieg: Nach $need erfolgreichen Wiederholungen → $nextStageLabel. "
             "Fehler führen typischerweise zu mehr Wiederholung (und ggf. Rückstufung, je nach Engine-Regel).";
       }
-      return "S5: Langzeitpflege – seltene Wiederholungen zur Stabilisierung.";
+      return "$sl: Langzeitpflege – seltene Wiederholungen zur Stabilisierung.";
     }
 
     if (mode == SrsPopupMode.aSrs) {
@@ -293,14 +319,15 @@ class SrsPopupText {
         "Timing (adaptiv wie A-SRS): Abstände werden je nach Stabilität früher oder später gesetzt.";
   }
 
-  static String colorLegend({required bool s0Locked}) {
+  static String colorLegend({required bool s0Locked, required SrsPopupMode mode}) {
     final lines = <String>[
       "Leuchtend: Diese Stufe ist aktiv oder im Fokus.",
       "Gedimmt: Nicht aktiv oder aktuell nicht im gewählten Bereich.",
       "Kurzer Impuls/Glow: Fortschritt (z. B. Aufstieg) wurde erreicht.",
     ];
     if (s0Locked) {
-      lines.insert(2, "Schloss/Gesperrt: S0 ist blockiert (keine neuen Wörter).");
+      final stage0Label = SrsPopupText.stageLabel(0, mode);
+      lines.insert(2, "Schloss/Gesperrt: $stage0Label ist blockiert (keine neuen Wörter).");
     }
     return lines.join("\n");
   }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 /// Auswahl-Modi für die Levels-Schaltung
 enum LevelSelectionMode { s0toS5, s1toS5, single }
 
-/// Drei schlanke Buttons: [S0–S5] [S1–S5] [Single]
+/// Drei schlanke Buttons: [AUTO] [T1–T5/A1–A5/H1–H5] [SINGLE]
 /// - Aktiv: Füllung #2D2C2E, weißer Rand + Glow, Text weiß
 /// - Inaktiv: nur Rand #2D2C2E, Innen transparent, Text ausgegraut
-class LevelSelectorButtons extends StatelessWidget {
+class LevelSelectorButtons extends ConsumerWidget {
   const LevelSelectorButtons({
     super.key,
     required this.mode,
@@ -24,25 +26,40 @@ class LevelSelectorButtons extends StatelessWidget {
   static const _activeFill = Color(0xFF2D2C2E);
   static const _inactiveStroke = Color(0xFF2D2C2E);
 
+  /// Gibt das Label für S1-S5 basierend auf dem SRS-Modus zurück
+  String _getS1ToS5Label(SrsSystem srsMode) {
+    switch (srsMode) {
+      case SrsSystem.time:
+        return 'T1–T5';
+      case SrsSystem.adaptive:
+        return 'A1–A5';
+      case SrsSystem.hybrid:
+        return 'H1–H5';
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final srsMode = ref.watch(srsModeControllerProvider).mode;
+    final s1ToS5Label = _getS1ToS5Label(srsMode);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _ModeButton(
-          label: 'S0–S5',
+          label: 'AUTO',
           selected: mode == LevelSelectionMode.s0toS5,
           onTap: () => onModeChanged(LevelSelectionMode.s0toS5),
         ),
         SizedBox(width: spacing),
         _ModeButton(
-          label: 'S1–S5',
+          label: s1ToS5Label,
           selected: mode == LevelSelectionMode.s1toS5,
           onTap: () => onModeChanged(LevelSelectionMode.s1toS5),
         ),
         SizedBox(width: spacing),
         _ModeButton(
-          label: 'Single',
+          label: 'SINGLE',
           selected: mode == LevelSelectionMode.single,
           onTap: () => onModeChanged(LevelSelectionMode.single),
         ),

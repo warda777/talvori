@@ -56,12 +56,12 @@ class StageWordsDialog extends ConsumerWidget {
     final daysForStage = isTSrs ? getTSrsDaysForStage(stage) : null;
 
     final header = SrsPopupText.stageHeader(stage, popupMode);
-    final rangeLine = SrsPopupText.rangeLabel(popupRange);
+    final rangeLine = SrsPopupText.rangeLabel(popupRange, popupMode);
 
     final modeLogic = switch (popupMode) {
-      SrsPopupMode.tSrs => SrsPopupText.tSrsLogicForStage(stage, s0Locked: s0Locked),
+      SrsPopupMode.tSrs => SrsPopupText.tSrsLogicForStage(stage, s0Locked: s0Locked, mode: popupMode),
       SrsPopupMode.aSrs => SrsPopupText.aSrsLogicForStage(stage),
-      SrsPopupMode.hybrid => SrsPopupText.hybridLogicForStage(stage),
+      SrsPopupMode.hybrid => SrsPopupText.hybridLogicForStage(stage, popupMode),
     };
 
     final progression = SrsPopupText.progressionBlock(
@@ -71,7 +71,7 @@ class StageWordsDialog extends ConsumerWidget {
       range: popupRange,
     );
 
-    final colors = SrsPopupText.colorLegend(s0Locked: s0Locked);
+    final colors = SrsPopupText.colorLegend(s0Locked: s0Locked, mode: popupMode);
 
     return Dialog(
       backgroundColor: const Color(0xFF1A1A1A),
@@ -145,7 +145,7 @@ class StageWordsDialog extends ConsumerWidget {
                     // Was ist das?
                     _Section(
                       title: "Was ist das?",
-                      text: SrsPopupText.whatIs(stage),
+                      text: SrsPopupText.whatIs(stage, popupMode),
                     ),
 
                     // Wie funktioniert es?
@@ -160,13 +160,13 @@ class StageWordsDialog extends ConsumerWidget {
                       text: progression,
                     ),
 
-                    // Tageslimit (nur für S0 bei T-SRS)
+                    // Tageslimit (nur für Stage 0 bei T-SRS)
                     if (popupMode == SrsPopupMode.tSrs && stage == 0) ...[
                       const SizedBox(height: 12),
                       _Section(
-                        title: "Tageslimit (S0)",
+                        title: "Tageslimit (${SrsPopupText.stageLabel(0, popupMode)})",
                         text: s0Locked
-                            ? "S0 ist blockiert – heute werden keine neuen Wörter eingeführt."
+                            ? "${SrsPopupText.stageLabel(0, popupMode)} ist blockiert – heute werden keine neuen Wörter eingeführt."
                             : "Heute maximal: ${dailyNewLimit ?? SrsUiConfig.tSrsDailyNewLimit} neue Wörter"
                                 "${learnedTodayFromS0 != null ? "\nHeute bereits gelernt: $learnedTodayFromS0 / ${(dailyNewLimit ?? SrsUiConfig.tSrsDailyNewLimit)}" : ""}",
                       ),

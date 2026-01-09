@@ -32,7 +32,7 @@ Color? innerCapsuleFill(ThemeData t, SrsKind kind) {
 /// Label-Anzeige für Stages.
 /// - T-SRS: "T0"–"T5"
 /// - A-SRS: "A0"–"A5"
-/// - Hybrid: "0"–"5" (neutral)
+/// - Hybrid: "H0"–"H5"
 String stageLabel(int stage, SrsKind kind) {
   assert(stage >= 0 && stage <= 5);
   switch (kind) {
@@ -41,6 +41,6 @@ String stageLabel(int stage, SrsKind kind) {
     case SrsKind.aSrs:
       return 'A$stage';
     case SrsKind.neutral:
-      return '$stage';
+      return 'H$stage';
   }
 }

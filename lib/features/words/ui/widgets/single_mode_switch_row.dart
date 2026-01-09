@@ -17,19 +17,21 @@ class SingleModeSwitchRow extends StatelessWidget {
     this.innerStrokeColor,         // NEU
     required this.innerFillColor,  // NEU: dynamische Füllfarbe innen
     this.onBucketDrop,             // NEU
+    this.switchKeys,               // NEU: Keys für Plasma-Link (Map mit 'SRC', 'R1', 'R2')
   });
 
   final String stageLabel;
   final int srcCount, sr1Count, sr2Count;
   // neu:
-  final String srPrefix;              // z.B. 'T' / 'A' / '' (Hybrid)
+  final String srPrefix;              // z.B. 'T' / 'A' / 'H' (Hybrid)
   final Color? innerStrokeColor;      // Stroke-Farbe für die innere Kapsel
   final Color innerFillColor;         // Füllfarbe der inneren Kapsel
   final void Function(String fromBucket, String toBucket, int count)? onBucketDrop; // 'SRC'|'R1'|'R2'
+  final Map<String, GlobalKey>? switchKeys; // NEU: Keys für Plasma-Link
 
   @override
   Widget build(BuildContext context) {
-    Widget buildSwitch(String label, int count, {bool isFirst = false}) {
+    Widget buildSwitch(String label, int count, {bool isFirst = false, GlobalKey? containerKey}) {
       // Gleiche Farben wie im S0-S5 Modus
       final Color outerColor = count > 0 
           ? (isFirst 
@@ -52,6 +54,7 @@ class SingleModeSwitchRow extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
+              key: containerKey, // NEU: Key für Plasma-Link Positionierung
               width: WordsUIConstants.stageSwitchWidth,
               height: WordsUIConstants.stageSwitchHeight,
               decoration: BoxDecoration(
@@ -134,17 +137,17 @@ class SingleModeSwitchRow extends StatelessWidget {
       _draggableBucket(
         bucket: 'SRC',
         count: srcCount,
-        child: buildSwitch(stageLabel, srcCount, isFirst: true),
+        child: buildSwitch(stageLabel, srcCount, isFirst: true, containerKey: switchKeys?['SRC']),
       ),
       _draggableBucket(
         bucket: 'R1',
         count: sr1Count,
-        child: buildSwitch('${srPrefix}R1', sr1Count),
+        child: buildSwitch('${srPrefix}R1', sr1Count, containerKey: switchKeys?['R1']),
       ),
       _draggableBucket(
         bucket: 'R2',
         count: sr2Count,
-        child: buildSwitch('${srPrefix}R2', sr2Count),
+        child: buildSwitch('${srPrefix}R2', sr2Count, containerKey: switchKeys?['R2']),
       ),
     ]);
   }
