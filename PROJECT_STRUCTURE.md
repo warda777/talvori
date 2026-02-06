@@ -1,6 +1,6 @@
 # Talvori - Flutter App Project Structure
 
-> Aktualisiert am 28.01.2025
+> Aktualisiert am 29.01.2025
 
 ## 📁 Projektübersicht
 
@@ -9,10 +9,15 @@
 - **Backend**: Supabase & Edge Functions
 - **Neue Features**: 
   - Stage Words Dialog mit modus-spezifischen Erklärungen
+  - Modusabhängige Stage-Bezeichnungen im Popup (T0-T5, A0-A5, H0-H5 statt S0-S5)
+  - Button-Bezeichnungen: "AUTO" (statt S0-S5), "SINGLE" (statt Single)
   - Visuelle Feedback-Systeme (Card Glow, Plasma Link, Switch Pulse)
   - Card Glow Settings (persistente Slider-Einstellungen)
   - Primary Language Einstellung (universell für alle Kategorien)
   - SVG-Icon Integration für Slider-Steuerung
+  - Plasma Link Bündelung auf 10% reduziert
+  - Wandering Wave Effekt im Plasma Link
+  - Plasma Link und Switch Pulse auch im SINGLE-Modus aktiv
 
 ## 📂 Verzeichnisstruktur (`lib/`)
 

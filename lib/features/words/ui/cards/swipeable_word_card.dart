@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
 import 'package:talvori/features/words/application/card_glow_settings_provider.dart';
 import '../widgets/level_badge.dart';
-import '../widgets/card_glow_painter.dart';
 
 typedef SwipeDecision = Future<void> Function(bool correct);
 
@@ -17,6 +16,8 @@ class SwipeableWordCard extends StatefulWidget {
   final bool showTranslation;
   final bool gesturesEnabled;        // blockt Flip/Swipe bei pausiertem Timer
   final Widget? footer;              // TimerBar etc.
+  final int? srsStage;               // 0..5 (für Streak-Progress Anzeige)
+  final int? streak;                 // korrekt-in-a-row in current stage
   final SwipeDecision onSwipe;       // true = right/correct, false = left/incorrect
   final VoidCallback onFlip;         // UI -> Controller.toggleFlip()
   final void Function(double dx)? onDragUpdate; // ← NEU: für Plasma-Link (dx für Stage-Berechnung)
@@ -33,6 +34,8 @@ class SwipeableWordCard extends StatefulWidget {
     required this.onSwipe,
     required this.onFlip,
     this.footer,
+    this.srsStage,
+    this.streak,
     this.onDragUpdate,                // ← NEU
     this.onDragEnd,                   // ← NEU
     this.onDragReturn,                // ← NEU
@@ -202,6 +205,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
               child: _AdaptiveText(widget.frontText),
             ),
           ),
+          _StreakProgressBadge(srsStage: widget.srsStage, streak: widget.streak),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
         ],
@@ -221,9 +225,54 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
               child: _AdaptiveText(widget.backText, back: true),
             ),
           ),
+          _StreakProgressBadge(srsStage: widget.srsStage, streak: widget.streak),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
         ],
+      ),
+    );
+  }
+}
+
+class _StreakProgressBadge extends StatelessWidget {
+  final int? srsStage; // 0..5
+  final int? streak; // korrekt in a row in current stage
+  const _StreakProgressBadge({this.srsStage, this.streak});
+
+  int _requiredCorrect(int stage) {
+    if (stage <= 0) return 1;
+    if (stage <= 3) return 2;
+    return 3; // S4 und S5
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stage = srsStage;
+    final s = streak;
+    if (stage == null || s == null) return const SizedBox.shrink();
+
+    final required = _requiredCorrect(stage);
+    final done = s.clamp(0, required);
+
+    return Positioned(
+      left: 30,
+      // 8px (TimerBar bottom) + 6px (ProgressBar height) + 6px Abstand
+      bottom: 24,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.28),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          '$done von $required',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            height: 1.0,
+          ),
+        ),
       ),
     );
   }

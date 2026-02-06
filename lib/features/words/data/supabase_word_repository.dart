@@ -7,7 +7,9 @@ import 'package:flutter/foundation.dart'; // für debugPrint
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // falls noch nicht
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
@@ -25,6 +27,25 @@ class WorkloadToday {
   WorkloadToday({required this.dueToday, required this.newTotal});
 }
 
+/// Ergebnis eines Review-RPC-Calls mit allen aktualisierten Feldern
+class ReviewResult {
+  final int stage;
+  final DateTime? nextDueAt;
+  final int streak;
+  final double ef;
+  final int lapses;
+  final DateTime? lastReviewedAt;
+
+  ReviewResult({
+    required this.stage,
+    this.nextDueAt,
+    required this.streak,
+    required this.ef,
+    required this.lapses,
+    this.lastReviewedAt,
+  });
+}
+
 // Falls du keinen kombinierten Typ hast: minimaler View-Mapper für v_words_user
 class WordUserView {
   final String id;
@@ -37,6 +58,8 @@ class WordUserView {
   final int srsStage;
   final DateTime? nextDueAt;
   final DateTime? userAddedAt;
+  final bool isRequeue; // ✅ Requeue-Flag
+  final int streak; // ✅ Streak für Link/Bounce-Berechnung
 
   WordUserView({
     required this.id,
@@ -49,24 +72,36 @@ class WordUserView {
     this.srsStage = 0,
     this.nextDueAt,
     this.userAddedAt,
+    this.isRequeue = false,
+    this.streak = 0,
   });
 
   WordUserView.fromJson(Map<String, dynamic> j)
-      : id = (j['id'] as String?) ?? '',
+      : id = (j['id'] as String?) ?? (j['word_id'] as String?) ?? '', // ✅ Unterstützt beide: v_words_user (id) und v_words_user_srs (word_id)
         text = (j['text'] as String?) ?? '',
         translation = (j['translation'] as String?) ?? '',
         level = j['level'] as String?,
         inMyWords = (j['in_my_words'] as bool?) ?? false,
         pickedUser = (j['picked_user'] as bool?) ?? false,
         favoriteUser = (j['favorite_user'] as bool?) ?? false,
-        srsStage = (j['srs_stage_user'] as int?) ?? 0,
-        nextDueAt = j['next_due_at_user'] != null ? DateTime.parse(j['next_due_at_user']) : null,
-        userAddedAt = j['user_added_at'] != null ? DateTime.parse(j['user_added_at']) : null;
+        srsStage = (j['srs_stage_user'] as int?) ?? 0, // ✅ v_words_user_srs hat srs_stage_user, v_words_user auch
+        nextDueAt = j['next_due_at_user'] != null
+            ? DateTime.parse(j['next_due_at_user'])
+            : null,
+        userAddedAt = j['user_added_at'] != null
+            ? DateTime.parse(j['user_added_at'])
+            : null,
+        // ✅ isRequeue: Default auf false, da is_requeue und show_after nicht mehr im Select sind (Fehler 42703 vermeiden)
+        isRequeue = (j['is_requeue'] as bool?) ?? false,
+        // ✅ Streak für Link/Bounce-Berechnung
+        streak = (j['streak'] as int?) ?? 0;
   
   WordUserView copyWith({
     int? srsStage,
     DateTime? nextDueAt,
     bool setDueNull = false,
+    bool? isRequeue,
+    int? streak,
   }) {
     return WordUserView(
       id: id,
@@ -79,11 +114,16 @@ class WordUserView {
       srsStage: srsStage ?? this.srsStage,
       nextDueAt: setDueNull ? null : (nextDueAt ?? this.nextDueAt),
       userAddedAt: userAddedAt,
+      isRequeue: isRequeue ?? this.isRequeue,
+      streak: streak ?? this.streak,
     );
   }
 }
 
 final _sb = Supabase.instance.client;
+
+// ✅ Sequenznummer für stale response protection
+int _reviewSeq = 0;
 
 /// 1) Stufen-Balken pro Kategorie
 Future<List<StageCount>> fetchStageCounts(String categoryId) async {
@@ -113,67 +153,423 @@ Future<WorkloadToday> fetchWorkloadToday(String categoryId) async {
 }
 
 
-/// Lern-Queue (alle Wörter der Kategorie – Größe dynamisch aus Progress)
-Future<List<WordUserView>> fetchLearnQueueAll(String categoryId) async {
-  final prog = await fetchCategoryProgress(categoryId);
-  final take = (prog.total > 0) ? prog.total : 2000; // Fallback
-  final rows = await _sb.rpc('fn_user_learn_queue', params: {'cat': categoryId, 'take': take});
-  final list = (rows as List).cast<Map<String, dynamic>>();
-  return list.map((j) => WordUserView.fromJson(j)).toList();
+
+
+
+/// Prüft SRS-Contracts nach einem Review
+/// Contract-Regeln:
+/// 1. DB == RPC (Server Source of Truth)
+/// 2. Local == Server (wenn localAppliedStage übergeben)
+/// 3. Keine Fake-Progress-Änderung bei oldStage == newStage
+/// 4. Stage-Summen bleiben konsistent
+void assertSrsContractsAfterReview({
+  required int rpcStage,
+  required DateTime? rpcNextDueAt,
+  required int? dbStage,
+  required DateTime? dbNextDueAt,
+  int? oldStage,
+  int? localAppliedStage,
+  List<int>? localStagesBefore,
+  List<int>? localStagesAfter,
+  int? totalWordsInCategory,
+  String? wordId,
+  String? categoryId,
+  String? traceId,
+}) {
+  final errors = <String>[];
+  
+  // Contract 1: DB == RPC (Server Source of Truth)
+  if (dbStage != null) {
+    if (dbStage != rpcStage) {
+      errors.add('CONTRACT VIOLATION 1: DB stage ($dbStage) != RPC stage ($rpcStage)');
+    }
+    
+    // Prüfe next_due_at (mit Toleranz für Millisekunden-Unterschiede)
+    if (dbNextDueAt != null && rpcNextDueAt != null) {
+      final diff = dbNextDueAt.difference(rpcNextDueAt).abs();
+      if (diff.inSeconds > 1) {
+        errors.add('CONTRACT VIOLATION 1: DB next_due_at ($dbNextDueAt) != RPC next_due_at ($rpcNextDueAt) [diff: ${diff.inSeconds}s]');
+      }
+    } else if (dbNextDueAt != rpcNextDueAt) {
+      errors.add('CONTRACT VIOLATION 1: DB next_due_at ($dbNextDueAt) != RPC next_due_at ($rpcNextDueAt) [one is null]');
+    }
+  }
+  
+  // Contract 2: Local == Server (wenn localAppliedStage übergeben)
+  if (localAppliedStage != null) {
+    if (localAppliedStage != rpcStage) {
+      errors.add('CONTRACT VIOLATION 2: Local applied stage ($localAppliedStage) != RPC stage ($rpcStage)');
+    }
+  }
+  
+  // Contract 3: Keine Fake-Progress-Änderung bei oldStage == newStage
+  if (oldStage != null && oldStage == rpcStage && localStagesBefore != null && localStagesAfter != null) {
+    // Wenn Stage sich nicht geändert hat, dürfen sich auch die Counts nicht ändern
+    if (localStagesBefore.length == localStagesAfter.length) {
+      for (int i = 0; i < localStagesBefore.length; i++) {
+        if (localStagesBefore[i] != localStagesAfter[i]) {
+          errors.add('CONTRACT VIOLATION 3: Stage unchanged (old=$oldStage, new=$rpcStage) but stages[$i] changed: ${localStagesBefore[i]} -> ${localStagesAfter[i]}');
+        }
+      }
+    }
+  }
+  
+  // Contract 4: Stage-Summen bleiben konsistent
+  if (localStagesAfter != null && totalWordsInCategory != null) {
+    final sum = localStagesAfter.fold<int>(0, (sum, count) => sum + count);
+    if (sum != totalWordsInCategory) {
+      errors.add('CONTRACT VIOLATION 4: Sum of stages ($sum) != totalWordsInCategory ($totalWordsInCategory)');
+    }
+  }
+  
+  // Logge alle Contract-Verletzungen
+  if (errors.isNotEmpty) {
+    debugPrint('🚨 SRS CONTRACT VIOLATIONS [$traceId ?? "N/A"]:');
+    for (final error in errors) {
+      debugPrint('  ❌ $error');
+    }
+    debugPrint('  Context: wordId=$wordId, categoryId=$categoryId, oldStage=$oldStage, rpcStage=$rpcStage');
+    if (localStagesBefore != null) {
+      debugPrint('  Local stages before: $localStagesBefore');
+    }
+    if (localStagesAfter != null) {
+      debugPrint('  Local stages after: $localStagesAfter');
+    }
+  } else {
+    debugPrint('✅ SRS CONTRACTS OK [${traceId ?? "N/A"}]: wordId=$wordId, oldStage=$oldStage -> rpcStage=$rpcStage');
+  }
 }
-
-/// Lern-Queue für Learn Mode (nur S0 + fällige S1-S5)
-Future<List<WordUserView>> fetchLearnQueueForMode(
-  String categoryId, {
-  required LevelSelectionMode mode,
-  int? singleStage, // 1..5 (nur relevant bei single)
-}) async {
-  // Korrekte RPC-Funktion mit korrekten Parameter-Namen
-  final modeStr = switch (mode) {
-    LevelSelectionMode.s0toS5 => 'all',
-    LevelSelectionMode.s1toS5 => 'reviews',
-    LevelSelectionMode.single => 'single',
-  };
-
-  final params = <String, dynamic>{
-    'category_id': categoryId,        // ✅ genau so benannt
-    'mode': modeStr,                  // 'all' | 'reviews' | 'single'
-    if (mode == LevelSelectionMode.single) 'single_stage': singleStage, // 1..5
-    'limit': 50,                      // falls in SQL unterstützt
-  };
-
-  final res = await _sb.rpc('fn_user_learn_queue_mode', params: params);
-  final list = (res as List).cast<Map<String, dynamic>>();
-  return list.map((j) => WordUserView.fromJson(j)).toList();
-}
-
 
 /// Review-Ergebnis senden (true = richtig, false = falsch)
-Future<(int stage, DateTime due)> submitReview(
+Future<ReviewResult> submitReview(
+  String categoryId,     // ✅ NEU
   String wordId,
   bool correct, {
   required SrsSystem srsSystem,
+  int? oldStage, // ✅ Optional: oldStage für Tracing
 }) async {
+  debugPrint('🧪 submitReview: srsSystem=$srsSystem  correct=$correct  cat=$categoryId  word=$wordId');
+  
+  // ✅ Sequenznummer für stale response protection
+  final seq = ++_reviewSeq;
+  
+  // fn_user_review_mode unterstützt nur adaptive/hybrid
+  // Für time muss fn_user_review_time_mode verwendet werden
+  if (srsSystem == SrsSystem.time) {
+    // T-SRS: Verwende fn_user_review_time_mode (schreibt auch in user_word_srs mode='time')
+    debugPrint('🧪 submitReview: CALL fn_user_review_time_mode (TIME+MODE)');
+
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('submitReview(TIME): No current user');
+    }
+
+    final rows = await _sb.rpc('fn_user_review_time_mode', params: {
+      'p_word': wordId,
+      'p_category': categoryId,
+      'p_result': correct,
+      'p_user': userId,
+    });
+
+    // ✅ Stale response check
+    if (seq != _reviewSeq) {
+      throw StateError('Stale review response ignored (T-SRS)');
+    }
+
+    // ✅ Robustes Parsing: Map ODER List unterstützen
+    Map<String, dynamic> row;
+    if (rows is List) {
+      row = (rows as List).cast<Map<String, dynamic>>().first;
+    } else if (rows is Map) {
+      row = Map<String, dynamic>.from(rows as Map);
+    } else {
+      throw StateError('Unexpected RPC response type: ${rows.runtimeType}');
+    }
+
+    final stage = (row['srs_stage'] as int?) ?? 0;
+    final dueStr = row['next_due_at'] as String?;
+    final due = dueStr != null ? DateTime.parse(dueStr) : null;
+    
+      // ✅ POST-RPC DB CHECK: Was wurde tatsächlich in der DB gespeichert? (T-SRS)
+    // ✅ WICHTIG: Lese zusätzliche Felder aus DB für vollständige ReviewResult
+    int streak = 0;
+    double ef = 2.5;
+    int lapses = 0;
+    DateTime? lastReviewedAt;
+    
+    try {
+      // Scoped read: Mit category_id filter (für vollständige Daten)
+      final dbRows = await _sb
+          .from('user_word_srs')
+          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('word_id', wordId)
+          .eq('category_id', categoryId)
+          .eq('mode', 'time') // ✅ Mode-Filter hinzugefügt
+          .maybeSingle();
+      
+      debugPrint('--- POST-RPC DB CHECK (scoped) [T-SRS] ---');
+      debugPrint('dbRows=$dbRows');
+      
+      if (dbRows != null) {
+        streak = (dbRows['streak'] as int?) ?? 0;
+        ef = (dbRows['ef'] as num?)?.toDouble() ?? 2.5;
+        lapses = (dbRows['lapses'] as int?) ?? 0;
+        final lastReviewedStr = dbRows['last_reviewed_at'] as String?;
+        lastReviewedAt = lastReviewedStr != null ? DateTime.parse(lastReviewedStr) : null;
+        
+        debugPrint('db_stage=${dbRows['stage']}');
+        debugPrint('db_streak=$streak');
+        debugPrint('db_ef=$ef');
+        debugPrint('db_lapses=$lapses');
+        debugPrint('db_next_due_at=${dbRows['next_due_at']}');
+        debugPrint('db_category_id=${dbRows['category_id']}');
+        debugPrint('db_mode=${dbRows['mode']}');
+        debugPrint('RPC_srs_stage=$stage');
+        debugPrint('RPC_next_due_at=$due');
+        
+        // Vergleich: Stimmen RPC-Response und DB überein?
+        final dbStage = (dbRows['stage'] as int?) ?? 0;
+        final dbNextDueAtStr = dbRows['next_due_at'] as String?;
+        final dbNextDueAt = dbNextDueAtStr != null ? DateTime.parse(dbNextDueAtStr) : null;
+        
+        if (dbStage != stage) {
+          debugPrint('⚠️ MISMATCH: RPC sagt stage=$stage, DB hat stage=$dbStage');
+        }
+        
+        // ✅ Contract-Assertion: DB == RPC (Contract 1)
+        assertSrsContractsAfterReview(
+          rpcStage: stage,
+          rpcNextDueAt: due,
+          dbStage: dbStage,
+          dbNextDueAt: dbNextDueAt,
+          oldStage: oldStage,
+          wordId: wordId,
+          categoryId: categoryId,
+          traceId: 'T-SRS',
+        );
+      } else {
+        debugPrint('⚠️ DB CHECK: Keine Zeile gefunden für user_id=$userId, word_id=$wordId, category_id=$categoryId');
+        // Auch ohne DB-Row Contract 1 prüfen (mit null-Werten)
+        assertSrsContractsAfterReview(
+          rpcStage: stage,
+          rpcNextDueAt: due,
+          dbStage: null,
+          dbNextDueAt: null,
+          oldStage: oldStage,
+          wordId: wordId,
+          categoryId: categoryId,
+          traceId: 'T-SRS',
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ DB CHECK ERROR: $e');
+      // Weiter machen, auch wenn DB-Check fehlschlägt
+      // Contract-Assertion trotzdem aufrufen (mit null DB-Werten)
+      assertSrsContractsAfterReview(
+        rpcStage: stage,
+        rpcNextDueAt: due,
+        dbStage: null,
+        dbNextDueAt: null,
+        oldStage: oldStage,
+        wordId: wordId,
+        categoryId: categoryId,
+        traceId: 'T-SRS',
+      );
+    }
+
+    return ReviewResult(
+      stage: stage,
+      nextDueAt: due,
+      streak: streak,
+      ef: ef,
+      lapses: lapses,
+      lastReviewedAt: lastReviewedAt,
+    );
+  } else {
+    // A-SRS / Hybrid: Verwende fn_user_review_mode
   final modeStr = switch (srsSystem) {
-    SrsSystem.time => 'time',
     SrsSystem.adaptive => 'adaptive',
     SrsSystem.hybrid => 'hybrid',
-  };
+      SrsSystem.time => throw StateError('time should not reach here'),
+    };
 
-  final rows = await _sb.rpc('fn_user_review_mode', params: {
-    'p_word': wordId,
-    'p_result': correct,
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('User not authenticated');
+    }
+    
+    // ✅ Trace-ID für mehrere Calls auseinanderhalten
+    final traceId = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    
+    // ✅ Direkt vor dem RPC: Input + oldStage loggen
+    // Hinweis: oldStage muss aus dem aktuellen Wort geholt werden (wird vom Caller übergeben oder hier geholt)
+    debugPrint('--- fn_user_review_mode TRACE (REQUEST) [$traceId] ---');
+    debugPrint('oldStage=${oldStage ?? 'N/A'}');
+    debugPrint('user_id=$userId');
+    debugPrint('word_id=$wordId');
+    debugPrint('category_id=$categoryId');
+    debugPrint('modeStr=$modeStr');
+    debugPrint('correct=$correct');
+    
+    // ✅ RPC-Call mit try/catch umklammern und Output roh loggen
+    try {
+      final params = {
+        'p_category': categoryId,
     'p_mode': modeStr,
-  });
+        'p_result': correct,
+        'p_user': userId,
+        'p_word': wordId,
+      };
+      
+      debugPrint('RPC params=$params');
+      
+      // ✅ PRE-RPC DB CHECK: Zustand VOR dem Review lesen
+      try {
+        final preRpcCheck = await _sb
+            .from('user_word_srs')
+            .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+            .eq('user_id', userId)
+            .eq('word_id', wordId)
+            .eq('category_id', categoryId)
+            .eq('mode', modeStr)
+            .maybeSingle();
+        
+        debugPrint('--- PRE-RPC DB CHECK [$traceId] ---');
+        debugPrint('preRpcCheck=$preRpcCheck');
+        if (preRpcCheck != null) {
+          debugPrint('pre_stage=${preRpcCheck['stage']}');
+          debugPrint('pre_streak=${preRpcCheck['streak']}');
+          debugPrint('pre_ef=${preRpcCheck['ef']}');
+          debugPrint('pre_lapses=${preRpcCheck['lapses']}');
+        } else {
+          debugPrint('⚠️ PRE-RPC: Keine Zeile gefunden für user_id=$userId, word_id=$wordId, category_id=$categoryId, mode=$modeStr');
+        }
+      } catch (e) {
+        debugPrint('⚠️ PRE-RPC DB CHECK ERROR: $e');
+        // Weiter machen, auch wenn PRE-RPC-Check fehlschlägt
+      }
+      
+      final rows = await _sb.rpc('fn_user_review_mode', params: params);
 
-  final list = (rows as List).cast<Map<String, dynamic>>();
-  final row = list.first;
+      // ✅ Stale response check
+      if (seq != _reviewSeq) {
+        throw StateError('Stale review response ignored (A-SRS/Hybrid)');
+      }
+
+      debugPrint('--- fn_user_review_mode TRACE (RESPONSE) [$traceId] ---');
+      debugPrint('raw=${rows.toString()}');
+
+      // ✅ Robustes Parsing: Map ODER List unterstützen
+      Map<String, dynamic> row;
+      if (rows is List) {
+        row = (rows as List).cast<Map<String, dynamic>>().first;
+      } else if (rows is Map) {
+        row = Map<String, dynamic>.from(rows as Map);
+      } else {
+        throw StateError('Unexpected RPC response type: ${rows.runtimeType}');
+      }
 
   final stage = (row['srs_stage'] as int?) ?? 0;
   final dueStr = row['next_due_at'] as String?;
-  final due = dueStr != null ? DateTime.parse(dueStr) : DateTime.now();
-
-  return (stage, due);
+      final due = dueStr != null ? DateTime.parse(dueStr) : null;
+      
+      debugPrint('--- fn_user_review_mode TRACE (PARSED) [$traceId] ---');
+      debugPrint('srs_stage=$stage');
+      debugPrint('next_due_at=$due');
+      
+      // ✅ POST-RPC DB CHECK: Was wurde tatsächlich in der DB gespeichert?
+      // ✅ WICHTIG: Lese zusätzliche Felder aus DB für vollständige ReviewResult
+      int streak = 0;
+      double ef = 2.5;
+      int lapses = 0;
+      DateTime? lastReviewedAt;
+      
+    try {
+      // ✅ DB PROBE: Prüfe welche Spalten die Tabelle tatsächlich hat
+      final probe = await _sb
+          .from('user_word_srs')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('word_id', wordId)
+          .eq('mode', modeStr) // ✅ Mode-Filter hinzugefügt
+          .maybeSingle(); // ✅ maybeSingle statt limit(1) für single row
+      
+      debugPrint('--- DB PROBE user_word_srs [$traceId] ---');
+      debugPrint('probe=$probe');
+      if (probe != null) {
+        debugPrint('keys=${(probe as Map).keys.toList()}');
+      }
+      
+      // Wide read: Alle Rows für word+user (ohne category filter)
+      final allRows = await _sb
+          .from('user_word_srs')
+          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('word_id', wordId)
+          .eq('mode', modeStr); // ✅ Mode-Filter hinzugefügt
+      
+      debugPrint('--- DB CHECK (all rows for word+user) [$traceId] ---');
+      debugPrint('allRows=$allRows');
+      
+      // Scoped read: Mit category_id filter (für vollständige Daten)
+      final dbRows = await _sb
+          .from('user_word_srs')
+          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('word_id', wordId)
+          .eq('category_id', categoryId)
+          .eq('mode', modeStr) // ✅ Mode-Filter hinzugefügt
+          .maybeSingle();
+      
+      debugPrint('--- POST-RPC DB CHECK (scoped) [$traceId] ---');
+      debugPrint('dbRows=$dbRows');
+      
+      if (dbRows != null) {
+        streak = (dbRows['streak'] as int?) ?? 0;
+        ef = (dbRows['ef'] as num?)?.toDouble() ?? 2.5;
+        lapses = (dbRows['lapses'] as int?) ?? 0;
+        final lastReviewedStr = dbRows['last_reviewed_at'] as String?;
+        lastReviewedAt = lastReviewedStr != null ? DateTime.parse(lastReviewedStr) : null;
+        
+        debugPrint('db_stage=${dbRows['stage']}');
+        debugPrint('db_streak=$streak');
+        debugPrint('db_ef=$ef');
+        debugPrint('db_lapses=$lapses');
+        debugPrint('db_next_due_at=${dbRows['next_due_at']}');
+        debugPrint('db_category_id=${dbRows['category_id']}');
+        debugPrint('db_mode=${dbRows['mode']}');
+        debugPrint('RPC_srs_stage=$stage');
+        debugPrint('RPC_next_due_at=$due');
+        
+        // Vergleich: Stimmen RPC-Response und DB überein?
+        final dbStage = (dbRows['stage'] as int?) ?? 0;
+        if (dbStage != stage) {
+          debugPrint('⚠️ MISMATCH: RPC sagt stage=$stage, DB hat stage=$dbStage');
+        }
+      } else {
+        debugPrint('⚠️ DB CHECK: Keine Zeile gefunden für user_id=$userId, word_id=$wordId, category_id=$categoryId');
+      }
+    } catch (e) {
+      debugPrint('⚠️ DB CHECK ERROR: $e');
+      // Weiter machen, auch wenn DB-Check fehlschlägt
+    }
+      
+      return ReviewResult(
+        stage: stage,
+        nextDueAt: due,
+        streak: streak,
+        ef: ef,
+        lapses: lapses,
+        lastReviewedAt: lastReviewedAt,
+      );
+    } catch (e, st) {
+      debugPrint('--- fn_user_review_mode TRACE (ERROR) [$traceId] ---');
+      debugPrint(e.toString());
+      debugPrint(st.toString());
+      rethrow;
+    }
+  }
 }
 
 class CategoryProgress {
@@ -187,12 +583,8 @@ class CategoryProgress {
     required this.dueToday,
     required this.newTotal,
   });
-}
 
-Future<CategoryProgress> fetchCategoryProgress(String categoryId) async {
-  final rows = await _sb.rpc('fn_user_category_progress', params: {'cat': categoryId});
-  final r = rows.cast<Map<String, dynamic>>().first;
-
+  factory CategoryProgress.fromRow(Map<String, dynamic> r) {
   return CategoryProgress(
     total: (r['total'] as int?) ?? 0,
     stages: [
@@ -206,10 +598,667 @@ Future<CategoryProgress> fetchCategoryProgress(String categoryId) async {
     dueToday: (r['due_today'] as int?) ?? 0,
     newTotal: (r['new_total'] as int?) ?? 0,
   );
+  }
 }
 
 class SupabaseWordRepository {
   final _sb = Supabase.instance.client;
+
+  // Device-ID und Sequenznummer für deterministische Sync-Logik
+  static const String _kDeviceIdKey = 'talvori_device_id';
+  static const String _kDeviceSeqKey = 'talvori_device_seq';
+  static const String _kLastUpdatedAtKey = 'talvori_last_updated_at';
+
+  /// Stellt sicher, dass Progress-Rows für alle Wörter einer Kategorie existieren
+  /// Gibt die Anzahl der erzeugten/aktualisierten Rows zurück
+  Future<int> ensureWordProgressForCategory(
+    String categoryId, {
+    required SrsSystem srsSystem,
+  }) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('ensureWordProgressForCategory: No current user');
+    }
+
+    // mode string: 'adaptive' | 'hybrid' | 'time'
+    final modeStr = srsSystem.name;
+
+    // device_id / device_seq / updated_at (minimal, aber deterministisch-monoton)
+    final deviceId = await _getOrCreateDeviceId();
+    final deviceSeq = await _nextDeviceSeq();
+    final updatedAt = await _nextLogicalUpdatedAt();
+
+    final res = await _sb.rpc(
+      'fn_wp_ensure_category_progress',
+      params: {
+        'p_cat': categoryId,
+        'p_mode': modeStr,
+        'p_user': userId,
+        'p_device_id': deviceId,
+        'p_device_seq': deviceSeq,
+        'p_updated_at': updatedAt.toIso8601String(),
+      },
+    );
+
+    // Supabase kann int oder num zurückgeben
+    if (res is int) return res;
+    if (res is num) return res.toInt();
+    throw StateError(
+      'ensureWordProgressForCategory: unexpected result ${res.runtimeType}: $res',
+    );
+  }
+
+  /// Stellt sicher, dass Progress-Rows für alle Kategorien existieren
+  /// Gibt die Anzahl der erzeugten/aktualisierten Rows zurück
+  Future<int> ensureWordProgressForAllCategories({
+    required SrsSystem srsSystem,
+  }) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('ensureWordProgressForAllCategories: No current user');
+    }
+
+    final modeStr = srsSystem.name;
+    final deviceId = await _getOrCreateDeviceId();
+    final deviceSeq = await _nextDeviceSeq();
+    final updatedAt = await _nextLogicalUpdatedAt();
+
+    final res = await _sb.rpc(
+      'fn_wp_ensure_all_progress',
+      params: {
+        'p_mode': modeStr,
+        'p_user': userId,
+        'p_device_id': deviceId,
+        'p_device_seq': deviceSeq,
+        'p_updated_at': updatedAt.toIso8601String(),
+      },
+    );
+
+    if (res is int) return res;
+    if (res is num) return res.toInt();
+    throw StateError(
+      'ensureWordProgressForAllCategories: unexpected result ${res.runtimeType}: $res',
+    );
+  }
+
+  /// Kategorie-Progress (Stage-Zahlen, total, dueToday, newTotal)
+Future<CategoryProgress> fetchCategoryProgress(
+  String categoryId, {
+  required SrsSystem srsSystem,
+}) async {
+  debugPrint('📊 fetchCategoryProgress: cat=$categoryId srs=$srsSystem');
+
+  // Mode-String exakt wie im DB-Enum
+  final modeStr = srsSystem.name; // 'time' | 'adaptive' | 'hybrid'
+
+  final userId = _sb.auth.currentUser?.id;
+  if (userId == null) {
+    throw StateError('fetchCategoryProgress: No current user');
+  }
+
+  final res = await _sb.rpc('fn_user_category_progress', params: {
+    'p_category': categoryId,
+    'p_mode': modeStr, // "adaptive"
+    'p_user': userId,  // optional, aber konsistent zu deinen anderen RPCs
+  });
+
+  final row = (res as List).first as Map<String, dynamic>;
+  final total = row['total'] as int;
+  final stages = (row['stages'] as List).map((e) => (e as num).toInt()).toList();
+  final dueToday = (row['due_today'] as num?)?.toInt() ?? 0;
+
+  // newTotal ist normalerweise stages[0] (Stage 0)
+  final newTotal = stages.isNotEmpty ? stages[0] : 0;
+
+  final prog = CategoryProgress(
+    total: total,
+    stages: stages.length == 6 ? stages : List.filled(6, 0),
+    dueToday: dueToday,
+    newTotal: newTotal,
+  );
+
+  debugPrint(
+    '📥 fetchCategoryProgress RESULT → '
+    'cat=$categoryId '
+    'mode=$modeStr '
+    'total=$total '
+    'stages=$stages '
+    'dueToday=$dueToday',
+  );
+
+  return prog;
+}
+
+  /// Lern-Queue (alle Wörter der Kategorie – Größe dynamisch aus Progress)
+  /// ❌ Für A-SRS wird fetchLearnQueueAdaptive verwendet
+  Future<List<WordUserView>> fetchLearnQueueAll(
+    String categoryId, {
+    required SrsSystem srsSystem,
+  }) async {
+    // ✅ A-SRS: Diese Funktion darf für A-SRS NICHT verwendet werden
+    // Verwende stattdessen fetchAdaptiveQueue mit limit
+    if (srsSystem == SrsSystem.adaptive) {
+      throw StateError(
+        'fetchLearnQueueAll darf für A-SRS nicht verwendet werden. '
+        'Verwende stattdessen fetchAdaptiveQueue(userId, categoryId, limit: 20)'
+      );
+    }
+
+    // T-SRS/Hybrid: Alte Funktion verwenden
+    final prog = await fetchCategoryProgress(categoryId, srsSystem: srsSystem);
+    final take = (prog.total > 0) ? prog.total : 2000; // Fallback
+
+    final res = await _sb.rpc('fn_user_learn_queue', params: {
+      'cat': categoryId,
+      'take': take,
+    });
+
+    final list = (res as List).cast<Map<String, dynamic>>();
+    return list.map((j) => WordUserView.fromJson(j)).toList();
+  }
+
+  /// A-SRS Adaptive Queue (Contract-konform)
+  /// Lädt die Server-Queue für A-SRS mit limit
+  Future<List<WordUserView>> fetchAdaptiveQueue({
+    required String userId,
+    required String categoryId,
+    required int limit,
+  }) async {
+    debugPrint('📥 fetchAdaptiveQueue: cat=$categoryId limit=$limit user=$userId');
+    
+    final res = await _sb.rpc(
+      'fn_user_learn_queue_adaptive',
+      params: {
+        'p_category_id': categoryId,
+        'p_take': limit,
+        'p_user': userId,
+      },
+    );
+
+    debugPrint('📥 fetchAdaptiveQueue: RPC response type=${res.runtimeType}, length=${res is List ? (res as List).length : 'N/A'}');
+    
+    final rows = (res as List).cast<Map<String, dynamic>>();
+    
+    if (rows.isEmpty) {
+      debugPrint('⚠️ fetchAdaptiveQueue: Keine Rows zurückgegeben!');
+      return [];
+    }
+    
+    final ids = rows
+        .map((r) => r['word_id'] as String?)
+        .whereType<String>()
+        .toList();
+
+    if (ids.isEmpty) {
+      debugPrint('⚠️ fetchAdaptiveQueue: Keine IDs gefunden!');
+      return [];
+    }
+
+    // Details nachladen aus v_words_user_srs
+    final modeStr = 'adaptive';
+    final data = await _sb
+        .from('v_words_user_srs')
+        .select('word_id,text,translation,level,'
+            'in_my_words,favorite_user,picked_user,'
+            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+            'ef,streak,lapses')
+        .eq('category_id', categoryId)
+        .eq('srs_mode', modeStr)
+        .inFilter('word_id', ids);
+    
+    // Reihenfolge wie Queue wiederherstellen
+    final map = {
+      for (final j in (data as List).cast<Map<String, dynamic>>())
+        (j['word_id'] as String): j
+    };
+
+    final ordered = <WordUserView>[];
+    for (final id in ids) {
+      final j = map[id];
+      if (j != null) {
+        ordered.add(WordUserView.fromJson(j));
+      } else {
+        debugPrint('⚠️ fetchAdaptiveQueue: Wort-ID $id nicht in v_words_user_srs gefunden!');
+      }
+    }
+
+    debugPrint('📥 fetchAdaptiveQueue: ordered.length=${ordered.length}');
+    return ordered;
+  }
+
+  /// Lern-Queue für A-SRS (nur fn_user_learn_queue_adaptive)
+  Future<List<WordUserView>> fetchLearnQueueAdaptive(
+    String categoryId, {
+    int take = 2000,
+  }) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('fetchLearnQueueAdaptive: No current user');
+    }
+
+    debugPrint('📥 fetchLearnQueueAdaptive: cat=$categoryId take=$take user=$userId');
+    
+    final res = await _sb.rpc(
+      'fn_user_learn_queue_adaptive',
+      params: {
+        'p_category_id': categoryId, // ✅ WICHTIG: Parameter-Name korrigiert
+        'p_take': take,
+        'p_user': userId,
+      },
+    );
+
+    debugPrint('📥 fetchLearnQueueAdaptive: RPC response type=${res.runtimeType}, length=${res is List ? (res as List).length : 'N/A'}');
+    
+    final rows = (res as List).cast<Map<String, dynamic>>();
+    // ✅ Log: Nach RPC-Call, Rows aus Supabase geladen
+    debugPrint('🟦 _loadWords ROWS rows.length=${rows.length} firstKeys=${rows.isNotEmpty ? rows.first.keys.toList() : []}');
+    debugPrint('📥 fetchLearnQueueAdaptive: rows.length=${rows.length}');
+    
+    if (rows.isEmpty) {
+      debugPrint('⚠️ fetchLearnQueueAdaptive: Keine Rows zurückgegeben!');
+      return [];
+    }
+    
+    // Debug: Erste Row anzeigen
+    if (rows.isNotEmpty) {
+      debugPrint('📥 fetchLearnQueueAdaptive: Erste Row Keys=${rows.first.keys.toList()}');
+      debugPrint('📥 fetchLearnQueueAdaptive: Erste Row Values=${rows.first.values.take(3).toList()}');
+    }
+    
+    final ids = rows
+        .map((r) => r['word_id'] as String?)
+        .whereType<String>()
+        .toList();
+
+    debugPrint('📥 fetchLearnQueueAdaptive: ids.length=${ids.length}, erste IDs=${ids.take(5).toList()}');
+    
+    if (ids.isEmpty) {
+      debugPrint('⚠️ fetchLearnQueueAdaptive: Keine IDs gefunden!');
+      return [];
+    }
+
+    // Details nachladen (UI bleibt dumm, DB bleibt Logik)
+    // ✅ v_words_user_srs verwendet word_id statt id, srs_mode für Filter
+    final modeStr = 'adaptive'; // fetchLearnQueueAdaptive ist A-SRS, daher fix
+    final data = await _sb
+        .from('v_words_user_srs')
+        .select('word_id,text,translation,level,'
+            'in_my_words,favorite_user,picked_user,'
+            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+            'ef,streak,lapses')
+        .eq('category_id', categoryId)
+        .eq('srs_mode', modeStr)
+        .inFilter('word_id', ids);
+    
+    debugPrint('📥 fetchLearnQueueAdaptive: data.length=${(data as List).length}');
+
+    // Optional: Reihenfolge wie Queue wiederherstellen
+    // ✅ Mapping: word_id -> id für WordUserView (word_id ist String, kein nullable)
+    final map = {
+      for (final j in (data as List).cast<Map<String, dynamic>>())
+        (j['word_id'] as String): j
+    };
+
+    final ordered = <WordUserView>[];
+    for (final id in ids) {
+      final j = map[id];
+      if (j != null) {
+        ordered.add(WordUserView.fromJson(j));
+      } else {
+        debugPrint('⚠️ fetchLearnQueueAdaptive: Wort-ID $id nicht in v_words_user_srs gefunden!');
+      }
+    }
+
+    debugPrint('📥 fetchLearnQueueAdaptive: ordered.length=${ordered.length}, erste Wörter=${ordered.take(3).map((w) => w.text).toList()}');
+    return ordered;
+  }
+
+  /// Lern-Queue für Learn Mode (mode-aware über DB)
+  /// ❌ Für A-SRS darf diese Funktion NICHT verwendet werden - verwende stattdessen fetchAdaptiveQueue
+  Future<List<WordUserView>> fetchLearnQueueForMode(
+    String categoryId, {
+    required LevelSelectionMode mode,
+    required SrsSystem srsSystem,
+    int? singleStage, // 1..5 (nur relevant bei single)
+  }) async {
+    // ✅ A-SRS: Diese Funktion darf für A-SRS NICHT verwendet werden
+    // Verwende stattdessen fetchAdaptiveQueue mit limit
+    if (srsSystem == SrsSystem.adaptive) {
+      throw StateError(
+        'fetchLearnQueueForMode darf für A-SRS nicht verwendet werden. '
+        'Verwende stattdessen fetchAdaptiveQueue(userId, categoryId, limit: 20)'
+      );
+    }
+
+    // T-SRS/Hybrid: Alte Funktionen verwenden
+    final res = await _sb.rpc('fetch_learn_queue_for_mode', params: {
+      'p_category_id': categoryId,
+      'p_mode': srsSystem.name,     // 'time' | 'hybrid'
+      'p_stage': mode == LevelSelectionMode.single ? singleStage : null,
+      'p_limit': 2000,
+    });
+
+    final rows = (res as List).cast<Map<String, dynamic>>();
+    final ids = rows
+        .map((r) => r['word_id'] as String?)
+        .whereType<String>()
+        .toList();
+
+    if (ids.isEmpty) return [];
+
+    // Details nachladen (UI bleibt dumm, DB bleibt Logik)
+    // ✅ v_words_user_srs verwendet word_id statt id, srs_mode für Filter
+    final modeStr = srsSystem.name; // 'time' | 'hybrid'
+    final data = await _sb
+        .from('v_words_user_srs')
+        .select('word_id,text,translation,level,'
+            'in_my_words,favorite_user,picked_user,'
+            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+            'ef,streak,lapses')
+        .eq('category_id', categoryId)
+        .eq('srs_mode', modeStr)
+        .inFilter('word_id', ids);
+
+    // Optional: Reihenfolge wie Queue wiederherstellen
+    // ✅ Mapping: word_id -> id für WordUserView (word_id ist String, kein nullable)
+    final map = {
+      for (final j in (data as List).cast<Map<String, dynamic>>())
+        (j['word_id'] as String): j
+    };
+
+    final ordered = <WordUserView>[];
+    for (final id in ids) {
+      final j = map[id];
+      if (j != null) ordered.add(WordUserView.fromJson(j));
+    }
+
+    return ordered;
+  }
+
+  /// Holt Wörter für eine spezifische Stage (für A-SRS Nachschub-Regel)
+  /// Für A-SRS: Filtert nach last_queued_counter < refillCounter (Cooldown)
+  Future<List<WordUserView>> fetchWordsForStage({
+    required String categoryId,
+    required int stage,
+    required int limit,
+    required SrsSystem srsSystem,
+    int? refillCounter, // Optional: für A-SRS Cooldown-Filter
+  }) async {
+    if (srsSystem == SrsSystem.adaptive) {
+      // A-SRS: Verwende RPC mit refillCounter-Filter
+      final userId = _sb.auth.currentUser?.id;
+      if (userId == null) return [];
+      
+      // Wenn refillCounter gegeben: Filter nach Cooldown
+      if (refillCounter != null) {
+        try {
+          final res = await _sb.rpc(
+            'fn_a_srs_fetch_words_for_stage',
+            params: {
+              'p_user': userId,
+              'p_category': categoryId,
+              'p_stage': stage,
+              'p_limit': limit,
+              'p_refill_counter': refillCounter,
+            },
+          );
+          
+          final rows = (res as List).cast<Map<String, dynamic>>();
+          final ids = rows
+              .map((r) => r['word_id'] as String?)
+              .whereType<String>()
+              .toList();
+          
+          if (ids.isEmpty) return [];
+          
+          // Details nachladen
+          final data = await _sb
+              .from('v_words_user_srs')
+              .select('word_id,text,translation,level,'
+                  'in_my_words,favorite_user,picked_user,'
+                  'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+                  'ef,streak,lapses')
+              .eq('category_id', categoryId)
+              .eq('srs_mode', 'adaptive')
+              .inFilter('word_id', ids);
+          
+          final map = {
+            for (final j in (data as List).cast<Map<String, dynamic>>())
+              (j['word_id'] as String): j
+          };
+          
+          final ordered = <WordUserView>[];
+          for (final id in ids) {
+            final j = map[id];
+            if (j != null) ordered.add(WordUserView.fromJson(j));
+          }
+          
+          return ordered;
+        } catch (e) {
+          debugPrint('⚠️ fetchWordsForStage (A-SRS mit refillCounter) Fehler: $e');
+          // Fallback: ohne Cooldown-Filter
+        }
+      }
+      
+      // ❌ Fallback für A-SRS entfernt: fetchWordsForStage sollte für A-SRS nicht mehr verwendet werden
+      // Verwende stattdessen fetchAdaptiveQueue mit limit
+      throw StateError(
+        'fetchWordsForStage Fallback für A-SRS nicht mehr unterstützt. '
+        'Verwende stattdessen fetchAdaptiveQueue(userId, categoryId, limit: 20)'
+      );
+    } else {
+      // T-SRS/Hybrid: Verwende fetch_learn_queue_for_mode mit singleStage
+      final res = await _sb.rpc('fetch_learn_queue_for_mode', params: {
+        'p_category_id': categoryId,
+        'p_mode': srsSystem.name,
+        'p_stage': stage,
+        'p_limit': limit,
+      });
+
+      final rows = (res as List).cast<Map<String, dynamic>>();
+      final ids = rows
+          .map((r) => r['word_id'] as String?)
+          .whereType<String>()
+          .toList();
+
+      if (ids.isEmpty) return [];
+
+      final modeStr = srsSystem.name;
+      final data = await _sb
+          .from('v_words_user_srs')
+          .select('word_id,text,translation,level,'
+              'in_my_words,favorite_user,picked_user,'
+              'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+              'ef,streak,lapses')
+          .eq('category_id', categoryId)
+          .eq('srs_mode', modeStr)
+          .inFilter('word_id', ids);
+
+      final map = {
+        for (final j in (data as List).cast<Map<String, dynamic>>())
+          (j['word_id'] as String): j
+      };
+
+      final ordered = <WordUserView>[];
+      for (final id in ids) {
+        final j = map[id];
+        if (j != null) ordered.add(WordUserView.fromJson(j));
+      }
+
+      return ordered;
+    }
+  }
+
+
+
+  /// A-SRS Refill-Counter atomar erhöhen und zurückgeben
+  /// Nutzt RPC-Funktion für atomare Operation
+  Future<int> nextRefillCounter({
+    required String userId,
+    required String categoryId,
+    required String mode, // 'adaptive'
+  }) async {
+    try {
+      // Verwende RPC-Funktion für atomare Increment-Operation
+      final res = await _sb.rpc(
+        'fn_a_srs_next_refill_counter',
+        params: {
+          'p_user': userId,
+          'p_category': categoryId,
+          'p_mode': mode,
+        },
+      );
+      
+      // RPC gibt den neuen Counter-Wert zurück
+      if (res is int) return res;
+      if (res is num) return res.toInt();
+      if (res is Map) {
+        return (res['refill_counter'] as int?) ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      debugPrint('⚠️ nextRefillCounter Fehler: $e');
+      // Fallback: Versuche zu lesen
+      try {
+        final res = await _sb
+            .from('a_refill_state')
+            .select('refill_counter')
+            .eq('user_id', userId)
+            .eq('category_id', categoryId)
+            .eq('mode', mode)
+            .maybeSingle();
+        return (res?['refill_counter'] as int?) ?? 0;
+      } catch (_) {
+        return 0;
+      }
+    }
+  }
+
+  /// Holt S0-Wörter für Refill mit Cooldown-Filter
+  Future<List<WordUserView>> fetchS0ForRefill({
+    required String userId,
+    required String categoryId,
+    required String mode, // 'adaptive'
+    required int refillCounter,
+    required int limit, // Contract: s0_count pro Refill (z.B. 6)
+    required int overfetch,
+  }) async {
+    try {
+      // Query mit LEFT JOIN auf a_deck_state für Cooldown-Filter
+      final query = _sb
+          .from('user_word_srs')
+          .select('''
+            word_id,
+            srs_stage_user as srs_stage_user,
+            next_due_at_user as next_due_at_user,
+            created_at
+          ''')
+          .eq('user_id', userId)
+          .eq('category_id', categoryId)
+          .eq('mode', mode)
+          .eq('stage', 0) // Stage 0
+          .eq('ever_enrolled', false) // ever_enrolled = false
+          .eq('is_mastered', false) // is_mastered = false
+          .order('created_at', ascending: true)
+          .limit(overfetch);
+
+      // Cooldown-Filter: Exclude words that were queued in this refill cycle
+      // Wir müssen das in Dart machen, da Supabase keine komplexen JOINs mit Subqueries unterstützt
+      final rows = await query;
+      final wordIds = (rows as List)
+          .cast<Map<String, dynamic>>()
+          .map((r) => r['word_id'] as String?)
+          .whereType<String>()
+          .toList();
+
+      if (wordIds.isEmpty) return [];
+
+      // Prüfe Cooldown: Hole last_queued_counter für diese Wörter
+      final deckStateRows = await _sb
+          .from('a_deck_state')
+          .select('word_id, last_queued_counter')
+          .eq('user_id', userId)
+          .eq('category_id', categoryId)
+          .eq('mode', mode)
+          .inFilter('word_id', wordIds);
+
+      final deckStateMap = {
+        for (final row in (deckStateRows as List).cast<Map<String, dynamic>>())
+          (row['word_id'] as String): (row['last_queued_counter'] as int?) ?? -1
+      };
+
+      // Filtere Wörter, die in diesem Refill bereits queued wurden
+      final filteredIds = wordIds.where((id) {
+        final lastQueued = deckStateMap[id] ?? -1;
+        return lastQueued < refillCounter;
+      }).take(limit).toList();
+
+      if (filteredIds.isEmpty) return [];
+
+      // Hole Details für die gefilterten Wörter
+      final details = await _sb
+          .from('v_words_user_srs')
+          .select('word_id,text,translation,level,'
+              'in_my_words,favorite_user,picked_user,'
+              'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+              'ef,streak,lapses')
+          .eq('category_id', categoryId)
+          .eq('srs_mode', mode)
+          .inFilter('word_id', filteredIds);
+
+      return (details as List)
+          .cast<Map<String, dynamic>>()
+          .map((j) => WordUserView.fromJson(j))
+          .toList();
+    } catch (e, st) {
+      debugPrint('⚠️ fetchS0ForRefill Fehler: $e');
+      debugPrint('⚠️ Stack: $st');
+      return [];
+    }
+  }
+
+  /// Markiert Wörter als "queued" für einen Refill-Zyklus
+  /// Contract: last_queued_counter ist lokal-only (word_progress_deck_state)
+  Future<void> markQueuedForRefill({
+    required String userId,
+    required String categoryId,
+    required String mode, // 'adaptive'
+    required int refillCounter,
+    required List<String> wordIds,
+  }) async {
+    if (wordIds.isEmpty) return;
+
+    final rows = wordIds.map((wid) => {
+          'user_id': userId,
+          'category_id': categoryId,
+          'word_id': wid,
+          'mode': mode,
+          'last_queued_counter': refillCounter,
+        }).toList();
+
+    await Supabase.instance.client
+        .from('word_progress_deck_state')
+        .upsert(rows, onConflict: 'user_id,category_id,word_id,mode');
+  }
+
+  /// Workload heute (fällig heute + neu gesamt) pro Kategorie
+  Future<WorkloadToday> fetchWorkloadToday(String categoryId) async {
+    final res = await _sb.rpc('fn_user_workload_today', params: {'cat': categoryId});
+
+    late final Map<String, dynamic> j;
+    if (res is Map<String, dynamic>) {
+      j = res;
+    } else if (res is List && res.isNotEmpty && res.first is Map<String, dynamic>) {
+      j = res.first as Map<String, dynamic>;
+    } else {
+      j = const {}; // fallback
+    }
+
+    return WorkloadToday(
+      newTotal: (j['newTotal'] ?? j['new_total'] ?? 0) as int,
+      dueToday: (j['dueToday'] ?? j['due_today'] ?? 0) as int,
+    );
+  }
 
   // ⬇️ NEU: Helper-Funktion zum Erstellen von Query-Parametern aus Filter
   Map<String, String> _buildQueryParamsForFilter(WordListFilter filter) {
@@ -240,7 +1289,8 @@ class SupabaseWordRepository {
             params['favorite_user'] = 'eq.true';
             break;
           case 'known-words':
-            params['srs_stage_user'] = 'gte.1';
+            // ✅ Für v_words_user_srs: stage statt srs_stage_user
+            params['stage'] = 'gte.1';
             break;
           case 'my-mix':
             params['picked_user'] = 'eq.true';
@@ -667,16 +1717,67 @@ class SupabaseWordRepository {
     return 0;
   }
 
+  /// Zählt die Anzahl der gelernten Wörter in Stage 5 (Streak >= 3)
+  /// Diese Wörter sind endgültig fertig und als "gelernt" markiert
+  Future<int> countLearnedInStage5(String categoryId, {required SrsSystem srsSystem}) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      return 0;
+    }
+
+    final modeStr = srsSystem.name;
+    
+    try {
+      // Verwende v_words_user_srs, um Wörter in S5 mit Streak >= 3 zu zählen
+      final res = await _sb
+          .from('v_words_user_srs')
+          .select('word_id')
+          .eq('category_id', categoryId)
+          .eq('srs_mode', modeStr)
+          .eq('srs_stage_user', 5)
+          .gte('streak', 3);
+      
+      // Zähle die Ergebnisse
+      if (res is List) {
+        return res.length;
+      }
+      
+      return 0;
+    } catch (e) {
+      debugPrint('⚠️ countLearnedInStage5 error: $e');
+      // Fallback: Verwende user_word_srs direkt
+      try {
+        final res = await _sb
+            .from('user_word_srs')
+            .select('word_id')
+            .eq('user_id', userId)
+            .eq('category_id', categoryId)
+            .eq('mode', modeStr)
+            .eq('stage', 5)
+            .gte('streak', 3);
+        
+        if (res is List) {
+          return res.length;
+        }
+        return 0;
+      } catch (e2) {
+        debugPrint('⚠️ countLearnedInStage5 fallback error: $e2');
+        return 0;
+      }
+    }
+  }
+
   Future<int> countDueTodayByFilter(WordListFilter filter) async {
-    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
+    // ✅ v_words_user_srs verwendet word_id statt id, stage statt srs_stage_user, next_due_at statt next_due_at_user
+    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user_srs';
     final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
     
     final params = <String>[
-      'select=id',
+      'select=word_id',
       'limit=1',
       'prefer=count=exact',
-      'srs_stage_user=gte.1',
-      'next_due_at_user=lte.${DateTime.now().toIso8601String()}',
+      'stage=gte.1',
+      'next_due_at=lte.${DateTime.now().toIso8601String()}',
     ];
     
     final queryParams = _buildQueryParamsForFilter(filter);
@@ -771,6 +1872,66 @@ class SupabaseWordRepository {
     debugPrint('🔹 Function response: ${response.data}');
   }
 
+  /// Requeue nach Ausspielung konsumieren (löschen)
+  Future<void> requeueConsume({
+    required String categoryId,
+    required String wordId,
+    required String mode, // 'adaptive' | 'hybrid' | 'time'
+  }) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('requeueConsume: No current user');
+    }
+
+    debugPrint('🔄 requeueConsume: cat=$categoryId word=$wordId mode=$mode');
+    
+    await _sb.rpc('fn_user_requeue_consume', params: {
+      'p_category_id': categoryId,
+      'p_word_id': wordId,
+      'p_mode': mode,
+      'p_user': userId,
+    });
+    
+    debugPrint('✅ requeueConsume: Erfolgreich');
+  }
+
+  // ---- Helper-Methoden für Device-ID, Sequenznummer und Logical Updated-At ----
+
+  Future<String> _getOrCreateDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(_kDeviceIdKey);
+    if (existing != null && existing.isNotEmpty) return existing;
+
+    final id = const Uuid().v4();
+    await prefs.setString(_kDeviceIdKey, id);
+    return id;
+  }
+
+  Future<int> _nextDeviceSeq() async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getInt(_kDeviceSeqKey) ?? 0;
+    final next = current + 1;
+    await prefs.setInt(_kDeviceSeqKey, next);
+    return next;
+  }
+
+  /// Monotonic updated_at: max(now, last+1ms)
+  Future<DateTime> _nextLogicalUpdatedAt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now().toUtc();
+
+    final lastIso = prefs.getString(_kLastUpdatedAtKey);
+    DateTime next = now;
+
+    if (lastIso != null) {
+      final last = DateTime.parse(lastIso).toUtc();
+      final lastPlus = last.add(const Duration(milliseconds: 1));
+      if (lastPlus.isAfter(next)) next = lastPlus;
+    }
+
+    await prefs.setString(_kLastUpdatedAtKey, next.toIso8601String());
+    return next;
+  }
 }
 
 // --- MyWords API: fetch + count (nur user_words) ---------------------------
@@ -826,12 +1987,60 @@ extension MyWordsApi on SupabaseWordRepository {
   }
 
   Future<WordUserView?> fetchWordById(String wordId) async {
+    // ✅ v_words_user_srs verwendet word_id statt id
     final row = await _sb
-        .from('v_words_user')
+        .from('v_words_user_srs')
         .select()
-        .eq('id', wordId)
+        .eq('word_id', wordId)
         .maybeSingle();
     return row == null ? null : WordUserView.fromJson(row);
+  }
+
+  /// Holt mehrere WordUserView Objekte anhand ihrer IDs.
+  /// Wichtig: Die Reihenfolge der zurückgegebenen Liste entspricht der Reihenfolge der übergebenen IDs.
+  Future<List<WordUserView>> fetchWordUserViewsByIds({
+    required String categoryId,
+    required List<String> ids,
+    required SrsSystem srsSystem,
+  }) async {
+    if (ids.isEmpty) return [];
+
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('fetchWordUserViewsByIds: No current user');
+    }
+
+    final modeStr = srsSystem.name; // 'adaptive' | 'hybrid' | 'time'
+
+    // Hole Details aus v_words_user_srs
+    final data = await _sb
+        .from('v_words_user_srs')
+        .select('word_id,text,translation,level,'
+            'in_my_words,favorite_user,picked_user,'
+            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+            'ef,streak,lapses')
+        .eq('category_id', categoryId)
+        .eq('srs_mode', modeStr)
+        .inFilter('word_id', ids);
+
+    // Mapping: word_id -> JSON
+    final map = {
+      for (final j in (data as List).cast<Map<String, dynamic>>())
+        (j['word_id'] as String): j
+    };
+
+    // Reihenfolge wie IDs wiederherstellen
+    final ordered = <WordUserView>[];
+    for (final id in ids) {
+      final j = map[id];
+      if (j != null) {
+        ordered.add(WordUserView.fromJson(j));
+      } else {
+        debugPrint('⚠️ fetchWordUserViewsByIds: Wort-ID $id nicht in v_words_user_srs gefunden!');
+      }
+    }
+
+    return ordered;
   }
 }
 
@@ -941,10 +2150,10 @@ Future<Map<String, dynamic>?> fetchNextFromSingle(String catId, int stage) async
       .limit(1);
   if (res.isEmpty) return null;
   final wordId = res[0]['word_id'];
-  // Lade Wortdaten wie sonst auch:
-  final w = await _sb.from('v_words_user')
+  // ✅ v_words_user_srs verwendet word_id statt id
+  final w = await _sb.from('v_words_user_srs')
       .select()
-      .eq('id', wordId)
+      .eq('word_id', wordId)
       .maybeSingle();
   return w;
 }
@@ -973,10 +2182,10 @@ Future<String?> singleNextWordId(String catId, int stage) async {
   // Debug-Ausgabe zur Kontrolle
   debugPrint('🧩 Next word: $wordId from bucket=$bucket');
 
-  // Wortdaten nachladen (wie bisher)
-  final w = await _sb.from('v_words_user')
+  // ✅ v_words_user_srs verwendet word_id statt id
+  final w = await _sb.from('v_words_user_srs')
       .select()
-      .eq('id', wordId)
+      .eq('word_id', wordId)
       .maybeSingle();
 
   return w == null ? null : wordId;

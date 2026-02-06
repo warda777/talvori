@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/application.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
+import 'package:talvori/features/words/ui/widgets/frozen_stage_switch_overlay.dart';
 import 'vertical_stage_switch.dart';
 
 // Knopf-Anker: Finger sitzt leicht UNTER dem Knopf, damit der Knopf sichtbar VOR dem Finger ist.
@@ -65,6 +67,14 @@ class StageSwitchRow extends StatefulWidget {
   final StageSwitchColors? colors;
   final StageSwitchLabels? labels;
   final StageSwitchRowController? controller;
+  /// Shows the "learned words in S5" counter under the S5 switch.
+  ///
+  /// IMPORTANT: Keep this `false` for `LearnModeScreen` to avoid layout changes there.
+  final bool showLearnedCounterInStage5;
+  /// Category id used to compute the learned-in-S5 counter.
+  ///
+  /// If null/empty, the learned counter will show `0`.
+  final String? learnedCounterCategoryId;
   final bool selectable;                 // ← NEU: Tippen erlaubt?
   final ValueChanged<int>? onSelectStage; // ← NEU: Callback bei Tap
   final bool idlePulse;                  // ← NEU: sanftes Pulsieren aller
@@ -85,6 +95,8 @@ class StageSwitchRow extends StatefulWidget {
     this.colors,
     this.labels,
     this.controller,
+    this.showLearnedCounterInStage5 = false,
+    this.learnedCounterCategoryId,
     this.selectable = false,                 // ← NEU: Tippen erlaubt?
     this.onSelectStage,                      // ← NEU: Callback bei Tap
     this.idlePulse = false,                  // ← NEU: sanftes Pulsieren aller
@@ -188,22 +200,30 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
   }
 
   Widget _buildWithParams() {
-    final s = widget.counts!;
-    final goal = widget.goalPerStage ?? 100;
-    final switchGap = widget.gap ?? 8.0;
-    
-    // 6er-Default wenn keine Maske übergeben
-    final mask = widget.visibleMask ??
-        const [true, true, true, true, true, true];
+    return Consumer(
+      builder: (context, ref, _) {
+        final s = widget.counts!;
+        final goal = widget.goalPerStage ?? 100;
+        final switchGap = widget.gap ?? 8.0;
+        
+        // Prüfe Bedingungen für Einfrieren
+        final learnState = ref.watch(learnModeControllerProvider);
+        final srsMode = ref.watch(srsModeControllerProvider);
+        final isTimeOrHybrid = srsMode.mode == SrsSystem.time || srsMode.mode == SrsSystem.hybrid;
+        final timerActive = learnState.timerActive && !learnState.timerPaused;
+        
+        // 6er-Default wenn keine Maske übergeben
+        final mask = widget.visibleMask ??
+            const [true, true, true, true, true, true];
 
-    // Welche Indizes sollen wirklich sichtbar sein?
-    final visibleIndices = <int>[];
-    for (var i = 0; i < 6; i++) {
-      final show = i < mask.length ? mask[i] : true;
-      if (show) visibleIndices.add(i);
-    }
+        // Welche Indizes sollen wirklich sichtbar sein?
+        final visibleIndices = <int>[];
+        for (var i = 0; i < 6; i++) {
+          final show = i < mask.length ? mask[i] : true;
+          if (show) visibleIndices.add(i);
+        }
 
-    final children = <Widget>[];
+        final children = <Widget>[];
 
     for (var vi = 0; vi < visibleIndices.length; vi++) {
       final i = visibleIndices[vi];
@@ -244,6 +264,10 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         final bool softGlow = widget.idlePulse && (stage >= 1);
         final bool isSelected = (widget.selectedStageHighlight != null) && (stage == widget.selectedStageHighlight);
 
+        final learnedCount = (widget.showLearnedCounterInStage5 && stage == 5)
+            ? (ref.watch(learnedInStage5Provider(widget.learnedCounterCategoryId ?? '')).valueOrNull ?? 0)
+            : null;
+
         Widget knobbed = VerticalStageSwitch(
           containerKey: widget.switchKeys?[stage],
           count: s[stage],
@@ -257,6 +281,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           glow: hardGlow || softGlow || isSelected,
           pulseAnimation: softGlow ? _pulse : null,
           selectedHighlight: isSelected,
+          showLearnedCount: widget.showLearnedCounterInStage5 && stage == 5,
+          learnedCount: learnedCount,
           knobWrapper: (knob) => LongPressDraggable<StageDrag>(
             data: StageDrag(stage, count: 1),
             child: knob,
@@ -276,59 +302,126 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       }
 
       // Tap-Handler für Switches
+      final count = s[i];
+      final disabled = count == 0;
+      
       if (widget.selectable && i >= 1) {
         // Single-Mode: Tap wählt Stage (nur S1-S5)
+        // ❗ Block: leere Stages deaktivieren
         switchBody = GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () async {
+          onTap: disabled ? null : () async {
+            // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
+            if (count == 0) return;
             widget.onSelectStage?.call(i);
             await _blinkOnly(i);
           },
           onLongPress: () {
             // TODO: später Karten verschieben
           },
-          child: switchBody,
+          child: Opacity(
+            opacity: disabled ? 0.35 : 1.0,
+            child: switchBody,
+          ),
         );
       } else if (widget.onTapStage != null) {
         // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
-        switchBody = GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            widget.onTapStage?.call(i);
-          },
-          child: switchBody,
-        );
+        // ABER: Wenn S0 gesperrt ist ODER Stage leer ist, dann nicht tappbar
+        final bool isS0Locked = (i == 0) && (widget.s0Locked == true);
+        if (!isS0Locked && !disabled) {
+          switchBody = GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
+              if (count == 0) return;
+              widget.onTapStage?.call(i);
+            },
+            child: switchBody,
+          );
+        } else if (disabled) {
+          // Leere Stage: Opacity reduzieren
+          switchBody = Opacity(
+            opacity: 0.35,
+            child: switchBody,
+          );
+        }
       }
 
-      children.add(
-        Container(
-          margin: EdgeInsets.only(right: isLast ? 0 : switchGap),
-          child: switchBody,
-        ),
+        // Bestimme, ob diese Switch eingefroren sein soll
+        final bool shouldFreeze;
+        if (isTimeOrHybrid) {
+          if (timerActive) {
+            // Timer aktiv: Alle Switches einfrieren
+            shouldFreeze = true;
+          } else {
+            // Timer nicht aktiv: Nur leere Stages einfrieren
+            shouldFreeze = count == 0;
+          }
+        } else {
+          // Nicht T-SRS/Hybrid: Nicht einfrieren
+          shouldFreeze = false;
+        }
+
+        // Wrap Switch mit FrozenOverlay, wenn gefroren
+        Widget finalSwitch = switchBody;
+        if (shouldFreeze) {
+          finalSwitch = FrozenStageSwitchOverlay(
+            isFrozen: true,
+            stageIndex: i, // Stage-Index für unterschiedliche Schneeflocken-Verteilung
+            child: switchBody,
+          );
+        }
+
+        children.add(
+          Container(
+            margin: EdgeInsets.only(right: isLast ? 0 : switchGap),
+            child: finalSwitch,
+          ),
+        );
+      }
+      
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // Alle Switches oben ausrichten, damit sie auf gleicher Y-Position sind
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: children,
       );
-    }
-    
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: children,
+    },
     );
   }
 
   Widget _buildWithStages(List<int> stages) {
-    // 6er-Default wenn keine Maske übergeben
-    final mask = widget.visibleMask ??
-        const [true, true, true, true, true, true];
+    return Consumer(
+      builder: (context, ref, _) {
+        // Prüfe Bedingungen für Einfrieren
+        final learnState = ref.watch(learnModeControllerProvider);
+        final srsMode = ref.watch(srsModeControllerProvider);
+        final isTimeOrHybrid = srsMode.mode == SrsSystem.time || srsMode.mode == SrsSystem.hybrid;
+        final timerActive = learnState.timerActive && !learnState.timerPaused;
+        
+        // 6er-Default wenn keine Maske übergeben
+        final mask = widget.visibleMask ??
+            const [true, true, true, true, true, true];
 
-    // Welche Indizes sollen wirklich sichtbar sein?
-    final visibleIndices = <int>[];
-    for (var i = 0; i < 6; i++) {
-      final show = i < mask.length ? mask[i] : true;
-      if (show) visibleIndices.add(i);
-    }
+        // Welche Indizes sollen wirklich sichtbar sein?
+        // ✅ Im LearnMode nur Stages mit Count > 0 anzeigen
+        final visibleIndices = <int>[];
+        for (var i = 0; i < 6; i++) {
+          final show = i < mask.length ? mask[i] : true;
+          if (show && stages[i] > 0) {
+            visibleIndices.add(i);
+          }
+        }
 
-    final children = <Widget>[];
+        // Fallback: wenn ALLES 0 (kurzer Reset/Reload-Moment)
+        if (visibleIndices.isEmpty) {
+          for (var i = 0; i < 6; i++) {
+            final show = i < mask.length ? mask[i] : true;
+            if (show) visibleIndices.add(i);
+          }
+        }
+
+        final children = <Widget>[];
 
     for (var vi = 0; vi < visibleIndices.length; vi++) {
       final i = visibleIndices[vi];
@@ -361,6 +454,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         // S1-S5 Switches
         final stage = i;
         final prefix = widget.labels?.stagePrefix ?? 'S';
+        
         Widget knobbed = VerticalStageSwitch(
           containerKey: widget.switchKeys?[stage],
           count: stages[stage],
@@ -371,6 +465,10 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           label: '$prefix$stage',
           note: '$prefix$stage',
           glow: _blinking.contains(stage),
+          showLearnedCount: widget.showLearnedCounterInStage5 && stage == 5,
+          learnedCount: (widget.showLearnedCounterInStage5 && stage == 5)
+              ? (ref.watch(learnedInStage5Provider(widget.learnedCounterCategoryId ?? '')).valueOrNull ?? 0)
+              : null,
           knobWrapper: (knob) => LongPressDraggable<StageDrag>(
             data: StageDrag(stage, count: 1),
             child: knob,
@@ -390,49 +488,97 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       }
 
       // Tap-Handler für Switches
+      final count = stages[i];
+      final disabled = count == 0;
+      
       if (widget.selectable && i >= 1) {
         // Single-Mode: Tap wählt Stage (nur S1-S5)
+        // ❗ Block: leere Stages deaktivieren
         switchBody = GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () async {
+          onTap: disabled ? null : () async {
+            // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
+            if (count == 0) return;
             widget.onSelectStage?.call(i);
             await _blinkOnly(i);
           },
           onLongPress: () {
             // TODO: später Karten verschieben
           },
-          child: switchBody,
+          child: Opacity(
+            opacity: disabled ? 0.35 : 1.0,
+            child: switchBody,
+          ),
         );
       } else if (widget.onTapStage != null) {
         // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
-        switchBody = GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            widget.onTapStage?.call(i);
-          },
-          child: switchBody,
-        );
+        // ABER: Wenn S0 gesperrt ist ODER Stage leer ist, dann nicht tappbar
+        final bool isS0Locked = (i == 0) && (widget.s0Locked == true);
+        if (!isS0Locked && !disabled) {
+          switchBody = GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
+              if (count == 0) return;
+              widget.onTapStage?.call(i);
+            },
+            child: switchBody,
+          );
+        } else if (disabled) {
+          // Leere Stage: Opacity reduzieren
+          switchBody = Opacity(
+            opacity: 0.35,
+            child: switchBody,
+          );
+        }
       }
 
-      children.add(
-        Container(
-          margin: EdgeInsets.only(right: isLast ? 0 : WordsUIConstants.switchGap),
-          child: switchBody,
+        // Bestimme, ob diese Switch eingefroren sein soll
+        final bool shouldFreeze;
+        if (isTimeOrHybrid) {
+          if (timerActive) {
+            // Timer aktiv: Alle Switches einfrieren
+            shouldFreeze = true;
+          } else {
+            // Timer nicht aktiv: Nur leere Stages einfrieren
+            shouldFreeze = count == 0;
+          }
+        } else {
+          // Nicht T-SRS/Hybrid: Nicht einfrieren
+          shouldFreeze = false;
+        }
+
+        // Wrap Switch mit FrozenOverlay, wenn gefroren
+        Widget finalSwitch = switchBody;
+        if (shouldFreeze) {
+          finalSwitch = FrozenStageSwitchOverlay(
+            isFrozen: true,
+            stageIndex: i, // Stage-Index für unterschiedliche Schneeflocken-Verteilung
+            child: switchBody,
+          );
+        }
+
+        children.add(
+          Container(
+            margin: EdgeInsets.only(right: isLast ? 0 : WordsUIConstants.switchGap),
+            child: finalSwitch,
+          ),
+        );
+      }
+      
+      return Padding(
+        padding: WordsUIConstants.screenPadding,
+        child: Transform.translate(
+          offset: WordsUIConstants.switchOffset,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: children,
+          ),
         ),
       );
-    }
-    
-    return Padding(
-      padding: WordsUIConstants.screenPadding,
-      child: Transform.translate(
-        offset: WordsUIConstants.switchOffset,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        ),
-      ),
+    },
     );
   }
 }

@@ -1,7 +1,7 @@
 # 📋 Programmliste - Aktualisierte Übersicht
 
-> **Letzte Aktualisierung:** 28. Januar 2025  
-> **Version:** 1.5  
+> **Letzte Aktualisierung:** 29. Januar 2025  
+> **Version:** 1.6  
 > **Status:** ✅ Aktualisiert
 
 ## 📊 Projekt-Statistiken
@@ -64,15 +64,19 @@
 
 ### Spaced Repetition System (SRS)
 
-- **Stufen**: S0 (Neu) → S1-S5 (Gelernt)
-- **Modi**: S0-S5, S1-S5, Single Stage
+- **Stufen**: Modusabhängige Bezeichnungen
+  - T-SRS: T0 (Neu) → T1-T5 (Gelernt)
+  - A-SRS: A0 (Neu) → A1-A5 (Gelernt)
+  - Hybrid: H0 (Neu) → H1-H5 (Gelernt)
+- **Modi**: AUTO (T0-T5/A0-A5/H0-H5), T1-T5/A1-A5/H1-H5, SINGLE Stage
 - **Engines**: T-SRS, A-SRS, Hybrid
-- **S0 Lock**: Optional Sperre für neue Karten
+- **S0 Lock**: Optional Sperre für neue Karten (T0/A0/H0)
 - **Stage Words Dialog**: 
   - Popup mit allen Wörtern eines Stages
   - Modus-spezifische Erklärungen (T-SRS, A-SRS, Hybrid)
+  - Dynamische Stage-Bezeichnungen je nach aktivem Modus (T0-T5, A0-A5, H0-H5)
   - T-SRS Erklärung (2-6-19 System)
-  - Aufstieg/Abstieg-Regeln
+  - Aufstieg/Abstieg-Regeln mit modusabhängigen Bezeichnungen
   - Farben & Feedback-Legende
   - Nummerierung (z.B. "1/35") bei jedem Wort
   - Automatisch erscheinender Scrollbar
@@ -94,17 +98,20 @@
   
 - **Plasma Link Animation**:
   - Verbindet Karte mit Ziel-Stage-Switch während Drag-Geste
-  - Mehrere animierte Fäden zwischen Karten-Unterkante (20% Breite) und Switch-Oberkante
+  - Mehrere animierte Fäden zwischen Karten-Unterkante (10% Breite) und Switch-Oberkante
   - Bündelung in der Mitte für organischen Look
   - Dynamische Kurven mit tangentialen Übergängen, größerer Bogen nach oben
+  - Wandering Wave: Radien bewegen sich entlang der Länge des Links
   - Erscheint erst nach Karten-Animation (500ms Delay)
   - Verschwindet beim Drag, erscheint wieder wenn Karte zurückkommt
-  - Doppelte Animationsgeschwindigkeit für flüssigere Bewegung
+  - Halbierte Animationsgeschwindigkeit für ruhigere Bewegung
+  - Funktioniert auch im SINGLE-Modus (zeigt auf SRC-Switch)
   
 - **Switch Pulse Animation**:
   - Corona-Effekt um Ziel-Stage-Switch bei erfolgreichem Swipe
   - Expandierender, pulsierender Glow (2 Sekunden Dauer)
   - Mehrschichtige Animation für Tiefe
+  - Funktioniert auch im SINGLE-Modus (zeigt Bounce auf SRC, R1 oder R2)
 
 ### Mix Feature
 

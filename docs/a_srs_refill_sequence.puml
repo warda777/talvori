@@ -1,0 +1,46 @@
+@startuml
+title Talvori A-SRS – Refill Sequence (Enroll + Deck Build)
+
+actor User
+participant "UI (Flutter)" as UI
+participant "Engine (Dart)\nRefill()" as ENG
+database "Local DB\n(SQLite/Drift)" as LDB
+database "Remote DB\n(Supabase)" as RDB
+
+== Trigger ==
+User -> UI : Start Session / Queue empty / User presses Refill
+UI -> ENG : refill(category_id, mode)
+
+== Load counts (local truth) ==
+ENG -> LDB : SELECT aggregates (S0_total, S1_count, ... , S5_available, mastered_count, active_total)
+LDB --> ENG : counts
+
+== Compute enroll n ==
+ENG -> ENG : capacity = S1_max_effective - S1_count
+ENG -> ENG : enroll_limit = (S0_total>40)?20:ceil(0.25*S0_total)
+ENG -> ENG : n = min(capacity, enroll_limit, S0_total)
+
+== Select deterministic n words ==
+ENG -> LDB : SELECT word_id FROM progress\nWHERE stage=0 AND ever_enrolled=false AND is_mastered=false\nORDER BY added_to_category_at ASC, word_id ASC\nLIMIT n
+LDB --> ENG : word_ids[n]
+
+== Atomic local transaction ==
+ENG -> LDB : TRANSACTION\nUPDATE progress SET stage=1, ever_enrolled=true, streak=0, updated_at=now, device_seq++\nWHERE word_id IN (word_ids[n])\nCOMMIT
+LDB --> ENG : ok
+
+== Build deck (S1..S5, with S5 cap) ==
+ENG -> LDB : SELECT candidates for S1..S5 (is_mastered=false)\napply slot policy + S5_cap_per_refill=2\nselect deterministic IDs then shuffle by seed
+LDB --> ENG : deck_ids[<=DECK_SIZE]
+
+== Return to UI ==
+ENG --> UI : deck_ids + updated counts
+UI -> UI : render queue + counters (from local aggregates)
+
+== Optional async sync ==
+ENG -> RDB : upsert changed progress rows (delta)
+RDB --> ENG : ok
+ENG -> LDB : apply merge rule + enforce invariants (INV-1..INV-4)
+
+@enduml
+
+

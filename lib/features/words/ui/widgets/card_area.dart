@@ -49,18 +49,27 @@ class CardArea extends ConsumerWidget {
           frontText: frontText,
           backText: backText,
           level: current?.level,
+          srsStage: current?.srsStage,
+          streak: current?.streak,
           showTranslation: s.showTranslation,
           gesturesEnabled: !isPaused,
           footer: TimerBar(s: s),
           onSwipe: (correct) async {
-            onSwipeCommit?.call(correct); // Pulse-Animation triggern
+            final paused = s.timerPaused;
+            final active = s.timerActive;
+            final running = s.running;
+            
+            if (correct) {
+              debugPrint('✅ UI SwipeRight angekommen | paused=$paused active=$active running=$running');
+              onSwipeCommit?.call(true);
+            } else {
+              debugPrint('✅ UI SwipeLeft angekommen | paused=$paused active=$active running=$running');
+              onSwipeCommit?.call(false);
+            }
+            
             // Nach dem Wischen: Zurück zur Hauptsprache (showTranslation = false)
             c.setShowTranslation(false);
-            if (correct) {
-              c.onSwipeRight();
-            } else {
-              c.onSwipeLeft();
-            }
+            // Controller wird jetzt in _handleSwipeCommit() im Screen aufgerufen, nicht hier!
           },
           onFlip: () => c.toggleFlip(),
           onDragUpdate: onDragUpdate, // ← NEU

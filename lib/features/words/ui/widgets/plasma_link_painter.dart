@@ -69,14 +69,19 @@ class PlasmaBandPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (!visible || cardRect == null || switchRect == null) return;
 
-    final t = phase * 2 * pi * 1.0; // Halbierte Geschwindigkeit (von 2.0 auf 1.0)
-    final fromPts = cardBottomBand(cardRect!, count: 10, widthFactor: 0.10); // 10% Breite - sehr eng gebündelt am Kartenrand
+    final t = phase * 2 * pi * 1.0;
+
+    final fromPts = cardBottomBand(
+      cardRect!,
+      count: 8,
+      widthFactor: 0.06, // slimmer band at the card edge
+    );
     final toPts = switchTopArcTight(
       switchRect!,
-      count: 10,
-      arcPortionOfHalf: 0.15,  // 15% des Halbkreises - extrem eng gebündelt oben
-      ringInset: 1,     // Nur 1px nach innen - liegt auf der äußeren farbigen Pill (rot/gold/weiß)
-      yOutset: 0,       // Kein yOutset
+      count: 8,
+      arcPortionOfHalf: 0.12, // tight arc at switch top
+      ringInset: 1,
+      yOutset: 0,
     );
 
     Paint glow(Color c, double w, double a, double blur) => Paint()
@@ -87,151 +92,55 @@ class PlasmaBandPainter extends CustomPainter {
       ..color = c.withOpacity(a)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur);
 
-    final outer = glow(const Color(0xFFB16CFF), 14, 0.10, 18);
-    final mid   = glow(const Color(0xFF7B5CFF), 8,  0.14, 12);
+    // Much slimmer link paints
+    final outer = glow(const Color(0xFFB16CFF), 6, 0.10, 12);
+    final mid   = glow(const Color(0xFF7B5CFF), 3, 0.14, 9);
     final core  = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..strokeWidth = 2.0
+      ..strokeWidth = 1.3
       ..color = const Color(0xFFEFE9FF).withOpacity(0.60);
 
-    // Richtung und Normalenvektor für Bündelung
+    // Direction + normal for gentle wobble
     final d = (toPts[toPts.length ~/ 2] - fromPts[fromPts.length ~/ 2]);
     final dist = d.distance.clamp(1.0, 2000.0);
     final dir = d / dist;
     final n = Offset(-dir.dy, dir.dx);
 
-    // Fäden zeichnen (geordnet: i -> i, keine Permutation)
     for (int i = 0; i < fromPts.length; i++) {
       final a = fromPts[i];
-      final b = toPts[i]; // match i -> i (geordnet, vermeidet Nachbar-Switches)
-
-      // startSpread = 0, damit alle Punkte exakt auf der Linie bleiben
-      final startSpread = 0.0; // Keine seitliche Verschiebung - alle auf einer Linie
-      final endSpread = 0.0; // Zielpunkte liegen schon auf Arc, nicht zusätzlich seitlich
-
-      final path = _bundledFlow(a, b, n, t, i, startSpread, endSpread);
-
+      final b = toPts[i];
+      final path = _wavyStrand(a, b, n, t, seed: i);
       canvas.drawPath(path, outer);
       canvas.drawPath(path, mid);
-      canvas.drawPath(path, core..color = const Color(0xFFEFE9FF).withOpacity(0.35 + 0.25 * sin(t + i)));
+      canvas.drawPath(path, core..color = const Color(0xFFEFE9FF).withOpacity(0.26 + 0.22 * sin(t + i)));
     }
-
-    // Optional: Dock-Glow als "Fächer" unten und oben
-    _dockFan(canvas, cardRect!.bottomCenter, t, strength: 1.0);
-    _dockFan(canvas, Offset(switchRect!.center.dx, switchRect!.top), t, strength: 0.7);
   }
 
-  // Bundle-Punkt: liegt zwischen Karte und Switch, etwas näher an der Switch
-  // Mit sanfterem Bogen nach oben, um Switches nicht zu berühren
-  Offset _bundlePoint(Offset a, Offset b, double t, Offset n) {
-    final mid = Offset.lerp(a, b, 0.62)!; // näher zur Switch
-    
-    // Sanftere Bewegung mit mehreren Wellen
-    final wobble1 = sin(t) * 3.0;
-    final wobble2 = sin(t * 0.9 + 1.5) * 2.0;
-    final wobble = (wobble1 + wobble2) / 2.0; // Durchschnitt für sanftere Bewegung
-    
-    // Sanfterer Bogen nach oben
-    final verticalOffset = -20.0;
-    final upVector = Offset(0, verticalOffset);
-    
-    return mid + n * wobble + upVector;
-  }
+  Path _wavyStrand(Offset a, Offset b, Offset n, double t, {required int seed}) {
+    // Create a smooth, slim, wavy cubic path.
+    // The wave "travels" along the link by mixing multiple sinusoids.
+    final mid = Offset.lerp(a, b, 0.58)!;
 
-  // Pfad pro Faden (breit → eng → breit) mit wandernder Welle entlang des Links
-  Path _bundledFlow(Offset a, Offset b, Offset n, double t, int seed, double startSpread, double endSpread) {
-    final m = _bundlePoint(a, b, t, n);
-
-    // Startpunkt fächert breit
-    final a2 = a + n * startSpread;
-
-    // Endpunkt fächert breit (entlang Arc-Samples kommt sowieso Variation)
-    final b2 = b + n * endSpread;
-
-    // Sanfter Bogen nach oben
-    final arcHeight = -25.0;
-    final upOffset = Offset(0, arcHeight);
-
-    // Wandernde Welle: Die Phase bewegt sich entlang des Pfades (0.0 an der Karte -> 1.0 an der Switch)
-    // Geschwindigkeit der wandernden Welle (wie schnell sie sich entlang des Links bewegt)
-    final waveSpeed = 2.0; // Wie viele Wellen pro Sekunde entlang des Links wandern
-    final wavePhase = (t * waveSpeed) % (2 * pi); // Phase der wandernden Welle
-
-    // Helper-Funktion: Berechnet die lokale Welle basierend auf der Position entlang des Pfades
-    double getLocalWave(double pathPosition) {
-      // pathPosition: 0.0 = an der Karte, 1.0 = an der Switch
-      // Die Welle wandert von der Karte zur Switch
-      final localPhase = wavePhase - pathPosition * 2 * pi; // Welle läuft von 0 nach 1
-      
-      // Mehrere überlagerte Wellen für komplexeres Muster
-      final wave1 = sin(localPhase + seed) * 4.0;
-      final wave2 = sin(localPhase * 0.8 + seed * 1.2) * 3.0;
-      final wave3 = sin(localPhase * 1.2 + seed * 0.7) * 2.0;
-      return (wave1 + wave2 + wave3) / 3.0;
+    // traveling wave phase (0 at card -> 1 at switch)
+    double wave(double p) {
+      final base = t * 1.6 - p * 2 * pi;
+      final w1 = sin(base + seed * 0.6) * 5.0;
+      final w2 = sin(base * 0.8 + 1.2 + seed * 0.35) * 3.0;
+      return (w1 + w2) / 2.0;
     }
 
-    // Drei Segmente für zusätzliche Welle: a2 -> m1 -> m2 -> b2
-    // m1 bei 1/3 (oberer Bereich, wo nach unten geht)
-    // m2 bei 2/3 (dann wieder nach oben)
-    final m1 = Offset.lerp(a2, b2, 0.33)!; // Bei einem Drittel
-    final m2 = Offset.lerp(a2, b2, 0.67)!; // Bei zwei Dritteln
-
-    // Erste Kurve: a2 -> m1 (nach oben)
-    // Position entlang des Pfades: 0.0 - 0.33
-    final c1aPos = 0.125; // 0.25 * 0.5 (Mitte zwischen a2 und m1)
-    final c1bPos = 0.25;  // 0.75 * 0.33 (Mitte zwischen a2 und m1)
-    final c1a = Offset.lerp(a2, m1, 0.25)! + n * (getLocalWave(c1aPos) * 0.6) + upOffset * 0.2;
-    final c1b = Offset.lerp(a2, m1, 0.75)! + n * (getLocalWave(c1bPos) * 0.6) + upOffset * 1.0;
-
-    // Zweite Kurve: m1 -> m2 (nach unten, dann wieder nach oben)
-    // Position entlang des Pfades: 0.33 - 0.67
-    // Tangentialer Übergang: c1b, m1, c2a müssen kollinear sein
-    final downOffset = Offset(0, 15.0); // Nach unten für die Welle
-    
-    // Richtung am Ende der ersten Kurve (von c1b zu m1)
-    final dirAtM1 = m1 - c1b;
-    final dirAtM1Len = dirAtM1.distance;
-    final dirAtM1Norm = dirAtM1Len > 0.001 ? dirAtM1 / dirAtM1Len : Offset(0, -1);
-    // c2a liegt auf der Verlängerung von c1b -> m1 für tangentialen Übergang
-    final c2aPos = 0.42; // 0.33 + 0.25 * (0.67 - 0.33)
-    final c2bPos = 0.58; // 0.33 + 0.75 * (0.67 - 0.33)
-    final c2a = m1 + dirAtM1Norm * 25.0 + n * (getLocalWave(c2aPos) * 1.1) + downOffset * 0.3;
-    final c2b = Offset.lerp(m1, m2, 0.75)! + n * (getLocalWave(c2bPos) * 1.1) + upOffset * 0.9;
-
-    // Dritte Kurve: m2 -> b2 (nach oben zur Switch)
-    // Position entlang des Pfades: 0.67 - 1.0
-    // Tangentialer Übergang: c2b, m2, c3a müssen kollinear sein
-    final dirAtM2 = m2 - c2b;
-    final dirAtM2Len = dirAtM2.distance;
-    final dirAtM2Norm = dirAtM2Len > 0.001 ? dirAtM2 / dirAtM2Len : Offset(0, -1);
-    // c3a liegt auf der Verlängerung von c2b -> m2 für tangentialen Übergang
-    final c3aPos = 0.75; // 0.67 + 0.25 * (1.0 - 0.67)
-    final c3a = m2 + dirAtM2Norm * 25.0 + n * (getLocalWave(c3aPos) * 1.0) + upOffset * 1.0;
-    
-    // Größerer Bogen nach oben kurz vor der Switch
-    final largeArcOffset = Offset(0, -40.0); // Größerer Bogen nach oben
-    final c3bPos = 0.87; // 0.67 + 0.80 * (1.0 - 0.67)
-    final c3b = Offset.lerp(m2, b2, 0.80)! + n * (getLocalWave(c3bPos) * 0.6) + largeArcOffset;
+    final up = const Offset(0, -22.0);
+    final c1 = Offset.lerp(a, mid, 0.60)! + n * (wave(0.22) * 0.35) + up * 0.25;
+    final c2 = Offset.lerp(mid, b, 0.45)! + n * (wave(0.72) * 0.45) + up * 1.0;
 
     return Path()
-      ..moveTo(a2.dx, a2.dy)
-      ..cubicTo(c1a.dx, c1a.dy, c1b.dx, c1b.dy, m1.dx, m1.dy)
-      ..cubicTo(c2a.dx, c2a.dy, c2b.dx, c2b.dy, m2.dx, m2.dy)
-      ..cubicTo(c3a.dx, c3a.dy, c3b.dx, c3b.dy, b2.dx, b2.dy);
+      ..moveTo(a.dx, a.dy)
+      ..cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, b.dx, b.dy);
   }
 
-  void _dockFan(Canvas canvas, Offset p, double t, {double strength = 1.0}) {
-    final pulse = 0.6 + 0.4 * sin(t * 1.1);
-    final r = (18 + 16 * pulse) * strength;
-
-    final paint = Paint()
-      ..color = const Color(0xFFB16CFF).withOpacity(0.10 * strength)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
-
-    canvas.drawCircle(p, r, paint);
-  }
+  // (No knots / dock fans on purpose: user wants a clean slim wavy link.)
 
   @override
   bool shouldRepaint(covariant PlasmaBandPainter old) =>

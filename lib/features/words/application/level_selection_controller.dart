@@ -10,6 +10,11 @@ class LevelSelectionController {
     WidgetRef ref,
     LevelSelectionMode mode,
   ) async {
+    // WICHTIG: singleStage zurücksetzen, wenn Mode nicht single ist
+    if (mode != LevelSelectionMode.single) {
+      ref.read(singleStageProvider.notifier).state = 1; // Reset auf Default
+    }
+    
     ref.read(levelSelectionProvider.notifier).state = mode;
 
     if (mode == LevelSelectionMode.single) {

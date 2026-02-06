@@ -95,6 +95,13 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
     final t = Theme.of(context);
     final s = (widget.stages.length >= 6) ? widget.stages : [0, 0, 0, 0, 0, 0];
     final srs = ref.watch(srsModeControllerProvider);
+    final bool isHybrid = srs.mode == SrsSystem.hybrid;
+    final bool s0Locked = (widget.categoryId == null)
+        ? false
+        : ref.watch(s0LockedProvider(widget.categoryId!)).maybeWhen(
+            data: (v) => v,
+            orElse: () => false,
+          );
     // Stroke: in T/A ausblenden, in Hybrid wie gehabt
     final Color stroke = () {
       switch (srs.mode) {
@@ -165,6 +172,8 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                     counts: s,
                     goalPerStage: widget.goalPerStage,
                     gap: widget.switchGap,
+                    showLearnedCounterInStage5: true,
+                    learnedCounterCategoryId: widget.categoryId ?? '',
                     sizes: const StageSwitchSizes(
                         width: 42, height: 75, knobTop: 2, knobBottom: 18),
                     colors: StageSwitchColors(
@@ -180,7 +189,7 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                     idlePulse: widget.mode == LevelSelectionMode.single && widget.selectingSingle, // ← NEU
                     selectedStageHighlight: (widget.mode == LevelSelectionMode.single) ? ref.read(singleStageProvider) : null, // ← NEU
                     // ✅ KEINE visibleMask hier im Kategorie-Screen
-                    s0Locked: ref.watch(s0LockedProvider),
+                    s0Locked: s0Locked,
                     onTapS0: null, // Icon ist jetzt in der LevelsCard, nicht mehr in der Switch
                     onSelectStage: (stg) {
                       // Nutzer hat S1..S5 gewählt:
@@ -196,7 +205,6 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                       // Adapter: Map interne Enums zu Popup-Enums
                       final internalMode = ref.read(srsModeControllerProvider);
                       final internalRange = ref.read(levelSelectionProvider);
-                      final s0Locked = ref.read(s0LockedProvider);
                       
                       final popupMode = _mapPopupMode(internalMode.mode);
                       final popupRange = _mapPopupRange(internalRange);
@@ -263,37 +271,44 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                             ),
                           ),
                         ),
-                        Positioned(
-                          left: buttonLeft - gap - iconBoxW,
-                          top: buttonTop + (buttonH - 40) / 2 - 10, // Zentriert vertikal mit Button (Icon ist 40px + 10px padding oben/unten)
-                          child: Transform.translate(
-                            offset: const Offset(-20, 0), // X nach links
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () async {
-                                  final notifier = ref.read(s0LockedProvider.notifier);
-                                  final wasLocked = notifier.state;
-                                  notifier.state = !wasLocked;
+                        if (!isHybrid)
+                          Positioned(
+                            left: buttonLeft - gap - iconBoxW,
+                            top: buttonTop + (buttonH - 40) / 2 - 10,
+                            child: Transform.translate(
+                              offset: const Offset(-20, 0),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () async {
+                                    if (widget.categoryId == null) return;
 
-                                  // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
-                                  if (wasLocked) {
-                                    await _switchCtrl.blinkS0Once();
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(25),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10), // Größerer Tap-Bereich
-                                  child: Icon(
-                                    ref.watch(s0LockedProvider) ? Icons.lock_rounded : Icons.lock_open_rounded,
-                                    size: 40,
-                                    color: ref.watch(s0LockedProvider) ? Colors.white : Colors.grey,
+                                    final wasLocked = s0Locked;
+                                    final nextLocked = !wasLocked;
+
+                                    await ref.read(s0LockServiceProvider).setLocked(
+                                      categoryId: widget.categoryId!,
+                                      locked: nextLocked,
+                                    );
+
+                                    // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
+                                    if (wasLocked) {
+                                      await _switchCtrl.blinkS0Once();
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Icon(
+                                      s0Locked ? Icons.lock_rounded : Icons.lock_open_rounded,
+                                      size: 40,
+                                      color: s0Locked ? Colors.white : Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   );

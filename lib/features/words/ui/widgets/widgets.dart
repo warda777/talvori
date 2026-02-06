@@ -10,6 +10,7 @@ export 'menu_sheet.dart';
 export 'header_bar.dart';
 export 'card_area.dart';
 export 'stage_switch_row.dart';
+export 'frozen_stage_switch_overlay.dart';
 export 'bottom_controls.dart';
 export 'section_header.dart';
 export 'mini_badge.dart';

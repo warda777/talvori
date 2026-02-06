@@ -13,6 +13,7 @@ import 'package:talvori/features/words/application/word_list_controller.dart' sh
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart' show WordUserView;
@@ -76,6 +77,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   late final AnimationController pulse;
   int? pulseStage; // Für normale Stages (0-5)
   String? pulseSingleBucket; // Für Single-Modus ('SRC', 'R1', 'R2')
+  
+  // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
+  DateTime? _lastSwipeCommitAt;
+  
+  // ✅ Provider Subscription für Stage-Änderungen
+  ProviderSubscription<LearnModeState>? _stagesSub;
 
   // Koordinaten-Helper: Global → Stack-lokal
   Offset _centerInStack(GlobalKey key) {
@@ -145,11 +152,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void _hideLink() => setState(() => linkVisible = false);
 
   void triggerPulse(int stage) {
+    debugPrint('🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}');
     setState(() {
       pulseStage = stage;
       pulseSingleBucket = null; // Normal-Modus
     });
     pulse.forward(from: 0);
+    debugPrint('🎬 Pulse-Animation gestartet: pulseStage=$pulseStage');
   }
 
   void triggerPulseSingle(String bucket) {
@@ -177,13 +186,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final current = ref.read(currentWordProvider);
     if (current == null) return;
 
-    int targetStage;
+    int? targetStage;
     if (dx > threshold) {
-      // Rechts = Correct = Stage hoch
-      targetStage = (current.srsStage + 1).clamp(0, 5);
+      // Rechts = Correct = Streak-basierte Berechnung
+      targetStage = _getNextStageForLink(current.srsStage, current.streak, true);
     } else {
-      // Links = Incorrect = Stage runter
-      targetStage = (current.srsStage - 1).clamp(0, 5);
+      // Links = Incorrect = Stage runter (bleibt in aktueller Stage)
+      targetStage = _getNextStageForLink(current.srsStage, current.streak, false);
     }
 
     _updateLink(targetStage);
@@ -204,10 +213,36 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _handleSwipeCommit(bool correct) {
-    final mode = ref.read(levelSelectionProvider);
+    // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes innerhalb von 250ms)
+    final now = DateTime.now();
+    if (_lastSwipeCommitAt != null &&
+        now.difference(_lastSwipeCommitAt!) < const Duration(milliseconds: 250)) {
+      // Debug optional:
+      debugPrint('🧯 SwipeCommit THROTTLED (duplicate within 250ms)');
+      return;
+    }
+    _lastSwipeCommitAt = now;
     
-    // Link sofort verstecken, weil Karte fliegt raus
-    _hideLink();
+    final mode = ref.read(levelSelectionProvider);
+    final srs = ref.read(srsModeControllerProvider).mode;
+    
+    // ✅ Routing nach SRS-System (explizit für Klarheit)
+    debugPrint('🧭 UI _handleSwipeCommit: srs=$srs mode=$mode correct=$correct');
+    
+    // Alle SRS-Systeme verwenden aktuell denselben Controller,
+    // aber die Routing-Logik ist explizit nach SRS-System getrennt
+    switch (srs) {
+      case SrsSystem.time:
+      case SrsSystem.adaptive:
+      case SrsSystem.hybrid:
+        // Alle verwenden den gleichen Controller, aber die Logik ist explizit geroutet
+        if (correct) {
+          _controller.onSwipeRight();
+        } else {
+          _controller.onSwipeLeft();
+        }
+        break;
+    }
 
     if (mode == LevelSelectionMode.single) {
       // Im Single-Modus: Bestimme den Ziel-Bucket basierend auf correct
@@ -246,19 +281,33 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     } else {
       // Normal-Modus
       final current = ref.read(currentWordProvider);
-      if (current == null) return;
+      if (current != null) {
+        // ✅ Streak-basierte Berechnung für Pulse/Bounce
+        // Bounce zeigt auf die ZIEL-Stage (wohin die Karte nach dem Swipe wandert)
+        final targetStage = _getTargetStageForBounce(current.srsStage, current.streak, correct);
+        
+        debugPrint('🎯 Bounce-Berechnung: currentStage=${current.srsStage}, streak=${current.streak}, correct=$correct → targetStage=$targetStage');
 
-      int targetStage;
-      if (correct) {
-        // Rechts = Correct = Stage hoch
-        targetStage = (current.srsStage + 1).clamp(0, 5);
+        // ✅ Link kurz auf Ziel-Stage zeigen (wohin die Karte wandert)
+        if (targetStage != null) {
+          // Zeige Link kurz auf Ziel-Stage
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              _updateLink(targetStage);
+            }
+          });
+        }
+
+        // Pulse-Animation beim Commit (nur wenn targetStage != null und nicht S0)
+        if (targetStage != null) {
+          debugPrint('💥 Trigger Pulse auf Stage $targetStage');
+          triggerPulse(targetStage);
+        } else {
+          debugPrint('⚠️ Kein Bounce: targetStage ist null');
+        }
       } else {
-        // Links = Incorrect = Stage runter
-        targetStage = (current.srsStage - 1).clamp(0, 5);
+        debugPrint('⚠️ Kein Bounce: current ist null');
       }
-
-      // Pulse-Animation beim Commit
-      triggerPulse(targetStage);
     }
 
     // Nach dem Swipe-Commit: Link für neue Karte aktivieren, NACH der Karten-Animation
@@ -273,8 +322,93 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     });
   }
 
+  /// Berechnet die nächste Stage für Link basierend auf aktueller Stage und Streak.
+  /// Zeigt an, wohin die Karte wandern KÖNNTE (wenn Streak ausreicht).
+  /// Regeln:
+  /// - S0 → S1: Streak 1 (1x richtig)
+  /// - S1 → S2: Streak 2 (2x richtig)
+  /// - S2 → S3: Streak 2 (2x richtig)
+  /// - S3 → S4: Streak 2 (2x richtig)
+  /// - S4 → S5: Streak 3 (3x richtig)
+  /// - S5 → gelernt: Streak 3 (3x richtig)
+  int? _getNextStageForLink(int currentStage, int currentStreak, bool correct) {
+    if (!correct) {
+      // Bei falscher Antwort: zeigt auf aktuelle Stage (bleibt)
+      return currentStage;
+    }
+
+    // Streak-Anforderungen pro Stage
+    final requiredStreak = switch (currentStage) {
+      0 => 1, // S0 → S1: 1x richtig
+      1 => 2, // S1 → S2: 2x richtig
+      2 => 2, // S2 → S3: 2x richtig
+      3 => 2, // S3 → S4: 2x richtig
+      4 => 3, // S4 → S5: 3x richtig
+      5 => 3, // S5 → gelernt: 3x richtig
+      _ => 1,
+    };
+
+    // Wenn Streak noch nicht erreicht → zeigt auf aktuelle Stage
+    if (currentStreak < requiredStreak) {
+      return currentStage;
+    }
+
+    // Wenn Streak erreicht → zeigt auf nächste Stage
+    if (currentStage < 5) {
+      return currentStage + 1;
+    }
+
+    // S5 bleibt bei S5 (wird als gelernt markiert)
+    return 5;
+  }
+
+  /// Berechnet die tatsächliche Ziel-Stage für Bounce nach einem Swipe.
+  /// Zeigt an, wohin die Karte TATSÄCHLICH wandert (nach dem Review).
+  /// WICHTIG: S0 selbst wird nie gebounct, aber wenn eine Karte von S0 nach S1 wandert, wird S1 gebounct.
+  int? _getTargetStageForBounce(int currentStage, int currentStreak, bool correct) {
+    if (!correct) {
+      // Bei falscher Antwort: Karte geht zurück (niedrigere Stage, aber nicht unter 0)
+      final targetStage = (currentStage - 1).clamp(0, 5);
+      // ✅ S0 wird nie gebounct (auch nicht wenn Karte nach S0 zurückgeht)
+      if (targetStage == 0) return null;
+      return targetStage;
+    }
+
+    // ✅ Bei richtiger Antwort: Der Streak wird nach dem Review erhöht!
+    // Daher müssen wir den "zukünftigen" Streak berechnen: currentStreak + 1
+    final futureStreak = currentStreak + 1;
+    
+    // Prüfe ob der zukünftige Streak ausreicht
+    final requiredStreak = switch (currentStage) {
+      0 => 1, // S0 → S1: 1x richtig
+      1 => 2, // S1 → S2: 2x richtig
+      2 => 2, // S2 → S3: 2x richtig
+      3 => 2, // S3 → S4: 2x richtig
+      4 => 3, // S4 → S5: 3x richtig
+      5 => 3, // S5 → gelernt: 3x richtig
+      _ => 1,
+    };
+
+    // ✅ Wenn zukünftiger Streak ausreicht → wandert zur nächsten Stage
+    if (futureStreak >= requiredStreak) {
+      // Die ZIEL-Stage wird gebounct (auch wenn es S1 ist, wenn Karte von S0 kommt)
+      if (currentStage < 5) {
+        return currentStage + 1;
+      }
+      // S5 bleibt bei S5 (wird als gelernt markiert)
+      return 5;
+    }
+
+    // ✅ Wenn zukünftiger Streak noch nicht ausreicht → bleibt in aktueller Stage
+    // Wenn Karte in S0 bleibt → kein Bounce (S0 wird nie gebounct)
+    if (currentStage == 0) return null;
+    // Wenn Karte in anderer Stage bleibt → diese Stage bouncen
+    return currentStage;
+  }
+
   /// Ziel-Stage für Idle-Karte (noch nicht geswiped)
-  /// Zeigt auf die aktuelle Stage des Wortes (S0..S5) oder im Single-Modus auf 'SRC'
+  /// Zeigt auf die nächste Stage, wohin die Karte gehen KÖNNTE (wenn richtig beantwortet)
+  /// Berücksichtigt Streak: zeigt nur auf nächste Stage, wenn Streak ausreicht
   int? _targetStageForIdleCard() {
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
@@ -283,7 +417,16 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       return -1; // Spezieller Wert für Single-Modus
     }
     final current = ref.read(currentWordProvider);
-    return current?.srsStage ?? 0; // Fallback: Stage 0
+    if (current == null) return 0; // Fallback: Stage 0
+    
+    // ✅ Link zeigt immer die nächste Stage (wenn Streak ausreicht) oder aktuelle Stage (wenn nicht)
+    // Für Idle-Karte nehmen wir an, dass sie richtig beantwortet wird (correct = true)
+    final targetStage = _getNextStageForLink(current.srsStage, current.streak, true);
+    
+    // ✅ WICHTIG: Link zeigt die nächste Stage, nicht die aktuelle
+    // Wenn Streak ausreicht → zeigt auf nächste Stage
+    // Wenn Streak nicht ausreicht → zeigt auf aktuelle Stage (bleibt)
+    return targetStage;
   }
 
   /// Link für aktuelle Karte anzeigen
@@ -294,6 +437,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   @override
   void dispose() {
+    // ✅ Provider Subscription schließen
+    _stagesSub?.close();
     fx.dispose();
     pulse.dispose();
     super.dispose();
@@ -309,6 +454,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   @override
   void initState() {
     super.initState();
+    
+    // ✅ Listener für Stage-Änderungen (statt Logs in build())
+    _stagesSub = ref.listenManual<LearnModeState>(
+      learnModeControllerProvider,
+      (prev, next) {
+        final prevStages = prev?.stages;
+        final nextStages = next.stages;
+        if (prevStages != nextStages) {
+          debugPrint("📊 stages changed: $prevStages -> $nextStages");
+        }
+      },
+    );
     
     // Animation Controller initialisieren - sehr langsame Animation
     fx = AnimationController(
@@ -377,7 +534,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     
     // Wenn keine Herkunft definiert → Standard-Navigation (pop)
     if (origin == null) {
-      Navigator.of(context).pop();
+      final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+      Navigator.of(context).pop(didReset);
       return;
     }
     
@@ -391,7 +549,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         // Wenn sich der Index geändert hat → zur neuen QuickSets Detail Screen navigieren
         if (currentIndex != originalIndex) {
           // Pop LearnMode und die alte QuickSets Detail Screen
-          Navigator.of(context).pop(); // Pop LearnMode
+          final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+          Navigator.of(context).pop(didReset); // Pop LearnMode
           Navigator.of(context).pop(); // Pop alte QuickSets Detail Screen
           // Push neue QuickSets Detail Screen mit neuem Index
           Navigator.of(context).push(
@@ -403,11 +562,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         }
         
         // Fallback: Wenn keine Änderung → einfach zurück (pop)
-        Navigator.of(context).pop();
+        final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+        Navigator.of(context).pop(didReset);
         return;
       }
       
       // Normale Category-Navigation (nicht QuickSets)
+      // Hinweis: s ist hier nicht verfügbar (außerhalb von build), daher read verwenden
       final state = ref.read(learnModeControllerProvider);
       final categories = state.categories;
       final selectedIndex = state.selectedCategoryIndex;
@@ -420,7 +581,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         // Wenn die aktuelle Kategorie anders ist als die ursprüngliche → zur neuen Kategorie navigieren
         if (originalCatId != null && currentCat.id != originalCatId) {
           // Pop LearnMode und die alte Category Detail Screen
-          Navigator.of(context).pop(); // Pop LearnMode
+          final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+          Navigator.of(context).pop(didReset); // Pop LearnMode
           Navigator.of(context).pop(); // Pop alte Category Detail Screen
           // Push neue Category Detail Screen
           Navigator.of(context).push(
@@ -438,7 +600,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
       
       // Fallback: Wenn keine Änderung oder gleiche Kategorie → einfach zurück (pop)
-      Navigator.of(context).pop();
+      final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+      Navigator.of(context).pop(didReset);
       return;
     }
     
@@ -452,7 +615,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       
       // Wenn Wheel gedreht wurde oder nicht auf "My words" → zurück zu QuickSets-Detail
       // Pop LearnMode, dann navigiere zu QuickSetsDetailScreen mit aktuellem Index
-      Navigator.of(context).pop(); // Pop LearnMode
+      final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+      Navigator.of(context).pop(didReset); // Pop LearnMode
       // Nach pop sollten wir auf Home sein, dann navigiere zu QuickSetsDetailScreen
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -463,7 +627,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }
     
     // Fallback: Standard pop
-    Navigator.of(context).pop();
+    final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+    Navigator.of(context).pop(didReset);
   }
 
 
@@ -471,11 +636,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final s = ref.watch(learnModeControllerProvider);
     final mode = ref.watch(levelSelectionProvider);
     final allowed = ref.watch(allowedStagesProvider);
     final mask = List<bool>.generate(6, (i) => allowed.contains(i));
-    final state = ref.watch(learnModeControllerProvider);
-    final s = state.stages; // [S0..S5]
     
     // Link aktualisieren, wenn sich die Karte ändert (nur wenn nicht gerade gedragt wird)
     // ABER: Warte bis die Karten-Animation fertig ist
@@ -582,11 +746,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         SrsKind.neutral => 'H',
       };
 
+      // ✅ A-SRS: Stages aus categoryProgressProvider verwenden (Server-Daten)
+      // T-SRS/Hybrid: Stages aus learnState verwenden (Live-Daten)
+      final List<int> stageCounts;
+      if (srsMode.mode == SrsSystem.adaptive && s.categoryId.isNotEmpty) {
+        final progAsync = ref.watch(categoryProgressProvider((catId: s.categoryId, srs: SrsSystem.adaptive)));
+        stageCounts = progAsync.value?.stages ?? const [0, 0, 0, 0, 0, 0];
+      } else {
+        stageCounts = s.stages;
+      }
+
       switchesRow = StageSwitchRow(
         controller: _switchCtrl,
-        counts: s, 
+        counts: stageCounts, 
         goalPerStage: 100, 
         gap: 12, // kSwitchGap
+        showLearnedCounterInStage5: true, // show same learned counter as in Category Detail
+        learnedCounterCategoryId: widget.categoryId,
         sizes: const StageSwitchSizes(width: 42, height: 75, knobTop: 2, knobBottom: 18),
         colors: StageSwitchColors(
           newOuter: const Color(0xFFA05260),
@@ -597,7 +773,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
         labels: StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: prefix),
         visibleMask: mask,                        // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
-        s0Locked: ref.watch(s0LockedProvider),
+        s0Locked: ref.watch(s0LockedProvider(widget.categoryId)).maybeWhen(
+          data: (v) => v,
+          orElse: () => false,
+        ),
         onTapS0: null, // Icon ist im Category Detail Screen, hier nicht benötigt
         switchKeys: switchKeys, // ← NEU: Keys für Plasma-Link
     );
@@ -678,9 +857,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   } else if (pulseStage != null) {
                     // Normal-Modus: verwende switchKeys
                     targetKey = switchKeys[pulseStage!];
+                    if (targetKey == null) {
+                      debugPrint('⚠️ Bounce: switchKeys[$pulseStage] ist null! Verfügbare Keys: ${switchKeys.keys.toList()}');
+                    }
                   }
                   
-                  if (targetKey?.currentContext == null) return const SizedBox.shrink();
+                  if (targetKey?.currentContext == null) {
+                    if (pulseStage != null || pulseSingleBucket != null) {
+                      debugPrint('⚠️ Bounce: targetKey.currentContext ist null (pulseStage=$pulseStage, pulseSingleBucket=$pulseSingleBucket)');
+                    }
+                    return const SizedBox.shrink();
+                  }
 
                   return CustomPaint(
                     painter: SwitchPulsePainter(

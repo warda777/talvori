@@ -10,8 +10,30 @@ import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_hub_tile_overrides_provider.dart';
 import 'package:talvori/features/words/application/radial_palette_controller.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
-import 'package:talvori/features/words/application/category_stats_provider.dart';
+import 'package:talvori/features/words/application/category_detail_controller.dart';
+import 'package:talvori/features/words/application/category_id_cache.dart';
+import 'package:talvori/features/words/application/learn_mode_controller.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'shimmer_box.dart';
+
+// Helper-Provider: löst categoryId aus HubSubcat auf
+final _categoryIdForSubProvider = FutureProvider.family<String?, HubSubcat>((ref, sub) async {
+  final repo = ref.read(supabaseWordRepositoryProvider);
+  final cached = getCachedCategoryId(ref, sub.label);
+  if (cached != null) return cached;
+  
+  final String? catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
+      ? sub.supabaseId
+      : await repo.findCategoryIdByName(sub.label);
+  
+  if (catId != null) {
+    setCachedCategoryId(ref, sub.label, catId);
+  }
+  
+  return catId;
+});
 
 class CategoryCard extends ConsumerStatefulWidget {
   final String sectionKey;
@@ -41,13 +63,19 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     with WidgetsBindingObserver {
   StreamSubscription<String>? _resetSubscription;
 
+  String? _cachedCategoryId;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Invalidate Stats bei Reset-Events
+    // Invalidate Progress bei Reset-Events
     _resetSubscription = ResetEvent.stream.listen((_) {
-      ref.invalidate(categoryStatsProvider(widget.sub));
+      ref.invalidate(_categoryIdForSubProvider(widget.sub));
+      if (_cachedCategoryId != null) {
+        final srs = ref.read(srsModeControllerProvider).mode;
+        ref.invalidate(categoryProgressProvider((catId: _cachedCategoryId!, srs: srs)));
+      }
     });
   }
 
@@ -55,7 +83,11 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      ref.invalidate(categoryStatsProvider(widget.sub));
+      ref.invalidate(_categoryIdForSubProvider(widget.sub));
+      if (_cachedCategoryId != null) {
+        final srs = ref.read(srsModeControllerProvider).mode;
+        ref.invalidate(categoryProgressProvider((catId: _cachedCategoryId!, srs: srs)));
+      }
     }
   }
 
@@ -69,10 +101,57 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final asyncStats = ref.watch(categoryStatsProvider(widget.sub));
-    final stats = asyncStats.value; // kann schon befüllt sein
-    final loading =
-        asyncStats.isLoading && stats == null; // 👈 nur dann "echt" laden
+    final srs = ref.watch(srsModeControllerProvider).mode;
+    
+    // categoryId auflösen (asynchron über Provider)
+    final catIdAsync = ref.watch(_categoryIdForSubProvider(widget.sub));
+    final catId = catIdAsync.value;
+    
+    // Cache die categoryId für Invalidate-Calls
+    if (catId != null && catId.isNotEmpty) {
+      _cachedCategoryId = catId;
+    }
+    
+    // Prüfe, ob Learn-Mode aktiv ist für diese Kategorie
+    final learnState = ref.watch(learnModeControllerProvider);
+    final isLearning = learnState.categoryId.isNotEmpty && learnState.categoryId == catId;
+    
+    // ✅ A-SRS: IMMER Server-Progress verwenden (auch während Learn-Mode)
+    // LearnState nur verwenden, wenn isLearning && srsSystem != SrsSystem.adaptive
+    final useLearnState = isLearning; // Deck/Queue IMMER aus LearnState nehmen, sobald LearnMode aktiv ist
+    
+    // Datenquelle umschalten: Learn-Mode oder Server-Daten
+    late final int total;
+    late final List<int> stages;
+    final bool loading;
+    
+    // ✅ Für A-SRS: categoryProgressProvider immer laden (auch wenn isLearning)
+    final prog = catId != null && catId.isNotEmpty
+        ? ref.watch(categoryProgressProvider((catId: catId, srs: srs)))
+        : AsyncValue.data(CategoryProgress(total: 0, stages: const [0,0,0,0,0,0], dueToday: 0, newTotal: 0));
+    
+    if (useLearnState) {
+      // Während Learn-Mode (T-SRS/Hybrid): Live-Daten aus LearnModeController
+      total = learnState.totalWordsInCategory;
+      stages = learnState.stages; // [S0..S5] live (NICHT deckStages!)
+      loading = false; // Learn-Mode hat immer Daten
+    } else {
+      // Normal oder A-SRS: Server-Daten aus categoryProgressProvider
+      total = prog.value?.total ?? 0;
+      stages = prog.value?.stages ?? const [0,0,0,0,0,0];
+      loading = (catIdAsync.isLoading || prog.isLoading) && prog.value == null;
+    }
+    
+    // Debug: Logging für Counter-Problem
+    if (useLearnState) {
+      debugPrint('🎯 CategoryCard "${widget.sub.label}": Learn-Mode aktiv (T-SRS/Hybrid) | total=$total, stages=$stages');
+    } else if (isLearning && srs == SrsSystem.adaptive) {
+      debugPrint('🎯 CategoryCard "${widget.sub.label}": Learn-Mode aktiv (A-SRS) → Server-Daten | total=$total, stages=$stages');
+    } else if (loading) {
+      debugPrint('⏳ CategoryCard "${widget.sub.label}": Loading...');
+    } else {
+      debugPrint('🎯 CategoryCard "${widget.sub.label}": Server-Daten | total=$total, stages=$stages');
+    }
     final String normalizedLabel = widget.sub.label
         .toLowerCase()
         .trim()
@@ -184,10 +263,10 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                                   ),
                                 ),
                               )
-                              else if (stats != null)
+                              else if (!loading && total > 0)
                               Align(
                                 alignment: Alignment.bottomRight,
-                                child: _buildCount(stats.total, countColor, isCountFocused, ref),
+                                child: _buildCount(total, countColor, isCountFocused, ref),
                               ),
                           ],
                         ),

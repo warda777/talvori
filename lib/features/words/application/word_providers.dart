@@ -5,8 +5,7 @@ import 'package:talvori/features/words/data/mock_word_repository.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
-
-import 'package:talvori/features/words/data/supabase_word_repository.dart' show WordUserView;
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 final wordRepositoryProvider = Provider<MockWordRepository>((ref) {
   return MockWordRepository();
@@ -21,15 +20,46 @@ final recentWordsProvider = FutureProvider<List<Word>>((ref) async {
 /// Aktuelles Wort basierend auf Index und Queue
 final currentWordProvider = Provider<WordUserView?>((ref) {
   final s = ref.watch(learnModeControllerProvider);
-  if (s.shuffledWordIds.isEmpty || s.index >= s.shuffledWordIds.length) return null;
+  if (s.shuffledWordIds.isEmpty || s.index >= s.shuffledWordIds.length) {
+    print('🔍 currentWordProvider: shuffledWordIds.isEmpty=${s.shuffledWordIds.isEmpty}, index=${s.index}, shuffledWordIds.length=${s.shuffledWordIds.length}');
+    return null;
+  }
   final id = s.shuffledWordIds[s.index];
+  print('🔍 currentWordProvider: Suche Wort mit id=$id (index=${s.index})');
+  print('🔍 currentWordProvider: wordQueue.length=${s.wordQueue.length}');
+  if (s.wordQueue.isNotEmpty) {
+    print('🔍 currentWordProvider: Erste 3 IDs in wordQueue: ${s.wordQueue.take(3).map((w) => w.id).toList()}');
+  }
   final w = s.wordQueue.where((e) => e.id == id);
-  return w.isEmpty ? null : w.first;
+  if (w.isEmpty) {
+    print('⚠️ currentWordProvider: Wort mit id=$id nicht in wordQueue gefunden!');
+    print('⚠️ currentWordProvider: shuffledWordIds[${s.index}]=$id');
+    if (s.wordQueue.isNotEmpty) {
+      print('⚠️ currentWordProvider: Verfügbare IDs in wordQueue: ${s.wordQueue.map((e) => e.id).toList()}');
+    }
+    return null;
+  }
+  final word = w.first;
+  print('✅ currentWordProvider: Wort gefunden: ${word.text} (id=${word.id})');
+  return word;
 });
 
 /// Stages für die Switches
+/// Gibt die Stage-Counts aus dem aktuell geladenen Deck zurück (nur geladene Karten).
+/// Verwendet deckStages statt stages (CategoryProgress), damit die UI nur Stages zeigt, die wirklich im Deck sind.
 final stagesProvider = Provider<List<int>>((ref) {
-  return ref.watch(learnModeControllerProvider.select((s) => s.stages));
+  return ref.watch(learnModeControllerProvider.select((s) => s.deckStages));
+});
+
+/// Anzahl der gelernten Wörter in Stage 5 (Streak >= 3) pro Kategorie.
+/// Diese Wörter sind endgültig fertig und als "gelernt" markiert.
+final learnedInStage5Provider = FutureProvider.family<int, String>((ref, categoryId) async {
+  if (categoryId.isEmpty) return 0;
+
+  final srsSystem = ref.watch(srsModeControllerProvider).mode;
+  final repo = ref.read(supabaseWordRepositoryProvider);
+
+  return repo.countLearnedInStage5(categoryId, srsSystem: srsSystem);
 });
 
 /// Timer-Status (aktiv und läuft)

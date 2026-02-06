@@ -16,6 +16,8 @@ class VerticalStageSwitch extends StatelessWidget {
   final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
   final Widget Function(Widget knob)? knobWrapper; // optionaler Wrapper nur um den Knopf
   final bool isLocked;              // ← NEU: nur für Opacity (Switch ausgrauen)
+  final int? learnedCount; // optionaler zweiter Counter (z.B. "gelernt" in S5)
+  final bool showLearnedCount; // explizites Feature-Flag, damit andere Screens nicht beeinflusst werden
 
   final Key? containerKey; // Key für den äußeren Container (für Plasma-Link Positionierung)
   
@@ -36,6 +38,8 @@ class VerticalStageSwitch extends StatelessWidget {
     this.innerStrokeColor,
     this.knobWrapper,
     this.isLocked = false,          // ← NEU (Default)
+    this.learnedCount,
+    this.showLearnedCount = false,
   });
 
   double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
@@ -45,6 +49,14 @@ class VerticalStageSwitch extends StatelessWidget {
     final badgeGlow = highlight
         ? [BoxShadow(color: outerColor.withOpacity(0.8), blurRadius: 14, spreadRadius: 1)]
         : const <BoxShadow>[];
+
+    final bool canShowLearnedBadge = showLearnedCount && learnedCount != null;
+    const double knobHeight = 52.0;
+    const double learnedBadgeHeight = 16.0;
+    // "Unterhalb des Knobs" (bei count>0 liegt der Knob oben; darunter ist Platz).
+    // Clamp verhindert Overflow, falls sich Switch-Height in Zukunft ändert.
+    final double learnedBadgeTop = (_getSwitchPosition() + knobHeight + 4.0)
+        .clamp(4.0, WordsUIConstants.stageSwitchHeight - learnedBadgeHeight - 4.0);
 
     return Padding(
       padding: EdgeInsets.only(left: isFirst ? 6 : 0, right: isFirst ? 4 : 0),
@@ -175,6 +187,27 @@ class VerticalStageSwitch extends StatelessWidget {
                             return knob;
                           }(),
                   ),
+                  if (canShowLearnedBadge)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      top: learnedBadgeTop,
+                      child: Center(
+                        child: SizedBox(
+                          height: learnedBadgeHeight,
+                          child: Text(
+                            '${learnedCount!}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                              height: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

@@ -43,9 +43,11 @@ class BottomControls extends ConsumerWidget {
             },
           ),
           const SizedBox(width: WordsUIConstants.largeSpacing),
-          s.timerActive
-              ? CancelTimerButton(onTap: c.cancelTimer)
-              : ResetButton(onResetComplete: c.performReset),
+          // ✅ Reset-Button immer anzeigen, wenn Timer nicht aktiv
+          if (s.timerActive)
+            CancelTimerButton(onTap: c.cancelTimer)
+          else
+            ResetButton(onResetComplete: c.performReset),
         ],
       ),
     );

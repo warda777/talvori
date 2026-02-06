@@ -18,6 +18,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   supabase_flutter: ^2.6.0
   shared_preferences: ^2.3.2
+  uuid: ^4.5.1
   http: ^1.2.2
   app_links: ^6.4.1
   # share_handler: ^0.0.25  # Temporär deaktiviert - verursacht iOS-Build-Fehler
@@ -29,6 +30,7 @@ dependencies:
   riverpod_annotation: ^2.6.1
   connectivity_plus: ^6.0.3
   animations: ^2.0.11
+  sqflite: ^2.3.3+2
 
 dev_dependencies:
   flutter_test:

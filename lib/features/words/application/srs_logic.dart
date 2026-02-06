@@ -2,6 +2,28 @@
 import 'dart:math';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/srs_config.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+
+/// Zentrale Helper-Funktion für Due-Berechnung
+/// Regel:
+/// - A-SRS: nextDueAt == null → immer due (kein Time-Due in A-SRS)
+/// - T-SRS/Hybrid: nextDueAt == null && stage == 0 → due (neue Karte)
+/// - T-SRS/Hybrid: nextDueAt == null && stage > 0 → nicht due
+/// - nextDueAt != null && nextDueAt <= now → due
+bool isDueNow(WordUserView w, DateTime now, {SrsSystem? srsSystem}) {
+  // A-SRS: NULL = sofort fällig (kein Time-Due)
+  if (srsSystem == SrsSystem.adaptive && w.nextDueAt == null) {
+    return true;
+  }
+  
+  // Time-basierte Due-Prüfung
+  final dueByTime = w.nextDueAt != null && !w.nextDueAt!.isAfter(now);
+  
+  // T-SRS/Hybrid: Neue Karten (Stage 0) ohne Due-Datum sind fällig
+  final dueByNewCard = (w.nextDueAt == null && w.srsStage == 0);
+  
+  return dueByTime || dueByNewCard;
+}
 
 List<int> buildSmartCardOrder(
   List<WordUserView> queue, {
@@ -34,12 +56,10 @@ List<int> buildSmartCardOrder(
   final rest        = <int>[];
   final forbidden   = <int>[]; // Karten mit st > allowedMaxStage
 
-  bool isDue(WordUserView w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(now);
-
   for (var i = 0; i < pool.length; i++) {
     final w  = pool[i];
     final st = w.srsStage.clamp(0, 5);
-    final due = isDue(w);
+    final due = isDueNow(w, now);
 
     if (st > allowedMaxStage) {
       forbidden.add(i);
@@ -99,7 +119,7 @@ List<int> buildSmartCardOrder(
 
   // initialer Burst (Neue)
   while (head.length < cfg.headSize &&
-      head.where((i) => pool[i].srsStage == 0 && !isDue(pool[i])).length < cfg.initialNewBurst) {
+      head.where((i) => pool[i].srsStage == 0 && !isDueNow(pool[i], now)).length < cfg.initialNewBurst) { // buildSmartCardOrder wird nur für T-SRS/Hybrid verwendet
     final d = pullAnyDue();
     if (d != null) { head.add(d); continue; }
     final n = pullNew();
@@ -118,7 +138,7 @@ List<int> buildSmartCardOrder(
       // Verhältnis prüfen
       final revCount = head.where((ix) {
         final w = pool[ix];
-        final isNewWait = (w.srsStage == 0) && !isDue(w);
+        final isNewWait = (w.srsStage == 0) && !isDueNow(w, now); // buildSmartCardOrder wird nur für T-SRS/Hybrid verwendet
         return !isNewWait;
       }).length;
       final newCount = head.length - revCount;
@@ -172,9 +192,8 @@ List<WordUserView> _capActivePool(List<WordUserView> queue, int cap, DateTime no
   final due = <WordUserView>[];
   final wait = <WordUserView>[];
 
-  bool isDue(WordUserView w) => w.nextDueAt != null && !w.nextDueAt!.isAfter(now);
   for (final w in queue) {
-    (isDue(w) ? due : wait).add(w);
+    (isDueNow(w, now) ? due : wait).add(w); // _capActivePool wird nur für T-SRS/Hybrid verwendet
   }
   due.shuffle();
   wait.shuffle();

@@ -10,6 +10,7 @@ import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
+import 'package:talvori/features/words/application/category_stats_provider.dart';
 import 'package:talvori/features/words/ui/widgets/category_card.dart';
 // ⬇️ NEU
 import 'package:talvori/features/words/application/radial_palette_controller.dart';
@@ -415,6 +416,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Einmalig beim WordHub-Start: Ensure Progress-Rows für alle Kategorien
+    // Fehler werden ignoriert, damit WordHub trotzdem lädt
+    final ensureAsync = ref.watch(ensureAllProgressProvider);
+    ensureAsync.when(
+      data: (count) => debugPrint('✅ ensureAllProgress: $count Rows'),
+      loading: () => debugPrint('⏳ ensureAllProgress: Loading...'),
+      error: (err, st) => debugPrint('⚠️ ensureAllProgress Fehler (ignoriert): $err'),
+    );
+
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final repo = ref.read(wordHubControllerProvider.notifier).repo;
     final glowEnabled = ref.watch(wordHubGlowProvider);

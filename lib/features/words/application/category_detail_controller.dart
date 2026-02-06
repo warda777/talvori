@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'category_detail_state.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/widgets/stats_helpers.dart';
 import 'package:talvori/core/events/events.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
 
 final categoryDetailControllerProvider =
   NotifierProvider<CategoryDetailController, CategoryDetailState>(
@@ -88,7 +90,7 @@ class CategoryDetailController extends Notifier<CategoryDetailState> {
     if (state.categories.isEmpty) return;
     final selId = _currentCatId;
     await ensureTodayBucket(selId);
-    await _loadProgress(selId, preferLocal: true);
+    await _loadProgress(selId, preferLocal: false);
     await _loadVocabsTotal(selId);
   }
 
@@ -133,8 +135,12 @@ class CategoryDetailController extends Notifier<CategoryDetailState> {
     final justSeeded = prefs.getBool('just_seeded_$selId') ?? false;
 
     if (justSeeded) {
-      final prog = await fetchCategoryProgress(selId);
-      final wl   = await fetchWorkloadToday(selId);
+      final repo = ref.read(supabaseWordRepositoryProvider);
+      final prog = await repo.fetchCategoryProgress(
+        selId,
+        srsSystem: ref.read(srsModeControllerProvider).mode,
+      );
+      final wl   = await repo.fetchWorkloadToday(selId);
       await prefs.remove('just_seeded_$selId');
 
       final daily = await loadDailyLearningStats(selId);
@@ -163,8 +169,12 @@ class CategoryDetailController extends Notifier<CategoryDetailState> {
       return;
     }
 
-    final prog = await fetchCategoryProgress(selId);
-    final wl   = await fetchWorkloadToday(selId);
+    final repo = ref.read(supabaseWordRepositoryProvider);
+    final prog = await repo.fetchCategoryProgress(
+      selId,
+      srsSystem: ref.read(srsModeControllerProvider).mode,
+    );
+    final wl   = await repo.fetchWorkloadToday(selId);
     final daily = await loadDailyLearningStats(selId);
 
     final stages = (preferLocal && localStages != null) ? localStages : prog.stages;
@@ -194,3 +204,13 @@ class CategoryDetailController extends Notifier<CategoryDetailState> {
     return i >= 0 ? i : 0;
   }
 }
+
+/// Mode-abhängiger Category Progress Provider
+/// Provider-Key ist (catId, srs) -> wird bei Mode-Wechsel automatisch neu geladen
+final categoryProgressProvider =
+    FutureProvider.family<CategoryProgress, ({String catId, SrsSystem srs})>((ref, args) async {
+  final repo = ref.read(supabaseWordRepositoryProvider);
+
+  // Muss die MODE-AWARE RPC benutzen (nicht die alte ohne mode)
+  return repo.fetchCategoryProgress(args.catId, srsSystem: args.srs);
+});

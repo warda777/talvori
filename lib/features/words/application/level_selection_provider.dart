@@ -29,15 +29,23 @@ class SingleSessionCounts {
 final singleSessionCountsProvider = StateProvider<SingleSessionCounts>((_) => const SingleSessionCounts(0, 0, 0));
 
 // Sicht/Filter der Stufen aus Modus ableiten
+// Hinweis: S0-Lock wird nicht hier behandelt, da categoryId benötigt wird.
+// S0-Lock wird lokal in levels_card.dart und learn_mode_screen.dart gehandhabt.
 final allowedStagesProvider = Provider<Set<int>>((ref) {
-  final mode = ref.watch(levelSelectionProvider);
-  switch (mode) {
+  final range = ref.watch(levelSelectionProvider);
+
+  switch (range) {
     case LevelSelectionMode.s0toS5:
-      return {0,1,2,3,4,5};
+      // S0-S5: alle Stages (S0-Lock wird lokal behandelt)
+      return {0, 1, 2, 3, 4, 5};
+
     case LevelSelectionMode.s1toS5:
-      return {1,2,3,4,5};           // ← KEIN 0!
+      // H1–H5 / A1–A5 / T1–T5: immer ohne S0
+      return {1, 2, 3, 4, 5};
+
     case LevelSelectionMode.single:
+      // Single-Modus: exakt eine Stufe
       final st = ref.watch(singleStageProvider);
-      return {st.clamp(1,5)};       // genau eine Stufe
+      return {st.clamp(1, 5)};
   }
 });
