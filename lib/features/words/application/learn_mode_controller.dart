@@ -1,5 +1,6 @@
 // lib/features/words/application/learn_mode_controller.dart
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,11 +12,13 @@ import 'package:talvori/features/words/services/sfx_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/events/events.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
+import 'package:talvori/features/words/application/s0_lock_provider.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_controller.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
 
 /// ---------- State ----------
 
@@ -31,6 +34,7 @@ class LearnModeState {
   final List<int> deckStages; // [S0..S5] - Counts nur aus aktuell geladenem Deck (shuffledWordIds)
   final int totalWordsInCategory;
   final int activeStage; // A-SRS: Aktuelle Stage (0..5), wird für Navigation verwendet
+  final int masteredCount; // Kapsel unter A5 (gelernt, streak>=3)
 
   final List<WordUserView> wordQueue;      // Originale Wortliste (Objekte)
   final List<String> shuffledWordIds;      // Reihenfolge (nur IDs)
@@ -45,10 +49,25 @@ class LearnModeState {
   final double remainingMillis;
   final int timeLimit;         // Sekunden pro Karte
 
+  // Hybrid: Tages-Lernzeit pro Stage (S1-S5). -1 = keine Anzeige/kein Budget.
+  // Wird nur im Hybrid genutzt, in anderen Modi bleibt es [-1..].
+  final List<int> hybridStageRemainingSec; // Länge 6 (S0..S5)
+  // Hybrid: Stage ist für HEUTE eingefroren (Budget aufgebraucht) -> bis morgen.
+  final List<bool> hybridStageFrozen; // Länge 6 (S0..S5)
+  // Hybrid: ab erstem "echten Start" (1. Swipe) gilt die Session als gestartet -> Timer/Grün-Status.
+  final bool hybridSessionStarted;
+  // UI: LearnModeScreen ist gerade sichtbar/aktiv (wichtig für CategoryDetail/Hub-UI, damit nicht "stale" Live-Counts weiter genutzt werden).
+  final bool inLearnScreen;
+
   // Reviews
   final List<String> recentlySwiped; // IDs der Karten, die in dieser Session korrekt geswipet wurden
   final int cardsSwipedInSession;
   final bool hasLoadedReviews;
+  /// Verhindert doppelte Swipe/Commit während RPC läuft
+  final bool isSubmitting;
+
+  /// Sichtbare Diagnose wenn Queue leer (für Gerät ohne Terminal)
+  final String? emptyQueueHint;
 
   const LearnModeState({
     this.categoryId = '',
@@ -62,6 +81,7 @@ class LearnModeState {
     this.deckStages = const [0, 0, 0, 0, 0, 0],
     this.totalWordsInCategory = 0,
     this.activeStage = 0,
+    this.masteredCount = 0,
 
     this.wordQueue = const [],
     this.shuffledWordIds = const [],
@@ -75,9 +95,19 @@ class LearnModeState {
     this.remainingMillis = 10000.0,
     this.timeLimit = 10,
 
+    // Default: im Hybrid sollen H1/H2 direkt eine sinnvolle Anzeige haben,
+    // selbst bevor SharedPreferences geladen sind.
+    // (wird nach _loadHybridBudgetsIfNeeded() ggf. überschrieben)
+    this.hybridStageRemainingSec = const [-1, 60 * 60, 90 * 60, -1, -1, -1],
+    this.hybridStageFrozen = const [false, false, false, false, false, false],
+    this.hybridSessionStarted = false,
+    this.inLearnScreen = false,
+
     this.recentlySwiped = const [],
     this.cardsSwipedInSession = 0,
     this.hasLoadedReviews = false,
+    this.isSubmitting = false,
+    this.emptyQueueHint,
   });
 
   factory LearnModeState.initial() => const LearnModeState();
@@ -94,6 +124,7 @@ class LearnModeState {
     List<int>? deckStages,
     int? totalWordsInCategory,
     int? activeStage,
+    int? masteredCount,
 
     List<WordUserView>? wordQueue,
     List<String>? shuffledWordIds,
@@ -107,9 +138,17 @@ class LearnModeState {
     double? remainingMillis,
     int? timeLimit,
 
+    List<int>? hybridStageRemainingSec,
+    List<bool>? hybridStageFrozen,
+    bool? hybridSessionStarted,
+    bool? inLearnScreen,
+
     List<String>? recentlySwiped,
     int? cardsSwipedInSession,
     bool? hasLoadedReviews,
+    bool? isSubmitting,
+    String? emptyQueueHint,
+    bool clearEmptyQueueHint = false,
   }) {
     return LearnModeState(
       categoryId: categoryId ?? this.categoryId,
@@ -123,6 +162,7 @@ class LearnModeState {
       deckStages: deckStages ?? this.deckStages,
       totalWordsInCategory: totalWordsInCategory ?? this.totalWordsInCategory,
       activeStage: activeStage ?? this.activeStage,
+      masteredCount: masteredCount ?? this.masteredCount,
 
       wordQueue: wordQueue ?? this.wordQueue,
       shuffledWordIds: shuffledWordIds ?? this.shuffledWordIds,
@@ -136,9 +176,16 @@ class LearnModeState {
       remainingMillis: remainingMillis ?? this.remainingMillis,
       timeLimit: timeLimit ?? this.timeLimit,
 
+      hybridStageRemainingSec: hybridStageRemainingSec ?? this.hybridStageRemainingSec,
+      hybridStageFrozen: hybridStageFrozen ?? this.hybridStageFrozen,
+      hybridSessionStarted: hybridSessionStarted ?? this.hybridSessionStarted,
+      inLearnScreen: inLearnScreen ?? this.inLearnScreen,
+
       recentlySwiped: recentlySwiped ?? this.recentlySwiped,
       cardsSwipedInSession: cardsSwipedInSession ?? this.cardsSwipedInSession,
       hasLoadedReviews: hasLoadedReviews ?? this.hasLoadedReviews,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      emptyQueueHint: clearEmptyQueueHint ? null : (emptyQueueHint ?? this.emptyQueueHint),
     );
   }
 }
@@ -156,11 +203,142 @@ class LearnModeController extends Notifier<LearnModeState> {
   @override
   LearnModeState build() {
     _didReset = false; // Reset-Flag zurücksetzen bei neuer Session
+    ref.onDispose(() {
+      _wordTimer?.cancel();
+      _hybridBudgetTimer?.cancel();
+    });
     return LearnModeState.initial();
+  }
+
+  String _hybridBudgetKey({
+    required String userId,
+    required String categoryId,
+    required DateTime dayStartLocal,
+    required int stage,
+  }) {
+    final y = dayStartLocal.year.toString().padLeft(4, '0');
+    final m = dayStartLocal.month.toString().padLeft(2, '0');
+    final d = dayStartLocal.day.toString().padLeft(2, '0');
+    return 'hybrid_stage_budget_used_ms:$userId:$categoryId:$y$m$d:s$stage';
+  }
+
+  DateTime _localDayStart(DateTime now) => DateTime(now.year, now.month, now.day);
+
+  Future<void> _loadHybridBudgetsIfNeeded() async {
+    final srs = ref.read(srsModeControllerProvider).mode;
+    if (srs != SrsSystem.hybrid) {
+      // reset UI-only hybrid fields when leaving hybrid
+      if (state.hybridStageRemainingSec.any((v) => v != -1) ||
+          state.hybridStageFrozen.any((v) => v)) {
+        state = state.copyWith(
+          hybridStageRemainingSec: const [-1, -1, -1, -1, -1, -1],
+          hybridStageFrozen: const [false, false, false, false, false, false],
+          hybridSessionStarted: false,
+        );
+      }
+      return;
+    }
+
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+    if (state.categoryId.isEmpty) return;
+
+    final now = DateTime.now();
+    final dayStart = _localDayStart(now);
+    if (_hybridBudgetDayStartLocal == dayStart && _hybridUsedMsByStage.isNotEmpty) {
+      return; // already loaded for today
+    }
+
+    _hybridBudgetDayStartLocal = dayStart;
+    _hybridUsedMsByStage.clear();
+    _hybridPersistAccumulatorMs = 0;
+    _hybridUiAccumulatorMs = 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    for (final stage in _hybridDailyBudgetSecByStage.keys) {
+      final key = _hybridBudgetKey(
+        userId: userId,
+        categoryId: state.categoryId,
+        dayStartLocal: dayStart,
+        stage: stage,
+      );
+      _hybridUsedMsByStage[stage] = prefs.getInt(key) ?? 0;
+    }
+
+    _recomputeHybridBudgetState(now: now, forceEmit: true);
+  }
+
+  void _recomputeHybridBudgetState({required DateTime now, bool forceEmit = false}) {
+    if (ref.read(srsModeControllerProvider).mode != SrsSystem.hybrid) return;
+
+    final dayStart = _localDayStart(now);
+    if (_hybridBudgetDayStartLocal == null || _hybridBudgetDayStartLocal != dayStart) {
+      _hybridBudgetDayStartLocal = dayStart;
+      _hybridUsedMsByStage.clear();
+    }
+
+    final remaining = List<int>.filled(6, -1);
+    final frozen = List<bool>.filled(6, false);
+
+    for (final entry in _hybridDailyBudgetSecByStage.entries) {
+      final stage = entry.key;
+      final budgetSec = entry.value;
+      final usedMs = _hybridUsedMsByStage[stage] ?? 0;
+      final usedSec = (usedMs / 1000).floor();
+      final rem = (budgetSec - usedSec).clamp(0, budgetSec);
+      remaining[stage] = rem;
+      frozen[stage] = rem == 0;
+    }
+
+    if (forceEmit) {
+      state = state.copyWith(hybridStageRemainingSec: remaining, hybridStageFrozen: frozen);
+      return;
+    }
+
+    if (remaining.toString() != state.hybridStageRemainingSec.toString() ||
+        frozen.toString() != state.hybridStageFrozen.toString()) {
+      state = state.copyWith(hybridStageRemainingSec: remaining, hybridStageFrozen: frozen);
+    }
+  }
+
+  Future<void> _persistHybridBudgetsMaybe({
+    required String userId,
+    required String categoryId,
+  }) async {
+    if (ref.read(srsModeControllerProvider).mode != SrsSystem.hybrid) return;
+    if (_hybridBudgetDayStartLocal == null) return;
+    if (_hybridPersistAccumulatorMs < 1000) return; // write max ~1/sec
+    _hybridPersistAccumulatorMs = 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    for (final stage in _hybridDailyBudgetSecByStage.keys) {
+      final used = _hybridUsedMsByStage[stage] ?? 0;
+      final key = _hybridBudgetKey(
+        userId: userId,
+        categoryId: categoryId,
+        dayStartLocal: _hybridBudgetDayStartLocal!,
+        stage: stage,
+      );
+      await prefs.setInt(key, used);
+    }
   }
 
   Timer? _wordTimer;
   SfxService? _sfx;
+  Timer? _hybridBudgetTimer;
+  DateTime? _hybridLastInteractionAt;
+  
+  // ---- Hybrid Stage Daily Budgets (Client-seitig) ----
+  // Ziel: z.B. H1 max 60min/Tag, H2 max 90min/Tag. Wenn Budget = 0 => Stage bis morgen einfrieren.
+  static const Map<int, int> _hybridDailyBudgetSecByStage = {
+    1: 60 * 60,
+    2: 90 * 60,
+    // 3..5: aktuell kein Tagesbudget (werden eher durch Zeitlocks/Intervals geregelt)
+  };
+  DateTime? _hybridBudgetDayStartLocal; // lokaler "Tag" (00:00)
+  final Map<int, int> _hybridUsedMsByStage = {}; // stage -> usedMs today
+  int _hybridPersistAccumulatorMs = 0;
+  int _hybridUiAccumulatorMs = 0;
   
   // ⬇️ NEU: QuickSets-Index für Filter-Mapping
   int? _quickSetsIndex;
@@ -197,8 +375,12 @@ class LearnModeController extends Notifier<LearnModeState> {
   final List<List<String>> _stageQueues = List.generate(6, (_) => <String>[]);
   
   // Guard gegen Doppelausführung beim Reset
-  bool _isResetting = false;
+  bool _isResetRunning = false;
   bool _didReset = false;
+
+  // Refill-Lock: verhindert parallele/doppelte Refill-Ausführung
+  DateTime? _lastAdaptiveRefillAt;
+  bool _isAdaptiveRefillRunning = false;
   
   // Getter für Reset-Status (für Navigation Result)
   bool get didReset => _didReset;
@@ -258,6 +440,18 @@ class LearnModeController extends Notifier<LearnModeState> {
       stages: progStages ?? const [0, 0, 0, 0, 0, 0],
       totalWordsInCategory: progStages != null ? progTotal : 0,
     );
+    // LearnModeScreen ist jetzt aktiv.
+    state = state.copyWith(inLearnScreen: true);
+    
+    // 2b) Single-Modus: singleSessionCountsProvider sofort mit Stage-Wert aus Category Detail initialisieren
+    final mode = ref.read(levelSelectionProvider);
+    if (mode == LevelSelectionMode.single && progStages != null && !_isVirtualCategory(categoryId)) {
+      final stages = progStages;
+      final singleStage = ref.read(singleStageProvider).clamp(1, 5);
+      final src = singleStage < stages.length ? stages[singleStage] : 0;
+      ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(src, 0, 0);
+      print('📊 init() Single-Modus: src=$src aus Category Detail (stage $singleStage)');
+    }
     
     _quickSetsIndex = initialQuickSetsIndex;
     _sfx = ref.read(sfxProvider);
@@ -268,6 +462,12 @@ class LearnModeController extends Notifier<LearnModeState> {
     // 4) Erst jetzt ist Learn-Mode wirklich aktiv (Stages sind gesetzt)
     print('🚀 init() abgeschlossen, state.shuffledWordIds.length=${state.shuffledWordIds.length}, stages=${state.stages}');
   }
+
+  /// UI-Hook: LearnModeScreen mount/unmount.
+  void setInLearnScreen(bool value) {
+    if (state.inLearnScreen == value) return;
+    state = state.copyWith(inLearnScreen: value);
+  }
   
   // ⬇️ NEU: Wörter für QuickSets mit Filter laden
   Future<void> loadWordsForQuickSets(int index) async {
@@ -275,10 +475,15 @@ class LearnModeController extends Notifier<LearnModeState> {
     await _loadWords();
   }
 
+  void setSubmitting(bool value) {
+    _set(isSubmitting: value);
+  }
+
   void onSwipeRight() {
     print('✅ UI SwipeRight angekommen | paused=${state.timerPaused} active=${state.timerActive} running=${state.running}');
     // _canInteract() Prüfung entfernt: gesturesEnabled in SwipeableWordCard prüft bereits
     _sfx?.correct();
+    _markHybridInteraction();
     _handleAnswer(correct: true);
   }
 
@@ -286,7 +491,32 @@ class LearnModeController extends Notifier<LearnModeState> {
     print('✅ UI SwipeLeft angekommen | paused=${state.timerPaused} active=${state.timerActive} running=${state.running}');
     // _canInteract() Prüfung entfernt: gesturesEnabled in SwipeableWordCard prüft bereits
     _sfx?.wrong();
+    _markHybridInteraction();
     _handleAnswer(correct: false);
+  }
+
+  void _markHybridInteraction() {
+    if (ref.read(srsModeControllerProvider).mode != SrsSystem.hybrid) return;
+    _hybridLastInteractionAt = DateTime.now();
+    // ✅ ab erstem Swipe zählt Hybrid "Übungszeit" (auch wenn man danach nur liest)
+    if (!state.hybridSessionStarted) {
+      state = state.copyWith(hybridSessionStarted: true);
+    }
+    // budgets ggf. erst jetzt laden (falls Swipe schneller als Stage-Load war)
+    unawaited(_loadHybridBudgetsIfNeeded());
+    _ensureHybridBudgetTickerRunning();
+  }
+
+  void _ensureHybridBudgetTickerRunning() {
+    if (_hybridBudgetTimer != null) return;
+    _hybridBudgetTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (ref.read(srsModeControllerProvider).mode != SrsSystem.hybrid) return;
+      if (state.categoryId.isEmpty) return;
+      if (!state.hybridSessionStarted) return;
+
+      // ✅ Budget zählt als "Session-Zeit" weiter, auch wenn man nur liest/anschaut.
+      _tickHybridStageBudget(deltaMs: 1000);
+    });
   }
   
   void toggleFlip() {
@@ -316,12 +546,49 @@ class LearnModeController extends Notifier<LearnModeState> {
   void cancelTimer() => _stopTimer();
 
   Future<void> selectCategoryIndex(int idx) async {
+    if (idx < 0 || idx >= state.categories.length) {
+      print('⚠️ selectCategoryIndex: idx out of range: idx=$idx len=${state.categories.length}');
+      return;
+    }
+
     final currentStage = state.wordQueue.isNotEmpty && state.index < state.wordQueue.length
         ? state.wordQueue[state.index].srsStage
         : -1;
     print('🧨 STAGE SET from=${state.index} (Stage=$currentStage) -> to=0 (new category) at=${StackTrace.current}');
     print('🧨 INDEX-RESET auf 0 in selectCategoryIndex: prevIndex=${state.index}, activeStage=${state.activeStage}, deckLen=${state.shuffledWordIds.length}');
-    _set(selectedCategoryIndex: idx, index: 0);
+
+    final nextCat = state.categories[idx];
+
+    // Beim Kategorie-Wechsel müssen wir *categoryId* im State aktualisieren.
+    // Sonst bleiben Timer/Budgets/ASRS-RPCs/Persistence auf der alten Kategorie hängen,
+    // und im A‑SRS greift außerdem der "Deck bereits geladen" Guard.
+    _stopTimer();
+    _hybridBudgetTimer?.cancel();
+    _hybridBudgetTimer = null;
+    _hybridBudgetDayStartLocal = null;
+    _hybridUsedMsByStage.clear();
+    _hybridPersistAccumulatorMs = 0;
+    _hybridUiAccumulatorMs = 0;
+    _hybridLastInteractionAt = null;
+    _cooldown.clear();
+
+    _set(
+      selectedCategoryIndex: idx,
+      categoryId: nextCat.id,
+      title: nextCat.name,
+      // Deck/Queue clearen, damit _loadWords() wirklich neu lädt (v.a. A‑SRS lock).
+      wordQueue: const [],
+      shuffledWordIds: const [],
+      index: 0,
+      deckStages: const [0, 0, 0, 0, 0, 0],
+    );
+
+    // Hybrid UI-State reset (nicht über _set, da _set diese Felder bewusst nicht setzt)
+    state = state.copyWith(
+      hybridSessionStarted: false,
+      hybridStageFrozen: const [false, false, false, false, false, false],
+      hybridStageRemainingSec: const [-1, 60 * 60, 90 * 60, -1, -1, -1],
+    );
     _resetCardBasedSystem();
     await _loadStageData();
     await _loadWords();
@@ -329,8 +596,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   Future<void> performReset() async {
     try {
-      print('✅ _performReset CALLED catId=${state.categoryId} mode=${ref.read(srsModeControllerProvider).mode.name}');
-    // Single-Session Reset falls im Single-Modus
+      // Single-Session Reset falls im Single-Modus
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
       await resetSingleSession();
@@ -416,14 +682,13 @@ class LearnModeController extends Notifier<LearnModeState> {
         srsSystem: ref.read(srsModeControllerProvider).mode,
       );
       
-      // ⬇️ FIX für A-SRS und Hybrid: Stage 0 = vocabsTotal - learnedWords
+      // ⬇️ A-SRS: Server-Stages direkt verwenden (Stage 0 ist bereits korrekt)
+      // ⬇️ Hybrid: Stage 0 = vocabsTotal - learnedWords (Legacy-Korrektur)
       final srsSystem = ref.read(srsModeControllerProvider).mode;
       var stagesToSet = prog.stages;
       int vocabsTotal = prog.total;
       
-      if (srsSystem == SrsSystem.adaptive || srsSystem == SrsSystem.hybrid) {
-        // Bei A-SRS/Hybrid: Stage 0 enthält alle Wörter in der Kategorie, die noch nicht in S1-S5 sind
-        // Wir müssen vocabsTotal (Gesamtanzahl aller Wörter) holen
+      if (srsSystem == SrsSystem.hybrid) {
         final sb = Supabase.instance.client;
         vocabsTotal = await sb.rpc('fn_category_word_count', params: {'p_category_id': catId}) as int? ?? 0;
         final learnedWords = prog.stages.skip(1).fold<int>(0, (a, b) => a + b);
@@ -434,8 +699,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       if (!hasLocal) {
         _setStages(stagesToSet);
       } else {
-        // Auch wenn lokal vorhanden, Stage 0 korrigieren für A-SRS/Hybrid
-        if (srsSystem == SrsSystem.adaptive || srsSystem == SrsSystem.hybrid) {
+        if (srsSystem == SrsSystem.hybrid) {
           final learnedWords = state.stages.skip(1).fold<int>(0, (a, b) => a + b);
           final correctedStage0 = (vocabsTotal - learnedWords).clamp(0, 1 << 30);
           final correctedStages = [correctedStage0, ...state.stages.skip(1)];
@@ -458,50 +722,81 @@ class LearnModeController extends Notifier<LearnModeState> {
 
   /// A-SRS Refill: Enrolliert neue Wörter aus S0 nach S1
   /// Gibt den Refill-Counter zurück
-  Future<int> _ensureA_SrsRefill() async {
-    final srsSystem = ref.read(srsModeControllerProvider).mode;
-    if (srsSystem != SrsSystem.adaptive) return 0;
-    
-    final userId = Supabase.instance.client.auth.currentUser?.id;
-    if (userId == null) {
-      print('⚠️ _ensureA_SrsRefill: Kein User eingeloggt');
+  /// [categoryId] optional – wenn nicht gesetzt, wird _currentCatId verwendet (wichtig bei Kategorie-Wechsel im Wheel)
+  Future<int> _ensureA_SrsRefill({String? categoryId}) async {
+    if (_isAdaptiveRefillRunning) {
+      print('⛔ Refill übersprungen: läuft bereits');
       return 0;
     }
-    
+
+    final now = DateTime.now();
+    if (_lastAdaptiveRefillAt != null &&
+        now.difference(_lastAdaptiveRefillAt!) < const Duration(seconds: 2)) {
+      print('⛔ Refill übersprungen: Cooldown aktiv');
+      return 0;
+    }
+
+    _isAdaptiveRefillRunning = true;
+    _lastAdaptiveRefillAt = now;
+
     try {
-      // 1) Refill-Counter atomar erhöhen
+      final srsSystem = ref.read(srsModeControllerProvider).mode;
+      if (srsSystem != SrsSystem.adaptive) return 0;
+
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        print('⚠️ _ensureA_SrsRefill: Kein User eingeloggt');
+        return 0;
+      }
+
+      final catId = categoryId ?? _currentCatId;
+      if (catId.isEmpty || _isVirtualCategory(catId)) return 0;
+
       final refillCounter = await _repo.nextRefillCounter(
         userId: userId,
-        categoryId: state.categoryId,
+        categoryId: catId,
         mode: 'adaptive',
       );
-      
-      // 2) Refill-Enrollment ausführen
-      await Supabase.instance.client.rpc(
-        'fn_a_srs_refill_enroll',
-        params: {
-          'p_user': userId,
-          'p_category': state.categoryId,
-        },
+
+      await _repo.refillAdaptiveEnroll(
+        userId: userId,
+        categoryId: catId,
       );
-      
-      print('✅ A-SRS Refill ausgeführt für category=${state.categoryId}, refillCounter=$refillCounter');
+
+      // enrolled = Wörter im Lernkreislauf (stage > 0 && !isMastered) aus Progress
+      final prog = await _repo.fetchCategoryProgress(catId, srsSystem: SrsSystem.adaptive);
+      final enrolled = prog.stages.length >= 6
+          ? prog.stages.sublist(1, 6).fold<int>(0, (s, n) => s + n)
+          : 0;
+
+      print(
+        '✅ A-SRS Refill: category=$catId, refillCounter=$refillCounter, enrolled=$enrolled',
+      );
+
       return refillCounter;
     } catch (e, st) {
       print('⚠️ A-SRS Refill fehlgeschlagen: $e');
       print('⚠️ Stack: $st');
-      // Weiter machen, auch wenn Refill fehlschlägt
       return 0;
+    } finally {
+      _isAdaptiveRefillRunning = false;
     }
   }
 
-  Future<void> _loadWords() async {
+  Future<void> _loadWords({bool forceReload = false}) async {
     print('🚀 _loadWords() aufgerufen für catId: ${_currentCatId}');
     final srs = ref.read(srsModeControllerProvider).mode;
     print('🟦 _loadWords START | srs=$srs cat=${_currentCatId}');
+
+    // ✅ Hybrid: Tagesbudgets laden (für Timer unter den Switches)
+    if (srs == SrsSystem.hybrid) {
+      await _loadHybridBudgetsIfNeeded();
+      // Timer soll laufen, sobald der User anfängt zu üben (auch ohne Play)
+      _ensureHybridBudgetTickerRunning();
+    }
     
-    // ✅ Schritt 1: A-SRS frühzeitig "locken" – _loadWords darf NICHT nochmal laufen
-    if (srs == SrsSystem.adaptive && state.wordQueue.isNotEmpty) {
+    // ✅ Schritt 1: A-SRS frühzeitig "locken" – _loadWords darf NICHT nochmal laufen (außer forceReload)
+    if (!forceReload && srs == SrsSystem.adaptive && state.wordQueue.isNotEmpty) {
       print('🛑 _loadWords SKIP: A-SRS Deck bereits geladen');
       return;
     }
@@ -509,13 +804,22 @@ class LearnModeController extends Notifier<LearnModeState> {
     // ✅ A-SRS Bootstrap: Wird jetzt von ASrsRefillEngine verwaltet
     // (Bootstrap-Logik wurde aus Repository entfernt)
     
-    // ✅ A-SRS Refill: IMMER vor Deck-Build ausführen
+    // ✅ A-SRS Refill: IMMER vor Deck-Build ausführen (Enroll + Refill-Counter)
+    // Nutzt _currentCatId, damit bei Kategorie-Wechsel im Wheel die richtige Kategorie geseeded wird
     int refillCounter = 0;
-    if (srs == SrsSystem.adaptive) {
-      refillCounter = await _ensureA_SrsRefill();
+    final catId = _currentCatId;
+    if (srs == SrsSystem.adaptive && !_isVirtualCategory(catId)) {
+      print('A2 before _ensureA_SrsRefill');
+      try {
+        refillCounter = await _ensureA_SrsRefill(categoryId: catId);
+        print('A2 ok: refillCounter=$refillCounter');
+      } catch (e, st) {
+        print('A2 FAIL: $e');
+        print(st);
+        rethrow;
+      }
     }
     try {
-      final catId = _currentCatId;
       
       // ⬇️ NEU: Guard für virtuelle Kategorien mit Filter-Logik
       if (_isVirtualCategory(catId)) {
@@ -556,10 +860,10 @@ class LearnModeController extends Notifier<LearnModeState> {
           streak: 0, // QuickSets hat keinen Streak-Tracking
         )).toList();
         
-        // Client-seitige Filterung
+        // Client-seitige Filterung – S0-Lock berücksichtigen
         final allowed = ref.read(allowedStagesProvider);
-        // ✅ Stage 0 immer erlauben (Deck-Allowed)
-        final allowedForced = {...allowed, 0};
+        final s0Locked = ref.read(s0LockedProvider(_currentCatId)).maybeWhen(data: (v) => v, orElse: () => false);
+        final allowedForced = s0Locked ? allowed.where((s) => s != 0).toSet() : {...allowed, 0};
         final filteredWords = wordViews.where((w) => allowedForced.contains(w.srsStage)).toList();
         
         if (filteredWords.isEmpty) {
@@ -594,10 +898,18 @@ class LearnModeController extends Notifier<LearnModeState> {
       final srsSystem = ref.read(srsModeControllerProvider).mode;
       
       // ✅ Ensure Progress-Rows existieren (beim ersten Öffnen, vor Queue-Laden)
-      await _repo.ensureWordProgressForCategory(
-        catId,
-        srsSystem: srsSystem,
-      );
+      print('A1 before ensureWordProgressForCategory');
+      try {
+        await _repo.ensureWordProgressForCategory(
+          catId,
+          srsSystem: srsSystem,
+        );
+        print('A1 ok');
+      } catch (e, st) {
+        print('A1 FAIL: $e');
+        print(st);
+        rethrow;
+      }
       
       if (srsSystem == SrsSystem.adaptive) {
         // ✅ A-SRS (Adaptive): IMMER Server-Queue laden (Contract), NICHT komplette Kategorie.
@@ -608,25 +920,93 @@ class LearnModeController extends Notifier<LearnModeState> {
           return;
         }
         
-        final queue = await _repo.fetchAdaptiveQueue(
-          userId: userId,
-          categoryId: catId,
-          limit: 20, // zum Validieren erstmal hart 20
-        );
+        var queue = <WordUserView>[];
+        print('A3 before fetchAdaptiveQueue');
+        try {
+          queue = await _repo.fetchAdaptiveQueue(
+            userId: userId,
+            categoryId: catId,
+            limit: 80, // Deck-Größe: S1-S5 können ~62+ Wörter haben, plus S0
+          );
+          print('A3 ok: queue.length=${queue.length}');
+        } catch (e, st) {
+          print('A3 FAIL: $e');
+          print(st);
+          rethrow;
+        }
+        int rpcFirst = queue.length;
+        int enrolledCount = 0;
+        int rpcSecond = 0;
+        int bootstrapCount = 0;
+        
+        // ✅ Fallback: Queue leer (z.B. nach Reset) → fn_enroll_user_category_mode seeden, dann erneut laden
+        if (queue.isEmpty && !_isVirtualCategory(catId)) {
+          print('A4 before fallback enroll');
+          try {
+            enrolledCount = await Supabase.instance.client.rpc('fn_enroll_user_category_mode', params: {
+              'p_category_id': catId,
+              'p_mode': 'adaptive',
+              'p_user': userId,
+            }) as int? ?? 0;
+            queue = await _repo.fetchAdaptiveQueue(userId: userId, categoryId: catId, limit: 80);
+            rpcSecond = queue.length;
+            // ✅ Bootstrap: Wenn RPC weiterhin leer, Wörter direkt aus Kategorie laden
+            if (queue.isEmpty) {
+              queue = await _repo.fetchAdaptiveQueueBootstrap(
+                userId: userId,
+                categoryId: catId,
+                limit: 80,
+              );
+              bootstrapCount = queue.length;
+            }
+            print('A4 ok');
+          } catch (e, st) {
+            print('A4 FAIL: $e');
+            print(st);
+            rethrow;
+          }
+        }
+        
+        // ✅ S0-Lock: Wenn Schloss aktiv (0 Sperre), Stage-0-Karten aus Queue filtern
+        final s0Locked = ref.read(s0LockedProvider(catId)).maybeWhen(data: (v) => v, orElse: () => false);
+        // if (s0Locked) {
+        //   queue = queue.where((w) => w.srsStage != 0).toList();
+        // }
         
         // queue: List<WordUserView> mit stage/due aus Server-Sicht
         final deckStages = _countStages(queue); // helper: counts [S0..S5]
         final shuffledIds = queue.map((w) => w.id).toList();
         
-        // ✅ Schritt 3: Debug-Sicherung (direkt nach erfolgreichem A-SRS-Queue-Load)
-        assert(queue.isNotEmpty, 'A-SRS: Queue darf nicht leer sein');
-        assert(shuffledIds.isNotEmpty, 'A-SRS: shuffledWordIds leer');
+        // ✅ A-SRS: Wenn die Queue leer ist, nicht crashen (Backend/Eligibility kann leer liefern).
+        if (queue.isEmpty || shuffledIds.isEmpty) {
+          int catCount = 0;
+          try {
+            catCount = await Supabase.instance.client.rpc('fn_category_word_count', params: {'p_category_id': catId}) as int? ?? 0;
+          } catch (e) {
+            print('⚠️ A-SRS Diagnose: fn_category_word_count Fehler: $e');
+          }
+          // Diagnose auf Karte sichtbar (kompakt, da maxLines begrenzt)
+          String hint = 'catId=$catId catCount=$catCount | rpc1=$rpcFirst e=$enrolledCount rpc2=$rpcSecond b=$bootstrapCount s0Lock=$s0Locked';
+          if (s0Locked && catCount > 0) {
+            hint += '\n\nS0-Lock aktiv. Entsperre Fach 0 (Schloss-Icon) um neue Wörter zu lernen.';
+          }
+          print('⚠️ A-SRS: Server-Queue leer | $hint');
+          _set(
+            wordQueue: const [],
+            shuffledWordIds: const [],
+            index: 0,
+            deckStages: const [0, 0, 0, 0, 0, 0],
+            emptyQueueHint: hint,
+          );
+          return;
+        }
         
         _set(
           wordQueue: queue,
           shuffledWordIds: shuffledIds,
           index: 0,
           deckStages: deckStages,
+          clearEmptyQueueHint: true,
         );
         
         print('✅ A-SRS: Server-Queue geladen | queue.length=${queue.length} | deckStages=$deckStages');
@@ -653,9 +1033,10 @@ class LearnModeController extends Notifier<LearnModeState> {
 
         // Client-seitige Filterung als zusätzliche Absicherung
         final allowed = ref.read(allowedStagesProvider);
-        // ✅ Stage 0 immer erlauben (Deck-Allowed vs. UI-Allowed)
-        final allowedForced = {...allowed, 0};
-        print('🔎 _loadWords: allowed (UI)=$allowed, allowedForced (Deck)=$allowedForced');
+        // ✅ S0-Lock: Wenn Schloss aktiv (0 Sperre), Stage 0 NICHT erlauben
+        final s0Locked = ref.read(s0LockedProvider(catId)).maybeWhen(data: (v) => v, orElse: () => false);
+        final allowedForced = s0Locked ? allowed.where((s) => s != 0).toSet() : {...allowed, 0};
+        print('🔎 _loadWords: allowed (UI)=$allowed, s0Locked=$s0Locked, allowedForced (Deck)=$allowedForced');
         var filteredWords = words.where((w) => allowedForced.contains(w.srsStage)).toList();
         print('🔎 _loadWords: filteredWords.length=${filteredWords.length}');
 
@@ -669,14 +1050,16 @@ class LearnModeController extends Notifier<LearnModeState> {
             await singleSeed(catId, singleStage);
             final counts = await singleCounts(catId, singleStage);
             print('🔢 SingleCounts for $catId (stage $singleStage): src=${counts.$1}, sr1=${counts.$2}, sr2=${counts.$3}');
+            // Fallback: Wenn Server 0 liefert, Category-Detail-Wert beibehalten (nicht überschreiben)
+            final srcFromCategory = singleStage < state.stages.length ? state.stages[singleStage] : 0;
+            final src = counts.$1 > 0 ? counts.$1 : srcFromCategory;
             ref.read(singleSessionBucketsProvider.notifier).state = SingleSessionBuckets(
-              src: counts.$1, 
-              sx: counts.$2, 
+              src: src,
+              sx: counts.$2,
               sy: counts.$3,
             );
-            // Auch die neuen Counts setzen
             ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(
-              counts.$1, counts.$2, counts.$3,
+              src, counts.$2, counts.$3,
             );
           } catch (e) {
             print('❌ Single session seed failed: $e');
@@ -797,22 +1180,8 @@ class LearnModeController extends Notifier<LearnModeState> {
         
         print('✅ Safe activeStage gewählt: $safeStage (deckStages: $deckStages)');
         
-        // ✅ Stage-IDs nur innerhalb des gebauten Quota-Decks (finalIds)
-        final stageWordIds = <String>[];
-        for (final id in finalIds) {
-          final w = _findWordById(id, queue);
-          if (w == null) {
-            print('⚠️ missing word in queue: $id');
-            continue;
-          }
-          if (w.srsStage == safeStage) stageWordIds.add(id);
-        }
-        stageWordIds.shuffle();
-        
-        print('📦 StageWordIds für Stage $safeStage: ${stageWordIds.length} IDs');
-        
-        // Wenn Stage innerhalb des Decks leer ist, fallback auf das gesamte Deck
-        finalShuffledIds = stageWordIds.isNotEmpty ? stageWordIds : finalIds;
+        // ✅ T-SRS/Hybrid: Deck-Mix aus allen Stages (nicht nur einer) – sonst arbeitet man nur in A1
+        finalShuffledIds = List<String>.from(finalIds)..shuffle();
       }
       
       final currentStage = state.wordQueue.isNotEmpty && state.index < state.wordQueue.length
@@ -848,10 +1217,10 @@ class LearnModeController extends Notifier<LearnModeState> {
         print('⏭️ _loadWords: A-SRS - Überspringe _rebuildStageQueuesFromCurrentWords und _ensureValidActiveStageAndSync');
       }
       
-      // ✅ T-SRS/Hybrid: Auto-Fallback auf erste nicht-leere Stage und Deck synchronisieren
+      // ✅ T-SRS/Hybrid: Deck ist bereits gemischt (finalShuffledIds). Nur activeStage validieren, NICHT auf eine Stage filtern.
       if (srsSystem != SrsSystem.adaptive) {
-        await _ensureValidActiveStageAndSync(shuffle: false); // Beim Initial-Load nicht nochmal shufflen
-        print('✅ _loadWords: _ensureValidActiveStageAndSync() abgeschlossen. activeStage=${state.activeStage}, shuffledWordIds.length=${state.shuffledWordIds.length}');
+        _ensureValidActiveStage(); // activeStage auf nicht-leere Stage setzen
+        print('✅ _loadWords: activeStage=${state.activeStage}, Deck-Mix aus allen Stages, shuffledWordIds.length=${state.shuffledWordIds.length}');
       } else {
         // ❌ A-SRS: KEINE _ensureValidActiveStageAndSync, KEINE _syncDeckToActiveStage
         // Für T-SRS/Hybrid: shuffledWordIds wurde bereits in _set() gesetzt
@@ -1012,30 +1381,49 @@ class LearnModeController extends Notifier<LearnModeState> {
   // ---- Review / Antwort-Handling ----
 
   Future<void> _handleAnswer({required bool correct}) async {
-    print('🎯 _handleAnswer aufgerufen: correct=$correct');
+    developer.log('🎯 Swipe: correct=$correct', name: 'LearnMode');
     final mode = ref.read(levelSelectionProvider);
     final srsSystem = ref.read(srsModeControllerProvider).mode;
-    print('🎯 Mode: $mode, SRS: $srsSystem');
     
         // Progress-Update basierend auf Modus
         if (mode == LevelSelectionMode.single) {
-          // Single-Modus: Server-Session updaten
+          // Single-Modus: Server-Session updaten (oder nur lokal bei noSave)
           try {
-            final st = ref.read(singleStageProvider);     // 1..5
-            final catId = _currentCatId;                  // wie bei Seed
+            final st = ref.read(singleStageProvider);
+            final catId = _currentCatId;
+            final noSave = ref.read(noSaveProgressProvider);
             
-            // Aktuelles Wort aus wordQueue und index ableiten
             final currentWord = state.wordQueue.isNotEmpty && state.index < state.wordQueue.length
                 ? state.wordQueue[state.index]
                 : null;
             
-            if (currentWord == null) return; // Kein aktuelles Wort verfügbar
+            if (currentWord == null) return;
 
-            // 1) in Session-Bucket verschieben
-            await singleMove(catId, st, currentWord.id, correct);
+            if (!noSave) {
+              await singleMove(catId, st, currentWord.id, correct);
+            }
 
-            // 2) nächste Karte aus SRC holen
-            final nextId = await singleNextWordId(catId, st);
+            // Optimistisches UI-Update: sofort anzeigen (correct: src→sr1)
+            final cur = ref.read(singleSessionCountsProvider);
+            if (correct) {
+              ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(
+                (cur.src - 1).clamp(0, 1 << 30),
+                cur.sr1 + 1,
+                cur.sr2,
+              );
+            }
+
+            String? nextId;
+            if (noSave) {
+              // Lokale Queue: aktuelle Karte entfernen, Index anpassen
+              final ids = List<String>.from(state.shuffledWordIds);
+              final i = state.index;
+              if (i < ids.length) ids.removeAt(i);
+              final newIdx = ids.isEmpty ? 0 : (i % ids.length).clamp(0, ids.length - 1);
+              _set(shuffledWordIds: ids, index: newIdx);
+              return; // Kein singleCounts bei noSave
+            }
+            nextId = await singleNextWordId(catId, st);
 
             // Falls es eine nächste Karte gibt -> IDs & Queue aktualisieren
             final ids = List<String>.from(state.shuffledWordIds);
@@ -1076,9 +1464,20 @@ class LearnModeController extends Notifier<LearnModeState> {
             }
 
             // 3) Zähler aktualisieren (S{n}, SR1, SR2)
+            // Fallback: Wenn Server nur Nullen liefert, optimistic Update (correct: src-1, sr1+1)
             final c = await singleCounts(catId, st);
-            ref.read(singleSessionCountsProvider.notifier).state =
-                SingleSessionCounts(c.$1, c.$2, c.$3);
+            final prev = ref.read(singleSessionCountsProvider);
+            final useServer = c.$1 > 0 || c.$2 > 0 || c.$3 > 0;
+            if (useServer) {
+              ref.read(singleSessionCountsProvider.notifier).state =
+                  SingleSessionCounts(c.$1, c.$2, c.$3);
+            } else if (correct) {
+              ref.read(singleSessionCountsProvider.notifier).state = SingleSessionCounts(
+                (prev.src - 1).clamp(0, 1 << 30),
+                prev.sr1 + 1,
+                prev.sr2,
+              );
+            }
           } catch (e) {
             print('❌ Single session move failed: $e');
           }
@@ -1096,31 +1495,13 @@ class LearnModeController extends Notifier<LearnModeState> {
 
       final currentId = ids[i];
       final current = queue.firstWhere((w) => w.id == currentId, orElse: () => queue.first);
-      
-      // ✅ oldStage aus DB holen (nicht aus Deck/activeStage)
-      int oldStage = current.srsStage; // Fallback auf Deck-Stage
-      try {
-        final sb = Supabase.instance.client;
-        final userId = sb.auth.currentUser?.id;
-        if (userId != null) {
-          final modeStr = srsSystem.name; // 'adaptive', 'hybrid', 'time'
-          final dbRow = await sb
-              .from('user_word_srs')
-              .select('stage')
-              .eq('user_id', userId)
-              .eq('word_id', currentId)
-              .eq('category_id', _currentCatId)
-              .eq('mode', modeStr)
-              .maybeSingle();
-          if (dbRow != null) {
-            oldStage = (dbRow['stage'] as int?) ?? current.srsStage;
-          }
-        }
-      } catch (e) {
-        print('⚠️ Konnte oldStage nicht aus DB holen (Single-Mode), verwende Deck-Stage: $e');
-        // Fallback auf Deck-Stage bleibt
-      }
-      
+
+      // oldStage direkt aus Queue-Karte (gleiche Quelle wie fetchAdaptiveQueue / UI)
+      final queueItem = state.wordQueue.firstWhere(
+        (w) => w.id == current.id,
+      );
+      final oldStage = queueItem.srsStage ?? 0;
+
       final delta = correct ? 1 : -1;
       final newStage = (oldStage + delta).clamp(1, 5); // Niemals unter 1
       
@@ -1134,71 +1515,72 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
       _setStages(stages);
       
-      // Server-Update
-      try {
-        final result = await submitReview(
-          _currentCatId,  // ✅ categoryId hinzugefügt
-          currentId,
-          correct,
-          srsSystem: srsSystem,
-          oldStage: oldStage, // ✅ oldStage aus DB für Tracing übergeben
-        );
-        final serverStage = result.stage;
-        final serverDue = result.nextDueAt;
-        
-        // 🧪 DEBUG: Server-Progress direkt nach submitReview() holen (zum Vergleich mit UI)
+      // Server-Update (nur wenn Fortschritt gespeichert wird)
+      if (!ref.read(noSaveProgressProvider)) {
         try {
-          final serverProgress = await _repo.fetchCategoryProgress(
+          final result = await submitReview(
             _currentCatId,
+            currentId,
+            correct,
             srsSystem: srsSystem,
+            oldStage: oldStage,
           );
-          print('🧪 After submitReview (S1-S5): serverProgress stages=${serverProgress.stages} total=${serverProgress.total} (cat=$_currentCatId, word=$currentId, oldStage=$oldStage, newStage=$serverStage)');
-        } catch (e) {
-          print('⚠️ Konnte Server-Progress nach submitReview (S1-S5) nicht holen: $e');
-        }
-        
-        // ✅ Requeue nach Ausspielung konsumieren (löschen)
-        if (current.isRequeue) {
+          final serverStage = result.stage;
+          final serverDue = result.nextDueAt;
+          
           try {
-            await _repo.requeueConsume(
-              categoryId: _currentCatId,
-              wordId: currentId,
-              mode: srsSystem.name,
-            );
-            print('🔄 Requeue konsumiert für word=$currentId');
-          } catch (e) {
-            print('⚠️ Requeue-Consume fehlgeschlagen: $e');
+            await _repo.fetchCategoryProgress(_currentCatId, srsSystem: srsSystem);
+          } catch (_) {}
+          
+          if (current.isRequeue) {
+            try {
+              await _repo.requeueConsume(
+                categoryId: _currentCatId,
+                wordId: currentId,
+                mode: srsSystem.name,
+              );
+            } catch (_) {}
           }
+          
+          ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: srsSystem)));
+          
+          final q = List<WordUserView>.from(state.wordQueue);
+          final pos = q.indexWhere((w) => w.id == currentId);
+          if (pos != -1) {
+            q[pos] = q[pos].copyWith(
+              srsStage: result.stage,
+              nextDueAt: result.nextDueAt,
+              streak: result.streak,
+            );
+            _set(wordQueue: q);
+          }
+          
+          if (serverStage != newStage) {
+            final updatedStages = [...state.stages];
+            if (newStage >= 1 && newStage < updatedStages.length) {
+              updatedStages[newStage] = (updatedStages[newStage] - 1).clamp(0, 1 << 30);
+            }
+            if (serverStage >= 1 && serverStage < updatedStages.length) {
+              updatedStages[serverStage] = updatedStages[serverStage] + 1;
+            }
+            _setStages(updatedStages);
+          }
+        } catch (e) {
+          print('❌ Review submission failed: $e');
+          _set(isSubmitting: false);
         }
-        
-        // ⬇️ Provider invalidierten, damit Category Detail Screen die neuen Stage-Zahlen zeigt
-        ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: srsSystem)));
-        
-        // ✅ Server-Response verwenden: Word-Instanz mit ALLEN Serverwerten aktualisieren
+      } else {
+        // noSave: Word-Instanz nur lokal aktualisieren
         final q = List<WordUserView>.from(state.wordQueue);
         final pos = q.indexWhere((w) => w.id == currentId);
         if (pos != -1) {
           q[pos] = q[pos].copyWith(
-            srsStage: result.stage,
-            nextDueAt: result.nextDueAt,
-            streak: result.streak,
+            srsStage: newStage,
+            nextDueAt: DateTime.now().add(Duration(hours: 1 << newStage.clamp(0, 5))),
+            streak: 0,
           );
           _set(wordQueue: q);
         }
-        
-        // Stages mit Server-Response synchronisieren
-        if (serverStage != newStage) {
-          final updatedStages = [...state.stages];
-          if (newStage >= 1 && newStage < updatedStages.length) {
-            updatedStages[newStage] = (updatedStages[newStage] - 1).clamp(0, 1 << 30);
-          }
-          if (serverStage >= 1 && serverStage < updatedStages.length) {
-            updatedStages[serverStage] = updatedStages[serverStage] + 1;
-          }
-          _setStages(updatedStages);
-        }
-      } catch (e) {
-        print('❌ Review submission failed: $e');
       }
       
       // Nächste Karte
@@ -1209,6 +1591,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       final nextStage = nextWord.srsStage;
       print('🧨 STAGE SET from=${state.index} (Stage=$currentStage) -> to=$nextIndex (Stage=$nextStage) at=${StackTrace.current}');
       _set(index: nextIndex);
+      _set(isSubmitting: false);
       
       return;
     }
@@ -1227,7 +1610,7 @@ class LearnModeController extends Notifier<LearnModeState> {
     final current = queue.firstWhere((w) => w.id == currentId, orElse: () => queue.first);
     
     // ✅ Requeue nach Ausspielung konsumieren (löschen) - direkt wenn Wort angezeigt wird
-    if (current.isRequeue) {
+    if (!ref.read(noSaveProgressProvider) && current.isRequeue) {
       try {
         await _repo.requeueConsume(
           categoryId: _currentCatId,
@@ -1250,30 +1633,109 @@ class LearnModeController extends Notifier<LearnModeState> {
     final wasPaused = state.timerPaused;
     final wasRunning = state.running;
 
-    // 2) oldStage aus DB holen (nicht aus Deck/activeStage)
-    int oldStage = current.srsStage; // Fallback auf Deck-Stage
-    try {
+    // oldStage direkt aus Queue-Karte (gleiche Quelle wie fetchAdaptiveQueue / UI)
+    final currentWordId = current.id;
+    final queueItem = state.wordQueue.firstWhere(
+      (w) => w.id == currentWordId,
+    );
+    final oldStage = queueItem.srsStage ?? 0;
+
+    print('A-HANDLE start: word=${current.id} oldStage=$oldStage correct=$correct srs=$srsSystem');
+
+    // ✅ A‑SRS S0 Sonderfall:
+    // S0 ("New") ist kein Review-State. Bei KORREKT wird die Karte pro Karte nach S1 enrolled.
+    if (srsSystem == SrsSystem.adaptive && oldStage == 0) {
+      print('A-HANDLE branch: S0');
       final sb = Supabase.instance.client;
       final userId = sb.auth.currentUser?.id;
-      if (userId != null) {
-        final modeStr = srsSystem.name; // 'adaptive', 'hybrid', 'time'
-        final dbRow = await sb
-            .from('user_word_srs')
-            .select('stage')
-            .eq('user_id', userId)
-            .eq('word_id', currentId)
-            .eq('category_id', _currentCatId)
-            .eq('mode', modeStr)
-            .maybeSingle();
-        if (dbRow != null) {
-          oldStage = (dbRow['stage'] as int?) ?? current.srsStage;
-        }
+      if (userId == null) {
+        _set(isSubmitting: false);
+        return;
       }
-    } catch (e) {
-      print('⚠️ Konnte oldStage nicht aus DB holen, verwende Deck-Stage: $e');
-      // Fallback auf Deck-Stage bleibt
+
+      final noSave = ref.read(noSaveProgressProvider);
+      try {
+        if (correct && !noSave) {
+          print('A-HANDLE before enroll...');
+          final result = await _repo.enrollFromS0ToS1(
+            userId: userId,
+            categoryId: _currentCatId,
+            wordId: currentId,
+            mode: 'adaptive',
+          );
+          final serverStage = result.stage;
+          final serverDue = result.nextDueAt;
+          print('DB stage: $oldStage -> $serverStage');
+
+          // Queue-Item updaten
+          final q = List<WordUserView>.from(state.wordQueue);
+          final pos = q.indexWhere((w) => w.id == currentId);
+          if (pos != -1) {
+            q[pos] = q[pos].copyWith(
+              srsStage: serverStage,
+              nextDueAt: serverDue,
+              streak: 0,
+            );
+            _set(wordQueue: q);
+          }
+
+          // Stage-Counts updaten (S0--, S1++)
+          final updatedStages = [...state.stages];
+          updatedStages[0] = (updatedStages[0] - 1).clamp(0, 1 << 30);
+          if (serverStage >= 1 && serverStage < updatedStages.length) {
+            updatedStages[serverStage] = updatedStages[serverStage] + 1;
+          }
+          _setStages(updatedStages);
+
+          // Provider invalidieren (Category Detail / Cards + Kapsel unter A5)
+          ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: srsSystem)));
+          ref.invalidate(learnedInStage5Provider(_currentCatId));
+
+          // Queue neu vom Server holen (frisch enrolled S1-Karten nachrücken)
+          await _loadWords(forceReload: true);
+          _set(isSubmitting: false);
+          return;
+        } else if (correct && noSave) {
+          // noSave: nur lokales UI-Update, kein Backend
+          final serverStage = 1;
+          final serverDue = DateTime.now().add(const Duration(hours: 1));
+          final q = List<WordUserView>.from(state.wordQueue);
+          final pos = q.indexWhere((w) => w.id == currentId);
+          if (pos != -1) {
+            q[pos] = q[pos].copyWith(srsStage: serverStage, nextDueAt: serverDue, streak: 0);
+            _set(wordQueue: q);
+          }
+          final updatedStages = [...state.stages];
+          updatedStages[0] = (updatedStages[0] - 1).clamp(0, 1 << 30);
+          if (serverStage < updatedStages.length) updatedStages[serverStage] = updatedStages[serverStage] + 1;
+          _setStages(updatedStages);
+        } else if (!correct && !noSave) {
+          // Falsch in S0: in Requeue schieben (keine Stage-Änderung)
+          await sb.rpc('fn_requeue_s0_fail', params: {
+            'p_user': userId,
+            'p_mode': 'adaptive',
+            'p_category_id': _currentCatId,
+            'p_word_id': currentId,
+          });
+        }
+      } catch (e) {
+        print('❌ A-SRS S0 answer failed: $e');
+        _set(isSubmitting: false);
+      }
+
+      // Nächste Karte (noSave, wrong, oder nach catch)
+      final nextIndex = (i + 1) % ids.length;
+      final currentStage = current.srsStage;
+      final nextId = ids[nextIndex];
+      final nextWord = queue.firstWhere((w) => w.id == nextId, orElse: () => queue.first);
+      final nextStage = nextWord.srsStage;
+      print('🧨 STAGE SET from=${state.index} (Stage=$currentStage) -> to=$nextIndex (Stage=$nextStage) at=${StackTrace.current}');
+      _set(index: nextIndex);
+      _set(isSubmitting: false);
+      return;
     }
     
+      print('A-HANDLE branch: REVIEW');
     // 3) Für A-SRS: KEINE lokale Stage-Mutation, direkt Server-Response abwarten
     // Für T-SRS/Hybrid: lokale Schätzung (wie bisher)
     int newStage = oldStage;
@@ -1309,46 +1771,66 @@ class LearnModeController extends Notifier<LearnModeState> {
     DateTime? serverDue;
     // ✅ WICHTIG: serverProgress außerhalb des try-catch deklarieren, damit es im gesamten Scope verfügbar ist
     CategoryProgress? serverProgress;
-    try {
-      final result = await submitReview(
-        _currentCatId,
-        currentId,
-        correct,
-        srsSystem: srsSystem,
-        oldStage: oldStage, // ✅ oldStage für Tracing übergeben
-      );
-      serverStage = result.stage;
-      serverDue = result.nextDueAt;
-      print('🗂 Server says: word=$currentId -> stage=$serverStage, streak=${result.streak}, due=$serverDue (old=$oldStage, correct=$correct)');
+    final noSave = ref.read(noSaveProgressProvider);
+    // ✅ A-SRS: Immer speichern wenn User eingeloggt (noSave ignorieren), sonst bleiben Karten in A1
+    final shouldSaveToServer = srsSystem == SrsSystem.adaptive
+        ? (Supabase.instance.client.auth.currentUser != null)
+        : !noSave;
 
-      // 🧪 DEBUG: Server-Progress direkt nach submitReview() holen (zum Vergleich mit UI)
-      // ✅ WICHTIG: serverProgress wird auch für activeStage-Berechnung verwendet (Source of Truth)
+    ReviewResult? reviewResult;
+    if (!shouldSaveToServer) {
+      // Kein Speichern: nur lokale Werte für UI, Category Detail behält alte Werte
+      serverDue = DateTime.now().add(Duration(hours: 1 << serverStage.clamp(0, 5)));
+      print('⚠️ Review nicht gespeichert (user=${Supabase.instance.client.auth.currentUser != null})');
+    } else {
       try {
-        serverProgress = await _repo.fetchCategoryProgress(
+        print('A-HANDLE before submitReview');
+        reviewResult = await submitReview(
           _currentCatId,
+          currentId,
+          correct,
           srsSystem: srsSystem,
+          oldStage: oldStage, // ✅ oldStage für Tracing übergeben
         );
-        print('🧪 After submitReview: serverProgress stages=${serverProgress.stages} total=${serverProgress.total} (cat=$_currentCatId, word=$currentId, oldStage=$oldStage, newStage=$serverStage)');
-      } catch (e) {
-        print('⚠️ Konnte Server-Progress nach submitReview nicht holen: $e');
-        serverProgress = null;
-      }
+        serverStage = reviewResult!.stage;
+        serverDue = reviewResult!.nextDueAt;
+        print('✅ Review gespeichert: Stage $oldStage → $serverStage');
+        // Hinweis: S1→S2 erfolgt erst nach 2 richtigen (pass_count). Erste richtige Antwort bleibt in S1.
 
-      // ✅ Requeue nach Ausspielung konsumieren (löschen)
-      if (current.isRequeue) {
+        // 🧪 DEBUG: Server-Progress direkt nach submitReview() holen (zum Vergleich mit UI)
         try {
-          await _repo.requeueConsume(
-            categoryId: _currentCatId,
-            wordId: currentId,
-            mode: srsSystem.name,
+          serverProgress = await _repo.fetchCategoryProgress(
+            _currentCatId,
+            srsSystem: srsSystem,
           );
-          print('🔄 Requeue konsumiert für word=$currentId');
+          print('🧪 After submitReview: serverProgress stages=${serverProgress.stages} total=${serverProgress.total} (cat=$_currentCatId, word=$currentId, oldStage=$oldStage, newStage=$serverStage)');
         } catch (e) {
-          print('⚠️ Requeue-Consume fehlgeschlagen: $e');
+          print('⚠️ Konnte Server-Progress nach submitReview nicht holen: $e');
+          serverProgress = null;
         }
+
+        // ✅ Requeue nach Ausspielung konsumieren (löschen)
+        if (current.isRequeue) {
+          try {
+            await _repo.requeueConsume(
+              categoryId: _currentCatId,
+              wordId: currentId,
+              mode: srsSystem.name,
+            );
+            print('🔄 Requeue konsumiert für word=$currentId');
+          } catch (e) {
+            print('⚠️ Requeue-Consume fehlgeschlagen: $e');
+          }
+        }
+      } catch (e) {
+        print('❌ Review submission failed: $e');
+        _set(isSubmitting: false);
+        return;
       }
-      
-      // ⚠️ WARNUNG: Prüfe ob Backend-Antwort mit A-SRS-Regeln übereinstimmt
+    }
+
+    // Ab hier für BEIDE (noSave + else): lokales UI-Update
+    // ⚠️ WARNUNG: Prüfe ob Backend-Antwort mit A-SRS-Regeln übereinstimmt
       // ✅ Neue Logik berücksichtigt oldStreak: Stage 1 bleibt bei streak < 1, wird 2 bei streak == 1
       // COMMENTED OUT:
       // if (srs == SrsSystem.adaptive && correct) {
@@ -1399,6 +1881,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       // ✅ Contract-Assertion: Sammle "before"-Werte VOR lokalen Updates
       final stagesBefore = List<int>.from(state.stages);
       final stageQueuesBefore = _stageQueues.map((q) => q.length).toList();
+      final masteredBefore = state.masteredCount;
       
       // ✅ DB-Werte für Contract-Assertion holen
       int dbStage = serverStage; // Fallback
@@ -1428,13 +1911,14 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
       
       // ✅ Queue-Item updaten mit ALLEN Serverwerten (stage, streak, nextDueAt)
+      final displayStreak = shouldSaveToServer ? (reviewResult?.streak ?? 0) : 0;
       final updatedQueue = [
         for (final w in state.wordQueue)
           if (w.id == currentId)
             w.copyWith(
-              srsStage: result.stage,
-              nextDueAt: result.nextDueAt,
-              streak: result.streak,
+              srsStage: serverStage,
+              nextDueAt: serverDue,
+              streak: displayStreak,
             )
           else
             w
@@ -1445,15 +1929,33 @@ class LearnModeController extends Notifier<LearnModeState> {
 
       if (srsSystem == SrsSystem.adaptive) {
         // ✅ A-SRS: KEIN lokales Category-Progress-Mutieren!
-        // Provider invalidieren, damit UI Server-Daten neu lädt
-        ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: SrsSystem.adaptive)));
-
         print('📊 A-SRS: Kein lokales Progress-Update (Server ist Source of Truth)');
 
-        // ✅ Wichtig: stages NICHT anfassen, also NICHT übergeben
+        // ✅ A‑SRS UI: Switches sollen Category-Counts anzeigen (state.stages).
+        // Diese Counts dürfen NUR anhand von Serverdaten aktualisiert werden:
+        // - bevorzugt serverProgress.stages (voller Snapshot)
+        // - fallback: delta oldStage -> serverStage (auch server-basiert, aus RPC)
+        List<int>? updatedStages;
+        if (serverProgress != null) {
+          updatedStages = serverProgress!.stages;
+        } else if (serverStage != oldStage) {
+          updatedStages = _applyLocalProgressDelta(
+            stages: state.stages,
+            oldStage: oldStage,
+            newStage: serverStage,
+          );
+        }
+
+        // deckStages (nur das aktuelle Deck) müssen ebenfalls live aktualisiert werden.
+        final updatedDeckStages = _computeDeckStages(state.shuffledWordIds, updatedQueue);
+        final masteredCount = await _repo.countLearnedInStage5(_currentCatId, srsSystem: srsSystem).catchError((_) => 0);
         _set(
           wordQueue: updatedQueue,
+          deckStages: updatedDeckStages,
+          stages: updatedStages,
+          masteredCount: masteredCount,
         );
+        ref.invalidate(learnedInStage5Provider(_currentCatId));
       } else {
         // ✅ T-SRS / Hybrid: lokales Live-Progress-Update bleibt erlaubt
         List<int>? updatedStages;
@@ -1489,6 +1991,10 @@ class LearnModeController extends Notifier<LearnModeState> {
       final stagesAfter = List<int>.from(state.stages);
       final stageQueuesAfter = _stageQueues.map((q) => q.length).toList();
       
+      // DEBUG: Provider-Wert direkt vor Assert
+      final learnedStage5 = await ref.read(learnedInStage5Provider(_currentCatId).future);
+      print('DEBUG learnedInStage5Provider=$_currentCatId -> $learnedStage5');
+      
       // ✅ Contract-Assertion aufrufen
       assertSrsContractsAfterReview(
         wordId: currentId,
@@ -1502,12 +2008,18 @@ class LearnModeController extends Notifier<LearnModeState> {
         stageQueuesBefore: stageQueuesBefore,
         stageQueuesAfter: stageQueuesAfter,
         totalWordsInCategory: state.totalWordsInCategory,
+        masteredBefore: masteredBefore,
+        masteredAfter: state.masteredCount,
       );
       
       // ⬇️ Provider invalidierten (für T-SRS/Hybrid, damit CategoryDetailScreen aktualisiert wird)
-      // ✅ A-SRS: Wurde bereits früher invalidiert (direkt nach RPC-Call)
-      if (srsSystem != SrsSystem.adaptive) {
+      // ✅ Nur wenn Fortschritt gespeichert wurde (sonst alte Werte beim Zurückkehren)
+      if (shouldSaveToServer && srsSystem != SrsSystem.adaptive) {
         ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: srsSystem)));
+      }
+      // Kapsel unter A5 (learned count) mit aktualisieren (auch für A-SRS)
+      if (shouldSaveToServer) {
+        ref.invalidate(learnedInStage5Provider(_currentCatId));
       }
       
       int allowedMaxStage;
@@ -1579,10 +2091,6 @@ class LearnModeController extends Notifier<LearnModeState> {
       if (correct && oldStage == 1) {
         _scheduleImmediateReinforce(currentId, after: 14);
       }
-    } catch (e) {
-      // optional loggen
-      print('❌ Review submission failed: $e');
-    }
 
     // 5) Nächste Karte - Navigation basierend auf SRS-Mode
     final currentStageValue = current.srsStage.clamp(0, 5);
@@ -1616,10 +2124,30 @@ class LearnModeController extends Notifier<LearnModeState> {
         cardsSwipedInSession: state.cardsSwipedInSession + 1,
       );
 
-      // ✅ A-SRS: KEINE lokale Stage-Queue-Synchronisation mehr
-      // Die Server-Queue enthält bereits alle Stages, Index einfach weiterschalten
+      // ✅ A-SRS Retry-Regel: Bei falsch → Karte an Position (index+1+retry_delay) einfügen
+      // retry_delay: 0 (active=1), 1 (2-5), 3 (6+)
+      if (!correct) {
+        final stagesForRetry = serverProgress?.stages ?? state.stages;
+        final activeCount = stagesForRetry.length >= 6
+            ? stagesForRetry.sublist(1, 6).fold<int>(0, (a, b) => a + b)
+            : 0;
+        final retryDelay = activeCount <= 1 ? 0 : (activeCount <= 5 ? 1 : 3);
+        final ids = List<String>.from(state.shuffledWordIds);
+        final curPos = ids.indexOf(currentId);
+        if (curPos != -1 && ids.length > 1) {
+          ids.removeAt(curPos);
+          final insertAt = (prevIndex + 1 + retryDelay).clamp(0, ids.length);
+          ids.insert(insertAt, currentId);
+          final updatedDeckStages = _computeDeckStages(ids, state.wordQueue);
+          _set(shuffledWordIds: ids, deckStages: updatedDeckStages);
+          print('🔄 A-SRS Retry: $currentId an Pos ${prevIndex + 1 + retryDelay} (active=$activeCount, delay=$retryDelay)');
+        }
+      }
+
+      // ✅ A-SRS: Index weiterschalten
       await _advanceIndexAfterReview(fromIndex: prevIndex);
 
+      _set(isSubmitting: false);
       // Früh returnen - keine weitere Navigation-Logik
       return;
     } else {
@@ -1843,6 +2371,8 @@ class LearnModeController extends Notifier<LearnModeState> {
       print('🔧 _handleAnswer (T-SRS/Hybrid): activeStage ${state.activeStage} -> $safeStage (Queue-basiert)');
       _set(activeStage: safeStage);
     }
+
+    _set(isSubmitting: false);
   }
 
   // ---- Timer ----
@@ -1877,7 +2407,67 @@ class LearnModeController extends Notifier<LearnModeState> {
         } else {
           _set(remainingMillis: left);
         }
+
+        // ✅ Hybrid: Stage-Tagesbudget ticken (nur wenn wirklich "laufend")
+        if (ref.read(srsModeControllerProvider).mode == SrsSystem.hybrid && state.running && state.timerActive && !state.timerPaused) {
+          _tickHybridStageBudget(deltaMs: 16);
+        }
       });
+    }
+  }
+
+  void _tickHybridStageBudget({required int deltaMs}) {
+    // Lazy load budgets once we have a category.
+    if (state.categoryId.isEmpty) return;
+    // Wichtig: Budget muss an der *aktuellen Karte* hängen, nicht an activeStage.
+    // In s0toS5 kann activeStage vom aktuell angezeigten Wort abweichen -> dann würde nie getickt.
+    int st = state.activeStage;
+    if (state.shuffledWordIds.isNotEmpty &&
+        state.index >= 0 &&
+        state.index < state.shuffledWordIds.length &&
+        state.wordQueue.isNotEmpty) {
+      final currentId = state.shuffledWordIds[state.index];
+      for (final w in state.wordQueue) {
+        if (w.id == currentId) {
+          st = w.srsStage;
+          break;
+        }
+      }
+    }
+    // S0 hat kein Budget. Wir zählen nur Stages, die tatsächlich ein Tagesbudget haben.
+    st = st.clamp(0, 5);
+    final budgetSec = _hybridDailyBudgetSecByStage[st];
+    if (budgetSec == null) return;
+
+    final now = DateTime.now();
+    final dayStart = _localDayStart(now);
+    if (_hybridBudgetDayStartLocal == null || _hybridBudgetDayStartLocal != dayStart) {
+      // day rollover; reset (async reload later)
+      _hybridBudgetDayStartLocal = dayStart;
+      _hybridUsedMsByStage.clear();
+    }
+
+    final used = (_hybridUsedMsByStage[st] ?? 0) + deltaMs;
+    _hybridUsedMsByStage[st] = used;
+    _hybridPersistAccumulatorMs += deltaMs;
+    _hybridUiAccumulatorMs += deltaMs;
+
+    // UI nur ca. 1× pro Sekunde updaten (sonst rebuild spam)
+    if (_hybridUiAccumulatorMs >= 1000) {
+      _hybridUiAccumulatorMs = 0;
+      _recomputeHybridBudgetState(now: now);
+
+      // Wenn Stage eingefroren wurde, wechsle automatisch auf nächste Stage mit Karten
+      if (st >= 1 && st < state.hybridStageFrozen.length && state.hybridStageFrozen[st]) {
+        // Rebuild stage queues zählen auf state.stages; wir nutzen die vorhandene Validierung + Sync.
+        unawaited(_ensureValidActiveStageAndSync(shuffle: false));
+      }
+    }
+
+    // Persist max 1× pro Sekunde
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId != null) {
+      unawaited(_persistHybridBudgetsMaybe(userId: userId, categoryId: state.categoryId));
     }
   }
 
@@ -1953,6 +2543,7 @@ class LearnModeController extends Notifier<LearnModeState> {
     final keys = List<String>.from(_cooldown.keys);
     for (final k in keys) {
       final next = (_cooldown[k] ?? 0) - 1;
+      
       if (next <= 0) {
         _cooldown.remove(k);
       } else {
@@ -2135,30 +2726,7 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   int _computeAllowedMaxStageFromQueue(List<WordUserView> queue) {
-    final srs = ref.read(srsModeControllerProvider).mode;
-    
-    // A-SRS: Kein Gate, alle Stages erlaubt
-    if (srs == SrsSystem.adaptive) {
-      return 5;
-    }
-    
-    // T-SRS und Hybrid: Gate-Logik wie bisher
-    // Zähle Stufen in der aktuell aktiven Menge (kannst auch _capActivePool-Spiegel nutzen)
-    int s1 = 0, s2 = 0, s3 = 0, s4 = 0;
-    for (final w in queue) {
-      switch (w.srsStage) {
-        case 1: s1++; break;
-        case 2: s2++; break;
-        case 3: s3++; break;
-        case 4: s4++; break;
-      }
-    }
-
-    // Gate-Stufen NUR anhand der real verfügbaren Karten in der Queue öffnen
-    if (s1 < 12) return 1;  // erst S1 aufbauen
-    if (s2 < 20) return 2;  // dann S2
-    if (s3 < 25) return 3;  // dann S3
-    if (s4 < 30) return 4;  // dann S4
+    // Alle Modi: Keine Sperre, alle Stages T0–T5 / H0–H5 / A0–A5 erlaubt
     return 5;
   }
 
@@ -2500,11 +3068,28 @@ class LearnModeController extends Notifier<LearnModeState> {
     final current = state.activeStage;
     int target = current;
 
-    final currentCount = (current >= 0 && current < counts.length) ? counts[current] : 0;
+    final currentCountRaw = (current >= 0 && current < counts.length) ? counts[current] : 0;
+    final isHybrid = ref.read(srsModeControllerProvider).mode == SrsSystem.hybrid;
+    final isFrozen = isHybrid &&
+        current >= 0 &&
+        current < state.hybridStageFrozen.length &&
+        state.hybridStageFrozen[current] == true;
+    final currentCount = isFrozen ? 0 : currentCountRaw;
     print('🔧 _ensureValidActiveStageAndSync: current=$current, currentCount=$currentCount, counts=$counts');
     
     if (currentCount == 0) {
       target = counts.indexWhere((c) => c > 0);
+      // Hybrid: gefrorene Stages überspringen
+      if (isHybrid) {
+        for (var i = 0; i < counts.length; i++) {
+          if (counts[i] > 0 &&
+              i < state.hybridStageFrozen.length &&
+              state.hybridStageFrozen[i] == false) {
+            target = i;
+            break;
+          }
+        }
+      }
       if (target == -1) {
         target = 0; // alles leer -> S0 als Default
         print('⚠️ _ensureValidActiveStageAndSync: Alle Stages leer, setze auf S0');
@@ -2544,7 +3129,7 @@ class LearnModeController extends Notifier<LearnModeState> {
     final srsSystem = ref.read(srsModeControllerProvider).mode;
     
     if (srsSystem == SrsSystem.adaptive) {
-      // ✅ A-SRS: Direkt Server-Queue neu laden (Contract-konform)
+      // ✅ A-SRS: Refill-Counter erhöhen, dann neue Queue laden (sonst sind alle Wörter ineligible)
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) {
         print('⚠️ _advanceIndexAfterReview: Kein User eingeloggt für A-SRS');
@@ -2559,11 +3144,19 @@ class LearnModeController extends Notifier<LearnModeState> {
         return;
       }
       
-      final queue = await _repo.fetchAdaptiveQueue(
+      await _ensureA_SrsRefill();
+      
+      var queue = await _repo.fetchAdaptiveQueue(
         userId: userId,
         categoryId: state.categoryId!,
-        limit: 20, // zum Validieren erstmal hart 20
+        limit: 80, // Deck-Größe: S1-S5 können ~62+ Wörter haben, plus S0
       );
+      
+      // ✅ S0-Lock: Wenn Schloss aktiv (0 Sperre), Stage-0-Karten aus Queue filtern
+      final s0Locked = ref.read(s0LockedProvider(state.categoryId!)).maybeWhen(data: (v) => v, orElse: () => false);
+      // if (s0Locked) {
+      //   queue = queue.where((w) => w.srsStage != 0).toList();
+      // }
       
       if (queue.isEmpty) {
         print('🏁 Keine weiteren Karten verfügbar, Session beendet');
@@ -2650,24 +3243,34 @@ class LearnModeController extends Notifier<LearnModeState> {
         return [];
       }
       
-      final queue = await _repo.fetchAdaptiveQueue(
+      var queue = await _repo.fetchAdaptiveQueue(
         userId: userId,
         categoryId: state.categoryId!,
-        limit: 20, // zum Validieren erstmal hart 20
+        limit: 80, // Deck-Größe: S1-S5 können ~62+ Wörter haben, plus S0
       );
+      
+      // ✅ S0-Lock: Wenn Schloss aktiv (0 Sperre), Stage-0-Karten aus Queue filtern
+      final s0Locked = ref.read(s0LockedProvider(state.categoryId!)).maybeWhen(data: (v) => v, orElse: () => false);
+      // if (s0Locked) {
+      //   queue = queue.where((w) => w.srsStage != 0).toList();
+      // }
       
       // ✅ Wichtig: Reihenfolge genau wie Server (kein Shuffle!)
       final ids = queue.map((w) => w.id).toList();
-      print('✅ A-SRS Deck-Rebuild: Server-Queue geladen, ${ids.length} IDs');
+      print('✅ A-SRS Deck-Rebuild: Server-Queue geladen, ${ids.length} IDs (s0Locked=$s0Locked)');
       return ids;
     } else {
       // T-SRS/Hybrid: Aus state.wordQueue mit Quota bauen
       final queue = state.wordQueue;
       if (queue.isEmpty) return [];
       
-      // Filtere nach allowed stages
+      // Filtere nach allowed stages – S0-Lock berücksichtigen
       final allowed = ref.read(allowedStagesProvider);
-      final allowedForced = {...allowed, 0}; // Stage 0 immer erlauben
+      final catId = state.categoryId;
+      final s0Locked = catId != null
+          ? ref.read(s0LockedProvider(catId)).maybeWhen(data: (v) => v, orElse: () => false)
+          : false;
+      final allowedForced = s0Locked ? allowed.where((s) => s != 0).toSet() : {...allowed, 0};
       final filteredWords = queue.where((w) => allowedForced.contains(w.srsStage)).toList();
       
       if (filteredWords.isEmpty) return [];
@@ -2842,10 +3445,14 @@ class LearnModeController extends Notifier<LearnModeState> {
   }
 
   Future<void> _performReset() async {
-    if (_isResetting) return;
-    _isResetting = true;
+    if (_isResetRunning) {
+      print('⛔ Reset übersprungen: läuft bereits');
+      return;
+    }
+
+    _isResetRunning = true;
     try {
-    final sb = Supabase.instance.client;
+      final sb = Supabase.instance.client;
       final catId = state.categoryId;
       final mode = ref.read(srsModeControllerProvider).mode.name; // time|adaptive|hybrid
 
@@ -2856,6 +3463,20 @@ class LearnModeController extends Notifier<LearnModeState> {
         'p_mode': mode,
         // p_user NICHT mitsenden
       });
+
+      // ✅ A-SRS: Nach Reset sind user_word_srs leer – fn_enroll_user_category_mode neu seeden
+      // (fn_a_srs_intake/fn_a_srs_queue brauchen Stage-0-Rows)
+      if (mode == 'adaptive') {
+        final userId = sb.auth.currentUser?.id;
+        if (userId != null) {
+          await sb.rpc('fn_enroll_user_category_mode', params: {
+            'p_category_id': catId,
+            'p_mode': 'adaptive',
+            'p_user': userId,
+          });
+          print('✅ A-SRS: Nach Reset neu geseeded (fn_enroll_user_category_mode)');
+        }
+      }
 
       // nach erfolgreichem Reset
       _didReset = true;
@@ -2902,7 +3523,7 @@ class LearnModeController extends Notifier<LearnModeState> {
     } catch (e) {
       print('⚠️ Reset failed: $e');
     } finally {
-      _isResetting = false;
+      _isResetRunning = false;
     }
   }
 
@@ -2919,6 +3540,7 @@ class LearnModeController extends Notifier<LearnModeState> {
     List<int>? deckStages,
     int? totalWordsInCategory,
     int? activeStage,
+    int? masteredCount,
 
     List<WordUserView>? wordQueue,
     List<String>? shuffledWordIds,
@@ -2936,6 +3558,9 @@ class LearnModeController extends Notifier<LearnModeState> {
     List<String>? recentlySwiped,
     int? cardsSwipedInSession,
     bool? hasLoadedReviews,
+    bool? isSubmitting,
+    String? emptyQueueHint,
+    bool clearEmptyQueueHint = false,
   }) {
     final oldStages = state.stages;
     state = state.copyWith(
@@ -2950,6 +3575,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       deckStages: deckStages,
       totalWordsInCategory: totalWordsInCategory,
       activeStage: activeStage,
+      masteredCount: masteredCount,
 
       wordQueue: wordQueue,
       shuffledWordIds: shuffledWordIds,
@@ -2965,6 +3591,9 @@ class LearnModeController extends Notifier<LearnModeState> {
       recentlySwiped: recentlySwiped,
       cardsSwipedInSession: cardsSwipedInSession,
       hasLoadedReviews: hasLoadedReviews,
+      isSubmitting: isSubmitting,
+      emptyQueueHint: emptyQueueHint,
+      clearEmptyQueueHint: clearEmptyQueueHint,
     );
     
     // Debug: Logge wenn Stages geändert wurden
@@ -3000,20 +3629,35 @@ class LearnModeController extends Notifier<LearnModeState> {
     required List<int> stageQueuesBefore,
     required List<int> stageQueuesAfter,
     required int totalWordsInCategory,
+    required int masteredBefore,
+    required int masteredAfter,
   }) {
     // 1) DB == RPC (Server truth)
     assert(dbStage == rpcStage, 'CONTRACT FAIL: dbStage($dbStage) != rpcStage($rpcStage) for $wordId');
     assert(_eqDate(dbNextDueAt, rpcNextDueAt),
         'CONTRACT FAIL: dbNextDueAt($dbNextDueAt) != rpcNextDueAt($rpcNextDueAt) for $wordId');
 
-    // 2) Stages sum must stay stable
-    assert(stagesAfter.fold<int>(0, (a, b) => a + b) == totalWordsInCategory,
-        'CONTRACT FAIL: sum(stagesAfter) != totalWordsInCategory');
+    // 2) Stages sum must stay stable (mastered = kleine Zahl unter A5)
+    final masteredCount = state.masteredCount;
+    print('ASSERT CHECK -> totalWordsInCategory=$totalWordsInCategory stagesAfter=$stagesAfter sum=${stagesAfter.fold<int>(0, (a, b) => a + b)} masteredCount=$masteredCount');
+    assert(
+      stagesAfter.fold<int>(0, (a, b) => a + b) + masteredCount == totalWordsInCategory,
+      'CONTRACT FAIL: sum(stagesAfter)+masteredCount != totalWordsInCategory',
+    );
 
     // 3) If oldStage == newStage, local progress MUST NOT change
+    // Sonderfall: Stage 5 + Mastered-Übergang erlaubt (stages[5] -1, mastered +1)
+    // Sonderfall A-SRS: Server ist Source of Truth – Stages können sich beim Sync ändern (z.B. nach init-Korrektur)
     if (oldStage == rpcStage) {
-      assert(_listEq(stagesBefore, stagesAfter),
-          'CONTRACT FAIL: stages changed even though stage stayed same (old=$oldStage new=$rpcStage)');
+      final srsSystem = ref.read(srsModeControllerProvider).mode;
+      final stageCountsMayChangeBecauseOfMastered =
+          oldStage == 5 && (masteredAfter != masteredBefore);
+      final aSrsServerSync = srsSystem == SrsSystem.adaptive;
+
+      assert(
+        _listEq(stagesBefore, stagesAfter) || stageCountsMayChangeBecauseOfMastered || aSrsServerSync,
+        'CONTRACT FAIL: stages changed even though stage stayed same (old=$oldStage new=$rpcStage)',
+      );
       assert(_listEq(stageQueuesBefore, stageQueuesAfter),
           'CONTRACT FAIL: stageQueues changed even though stage stayed same (old=$oldStage new=$rpcStage)');
     } else {

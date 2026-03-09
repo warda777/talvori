@@ -7,6 +7,8 @@ import 'package:talvori/features/words/ui/ui_constants.dart';
 import 'package:talvori/features/words/ui/widgets/frozen_stage_switch_overlay.dart';
 import 'vertical_stage_switch.dart';
 
+const _kHybridTimerGreen = Color(0xFF2EE56C);
+
 // Knopf-Anker: Finger sitzt leicht UNTER dem Knopf, damit der Knopf sichtbar VOR dem Finger ist.
 Offset knobDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset globalPosition) {
   // Knopfgröße: 38x52 -> Anker unten bei ~75% Höhe
@@ -118,6 +120,72 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse; // 0..1
 
+  bool _isHybridStageFrozen(LearnModeState s, int stage) {
+    if (stage < 0) return false;
+    if (stage >= s.hybridStageFrozen.length) return false;
+    return s.hybridStageFrozen[stage] == true;
+  }
+
+  String _fmtMmSs(int sec) {
+    final s = sec.clamp(0, 99 * 60 + 59);
+    final m = (s ~/ 60).toString().padLeft(2, '0');
+    final r = (s % 60).toString().padLeft(2, '0');
+    return '$m:$r';
+  }
+
+  String _fmtHhMm(Duration d) {
+    final totalMin = d.inMinutes;
+    final h = (totalMin ~/ 60).toString().padLeft(2, '0');
+    final m = (totalMin % 60).toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  String _hybridStageTimerLabel(LearnModeState s, int stage) {
+    if (stage <= 0) return '';
+    if (stage >= s.hybridStageRemainingSec.length) return '';
+    final rem = s.hybridStageRemainingSec[stage];
+    if (rem < 0) return ''; // H3–H5: kein Timer, nichts anzeigen
+    if (rem == 0) {
+      // bis morgen (lokal)
+      final now = DateTime.now();
+      final tomorrow = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+      final left = tomorrow.difference(now);
+      return 'Morgen ${_fmtHhMm(left)}';
+    }
+    return _fmtMmSs(rem);
+  }
+
+  String _stageSubNote(SrsSystem mode, LearnModeState s, int stage) {
+    // ✅ Timer-Anzeige nur im Hybrid (A‑SRS wird nie "getimed", T‑SRS aktuell ohne Timer-UI)
+    if (stage <= 0) return '';
+    if (mode == SrsSystem.hybrid) return _hybridStageTimerLabel(s, stage);
+    return '';
+  }
+
+  Color? _stageSubNoteColor(SrsSystem mode, LearnModeState s, int stage) {
+    if (mode != SrsSystem.hybrid) return null;
+    if (!s.hybridSessionStarted) return null;
+    // Farbe soll sich an der *aktuellen Karte* orientieren (nicht an activeStage),
+    // damit der Nutzer sieht, dass der Countdown für H1/H2 wirklich läuft.
+    int currentStage = s.activeStage;
+    if (s.shuffledWordIds.isNotEmpty &&
+        s.index >= 0 &&
+        s.index < s.shuffledWordIds.length &&
+        s.wordQueue.isNotEmpty) {
+      final currentId = s.shuffledWordIds[s.index];
+      for (final w in s.wordQueue) {
+        if (w.id == currentId) {
+          currentStage = w.srsStage;
+          break;
+        }
+      }
+    }
+    if (stage != currentStage) return null;
+    if (stage < 1 || stage > 2) return null; // aktuell nur H1/H2 haben Tagesbudgets
+    if (_isHybridStageFrozen(s, stage)) return null;
+    return _kHybridTimerGreen;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -211,6 +279,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         final srsMode = ref.watch(srsModeControllerProvider);
         final isTimeOrHybrid = srsMode.mode == SrsSystem.time || srsMode.mode == SrsSystem.hybrid;
         final timerActive = learnState.timerActive && !learnState.timerPaused;
+        final isHybrid = srsMode.mode == SrsSystem.hybrid;
         
         // 6er-Default wenn keine Maske übergeben
         final mask = widget.visibleMask ??
@@ -232,7 +301,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
       // Switch-Body für Index i
       Widget switchBody;
       
-      if (i == 0) {
+        if (i == 0) {
         // S0 (New) Switch: nur Drop-Ziel
         final bool locked = widget.s0Locked ?? false;
         switchBody = DragTarget<StageDrag>(
@@ -241,17 +310,19 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           builder: (_, __, ___) => VerticalStageSwitch(
             containerKey: widget.switchKeys?[0],
             count: s[0],
-            outerColor: s[0] > 0 ? (widget.colors?.newOuter ?? const Color(0xFFA05260))
-                         : (widget.colors?.disabledOuter ?? Colors.grey),
+            outerColor: locked
+                ? (widget.colors?.disabledOuter ?? Colors.grey)
+                : (s[0] > 0 ? (widget.colors?.newOuter ?? const Color(0xFFA05260))
+                    : (widget.colors?.disabledOuter ?? Colors.grey)),
             innerColor: widget.colors?.inner ?? const Color(0xFF2D2C2C),
             innerStrokeColor: widget.colors?.innerStroke,
-            highlight: s[0] > 0,
+            highlight: locked ? false : (s[0] > 0),
             completed: false,
             label: widget.labels?.newLabel ?? 'New',
-            note: widget.labels?.newNote ?? '0',
+            note: locked ? '' : 'Fach 0',
             isFirst: true,
             glow: _blinking.contains(0),
-            isLocked: locked,           // ← Switch ausgrauen wenn gelockt
+            isLocked: locked,           // ← Bei Lock: großes X statt Count; bei Unlock: Fach 0
           ),
         );
       } else {
@@ -278,6 +349,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           completed: s[stage] >= goal,
           label: '$prefix$stage',
           note: '$prefix$stage',
+          subNote: _stageSubNote(srsMode.mode, learnState, stage),
+          subNoteColor: _stageSubNoteColor(srsMode.mode, learnState, stage),
           glow: hardGlow || softGlow || isSelected,
           pulseAnimation: softGlow ? _pulse : null,
           selectedHighlight: isSelected,
@@ -290,7 +363,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             feedback: _KnobFeedback(count: s[stage], innerColor: widget.colors?.inner ?? Colors.grey, stroke: widget.colors?.innerStroke),
             dragAnchorStrategy: knobDragAnchorStrategy,
             feedbackOffset: Offset.zero,
-            maxSimultaneousDrags: s[stage] > 0 ? 1 : 0,
+            maxSimultaneousDrags: (s[stage] > 0 && !(isHybrid && _isHybridStageFrozen(learnState, stage))) ? 1 : 0,
           ),
         );
 
@@ -319,48 +392,22 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           onLongPress: () {
             // TODO: später Karten verschieben
           },
-          child: Opacity(
-            opacity: disabled ? 0.35 : 1.0,
-            child: switchBody,
-          ),
+          child: switchBody,
         );
       } else if (widget.onTapStage != null) {
-        // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
-        // ABER: Wenn S0 gesperrt ist ODER Stage leer ist, dann nicht tappbar
+        // Normal-Mode: Tap öffnet Dialog mit Infos (alle Stages, auch leere)
         final bool isS0Locked = (i == 0) && (widget.s0Locked == true);
-        if (!isS0Locked && !disabled) {
+        if (!isS0Locked) {
           switchBody = GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () {
-              // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
-              if (count == 0) return;
-              widget.onTapStage?.call(i);
-            },
-            child: switchBody,
-          );
-        } else if (disabled) {
-          // Leere Stage: Opacity reduzieren
-          switchBody = Opacity(
-            opacity: 0.35,
+            onTap: () => widget.onTapStage!.call(i),
             child: switchBody,
           );
         }
       }
 
-        // Bestimme, ob diese Switch eingefroren sein soll
-        final bool shouldFreeze;
-        if (isTimeOrHybrid) {
-          if (timerActive) {
-            // Timer aktiv: Alle Switches einfrieren
-            shouldFreeze = true;
-          } else {
-            // Timer nicht aktiv: Nur leere Stages einfrieren
-            shouldFreeze = count == 0;
-          }
-        } else {
-          // Nicht T-SRS/Hybrid: Nicht einfrieren
-          shouldFreeze = false;
-        }
+        // Visuelles Einfrieren deaktiviert
+        const bool shouldFreeze = false;
 
         // Wrap Switch mit FrozenOverlay, wenn gefroren
         Widget finalSwitch = switchBody;
@@ -398,6 +445,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
         final srsMode = ref.watch(srsModeControllerProvider);
         final isTimeOrHybrid = srsMode.mode == SrsSystem.time || srsMode.mode == SrsSystem.hybrid;
         final timerActive = learnState.timerActive && !learnState.timerPaused;
+        final isHybrid = srsMode.mode == SrsSystem.hybrid;
         
         // 6er-Default wenn keine Maske übergeben
         final mask = widget.visibleMask ??
@@ -439,15 +487,17 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           builder: (_, __, ___) => VerticalStageSwitch(
             containerKey: widget.switchKeys?[0],
             count: stages[0],
-            outerColor: stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive,
+            outerColor: locked
+                ? WordsUIConstants.stageInactive
+                : (stages[0] > 0 ? WordsUIConstants.stageInnerRed : WordsUIConstants.stageInactive),
             innerColor: WordsUIConstants.stageInnerDark,
-            highlight: stages[0] > 0,
+            highlight: locked ? false : (stages[0] > 0),
             completed: false,
             label: 'New',
-            note: '0',
+            note: locked ? '' : 'Fach 0',
             isFirst: true,
             glow: _blinking.contains(0),
-            isLocked: locked,           // ← Switch ausgrauen wenn gelockt
+            isLocked: locked,           // ← Bei Lock: großes X statt Count; bei Unlock: Fach 0
           ),
         );
       } else {
@@ -464,6 +514,8 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           completed: stages[stage] >= WordsUIConstants.stageGoal,
           label: '$prefix$stage',
           note: '$prefix$stage',
+          subNote: _stageSubNote(srsMode.mode, learnState, stage),
+          subNoteColor: _stageSubNoteColor(srsMode.mode, learnState, stage),
           glow: _blinking.contains(stage),
           showLearnedCount: widget.showLearnedCounterInStage5 && stage == 5,
           learnedCount: (widget.showLearnedCounterInStage5 && stage == 5)
@@ -476,7 +528,7 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
             feedback: const _KnobFeedback(count: 0, innerColor: WordsUIConstants.stageInner, stroke: null),
             dragAnchorStrategy: knobDragAnchorStrategy,
             feedbackOffset: Offset.zero,
-            maxSimultaneousDrags: stages[stage] > 0 ? 1 : 0,
+            maxSimultaneousDrags: (stages[stage] > 0 && !(isHybrid && _isHybridStageFrozen(learnState, stage))) ? 1 : 0,
           ),
         );
 
@@ -505,48 +557,22 @@ class _StageSwitchRowState extends State<StageSwitchRow> with SingleTickerProvid
           onLongPress: () {
             // TODO: später Karten verschieben
           },
-          child: Opacity(
-            opacity: disabled ? 0.35 : 1.0,
-            child: switchBody,
-          ),
+          child: switchBody,
         );
       } else if (widget.onTapStage != null) {
-        // Normal-Mode: Tap öffnet Dialog mit Wörtern (alle Stages inkl. S0)
-        // ABER: Wenn S0 gesperrt ist ODER Stage leer ist, dann nicht tappbar
+        // Normal-Mode: Tap öffnet Dialog mit Infos (alle Stages, auch leere)
         final bool isS0Locked = (i == 0) && (widget.s0Locked == true);
-        if (!isS0Locked && !disabled) {
+        if (!isS0Locked) {
           switchBody = GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () {
-              // ✅ FIX: leere Stage nicht auswählbar (zusätzliche Sicherheit)
-              if (count == 0) return;
-              widget.onTapStage?.call(i);
-            },
-            child: switchBody,
-          );
-        } else if (disabled) {
-          // Leere Stage: Opacity reduzieren
-          switchBody = Opacity(
-            opacity: 0.35,
+            onTap: () => widget.onTapStage!.call(i),
             child: switchBody,
           );
         }
       }
 
-        // Bestimme, ob diese Switch eingefroren sein soll
-        final bool shouldFreeze;
-        if (isTimeOrHybrid) {
-          if (timerActive) {
-            // Timer aktiv: Alle Switches einfrieren
-            shouldFreeze = true;
-          } else {
-            // Timer nicht aktiv: Nur leere Stages einfrieren
-            shouldFreeze = count == 0;
-          }
-        } else {
-          // Nicht T-SRS/Hybrid: Nicht einfrieren
-          shouldFreeze = false;
-        }
+        // Visuelles Einfrieren deaktiviert
+        const bool shouldFreeze = false;
 
         // Wrap Switch mit FrozenOverlay, wenn gefroren
         Widget finalSwitch = switchBody;

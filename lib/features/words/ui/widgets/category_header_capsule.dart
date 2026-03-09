@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 import 'package:talvori/features/words/ui/widgets/glow_circle_button.dart';
 import 'package:talvori/features/words/ui/widgets/glow_rect_tile.dart';
+import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 
 class CategoryHeaderCapsule extends StatelessWidget {
@@ -37,6 +37,10 @@ class CategoryHeaderCapsule extends StatelessWidget {
   // Optional: zusätzliches Widget rechts unter den Add/Settings-Buttons (z. B. Toggle)
   final Widget? trailingRightBelow;
 
+  /// Keys für Tooltip-Positionierung (optional)
+  final GlobalKey? vocabsKey;
+  final GlobalKey? wheelKey;
+
   const CategoryHeaderCapsule({
     super.key,
     required this.height,
@@ -61,6 +65,8 @@ class CategoryHeaderCapsule extends StatelessWidget {
     this.accentColor = const Color(0xFFB1CCFE),
     this.backgroundColor,
     this.trailingRightBelow,
+    this.vocabsKey,
+    this.wheelKey,
   });
 
   @override
@@ -93,10 +99,13 @@ class CategoryHeaderCapsule extends StatelessWidget {
                   ),
                   Expanded(
                     child: Center(
-                      child: CategoryWheel(
-                        categories: categories,
-                        initialIndex: selectedIndex,
-                        onChanged: onWheelChanged,
+                      child: KeyedSubtree(
+                        key: wheelKey,
+                        child: CategoryWheel(
+                          categories: categories,
+                          initialIndex: selectedIndex,
+                          onChanged: onWheelChanged,
+                        ),
                       ),
                     ),
                   ),
@@ -117,9 +126,9 @@ class CategoryHeaderCapsule extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 16),
                       child: Material(
+                        key: vocabsKey,
                         color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(15),
+                        child: VocabsTileTapAnimation(
                           onTap: onVocabs,
                           child: GlowRectTile(
                             width: 84,

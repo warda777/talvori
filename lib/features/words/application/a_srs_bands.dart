@@ -150,14 +150,15 @@ class ASrsBandsStatic {
     }
 
     // 6A.1 Große Kategorien (>40 aktive Wörter)
+    // Ab 10 Karten pro Stage: Wiederholungen schon früh mixen (A1–A5)
     if (total > 40) {
       return const EffectiveBands(
         pipelineMode: false,
-        s1: Band(min: 10, max: 20),
-        s2: Band(min: 8, max: 16),
-        s3: Band(min: 6, max: 12),
-        s4: Band(min: 4, max: 8),
-        s5: Band(min: 2, max: 6),
+        s1: Band(min: 10, max: 30),
+        s2: Band(min: 10, max: 16),
+        s3: Band(min: 10, max: 12),
+        s4: Band(min: 10, max: 12),
+        s5: Band(min: 10, max: 10),
       );
     }
 
@@ -207,11 +208,13 @@ class ASrsBandsStatic {
       max5 = max5 < 0 ? 0 : max5;
     }
 
-    final min1 = (0.5 * max1).floor();
-    final min2 = (0.5 * max2).floor();
-    final min3 = (0.5 * max3).floor();
-    final min4 = (0.5 * max4).floor();
-    final min5 = (0.5 * max5).floor();
+    // Ab 10 Karten pro Stage: frühe Wiederholung (min mindestens 10, aber ≤ max)
+    const minTarget = 10;
+    final min1 = min(minTarget, max1).clamp(1, max1);
+    final min2 = min(minTarget, max2).clamp(1, max2);
+    final min3 = min(minTarget, max3).clamp(1, max3);
+    final min4 = min(minTarget, max4).clamp(1, max4);
+    final min5 = min(minTarget, max5).clamp(1, max5);
 
     return EffectiveBands(
       pipelineMode: false,

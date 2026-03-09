@@ -8,8 +8,17 @@ import 'package:flutter/services.dart';
 /// - Nach Ablauf wird [onResetComplete] aufgerufen.
 class ResetButton extends StatefulWidget {
   final Future<void> Function() onResetComplete;
+  final VoidCallback? onBeforeLongPressStart;
+  final VoidCallback? onTap;
+  final Key? tooltipKey;
 
-  const ResetButton({super.key, required this.onResetComplete});
+  const ResetButton({
+    super.key,
+    required this.onResetComplete,
+    this.onBeforeLongPressStart,
+    this.onTap,
+    this.tooltipKey,
+  });
 
   @override
   State<ResetButton> createState() => _ResetButtonState();
@@ -21,6 +30,7 @@ class _ResetButtonState extends State<ResetButton> {
   OverlayEntry? _overlayEntry;
 
   void _onLongPressStart(LongPressStartDetails details) {
+    widget.onBeforeLongPressStart?.call();
     setState(() {
       _isPressed = true;
       _countdown = 3;
@@ -47,28 +57,46 @@ class _ResetButtonState extends State<ResetButton> {
     final overlay = Overlay.of(context);
     _overlayEntry = OverlayEntry(
       builder: (_) => Material(
-        color: Colors.black.withOpacity(0.85),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        // Deutlich dunkler, damit darunter fast nichts mehr sichtbar ist.
+        color: Colors.black.withOpacity(0.97),
+        child: SafeArea(
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              const Text('Reset',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 2,
-                  )),
-              const SizedBox(height: 8),
-              const Text('Lernfortschritt?',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  )),
-              const SizedBox(height: 40),
-              StatefulBuilder(
-                builder: (context, setOverlayState) => Text(
+              // Header bleibt oben
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 48),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text(
+                        'Reset',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Lernfortschritt?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Countdown-Zahl exakt in die Mitte
+              Center(
+                child: Text(
                   '$_countdown',
                   style: const TextStyle(
                     color: Color(0xFFA05260),
@@ -77,9 +105,18 @@ class _ResetButtonState extends State<ResetButton> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
-              const Text('Finger gedrückt halten...',
-                  style: TextStyle(color: Colors.white54, fontSize: 14)),
+
+              // Hint bleibt unten
+              const Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 48),
+                  child: Text(
+                    'Finger gedrückt halten...',
+                    style: TextStyle(color: Colors.white54, fontSize: 14),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -136,22 +173,26 @@ class _ResetButtonState extends State<ResetButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPressStart: _onLongPressStart,
-      onLongPressEnd: _onLongPressEnd,
-      onLongPressCancel: _onLongPressCancel,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: _isPressed ? const Color(0xFFA05260) : const Color(0xFF2D2D2F),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.black, width: 1),
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.refresh_rounded,
-          color: _isPressed ? Colors.white : Colors.white70,
+    return Container(
+      key: widget.tooltipKey,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onLongPressStart: _onLongPressStart,
+        onLongPressEnd: _onLongPressEnd,
+        onLongPressCancel: _onLongPressCancel,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _isPressed ? const Color(0xFFA05260) : const Color(0xFF2D2D2F),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.refresh_rounded,
+            color: _isPressed ? Colors.white : Colors.white70,
+          ),
         ),
       ),
     );

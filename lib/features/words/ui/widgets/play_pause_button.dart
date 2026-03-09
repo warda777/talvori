@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 class PlayPauseButton extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onTap;
+  final Key? tooltipKey;
 
-  const PlayPauseButton({super.key, required this.isPlaying, required this.onTap});
+  const PlayPauseButton({
+    super.key,
+    required this.isPlaying,
+    required this.onTap,
+    this.tooltipKey,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Container(
+      key: tooltipKey,
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -36,6 +44,7 @@ class PlayPauseButton extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -4,11 +4,24 @@ import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 final levelSelectionProvider =
     StateProvider<LevelSelectionMode>((ref) => LevelSelectionMode.s0toS5);
 
+/// Wenn true: H1–H5/A1–A5/T1–T5 Fortschritt wird NICHT gespeichert.
+/// Beim Zurückkehren zum Category Detail erscheinen die alten Werte.
+/// Default false: Fortschritt wird an Supabase gesendet (submitReview).
+final noSaveProgressProvider = StateProvider<bool>((ref) => false);
+
 // Single-Zielstufe 1..5
 final singleStageProvider = StateProvider<int>((ref) => 1);
 
 // NEU: Auswahl läuft (bis Nutzer eine Stufe tippt)
 final selectingSingleProvider = StateProvider<bool>((ref) => false);
+
+/// User hat Modus oder Einstellung bewusst geändert (nicht nur Screen-Load).
+/// Wird in initState des CategoryDetailScreen auf false gesetzt.
+final userHasInteractedWithModeProvider = StateProvider<bool>((ref) => false);
+
+/// User kommt gerade von einer Learn-Session zurück.
+/// Nur dann wird Daily Progress angezeigt; bei jeder Interaktion wird es ausgeblendet.
+final returnedFromLearnSessionProvider = StateProvider<bool>((ref) => false);
 
 // Session-Buckets für Single-Modus (nur Learn-Modus)
 class SingleSessionBuckets {

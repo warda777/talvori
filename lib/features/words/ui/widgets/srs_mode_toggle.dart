@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 class SrsModeToggle extends ConsumerWidget {
-  const SrsModeToggle({super.key});
+  const SrsModeToggle({super.key, this.onUserTap});
+
+  final VoidCallback? onUserTap;
 
   static const _size = Size(80, 44);
   static const _gold = Color(0xFFE5B966);
@@ -18,18 +20,20 @@ class SrsModeToggle extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(srsModeControllerProvider);
     final ctrl = ref.read(srsModeControllerProvider.notifier);
-    final mode = state.mode; // direkt aus Controller-State
+    final mode = state.mode;
     final isHybrid = mode == SrsSystem.hybrid;
     final isAdaptive = mode == SrsSystem.adaptive;
-    final counting = state.counting;
-    final count = state.count;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: ctrl.tap,
-      // Long-Press vom übergeordneten Wrapper (SrsModeHybridWrapper) behandeln lassen
-      onLongPressStart: (_) => ctrl.longPressStart(),   // ← NEU
-      onLongPressEnd:   (_) => ctrl.longPressEnd(),     // ← NEU
+      onTap: () {
+        ctrl.tap();
+        onUserTap?.call();
+      },
+      onLongPress: () {
+        ctrl.longPress();
+        onUserTap?.call();
+      },
       child: SizedBox(
         width: _size.width,
         height: _size.height,
@@ -40,7 +44,10 @@ class SrsModeToggle extends ConsumerWidget {
             if (isHybrid)
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: ctrl.tap, // Hybrid -> zurück zu lastNonHybrid
+                onTap: () {
+                  ctrl.tap();
+                  onUserTap?.call();
+                },
                 child: _buildHybridButton(),
               ),
           ],
@@ -80,7 +87,7 @@ class SrsModeToggle extends ConsumerWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Transform.translate(
-            offset: const Offset(-46, 0), // nach außen schieben
+            offset: const Offset(-46, 0),
             child: Container(
               decoration: !isAdaptive
                   ? BoxDecoration(
@@ -97,7 +104,7 @@ class SrsModeToggle extends ConsumerWidget {
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   shadows: !isAdaptive
-                      ? [Shadow(color: _activeTxt.withOpacity(0.25), blurRadius: 14, offset: Offset(0, 10))]
+                      ? [Shadow(color: _activeTxt.withOpacity(0.25), blurRadius: 14, offset: const Offset(0, 10))]
                       : null,
                 ),
               ),
@@ -126,7 +133,7 @@ class SrsModeToggle extends ConsumerWidget {
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   shadows: isAdaptive
-                      ? [Shadow(color: _activeTxt.withOpacity(0.25), blurRadius: 14, offset: Offset(0, 10))]
+                      ? [Shadow(color: _activeTxt.withOpacity(0.25), blurRadius: 14, offset: const Offset(0, 10))]
                       : null,
                 ),
               ),
@@ -136,43 +143,6 @@ class SrsModeToggle extends ConsumerWidget {
       ],
     );
   }
-
-    Widget _buildCountdown(int count) {
-    // Overlay NICHT klickbar und oberhalb der Switch
-    return IgnorePointer(
-      ignoring: true,
-      child: Transform.translate(
-        offset: const Offset(0, -96), // höher über der Switch (Feinjustage: -88…-112)
-        child: Container(
-          width: 240,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.85),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white24, width: 1),
-            boxShadow: const [BoxShadow(blurRadius: 24, color: Colors.black54)],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'System wird auf Hybrid umgestellt',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70, height: 1.1),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '$count',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
 
   Widget _buildHybridButton() {
     return Container(

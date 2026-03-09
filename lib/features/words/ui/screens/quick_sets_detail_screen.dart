@@ -203,8 +203,10 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
                     padding: const EdgeInsets.only(bottom: WordsLayout.pageBottomPadding),
                     child: Column(
                       children: [
-                        // ⬇️ NEU: Stats aus Provider verwenden
-                        stats.when(
+                        // Single-Modus: Hinweis statt Daily Progress, bis Nutzer Stufe wählt
+                        (mode == LevelSelectionMode.single && selecting)
+                            ? const _SingleModeHint()
+                            : stats.when(
                           data: (s) {
                             final overallPercent = s.total == 0 ? 0.0 : s.learned / s.total;
                             final overallLabel = '${s.learned}/${s.total}';
@@ -281,42 +283,29 @@ class _QuickSetsDetailScreenState extends ConsumerState<QuickSetsDetailScreen> {
                 ),
               ],
             ),
-
-            // SRS Countdown Overlay (wie in category_detail_screen)
-            if (srs.counting)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.75),
-                    alignment: const Alignment(0, -1.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'System wird auf Hybrid umgestellt',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          '${srs.count}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 96,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hinweis im Single-Modus: Nutzer soll S1–S5 wählen
+class _SingleModeHint extends StatelessWidget {
+  const _SingleModeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Text(
+          'Wähle eine Stufe:\nTippe auf S1–S5',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white.withOpacity(0.9),
+            height: 1.4,
+          ),
         ),
       ),
     );

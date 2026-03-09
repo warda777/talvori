@@ -4,9 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Controller/Provider
 import '../../application/settings_controller.dart';
 import '../../providers.dart';
+import 'package:talvori/features/onboarding/application/onboarding_settings_provider.dart';
+import 'package:talvori/features/onboarding/ui/screens/onboarding_flow_screen.dart';
+import 'package:talvori/features/words/application/tooltip_settings_provider.dart'
+    show showTooltipsAlwaysProvider, resetAllTooltipFlags;
 
 // Settings Widgets
 import '../widgets/widgets.dart';
+import '../widgets/settings_switch_tile.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -28,6 +33,57 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
           children: [
+
+            // TOOLTIPS
+            SettingsSection(
+              title: 'Hinweise',
+              children: [
+                SettingsSwitchTile(
+                  title: 'Tooltips bei Nutzung anzeigen',
+                  subtitle: 'Zeigt kurze Hinweise bei der Bedienung.',
+                  value: ref.watch(showTooltipsAlwaysProvider),
+                  onChanged: (v) =>
+                      ref.read(showTooltipsAlwaysProvider.notifier).setShowTooltipsAlways(v),
+                ),
+                SettingsTile(
+                  title: 'Tooltips zurücksetzen',
+                  onTap: () async {
+                    await resetAllTooltipFlags(ref);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Tooltips wurden zurückgesetzt')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+
+            // ONBOARDING
+            SettingsSection(
+              title: 'Onboarding',
+              children: [
+                SettingsSwitchTile(
+                  title: 'Onboarding bei Start anzeigen',
+                  subtitle: 'Zeigt die Einführung beim Öffnen einer Kategorie im Word Hub.',
+                  value: ref.watch(showOnboardingOnStartProvider),
+                  onChanged: (v) =>
+                      ref.read(showOnboardingOnStartProvider.notifier).setShowOnStart(v),
+                ),
+                SettingsTile(
+                  title: 'Onboarding erneut ansehen',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => OnboardingFlowScreen(
+                          onComplete: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
 
             // PREMIUM
             SettingsSection(

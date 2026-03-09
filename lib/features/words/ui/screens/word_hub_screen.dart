@@ -583,36 +583,31 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             );
           }
 
-          if (catId != null) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => CategoryDetailScreen(
-                  title: sub.label,
-                  categoryId: catId!,
-                  categorySlug: null,
-                  listFilter: WordListFilter(
-                    WordFilterKind.category,
-                    catId,
+          final categoryRoute = catId != null
+              ? MaterialPageRoute(
+                  builder: (_) => CategoryDetailScreen(
+                    title: sub.label,
+                    categoryId: catId!,
+                    categorySlug: null,
+                    listFilter: WordListFilter(
+                      WordFilterKind.category,
+                      catId!,
+                    ),
                   ),
-                ),
-              ),
-            );
-          } else {
-            final (kind, value) = _mapToFilter(
-              section.key,
-              sub.label,
-            );
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => CategoryDetailScreen(
-                  title: sub.label,
-                  categoryId: null,
-                  categorySlug: _slugifyLocal(sub.label),
-                  listFilter: WordListFilter(kind, value),
-                ),
-              ),
-            );
-          }
+                )
+              : MaterialPageRoute(
+                  builder: (_) {
+                    final (kind, value) = _mapToFilter(section.key, sub.label);
+                    return CategoryDetailScreen(
+                      title: sub.label,
+                      categoryId: null,
+                      categorySlug: _slugifyLocal(sub.label),
+                      listFilter: WordListFilter(kind, value),
+                    );
+                  },
+                );
+
+          Navigator.of(context).push(categoryRoute);
         },
       ));
     }

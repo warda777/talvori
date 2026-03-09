@@ -1,7 +1,10 @@
-import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const _keyLastSrsMode = 'lastSrsMode';
+const _keyLastNonHybrid = 'lastNonHybrid';
 
 // Öffentliche API
 enum SrsSystem { time, adaptive, hybrid }
@@ -40,17 +43,50 @@ class SrsModeState {
 }
 
 class SrsModeController extends StateNotifier<SrsModeState> {
-  SrsModeController() : super(SrsModeState.initial);
+  SrsModeController() : super(SrsModeState.initial) {
+    _load();
+  }
 
-  Timer? _timer;
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final modeStr = prefs.getString(_keyLastSrsMode);
+    final lastStr = prefs.getString(_keyLastNonHybrid);
+    final mode = _parseMode(modeStr) ?? SrsSystem.time;
+    final lastNonHybrid = _parseMode(lastStr) ?? mode;
+    state = SrsModeState(
+      mode: mode,
+      lastNonHybrid: lastNonHybrid,
+      counting: false,
+      count: 0,
+    );
+  }
+
+  static SrsSystem? _parseMode(String? s) {
+    switch (s) {
+      case 'time': return SrsSystem.time;
+      case 'adaptive': return SrsSystem.adaptive;
+      case 'hybrid': return SrsSystem.hybrid;
+      default: return null;
+    }
+  }
+
+  Future<void> _save(SrsSystem mode, SrsSystem lastNonHybrid) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLastSrsMode, mode.name);
+    await prefs.setString(_keyLastNonHybrid, lastNonHybrid.name);
+  }
+
+  void _updateState(SrsModeState newState) {
+    state = newState;
+    _save(newState.mode, newState.lastNonHybrid);
+  }
 
   // UI ruft nur diese Methoden:
 
   void tap() {
-    if (state.counting) return;
     if (state.mode == SrsSystem.hybrid) {
       // zurück in letzten Nicht-Hybrid
-      state = state.copyWith(mode: state.lastNonHybrid);
+      _updateState(state.copyWith(mode: state.lastNonHybrid));
       HapticFeedback.selectionClick();
     } else {
       toggleTimeAdaptive();
@@ -58,57 +94,27 @@ class SrsModeController extends StateNotifier<SrsModeState> {
   }
 
   void toggleTimeAdaptive() {
-    if (state.counting) return;
     final next = (state.mode == SrsSystem.time)
         ? SrsSystem.adaptive
         : SrsSystem.time;
-    state = state.copyWith(mode: next, lastNonHybrid: next);
+    _updateState(state.copyWith(mode: next, lastNonHybrid: next));
     HapticFeedback.selectionClick();
   }
 
-  void longPressStart() {
-    if (state.counting || state.mode == SrsSystem.hybrid) return;
-    _cancel();
-    state = state.copyWith(counting: true, count: 2);
-    HapticFeedback.lightImpact();
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      final c = state.count;
-      if (c > 1) {
-        state = state.copyWith(count: c - 1);
-      } else {
-        t.cancel();
-        _timer = null;
-        _toHybrid();
-      }
-    });
-  }
-
-  void longPressEnd() {
-    // Abbruch vor 0
-    if (state.counting) _cancel();
+  /// Long-Press: Direkt in Hybrid wechseln (ohne Countdown).
+  void longPress() {
+    if (state.mode == SrsSystem.hybrid) return;
+    _toHybrid();
   }
 
   void _toHybrid() {
-    state = state.copyWith(
+    _updateState(state.copyWith(
       counting: false,
       count: 0,
       lastNonHybrid: state.mode,
       mode: SrsSystem.hybrid,
-    );
+    ));
     HapticFeedback.mediumImpact();
-  }
-
-  void _cancel() {
-    _timer?.cancel();
-    _timer = null;
-    state = state.copyWith(counting: false, count: 0);
-  }
-
-  @override
-  void dispose() {
-    _cancel();
-    super.dispose();
   }
 }
 

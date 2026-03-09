@@ -31,6 +31,17 @@ class StageWordsDialog extends ConsumerWidget {
     this.learnedTodayFromS0,
   });
 
+  static SrsSystem _popupModeToSrsSystem(SrsPopupMode mode) {
+    switch (mode) {
+      case SrsPopupMode.tSrs:
+        return SrsSystem.time;
+      case SrsPopupMode.aSrs:
+        return SrsSystem.adaptive;
+      case SrsPopupMode.hybrid:
+        return SrsSystem.hybrid;
+    }
+  }
+
   /// Berechnet die Tage für T-SRS Stages
   static int? getTSrsDaysForStage(int stage) {
     switch (stage) {
@@ -186,9 +197,13 @@ class StageWordsDialog extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Wortliste
+                    // Wortliste (modus-spezifisch aus user_word_srs)
                     FutureBuilder<List<WordUserView>>(
-                      future: fetchWordsByStage(categoryId, stage),
+                      future: fetchWordsByStage(
+                        categoryId,
+                        stage,
+                        srsSystem: _popupModeToSrsSystem(popupMode),
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(

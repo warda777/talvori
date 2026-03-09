@@ -41,11 +41,11 @@ SrsConfig computeSrsConfig({
   required int dueCount,
   required SrsStats stats,
 }) {
-  // 1) Initialer Burst skaliert moderat mit Kategoriegröße
+  // 1) Initialer Burst – keine Obergrenze (Sperre entfernt)
   final burst = _clampInt(
-    (0.018 * totalWordsInCategory).round(),
-    8, 14,
-  ); // ~2% der Kategorie, min 8, max 14
+    (0.08 * totalWordsInCategory).round(),
+    20, 9999,
+  ); // ~8% der Kategorie, min 20, max praktisch unbegrenzt
 
   // 2) Kopfgröße (wie viele wir "steuern")
   final head = _clampInt(

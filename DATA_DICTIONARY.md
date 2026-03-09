@@ -1,6 +1,29 @@
 # Talvori – Data Dictionary (public)
 
-Generiert: 2025-12-27 14:10
+Generiert: 2025-02-12
+
+## public.a_deck_state
+
+> A-SRS: Deck-Zustand pro Wort (last_queued_counter für Queue-Eligibility).
+
+| # | Column | Type | Null | PK | Default | Description |
+|---|--------|------|------|----|---------|-------------|
+| 1 | user_id | text | NO | YES |  |  |
+| 2 | category_id | text | NO | YES |  |  |
+| 3 | mode | text | NO | YES |  |  |
+| 4 | word_id | text | NO | YES |  |  |
+| 5 | last_queued_counter | integer | NO |  | -1 |  |
+
+## public.a_refill_state
+
+> A-SRS: Refill-Zähler pro User/Kategorie/Modus für Deck-Runden.
+
+| # | Column | Type | Null | PK | Default | Description |
+|---|--------|------|------|----|---------|-------------|
+| 1 | user_id | text | NO | YES |  |  |
+| 2 | category_id | text | NO | YES |  |  |
+| 3 | mode | text | NO | YES |  |  |
+| 4 | refill_counter | integer | NO |  | 0 |  |
 
 ## public.captures
 
@@ -187,6 +210,26 @@ Generiert: 2025-12-27 14:10
 - **user_words_word_id_fkey**: (word_id) → public.words (id) · on update NO ACTION · on delete CASCADE
 
 
+## public.user_word_srs
+
+> Modus-spezifischer SRS-Zustand pro User/Wort/Kategorie (time, adaptive, hybrid).
+
+| # | Column | Type | Null | PK | Default | Description |
+|---|--------|------|------|----|---------|-------------|
+| 1 | user_id | uuid | NO | YES |  |  |
+| 2 | word_id | uuid | NO | YES |  |  |
+| 3 | category_id | uuid | NO | YES |  |  |
+| 4 | mode | srs_mode | NO | YES |  | time, adaptive, hybrid |
+| 5 | stage | integer | NO |  | 0 | SRS-Stufe 0–5 |
+| 6 | ef | numeric | NO |  | 1.00 | E-Factor |
+| 7 | streak | integer | NO |  | 0 | Serie korrekter Antworten |
+| 8 | lapses | integer | NO |  | 0 |  |
+| 9 | last_reviewed_at | timestamp with time zone | YES |  |  |  |
+| 10 | next_due_at | timestamp with time zone | YES |  |  | Nächster Wiederholzeitpunkt |
+| 11 | created_at | timestamp with time zone | NO |  | now() |  |
+| 12 | updated_at | timestamp with time zone | NO |  | now() |  |
+
+
 ## public.word_categories
 
 > N:M-Link: words ↔ categories.
@@ -227,3 +270,15 @@ Generiert: 2025-12-27 14:10
 | 17 | qa_note | text | YES |  |  |  |
 
 
+## public.word_progress_deck_state
+
+> A-SRS: Deck-State pro Wort (last_queued_counter für Queue-Eligibility).
+
+| # | Column | Type | Null | PK | Default | Description |
+|---|--------|------|------|----|---------|-------------|
+| 1 | user_id | uuid | NO | YES |  |  |
+| 2 | category_id | uuid | NO | YES |  |  |
+| 3 | word_id | uuid | NO | YES |  |  |
+| 4 | mode | srs_mode | NO | YES |  |  |
+| 5 | last_queued_counter | integer | NO |  | -1 |  |
+| 6 | updated_at | timestamp with time zone | NO |  | now() |  |

@@ -4,6 +4,7 @@ import 'package:talvori/features/words/application/level_selection_provider.dart
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/widgets/stage_words_dialog.dart';
+import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
@@ -34,6 +35,12 @@ class LevelsCard extends ConsumerStatefulWidget {
   final bool selectingSingle;                      // ← NEU
   final ValueChanged<int>? onSelectSingleStage;    // ← NEU
   final List<bool>? visibleMask;                   // ← NEU
+  final VoidCallback? onS0LockTapped;              // ← NEU: für userHasInteracted
+  final Future<void> Function()? onBeforeLockTap;   // ← für Tooltip (vor Lock-Aktion)
+  final GlobalKey? lockKey;                        // ← für Tooltip
+  final GlobalKey? autoButtonKey;                  // ← für Tooltip
+  final GlobalKey? trainingButtonKey;             // ← für Tooltip
+  final GlobalKey? singleButtonKey;               // ← für Tooltip
 
   const LevelsCard({
     super.key,
@@ -58,6 +65,12 @@ class LevelsCard extends ConsumerStatefulWidget {
     this.selectingSingle = false,                  // ← NEU
     this.onSelectSingleStage,                      // ← NEU
     this.visibleMask,                              // ← NEU
+    this.onS0LockTapped,                           // ← NEU
+    this.onBeforeLockTap,                          // ← für Tooltip
+    this.lockKey,                                  // ← für Tooltip
+    this.autoButtonKey,                            // ← für Tooltip
+    this.trainingButtonKey,                        // ← für Tooltip
+    this.singleButtonKey,                          // ← für Tooltip
   });
 
   @override
@@ -66,6 +79,18 @@ class LevelsCard extends ConsumerStatefulWidget {
 
 class _LevelsCardState extends ConsumerState<LevelsCard> {
   final _switchCtrl = StageSwitchRowController();
+
+  Future<void> _handleLockTap(WidgetRef r, bool wasLocked) async {
+    if (widget.categoryId == null) return;
+    await widget.onBeforeLockTap?.call();
+    widget.onS0LockTapped?.call();
+    final nextLocked = !wasLocked;
+    await r.read(s0LockServiceProvider).setLocked(
+      categoryId: widget.categoryId!,
+      locked: nextLocked,
+    );
+    if (wasLocked) await _switchCtrl.blinkS0Once();
+  }
 
   // Adapter-Funktionen: Map interne Enums zu Popup-Enums
   SrsPopupMode _mapPopupMode(SrsSystem mode) {
@@ -113,15 +138,15 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
           return Colors.white24;
       }
     }();
-    // Inner-Fill: T = schwarz, A = helleres Grau, Hybrid = 0xFF2D2D2F
+    // Inner-Fill: T = schwarz, A = 542C78 (Violett), Hybrid = 244B8B (Blau)
     final Color innerFill = () {
       switch (srs.mode) {
         case SrsSystem.time:
           return const Color(0xFF1A1A1A);
         case SrsSystem.adaptive:
-          return const Color(0xFF162743);
+          return const Color(0xFF542C78);
         case SrsSystem.hybrid:
-          return const Color(0xFF2D2D2F);
+          return const Color(0xFF244B8B);
       }
     }();
     final String prefix = () {
@@ -148,6 +173,9 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
               child: Center(
                 child: LevelSelectorButtons(
                   mode: widget.mode,
+                  autoButtonKey: widget.autoButtonKey,
+                  trainingButtonKey: widget.trainingButtonKey,
+                  singleButtonKey: widget.singleButtonKey,
                   onModeChanged: (m) async {
                     widget.onModeChanged(m); // nach außen melden
 
@@ -257,17 +285,47 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                           child: SizedBox(
                             width: buttonW,
                             height: buttonH,
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF2D2D2F),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
+                            child: StartButtonPulse(
+                              onPressed: widget.onStartPressed,
+                              child: Container(
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(24),
-                                  side: const BorderSide(color: Colors.black, width: 1),
+                                  border: Border.all(
+                                    color: const Color(0xFFB1CCFE),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFB1CCFE).withOpacity(0.5),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, -2),
+                                    ),
+                                    BoxShadow(
+                                      color: const Color(0xFFB1CCFE).withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                    BoxShadow(
+                                      color: const Color(0xFFB1CCFE).withOpacity(0.3),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2D2D2F),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                      side: BorderSide.none,
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  child: const Text('Start'),
                                 ),
                               ),
-                              onPressed: widget.onStartPressed,
-                              child: const Text('Start'),
                             ),
                           ),
                         ),
@@ -277,26 +335,13 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
                             top: buttonTop + (buttonH - 40) / 2 - 10,
                             child: Transform.translate(
                               offset: const Offset(-20, 0),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () async {
-                                    if (widget.categoryId == null) return;
-
-                                    final wasLocked = s0Locked;
-                                    final nextLocked = !wasLocked;
-
-                                    await ref.read(s0LockServiceProvider).setLocked(
-                                      categoryId: widget.categoryId!,
-                                      locked: nextLocked,
-                                    );
-
-                                    // Wenn gerade ENTSPERRT wurde → einmal S0 blinken lassen
-                                    if (wasLocked) {
-                                      await _switchCtrl.blinkS0Once();
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(25),
+                              child: TapScaleAnimation(
+                                peakScale: 1.12,
+                                duration: const Duration(milliseconds: 200),
+                                onTap: () => _handleLockTap(ref, s0Locked),
+                                child: Material(
+                                  key: widget.lockKey,
+                                  color: Colors.transparent,
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
                                     child: Icon(

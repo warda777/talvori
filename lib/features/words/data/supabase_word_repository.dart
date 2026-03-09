@@ -60,6 +60,7 @@ class WordUserView {
   final DateTime? userAddedAt;
   final bool isRequeue; // ✅ Requeue-Flag
   final int streak; // ✅ Streak für Link/Bounce-Berechnung
+  final int passCount; // ✅ A-SRS: pass_count für Bounce-Logik (S1=2, S2=3, S3=3, S4=4, S5=5)
 
   WordUserView({
     required this.id,
@@ -74,7 +75,17 @@ class WordUserView {
     this.userAddedAt,
     this.isRequeue = false,
     this.streak = 0,
+    this.passCount = 0,
   });
+
+  /// rawStage: Keine Normalisierung (0 bleibt 0). Logik = rawStage, Display später separat.
+  static int _rawStage(Map<String, dynamic> j) {
+    final v = j['srs_stage'] ?? j['out_srs_stage'] ?? j['srs_stage_user'];
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return 0;
+  }
 
   WordUserView.fromJson(Map<String, dynamic> j)
       : id = (j['id'] as String?) ?? (j['word_id'] as String?) ?? '', // ✅ Unterstützt beide: v_words_user (id) und v_words_user_srs (word_id)
@@ -84,7 +95,7 @@ class WordUserView {
         inMyWords = (j['in_my_words'] as bool?) ?? false,
         pickedUser = (j['picked_user'] as bool?) ?? false,
         favoriteUser = (j['favorite_user'] as bool?) ?? false,
-        srsStage = (j['srs_stage_user'] as int?) ?? 0, // ✅ v_words_user_srs hat srs_stage_user, v_words_user auch
+        srsStage = WordUserView._rawStage(j), // rawStage: srs_stage ?? out_srs_stage ?? srs_stage_user ?? 0
         nextDueAt = j['next_due_at_user'] != null
             ? DateTime.parse(j['next_due_at_user'])
             : null,
@@ -94,7 +105,9 @@ class WordUserView {
         // ✅ isRequeue: Default auf false, da is_requeue und show_after nicht mehr im Select sind (Fehler 42703 vermeiden)
         isRequeue = (j['is_requeue'] as bool?) ?? false,
         // ✅ Streak für Link/Bounce-Berechnung
-        streak = (j['streak'] as int?) ?? 0;
+        streak = (j['streak'] as int?) ?? 0,
+        // ✅ A-SRS pass_count (Fallback auf streak wenn nicht vorhanden)
+        passCount = (j['pass_count'] as int?) ?? (j['streak'] as int?) ?? 0;
   
   WordUserView copyWith({
     int? srsStage,
@@ -102,6 +115,7 @@ class WordUserView {
     bool setDueNull = false,
     bool? isRequeue,
     int? streak,
+    int? passCount,
   }) {
     return WordUserView(
       id: id,
@@ -116,6 +130,7 @@ class WordUserView {
       userAddedAt: userAddedAt,
       isRequeue: isRequeue ?? this.isRequeue,
       streak: streak ?? this.streak,
+      passCount: passCount ?? this.passCount,
     );
   }
 }
@@ -253,18 +268,21 @@ Future<ReviewResult> submitReview(
   // ✅ Sequenznummer für stale response protection
   final seq = ++_reviewSeq;
   
-  // fn_user_review_mode unterstützt nur adaptive/hybrid
-  // Für time muss fn_user_review_time_mode verwendet werden
-  if (srsSystem == SrsSystem.time) {
-    // T-SRS: Verwende fn_user_review_time_mode (schreibt auch in user_word_srs mode='time')
-    debugPrint('🧪 submitReview: CALL fn_user_review_time_mode (TIME+MODE)');
+  // ✅ TIME + HYBRID:
+  // Beide verwenden TIME-basierte Review-Logik, aber persistieren in user_word_srs mit unterschiedlichem mode.
+  if (srsSystem == SrsSystem.time || srsSystem == SrsSystem.hybrid) {
+    final isHybrid = srsSystem == SrsSystem.hybrid;
+    final rpcName = isHybrid ? 'fn_user_review_hybrid_mode' : 'fn_user_review_time_mode';
+    final dbMode = isHybrid ? 'hybrid' : 'time';
+
+    debugPrint('🧪 submitReview: CALL $rpcName (${isHybrid ? "HYBRID" : "TIME"})');
 
     final userId = _sb.auth.currentUser?.id;
     if (userId == null) {
-      throw StateError('submitReview(TIME): No current user');
+      throw StateError('submitReview(${isHybrid ? "HYBRID" : "TIME"}): No current user');
     }
 
-    final rows = await _sb.rpc('fn_user_review_time_mode', params: {
+    final rows = await _sb.rpc(rpcName, params: {
       'p_word': wordId,
       'p_category': categoryId,
       'p_result': correct,
@@ -290,7 +308,7 @@ Future<ReviewResult> submitReview(
     final dueStr = row['next_due_at'] as String?;
     final due = dueStr != null ? DateTime.parse(dueStr) : null;
     
-      // ✅ POST-RPC DB CHECK: Was wurde tatsächlich in der DB gespeichert? (T-SRS)
+      // ✅ POST-RPC DB CHECK: Was wurde tatsächlich in der DB gespeichert? (TIME/HYBRID)
     // ✅ WICHTIG: Lese zusätzliche Felder aus DB für vollständige ReviewResult
     int streak = 0;
     double ef = 2.5;
@@ -298,17 +316,17 @@ Future<ReviewResult> submitReview(
     DateTime? lastReviewedAt;
     
     try {
-      // Scoped read: Mit category_id filter (für vollständige Daten)
+      // Scoped read: Immer user_id + word_id + category_id + mode (Vollschlüssel)
       final dbRows = await _sb
           .from('user_word_srs')
-          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at, pass_count, ever_enrolled, is_mastered, added_to_category_at')
           .eq('user_id', userId)
           .eq('word_id', wordId)
           .eq('category_id', categoryId)
-          .eq('mode', 'time') // ✅ Mode-Filter hinzugefügt
+          .eq('mode', dbMode)
           .maybeSingle();
       
-      debugPrint('--- POST-RPC DB CHECK (scoped) [T-SRS] ---');
+      debugPrint('--- POST-RPC DB CHECK (scoped) [${isHybrid ? "HYBRID" : "T-SRS"}] ---');
       debugPrint('dbRows=$dbRows');
       
       if (dbRows != null) {
@@ -346,7 +364,7 @@ Future<ReviewResult> submitReview(
           oldStage: oldStage,
           wordId: wordId,
           categoryId: categoryId,
-          traceId: 'T-SRS',
+          traceId: isHybrid ? 'HYBRID' : 'T-SRS',
         );
       } else {
         debugPrint('⚠️ DB CHECK: Keine Zeile gefunden für user_id=$userId, word_id=$wordId, category_id=$categoryId');
@@ -359,7 +377,7 @@ Future<ReviewResult> submitReview(
           oldStage: oldStage,
           wordId: wordId,
           categoryId: categoryId,
-          traceId: 'T-SRS',
+          traceId: isHybrid ? 'HYBRID' : 'T-SRS',
         );
       }
     } catch (e) {
@@ -374,7 +392,7 @@ Future<ReviewResult> submitReview(
         oldStage: oldStage,
         wordId: wordId,
         categoryId: categoryId,
-        traceId: 'T-SRS',
+        traceId: isHybrid ? 'HYBRID' : 'T-SRS',
       );
     }
 
@@ -428,7 +446,7 @@ Future<ReviewResult> submitReview(
       try {
         final preRpcCheck = await _sb
             .from('user_word_srs')
-            .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+            .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at, pass_count, ever_enrolled, is_mastered, added_to_category_at')
             .eq('user_id', userId)
             .eq('word_id', wordId)
             .eq('category_id', categoryId)
@@ -439,6 +457,7 @@ Future<ReviewResult> submitReview(
         debugPrint('preRpcCheck=$preRpcCheck');
         if (preRpcCheck != null) {
           debugPrint('pre_stage=${preRpcCheck['stage']}');
+          debugPrint('pre_pass_count=${preRpcCheck['pass_count']}');
           debugPrint('pre_streak=${preRpcCheck['streak']}');
           debugPrint('pre_ef=${preRpcCheck['ef']}');
           debugPrint('pre_lapses=${preRpcCheck['lapses']}');
@@ -486,43 +505,18 @@ Future<ReviewResult> submitReview(
       DateTime? lastReviewedAt;
       
     try {
-      // ✅ DB PROBE: Prüfe welche Spalten die Tabelle tatsächlich hat
-      final probe = await _sb
-          .from('user_word_srs')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('word_id', wordId)
-          .eq('mode', modeStr) // ✅ Mode-Filter hinzugefügt
-          .maybeSingle(); // ✅ maybeSingle statt limit(1) für single row
-      
-      debugPrint('--- DB PROBE user_word_srs [$traceId] ---');
-      debugPrint('probe=$probe');
-      if (probe != null) {
-        debugPrint('keys=${(probe as Map).keys.toList()}');
-      }
-      
-      // Wide read: Alle Rows für word+user (ohne category filter)
-      final allRows = await _sb
-          .from('user_word_srs')
-          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
-          .eq('user_id', userId)
-          .eq('word_id', wordId)
-          .eq('mode', modeStr); // ✅ Mode-Filter hinzugefügt
-      
-      debugPrint('--- DB CHECK (all rows for word+user) [$traceId] ---');
-      debugPrint('allRows=$allRows');
-      
-      // Scoped read: Mit category_id filter (für vollständige Daten)
+      // ✅ DB CHECK: Immer user_id + word_id + category_id + mode (Vollschlüssel)
+      // Verhindert "multiple (or no) rows returned" bei .maybeSingle()
       final dbRows = await _sb
           .from('user_word_srs')
-          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at')
+          .select('user_id, word_id, category_id, mode, stage, ef, streak, lapses, last_reviewed_at, next_due_at, created_at, updated_at, pass_count, ever_enrolled, is_mastered, added_to_category_at')
           .eq('user_id', userId)
           .eq('word_id', wordId)
           .eq('category_id', categoryId)
-          .eq('mode', modeStr) // ✅ Mode-Filter hinzugefügt
+          .eq('mode', modeStr)
           .maybeSingle();
       
-      debugPrint('--- POST-RPC DB CHECK (scoped) [$traceId] ---');
+      debugPrint('--- POST-RPC DB CHECK [$traceId] ---');
       debugPrint('dbRows=$dbRows');
       
       if (dbRows != null) {
@@ -767,11 +761,11 @@ Future<CategoryProgress> fetchCategoryProgress(
     debugPrint('📥 fetchAdaptiveQueue: cat=$categoryId limit=$limit user=$userId');
     
     final res = await _sb.rpc(
-      'fn_user_learn_queue_adaptive',
+      'fn_get_adaptive_queue_due',
       params: {
+        'p_user': userId,
         'p_category_id': categoryId,
         'p_take': limit,
-        'p_user': userId,
       },
     );
 
@@ -784,46 +778,202 @@ Future<CategoryProgress> fetchCategoryProgress(
       return [];
     }
     
+    // RPC kann word_id oder out_word_id liefern (je nach Wrapper)
     final ids = rows
-        .map((r) => r['word_id'] as String?)
+        .map((r) => (r['word_id'] ?? r['out_word_id']) as String?)
         .whereType<String>()
         .toList();
 
+    debugPrint('RPC rows count=${rows.length}');
+    if (rows.isNotEmpty) {
+      final fr = rows.first;
+      debugPrint('RPC first row ... srs_stage: ${fr['srs_stage'] ?? fr['out_srs_stage']}');
+    }
+    debugPrint('RPC ids sample=${ids.take(10).toList()}');
+
     if (ids.isEmpty) {
-      debugPrint('⚠️ fetchAdaptiveQueue: Keine IDs gefunden!');
+      debugPrint('⚠️ fetchAdaptiveQueue: Keine IDs gefunden! firstRowKeys=${rows.isNotEmpty ? rows.first.keys.toList() : []}');
       return [];
     }
 
-    // Details nachladen aus v_words_user_srs
-    final modeStr = 'adaptive';
+    debugPrint('📥 fetchAdaptiveQueue: RPC lieferte ${ids.length} IDs');
+
+    // Details nachladen aus v_words_user_srs (srs_mode=adaptive für pass_count!)
     final data = await _sb
         .from('v_words_user_srs')
         .select('word_id,text,translation,level,'
             'in_my_words,favorite_user,picked_user,'
             'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-            'ef,streak,lapses')
+            'ef,streak,pass_count,lapses')
         .eq('category_id', categoryId)
-        .eq('srs_mode', modeStr)
+        .eq('srs_mode', 'adaptive')
         .inFilter('word_id', ids);
     
-    // Reihenfolge wie Queue wiederherstellen
-    final map = {
-      for (final j in (data as List).cast<Map<String, dynamic>>())
+    final viewRows = (data as List).cast<Map<String, dynamic>>();
+    debugPrint('viewRows count=${viewRows.length}');
+    debugPrint('viewRows first=${viewRows.isNotEmpty ? viewRows.first : 'EMPTY'}');
+    final viewMap = {
+      for (final j in viewRows)
         (j['word_id'] as String): j
     };
+    final rpcMap = <String, Map<String, dynamic>>{};
+    for (final r in rows) {
+      final id = (r['word_id'] ?? r['out_word_id']) as String?;
+      if (id != null) rpcMap[id] = r;
+    }
 
-    final ordered = <WordUserView>[];
+    var ordered = <WordUserView>[];
     for (final id in ids) {
-      final j = map[id];
-      if (j != null) {
-        ordered.add(WordUserView.fromJson(j));
+      final viewRow = viewMap[id];
+      final rpcRow = rpcMap[id];
+      if (viewRow != null) {
+        // RPC srs_stage hat Vorrang (Queue-Source of Truth), sonst view srs_stage_user
+        final merged = Map<String, dynamic>.from(viewRow);
+        if (rpcRow != null) {
+          final rs = rpcRow['srs_stage'] ?? rpcRow['out_srs_stage'];
+          if (rs != null) merged['srs_stage'] = rs;
+        }
+        ordered.add(WordUserView.fromJson(merged));
       } else {
         debugPrint('⚠️ fetchAdaptiveQueue: Wort-ID $id nicht in v_words_user_srs gefunden!');
       }
     }
 
+    // Fallback: Wenn View leer liefert, direkt aus words + user_word_srs laden
+    if (ordered.isEmpty && ids.isNotEmpty) {
+      debugPrint('📥 fetchAdaptiveQueue: View-Fallback → words + user_word_srs');
+      ordered = await _fetchWordDetailsDirect(ids: ids, categoryId: categoryId, userId: userId);
+    }
+
     debugPrint('📥 fetchAdaptiveQueue: ordered.length=${ordered.length}');
     return ordered;
+  }
+
+  /// Bootstrap: Wenn RPC leer liefert, Wörter direkt aus Kategorie laden (nach fn_enroll)
+  Future<List<WordUserView>> fetchAdaptiveQueueBootstrap({
+    required String userId,
+    required String categoryId,
+    int limit = 80,
+  }) async {
+    debugPrint('📥 fetchAdaptiveQueueBootstrap: cat=$categoryId limit=$limit');
+    try {
+      final wcData = await _sb
+          .from('word_categories')
+          .select('word_id')
+          .eq('category_id', categoryId)
+          .limit(limit);
+      final wordIds = (wcData as List)
+          .cast<Map<String, dynamic>>()
+          .map((r) => r['word_id'] as String)
+          .toList();
+      debugPrint('📥 fetchAdaptiveQueueBootstrap: word_categories lieferte ${wordIds.length} word_ids');
+      if (wordIds.isEmpty) {
+        debugPrint('⚠️ fetchAdaptiveQueueBootstrap: word_categories LEER für category_id=$categoryId');
+        return [];
+      }
+      final uwsData = await _sb
+          .from('user_word_srs')
+          .select('word_id, stage, next_due_at')
+          .eq('user_id', userId)
+          .eq('category_id', categoryId)
+          .eq('mode', 'adaptive')
+          .inFilter('word_id', wordIds);
+      final uwsMap = {
+        for (final r in (uwsData as List).cast<Map<String, dynamic>>())
+          (r['word_id'] as String): r
+      };
+      final wordsData = await _sb
+          .from('words')
+          .select('id, text, translation, level')
+          .inFilter('id', wordIds);
+      final result = <WordUserView>[];
+      for (final r in (wordsData as List).cast<Map<String, dynamic>>()) {
+        final id = r['id'] as String;
+        final uws = uwsMap[id];
+        result.add(WordUserView(
+          id: id,
+          text: (r['text'] as String?) ?? '',
+          translation: (r['translation'] as String?) ?? '',
+          level: r['level'] as String?,
+          inMyWords: false,
+          pickedUser: false,
+          favoriteUser: false,
+          srsStage: (uws?['stage'] as int?) ?? 0,
+          nextDueAt: uws?['next_due_at'] != null
+              ? DateTime.parse(uws!['next_due_at'])
+              : null,
+          userAddedAt: null,
+          isRequeue: false,
+          streak: 0,
+        ));
+      }
+      debugPrint('📥 fetchAdaptiveQueueBootstrap: ${result.length} Wörter geladen');
+      return result;
+    } catch (e, st) {
+      debugPrint('⚠️ fetchAdaptiveQueueBootstrap FEHLER: $e');
+      debugPrint('⚠️ StackTrace: $st');
+      return [];
+    }
+  }
+
+  /// Fallback: Wörter direkt aus words + user_word_srs laden (wenn v_words_user_srs leer liefert)
+  Future<List<WordUserView>> _fetchWordDetailsDirect({
+    required List<String> ids,
+    required String categoryId,
+    required String userId,
+  }) async {
+    if (ids.isEmpty) return [];
+    try {
+      final wordsData = await _sb
+          .from('words')
+          .select('id, text, translation, level')
+          .inFilter('id', ids);
+      final srsData = await _sb
+          .from('user_word_srs')
+          .select('word_id, stage, next_due_at')
+          .eq('user_id', userId)
+          .eq('category_id', categoryId)
+          .eq('mode', 'adaptive')
+          .inFilter('word_id', ids);
+
+      final wordsMap = {
+        for (final r in (wordsData as List).cast<Map<String, dynamic>>())
+          (r['id'] as String): r
+      };
+      final srsMap = {
+        for (final r in (srsData as List).cast<Map<String, dynamic>>())
+          (r['word_id'] as String): r
+      };
+
+      final ordered = <WordUserView>[];
+      for (final id in ids) {
+        final w = wordsMap[id];
+        if (w == null) continue;
+        final srs = srsMap[id];
+        final stage = (srs?['stage'] as int?) ?? 0;
+        final nextDue = srs?['next_due_at'] != null
+            ? DateTime.parse(srs!['next_due_at'])
+            : null;
+        ordered.add(WordUserView(
+          id: id,
+          text: (w['text'] as String?) ?? '',
+          translation: (w['translation'] as String?) ?? '',
+          level: w['level'] as String?,
+          inMyWords: false,
+          pickedUser: false,
+          favoriteUser: false,
+          srsStage: stage,
+          nextDueAt: nextDue,
+          userAddedAt: null,
+          isRequeue: false,
+          streak: 0,
+        ));
+      }
+      return ordered;
+    } catch (e) {
+      debugPrint('⚠️ _fetchWordDetailsDirect: $e');
+      return [];
+    }
   }
 
   /// Lern-Queue für A-SRS (nur fn_user_learn_queue_adaptive)
@@ -885,7 +1035,7 @@ Future<CategoryProgress> fetchCategoryProgress(
         .select('word_id,text,translation,level,'
             'in_my_words,favorite_user,picked_user,'
             'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-            'ef,streak,lapses')
+            'ef,streak,pass_count,lapses')
         .eq('category_id', categoryId)
         .eq('srs_mode', modeStr)
         .inFilter('word_id', ids);
@@ -949,27 +1099,35 @@ Future<CategoryProgress> fetchCategoryProgress(
     // Details nachladen (UI bleibt dumm, DB bleibt Logik)
     // ✅ v_words_user_srs verwendet word_id statt id, srs_mode für Filter
     final modeStr = srsSystem.name; // 'time' | 'hybrid'
-    final data = await _sb
-        .from('v_words_user_srs')
-        .select('word_id,text,translation,level,'
-            'in_my_words,favorite_user,picked_user,'
-            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-            'ef,streak,lapses')
-        .eq('category_id', categoryId)
-        .eq('srs_mode', modeStr)
-        .inFilter('word_id', ids);
+    // Wichtig: IDs können groß sein (p_limit=2000). inFilter(...) ohne Chunking führt leicht zu 400 (Query zu lang).
+    const chunkSize = 400;
+    final map = <String, Map<String, dynamic>>{};
+    for (var i = 0; i < ids.length; i += chunkSize) {
+      final chunk = ids.skip(i).take(chunkSize).toList();
+      final data = await _sb
+          .from('v_words_user_srs')
+          .select('word_id,text,translation,level,'
+              'in_my_words,favorite_user,picked_user,'
+              'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+              'ef,streak,pass_count,lapses')
+          .eq('category_id', categoryId)
+          .eq('srs_mode', modeStr)
+          .inFilter('word_id', chunk);
+
+      for (final j in (data as List).cast<Map<String, dynamic>>()) {
+        map[(j['word_id'] as String)] = j;
+      }
+    }
 
     // Optional: Reihenfolge wie Queue wiederherstellen
-    // ✅ Mapping: word_id -> id für WordUserView (word_id ist String, kein nullable)
-    final map = {
-      for (final j in (data as List).cast<Map<String, dynamic>>())
-        (j['word_id'] as String): j
-    };
-
     final ordered = <WordUserView>[];
     for (final id in ids) {
       final j = map[id];
-      if (j != null) ordered.add(WordUserView.fromJson(j));
+      if (j != null) {
+        ordered.add(WordUserView.fromJson(j));
+      } else {
+        debugPrint('⚠️ fetchLearnQueueForMode: Wort-ID $id nicht in v_words_user_srs gefunden!');
+      }
     }
 
     return ordered;
@@ -1017,7 +1175,7 @@ Future<CategoryProgress> fetchCategoryProgress(
               .select('word_id,text,translation,level,'
                   'in_my_words,favorite_user,picked_user,'
                   'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-                  'ef,streak,lapses')
+                  'ef,streak,pass_count,lapses')
               .eq('category_id', categoryId)
               .eq('srs_mode', 'adaptive')
               .inFilter('word_id', ids);
@@ -1069,7 +1227,7 @@ Future<CategoryProgress> fetchCategoryProgress(
           .select('word_id,text,translation,level,'
               'in_my_words,favorite_user,picked_user,'
               'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-              'ef,streak,lapses')
+              'ef,streak,pass_count,lapses')
           .eq('category_id', categoryId)
           .eq('srs_mode', modeStr)
           .inFilter('word_id', ids);
@@ -1090,6 +1248,59 @@ Future<CategoryProgress> fetchCategoryProgress(
   }
 
 
+
+  /// A-SRS: Einzelne Karte von S0 nach S1 enrollen (fn_a_srs_s0_correct)
+  /// Wird bei korrektem Swipe auf S0-Karte aufgerufen.
+  Future<({int stage, DateTime? nextDueAt})> enrollFromS0ToS1({
+    required String userId,
+    required String categoryId,
+    required String wordId,
+    required String mode,
+  }) async {
+    final rows = await _sb.rpc(
+      'fn_a_srs_s0_correct',
+      params: {
+        'p_user': userId,
+        'p_category': categoryId,
+        'p_word': wordId,
+      },
+    );
+    Map<String, dynamic> row;
+    if (rows is List) {
+      row = (rows as List).cast<Map<String, dynamic>>().first;
+    } else if (rows is Map) {
+      row = Map<String, dynamic>.from(rows as Map);
+    } else {
+      throw StateError('Unexpected RPC response type: ${rows.runtimeType}');
+    }
+    final stage = (row['srs_stage'] as int?) ?? 1;
+    final dueStr = row['next_due_at'] as String?;
+    final nextDueAt = dueStr != null ? DateTime.parse(dueStr) : null;
+    return (stage: stage, nextDueAt: nextDueAt);
+  }
+
+  /// A-SRS Refill: S0 seeden (fn_enroll_user_category_mode).
+  /// fn_a_srs_intake wird NICHT hier aufgerufen – fn_user_learn_queue_adaptive_impl ruft es
+  /// bereits beim Queue-Abruf auf. Doppelter Aufruf führte zu 2 Karten in S1.
+  Future<int> refillAdaptiveEnroll({
+    required String userId,
+    required String categoryId,
+  }) async {
+    try {
+      await _sb.rpc(
+        'fn_enroll_user_category_mode',
+        params: {
+          'p_category_id': categoryId,
+          'p_mode': 'adaptive',
+          'p_user': userId,
+        },
+      );
+      return 0;
+    } catch (e) {
+      debugPrint('⚠️ refillAdaptiveEnroll Fehler: $e');
+      return 0;
+    }
+  }
 
   /// A-SRS Refill-Counter atomar erhöhen und zurückgeben
   /// Nutzt RPC-Funktion für atomare Operation
@@ -1201,7 +1412,7 @@ Future<CategoryProgress> fetchCategoryProgress(
           .select('word_id,text,translation,level,'
               'in_my_words,favorite_user,picked_user,'
               'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-              'ef,streak,lapses')
+              'ef,streak,pass_count,lapses')
           .eq('category_id', categoryId)
           .eq('srs_mode', mode)
           .inFilter('word_id', filteredIds);
@@ -1484,115 +1695,129 @@ Future<CategoryProgress> fetchCategoryProgress(
     String? query,
     SortMode? sort,
   }) async {
-    // ⬇️ NEU: Verwende v_words_user für User-Flags (statt words_view)
-    final baseUrl = '${dotenv.env['SUPABASE_URL']}/rest/v1/v_words_user';
-    final apiKey = dotenv.env['SUPABASE_ANON_KEY']!;
-
-    // Lokaler Schlüssel pro Filter+Sort-Kombination
-    final etagKey = '${filter.kind}:${filter.value}:${sort ?? ''}:${query ?? ''}';
-    final prefs = await SharedPreferences.getInstance();
-    final oldEtag = prefs.getString('etag_$etagKey');
-
-    final headers = {
-      'apikey': apiKey,
-      'Authorization': 'Bearer $apiKey',
-      'Accept': 'application/json',
-      if (oldEtag != null) 'If-None-Match': oldEtag,
-    };
-
-    // Querystring aufbauen
-    // ⬇️ NEU: User-Flags mit auswählen (für QuickSets-Filter)
-    final params = <String>[
-      'select=id,text,translation,level,pos,category_id,in_my_words,favorite_user,srs_stage_user,picked_user,user_added_at',
-      'limit=$limit',
-      'offset=$offset',
-      'order=${sort == SortMode.newest ? 'user_added_at.desc' : 'text.asc'}',
-    ];
-
-    // Filter (per eq)
-    switch (filter.kind) {
-      case WordFilterKind.category:
-        params.add('category_id=eq.${filter.value}');
-        break;
-      case WordFilterKind.level:
-        params.add('level=eq.${filter.value}');
-        break;
-      case WordFilterKind.pos:
-        params.add('pos=eq.${filter.value}');
-        break;
-      case WordFilterKind.domain:
-        params.add('group_slug=eq.${filter.value}');
-        break;
-      case WordFilterKind.about:
-        // ⬇️ NEU: QuickSets-Slugs mit User-Flags filtern
-        switch (filter.value) {
-          case 'my-words':
-            params.add('in_my_words=eq.true');          // ← nutzt bool-Spalte
-            break;
-          case 'favorites':
-            params.add('favorite_user=eq.true');        // ← nutzt bool-Spalte
-            break;
-          case 'known-words':
-            params.add('srs_stage_user=gte.1');         // ← "ich kenne" = ab S1
-            break;
-          case 'my-mix':
-            params.add('picked_user=eq.true');          // ← dein Mix
-            break;
-          default:
-            params.add('category_slug=eq.${filter.value}'); // fallback
+    // ✅ Supabase-Client nutzen (nicht raw HTTP), damit auth.uid() für RLS funktioniert
+    try {
+      if (filter.kind == WordFilterKind.category) {
+        // v_words_user_cats hat category_id (v_words_user hat keine)
+        // filter.value kann UUID oder Slug sein → ggf. auflösen
+        String categoryId = filter.value;
+        final isUuidLike = RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(filter.value);
+        if (!isUuidLike) {
+          final row = await _sb
+              .from('categories')
+              .select('id')
+              .eq('slug', filter.value)
+              .maybeSingle();
+          if (row != null && row['id'] != null) {
+            categoryId = row['id'] as String;
+          } else {
+            debugPrint('⚠️ fetchByFilter: category slug "${filter.value}" not found');
+            return [];
+          }
         }
-        break;
-      case WordFilterKind.query:
-        break;
-    }
 
-    if (query != null && query.trim().isNotEmpty) {
-      final q = query.trim();
-      params.add('or=(text.ilike.%$q%,translation.ilike.%$q%)');
-    }
+        dynamic q = _sb
+            .from('v_words_user_cats')
+            .select('id,text,translation,from_lang,to_lang,level,pos,category_id,'
+                'in_my_words,favorite_user,srs_stage_user,picked_user,'
+                'word_created_at,user_added_at')
+            .eq('category_id', categoryId);
 
-    final uri = Uri.parse('$baseUrl?${params.join('&')}');
+        q = sort == SortMode.newest
+            ? q.order('user_added_at', ascending: false)
+            : q.order('text', ascending: true);
 
-    // Anfrage senden
-    final resp = await http.get(uri, headers: headers);
+        if (query != null && query.trim().isNotEmpty) {
+          final qTrim = query.trim();
+          q = q.or('text.ilike.%$qTrim%,translation.ilike.%$qTrim%');
+        }
 
-    // 👇 nur Debug
-    // ignore: avoid_print
-    print('ETag fetch ${uri.path}: ${resp.statusCode} (If-None-Match=${headers['If-None-Match'] != null})');
+        final data = (await q.range(offset, offset + limit - 1)) as List;
+        debugPrint('✅ fetchByFilter category: loaded ${data.length} rows from v_words_user_cats (categoryId=$categoryId)');
+        final words = data.map((m) {
+          final json = Map<String, dynamic>.from(m as Map);
+          json['srs_stage'] = json['srs_stage_user'] ?? 0;
+          json['created_at'] = json['word_created_at'] ?? json['user_added_at'] ?? DateTime.now().toIso8601String();
+          json['favorite'] = json['favorite_user'] ?? false;
+          return Word.fromJson(json);
+        }).toList();
 
-    if (resp.statusCode == 304) {
-      return null; // WICHTIG: „unverändert" – UI nicht überschreiben!
-    }
-
-    if (resp.statusCode != 200) {
-      throw Exception('HTTP ${resp.statusCode}: ${resp.reasonPhrase}');
-    }
-
-    // Neuen ETag speichern
-    final newEtag = resp.headers['etag'];
-    if (newEtag != null) {
-      await prefs.setString('etag_$etagKey', newEtag);
-    }
-
-    // Daten parsen
-    final List data = jsonDecode(resp.body);
-    // ⬇️ NEU: Map srs_stage_user zu srs_stage für Word.fromJson
-    final words = data.map((m) {
-      final Map<String, dynamic> json = Map<String, dynamic>.from(m);
-      // v_words_user hat srs_stage_user, Word.fromJson erwartet srs_stage
-      if (json.containsKey('srs_stage_user') && !json.containsKey('srs_stage')) {
-        json['srs_stage'] = json['srs_stage_user'];
+        final seen = <String>{};
+        final unique = <Word>[];
+        for (final w in words) {
+          if (seen.add(w.id)) unique.add(w);
+        }
+        return unique;
       }
-      return Word.fromJson(json);
-    }).toList();
 
-    // Dedupe nach ID
-    final seen = <String>{};
-    final unique = <Word>[];
-    for (final w in words) {
-      if (seen.add(w.id)) unique.add(w);
+      // Andere Filter: v_words_user (ohne category_id)
+      dynamic q = _sb
+          .from('v_words_user')
+          .select('id,text,translation,from_lang,to_lang,level,pos,'
+              'in_my_words,favorite_user,srs_stage_user,picked_user,'
+              'word_created_at,user_added_at');
+
+      switch (filter.kind) {
+        case WordFilterKind.level:
+          q = q.eq('level', filter.value);
+          break;
+        case WordFilterKind.pos:
+          q = q.eq('pos', filter.value);
+          break;
+        case WordFilterKind.domain:
+          q = q.eq('domain', filter.value);
+          break;
+        case WordFilterKind.about:
+          switch (filter.value) {
+            case 'my-words':
+              q = q.eq('in_my_words', true);
+              break;
+            case 'favorites':
+              q = q.eq('favorite_user', true);
+              break;
+            case 'known-words':
+              q = q.gte('srs_stage_user', 1);
+              break;
+            case 'my-mix':
+              q = q.eq('picked_user', true);
+              break;
+            default:
+              q = q.eq('domain', filter.value);
+          }
+          break;
+        case WordFilterKind.query:
+        case WordFilterKind.category:
+          break;
+      }
+
+      if (query != null && query.trim().isNotEmpty) {
+        final qTrim = query.trim();
+        q = q.or('text.ilike.%$qTrim%,translation.ilike.%$qTrim%');
+      }
+
+      q = sort == SortMode.newest
+          ? q.order('user_added_at', ascending: false)
+          : q.order('text', ascending: true);
+
+      final data = (await q.range(offset, offset + limit - 1)) as List;
+      final words = data.map((m) {
+        final json = Map<String, dynamic>.from(m as Map);
+        json['srs_stage'] = json['srs_stage_user'] ?? 0;
+        json['created_at'] = json['word_created_at'] ?? json['user_added_at'] ?? DateTime.now().toIso8601String();
+        json['favorite'] = json['favorite_user'] ?? false;
+        return Word.fromJson(json);
+      }).toList();
+
+      final seen = <String>{};
+      final unique = <Word>[];
+      for (final w in words) {
+        if (seen.add(w.id)) unique.add(w);
+      }
+      return unique;
+    } catch (e) {
+      debugPrint('fetchByFilter error: $e');
+      rethrow;
     }
-    return unique;
   }
 
   // ⬇️ NEU: Count-APIs für QuickSets (nutzen HTTP-API wie fetchByFilter)
@@ -1717,54 +1942,21 @@ Future<CategoryProgress> fetchCategoryProgress(
     return 0;
   }
 
-  /// Zählt die Anzahl der gelernten Wörter in Stage 5 (Streak >= 3)
-  /// Diese Wörter sind endgültig fertig und als "gelernt" markiert
+  /// Zählt die mastered-Wörter in A-SRS pro Kategorie.
+  /// Zählt nicht über stage=5, streak>=3 oder pass_count, sondern is_mastered.
   Future<int> countLearnedInStage5(String categoryId, {required SrsSystem srsSystem}) async {
     final userId = _sb.auth.currentUser?.id;
-    if (userId == null) {
-      return 0;
-    }
+    if (userId == null) return 0;
 
-    final modeStr = srsSystem.name;
-    
-    try {
-      // Verwende v_words_user_srs, um Wörter in S5 mit Streak >= 3 zu zählen
-      final res = await _sb
-          .from('v_words_user_srs')
-          .select('word_id')
-          .eq('category_id', categoryId)
-          .eq('srs_mode', modeStr)
-          .eq('srs_stage_user', 5)
-          .gte('streak', 3);
-      
-      // Zähle die Ergebnisse
-      if (res is List) {
-        return res.length;
-      }
-      
-      return 0;
-    } catch (e) {
-      debugPrint('⚠️ countLearnedInStage5 error: $e');
-      // Fallback: Verwende user_word_srs direkt
-      try {
-        final res = await _sb
-            .from('user_word_srs')
-            .select('word_id')
-            .eq('user_id', userId)
-            .eq('category_id', categoryId)
-            .eq('mode', modeStr)
-            .eq('stage', 5)
-            .gte('streak', 3);
-        
-        if (res is List) {
-          return res.length;
-        }
-        return 0;
-      } catch (e2) {
-        debugPrint('⚠️ countLearnedInStage5 fallback error: $e2');
-        return 0;
-      }
-    }
+    final result = await _sb
+        .from('user_word_srs')
+        .select('word_id')
+        .eq('user_id', userId)
+        .eq('category_id', categoryId)
+        .eq('mode', 'adaptive')
+        .eq('is_mastered', true);
+
+    return result is List ? result.length : 0;
   }
 
   Future<int> countDueTodayByFilter(WordListFilter filter) async {
@@ -2013,21 +2205,25 @@ extension MyWordsApi on SupabaseWordRepository {
     final modeStr = srsSystem.name; // 'adaptive' | 'hybrid' | 'time'
 
     // Hole Details aus v_words_user_srs
-    final data = await _sb
-        .from('v_words_user_srs')
-        .select('word_id,text,translation,level,'
-            'in_my_words,favorite_user,picked_user,'
-            'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
-            'ef,streak,lapses')
-        .eq('category_id', categoryId)
-        .eq('srs_mode', modeStr)
-        .inFilter('word_id', ids);
+    // Chunking: große inFilter-Listen können 400 (Query zu lang) verursachen.
+    const chunkSize = 400;
+    final map = <String, Map<String, dynamic>>{};
+    for (var i = 0; i < ids.length; i += chunkSize) {
+      final chunk = ids.skip(i).take(chunkSize).toList();
+      final data = await _sb
+          .from('v_words_user_srs')
+          .select('word_id,text,translation,level,'
+              'in_my_words,favorite_user,picked_user,'
+              'srs_mode,srs_stage_user,next_due_at_user,user_added_at,'
+              'ef,streak,pass_count,lapses')
+          .eq('category_id', categoryId)
+          .eq('srs_mode', modeStr)
+          .inFilter('word_id', chunk);
 
-    // Mapping: word_id -> JSON
-    final map = {
-      for (final j in (data as List).cast<Map<String, dynamic>>())
-        (j['word_id'] as String): j
-    };
+      for (final j in (data as List).cast<Map<String, dynamic>>()) {
+        map[(j['word_id'] as String)] = j;
+      }
+    }
 
     // Reihenfolge wie IDs wiederherstellen
     final ordered = <WordUserView>[];
@@ -2048,13 +2244,18 @@ extension MyWordsApi on SupabaseWordRepository {
 extension CategoryLookup on SupabaseWordRepository {
   /// Sucht die Kategorie-ID (UUID) per Anzeigename (case-insensitive).
   Future<String?> findCategoryIdByName(String name) async {
-    final row = await _sb
+    var row = await _sb
         .from('categories')
         .select('id')
-        .ilike('name', name) // "Health & Fitness" ≈ "health & fitness"
+        .ilike('name', name)
         .maybeSingle();
-    if (row == null) return null;
-    return row['id'] as String?;
+    if (row == null && name.contains(' & ')) {
+      final alt = name.replaceAll(' & ', ' and ');
+      row = await _sb.from('categories').select('id').ilike('name', alt).maybeSingle();
+      if (row != null) debugPrint('📌 findCategoryIdByName: "$name" → Match via "$alt"');
+    }
+    if (row == null) debugPrint('⚠️ findCategoryIdByName: Kein Match für "$name"');
+    return row?['id'] as String?;
   }
 
   Future<String?> findCategorySlugById(String id) async {
@@ -2100,7 +2301,6 @@ Future<List<CategoryInfo>> fetchAllCategories() async {
   final rows = await _sb
       .from('categories')
       .select('id,name,slug,group_slug,group_name,order_index,type')
-      .eq('type', 'topic')
       .order('group_slug', ascending: true)
       .order('order_index', ascending: true);
   return (rows as List).map((e) => CategoryInfo.fromJson(e as Map<String, dynamic>)).toList();
@@ -2191,11 +2391,19 @@ Future<String?> singleNextWordId(String catId, int stage) async {
   return w == null ? null : wordId;
 }
 
-/// Lädt Wörter für einen bestimmten Stage einer Kategorie
-Future<List<WordUserView>> fetchWordsByStage(String categoryId, int stage) async {
+/// Lädt Wörter für einen bestimmten Stage einer Kategorie.
+/// Verwendet user_word_srs (modus-spezifisch), damit die Anzeige mit den
+/// Stage-Zählern aus fn_user_category_progress übereinstimmt.
+Future<List<WordUserView>> fetchWordsByStage(
+  String categoryId,
+  int stage, {
+  required SrsSystem srsSystem,
+}) async {
   try {
     final user = _sb.auth.currentUser;
     if (user == null) return [];
+
+    final modeStr = srsSystem.name; // 'time' | 'adaptive' | 'hybrid'
 
     // Hole category_id wenn nötig (kann UUID oder Slug sein)
     String catId = categoryId;
@@ -2214,7 +2422,6 @@ Future<List<WordUserView>> fetchWordsByStage(String categoryId, int stage) async
     }
 
     // Hole alle Wörter dieser Kategorie über word_categories Join
-    // Zuerst: Hole word_ids aus word_categories
     final wordCategoriesData = await _sb
         .from('word_categories')
         .select('word_id')
@@ -2230,7 +2437,7 @@ Future<List<WordUserView>> fetchWordsByStage(String categoryId, int stage) async
       return [];
     }
 
-    // Dann: Hole die Wort-Details aus words Tabelle
+    // Hole die Wort-Details aus words Tabelle
     final wordsData = await _sb
         .from('words')
         .select('id,text,translation,level,pos')
@@ -2244,93 +2451,86 @@ Future<List<WordUserView>> fetchWordsByStage(String categoryId, int stage) async
     }
 
     final wordIds = wordsList.map((w) => w['id'] as String).toList();
-    debugPrint('🔍 fetchWordsByStage: ${wordsList.length} Wörter gefunden für Stage $stage');
+    debugPrint('🔍 fetchWordsByStage: ${wordsList.length} Wörter in Kategorie, Stage $stage, mode=$modeStr');
 
     if (stage == 0) {
-      // Stage 0: Alle Wörter, die KEINEN user_words Eintrag haben ODER srs_stage = 0 haben
-      // WICHTIG: Wenn wordIds leer ist oder zu groß, müssen wir anders vorgehen
-      if (wordIds.isEmpty) {
-        return [];
-      }
-
-      // Hole alle user_words Einträge für diesen User und diese Wörter
-      // Verwende inFilter mit Chunking falls nötig (Supabase Limit: ~1000 Werte)
-      final userWordsMap = <String, Map<String, dynamic>>{};
-      
-      // Chunking für große Listen (falls mehr als 1000 Wörter)
+      // Stage 0: Wörter ohne user_word_srs-Eintrag für diese Kategorie+Modus ODER mit stage=0
+      final userWordSrsMap = <String, Map<String, dynamic>>{};
       const chunkSize = 1000;
       for (var i = 0; i < wordIds.length; i += chunkSize) {
         final chunk = wordIds.skip(i).take(chunkSize).toList();
-        final userWordsData = await _sb
-            .from('user_words')
-            .select('word_id,srs_stage,next_due_at')
+        final uwsData = await _sb
+            .from('user_word_srs')
+            .select('word_id,stage,next_due_at')
             .eq('user_id', user.id)
+            .eq('category_id', catId)
+            .eq('mode', modeStr)
             .inFilter('word_id', chunk);
-        
-        for (var uw in (userWordsData as List).cast<Map<String, dynamic>>()) {
-          final wordId = uw['word_id'] as String;
-          userWordsMap[wordId] = uw;
+        for (var row in (uwsData as List).cast<Map<String, dynamic>>()) {
+          userWordSrsMap[row['word_id'] as String] = row;
         }
       }
 
-      // Filtere: Alle Wörter, die NICHT in user_words sind ODER srs_stage = 0 haben
       final result = wordsList
           .where((w) {
             final wordId = w['id'] as String;
-            final userWord = userWordsMap[wordId];
-            // In Stage 0 wenn: kein user_words Eintrag ODER srs_stage = 0
-            return userWord == null || (userWord['srs_stage'] as int? ?? 0) == 0;
+            final uws = userWordSrsMap[wordId];
+            return uws == null || (uws['stage'] as int? ?? 0) == 0;
           })
           .map((word) {
             final wordId = word['id'] as String;
-            final userWord = userWordsMap[wordId];
+            final uws = userWordSrsMap[wordId];
             return WordUserView(
               id: wordId,
               text: word['text'] as String? ?? '',
               translation: word['translation'] as String? ?? '',
               level: word['level'] as String?,
               srsStage: 0,
-              nextDueAt: userWord?['next_due_at'] != null
-                  ? DateTime.parse(userWord!['next_due_at'])
+              nextDueAt: uws?['next_due_at'] != null
+                  ? DateTime.parse(uws!['next_due_at'])
                   : null,
             );
           })
           .toList();
 
-      debugPrint('🔍 fetchWordsByStage(S0): ${wordsList.length} Wörter in Kategorie, ${userWordsMap.length} in user_words, ${result.length} in Stage 0');
-      
+      debugPrint('🔍 fetchWordsByStage(S0): ${result.length} Wörter in Stage 0 (mode=$modeStr)');
       return result;
     } else {
-      // Stage 1-5: Wörter mit entsprechendem srs_stage
-      final userWordsData = await _sb
-          .from('user_words')
-          .select('word_id,srs_stage,next_due_at,last_reviewed_at')
+      // Stage 1-5: Wörter mit stage in user_word_srs für diese Kategorie+Modus
+      final uwsData = await _sb
+          .from('user_word_srs')
+          .select('word_id,stage,next_due_at')
           .eq('user_id', user.id)
-          .inFilter('word_id', wordIds)
-          .eq('srs_stage', stage);
+          .eq('category_id', catId)
+          .eq('mode', modeStr)
+          .eq('stage', stage)
+          .inFilter('word_id', wordIds);
 
-      final userWordsMap = <String, Map<String, dynamic>>{};
-      for (var uw in (userWordsData as List).cast<Map<String, dynamic>>()) {
-        userWordsMap[uw['word_id'] as String] = uw;
+      final uwsMap = <String, Map<String, dynamic>>{};
+      for (var row in (uwsData as List).cast<Map<String, dynamic>>()) {
+        uwsMap[row['word_id'] as String] = row;
       }
 
-      return wordsList
-          .where((w) => userWordsMap.containsKey(w['id'] as String))
+      final result = wordsList
+          .where((w) => uwsMap.containsKey(w['id'] as String))
           .map((word) {
             final wordId = word['id'] as String;
-            final userWord = userWordsMap[wordId]!;
+            final uws = uwsMap[wordId]!;
             return WordUserView(
               id: wordId,
               text: word['text'] as String? ?? '',
               translation: word['translation'] as String? ?? '',
               level: word['level'] as String?,
-              srsStage: (userWord['srs_stage'] as int?) ?? 0,
-              nextDueAt: userWord['next_due_at'] != null
-                  ? DateTime.parse(userWord['next_due_at'])
+              srsStage: (uws['stage'] as int?) ?? 0,
+              nextDueAt: uws['next_due_at'] != null
+                  ? DateTime.parse(uws['next_due_at'])
                   : null,
             );
           })
           .toList();
+
+      debugPrint('🔍 fetchWordsByStage(S$stage): ${result.length} Wörter (mode=$modeStr)');
+      return result;
     }
   } catch (e) {
     debugPrint('Error fetching words by stage: $e');

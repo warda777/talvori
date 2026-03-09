@@ -51,15 +51,21 @@ final stagesProvider = Provider<List<int>>((ref) {
   return ref.watch(learnModeControllerProvider.select((s) => s.deckStages));
 });
 
-/// Anzahl der gelernten Wörter in Stage 5 (Streak >= 3) pro Kategorie.
-/// Diese Wörter sind endgültig fertig und als "gelernt" markiert.
-final learnedInStage5Provider = FutureProvider.family<int, String>((ref, categoryId) async {
+/// Anzahl der endgültig gelernten Wörter in A-SRS (Stage 5 + mastered)
+/// pro Kategorie.
+/// Wichtig: Diese Kapsel gehört fachlich nur zu A-SRS und darf daher
+/// nicht vom globalen aktuell gewählten UI-Modus abhängen.
+final learnedInStage5Provider =
+    FutureProvider.family<int, String>((ref, categoryId) async {
   if (categoryId.isEmpty) return 0;
 
-  final srsSystem = ref.watch(srsModeControllerProvider).mode;
   final repo = ref.read(supabaseWordRepositoryProvider);
 
-  return repo.countLearnedInStage5(categoryId, srsSystem: srsSystem);
+  // Immer A-SRS zählen, nicht den globalen srsModeController verwenden.
+  return repo.countLearnedInStage5(
+    categoryId,
+    srsSystem: SrsSystem.adaptive,
+  );
 });
 
 /// Timer-Status (aktiv und läuft)

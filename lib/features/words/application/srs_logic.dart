@@ -33,10 +33,10 @@ List<int> buildSmartCardOrder(
   final now = DateTime.now();
   if (queue.isEmpty) return const [];
 
-  // Fallback-Config
+  // Fallback-Config (ohne Sperre)
   final cfg = config ??
       const SrsConfig(
-        initialNewBurst: 10,
+        initialNewBurst: 9999,
         headSize: 150,
         stageWeights: [1, 3, 4, 4, 2, 1],
         phases: [

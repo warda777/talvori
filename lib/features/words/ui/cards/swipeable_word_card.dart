@@ -195,6 +195,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   }
 
   Widget _buildFront() {
+    final isDiagnostic = widget.frontText.contains('Keine Wörter verfügbar');
     return _CardShell(
       child: Stack(
         children: [
@@ -202,10 +203,14 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
-              child: _AdaptiveText(widget.frontText),
+              child: isDiagnostic
+                  ? SingleChildScrollView(
+                      child: _AdaptiveText(widget.frontText, forceMultiline: true),
+                    )
+                  : _AdaptiveText(widget.frontText),
             ),
           ),
-          _StreakProgressBadge(srsStage: widget.srsStage, streak: widget.streak),
+          const _SwipeHint(top: false),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
         ],
@@ -503,18 +508,22 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
 class _AdaptiveText extends StatelessWidget {
   final String text;
   final bool back;
-  const _AdaptiveText(this.text, {this.back = false});
+  final bool forceMultiline;
+  const _AdaptiveText(this.text, {this.back = false, this.forceMultiline = false});
 
   @override
   Widget build(BuildContext context) {
     final wordCount = text.split(' ').length;
-    final isPhrase = wordCount > 1;
+    final isPhrase = wordCount > 1 || forceMultiline;
     final total = text.length;
 
     double fontSize; int maxLines;
 
-    if (isPhrase) {
-      if (back) {
+    if (isPhrase || forceMultiline) {
+      if (forceMultiline) {
+        fontSize = 14;
+        maxLines = 20;
+      } else if (back) {
         if (total > 50) { fontSize = 24; maxLines = 5; }
         else if (total > 35) { fontSize = 26; maxLines = 4; }
         else if (total > 20) { fontSize = 28; maxLines = 3; }
@@ -555,28 +564,33 @@ class _AdaptiveText extends StatelessWidget {
 }
 
 class _SwipeHint extends StatelessWidget {
-  const _SwipeHint();
+  final bool top;
+  const _SwipeHint({this.top = true});
+
+  static Widget _buildRow() => Row(
+    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.swipe_left, color: Colors.red.withOpacity(0.6), size: 16),
+      const SizedBox(width: 4),
+      Text('Falsch', style: TextStyle(color: Colors.red.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+      const SizedBox(width: 16),
+      Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+      const SizedBox(width: 16),
+      Text('Richtig', style: TextStyle(color: Colors.green.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+      const SizedBox(width: 4),
+      Icon(Icons.swipe_right, color: Colors.green.withOpacity(0.6), size: 16),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 16, left: 0, right: 0,
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.swipe_left,  color: Colors.red.withOpacity(0.6),   size: 16),
-            const SizedBox(width: 4),
-            Text('Falsch',  style: TextStyle(color: Colors.red.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
-            const SizedBox(width: 16),
-            Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
-            const SizedBox(width: 16),
-            Text('Richtig', style: TextStyle(color: Colors.green.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
-            const SizedBox(width: 4),
-            Icon(Icons.swipe_right, color: Colors.green.withOpacity(0.6), size: 16),
-          ],
-        ),
-      ),
+      top: top ? 16 : null,
+      bottom: top ? null : 44,
+      left: 0,
+      right: 0,
+      child: Center(child: _buildRow()),
     );
   }
 }

@@ -1,10 +1,10 @@
 # Talvori - Flutter App Project Structure
 
-> Aktualisiert am 29.01.2025
+> Aktualisiert am 12.02.2025
 
 ## 📁 Projektübersicht
 
-- **Total Dart Files**: 212
+- **Total Dart Files**: 222
 - **Architektur**: Feature-basiert (Riverpod)
 - **Backend**: Supabase & Edge Functions
 - **Neue Features**: 

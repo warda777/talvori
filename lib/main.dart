@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -60,6 +61,11 @@ class _InitGateState extends State<_InitGate> {
 
   Future<void> _initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // 0) Orientierung auf Hochformat fixieren (keine Drehung)
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     
     // 1) .env laden (mit Fallback)
     try {

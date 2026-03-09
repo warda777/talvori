@@ -9,6 +9,8 @@ class VerticalStageSwitch extends StatelessWidget {
   final bool completed;
   final String label; // "S1" / "New" (nur für Semantik)
   final String note;  // "0".."5"
+  final String? subNote; // optional: z.B. Timer/Countdown unterhalb des Labels
+  final Color? subNoteColor; // optional: Farbe für subNote (z.B. grün wenn Timer läuft)
   final bool isFirst;
   final bool glow; // NEU: für Blink-Effekt
   final Animation<double>? pulseAnimation; // NEU: für sanftes Pulsieren
@@ -31,6 +33,8 @@ class VerticalStageSwitch extends StatelessWidget {
     required this.completed,
     required this.label,
     required this.note,
+    this.subNote,
+    this.subNoteColor,
     this.isFirst = false,
     this.glow = false, // NEU: Standard false
     this.pulseAnimation, // NEU: für sanftes Pulsieren
@@ -42,7 +46,9 @@ class VerticalStageSwitch extends StatelessWidget {
     this.showLearnedCount = false,
   });
 
-  double _getSwitchPosition() => count > 0 ? 2.0 : 18.0;
+  /// Bei S0+Lock: Knopf unten (deaktiviert). Sonst: oben wenn count>0, unten wenn leer.
+  double _getSwitchPosition() =>
+      (isLocked && isFirst) ? 18.0 : (count > 0 ? 2.0 : 18.0);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +56,8 @@ class VerticalStageSwitch extends StatelessWidget {
         ? [BoxShadow(color: outerColor.withOpacity(0.8), blurRadius: 14, spreadRadius: 1)]
         : const <BoxShadow>[];
 
-    final bool canShowLearnedBadge = showLearnedCount && learnedCount != null;
+    // Learned-Counter nur anzeigen, wenn S5 auch tatsächlich Wörter hat (count > 0)
+    final bool canShowLearnedBadge = showLearnedCount && learnedCount != null && count > 0;
     const double knobHeight = 52.0;
     const double learnedBadgeHeight = 16.0;
     // "Unterhalb des Knobs" (bei count>0 liegt der Knob oben; darunter ist Platz).
@@ -63,9 +70,9 @@ class VerticalStageSwitch extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Die Switch selbst mit Opacity (wird ausgegraut wenn gelockt)
+          // Die Switch selbst: Bei S0+Lock → X statt Count; sonst ggf. ausgegraut
           Opacity(
-            opacity: isLocked ? 0.45 : 1.0,     // 45% sichtbar, Ursprung bleibt erkennbar
+            opacity: (isLocked && isFirst) ? 1.0 : (isLocked ? 0.45 : 1.0),
             child: Container(
               key: containerKey ?? key, // Key auf dem äußeren Container (für Plasma-Link Positionierung)
               width: WordsUIConstants.stageSwitchWidth,
@@ -129,14 +136,16 @@ class VerticalStageSwitch extends StatelessWidget {
                                   boxShadow: boxShadow,
                                 ),
                                 alignment: Alignment.center,
-                                child: Text(
-                                  '$count',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                child: (isLocked && isFirst)
+                                    ? const Icon(Icons.close, size: 32, color: Colors.white)
+                                    : Text(
+                                        '$count',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               );
                               final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
                               return knob;
@@ -174,14 +183,16 @@ class VerticalStageSwitch extends StatelessWidget {
                                       : null),
                             ),
                             alignment: Alignment.center,
-                            child: Text(
-                              '$count',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+                            child: (isLocked && isFirst)
+                                ? const Icon(Icons.close, size: 32, color: Colors.white)
+                                : Text(
+                                    '$count',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                             );
                             final Widget knob = knobWrapper != null ? knobWrapper!(knobCore) : knobCore;
                             return knob;
@@ -215,14 +226,39 @@ class VerticalStageSwitch extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             width: 42,
-            child: Text(
-              note,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Stack(
+              clipBehavior: Clip.none, // ✅ Timer darf rausmalen, ohne Layout zu vergrößern
+              alignment: Alignment.topCenter,
+              children: [
+                Text(
+                  note,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    height: 1.0,
+                  ),
+                ),
+                if (subNote != null && subNote!.isNotEmpty)
+                  Positioned(
+                    top: 14, // direkt unter dem Label, ohne die Switch-Höhe zu verändern
+                    left: -6,
+                    right: -6,
+                    child: Text(
+                      subNote!,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: (subNoteColor ?? Colors.white).withOpacity(0.9),
+                        height: 1.0,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

@@ -19,9 +19,14 @@ import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/category_settings_dialog.dart';
+import 'package:talvori/features/words/ui/widgets/category_detail_hint_bubble.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
-
-
+import 'package:talvori/features/words/application/s0_lock_provider.dart';
+import 'package:talvori/features/words/application/tooltip_settings_provider.dart'
+    show showTooltipsAlwaysProvider, hasSeenLockTooltipProvider, hasSeenSingleTooltipProvider,
+        hasSeenTrainingTooltipProvider, hasSeenVocabsTooltipProvider, hasSeenWheelTooltipProvider,
+        hasSeenAutoTooltipProvider, resetCategoryDetailTooltipFlags;
+import 'package:talvori/features/words/ui/widgets/contextual_tooltip.dart';
 
 // ===== KONSTANTEN =====
 const kAccentBlue = Color(0xFFB1CCFE);
@@ -50,6 +55,13 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
 class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> with WidgetsBindingObserver {
   ProviderSubscription<CategoryDetailState>? _controllerSub;
 
+  final _vocabsKey = GlobalKey();
+  final _wheelKey = GlobalKey();
+  final _lockKey = GlobalKey();
+  final _autoButtonKey = GlobalKey();
+  final _trainingButtonKey = GlobalKey();
+  final _singleButtonKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +88,6 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
         // per Tap-Logik zurück (setzt auf lastNonHybrid)
         ctrl.tap();
       }
-
     });
   }
 
@@ -87,6 +98,135 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     _controllerSub?.close();
     _controllerSub = null;
     super.dispose();
+  }
+
+  Future<void> _maybeShowLockTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenLockTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Hier sperrst du das Fach 0.',
+        line2: 'Es werden keine Wörter mehr rausgegeben.',
+        targetKey: _lockKey,
+      );
+      await ref.read(hasSeenLockTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Future<void> _maybeShowSingleTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenSingleTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Du trainierst gezielt nur eine Stufe.',
+        line2: '',
+        targetKey: _singleButtonKey,
+      );
+      await ref.read(hasSeenSingleTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Future<void> _maybeShowTrainingTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenTrainingTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Du trainierst gezielt diesen Bereich.',
+        line2: 'Drücke Start, um zu beginnen.',
+        targetKey: _trainingButtonKey,
+      );
+      await ref.read(hasSeenTrainingTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Future<void> _maybeShowVocabsTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenVocabsTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Hier siehst du alle Wörter dieser Kategorie.',
+        line2: 'Tippe auf eine Stufe für Details.',
+        targetKey: _vocabsKey,
+      );
+      await ref.read(hasSeenVocabsTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Future<void> _maybeShowAutoTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenAutoTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Zurück im normalen Modus.',
+        line2: '',
+        targetKey: _autoButtonKey,
+      );
+      await ref.read(hasSeenAutoTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Future<void> _maybeShowWheelTooltip() async {
+    final showAlways = ref.read(showTooltipsAlwaysProvider);
+    final hasSeen = ref.read(hasSeenWheelTooltipProvider);
+    if (!showAlways && hasSeen) return;
+    if (mounted) {
+      ContextualTooltip.show(
+        context: context,
+        line1: 'Hier kannst du zwischen Kategorien wechseln.',
+        line2: '',
+        targetKey: _wheelKey,
+      );
+      await ref.read(hasSeenWheelTooltipProvider.notifier).markSeen();
+    }
+  }
+
+  Widget _buildHintOrProgress({
+    required WidgetRef ref,
+    required String currentId,
+    required double dailyPercent,
+    required int dailyTotal,
+    required int dailyTarget,
+    required CategoryDetailState s,
+    required double overallPercent,
+    required String overallLabel,
+    required List<int> stages,
+  }) {
+    final showDaily = ref.watch(returnedFromLearnSessionProvider) &&
+        !ref.watch(userHasInteractedWithModeProvider);
+    if (showDaily) {
+      return LearningStatusPanel(
+        percent: dailyPercent,
+        percentLabel: '${(dailyPercent * 100).round()}%',
+        newCount: s.dailyNew,
+        repeatsCount: s.dailyRepeats,
+        repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
+        overallPercent: overallPercent,
+        overallLabel: overallLabel,
+      );
+    }
+    final s0Locked = currentId.isEmpty
+        ? false
+        : ref.watch(s0LockedProvider(currentId)).maybeWhen(
+              data: (v) => v,
+              orElse: () => false,
+            );
+    return Center(
+      child: CategoryDetailHintBubble(
+        categoryId: currentId.isEmpty ? null : currentId,
+        s0Locked: s0Locked,
+        stages: stages,
+      ),
+    );
   }
 
   @override
@@ -103,6 +243,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🔁 CategoryDetail BUILD');
     final s = ref.watch(categoryDetailControllerProvider);
     final loading = s.loading;
     final mode = ref.watch(levelSelectionProvider);
@@ -133,11 +274,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     
     // 1️⃣ LearnMode-State abfragen
     final learnState = ref.watch(learnModeControllerProvider);
-    final isLearning = learnState.categoryId.isNotEmpty && learnState.categoryId == currentId;
+    final isLearning = learnState.inLearnScreen && learnState.categoryId.isNotEmpty && learnState.categoryId == currentId;
     
-    // ✅ A-SRS: IMMER Server-Progress verwenden (auch während Learn-Mode)
-    // LearnState nur verwenden, wenn isLearning && srsSystem != SrsSystem.adaptive
-    final useLearnState = isLearning; // Deck/Queue IMMER aus LearnState nehmen, sobald LearnMode aktiv ist
+    // ✅ Im Learn-Mode: learnState nutzen (wird nach jedem Review aus serverProgress aktualisiert).
+    // Ohne Invalidate von categoryProgressProvider bleibt dessen Cache sonst veraltet.
+    final useLearnState = isLearning;
     
     // ✅ Für A-SRS: categoryProgressProvider immer laden (auch wenn isLearning)
     final progAsync = currentId.isNotEmpty
@@ -149,8 +290,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     // 2️⃣ Stage-Quelle korrekt wählen
     // ✅ Für A-SRS: IMMER Server-Daten verwenden, auch während Learn-Mode
     // ✅ FIX: Bei loading + hasValue die vorhandenen Daten weiter anzeigen (kein Flicker)
+    // total = volle Kategoriegröße (nicht Summe der Stages)
     final (stages, totalWords) = useLearnState
-        ? (learnState.stages, learnState.stages.fold<int>(0, (a, b) => a + b))
+        ? (learnState.stages, learnState.totalWordsInCategory)
         : (
             progAsync.valueOrNull?.stages ?? const [-1,-1,-1,-1,-1,-1],
             progAsync.valueOrNull?.total ?? -1,
@@ -181,7 +323,14 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
       body: SafeArea(
         child: Stack(
           children: [
-            Column(
+            Listener(
+              onPointerDown: (_) {
+                if (ref.read(returnedFromLearnSessionProvider)) {
+                  ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+                  ref.read(returnedFromLearnSessionProvider.notifier).state = false;
+                }
+              },
+              child: Column(
               children: [
                 // FIX: fester Header
                 SizedBox(
@@ -192,9 +341,18 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                     vocabsCount: s.vocabsTotal,
                     categories: cats.map((e)=>e.name).toList(),
                     selectedIndex: cats.isEmpty ? 0 : validSelIndex.clamp(0, cats.length - 1),
-                    onWheelChanged: (idx, _) => ref.read(categoryDetailControllerProvider.notifier).switchTo(idx),
-                    onBack: () => Navigator.of(context).pop(),
+                    vocabsKey: _vocabsKey,
+                    wheelKey: _wheelKey,
+                    onWheelChanged: (idx, label) {
+                      _maybeShowWheelTooltip();
+                      ref.read(categoryDetailControllerProvider.notifier).switchTo(idx);
+                    },
+                    onBack: () async {
+                      await resetCategoryDetailTooltipFlags(ref);
+                      if (context.mounted) Navigator.of(context).pop();
+                    },
                     onVocabs: () {
+                      _maybeShowVocabsTooltip();
                       if (currentId.isEmpty) return;
                       final currentName = cats.isNotEmpty && validSelIndex < cats.length ? cats[validSelIndex].name : widget.title;
                       Navigator.of(context).push(
@@ -230,22 +388,29 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                     wheelBottomGap: WordsLayout.wheelBottomGap,
                     accentColor: kAccentBlue,
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    trailingRightBelow: const SrsModeToggleWithHint(),
+                    trailingRightBelow: SrsModeToggleWithHint(
+                      onUserTap: () {
+                        ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+                        ref.read(returnedFromLearnSessionProvider.notifier).state = false;
+                      },
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: WordsLayout.gapBelowTop),
 
-                // Daily Progress - mit reduziertem Padding
+                // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
                 Flexible(
-                  child: LearningStatusPanel(
-                    percent: dailyPercent,
-                    percentLabel: '${(dailyPercent*100).round()}%',
-                    newCount: s.dailyNew,
-                    repeatsCount: s.dailyRepeats,
-                    repeatsOfTargetLabel: '$dailyTotal/$dailyTarget',
+                  child: _buildHintOrProgress(
+                    ref: ref,
+                    currentId: currentId,
+                    dailyPercent: dailyPercent,
+                    dailyTotal: dailyTotal,
+                    dailyTarget: dailyTarget,
+                    s: s,
                     overallPercent: overallPercent,
                     overallLabel: overallLabel,
+                    stages: stages,
                   ),
                 ),
 
@@ -276,17 +441,37 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                     selectingSingle: selecting,
                     visibleMask: mask,
                     categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
+                    lockKey: _lockKey,
+                    autoButtonKey: _autoButtonKey,
+                    trainingButtonKey: _trainingButtonKey,
+                    singleButtonKey: _singleButtonKey,
                     onSelectSingleStage: (stg) {
+                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
                       ref.read(singleStageProvider.notifier).state = stg;
                       ref.read(selectingSingleProvider.notifier).state = false;
                     },
                     onModeChanged: (m) async {
+                      if (m == LevelSelectionMode.s0toS5) {
+                        _maybeShowAutoTooltip();
+                      } else if (m == LevelSelectionMode.single) {
+                        _maybeShowSingleTooltip();
+                      } else if (m == LevelSelectionMode.s1toS5) {
+                        _maybeShowTrainingTooltip();
+                      }
+                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
                       ref.read(levelSelectionProvider.notifier).state = m;
                       if (m == LevelSelectionMode.single) {
                         ref.read(selectingSingleProvider.notifier).state = true;
                       } else {
                         ref.read(selectingSingleProvider.notifier).state = false;
                       }
+                    },
+                    onBeforeLockTap: _maybeShowLockTooltip,
+                    onS0LockTapped: () {
+                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
                     },
                     titleOffsetY: -15,
                     onStartPressed: () async {
@@ -313,6 +498,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                               ),
                             ),
                           ));
+                          if (mounted) {
+                            ref.read(returnedFromLearnSessionProvider.notifier).state = true;
+                            ref.read(userHasInteractedWithModeProvider.notifier).state = false;
+                          }
                           if (mounted && didReset == true) {
                             // Progress Provider invalidieren (mode-aware)
                             final srs = ref.read(srsModeControllerProvider).mode;
@@ -342,30 +531,6 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                 const SizedBox(height: 5),
               ],
             ),
-
-            if (srs.counting) Positioned.fill(
-              child: IgnorePointer(
-                child: Container(
-                  color: Colors.black.withOpacity(0.75),
-                  alignment: const Alignment(0, -1.0),
-        child: Column(
-                    mainAxisSize: MainAxisSize.min,
-          children: [
-                      const Text(
-                        'System wird auf Hybrid umgestellt',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Colors.white70),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${srs.count}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w900, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
           ],
         ),

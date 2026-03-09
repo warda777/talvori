@@ -114,11 +114,11 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     
     // Prüfe, ob Learn-Mode aktiv ist für diese Kategorie
     final learnState = ref.watch(learnModeControllerProvider);
-    final isLearning = learnState.categoryId.isNotEmpty && learnState.categoryId == catId;
+    final isLearning = learnState.inLearnScreen && learnState.categoryId.isNotEmpty && learnState.categoryId == catId;
     
-    // ✅ A-SRS: IMMER Server-Progress verwenden (auch während Learn-Mode)
-    // LearnState nur verwenden, wenn isLearning && srsSystem != SrsSystem.adaptive
-    final useLearnState = isLearning; // Deck/Queue IMMER aus LearnState nehmen, sobald LearnMode aktiv ist
+    // Im Learn-Mode: learnState nutzen (wird nach jedem Review aktualisiert).
+    // Ohne das würde categoryProgressProvider veraltet bleiben (kein Invalidate für A-SRS).
+    final useLearnState = isLearning;
     
     // Datenquelle umschalten: Learn-Mode oder Server-Daten
     late final int total;
@@ -144,9 +144,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     
     // Debug: Logging für Counter-Problem
     if (useLearnState) {
-      debugPrint('🎯 CategoryCard "${widget.sub.label}": Learn-Mode aktiv (T-SRS/Hybrid) | total=$total, stages=$stages');
-    } else if (isLearning && srs == SrsSystem.adaptive) {
-      debugPrint('🎯 CategoryCard "${widget.sub.label}": Learn-Mode aktiv (A-SRS) → Server-Daten | total=$total, stages=$stages');
+      debugPrint('🎯 CategoryCard "${widget.sub.label}": Learn-Mode aktiv | total=$total, stages=$stages');
     } else if (loading) {
       debugPrint('⏳ CategoryCard "${widget.sub.label}": Loading...');
     } else {

@@ -1,7 +1,7 @@
 # 🗄️ Supabase Architecture Documentation
 
-> **Letzte Aktualisierung:** 27.01.2025  
-> **Version:** 1.5  
+> **Letzte Aktualisierung:** 12.02.2025  
+> **Version:** 1.6  
 > **Status:** ✅ Aktive Entwicklung
 
 ## 📋 Übersicht
@@ -87,6 +87,35 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 
 ---
 
+### 4. `user_word_srs` - Modus-spezifischer SRS-Zustand
+
+**Zweck:** Speichert SRS-Progress pro User/Wort/Kategorie/Modus (time, adaptive, hybrid)
+
+**Felder:**
+
+- `user_id`, `word_id`, `category_id`, `mode` (PK)
+- `stage` (Integer) - SRS-Stufe 0–5
+- `ef`, `streak`, `lapses` - SM-2-ähnliche Metriken
+- `next_due_at`, `last_reviewed_at` - Zeitstempel
+
+**Verwendung in der App:**
+
+- `fetchLearnQueueForMode()` - Queue via `v_words_user_srs` abfragen
+- `submitReview()` - Review via `fn_user_review_time_mode`, `fn_user_review_hybrid_mode`, `fn_user_review_mode`
+- `fn_user_category_progress` - Stage-Zähler für UI
+
+**Aktionen:** SELECT, INSERT, UPDATE
+
+---
+
+### 5. `a_refill_state` / `a_deck_state` - A-SRS State
+
+**Zweck:** A-SRS Refill-Zähler und Deck-State (Text-Keys für user_id, category_id)
+
+**Verwendung:** `fn_a_srs_refill_enroll`, `fn_user_learn_queue_adaptive_impl`, `fn_a_srs_next_refill_counter`
+
+---
+
 ## 👁️ Views (Sichten)
 
 ### 4. `words_view` - Wörter-View
@@ -136,6 +165,14 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 
 ---
 
+### 7. `v_words_user_srs` - Wörter mit SRS-Daten pro Modus
+
+**Zweck:** View mit Word-Details + SRS-Daten für time/adaptive/hybrid; `word_id`, `srs_stage_user`, `next_due_at`
+
+**Verwendung:** `fetchLearnQueueForMode`, `fetchLearnQueueAdaptive`, `fetchWordUserViewsByIds()` – zentrale Quelle für alle SRS-Modi
+
+---
+
 ## ⚙️ RPC Functions (Stored Procedures)
 
 ### Lern-System Functions
@@ -161,32 +198,36 @@ Diese Dokumentation beschreibt alle Supabase-Tabellen, Views, RPC Functions und 
 **Rückgabe:** Liste von `WordUserView`
 **Verwendung:** `fetchLearnQueueAll()` - Komplette Lern-Queue
 
-#### `fn_user_learn_queue_mode`
+#### `fetch_learn_queue_for_mode`
 
-**Zweck:** Lern-Queue mit verschiedenen Modi
-**Parameter:**
+**Zweck:** Lern-Queue für T-SRS und Hybrid (mit stage-Parameter)
+**Parameter:** `p_category_id`, `p_mode`, `p_stage`, `p_limit`
 
-- `category_id` (String) - Kategorie-ID
-- `mode` (String) - 'all', 'reviews', 'single'
-- `single_stage` (Integer?) - Nur bei mode='single'
-- `limit` (Integer) - Maximale Anzahl Wörter (Standard: 50)
-  **Rückgabe:** Liste von `WordUserView`
-  **Verwendung:** `fetchLearnQueueForMode()` - Modus-basierte Lern-Queue
+#### `fn_user_learn_queue_adaptive_impl`
+
+**Zweck:** A-SRS Lern-Queue (S1–S5, ohne S0); nutzt `a_refill_state`, `a_deck_state`
 
 #### `fn_user_review_mode`
 
-**Zweck:** Review-Ergebnis verarbeiten mit SRS-Modus-Unterstützung
-**Parameter:**
+**Zweck:** Review für A-SRS (adaptive Mode)
+**Parameter:** `p_word`, `p_result`, `p_mode` (adaptive)
+**Rückgabe:** `srs_stage`, `next_due_at`
 
-- `p_word` (String) - Wort-ID
-- `p_result` (Boolean) - Richtig/Falsch
-- `p_mode` (String) - SRS-Modus: 'time', 'adaptive', 'hybrid'
-  **Rückgabe:** `srs_stage` (Integer), `next_due_at` (String)
-  **Verwendung:** `submitReview()` - SRS-Algorithmus mit modus-spezifischer Logik
+#### `fn_user_review_time_mode`
+
+**Zweck:** Review für T-SRS (time Mode); persistiert in `user_word_srs` mode='time'
+
+#### `fn_user_review_hybrid_mode`
+
+**Zweck:** Review für Hybrid Mode; persistiert in `user_word_srs` mode='hybrid'
+
+#### `fn_a_srs_refill_enroll`, `fn_a_srs_s0_correct`, `fn_requeue_s0_fail`
+
+**Zweck:** A-SRS Refill, S0→S1 bei korrektem Swipe, S0 bei falschem Swipe zurück in Queue
 
 #### `fn_user_review` (veraltet)
 
-**Hinweis:** Diese Funktion wurde durch `fn_user_review_mode` ersetzt. Die neue Funktion unterstützt modus-spezifische SRS-Logik.
+**Hinweis:** Ersetzt durch `fn_user_review_mode`, `fn_user_review_time_mode`, `fn_user_review_hybrid_mode`.
 
 #### `fn_user_category_progress`
 
@@ -314,6 +355,8 @@ graph TD
 | `fn_user_category_progress` | Hoch       | Kritisch     |
 | `words`                     | Hoch       | Kritisch     |
 | `v_words_user`              | Hoch       | Kritisch     |
+| `v_words_user_srs`          | Hoch       | Kritisch     |
+| `user_word_srs`             | Hoch       | Kritisch     |
 | `user_words`                | Mittel     | Wichtig      |
 | `categories`                | Mittel     | Wichtig      |
 | `words_view`                | Mittel     | Wichtig      |
@@ -355,6 +398,14 @@ Die App unterstützt verschiedene Filter-Kategorien über `WordListFilter`:
 ---
 
 ## 📝 Changelog
+
+### Version 1.6 (12. Februar 2025)
+
+- ✅ `user_word_srs`: Modus-spezifischer SRS-Zustand (time/adaptive/hybrid)
+- ✅ `v_words_user_srs`: View mit 3 UNION-Branches für alle SRS-Modi
+- ✅ `fn_user_review_hybrid_mode`, `fn_user_review_time_mode`: Review-RPCs pro Modus
+- ✅ A-SRS: `fn_a_srs_refill_enroll`, `fn_a_srs_s0_correct`, `fn_requeue_s0_fail`, `fn_a_srs_next_refill_counter`
+- ✅ `a_refill_state`, `a_deck_state`: A-SRS State-Tabellen
 
 ### Version 1.5 (27. Januar 2025)
 

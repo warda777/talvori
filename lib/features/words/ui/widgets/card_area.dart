@@ -30,7 +30,11 @@ class CardArea extends ConsumerWidget {
     final c = ref.read(learnModeControllerProvider.notifier);
     final primaryLanguage = ref.watch(primaryLanguageProvider);
 
-    final word = current?.text ?? (s.shuffledWordIds.isEmpty ? 'Keine Wörter\nverfügbar' : '—');
+    final isEmpty = s.shuffledWordIds.isEmpty;
+    final hint = isEmpty
+        ? '\n\n(${s.emptyQueueHint ?? 'catId=${s.categoryId}'})'
+        : '';
+    final word = current?.text ?? (isEmpty ? 'Keine Wörter verfügbar$hint' : '—');
     final translation = current?.translation ?? '';
 
     // Hauptsprache bestimmt, welche Sprache auf der Vorderseite ist
@@ -52,7 +56,7 @@ class CardArea extends ConsumerWidget {
           srsStage: current?.srsStage,
           streak: current?.streak,
           showTranslation: s.showTranslation,
-          gesturesEnabled: !isPaused,
+          gesturesEnabled: !isPaused && !s.isSubmitting,
           footer: TimerBar(s: s),
           onSwipe: (correct) async {
             final paused = s.timerPaused;

@@ -50,7 +50,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   // Controller für Switch-Row Blink-Effekte
   final _switchCtrl = StageSwitchRowController();
 
-  // Plasma-Link Keys und State
+  // Plasma-Link: zeigt Herkunft der aktuellen Karte (Stage)
+  static const _plasmaLinkEnabled = true;
+
   final stackKey = GlobalKey();
   final cardKey = GlobalKey();
   final Map<int, GlobalKey> switchKeys = {
@@ -126,25 +128,19 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _updateLink(int? targetStage) {
-    // Im Single-Modus verwenden wir singleSwitchKeys
+    if (!_plasmaLinkEnabled) return;
     final mode = ref.read(levelSelectionProvider);
     GlobalKey? targetKey;
-    
     if (mode == LevelSelectionMode.single && targetStage == -1) {
-      // Single-Modus: zeige auf SRC-Switch
       targetKey = singleSwitchKeys['SRC'];
     } else if (targetStage != null && targetStage >= 0 && targetStage <= 5) {
-      // Normal-Modus: verwende switchKeys
       targetKey = switchKeys[targetStage];
     }
-    
-    if (cardKey.currentContext == null || targetKey?.currentContext == null) return;
+    if (targetKey == null) return;
+    if (cardKey.currentContext == null || targetKey!.currentContext == null) return;
     setState(() {
       cardRect = _rectInStack(cardKey);
-      final raw = _rectInStack(targetKey!);
-      // Kein deflate - der Key ist bereits auf dem Container ohne Glow
-      // Falls nötig, können wir später ein kleines deflate hinzufügen
-      switchRect = raw; // Kein deflate, da Key bereits auf Container ohne Glow liegt
+      switchRect = _rectInStack(targetKey!);
       linkVisible = true;
     });
   }
@@ -178,7 +174,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
-      // Im Single-Modus zeigen wir immer auf den SRC-Switch
       _updateLink(-1);
       return;
     }
@@ -186,15 +181,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final current = ref.read(currentWordProvider);
     if (current == null) return;
 
-    int? targetStage;
-    if (dx > threshold) {
-      // Rechts = Correct = Streak-basierte Berechnung
-      targetStage = _getNextStageForLink(current.srsStage, current.streak, true);
-    } else {
-      // Links = Incorrect = Stage runter (bleibt in aktueller Stage)
-      targetStage = _getNextStageForLink(current.srsStage, current.streak, false);
-    }
-
+    // Link zeigt auf die aktuelle Stage (Herkunft der Karte) – immer korrekt
+    final targetStage = current.srsStage.clamp(0, 5);
     _updateLink(targetStage);
   }
 
@@ -213,12 +201,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _handleSwipeCommit(bool correct) {
+    if (ref.read(learnModeControllerProvider).isSubmitting) return;
+    ref.read(learnModeControllerProvider.notifier).setSubmitting(true);
+
     // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes innerhalb von 250ms)
     final now = DateTime.now();
     if (_lastSwipeCommitAt != null &&
         now.difference(_lastSwipeCommitAt!) < const Duration(milliseconds: 250)) {
-      // Debug optional:
       debugPrint('🧯 SwipeCommit THROTTLED (duplicate within 250ms)');
+      ref.read(learnModeControllerProvider.notifier).setSubmitting(false);
       return;
     }
     _lastSwipeCommitAt = now;
@@ -279,34 +270,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         }
       });
     } else {
-      // Normal-Modus
+      // Normal-Modus: Pulse nur bei correct (Ziel-Stage ist klar)
       final current = ref.read(currentWordProvider);
       if (current != null) {
-        // ✅ Streak-basierte Berechnung für Pulse/Bounce
-        // Bounce zeigt auf die ZIEL-Stage (wohin die Karte nach dem Swipe wandert)
-        final targetStage = _getTargetStageForBounce(current.srsStage, current.streak, correct);
-        
-        debugPrint('🎯 Bounce-Berechnung: currentStage=${current.srsStage}, streak=${current.streak}, correct=$correct → targetStage=$targetStage');
-
-        // ✅ Link kurz auf Ziel-Stage zeigen (wohin die Karte wandert)
+        final targetStage = _getTargetStageForBounce(current.srsStage, current.passCount, correct);
         if (targetStage != null) {
-          // Zeige Link kurz auf Ziel-Stage
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted) {
-              _updateLink(targetStage);
-            }
-          });
-        }
-
-        // Pulse-Animation beim Commit (nur wenn targetStage != null und nicht S0)
-        if (targetStage != null) {
-          debugPrint('💥 Trigger Pulse auf Stage $targetStage');
           triggerPulse(targetStage);
-        } else {
-          debugPrint('⚠️ Kein Bounce: targetStage ist null');
         }
-      } else {
-        debugPrint('⚠️ Kein Bounce: current ist null');
       }
     }
 
@@ -322,123 +292,99 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     });
   }
 
-  /// Berechnet die nächste Stage für Link basierend auf aktueller Stage und Streak.
-  /// Zeigt an, wohin die Karte wandern KÖNNTE (wenn Streak ausreicht).
-  /// Regeln:
-  /// - S0 → S1: Streak 1 (1x richtig)
-  /// - S1 → S2: Streak 2 (2x richtig)
-  /// - S2 → S3: Streak 2 (2x richtig)
-  /// - S3 → S4: Streak 2 (2x richtig)
-  /// - S4 → S5: Streak 3 (3x richtig)
-  /// - S5 → gelernt: Streak 3 (3x richtig)
+  /// Berechnet die nächste Stage für Link (z.B. beim Drag).
+  /// Exakt abgestimmt auf fn_user_review_time_mode, fn_user_review_hybrid_mode, fn_user_review_mode_text.
   int? _getNextStageForLink(int currentStage, int currentStreak, bool correct) {
+    final srs = ref.read(srsModeControllerProvider).mode;
+
+    // T-SRS und Hybrid: identische Server-Logik (fn_user_review_time_mode / fn_user_review_hybrid_mode)
+    if (srs == SrsSystem.time || srs == SrsSystem.hybrid) {
+      if (correct) {
+        return currentStage < 5 ? currentStage + 1 : 5;
+      }
+      // Wrong: S0→S0, T1/H1→T1/H1 (bleibt!), T2/H2→T1/H1, ...
+      if (currentStage <= 0) return 0;
+      if (currentStage == 1) return 1;  // T1/H1 wrong bleibt in T1/H1
+      return currentStage - 1;
+    }
+
+    // A-SRS: fn_user_review_mode_text - Streak-basiert bei correct, S1 bleibt bei wrong
     if (!correct) {
-      // Bei falscher Antwort: zeigt auf aktuelle Stage (bleibt)
-      return currentStage;
+      // Wrong: S1→S1, S2→S1, S3→S2, ...
+      return (currentStage - 1).clamp(1, 5);
     }
-
-    // Streak-Anforderungen pro Stage
     final requiredStreak = switch (currentStage) {
-      0 => 1, // S0 → S1: 1x richtig
-      1 => 2, // S1 → S2: 2x richtig
-      2 => 2, // S2 → S3: 2x richtig
-      3 => 2, // S3 → S4: 2x richtig
-      4 => 3, // S4 → S5: 3x richtig
-      5 => 3, // S5 → gelernt: 3x richtig
-      _ => 1,
+      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
     };
-
-    // Wenn Streak noch nicht erreicht → zeigt auf aktuelle Stage
-    if (currentStreak < requiredStreak) {
-      return currentStage;
-    }
-
-    // Wenn Streak erreicht → zeigt auf nächste Stage
-    if (currentStage < 5) {
-      return currentStage + 1;
-    }
-
-    // S5 bleibt bei S5 (wird als gelernt markiert)
-    return 5;
+    if (currentStreak + 1 < requiredStreak) return currentStage;  // bleibt
+    return currentStage < 5 ? currentStage + 1 : 5;
   }
 
   /// Berechnet die tatsächliche Ziel-Stage für Bounce nach einem Swipe.
-  /// Zeigt an, wohin die Karte TATSÄCHLICH wandert (nach dem Review).
-  /// WICHTIG: S0 selbst wird nie gebounct, aber wenn eine Karte von S0 nach S1 wandert, wird S1 gebounct.
-  int? _getTargetStageForBounce(int currentStage, int currentStreak, bool correct) {
-    if (!correct) {
-      // Bei falscher Antwort: Karte geht zurück (niedrigere Stage, aber nicht unter 0)
-      final targetStage = (currentStage - 1).clamp(0, 5);
-      // ✅ S0 wird nie gebounct (auch nicht wenn Karte nach S0 zurückgeht)
-      if (targetStage == 0) return null;
+  /// Exakt abgestimmt auf Supabase A-SRS: S1=2, S2=3, S3=3, S4=4, S5=5 (bis is_mastered).
+  /// Bounce bei: Stage up ODER Wiederholung in derselben Stage (pass_count+1 erreicht).
+  int? _getTargetStageForBounce(int currentStage, int passCount, bool correct) {
+    final srs = ref.read(srsModeControllerProvider).mode;
+
+    // T-SRS und Hybrid: identische Logik
+    if (srs == SrsSystem.time || srs == SrsSystem.hybrid) {
+      int targetStage;
+      if (correct) {
+        targetStage = currentStage < 5 ? currentStage + 1 : 5;
+      } else {
+        if (currentStage <= 0) targetStage = 0;
+        else if (currentStage == 1) targetStage = 1;  // T1/H1 wrong bleibt
+        else targetStage = currentStage - 1;
+      }
+      if (targetStage == 0) return null;  // S0 wird nie gebounct
       return targetStage;
     }
 
-    // ✅ Bei richtiger Antwort: Der Streak wird nach dem Review erhöht!
-    // Daher müssen wir den "zukünftigen" Streak berechnen: currentStreak + 1
-    final futureStreak = currentStreak + 1;
-    
-    // Prüfe ob der zukünftige Streak ausreicht
-    final requiredStreak = switch (currentStage) {
-      0 => 1, // S0 → S1: 1x richtig
-      1 => 2, // S1 → S2: 2x richtig
-      2 => 2, // S2 → S3: 2x richtig
-      3 => 2, // S3 → S4: 2x richtig
-      4 => 3, // S4 → S5: 3x richtig
-      5 => 3, // S5 → gelernt: 3x richtig
-      _ => 1,
-    };
-
-    // ✅ Wenn zukünftiger Streak ausreicht → wandert zur nächsten Stage
-    if (futureStreak >= requiredStreak) {
-      // Die ZIEL-Stage wird gebounct (auch wenn es S1 ist, wenn Karte von S0 kommt)
-      if (currentStage < 5) {
-        return currentStage + 1;
-      }
-      // S5 bleibt bei S5 (wird als gelernt markiert)
-      return 5;
+    // A-SRS: pass_count-basiert (Supabase-Logik)
+    if (!correct) {
+      final targetStage = (currentStage - 1).clamp(1, 5);  // S1 bleibt S1
+      return targetStage;
     }
-
-    // ✅ Wenn zukünftiger Streak noch nicht ausreicht → bleibt in aktueller Stage
-    // Wenn Karte in S0 bleibt → kein Bounce (S0 wird nie gebounct)
-    if (currentStage == 0) return null;
-    // Wenn Karte in anderer Stage bleibt → diese Stage bouncen
-    return currentStage;
+    final futurePassCount = passCount + 1;
+    final requiredPass = switch (currentStage) {
+      0 => 1, 1 => 2, 2 => 3, 3 => 3, 4 => 4, 5 => 5, _ => 1,
+    };
+    if (futurePassCount >= requiredPass) {
+      final targetStage = currentStage < 5 ? currentStage + 1 : 5;
+      return targetStage;
+    }
+    return currentStage;  // bleibt in currentStage (Wiederholung zählt)
   }
 
   /// Ziel-Stage für Idle-Karte (noch nicht geswiped)
-  /// Zeigt auf die nächste Stage, wohin die Karte gehen KÖNNTE (wenn richtig beantwortet)
-  /// Berücksichtigt Streak: zeigt nur auf nächste Stage, wenn Streak ausreicht
+  /// Zeigt auf den AUSGANG: die Stage, in der die Karte aktuell ist.
+  /// So sieht der Nutzer sofort, wo die Karte „herkommt“.
   int? _targetStageForIdleCard() {
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
-      // Im Single-Modus zeigen wir immer auf den SRC-Switch
-      // Wir verwenden einen speziellen Wert (-1) um zu signalisieren, dass es Single-Modus ist
-      return -1; // Spezieller Wert für Single-Modus
+      return -1; // Single-Modus: SRC-Switch
     }
     final current = ref.read(currentWordProvider);
-    if (current == null) return 0; // Fallback: Stage 0
+    if (current == null) return 0; // Fallback
     
-    // ✅ Link zeigt immer die nächste Stage (wenn Streak ausreicht) oder aktuelle Stage (wenn nicht)
-    // Für Idle-Karte nehmen wir an, dass sie richtig beantwortet wird (correct = true)
-    final targetStage = _getNextStageForLink(current.srsStage, current.streak, true);
-    
-    // ✅ WICHTIG: Link zeigt die nächste Stage, nicht die aktuelle
-    // Wenn Streak ausreicht → zeigt auf nächste Stage
-    // Wenn Streak nicht ausreicht → zeigt auf aktuelle Stage (bleibt)
-    return targetStage;
+    // Link zeigt immer auf den Ausgang (aktuelle Stage der Karte)
+    return current.srsStage.clamp(0, 5);
   }
 
-  /// Link für aktuelle Karte anzeigen
   void _showLinkForCurrentCard() {
-    final targetStage = _targetStageForIdleCard();
-    _updateLink(targetStage);
+    if (!_plasmaLinkEnabled) return;
+    _updateLink(_targetStageForIdleCard());
   }
 
   @override
   void dispose() {
     // ✅ Provider Subscription schließen
     _stagesSub?.close();
+    // Learn-Screen ist nicht mehr aktiv (wichtig, damit CategoryDetail sofort mode-aktuelle Server-Counts zeigt).
+    // WICHTIG: Nach dem Build setzen, nicht während dispose (verursacht Provider-Modifikation-Fehler)
+    Future.microtask(() {
+      _controller.setInLearnScreen(false);
+    });
     fx.dispose();
     pulse.dispose();
     super.dispose();
@@ -492,6 +438,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }
     
     _controller = ref.read(learnModeControllerProvider.notifier);
+    // Markiere Learn-Screen als aktiv, damit Hub/CategoryDetail nur dann LearnState-Live-Counts nutzt,
+    // wenn dieser Screen wirklich offen ist.
+    // WICHTIG: Nach dem Build setzen, nicht während initState (verursacht Provider-Modifikation-Fehler)
+    Future.microtask(() {
+      if (mounted) {
+        _controller.setInLearnScreen(true);
+      }
+    });
 
     // Init nach 1. Frame (damit Provider hängt)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -680,15 +634,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             return innerCapsuleStrokeColor(t, kind);
         }
       }();
-      // Inner-Fill je Modus
+      // Inner-Fill je Modus (A-SRS: 542C78 Violett, Hybrid: 244B8B Blau)
       final innerFill = () {
         switch (kind) {
           case SrsKind.tSrs:
             return const Color(0xFF1A1A1A);
           case SrsKind.aSrs:
-            return const Color(0xFF162743);
+            return const Color(0xFF542C78);
           case SrsKind.neutral:
-            return const Color(0xFF2D2D2F);
+            return const Color(0xFF244B8B);
         }
       }();
       final prefix = switch (kind) {
@@ -729,15 +683,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             return innerCapsuleStrokeColor(t, kind);
         }
       }();
-      // Inner-Fill je Modus
+      // Inner-Fill je Modus (A-SRS: 542C78 Violett, Hybrid: 244B8B Blau)
       final innerFill = () {
         switch (kind) {
           case SrsKind.tSrs:
             return const Color(0xFF1A1A1A);
           case SrsKind.aSrs:
-            return const Color(0xFF162743);
+            return const Color(0xFF542C78);
           case SrsKind.neutral:
-            return const Color(0xFF2D2D2F);
+            return const Color(0xFF244B8B);
         }
       }();
       final prefix = switch (kind) {
@@ -746,15 +700,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         SrsKind.neutral => 'H',
       };
 
-      // ✅ A-SRS: Stages aus categoryProgressProvider verwenden (Server-Daten)
-      // T-SRS/Hybrid: Stages aus learnState verwenden (Live-Daten)
-      final List<int> stageCounts;
-      if (srsMode.mode == SrsSystem.adaptive && s.categoryId.isNotEmpty) {
-        final progAsync = ref.watch(categoryProgressProvider((catId: s.categoryId, srs: SrsSystem.adaptive)));
-        stageCounts = progAsync.value?.stages ?? const [0, 0, 0, 0, 0, 0];
-      } else {
-        stageCounts = s.stages;
-      }
+      // Switches sollen die echten Category-Stage-Counts anzeigen (z.B. S0=250),
+      // nicht nur das aktuell geladene A‑SRS-Deck (z.B. 20).
+      // Live-Updates passieren über LearnModeController (stages wird nach RPC/ServerProgress aktualisiert).
+      final List<int> stageCounts = s.stages;
 
       switchesRow = StageSwitchRow(
         controller: _switchCtrl,
@@ -836,7 +785,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                     cardRect: cardRect,
                     switchRect: switchRect,
                     phase: fx.value,
-                    visible: linkVisible,
+                    visible: _plasmaLinkEnabled && linkVisible,
                   ),
                   size: Size.infinite,
                 ),
