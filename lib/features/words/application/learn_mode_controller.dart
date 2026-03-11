@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,9 +66,29 @@ class LearnModeState {
   final bool hasLoadedReviews;
   /// Verhindert doppelte Swipe/Commit während RPC läuft
   final bool isSubmitting;
+  final bool isSubmittingReview;
 
   /// Sichtbare Diagnose wenn Queue leer (für Gerät ohne Terminal)
   final String? emptyQueueHint;
+
+  /// Alle Wörter in S5 (A5) – zeige "Final Start"-Button statt Deck
+  final bool showFinalStartButton;
+
+  /// Finale Phase aktiv (nach Klick auf Final Round)
+  final bool finalPassActive;
+
+  /// Kategorie vollständig absolviert (letztes Wort in S5 mastered) – Glückwunsch-UI, Feuerwerk, Restart
+  final bool categoryMastered;
+  /// Nach Feuerwerk: Restart-Button anzeigen (erst dann Reset möglich)
+  final bool categoryMasteredRestartReady;
+
+  /// A-SRS: Frische Runde noch nicht gestartet (kein erster Swipe).
+  /// Bei false: _ensureA_SrsRefill darf nicht automatisch enrollen (S0=total, S1-S5=0).
+  /// Wird beim ersten echten Swipe auf true gesetzt.
+  final bool hasStartedAdaptiveRound;
+
+  /// A-SRS: Nächsten Refill einmalig überspringen (nach erstem S0→S1 Enroll).
+  final bool skipNextAdaptiveRefill;
 
   const LearnModeState({
     this.categoryId = '',
@@ -107,7 +128,14 @@ class LearnModeState {
     this.cardsSwipedInSession = 0,
     this.hasLoadedReviews = false,
     this.isSubmitting = false,
+    this.isSubmittingReview = false,
     this.emptyQueueHint,
+    this.showFinalStartButton = false,
+    this.finalPassActive = false,
+    this.categoryMastered = false,
+    this.categoryMasteredRestartReady = false,
+    this.hasStartedAdaptiveRound = false,
+    this.skipNextAdaptiveRefill = false,
   });
 
   factory LearnModeState.initial() => const LearnModeState();
@@ -147,8 +175,15 @@ class LearnModeState {
     int? cardsSwipedInSession,
     bool? hasLoadedReviews,
     bool? isSubmitting,
+    bool? isSubmittingReview,
     String? emptyQueueHint,
     bool clearEmptyQueueHint = false,
+    bool? showFinalStartButton,
+    bool? finalPassActive,
+    bool? categoryMastered,
+    bool? categoryMasteredRestartReady,
+    bool? hasStartedAdaptiveRound,
+    bool? skipNextAdaptiveRefill,
   }) {
     return LearnModeState(
       categoryId: categoryId ?? this.categoryId,
@@ -185,7 +220,14 @@ class LearnModeState {
       cardsSwipedInSession: cardsSwipedInSession ?? this.cardsSwipedInSession,
       hasLoadedReviews: hasLoadedReviews ?? this.hasLoadedReviews,
       isSubmitting: isSubmitting ?? this.isSubmitting,
+      isSubmittingReview: isSubmittingReview ?? this.isSubmittingReview,
       emptyQueueHint: clearEmptyQueueHint ? null : (emptyQueueHint ?? this.emptyQueueHint),
+      showFinalStartButton: showFinalStartButton ?? this.showFinalStartButton,
+      finalPassActive: finalPassActive ?? this.finalPassActive,
+      categoryMastered: categoryMastered ?? this.categoryMastered,
+      categoryMasteredRestartReady: categoryMasteredRestartReady ?? this.categoryMasteredRestartReady,
+      hasStartedAdaptiveRound: hasStartedAdaptiveRound ?? this.hasStartedAdaptiveRound,
+      skipNextAdaptiveRefill: skipNextAdaptiveRefill ?? this.skipNextAdaptiveRefill,
     );
   }
 }
@@ -200,6 +242,9 @@ final learnModeControllerProvider =
 /// ---------- Controller ----------
 
 class LearnModeController extends Notifier<LearnModeState> {
+  int _answerRunId = 0;
+  int _progressRequestId = 0;
+
   @override
   LearnModeState build() {
     _didReset = false; // Reset-Flag zurücksetzen bei neuer Session
@@ -378,9 +423,9 @@ class LearnModeController extends Notifier<LearnModeState> {
   bool _isResetRunning = false;
   bool _didReset = false;
 
-  // Refill-Lock: verhindert parallele/doppelte Refill-Ausführung
-  DateTime? _lastAdaptiveRefillAt;
+  // Refill-Lock: verhindert parallele Refill-Ausführung
   bool _isAdaptiveRefillRunning = false;
+  static const int _refillTargetMinCards = 20; // Refill wenn enrolled < target
   
   // Getter für Reset-Status (für Navigation Result)
   bool get didReset => _didReset;
@@ -434,11 +479,16 @@ class LearnModeController extends Notifier<LearnModeState> {
     
     // 2) Learn-State NICHT mit [0,0,0,0,0,0] initialisieren,
     //    sondern mit den echten Stages (falls vorhanden)
+    //    Deck leeren bei Kategorie-Eintritt, damit _loadWords nicht skippt (kein altes Deck von anderer Kategorie)
     _set(
       categoryId: categoryId,
       title: title,
       stages: progStages ?? const [0, 0, 0, 0, 0, 0],
       totalWordsInCategory: progStages != null ? progTotal : 0,
+      wordQueue: const [],
+      shuffledWordIds: const [],
+      index: 0,
+      deckStages: const [0, 0, 0, 0, 0, 0],
     );
     // LearnModeScreen ist jetzt aktiv.
     state = state.copyWith(inLearnScreen: true);
@@ -609,6 +659,67 @@ class LearnModeController extends Notifier<LearnModeState> {
     }
   }
 
+  /// Nach Feuerwerk: Restart-Button freischalten
+  void setCategoryMasteredRestartReady() {
+    _set(categoryMasteredRestartReady: true);
+  }
+
+  /// A-SRS: Kategorie zurücksetzen (Restart nach Kategorie-Abschluss)
+  Future<void> resetAdaptiveCategory() async {
+    final catId = state.categoryId;
+    if (catId.isEmpty) return;
+
+    try {
+      await _repo.resetAdaptiveCategoryProgress(catId);
+
+      _set(
+        categoryMastered: false,
+        categoryMasteredRestartReady: false,
+        showFinalStartButton: false,
+        finalPassActive: false,
+        hasStartedAdaptiveRound: false,
+        skipNextAdaptiveRefill: false,
+        wordQueue: const [],
+        shuffledWordIds: const [],
+        index: 0,
+      );
+
+      await _loadWords(forceReload: true);
+      ResetEvent.notifyReset(catId);
+    } catch (e, st) {
+      print('⚠️ resetAdaptiveCategory failed: $e');
+      print(st);
+    }
+  }
+
+  /// A-SRS: Finale Runde starten (Button "Final Round")
+  Future<void> startFinalPass() async {
+    final catId = _currentCatId;
+    if (catId.isEmpty) return;
+    try {
+      // UI-State hart zurücksetzen, bevor _loadWords
+      _set(
+        finalPassActive: true,
+        showFinalStartButton: false,
+        shuffledWordIds: const [],
+        wordQueue: const [],
+        index: 0,
+        isSubmitting: false,
+        isSubmittingReview: false,
+        timerPaused: false,
+        categoryMasteredRestartReady: false,
+      );
+
+      await _repo.startAdaptiveFinalPass(categoryId: catId);
+      await _loadWords(forceReload: true);
+      print('🔥 startFinalPass DONE | finalPassActive=${state.finalPassActive} | '
+          'queue=${state.wordQueue.length} | index=${state.index}');
+    } catch (e, st) {
+      print('⚠️ startFinalPass failed: $e');
+      print(st);
+    }
+  }
+
   // ---- Loading ----
 
   Future<void> _loadCategories() async {
@@ -677,10 +788,17 @@ class LearnModeController extends Notifier<LearnModeState> {
         srsSystem: ref.read(srsModeControllerProvider).mode,
       );
 
+      final progressReqId = ++_progressRequestId;
+      print('📡 progress fetch START reqId=$progressReqId');
       final prog = await _repo.fetchCategoryProgress(
         catId,
         srsSystem: ref.read(srsModeControllerProvider).mode,
       );
+      print('📡 progress fetch DONE reqId=$progressReqId stages=${prog.stages}');
+      if (progressReqId != _progressRequestId) {
+        print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+        return;
+      }
       
       // ⬇️ A-SRS: Server-Stages direkt verwenden (Stage 0 ist bereits korrekt)
       // ⬇️ Hybrid: Stage 0 = vocabsTotal - learnedWords (Legacy-Korrektur)
@@ -724,34 +842,60 @@ class LearnModeController extends Notifier<LearnModeState> {
   /// Gibt den Refill-Counter zurück
   /// [categoryId] optional – wenn nicht gesetzt, wird _currentCatId verwendet (wichtig bei Kategorie-Wechsel im Wheel)
   Future<int> _ensureA_SrsRefill({String? categoryId}) async {
+    if (state.skipNextAdaptiveRefill) {
+      print('⛔ Refill einmalig übersprungen: nach Reset / frische Runde');
+      _set(skipNextAdaptiveRefill: false);
+      return 0;
+    }
     if (_isAdaptiveRefillRunning) {
       print('⛔ Refill übersprungen: läuft bereits');
       return 0;
     }
 
-    final now = DateTime.now();
-    if (_lastAdaptiveRefillAt != null &&
-        now.difference(_lastAdaptiveRefillAt!) < const Duration(seconds: 2)) {
-      print('⛔ Refill übersprungen: Cooldown aktiv');
+    final srsSystem = ref.read(srsModeControllerProvider).mode;
+    if (srsSystem != SrsSystem.adaptive) return 0;
+
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      print('⚠️ _ensureA_SrsRefill: Kein User eingeloggt');
+      return 0;
+    }
+
+    final catId = categoryId ?? _currentCatId;
+    if (catId.isEmpty || _isVirtualCategory(catId)) return 0;
+
+    // Phase 1: Refill nur anhand S1-S4 prüfen.
+    // S5 zählt NICHT als aktive Phase-1-Karte.
+    final prog = await _repo.fetchCategoryProgress(
+      catId,
+      srsSystem: SrsSystem.adaptive,
+    );
+
+    final s0Count = prog.stages.length >= 1 ? prog.stages[0] : 0;
+    final activePhase1Cards = prog.stages.length >= 5
+        ? prog.stages.sublist(1, 5).fold<int>(0, (s, n) => s + n) // S1-S4
+        : 0;
+    final total = prog.total;
+
+    // 🛑 Frische Runde – nur vor dem ersten Swipe blockieren (nicht danach)
+    if (!state.hasStartedAdaptiveRound &&
+        s0Count == total &&
+        activePhase1Cards == 0) {
+      print('⛔ Refill übersprungen: frische Runde (noch kein Swipe)');
+      return 0;
+    }
+
+    // Nur dann abbrechen, wenn Phase 1 bereits voll ist.
+    // Sobald S0 noch Karten hat und S1-S4 unter Ziel liegen, weiter refillen.
+    if (activePhase1Cards >= _refillTargetMinCards || s0Count <= 0) {
+      print(
+        '⛔ Refill übersprungen: s0=$s0Count, activePhase1Cards=$activePhase1Cards >= target=$_refillTargetMinCards',
+      );
       return 0;
     }
 
     _isAdaptiveRefillRunning = true;
-    _lastAdaptiveRefillAt = now;
-
     try {
-      final srsSystem = ref.read(srsModeControllerProvider).mode;
-      if (srsSystem != SrsSystem.adaptive) return 0;
-
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        print('⚠️ _ensureA_SrsRefill: Kein User eingeloggt');
-        return 0;
-      }
-
-      final catId = categoryId ?? _currentCatId;
-      if (catId.isEmpty || _isVirtualCategory(catId)) return 0;
-
       final refillCounter = await _repo.nextRefillCounter(
         userId: userId,
         categoryId: catId,
@@ -763,14 +907,13 @@ class LearnModeController extends Notifier<LearnModeState> {
         categoryId: catId,
       );
 
-      // enrolled = Wörter im Lernkreislauf (stage > 0 && !isMastered) aus Progress
-      final prog = await _repo.fetchCategoryProgress(catId, srsSystem: SrsSystem.adaptive);
-      final enrolled = prog.stages.length >= 6
-          ? prog.stages.sublist(1, 6).fold<int>(0, (s, n) => s + n)
+      final progAfter = await _repo.fetchCategoryProgress(catId, srsSystem: SrsSystem.adaptive);
+      final enrolledAfter = progAfter.stages.length >= 6
+          ? progAfter.stages.sublist(1, 6).fold<int>(0, (s, n) => s + n)
           : 0;
 
       print(
-        '✅ A-SRS Refill: category=$catId, refillCounter=$refillCounter, enrolled=$enrolled',
+        '✅ A-SRS Refill: category=$catId, refillCounter=$refillCounter, enrolled=$enrolledAfter (vorher: activePhase1=$activePhase1Cards, s0=$s0Count)',
       );
 
       return refillCounter;
@@ -796,8 +939,12 @@ class LearnModeController extends Notifier<LearnModeState> {
     }
     
     // ✅ Schritt 1: A-SRS frühzeitig "locken" – _loadWords darf NICHT nochmal laufen (außer forceReload)
-    if (!forceReload && srs == SrsSystem.adaptive && state.wordQueue.isNotEmpty) {
-      print('🛑 _loadWords SKIP: A-SRS Deck bereits geladen');
+    // WICHTIG: Nur skippen, wenn das geladene Deck zur aktuellen Kategorie gehört (Kategorienwechsel!)
+    if (!forceReload &&
+        srs == SrsSystem.adaptive &&
+        state.wordQueue.isNotEmpty &&
+        state.categoryId == _currentCatId) {
+      print('🛑 _loadWords SKIP: A-SRS Deck bereits geladen (cat=${state.categoryId})');
       return;
     }
     
@@ -919,15 +1066,60 @@ class LearnModeController extends Notifier<LearnModeState> {
           _set(wordQueue: const [], shuffledWordIds: const [], index: 0);
           return;
         }
-        
+
+        final progressReqId = ++_progressRequestId;
+        print('📡 progress fetch START reqId=$progressReqId');
+        final p = await _repo.fetchCategoryProgress(catId, srsSystem: SrsSystem.adaptive);
+        print('📡 progress fetch DONE reqId=$progressReqId stages=${p.stages}');
+        if (progressReqId != _progressRequestId) {
+          print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+          return;
+        }
+        final stages = p.stages;
+        final hasOpenA1ToA4 = stages.length >= 5 &&
+            (stages[1] > 0 || stages[2] > 0 || stages[3] > 0 || stages[4] > 0);
+        final hasStage5 = stages.length > 5 && stages[5] > 0;
+
+        // ✅ Stages sofort setzen (z.B. nach "Neue Runde" – Zahlen direkt in S0 anzeigen)
+        _setStages(stages);
+        _set(totalWordsInCategory: p.total);
+
+        if (!hasOpenA1ToA4 && hasStage5 && !state.finalPassActive) {
+          print('🏁 _loadWords: Nur S5 übrig → Final Round Button, kein Auto-Deck');
+          _set(
+            shuffledWordIds: const [],
+            index: 0,
+            showFinalStartButton: true,
+            wordQueue: const [],
+            loading: false,
+          );
+          return;
+        }
+
         var queue = <WordUserView>[];
         print('A3 before fetchAdaptiveQueue');
         try {
+          // fn_fetch_adaptive_queue: Phase 1 (S1-S4) oder Phase 2 (nur S5) – Server-seitig
           queue = await _repo.fetchAdaptiveQueue(
             userId: userId,
             categoryId: catId,
-            limit: 80, // Deck-Größe: S1-S5 können ~62+ Wörter haben, plus S0
+            limit: 80,
           );
+          // Normale Phase: A5 NICHT laden (nur A1–A4)
+          if (!state.finalPassActive) {
+            queue = queue.where((w) => (w.srsStage ?? 0) < 5).toList();
+          }
+          // Deck leer + S5>0 → Final Round Button (nicht automatisch S5 starten)
+          if (queue.isEmpty && p.stages.length >= 6 && p.stages[5] > 0) {
+            _set(
+              showFinalStartButton: true,
+              wordQueue: const [],
+              shuffledWordIds: const [],
+              index: 0,
+              loading: false,
+            );
+            return;
+          }
           print('A3 ok: queue.length=${queue.length}');
         } catch (e, st) {
           print('A3 FAIL: $e');
@@ -943,21 +1135,72 @@ class LearnModeController extends Notifier<LearnModeState> {
         if (queue.isEmpty && !_isVirtualCategory(catId)) {
           print('A4 before fallback enroll');
           try {
+            // ✅ Alle mastered: NUR wenn masteredCount >= total (nicht bei Reset: stages=[0,0,0,0,0,0] + queue leer)
+            final progressReqId = ++_progressRequestId;
+            print('📡 progress fetch START reqId=$progressReqId');
+            final pCheck = await _repo.fetchCategoryProgress(catId, srsSystem: SrsSystem.adaptive);
+            print('📡 progress fetch DONE reqId=$progressReqId stages=${pCheck.stages}');
+            if (progressReqId != _progressRequestId) {
+              print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+              // Stale: mastered-Check überspringen, direkt enroll
+            } else {
+              final totalWords = pCheck.total;
+              final masteredCount = await ref.read(learnedInStage5Provider(catId).future).catchError((_) => 0);
+              if (masteredCount >= totalWords && totalWords > 0) {
+                _set(
+                  categoryMastered: true,
+                  categoryMasteredRestartReady: true,
+                  showFinalStartButton: false,
+                  wordQueue: const [],
+                  shuffledWordIds: const [],
+                  index: 0,
+                  masteredCount: masteredCount,
+                  loading: false,
+                );
+                print('✅ A-SRS: Alle $totalWords Wörter mastered (masteredCount=$masteredCount) → Restart-UI');
+                return;
+              }
+            }
+
             enrolledCount = await Supabase.instance.client.rpc('fn_enroll_user_category_mode', params: {
               'p_category_id': catId,
               'p_mode': 'adaptive',
               'p_user': userId,
             }) as int? ?? 0;
-            queue = await _repo.fetchAdaptiveQueue(userId: userId, categoryId: catId, limit: 80);
+            // Nach Enroll: erneut laden. Bootstrap NUR wenn leer (kein anderer Codepfad lädt Bootstrap).
+            final adaptiveQueue = await _repo.fetchAdaptiveQueue(userId: userId, categoryId: catId, limit: 80);
+            final filtered = !state.finalPassActive
+                ? adaptiveQueue.where((w) => (w.srsStage ?? 0) < 5).toList()
+                : adaptiveQueue;
+            if (filtered.isNotEmpty) {
+              queue = filtered;
+            } else {
+              final isFinalRound = state.finalPassActive || state.activeStage == 5;
+              if (isFinalRound) {
+                queue = [];
+              } else {
+                queue = await _repo.fetchAdaptiveQueueBootstrap(
+                  userId: userId,
+                  categoryId: catId,
+                  limit: 80,
+                );
+                if (!state.finalPassActive) {
+                  queue = queue.where((w) => (w.srsStage ?? 0) < 5).toList();
+                }
+                bootstrapCount = queue.length;
+              }
+            }
             rpcSecond = queue.length;
-            // ✅ Bootstrap: Wenn RPC weiterhin leer, Wörter direkt aus Kategorie laden
-            if (queue.isEmpty) {
-              queue = await _repo.fetchAdaptiveQueueBootstrap(
-                userId: userId,
-                categoryId: catId,
-                limit: 80,
+            // Nach Fallback: Deck leer + S5>0 → Final Round Button
+            if (queue.isEmpty && pCheck.stages.length >= 6 && pCheck.stages[5] > 0) {
+              _set(
+                showFinalStartButton: true,
+                wordQueue: const [],
+                shuffledWordIds: const [],
+                index: 0,
+                loading: false,
               );
-              bootstrapCount = queue.length;
+              return;
             }
             print('A4 ok');
           } catch (e, st) {
@@ -973,43 +1216,40 @@ class LearnModeController extends Notifier<LearnModeState> {
         //   queue = queue.where((w) => w.srsStage != 0).toList();
         // }
         
-        // queue: List<WordUserView> mit stage/due aus Server-Sicht
-        final deckStages = _countStages(queue); // helper: counts [S0..S5]
-        final shuffledIds = queue.map((w) => w.id).toList();
-        
-        // ✅ A-SRS: Wenn die Queue leer ist, nicht crashen (Backend/Eligibility kann leer liefern).
-        if (queue.isEmpty || shuffledIds.isEmpty) {
-          int catCount = 0;
-          try {
-            catCount = await Supabase.instance.client.rpc('fn_category_word_count', params: {'p_category_id': catId}) as int? ?? 0;
-          } catch (e) {
-            print('⚠️ A-SRS Diagnose: fn_category_word_count Fehler: $e');
-          }
-          // Diagnose auf Karte sichtbar (kompakt, da maxLines begrenzt)
-          String hint = 'catId=$catId catCount=$catCount | rpc1=$rpcFirst e=$enrolledCount rpc2=$rpcSecond b=$bootstrapCount s0Lock=$s0Locked';
-          if (s0Locked && catCount > 0) {
-            hint += '\n\nS0-Lock aktiv. Entsperre Fach 0 (Schloss-Icon) um neue Wörter zu lernen.';
-          }
-          print('⚠️ A-SRS: Server-Queue leer | $hint');
+        // ⚠️ Kein späterer Bootstrap-Aufruf: fetchAdaptiveQueueBootstrap läuft NUR
+        // wenn queue.isEmpty (siehe Fallback-Enroll-Block oben).
+
+        // Phase 1: S5 darf NICHT im normalen Deck landen.
+        // Erst nach Klick auf "Final Round" dürfen S5-Wörter aktiv gespielt werden.
+        final isFinalRoundActive = state.finalPassActive;
+
+        final filteredQueue = isFinalRoundActive
+            ? queue
+            : queue.where((w) => (w.srsStage ?? 0) < 5).toList();
+
+        final deckStages = _countStages(filteredQueue);
+        final shuffledIds = filteredQueue.map((w) => w.id).toList();
+
+        if (filteredQueue.isEmpty || shuffledIds.isEmpty) {
           _set(
             wordQueue: const [],
             shuffledWordIds: const [],
             index: 0,
             deckStages: const [0, 0, 0, 0, 0, 0],
-            emptyQueueHint: hint,
+            clearEmptyQueueHint: true,
           );
           return;
         }
-        
+
         _set(
-          wordQueue: queue,
+          wordQueue: filteredQueue,
           shuffledWordIds: shuffledIds,
           index: 0,
           deckStages: deckStages,
           clearEmptyQueueHint: true,
         );
-        
-        print('✅ A-SRS: Server-Queue geladen | queue.length=${queue.length} | deckStages=$deckStages');
+
+        print('✅ A-SRS: Server-Queue geladen | queue.length=${filteredQueue.length} | deckStages=$deckStages');
         return; // ✅ A-SRS: Früher Return, kein weiterer Deck-Build
       } else {
         // T-SRS/Hybrid: Normaler Flow
@@ -1381,6 +1621,21 @@ class LearnModeController extends Notifier<LearnModeState> {
   // ---- Review / Antwort-Handling ----
 
   Future<void> _handleAnswer({required bool correct}) async {
+    print('🔥 ANSWER CHECK | finalPassActive=${state.finalPassActive} | '
+        'queue=${state.wordQueue.length} | index=${state.index}');
+    if (state.shuffledWordIds.isEmpty || state.index >= state.shuffledWordIds.length) {
+      debugPrint('⛔ _handleAnswer abgebrochen: kein aktives Deck vorhanden');
+      return;
+    }
+    final runId = ++_answerRunId;
+    print('🟢 _handleAnswer ENTER runId=$runId correct=$correct isSubmittingReview=${state.isSubmittingReview} index=${state.index}');
+    if (state.isSubmittingReview) return;
+    _set(
+      isSubmittingReview: true,
+      hasStartedAdaptiveRound: state.hasStartedAdaptiveRound ? null : true,
+    );
+    print('🟡 _handleAnswer LOCKED runId=$runId index=${state.index}');
+    try {
     developer.log('🎯 Swipe: correct=$correct', name: 'LearnMode');
     final mode = ref.read(levelSelectionProvider);
     final srsSystem = ref.read(srsModeControllerProvider).mode;
@@ -1518,6 +1773,7 @@ class LearnModeController extends Notifier<LearnModeState> {
       // Server-Update (nur wenn Fortschritt gespeichert wird)
       if (!ref.read(noSaveProgressProvider)) {
         try {
+          print('🔵 _handleAnswer BEFORE submitReview runId=$runId wordId=$currentId index=${state.index}');
           final result = await submitReview(
             _currentCatId,
             currentId,
@@ -1687,6 +1943,11 @@ class LearnModeController extends Notifier<LearnModeState> {
           }
           _setStages(updatedStages);
 
+          _set(
+            hasStartedAdaptiveRound: true,
+            skipNextAdaptiveRefill: true,
+          );
+
           // Provider invalidieren (Category Detail / Cards + Kapsel unter A5)
           ref.invalidate(categoryProgressProvider((catId: _currentCatId, srs: srsSystem)));
           ref.invalidate(learnedInStage5Provider(_currentCatId));
@@ -1784,13 +2045,19 @@ class LearnModeController extends Notifier<LearnModeState> {
       print('⚠️ Review nicht gespeichert (user=${Supabase.instance.client.auth.currentUser != null})');
     } else {
       try {
-        print('A-HANDLE before submitReview');
+        // ✅ Kein ref.read auf currentWordProvider/learnModeController – vermeidet CircularDependency
+        final catId = state.categoryId;
+        final wordId = current.id;
+        final correctValue = correct;
+        final srsSystemVal = srsSystem;
+        print('SUBMIT CHECK: currentIndex=${state.index} wordId=$wordId catId=$catId');
+        print('🔵 _handleAnswer BEFORE submitReview runId=$runId wordId=$wordId index=${state.index}');
         reviewResult = await submitReview(
-          _currentCatId,
-          currentId,
-          correct,
-          srsSystem: srsSystem,
-          oldStage: oldStage, // ✅ oldStage für Tracing übergeben
+          catId,
+          wordId,
+          correctValue,
+          srsSystem: srsSystemVal,
+          oldStage: oldStage,
         );
         serverStage = reviewResult!.stage;
         serverDue = reviewResult!.nextDueAt;
@@ -1799,11 +2066,19 @@ class LearnModeController extends Notifier<LearnModeState> {
 
         // 🧪 DEBUG: Server-Progress direkt nach submitReview() holen (zum Vergleich mit UI)
         try {
+          final progressReqId = ++_progressRequestId;
+          print('📡 progress fetch START reqId=$progressReqId');
           serverProgress = await _repo.fetchCategoryProgress(
             _currentCatId,
             srsSystem: srsSystem,
           );
-          print('🧪 After submitReview: serverProgress stages=${serverProgress.stages} total=${serverProgress.total} (cat=$_currentCatId, word=$currentId, oldStage=$oldStage, newStage=$serverStage)');
+          print('📡 progress fetch DONE reqId=$progressReqId stages=${serverProgress.stages}');
+          if (progressReqId != _progressRequestId) {
+            print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+            serverProgress = null;
+          } else {
+            print('🧪 After submitReview: serverProgress stages=${serverProgress.stages} total=${serverProgress.total} (cat=$_currentCatId, word=$currentId, oldStage=$oldStage, newStage=$serverStage)');
+          }
         } catch (e) {
           print('⚠️ Konnte Server-Progress nach submitReview nicht holen: $e');
           serverProgress = null;
@@ -1910,8 +2185,9 @@ class LearnModeController extends Notifier<LearnModeState> {
         print('⚠️ Konnte DB-Werte für Contract-Assertion nicht holen: $e');
       }
       
-      // ✅ Queue-Item updaten mit ALLEN Serverwerten (stage, streak, nextDueAt)
+      // ✅ Queue-Item updaten mit ALLEN Serverwerten (stage, streak, nextDueAt, passCount)
       final displayStreak = shouldSaveToServer ? (reviewResult?.streak ?? 0) : 0;
+      final displayPassCount = shouldSaveToServer ? (reviewResult?.passCount ?? 0) : 0;
       final updatedQueue = [
         for (final w in state.wordQueue)
           if (w.id == currentId)
@@ -1919,6 +2195,7 @@ class LearnModeController extends Notifier<LearnModeState> {
               srsStage: serverStage,
               nextDueAt: serverDue,
               streak: displayStreak,
+              passCount: displayPassCount,
             )
           else
             w
@@ -2010,6 +2287,7 @@ class LearnModeController extends Notifier<LearnModeState> {
         totalWordsInCategory: state.totalWordsInCategory,
         masteredBefore: masteredBefore,
         masteredAfter: state.masteredCount,
+        skipNextDueAtCheck: reviewResult?.isMastered ?? false, // A-SRS: mastered words – RPC kann next_due_at zurückgeben, DB evtl. nicht aktualisiert
       );
       
       // ⬇️ Provider invalidierten (für T-SRS/Hybrid, damit CategoryDetailScreen aktualisiert wird)
@@ -2126,7 +2404,41 @@ class LearnModeController extends Notifier<LearnModeState> {
 
       // ✅ A-SRS Retry-Regel: Bei falsch → Karte an Position (index+1+retry_delay) einfügen
       // retry_delay: 0 (active=1), 1 (2-5), 3 (6+)
-      if (!correct) {
+      // ✅ Final Round: S5 nicht-mastered → Re-Insert bei index+10 (überschreibt Retry)
+      final isFinalRoundS5NotMastered = state.finalPassActive &&
+          oldStage == 5 &&
+          !(reviewResult?.isMastered ?? true);
+
+      if (isFinalRoundS5NotMastered) {
+        // Final Round: Wort war in S5, noch nicht mastered → wieder bei index+8 einfügen
+        // (3× richtig nötig für mastered; mit +8 erscheint Wort seltener → erstes mastered ~24+ Swipes)
+        final ids = List<String>.from(state.shuffledWordIds);
+        final curPos = ids.indexOf(currentId);
+        if (curPos != -1) {
+          ids.removeAt(curPos);
+          final insertAt = (prevIndex + 8).clamp(0, ids.length);
+          ids.insert(insertAt, currentId);
+          final updatedDeckStages = _computeDeckStages(ids, state.wordQueue);
+          _set(shuffledWordIds: ids, deckStages: updatedDeckStages);
+          print('🔄 Final Round: $currentId (S5, nicht mastered) an Pos ${prevIndex + 8} eingefügt');
+        }
+      } else if (reviewResult?.isMastered ?? false) {
+        // Final Round: Wort mastered → aus Queue entfernen; wenn leer → categoryMastered
+        final ids = List<String>.from(state.shuffledWordIds);
+        final curPos = ids.indexOf(currentId);
+        if (curPos != -1) {
+          ids.removeAt(curPos);
+          final updatedDeckStages = _computeDeckStages(ids, state.wordQueue);
+          final becameEmpty = ids.isEmpty;
+          _set(
+            shuffledWordIds: ids,
+            deckStages: updatedDeckStages,
+            index: ids.isEmpty ? 0 : (prevIndex > ids.length - 1 ? ids.length - 1 : prevIndex),
+            categoryMastered: becameEmpty,
+          );
+          print('✅ Final Round: $currentId mastered, aus Queue entfernt. categoryMastered=$becameEmpty');
+        }
+      } else if (!correct) {
         final stagesForRetry = serverProgress?.stages ?? state.stages;
         final activeCount = stagesForRetry.length >= 6
             ? stagesForRetry.sublist(1, 6).fold<int>(0, (a, b) => a + b)
@@ -2373,6 +2685,10 @@ class LearnModeController extends Notifier<LearnModeState> {
     }
 
     _set(isSubmitting: false);
+  } finally {
+    print('🔴 _handleAnswer FINALLY runId=$runId index=${state.index}');
+    _set(isSubmittingReview: false);
+  }
   }
 
   // ---- Timer ----
@@ -3129,7 +3445,6 @@ class LearnModeController extends Notifier<LearnModeState> {
     final srsSystem = ref.read(srsModeControllerProvider).mode;
     
     if (srsSystem == SrsSystem.adaptive) {
-      // ✅ A-SRS: Refill-Counter erhöhen, dann neue Queue laden (sonst sind alle Wörter ineligible)
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) {
         print('⚠️ _advanceIndexAfterReview: Kein User eingeloggt für A-SRS');
@@ -3143,31 +3458,78 @@ class LearnModeController extends Notifier<LearnModeState> {
         );
         return;
       }
-      
+
+      // ✅ VOR dem Laden: Stages prüfen – bei nur S5 KEIN Auto-Deck, sondern Final Round Button
+      final progressReqId = ++_progressRequestId;
+      print('📡 progress fetch START reqId=$progressReqId');
+      final progress = await _repo.fetchCategoryProgress(state.categoryId!, srsSystem: SrsSystem.adaptive);
+      print('📡 progress fetch DONE reqId=$progressReqId stages=${progress.stages}');
+      if (progressReqId != _progressRequestId) {
+        print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+        return;
+      }
+      final stages = progress.stages;
+      final hasOpenA1ToA4 = stages.length >= 5 &&
+          (stages[1] > 0 || stages[2] > 0 || stages[3] > 0 || stages[4] > 0);
+      final hasStage5 = stages.length > 5 && stages[5] > 0;
+
+      if (!state.finalPassActive && !hasOpenA1ToA4 && hasStage5) {
+        // Kein Auto-Deck bauen – Final Round verfügbar
+        print('🏁 A-SRS: Nur S5 übrig → Final Round Button, kein Auto-Deck');
+        _set(
+          showFinalStartButton: true,
+          wordQueue: const [],
+          shuffledWordIds: const [],
+          index: 0,
+        );
+        return;
+      }
+
+      // ✅ Final Round: Kein Deck-Rebuild – wordQueue/shuffledWordIds beibehalten (Re-Inserts bleiben)
+      // Nur deckStages und index aktualisieren
+      if (state.finalPassActive) {
+        final deckStages = _computeDeckStages(state.shuffledWordIds, state.wordQueue);
+        _set(deckStages: deckStages, index: 0);
+        print('✅ A-SRS Final Round: Deck beibehalten, nur deckStages aktualisiert, index auf 0');
+        return;
+      }
+
+      if (state.index < state.shuffledWordIds.length - 1) {
+        return;
+      }
+
       await _ensureA_SrsRefill();
       
       var queue = await _repo.fetchAdaptiveQueue(
         userId: userId,
         categoryId: state.categoryId!,
-        limit: 80, // Deck-Größe: S1-S5 können ~62+ Wörter haben, plus S0
+        limit: 80,
       );
-      
-      // ✅ S0-Lock: Wenn Schloss aktiv (0 Sperre), Stage-0-Karten aus Queue filtern
-      final s0Locked = ref.read(s0LockedProvider(state.categoryId!)).maybeWhen(data: (v) => v, orElse: () => false);
-      // if (s0Locked) {
-      //   queue = queue.where((w) => w.srsStage != 0).toList();
-      // }
+
+      // ✅ Normale Phase: S5 NICHT laden (nur A1–A4)
+      queue = queue.where((w) => (w.srsStage ?? 0) < 5).toList();
       
       if (queue.isEmpty) {
-        print('🏁 Keine weiteren Karten verfügbar, Session beendet');
-        _set(
-          running: false,
-          timerActive: false,
-          timerPaused: false,
-          wordQueue: const [],
-          shuffledWordIds: const [],
-          index: 0,
-        );
+        // Nach Filter leer: ggf. Final Round (nur S5 übrig)
+        if (hasStage5) {
+          print('🏁 A-SRS: Queue leer nach Filter → Final Round Button');
+          _set(
+            showFinalStartButton: true,
+            wordQueue: const [],
+            shuffledWordIds: const [],
+            index: 0,
+          );
+        } else {
+          print('🏁 Keine weiteren Karten verfügbar, Session beendet');
+          _set(
+            running: false,
+            timerActive: false,
+            timerPaused: false,
+            wordQueue: const [],
+            shuffledWordIds: const [],
+            index: 0,
+          );
+        }
         return;
       }
       
@@ -3458,15 +3820,9 @@ class LearnModeController extends Notifier<LearnModeState> {
 
       print('✅ _performReset CALLED catId=$catId mode=$mode');
 
-      await sb.rpc('fn_reset_category_progress', params: {
-        'p_category_id': catId,
-        'p_mode': mode,
-        // p_user NICHT mitsenden
-      });
-
-      // ✅ A-SRS: Nach Reset sind user_word_srs leer – fn_enroll_user_category_mode neu seeden
-      // (fn_a_srs_intake/fn_a_srs_queue brauchen Stage-0-Rows)
       if (mode == 'adaptive') {
+        // A-SRS: fn_a_srs_reset_category_progress (setzt stage=0, ever_enrolled=false, etc.)
+        await _repo.resetAdaptiveCategoryProgress(catId);
         final userId = sb.auth.currentUser?.id;
         if (userId != null) {
           await sb.rpc('fn_enroll_user_category_mode', params: {
@@ -3476,6 +3832,11 @@ class LearnModeController extends Notifier<LearnModeState> {
           });
           print('✅ A-SRS: Nach Reset neu geseeded (fn_enroll_user_category_mode)');
         }
+      } else {
+        await sb.rpc('fn_reset_category_progress', params: {
+          'p_category_id': catId,
+          'p_mode': mode,
+        });
       }
 
       // nach erfolgreichem Reset
@@ -3491,14 +3852,23 @@ class LearnModeController extends Notifier<LearnModeState> {
         index: 0,
         recentlySwiped: const [],
         cardsSwipedInSession: 0,
+        categoryMastered: false,
+        categoryMasteredRestartReady: false,
       );
 
       // Fortschritt neu vom Server holen (zeigt dann Stage0=total)
       final srsSystem = ref.read(srsModeControllerProvider).mode;
+      final progressReqId = ++_progressRequestId;
+      print('📡 progress fetch START reqId=$progressReqId');
       final prog = await _repo.fetchCategoryProgress(
         catId,
         srsSystem: srsSystem,
       );
+      print('📡 progress fetch DONE reqId=$progressReqId stages=${prog.stages}');
+      if (progressReqId != _progressRequestId) {
+        print('⛔ progress fetch IGNORE stale reqId=$progressReqId latest=$_progressRequestId');
+        return;
+      }
       
       // ⬇️ Stage 0 für A-SRS/Hybrid korrigieren (vocabsTotal - learnedWords)
       var stagesToSet = prog.stages;
@@ -3512,6 +3882,16 @@ class LearnModeController extends Notifier<LearnModeState> {
       }
       
       _setStages(stagesToSet);
+
+      if (srsSystem == SrsSystem.adaptive) {
+        _set(
+          hasStartedAdaptiveRound: false,
+          skipNextAdaptiveRefill: true,
+          wordQueue: const [],
+          shuffledWordIds: const [],
+          index: 0,
+        );
+      }
 
       // Wörter neu laden
       await _loadWords();
@@ -3559,8 +3939,15 @@ class LearnModeController extends Notifier<LearnModeState> {
     int? cardsSwipedInSession,
     bool? hasLoadedReviews,
     bool? isSubmitting,
+    bool? isSubmittingReview,
     String? emptyQueueHint,
     bool clearEmptyQueueHint = false,
+    bool? showFinalStartButton,
+    bool? finalPassActive,
+    bool? categoryMastered,
+    bool? categoryMasteredRestartReady,
+    bool? hasStartedAdaptiveRound,
+    bool? skipNextAdaptiveRefill,
   }) {
     final oldStages = state.stages;
     state = state.copyWith(
@@ -3592,8 +3979,15 @@ class LearnModeController extends Notifier<LearnModeState> {
       cardsSwipedInSession: cardsSwipedInSession,
       hasLoadedReviews: hasLoadedReviews,
       isSubmitting: isSubmitting,
+      isSubmittingReview: isSubmittingReview,
       emptyQueueHint: emptyQueueHint,
       clearEmptyQueueHint: clearEmptyQueueHint,
+      showFinalStartButton: showFinalStartButton,
+      finalPassActive: finalPassActive,
+      categoryMastered: categoryMastered,
+      categoryMasteredRestartReady: categoryMasteredRestartReady,
+      hasStartedAdaptiveRound: hasStartedAdaptiveRound,
+      skipNextAdaptiveRefill: skipNextAdaptiveRefill,
     );
     
     // Debug: Logge wenn Stages geändert wurden
@@ -3631,11 +4025,14 @@ class LearnModeController extends Notifier<LearnModeState> {
     required int totalWordsInCategory,
     required int masteredBefore,
     required int masteredAfter,
+    bool skipNextDueAtCheck = false, // A-SRS: bei mastered words kann RPC next_due_at zurückgeben, DB evtl. unverändert
   }) {
     // 1) DB == RPC (Server truth)
     assert(dbStage == rpcStage, 'CONTRACT FAIL: dbStage($dbStage) != rpcStage($rpcStage) for $wordId');
-    assert(_eqDate(dbNextDueAt, rpcNextDueAt),
-        'CONTRACT FAIL: dbNextDueAt($dbNextDueAt) != rpcNextDueAt($rpcNextDueAt) for $wordId');
+    if (!skipNextDueAtCheck) {
+      assert(_eqDate(dbNextDueAt, rpcNextDueAt),
+          'CONTRACT FAIL: dbNextDueAt($dbNextDueAt) != rpcNextDueAt($rpcNextDueAt) for $wordId');
+    }
 
     // 2) Stages sum must stay stable (mastered = kleine Zahl unter A5)
     final masteredCount = state.masteredCount;

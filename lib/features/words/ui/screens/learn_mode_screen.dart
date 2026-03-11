@@ -15,8 +15,11 @@ import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart'
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
+import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart' show WordUserView;
+import 'package:talvori/core/ui/effects/fireworks_service.dart';
+import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
 
 
 class LearnModeScreen extends ConsumerStatefulWidget {
@@ -55,6 +58,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   final stackKey = GlobalKey();
   final cardKey = GlobalKey();
+  final passCountButtonKey = GlobalKey();
   final Map<int, GlobalKey> switchKeys = {
     0: GlobalKey(),
     1: GlobalKey(),
@@ -127,6 +131,25 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     return localTopLeft & box.size;
   }
 
+  /// Sichere Variante: gibt null zurück, wenn Element inactive oder nicht im Baum.
+  Rect? _tryRectInStack(GlobalKey key) {
+    try {
+      final stackContext = stackKey.currentContext;
+      final keyContext = key.currentContext;
+      if (stackContext == null || keyContext == null) return null;
+      final stackObj = stackContext.findRenderObject();
+      final keyObj = keyContext.findRenderObject();
+      if (stackObj is! RenderBox || keyObj is! RenderBox) return null;
+      final box = keyObj as RenderBox;
+      final stackBox = stackObj as RenderBox;
+      final globalTopLeft = box.localToGlobal(Offset.zero);
+      final localTopLeft = stackBox.globalToLocal(globalTopLeft);
+      return localTopLeft & box.size;
+    } catch (_) {
+      return null;
+    }
+  }
+
   void _updateLink(int? targetStage) {
     if (!_plasmaLinkEnabled) return;
     final mode = ref.read(levelSelectionProvider);
@@ -178,12 +201,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       return;
     }
 
-    final current = ref.read(currentWordProvider);
-    if (current == null) return;
-
-    // Link zeigt auf die aktuelle Stage (Herkunft der Karte) – immer korrekt
-    final targetStage = current.srsStage.clamp(0, 5);
-    _updateLink(targetStage);
+    // PlasmaLink zeigt immer die QUELLE der Karte (wo sie herkommt: Fach 0, A1, …),
+    // nicht das Ziel – damit man sieht, aus welchem Fach die Karte stammt
+    final targetStage = _targetStageForIdleCard();
+    if (targetStage != null && targetStage >= 0) {
+      _updateLink(targetStage);
+    }
   }
 
   void _handleDragEnd() {
@@ -192,16 +215,48 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _handleDragReturn() {
-    // Karte kommt zurück - Link wieder anzeigen nach kurzer Animation
-    Future.delayed(const Duration(milliseconds: 300), () {
+    // Karte kommt zurück - Link schnell wieder anzeigen
+    Future.delayed(const Duration(milliseconds: 80), () {
       if (mounted) {
         _showLinkForCurrentCard();
       }
     });
   }
 
+  /// Wird VOR der Karten-Animation aufgerufen (für Sparkle bei Stage-Up)
+  void _handleSwipeWillStart(BuildContext context, bool correct) {
+    if (!correct) return;
+    final srs = ref.read(srsModeControllerProvider).mode;
+    if (srs != SrsSystem.adaptive) return; // Nur A-SRS hat passCount
+    final current = ref.read(currentWordProvider);
+    if (current == null) return;
+    final passCount = current.passCount;
+    final currentStage = current.srsStage ?? 0;
+    // S1-S3: 2× richtig, S4-S5: 3× richtig
+    final requiredPass = switch (currentStage) {
+      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
+    };
+    // S5: pass_count auf 0..2 clamps (DB kann veraltete Werte haben), sonst korrekt
+    final effectivePassCount = (currentStage == 5) ? passCount.clamp(0, 2) : passCount;
+    final futurePassCount = effectivePassCount + 1;
+    // Zauberstaub nur bei S1→S2, S2→S3, … S5→mastered (grün→richtig), NICHT bei S0→S1 oder weiß/blau
+    if (currentStage > 0 && futurePassCount >= requiredPass) {
+      ArrowFlyService.showSparkleAtKey(
+        context: context,
+        key: passCountButtonKey,
+      );
+    }
+  }
+
   void _handleSwipeCommit(bool correct) {
-    if (ref.read(learnModeControllerProvider).isSubmitting) return;
+    final state = ref.read(learnModeControllerProvider);
+    debugPrint('🔥 ANSWER CHECK | finalPassActive=${state.finalPassActive} | '
+        'queue=${state.wordQueue.length} | index=${state.index}');
+    if (state.shuffledWordIds.isEmpty || state.index >= state.shuffledWordIds.length) {
+      debugPrint('⛔ _handleSwipeCommit abgebrochen: kein aktives Deck vorhanden');
+      return;
+    }
+    if (state.isSubmitting) return;
     ref.read(learnModeControllerProvider.notifier).setSubmitting(true);
 
     // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes innerhalb von 250ms)
@@ -270,7 +325,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         }
       });
     } else {
-      // Normal-Modus: Pulse nur bei correct (Ziel-Stage ist klar)
+      // Normal-Modus: Pulse bei correct (Ziel-Stage) und bei wrong (bleibt in derselben Stage)
       final current = ref.read(currentWordProvider);
       if (current != null) {
         final targetStage = _getTargetStageForBounce(current.srsStage, current.passCount, correct);
@@ -280,10 +335,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
     }
 
-    // Nach dem Swipe-Commit: Link für neue Karte aktivieren, NACH der Karten-Animation
-    // Karten-Animation: 300ms (raus) + 50ms (delay) + 400ms (rein) = 750ms
-    // Wir warten bis die Karte in Position ist (500ms nach dem Swipe-Commit)
-    Future.delayed(const Duration(milliseconds: 500), () {
+    // PlasmaLink für neue Karte: Wird vom currentWordProvider-Listener aktualisiert.
+    // Fallback nach 400ms falls Listener nicht feuert.
+    Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showLinkForCurrentCard();
@@ -340,14 +394,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       return targetStage;
     }
 
-    // A-SRS: pass_count-basiert (Supabase-Logik)
+    // A-SRS: Bei Falsch S1 bleibt S1, S2→S1, S3→S2, S4→S3, S5 bleibt S5
     if (!correct) {
-      final targetStage = (currentStage - 1).clamp(1, 5);  // S1 bleibt S1
-      return targetStage;
+      return (currentStage - 1).clamp(1, 5);
     }
-    final futurePassCount = passCount + 1;
+    final effectivePassCount = (currentStage == 5) ? passCount.clamp(0, 2) : passCount;
+    final futurePassCount = effectivePassCount + 1;
+    // S1-S3: 2× richtig, S4-S5: 3× richtig
     final requiredPass = switch (currentStage) {
-      0 => 1, 1 => 2, 2 => 3, 3 => 3, 4 => 4, 5 => 5, _ => 1,
+      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
     };
     if (futurePassCount >= requiredPass) {
       final targetStage = currentStage < 5 ? currentStage + 1 : 5;
@@ -358,17 +413,47 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   /// Ziel-Stage für Idle-Karte (noch nicht geswiped)
   /// Zeigt auf den AUSGANG: die Stage, in der die Karte aktuell ist.
-  /// So sieht der Nutzer sofort, wo die Karte „herkommt“.
+  /// WICHTIG: PlasmaLink darf nie auf einer leeren Stage stehen.
+  /// A-SRS Phase 1: S5 nie berühren – erst in Final Round (Phase 2).
   int? _targetStageForIdleCard() {
+    final state = ref.read(learnModeControllerProvider);
+    if (state.categoryMastered) return null; // Kein Link bei Kategorie-Abschluss
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
       return -1; // Single-Modus: SRC-Switch
     }
+    final stages = state.stages;
+    final srs = ref.read(srsModeControllerProvider).mode;
+    final isA_SrsPhase1 = srs == SrsSystem.adaptive && !state.finalPassActive;
+
+    // Hilfsfunktion: höchste Stage mit Wörtern (maxStage: A-SRS Phase 1 nur S0-S4)
+    int? _highestNonEmptyStage({int maxStage = 5}) {
+      for (int i = maxStage; i >= 0; i--) {
+        if (stages.length > i && stages[i] > 0) return i;
+      }
+      return null;
+    }
+
+    // A-SRS Final Round aktiv: S5 erlaubt
+    if (state.finalPassActive) {
+      return stages.length > 5 && stages[5] > 0 ? 5 : _highestNonEmptyStage() ?? 5;
+    }
+    // A-SRS Phase 1: S5 niemals – auch nicht bei showFinalStartButton
+    final maxStage = isA_SrsPhase1 ? 4 : 5;
+    if (state.showFinalStartButton) {
+      return _highestNonEmptyStage(maxStage: maxStage) ?? (isA_SrsPhase1 ? 4 : 5);
+    }
     final current = ref.read(currentWordProvider);
-    if (current == null) return 0; // Fallback
-    
-    // Link zeigt immer auf den Ausgang (aktuelle Stage der Karte)
-    return current.srsStage.clamp(0, 5);
+    if (current == null) return _highestNonEmptyStage(maxStage: maxStage) ?? 0;
+
+    int target = current.srsStage.clamp(0, maxStage);
+    // S0-Karte: immer Fach 0 zeigen (Pool, aus dem die Karte kommt)
+    if (target == 0) return 0;
+    // Nie auf leere Stage zeigen
+    if (stages.length <= target || stages[target] == 0) {
+      return _highestNonEmptyStage(maxStage: maxStage) ?? target;
+    }
+    return target;
   }
 
   void _showLinkForCurrentCard() {
@@ -409,6 +494,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         final nextStages = next.stages;
         if (prevStages != nextStages) {
           debugPrint("📊 stages changed: $prevStages -> $nextStages");
+        }
+        // PlasmaLink sofort aktualisieren, wenn Final Round startet (Layout hat sich geändert)
+        if (prev?.finalPassActive != next.finalPassActive && next.finalPassActive &&
+            next.shuffledWordIds.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (mounted) _showLinkForCurrentCard();
+              });
+            }
+          });
         }
       },
     );
@@ -455,8 +551,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         initialQuickSetsIndex: widget.categoryId == 'quicksets' ? _wheelIndex : null,
       );
       
-      // Link für erste Karte nach Layout aktivieren - warte bis Karte in Position ist
-      Future.delayed(const Duration(milliseconds: 500), () {
+      // Link für erste Karte schnell aktivieren
+      Future.delayed(const Duration(milliseconds: 150), () {
         if (mounted) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _showLinkForCurrentCard();
@@ -595,13 +691,25 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final allowed = ref.watch(allowedStagesProvider);
     final mask = List<bool>.generate(6, (i) => allowed.contains(i));
     
+    // Kategorie mastered: PlasmaLink ausblenden, Feuerwerk starten, nach 5s Restart-Button freischalten
+    ref.listen<bool>(learnModeControllerProvider.select((s) => s.categoryMastered), (prev, next) {
+      if (next && prev != true && mounted) {
+        _hideLink(); // PlasmaLink verschwindet, wenn Finale erreicht
+        FireworksService.show(context, duration: const Duration(seconds: 10));
+        Future.delayed(const Duration(seconds: 10), () {
+          if (mounted) {
+            ref.read(learnModeControllerProvider.notifier).setCategoryMasteredRestartReady();
+          }
+        });
+      }
+    });
+
     // Link aktualisieren, wenn sich die Karte ändert (nur wenn nicht gerade gedragt wird)
     // ABER: Warte bis die Karten-Animation fertig ist
     ref.listen<WordUserView?>(currentWordProvider, (previous, next) {
       if (previous?.id != next?.id && !linkVisible) {
-        // Karte hat sich geändert und Link ist nicht sichtbar (kein aktiver Drag)
-        // Warte bis die Karte in Position ist (500ms)
-        Future.delayed(const Duration(milliseconds: 500), () {
+        // Karte hat sich geändert – Link schnell anzeigen
+        Future.delayed(const Duration(milliseconds: 120), () {
           if (mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _showLinkForCurrentCard();
@@ -612,7 +720,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     });
 
     Widget switchesRow;
-    if (mode == LevelSelectionMode.single) {
+    if (s.categoryMastered) {
+      // Kategorie absolviert: Switch verschwindet, Mastered-Zahl blinkend in der Mitte
+      switchesRow = _MasteredCountBlink(count: s.masteredCount);
+    } else if (mode == LevelSelectionMode.single) {
       final st = ref.watch(singleStageProvider);                 // z.B. 2
       final counts = ref.watch(singleSessionCountsProvider);     // (src, sr1, sr2)
 
@@ -728,8 +839,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
         onTapS0: null, // Icon ist im Category Detail Screen, hier nicht benötigt
         switchKeys: switchKeys, // ← NEU: Keys für Plasma-Link
-    );
-  }
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -769,6 +880,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   onDragEnd: _handleDragEnd, // ← NEU
                   onDragReturn: _handleDragReturn, // ← NEU: Link wieder anzeigen wenn Karte zurückkommt
                   onSwipeCommit: _handleSwipeCommit, // ← NEU: Pulse-Animation
+                  onSettingsTap: () => showCardGlowSettingsPopup(context),
+                  passCountButtonKey: passCountButtonKey,
+                  onSwipeWillStart: _handleSwipeWillStart,
                 ),
                 switchesRow,
                 const SizedBox(height: WordsUIConstants.sectionSpacing), // Mehr Luft zwischen Switches und Buttons
@@ -776,19 +890,22 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               ],
             ),
 
-            // FX Overlay: Plasma-Link
+            // FX Overlay: Plasma-Link (verschwindet bei Kategorie-Abschluss)
             IgnorePointer(
               child: AnimatedBuilder(
                 animation: fx,
-                builder: (_, __) => CustomPaint(
-                  painter: PlasmaBandPainter(
-                    cardRect: cardRect,
-                    switchRect: switchRect,
-                    phase: fx.value,
-                    visible: _plasmaLinkEnabled && linkVisible,
-                  ),
-                  size: Size.infinite,
-                ),
+                builder: (_, __) {
+                  final hideForMastered = ref.watch(learnModeControllerProvider.select((s) => s.categoryMastered));
+                  return CustomPaint(
+                    painter: PlasmaBandPainter(
+                      cardRect: cardRect,
+                      switchRect: switchRect,
+                      phase: fx.value,
+                      visible: _plasmaLinkEnabled && linkVisible && !hideForMastered,
+                    ),
+                    size: Size.infinite,
+                  );
+                },
               ),
             ),
 
@@ -797,31 +914,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               child: AnimatedBuilder(
                 animation: pulse,
                 builder: (_, __) {
-                  GlobalKey? targetKey;
-                  
-                  // Prüfe ob Single-Modus oder Normal-Modus
-                  if (pulseSingleBucket != null) {
-                    // Single-Modus: verwende singleSwitchKeys
-                    targetKey = singleSwitchKeys[pulseSingleBucket];
-                  } else if (pulseStage != null) {
-                    // Normal-Modus: verwende switchKeys
-                    targetKey = switchKeys[pulseStage!];
-                    if (targetKey == null) {
-                      debugPrint('⚠️ Bounce: switchKeys[$pulseStage] ist null! Verfügbare Keys: ${switchKeys.keys.toList()}');
-                    }
-                  }
-                  
-                  if (targetKey?.currentContext == null) {
-                    if (pulseStage != null || pulseSingleBucket != null) {
-                      debugPrint('⚠️ Bounce: targetKey.currentContext ist null (pulseStage=$pulseStage, pulseSingleBucket=$pulseSingleBucket)');
-                    }
+                  if (!mounted) return const SizedBox.shrink();
+                  if (ref.read(learnModeControllerProvider).categoryMastered) {
                     return const SizedBox.shrink();
                   }
-
+                  GlobalKey? targetKey;
+                  if (pulseSingleBucket != null) {
+                    targetKey = singleSwitchKeys[pulseSingleBucket];
+                  } else if (pulseStage != null) {
+                    targetKey = switchKeys[pulseStage!];
+                  }
+                  if (targetKey == null) return const SizedBox.shrink();
+                  final rect = _tryRectInStack(targetKey);
+                  if (rect == null) return const SizedBox.shrink();
                   return CustomPaint(
                     painter: SwitchPulsePainter(
-                      rect: _rectInStack(targetKey!),
-                      t: Curves.easeOutCubic.transform(pulse.value), // Sanfterer, längerer Effekt
+                      rect: rect,
+                      t: Curves.easeOutCubic.transform(pulse.value),
                     ),
                     size: Size.infinite,
                   );
@@ -831,6 +940,70 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Blinkende Mastered-Zahl in der Mitte (während Feuerwerk)
+class _MasteredCountBlink extends StatefulWidget {
+  final int count;
+
+  const _MasteredCountBlink({required this.count});
+
+  @override
+  State<_MasteredCountBlink> createState() => _MasteredCountBlinkState();
+}
+
+class _MasteredCountBlinkState extends State<_MasteredCountBlink>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  static const _colors = [
+    Color(0xFFE4B866), // Gold
+    Color(0xFF4CAF50), // Grün
+    Color(0xFF2196F3), // Blau
+    Color(0xFF9C27B0), // Lila
+    Color(0xFFFF5722), // Orange
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, _) {
+        final idx = (_ctrl.value * _colors.length).floor() % _colors.length;
+        final color = _colors[idx];
+        return SizedBox(
+          height: 75,
+          child: Center(
+            child: Text(
+              '${widget.count}',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: color,
+                shadows: [
+                  Shadow(color: color.withOpacity(0.6), blurRadius: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

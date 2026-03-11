@@ -261,7 +261,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                                   ),
                                 ),
                               )
-                              else if (!loading && total > 0)
+                              else if (!loading)
                               Align(
                                 alignment: Alignment.bottomRight,
                                 child: _buildCount(total, countColor, isCountFocused, ref),

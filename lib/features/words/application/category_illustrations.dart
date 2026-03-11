@@ -12,6 +12,7 @@ class CategoryIllustrations {
     'food_cooking': Icons.restaurant_menu,
     'style_fashion': Icons.checkroom_outlined,
     'money_shopping': Icons.shopping_bag_outlined,
+    'productivity': Icons.task_alt_outlined,
 
     // People & Mind
     'personality': Icons.psychology_alt_outlined,

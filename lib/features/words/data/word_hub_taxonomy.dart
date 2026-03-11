@@ -27,6 +27,7 @@ const hubSections = <HubSection>[
       HubSubcat(key: 'food_cooking', label: 'Food & Cooking'),
       HubSubcat(key: 'style_fashion', label: 'Style & Fashion'),
       HubSubcat(key: 'money_shopping', label: 'Money & Shopping'),
+      HubSubcat(key: 'productivity', label: 'Productivity'),
     ],
   ),
   HubSection(

@@ -21,7 +21,7 @@ const mixGroups = <MixGroup>[
   MixGroup('Culture & Creativity', ['Art & Literature', 'Music & Entertainment']),
   MixGroup('Language Tools', ['Grammar & Syntax', 'Irregular Verbs', 'Phrases & Idioms', 'Top 500 Words']),
   MixGroup('Levels & Progress', ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
-  MixGroup('Life & Daily Flow', ['Food & Cooking', 'Health & Fitness', 'Home & Living', 'Money & Shopping', 'Style & Fashion']),
+  MixGroup('Life & Daily Flow', ['Food & Cooking', 'Health & Fitness', 'Home & Living', 'Money & Shopping', 'Produktivitie', 'Style & Fashion']),
   MixGroup('Nature & Beyond', ['Animals', 'Environment', 'Nature', 'Science', 'Space']),
   MixGroup('People & Mind', ['Feelings', 'Personality', 'Relationships', 'Thoughts']),
   MixGroup('Society & Systems', ['Law & Politics', 'Media & News', 'School & Studies', 'Tech & Innovation', 'Work & Careers']),

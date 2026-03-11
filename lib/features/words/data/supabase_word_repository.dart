@@ -35,6 +35,10 @@ class ReviewResult {
   final double ef;
   final int lapses;
   final DateTime? lastReviewedAt;
+  /// A-SRS: true wenn Wort gerade mastered wurde (is_mastered in DB)
+  final bool isMastered;
+  /// A-SRS: pass_count nach dem Review (0, 1 oder 2 in S5)
+  final int passCount;
 
   ReviewResult({
     required this.stage,
@@ -43,6 +47,8 @@ class ReviewResult {
     required this.ef,
     required this.lapses,
     this.lastReviewedAt,
+    this.isMastered = false,
+    this.passCount = 0,
   });
 }
 
@@ -56,6 +62,8 @@ class WordUserView {
   final bool pickedUser;
   final bool favoriteUser;
   final int srsStage;
+  /// Alias für srsStage (JSON: srs_stage_user) – für Debug/Filter
+  int get srsStageUser => srsStage;
   final DateTime? nextDueAt;
   final DateTime? userAddedAt;
   final bool isRequeue; // ✅ Requeue-Flag
@@ -403,6 +411,7 @@ Future<ReviewResult> submitReview(
       ef: ef,
       lapses: lapses,
       lastReviewedAt: lastReviewedAt,
+      passCount: 0, // T-SRS hat kein pass_count
     );
   } else {
     // A-SRS / Hybrid: Verwende fn_user_review_mode
@@ -502,7 +511,9 @@ Future<ReviewResult> submitReview(
       int streak = 0;
       double ef = 2.5;
       int lapses = 0;
+      int passCount = 0;
       DateTime? lastReviewedAt;
+      bool isMastered = false;
       
     try {
       // ✅ DB CHECK: Immer user_id + word_id + category_id + mode (Vollschlüssel)
@@ -527,6 +538,8 @@ Future<ReviewResult> submitReview(
         lastReviewedAt = lastReviewedStr != null ? DateTime.parse(lastReviewedStr) : null;
         
         debugPrint('db_stage=${dbRows['stage']}');
+        debugPrint('db_pass_count=${dbRows['pass_count']}');
+        debugPrint('db_is_mastered=${dbRows['is_mastered']}');
         debugPrint('db_streak=$streak');
         debugPrint('db_ef=$ef');
         debugPrint('db_lapses=$lapses');
@@ -541,6 +554,8 @@ Future<ReviewResult> submitReview(
         if (dbStage != stage) {
           debugPrint('⚠️ MISMATCH: RPC sagt stage=$stage, DB hat stage=$dbStage');
         }
+        isMastered = (dbRows['is_mastered'] as bool? ?? false);
+        passCount = (dbRows['pass_count'] as int?) ?? 0;
       } else {
         debugPrint('⚠️ DB CHECK: Keine Zeile gefunden für user_id=$userId, word_id=$wordId, category_id=$categoryId');
       }
@@ -556,6 +571,8 @@ Future<ReviewResult> submitReview(
         ef: ef,
         lapses: lapses,
         lastReviewedAt: lastReviewedAt,
+        isMastered: isMastered,
+        passCount: passCount,
       );
     } catch (e, st) {
       debugPrint('--- fn_user_review_mode TRACE (ERROR) [$traceId] ---');
@@ -751,54 +768,39 @@ Future<CategoryProgress> fetchCategoryProgress(
     return list.map((j) => WordUserView.fromJson(j)).toList();
   }
 
-  /// A-SRS Adaptive Queue (Contract-konform)
-  /// Lädt die Server-Queue für A-SRS mit limit
+  /// A-SRS Adaptive Queue (Phase 1: S1-S4, Phase 2: Final Round nur S5)
+  /// Nutzt fn_fetch_adaptive_queue – Server entscheidet Phase 1 vs Phase 2
   Future<List<WordUserView>> fetchAdaptiveQueue({
     required String userId,
     required String categoryId,
     required int limit,
   }) async {
     debugPrint('📥 fetchAdaptiveQueue: cat=$categoryId limit=$limit user=$userId');
-    
+
     final res = await _sb.rpc(
-      'fn_get_adaptive_queue_due',
+      'fn_fetch_adaptive_queue',
       params: {
         'p_user': userId,
-        'p_category_id': categoryId,
-        'p_take': limit,
+        'p_category': categoryId,
+        'p_limit': limit,
       },
     );
 
-    debugPrint('📥 fetchAdaptiveQueue: RPC response type=${res.runtimeType}, length=${res is List ? (res as List).length : 'N/A'}');
-    
     final rows = (res as List).cast<Map<String, dynamic>>();
-    
-    if (rows.isEmpty) {
-      debugPrint('⚠️ fetchAdaptiveQueue: Keine Rows zurückgegeben!');
-      return [];
-    }
-    
-    // RPC kann word_id oder out_word_id liefern (je nach Wrapper)
+    // RPC liefert: word_id, stage, pass_count, is_mastered
     final ids = rows
-        .map((r) => (r['word_id'] ?? r['out_word_id']) as String?)
+        .map((r) => (r['word_id'] as String?))
         .whereType<String>()
         .toList();
 
-    debugPrint('RPC rows count=${rows.length}');
-    if (rows.isNotEmpty) {
-      final fr = rows.first;
-      debugPrint('RPC first row ... srs_stage: ${fr['srs_stage'] ?? fr['out_srs_stage']}');
-    }
-    debugPrint('RPC ids sample=${ids.take(10).toList()}');
-
     if (ids.isEmpty) {
-      debugPrint('⚠️ fetchAdaptiveQueue: Keine IDs gefunden! firstRowKeys=${rows.isNotEmpty ? rows.first.keys.toList() : []}');
+      debugPrint('⚠️ fetchAdaptiveQueue: Keine Rows zurückgegeben');
       return [];
     }
 
     debugPrint('📥 fetchAdaptiveQueue: RPC lieferte ${ids.length} IDs');
 
-    // Details nachladen aus v_words_user_srs (srs_mode=adaptive für pass_count!)
+    // Details nachladen aus v_words_user_srs
     final data = await _sb
         .from('v_words_user_srs')
         .select('word_id,text,translation,level,'
@@ -808,17 +810,14 @@ Future<CategoryProgress> fetchCategoryProgress(
         .eq('category_id', categoryId)
         .eq('srs_mode', 'adaptive')
         .inFilter('word_id', ids);
-    
-    final viewRows = (data as List).cast<Map<String, dynamic>>();
-    debugPrint('viewRows count=${viewRows.length}');
-    debugPrint('viewRows first=${viewRows.isNotEmpty ? viewRows.first : 'EMPTY'}');
+
     final viewMap = {
-      for (final j in viewRows)
+      for (final j in (data as List).cast<Map<String, dynamic>>())
         (j['word_id'] as String): j
     };
     final rpcMap = <String, Map<String, dynamic>>{};
     for (final r in rows) {
-      final id = (r['word_id'] ?? r['out_word_id']) as String?;
+      final id = r['word_id'] as String?;
       if (id != null) rpcMap[id] = r;
     }
 
@@ -826,23 +825,32 @@ Future<CategoryProgress> fetchCategoryProgress(
     for (final id in ids) {
       final viewRow = viewMap[id];
       final rpcRow = rpcMap[id];
-      if (viewRow != null) {
-        // RPC srs_stage hat Vorrang (Queue-Source of Truth), sonst view srs_stage_user
+      if (viewRow != null && rpcRow != null) {
         final merged = Map<String, dynamic>.from(viewRow);
-        if (rpcRow != null) {
-          final rs = rpcRow['srs_stage'] ?? rpcRow['out_srs_stage'];
-          if (rs != null) merged['srs_stage'] = rs;
-        }
+        merged['srs_stage'] = rpcRow['stage'] as int;
+        merged['pass_count'] = rpcRow['pass_count'] as int;
         ordered.add(WordUserView.fromJson(merged));
+      } else if (viewRow != null) {
+        ordered.add(WordUserView.fromJson(viewRow));
       } else {
         debugPrint('⚠️ fetchAdaptiveQueue: Wort-ID $id nicht in v_words_user_srs gefunden!');
       }
     }
 
-    // Fallback: Wenn View leer liefert, direkt aus words + user_word_srs laden
     if (ordered.isEmpty && ids.isNotEmpty) {
-      debugPrint('📥 fetchAdaptiveQueue: View-Fallback → words + user_word_srs');
+      debugPrint('📥 fetchAdaptiveQueue: View-Fallback → _fetchWordDetailsDirect');
       ordered = await _fetchWordDetailsDirect(ids: ids, categoryId: categoryId, userId: userId);
+      // RPC stage/pass_count in Fallback-Ergebnis übernehmen
+      final rpcById = {for (final r in rows) (r['word_id'] as String): r};
+      for (var i = 0; i < ordered.length; i++) {
+        final rpc = rpcById[ordered[i].id];
+        if (rpc != null) {
+          ordered[i] = ordered[i].copyWith(
+            srsStage: rpc['stage'] as int,
+            passCount: rpc['pass_count'] as int,
+          );
+        }
+      }
     }
 
     debugPrint('📥 fetchAdaptiveQueue: ordered.length=${ordered.length}');
@@ -976,7 +984,7 @@ Future<CategoryProgress> fetchCategoryProgress(
     }
   }
 
-  /// Lern-Queue für A-SRS (nur fn_user_learn_queue_adaptive)
+  /// Lern-Queue für A-SRS (fn_get_adaptive_queue_due → fn_user_learn_queue_adaptive)
   Future<List<WordUserView>> fetchLearnQueueAdaptive(
     String categoryId, {
     int take = 2000,
@@ -989,11 +997,11 @@ Future<CategoryProgress> fetchCategoryProgress(
     debugPrint('📥 fetchLearnQueueAdaptive: cat=$categoryId take=$take user=$userId');
     
     final res = await _sb.rpc(
-      'fn_user_learn_queue_adaptive',
+      'fn_adaptive_queue_cli',
       params: {
-        'p_category_id': categoryId, // ✅ WICHTIG: Parameter-Name korrigiert
-        'p_take': take,
-        'p_user': userId,
+        'category_id': categoryId,
+        'user_id': userId,
+        'take_limit': take,
       },
     );
 
@@ -1279,9 +1287,9 @@ Future<CategoryProgress> fetchCategoryProgress(
     return (stage: stage, nextDueAt: nextDueAt);
   }
 
-  /// A-SRS Refill: S0 seeden (fn_enroll_user_category_mode).
-  /// fn_a_srs_intake wird NICHT hier aufgerufen – fn_user_learn_queue_adaptive_impl ruft es
-  /// bereits beim Queue-Abruf auf. Doppelter Aufruf führte zu 2 Karten in S1.
+  /// A-SRS Refill:
+  /// 1) fehlende user_word_srs-Zeilen anlegen
+  /// 2) genau 1 Wort von S0 nach S1 enrollen
   Future<int> refillAdaptiveEnroll({
     required String userId,
     required String categoryId,
@@ -1295,10 +1303,56 @@ Future<CategoryProgress> fetchCategoryProgress(
           'p_user': userId,
         },
       );
-      return 0;
+
+      final res = await _sb.rpc(
+        'fn_a_srs_refill_enroll',
+        params: {
+          'p_user': userId,
+          'p_category': categoryId,
+        },
+      );
+
+      final enrolled = (res as num?)?.toInt() ?? 0;
+      debugPrint('✅ refillAdaptiveEnroll: enrolled=$enrolled');
+      return enrolled;
     } catch (e) {
       debugPrint('⚠️ refillAdaptiveEnroll Fehler: $e');
       return 0;
+    }
+  }
+
+  /// A-SRS: Kategorie-Progress zurücksetzen (alle Wörter → S0)
+  Future<int> resetAdaptiveCategoryProgress(String categoryId) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('Kein User eingeloggt');
+    }
+
+    final result = await _sb.rpc(
+      'fn_a_srs_reset_category_progress',
+      params: {
+        'p_category_id': categoryId,
+        'p_user': userId,
+      },
+    );
+
+    return (result as num?)?.toInt() ?? 0;
+  }
+
+  /// A-SRS: Finale Phase starten (alle Wörter in S5 → Final Round)
+  Future<void> startAdaptiveFinalPass({required String categoryId}) async {
+    final userId = _sb.auth.currentUser?.id;
+    if (userId == null) return;
+    try {
+      await _sb.rpc(
+        'fn_a_srs_start_final_pass',
+        params: {
+          'p_category_id': categoryId,
+          'p_user': userId,
+        },
+      );
+    } catch (e) {
+      debugPrint('⚠️ startAdaptiveFinalPass Fehler: $e');
     }
   }
 

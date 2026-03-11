@@ -229,6 +229,87 @@ class _StartButtonPulseState extends State<StartButtonPulse>
   }
 }
 
+/// Final Round Button: Leichtes grünes Pochen (Glow-Pulse)
+class FinalRoundButtonPulse extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onPressed;
+
+  const FinalRoundButtonPulse({
+    super.key,
+    required this.child,
+    this.onPressed,
+  });
+
+  @override
+  State<FinalRoundButtonPulse> createState() => _FinalRoundButtonPulseState();
+}
+
+class _FinalRoundButtonPulseState extends State<FinalRoundButtonPulse>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _glow;
+
+  static const _green = Color(0xFF4CAF50);
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _glow = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.5, end: 1.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.5), weight: 50),
+    ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _ctrl.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onPressed() {
+    _ctrl.stop();
+    widget.onPressed?.call();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _onPressed,
+      child: AnimatedBuilder(
+        animation: _glow,
+        builder: (context, child) {
+          final v = _glow.value;
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: _green.withOpacity(0.7 * v),
+                  blurRadius: 20 * v,
+                  spreadRadius: 5 * v,
+                ),
+                BoxShadow(
+                  color: _green.withOpacity(0.5 * v),
+                  blurRadius: 36 * v,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: child,
+          );
+        },
+        child: IgnorePointer(child: widget.child),
+      ),
+    );
+  }
+}
+
 /// Vocabs-Kachel: Scale 1.0→1.05→1.0 + Elevation (200 ms)
 class VocabsTileTapAnimation extends StatefulWidget {
   final Widget child;

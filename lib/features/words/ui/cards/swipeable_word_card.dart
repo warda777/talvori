@@ -18,11 +18,15 @@ class SwipeableWordCard extends StatefulWidget {
   final Widget? footer;              // TimerBar etc.
   final int? srsStage;               // 0..5 (für Streak-Progress Anzeige)
   final int? streak;                 // korrekt-in-a-row in current stage
+  final int? passCount;              // A-SRS: wie oft in aktueller Stage richtig (0, 1, 2)
   final SwipeDecision onSwipe;       // true = right/correct, false = left/incorrect
   final VoidCallback onFlip;         // UI -> Controller.toggleFlip()
   final void Function(double dx)? onDragUpdate; // ← NEU: für Plasma-Link (dx für Stage-Berechnung)
   final VoidCallback? onDragEnd;     // ← NEU: für Plasma-Link verstecken
   final VoidCallback? onDragReturn;  // ← NEU: für Plasma-Link wieder anzeigen wenn Karte zurückkommt
+  final VoidCallback? onSettingsTap; // Glow-Einstellungen (fest auf der Vorderseite)
+  final GlobalKey? passCountButtonKey; // Für Sparkle-Effekt bei Stage-Up
+  final void Function(BuildContext context, bool correct)? onSwipeWillStart; // Vor Karten-Animation (für Sparkle)
 
   const SwipeableWordCard({
     super.key,
@@ -36,9 +40,13 @@ class SwipeableWordCard extends StatefulWidget {
     this.footer,
     this.srsStage,
     this.streak,
+    this.passCount,
     this.onDragUpdate,                // ← NEU
     this.onDragEnd,                   // ← NEU
     this.onDragReturn,                // ← NEU
+    this.onSettingsTap,
+    this.passCountButtonKey,
+    this.onSwipeWillStart,
   });
 
   @override
@@ -146,8 +154,10 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           return;
         }
         if (_offset.dx > threshold) {
+          widget.onSwipeWillStart?.call(context, true);
           _animateAway(true);
         } else if (_offset.dx < -threshold) {
+          widget.onSwipeWillStart?.call(context, false);
           _animateAway(false);
         } else {
           _resetPos();
@@ -195,11 +205,25 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   }
 
   Widget _buildFront() {
-    final isDiagnostic = widget.frontText.contains('Keine Wörter verfügbar');
+    final isDiagnostic = widget.frontText.contains('Keine Wörter verfügbar') ||
+        widget.frontText.contains('All words reached Stage 5') ||
+        widget.frontText.contains('Alle Wörter sind in Stufe 5');
+    final isCongratulation = widget.frontText.contains('Herzlichen Glückwunsch') ||
+        widget.frontText.contains('Congratulations');
     return _CardShell(
       child: Stack(
         children: [
-          Positioned(top: 12, right: 12, child: LevelBadge(level: widget.level)),
+          if (!isDiagnostic && !isCongratulation)
+            Positioned(top: 12, right: 12, child: LevelBadge(level: widget.level)),
+          if (!isDiagnostic && !isCongratulation && widget.passCount != null)
+            Positioned(
+              bottom: 28,
+              left: 12,
+              child: _PassCountIndicator(
+                passCount: widget.passCount!,
+                buttonKey: widget.passCountButtonKey,
+              ),
+            ),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
@@ -207,12 +231,42 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                   ? SingleChildScrollView(
                       child: _AdaptiveText(widget.frontText, forceMultiline: true),
                     )
-                  : _AdaptiveText(widget.frontText),
+                  : isCongratulation
+                      ? SingleChildScrollView(
+                          child: _AdaptiveText(
+                            widget.frontText,
+                            forceMultiline: true,
+                            compactFont: true,
+                          ),
+                        )
+                      : _AdaptiveText(widget.frontText),
             ),
           ),
-          const _SwipeHint(top: false),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
+          if (widget.onSettingsTap != null)
+            Positioned(
+              top: 12,
+              left: 12,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: widget.onSettingsTap,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D2D2F).withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white24, width: 1),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.settings_rounded, color: Colors.white70, size: 22),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -231,8 +285,139 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             ),
           ),
           _StreakProgressBadge(srsStage: widget.srsStage, streak: widget.streak),
+          if (widget.passCount != null)
+            Positioned(
+              bottom: 28,
+              left: 12,
+              child: _PassCountIndicator(
+                passCount: widget.passCount!,
+                buttonKey: widget.passCountButtonKey,
+              ),
+            ),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kleiner Button links unten: zeigt an, wie oft die Karte schon richtig beantwortet wurde.
+/// Farbe: 0=weiß, 1=hellblau, 2=grün. Zahl: 0, 1, 2. Tippen öffnet Erklärung.
+class _PassCountIndicator extends StatelessWidget {
+  final int passCount; // 0, 1 oder 2 (3 = mastered, Karte weg)
+  final GlobalKey? buttonKey;
+
+  const _PassCountIndicator({required this.passCount, this.buttonKey});
+
+  static Color _colorFor(int count) {
+    switch (count) {
+      case 0: return Colors.white;
+      case 1: return const Color(0xFF64B5F6); // Hellblau
+      case 2: return const Color(0xFF81C784);  // Hellgrün
+      default: return Colors.white;
+    }
+  }
+
+  static Color _textColorFor(int count) {
+    switch (count) {
+      case 0: return const Color(0xFF333333); // Dunkel auf Weiß
+      case 1:
+      case 2: return Colors.white; // Weiß auf Blau/Grün
+      default: return const Color(0xFF333333);
+    }
+  }
+
+  void _showExplanation(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Fortschritt-Anzeige'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Der Button links unten zeigt die Zahl (0, 1, 2) und die Farbe – wie oft du diese Karte schon richtig beantwortet hast:'),
+            SizedBox(height: 16),
+            _LegendRow(color: Colors.white, text: 'Weiß – erstes Mal dran'),
+            _LegendRow(color: Color(0xFF64B5F6), text: 'Hellblau – einmal richtig'),
+            _LegendRow(color: Color(0xFF81C784), text: 'Grün – zweimal richtig'),
+            SizedBox(height: 12),
+            Text('Nach drei richtigen Antworten wird die Karte gemastert.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colorFor(passCount);
+    final textColor = _textColorFor(passCount);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showExplanation(context),
+        child: Container(
+          key: buttonKey,
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '$passCount',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendRow extends StatelessWidget {
+  final Color color;
+  final String text;
+  const _LegendRow({required this.color, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
         ],
       ),
     );
@@ -318,9 +503,8 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
     final cardHeight = MediaQuery.of(context).size.height * 0.52;
     final borderRadius = WordsUIConstants.borderRadius;
     
-    // Lade persistente Einstellungen aus Provider (außerhalb von AnimatedBuilder)
+    // Lade persistente Einstellungen aus Provider (Steuerung jetzt im Settings-Popup)
     final settings = ref.watch(cardGlowSettingsProvider);
-    final settingsNotifier = ref.read(cardGlowSettingsProvider.notifier);
 
     return AnimatedBuilder(
       animation: _glowController,
@@ -379,125 +563,6 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
           ),
           child: widget.child,
         ),
-            // Slider (nur auf Vorderseite, nicht auf Rückseite)
-            if (!widget.dark) ...[
-              // Glow-Intensitäts-Slider (horizontal) mit Icons
-              Positioned(
-                top: 12,
-                left: 12,
-                width: (cardWidth * 0.5 - 24) * 1.5, // 1.5x so lang wie ursprünglich
-                child: Row(
-                  children: [
-                    // Links: Schwaches Licht-Icon
-                    Transform.translate(
-                      offset: const Offset(8, 0), // Nach rechts verschieben, um näher zum Slider zu kommen
-                      child: SvgPicture.asset(
-                        'assets/icons/low_sun-line.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white54,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    // Slider
-                    Expanded(
-                      child: Transform.translate(
-                        offset: const Offset(-8, 0), // Nach links verschieben, um näher zum Icon zu kommen
-                        child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: const Color(0xFFB16CFF),
-                          inactiveTrackColor: Colors.white24,
-                          thumbColor: const Color(0xFFB16CFF),
-                          overlayColor: const Color(0xFFB16CFF).withOpacity(0.2),
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                          trackHeight: 2,
-                        ),
-                        child: Slider(
-                          value: settings.intensity,
-                          min: 0.0,
-                          max: 1.0,
-                          onChanged: (value) {
-                            settingsNotifier.setIntensity(value);
-                          },
-                        ),
-                        ),
-                      ),
-                    ),
-                    // Rechts: Starkes Licht-Icon
-                    Transform.translate(
-                      offset: const Offset(-24, 0), // Nach links verschieben, um näher zum Slider zu kommen
-                      child: SvgPicture.asset(
-                        'assets/icons/bright_sun-line.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white54,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Pulsierungsgeschwindigkeit-Slider (mit größerem Abstand zum oberen Slider) mit Icons
-              Positioned(
-                top: 50, // Größerer Abstand (vorher 40)
-                left: 12,
-                width: (cardWidth * 0.5 - 24) * 1.5, // 1.5x so lang wie ursprünglich
-                child: Row(
-                  children: [
-                    // Links: Einfacher Strich (statisch, kein Pochen)
-                    Transform.translate(
-                      offset: const Offset(8, 0), // Nach rechts verschieben, um näher zum Slider zu kommen
-                      child: Icon(
-                        Icons.remove,
-                        color: Colors.white54,
-                        size: 16,
-                      ),
-                    ),
-                    // Slider
-                    Expanded(
-                      child: Transform.translate(
-                        offset: const Offset(-8, 0), // Nach links verschieben, um näher zum Icon zu kommen
-                        child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: const Color(0xFF7B5CFF),
-                          inactiveTrackColor: Colors.white24,
-                          thumbColor: const Color(0xFF7B5CFF),
-                          overlayColor: const Color(0xFF7B5CFF).withOpacity(0.2),
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                          trackHeight: 2,
-                        ),
-                        child: Slider(
-                          value: settings.pulseSpeed,
-                          min: 0.0,
-                          max: 1.0,
-                          onChanged: (value) {
-                            settingsNotifier.setPulseSpeed(value);
-                          },
-                        ),
-                        ),
-                      ),
-                    ),
-                    // Rechts: EKG/Rhythmus-Linie (Pochen)
-                    Transform.translate(
-                      offset: const Offset(-24, 0), // Nach links verschieben, um näher zum Slider zu kommen
-                      child: SvgPicture.asset(
-                        'assets/icons/impulse.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white54,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         );
       },
@@ -509,7 +574,8 @@ class _AdaptiveText extends StatelessWidget {
   final String text;
   final bool back;
   final bool forceMultiline;
-  const _AdaptiveText(this.text, {this.back = false, this.forceMultiline = false});
+  final bool compactFont;
+  const _AdaptiveText(this.text, {this.back = false, this.forceMultiline = false, this.compactFont = false});
 
   @override
   Widget build(BuildContext context) {
@@ -519,30 +585,31 @@ class _AdaptiveText extends StatelessWidget {
 
     double fontSize; int maxLines;
 
+    const double bump = 4.0; // Größere Schrift auf der Karte
     if (isPhrase || forceMultiline) {
       if (forceMultiline) {
-        fontSize = 14;
+        fontSize = compactFont ? 16 : 22;
         maxLines = 20;
       } else if (back) {
-        if (total > 50) { fontSize = 24; maxLines = 5; }
-        else if (total > 35) { fontSize = 26; maxLines = 4; }
-        else if (total > 20) { fontSize = 28; maxLines = 3; }
-        else { fontSize = 30; maxLines = 2; }
+        if (total > 50) { fontSize = 24 + bump; maxLines = 5; }
+        else if (total > 35) { fontSize = 26 + bump; maxLines = 4; }
+        else if (total > 20) { fontSize = 28 + bump; maxLines = 3; }
+        else { fontSize = 30 + bump; maxLines = 2; }
       } else {
-        if (total > 40) { fontSize = 26; maxLines = 4; }
-        else if (total > 25) { fontSize = 28; maxLines = 3; }
-        else { fontSize = 30; maxLines = 2; }
+        if (total > 40) { fontSize = 26 + bump; maxLines = 4; }
+        else if (total > 25) { fontSize = 28 + bump; maxLines = 3; }
+        else { fontSize = 30 + bump; maxLines = 2; }
       }
     } else {
       if (back) {
-        if (total > 20) { fontSize = 26; maxLines = 3; }
-        else if (total > 14) { fontSize = 28; maxLines = 2; }
-        else if (total > 10) { fontSize = 30; maxLines = 2; }
-        else { fontSize = 32; maxLines = 1; }
+        if (total > 20) { fontSize = 26 + bump; maxLines = 3; }
+        else if (total > 14) { fontSize = 28 + bump; maxLines = 2; }
+        else if (total > 10) { fontSize = 30 + bump; maxLines = 2; }
+        else { fontSize = 32 + bump; maxLines = 1; }
       } else {
-        if (total > 18) { fontSize = 28; maxLines = 2; }
-        else if (total > 12) { fontSize = 30; maxLines = 2; }
-        else { fontSize = 34; maxLines = 1; }
+        if (total > 18) { fontSize = 28 + bump; maxLines = 2; }
+        else if (total > 12) { fontSize = 30 + bump; maxLines = 2; }
+        else { fontSize = 34 + bump; maxLines = 1; }
       }
     }
 

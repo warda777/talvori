@@ -179,5 +179,41 @@ class ArrowFlyService {
       overlay.insert(sparkleEntry);
     });
   }
+
+  /// Zeigt Zauberpulver-Effekt an der Position eines Widgets (z.B. PassCount-Button bei Stage-Up)
+  static void showSparkleAtKey({
+    required BuildContext context,
+    required GlobalKey key,
+    Color color = const Color(0xFFF1C86B),
+  }) {
+    final overlay = Overlay.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) return;
+      final globalPos = renderBox.localToGlobal(Offset.zero);
+      final center = Offset(
+        globalPos.dx + renderBox.size.width / 2,
+        globalPos.dy + renderBox.size.height / 2,
+      );
+      late final OverlayEntry sparkleEntry;
+      sparkleEntry = OverlayEntry(
+        builder: (ctx) => Stack(
+          children: [
+            SparkleParticleEffect(
+              position: center,
+              color: color,
+              particleCount: 60,
+              duration: const Duration(milliseconds: 1500),
+              spreadRadius: 120.0,
+              onComplete: () {
+                sparkleEntry.remove();
+              },
+            ),
+          ],
+        ),
+      );
+      overlay.insert(sparkleEntry);
+    });
+  }
 }
 
