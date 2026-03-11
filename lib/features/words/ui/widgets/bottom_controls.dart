@@ -178,24 +178,35 @@ class _RestartButton extends StatelessWidget {
     const buttonW = 138.0;
     const buttonH = 48.0;
 
-    return SizedBox(
-      width: buttonW,
-      height: buttonH,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          backgroundColor: const Color(0xFF2D2D2F),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+    return FinalRoundButtonPulse(
+      onPressed: onTap,
+      child: Container(
+        width: buttonW,
+        height: buttonH,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFF4CAF50),
+            width: 1.5,
           ),
         ),
-        onPressed: onTap,
-        child: const Text(
-          'Neue Runde',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF2D2D2F),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide.none,
+            ),
+          ),
+          onPressed: onTap,
+          child: const Text(
+            'Neue Runde',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

@@ -21,6 +21,7 @@ import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/category_settings_dialog.dart';
 import 'package:talvori/features/words/ui/widgets/category_detail_hint_bubble.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
+import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
 import 'package:talvori/features/words/application/tooltip_settings_provider.dart'
     show showTooltipsAlwaysProvider, hasSeenLockTooltipProvider, hasSeenSingleTooltipProvider,
@@ -502,16 +503,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
                             ref.read(returnedFromLearnSessionProvider.notifier).state = true;
                             ref.read(userHasInteractedWithModeProvider.notifier).state = false;
                           }
-                          if (mounted && didReset == true) {
-                            // Progress Provider invalidieren (mode-aware)
+                          if (mounted) {
+                            // Progress Provider immer invalidieren bei Rückkehr (Fortschritt wurde im Learn-Mode gespeichert)
                             final srs = ref.read(srsModeControllerProvider).mode;
                             ref.invalidate(categoryProgressProvider((catId: currentId, srs: srs)));
-                            
+                            ref.invalidate(learnedInStage5Provider(currentId));
                             // Controller neu laden (lädt vocabsTotal, categories, progress)
                             await ref.read(categoryDetailControllerProvider.notifier).reload();
-                            
-                            // optional: wenn deine Kategorien-Liste den Counter/Wheel speist:
-                            // ref.invalidate(categoryControllerProvider);
                           }
                         }
                       } catch (e) {

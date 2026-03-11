@@ -446,7 +446,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final current = ref.read(currentWordProvider);
     if (current == null) return _highestNonEmptyStage(maxStage: maxStage) ?? 0;
 
-    int target = current.srsStage.clamp(0, maxStage);
+    int target = (current.srsStage ?? 0).clamp(0, maxStage);
     // S0-Karte: immer Fach 0 zeigen (Pool, aus dem die Karte kommt)
     if (target == 0) return 0;
     // Nie auf leere Stage zeigen
@@ -722,7 +722,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     Widget switchesRow;
     if (s.categoryMastered) {
       // Kategorie absolviert: Switch verschwindet, Mastered-Zahl blinkend in der Mitte
-      switchesRow = _MasteredCountBlink(count: s.masteredCount);
+      switchesRow = _MasteredCountBlink(count: s.masteredCount, restartReady: s.categoryMasteredRestartReady);
     } else if (mode == LevelSelectionMode.single) {
       final st = ref.watch(singleStageProvider);                 // z.B. 2
       final counts = ref.watch(singleSessionCountsProvider);     // (src, sr1, sr2)
@@ -945,10 +945,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 }
 
 /// Blinkende Mastered-Zahl in der Mitte (während Feuerwerk)
+/// Nach Feuerwerk (restartReady): nur weiß leuchten, kein Blinken
 class _MasteredCountBlink extends StatefulWidget {
   final int count;
+  final bool restartReady;
 
-  const _MasteredCountBlink({required this.count});
+  const _MasteredCountBlink({required this.count, this.restartReady = false});
 
   @override
   State<_MasteredCountBlink> createState() => _MasteredCountBlinkState();
@@ -964,6 +966,7 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
     Color(0xFF9C27B0), // Lila
     Color(0xFFFF5722), // Orange
   ];
+  static const _white = Color(0xFFFFFFFF);
 
   @override
   void initState() {
@@ -971,7 +974,18 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
-    )..repeat();
+    );
+    if (!widget.restartReady) _ctrl.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MasteredCountBlink oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.restartReady && _ctrl.isAnimating) {
+      _ctrl.stop();
+    } else if (!widget.restartReady && !_ctrl.isAnimating) {
+      _ctrl.repeat();
+    }
   }
 
   @override
@@ -982,11 +996,28 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.restartReady) {
+      return SizedBox(
+        height: 75,
+        child: Center(
+          child: Text(
+            '${widget.count}',
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: _white,
+              shadows: [
+                Shadow(color: _white.withOpacity(0.6), blurRadius: 12),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (context, _) {
-        final idx = (_ctrl.value * _colors.length).floor() % _colors.length;
-        final color = _colors[idx];
+        final color = _colors[(_ctrl.value * _colors.length).floor() % _colors.length];
         return SizedBox(
           height: 75,
           child: Center(

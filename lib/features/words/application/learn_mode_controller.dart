@@ -671,6 +671,7 @@ class LearnModeController extends Notifier<LearnModeState> {
 
     try {
       await _repo.resetAdaptiveCategoryProgress(catId);
+      ref.invalidate(learnedInStage5Provider(catId));
 
       _set(
         categoryMastered: false,
@@ -2410,17 +2411,20 @@ class LearnModeController extends Notifier<LearnModeState> {
           !(reviewResult?.isMastered ?? true);
 
       if (isFinalRoundS5NotMastered) {
-        // Final Round: Wort war in S5, noch nicht mastered → wieder bei index+8 einfügen
-        // (3× richtig nötig für mastered; mit +8 erscheint Wort seltener → erstes mastered ~24+ Swipes)
+        // Final Round: S5 nicht-mastered → zirkuläre Kurzdistanz-Wiedereinplanung
+        // Karte kommt nach ~8 anderen wieder (ring-basiert, nicht absolut)
+        const finalRoundGap = 8;
         final ids = List<String>.from(state.shuffledWordIds);
         final curPos = ids.indexOf(currentId);
         if (curPos != -1) {
           ids.removeAt(curPos);
-          final insertAt = (prevIndex + 8).clamp(0, ids.length);
-          ids.insert(insertAt, currentId);
+          final targetIndex = ids.isEmpty
+              ? 0
+              : (prevIndex + 1 + finalRoundGap) % ids.length;
+          ids.insert(targetIndex, currentId);
           final updatedDeckStages = _computeDeckStages(ids, state.wordQueue);
           _set(shuffledWordIds: ids, deckStages: updatedDeckStages);
-          print('🔄 Final Round: $currentId (S5, nicht mastered) an Pos ${prevIndex + 8} eingefügt');
+          print('🔄 Final Round: $currentId (S5, nicht mastered) zirkulär an Pos $targetIndex eingefügt (gap=$finalRoundGap)');
         }
       } else if (reviewResult?.isMastered ?? false) {
         // Final Round: Wort mastered → aus Queue entfernen; wenn leer → categoryMastered

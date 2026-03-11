@@ -86,7 +86,7 @@ class CardArea extends ConsumerWidget {
               ? (current?.passCount ?? 0).clamp(0, 2)
               : current?.passCount,
           showTranslation: s.showTranslation,
-          gesturesEnabled: !isPaused && !s.isSubmitting && !s.showFinalStartButton,
+          gesturesEnabled: !isPaused && !s.isSubmitting && !s.showFinalStartButton && !categoryMastered,
           footer: TimerBar(s: s),
           onSettingsTap: onSettingsTap,
           passCountButtonKey: passCountButtonKey,
