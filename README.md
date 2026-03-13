@@ -1,4 +1,4 @@
-# Talvori
+# Talvori – Transparent Spaced Repetition Language Learning App
 
 ![Flutter](https://img.shields.io/badge/Flutter-Mobile-blue)
 ![Dart](https://img.shields.io/badge/Dart-Language-blue)
