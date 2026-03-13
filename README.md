@@ -195,7 +195,9 @@ Main features include:
 
 # Project Structure
 
+```
 Example simplified structure
+
 lib
 ├── models
 ├── services
@@ -207,6 +209,7 @@ backend
 ├── database
 ├── functions
 └── migrations
+```
 
 ---
 
