@@ -14,42 +14,23 @@ The project was developed as part of a **Bachelor thesis in Software Engineering
 
 # App Screenshots
 
-### Word Hub
-
-<p align="center">
-<img src="docs/screenshots/wordhub.png" width="300">
-</p>
-
-The Word Hub organizes vocabulary into thematic categories and provides an overview of the learning content.
-
----
-
 ### Dashboard
 
 <p align="center">
 <img src="docs/screenshots/dashboard.png" width="300">
 </p>
 
-The dashboard shows:
-
-- current learning mode  
-- vocabulary progress  
-- spaced repetition stages  
-- daily learning progress  
+The dashboard shows the current learning mode, vocabulary progress and spaced repetition stages.
 
 ---
 
-### Learning Mode
+### Word Hub
 
 <p align="center">
-<img src="docs/screenshots/learning.png" width="300">
+<img src="docs/screenshots/wordhub.png" width="300">
 </p>
 
-Interactive learning interface including:
-
-- vocabulary cards  
-- audio playback  
-- learning progress indicators  
+The Word Hub organizes vocabulary into thematic categories and provides access to the learning content.
 
 ---
 
@@ -59,7 +40,17 @@ Interactive learning interface including:
 <img src="docs/screenshots/category.png" width="300">
 </p>
 
-Users can navigate categories and track vocabulary distribution across learning stages.
+Users can browse categories and see how many words exist in each learning area.
+
+---
+
+### Learning Mode
+
+<p align="center">
+<img src="docs/screenshots/learning.png" width="300">
+</p>
+
+Interactive learning interface with vocabulary cards, audio playback and learning progress tracking.
 
 ---
 
