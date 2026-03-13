@@ -245,7 +245,7 @@ Planned improvements include:
 # Author
 
 Andreas Warda  
-B.Sc. Software Engineering  
+Software Engineering (B.Sc.)  
 IU International University
 
 GitHub  
