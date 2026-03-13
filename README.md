@@ -8,7 +8,7 @@
 
 Talvori is a mobile language learning application that implements a **transparent spaced-repetition system** designed to improve long-term vocabulary retention.
 
-The project was developed as part of a **Bachelor thesis in Software Engineering** and focuses on making the internal learning logic of spaced repetition systems **visible and understandable to the user**.
+The project was developed as part of a **Bachelor thesis in Software Engineering** and focuses on making the internal learning logic of spaced-repetition systems **visible and understandable to the user**.
 
 ---
 
@@ -70,23 +70,62 @@ This transparency supports **self-regulated learning** and allows learners to ac
 
 ---
 
+# System Architecture
+
+Talvori follows a layered architecture separating the user interface, learning logic and persistent backend state.
+
+<p align="center">
+<img src="docs/diagrams/system_architecture.png" width="900">
+</p>
+
+The Flutter client handles user interaction and session state.  
+Learning progress and repetition decisions are processed through backend logic implemented with Supabase and PostgreSQL.
+
+---
+
+# Transparency Architecture
+
+Talvori introduces a multi-layer transparency architecture that makes internal learning mechanisms visible to the user.
+
+<p align="center">
+<img src="docs/diagrams/transparency_architecture.png" width="900">
+</p>
+
+The system reveals stages, rules and feedback directly through the interface.  
+This allows learners to build mental models of how the learning system works.
+
+---
+
+# Theoretical Model
+
+The system design is based on a theoretical model connecting interface transparency with cognitive understanding and self-regulated learning.
+
+<p align="center">
+<img src="docs/diagrams/theoretical_model.png" width="900">
+</p>
+
+Transparent system feedback supports mental model formation, reduces cognitive load and increases perceived control over the learning process.
+
+---
+
 # Learning System
 
 Talvori implements **three spaced-repetition modes**.
 
-### Time-based Spaced Repetition (T-SRS)
+---
+
+## Time-based Spaced Repetition (T-SRS)
 
 A structured interval system where vocabulary appears again after predefined time intervals.
 
 Example concept:
 S0 → S1 → S2 → S3 → S4 → S5
 
-
 Each stage represents increasing long-term retention.
 
 ---
 
-### Adaptive Spaced Repetition (A-SRS)
+## Adaptive Spaced Repetition (A-SRS)
 
 An adaptive learning system that reacts to the learner's performance.
 
@@ -101,7 +140,7 @@ Based on these signals the algorithm dynamically adjusts the learning stage.
 
 ---
 
-### Hybrid Mode
+## Hybrid Mode
 
 Hybrid mode combines both approaches.
 
@@ -110,7 +149,7 @@ It merges:
 - **time-based intervals**
 - **adaptive difficulty**
 
-This creates a balanced system that adapts to the learner while still maintaining structured repetition intervals.
+This creates a balanced system that adapts to the learner while maintaining structured repetition intervals.
 
 ---
 
@@ -123,7 +162,7 @@ Main features include:
 - transparent spaced repetition system  
 - three learning modes (T-SRS, A-SRS, Hybrid)  
 - vocabulary stage visualization  
-- category based vocabulary organization  
+- category-based vocabulary organization  
 - modern mobile UI  
 - real-time learning progress tracking  
 - manual control of learning stages  
@@ -132,22 +171,22 @@ Main features include:
 
 # Technologies
 
-Frontend
+## Frontend
 
 - Flutter
 - Dart
 
-Backend
+## Backend
 
 - Supabase
 - PostgreSQL
 
-Architecture
+## Architecture
 
 - MVC-inspired architecture
 - REST-based backend communication
 
-Development Tools
+## Development Tools
 
 - Git
 - GitHub
@@ -157,7 +196,6 @@ Development Tools
 # Project Structure
 
 Example simplified structure
-
 lib
 ├── models
 ├── services
@@ -169,7 +207,6 @@ backend
 ├── database
 ├── functions
 └── migrations
-
 
 ---
 
