@@ -1,0 +1,1 @@
+enum ReviewAnswer { correct, wrong }

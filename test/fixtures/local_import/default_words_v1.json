@@ -1,0 +1,29 @@
+[
+  {
+    "id": "basics",
+    "name": "Basics",
+    "description": "Essential starter words for local import tests.",
+    "sort_order": 1,
+    "is_archived": false,
+    "words": [
+      {
+        "id": "basics_hello",
+        "term": "hello",
+        "translation": "hallo",
+        "example_sentence": "Hello, how are you?",
+        "notes": "Common greeting.",
+        "sort_order": 1,
+        "is_archived": false
+      },
+      {
+        "id": "basics_water",
+        "term": "water",
+        "translation": "Wasser",
+        "example_sentence": "I would like some water.",
+        "notes": "Useful everyday noun.",
+        "sort_order": 2,
+        "is_archived": false
+      }
+    ]
+  }
+]
