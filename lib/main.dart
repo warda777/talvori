@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -7,7 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:talvori/core/theme/app_theme.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
-import 'package:talvori/core/services/services.dart';
+import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,15 +17,21 @@ void main() {
   // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
-    Zone.current.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
+    Zone.current.handleUncaughtError(
+      details.exception,
+      details.stack ?? StackTrace.empty,
+    );
   };
 
-  runZonedGuarded(() {
-    runApp(const ProviderScope(child: TalvoriApp()));
-  }, (error, stack) {
-    // Optional: an Crashlytics/Sentry senden
-    debugPrint('Uncaught error: $error');
-  });
+  runZonedGuarded(
+    () {
+      runApp(const ProviderScope(child: TalvoriApp()));
+    },
+    (error, stack) {
+      // Optional: an Crashlytics/Sentry senden
+      debugPrint('Uncaught error: $error');
+    },
+  );
 }
 
 class TalvoriApp extends ConsumerWidget {
@@ -36,6 +44,15 @@ class TalvoriApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       home: const _InitGate(child: HomeScreen()),
+      routes: kDebugMode
+          ? {
+              localLearningDebugRouteDefinition.path: (_) =>
+                  localLearningDebugRouteDefinition.builder(
+                    categoryId:
+                        localLearningDebugRouteDefinition.defaultCategoryId,
+                  ),
+            }
+          : const {},
     );
   }
 }
@@ -63,10 +80,8 @@ class _InitGateState extends State<_InitGate> {
     WidgetsFlutterBinding.ensureInitialized();
 
     // 0) Orientierung auf Hochformat fixieren (keine Drehung)
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
     // 1) .env laden (mit Fallback)
     try {
       await dotenv.load(fileName: ".env");
@@ -74,17 +89,25 @@ class _InitGateState extends State<_InitGate> {
       print('⚠️ .env nicht gefunden, verwende .env.example');
       await dotenv.load(fileName: ".env.example");
     }
-    
+
     // Debug: Prüfe ob Keys geladen werden
     print('URL=${dotenv.env['SUPABASE_URL']}');
     print('ANON=${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 8)}...');
-    assert(dotenv.env['SUPABASE_URL']?.isNotEmpty == true, 'SUPABASE_URL missing');
-    assert(dotenv.env['SUPABASE_ANON_KEY']?.isNotEmpty == true, 'SUPABASE_ANON_KEY missing');
+    assert(
+      dotenv.env['SUPABASE_URL']?.isNotEmpty == true,
+      'SUPABASE_URL missing',
+    );
+    assert(
+      dotenv.env['SUPABASE_ANON_KEY']?.isNotEmpty == true,
+      'SUPABASE_ANON_KEY missing',
+    );
 
     // 2) Supabase initialisieren (mit Fallback)
     print('🔧 Supabase URL: ${dotenv.env['SUPABASE_URL']}');
-    print('🔧 Supabase Anon Key: ${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 20)}...');
-    
+    print(
+      '🔧 Supabase Anon Key: ${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 20)}...',
+    );
+
     try {
       await Supabase.initialize(
         url: dotenv.env['SUPABASE_URL']!,
@@ -101,16 +124,17 @@ class _InitGateState extends State<_InitGate> {
     try {
       final auth = Supabase.instance.client.auth;
       print('🔧 Current user: ${auth.currentUser?.email ?? "Kein User"}');
-      
+
       if (kDebugMode && auth.currentUser == null) {
         final email = dotenv.env['TEST_EMAIL'];
-        final pw    = dotenv.env['TEST_PASSWORD'];
+        final pw = dotenv.env['TEST_PASSWORD'];
         print('🔧 Versuche Login mit: $email');
-        
+
         if (email != null && pw != null && email.isNotEmpty && pw.isNotEmpty) {
           try {
-            final result = await auth.signInWithPassword(email: email, password: pw)
-                      .timeout(const Duration(seconds: 8));
+            final result = await auth
+                .signInWithPassword(email: email, password: pw)
+                .timeout(const Duration(seconds: 8));
             print('✅ Login erfolgreich: ${result.user?.email}');
           } on TimeoutException {
             print('⚠️ Login timeout – UI startet trotzdem');
@@ -140,7 +164,9 @@ class _InitGateState extends State<_InitGate> {
 
     // Logging hilft beim Teilen-Debug:
     try {
-      debugPrint('Logged in as: ${Supabase.instance.client.auth.currentUser?.id}');
+      debugPrint(
+        'Logged in as: ${Supabase.instance.client.auth.currentUser?.id}',
+      );
     } catch (e) {
       debugPrint('Kein User eingeloggt (Supabase nicht verfügbar)');
     }
