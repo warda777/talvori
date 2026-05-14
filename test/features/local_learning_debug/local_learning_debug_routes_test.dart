@@ -61,5 +61,57 @@ void main() {
         expect(find.text('Falsch'), findsNothing);
       },
     );
+
+    testWidgets('debug_router_builds_local_learning_screen', (tester) async {
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+      const contract = LocalLearningScreenContract(
+        isInitial: true,
+        isLoading: false,
+        hasError: false,
+        hasActiveCard: false,
+        isCompleted: false,
+        canShowSubmitActions: false,
+      );
+
+      expect(localLearningDebugRouteDefinition.path, '/debug/local-learning');
+      expect(localLearningDebugRouteDefinition.name, 'debugLocalLearning');
+      expect(localLearningDebugRouteDefinition.defaultCategoryId, 'basics');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localLearningScreenContractProvider.overrideWithValue(contract),
+          ],
+          child: MaterialApp(
+            home: localLearningDebugRouteDefinition.builder(
+              categoryId: localLearningDebugRouteDefinition.defaultCategoryId,
+            ),
+          ),
+        ),
+      );
+
+      final screen = tester.widget<LocalLearningTestScreen>(
+        find.byType(LocalLearningTestScreen),
+      );
+
+      expect(screen.categoryId, 'basics');
+      expect(find.text('Noch keine Session'), findsOneWidget);
+      expect(find.text('Intensiv lernen'), findsWidgets);
+      expect(find.text('Alles lernen'), findsOneWidget);
+      expect(find.text('Starten/Fortsetzen'), findsOneWidget);
+      expect(find.text('Richtig'), findsNothing);
+      expect(find.text('Falsch'), findsNothing);
+    });
   });
 }
