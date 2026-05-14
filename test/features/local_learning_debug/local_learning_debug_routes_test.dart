@@ -113,5 +113,17 @@ void main() {
       expect(find.text('Richtig'), findsNothing);
       expect(find.text('Falsch'), findsNothing);
     });
+
+    test('debug_gate_exposes_route_only_when_enabled', () {
+      final enabledRoutes = getLocalLearningDebugRoutes(enabled: true);
+      final disabledRoutes = getLocalLearningDebugRoutes(enabled: false);
+
+      expect(enabledRoutes, hasLength(1));
+      expect(enabledRoutes.single, same(localLearningDebugRouteDefinition));
+      expect(enabledRoutes.single.path, '/debug/local-learning');
+      expect(enabledRoutes.single.name, 'debugLocalLearning');
+
+      expect(disabledRoutes, isEmpty);
+    });
   });
 }

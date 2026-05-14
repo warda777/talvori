@@ -30,6 +30,16 @@ const localLearningDebugRouteDefinition = LocalLearningDebugRouteDefinition(
   builder: buildLocalLearningDebugScreen,
 );
 
+List<LocalLearningDebugRouteDefinition> getLocalLearningDebugRoutes({
+  required bool enabled,
+}) {
+  if (!enabled) {
+    return const [];
+  }
+
+  return const [localLearningDebugRouteDefinition];
+}
+
 Widget buildLocalLearningDebugScreen({required String categoryId}) {
   return LocalLearningTestScreen(categoryId: categoryId);
 }
