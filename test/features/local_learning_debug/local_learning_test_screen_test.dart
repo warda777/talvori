@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_screen_contract.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
+import 'package:talvori/core/local_database/controllers/local_debug_import_controller.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/providers/local_debug_import_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_screen_contract_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
@@ -97,18 +99,19 @@ void main() {
               home: LocalLearningTestScreen(
                 categoryId: 'test-category',
                 nowProvider: () => fixedNow,
-                onStartOrResume: ({
-                  required categoryId,
-                  required mode,
-                  required trainingArea,
-                  required now,
-                }) async {
-                  callCount += 1;
-                  capturedCategoryId = categoryId;
-                  capturedMode = mode;
-                  capturedTrainingArea = trainingArea;
-                  capturedNow = now;
-                },
+                onStartOrResume:
+                    ({
+                      required categoryId,
+                      required mode,
+                      required trainingArea,
+                      required now,
+                    }) async {
+                      callCount += 1;
+                      capturedCategoryId = categoryId;
+                      capturedMode = mode;
+                      capturedTrainingArea = trainingArea;
+                      capturedNow = now;
+                    },
               ),
             ),
           ),
@@ -125,9 +128,136 @@ void main() {
       },
     );
 
-    testWidgets('local_learning_test_screen_shows_active_card', (
+    testWidgets('debug_import_button_calls_import_default_words', (
       tester,
     ) async {
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+      const contract = LocalLearningScreenContract(
+        isInitial: true,
+        isLoading: false,
+        hasError: false,
+        hasActiveCard: false,
+        isCompleted: false,
+        canShowSubmitActions: false,
+      );
+      final fixedNow = DateTime(2026, 5, 14, 10);
+      var importCallCount = 0;
+      var startCallCount = 0;
+      DateTime? capturedNow;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localLearningScreenContractProvider.overrideWithValue(contract),
+          ],
+          child: MaterialApp(
+            home: LocalLearningTestScreen(
+              categoryId: 'test-category',
+              nowProvider: () => fixedNow,
+              onImportDefaultWords: ({required now}) async {
+                importCallCount += 1;
+                capturedNow = now;
+              },
+              onStartOrResume:
+                  ({
+                    required categoryId,
+                    required mode,
+                    required trainingArea,
+                    required now,
+                  }) async {
+                    startCallCount += 1;
+                  },
+            ),
+          ),
+        ),
+      );
+
+      expect(importCallCount, 0);
+
+      await tester.tap(find.text('Debug-Daten importieren'));
+      await tester.pump();
+
+      expect(importCallCount, 1);
+      expect(capturedNow, fixedNow);
+      expect(startCallCount, 0);
+    });
+
+    testWidgets(
+      'local_learning_test_screen_import_button_uses_provider_when_no_callback',
+      (tester) async {
+        const viewModelState = LocalLearningViewModelState(
+          isLoading: false,
+          hasSession: false,
+          currentPosition: 0,
+          totalItems: 0,
+          answeredCount: 0,
+          remainingCount: 0,
+          canSubmitAnswer: false,
+          canCompleteSession: false,
+          lastAction: LocalLearningControllerAction.none,
+        );
+        const contract = LocalLearningScreenContract(
+          isInitial: true,
+          isLoading: false,
+          hasError: false,
+          hasActiveCard: false,
+          isCompleted: false,
+          canShowSubmitActions: false,
+        );
+        final fixedNow = DateTime(2026, 5, 14, 12);
+        final fakeDebugImportNotifier = _FakeDebugImportControllerNotifier();
+        var startCallCount = 0;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              localLearningViewModelProvider.overrideWithValue(viewModelState),
+              localLearningScreenContractProvider.overrideWithValue(contract),
+              localDebugImportControllerProvider.overrideWith(
+                () => fakeDebugImportNotifier,
+              ),
+            ],
+            child: MaterialApp(
+              home: LocalLearningTestScreen(
+                categoryId: 'test-category',
+                nowProvider: () => fixedNow,
+                onStartOrResume:
+                    ({
+                      required categoryId,
+                      required mode,
+                      required trainingArea,
+                      required now,
+                    }) async {
+                      startCallCount += 1;
+                    },
+              ),
+            ),
+          ),
+        );
+
+        expect(fakeDebugImportNotifier.importCallCount, 0);
+
+        await tester.tap(find.text('Debug-Daten importieren'));
+        await tester.pump();
+
+        expect(fakeDebugImportNotifier.importCallCount, 1);
+        expect(fakeDebugImportNotifier.capturedNow, fixedNow);
+        expect(startCallCount, 0);
+      },
+    );
+
+    testWidgets('local_learning_test_screen_shows_active_card', (tester) async {
       const viewModelState = LocalLearningViewModelState(
         isLoading: false,
         hasSession: true,
@@ -245,178 +375,176 @@ void main() {
       },
     );
 
-    testWidgets(
-      'local_learning_test_screen_wrong_button_calls_submit_wrong',
-      (tester) async {
-        final fixedNow = DateTime(2026, 5, 13, 12, 45);
-        var callCount = 0;
-        DateTime? capturedNow;
+    testWidgets('local_learning_test_screen_wrong_button_calls_submit_wrong', (
+      tester,
+    ) async {
+      final fixedNow = DateTime(2026, 5, 13, 12, 45);
+      var callCount = 0;
+      DateTime? capturedNow;
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(
-                const LocalLearningViewModelState(
-                  isLoading: false,
-                  hasSession: true,
-                  sessionId: 'test-session',
-                  categoryId: 'test-category',
-                  mode: LearningMode.adaptive,
-                  trainingArea: TrainingArea.all,
-                  status: 'active',
-                  currentWordId: 'test-word',
-                  term: 'hello',
-                  translation: 'hallo',
-                  currentStage: SrsStage.s0,
-                  currentPosition: 0,
-                  totalItems: 3,
-                  answeredCount: 0,
-                  remainingCount: 3,
-                  canSubmitAnswer: true,
-                  canCompleteSession: false,
-                  lastAction: LocalLearningControllerAction.startOrResume,
-                ),
-              ),
-              localLearningScreenContractProvider.overrideWithValue(
-                const LocalLearningScreenContract(
-                  isInitial: false,
-                  isLoading: false,
-                  hasError: false,
-                  hasActiveCard: true,
-                  isCompleted: false,
-                  canShowSubmitActions: true,
-                ),
-              ),
-            ],
-            child: MaterialApp(
-              home: LocalLearningTestScreen(
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(
+              const LocalLearningViewModelState(
+                isLoading: false,
+                hasSession: true,
+                sessionId: 'test-session',
                 categoryId: 'test-category',
-                nowProvider: () => fixedNow,
-                onSubmitWrong: ({required now}) async {
-                  callCount += 1;
-                  capturedNow = now;
-                },
+                mode: LearningMode.adaptive,
+                trainingArea: TrainingArea.all,
+                status: 'active',
+                currentWordId: 'test-word',
+                term: 'hello',
+                translation: 'hallo',
+                currentStage: SrsStage.s0,
+                currentPosition: 0,
+                totalItems: 3,
+                answeredCount: 0,
+                remainingCount: 3,
+                canSubmitAnswer: true,
+                canCompleteSession: false,
+                lastAction: LocalLearningControllerAction.startOrResume,
               ),
             ),
-          ),
-        );
-
-        await tester.tap(find.text('Falsch'));
-        await tester.pump();
-
-        expect(callCount, 1);
-        expect(capturedNow, fixedNow);
-      },
-    );
-
-    testWidgets(
-      'local_learning_test_screen_buttons_follow_contract_flags',
-      (tester) async {
-        const viewModelState = LocalLearningViewModelState(
-          isLoading: false,
-          hasSession: true,
-          sessionId: 'test-session',
-          categoryId: 'test-category',
-          mode: LearningMode.adaptive,
-          trainingArea: TrainingArea.all,
-          status: 'active',
-          currentWordId: 'test-word',
-          term: 'hello',
-          translation: 'hallo',
-          currentStage: SrsStage.s0,
-          currentPosition: 0,
-          totalItems: 3,
-          answeredCount: 0,
-          remainingCount: 3,
-          canSubmitAnswer: false,
-          canCompleteSession: false,
-          lastAction: LocalLearningControllerAction.startOrResume,
-        );
-
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(viewModelState),
-              localLearningScreenContractProvider.overrideWithValue(
-                const LocalLearningScreenContract(
-                  isInitial: false,
-                  isLoading: false,
-                  hasError: false,
-                  hasActiveCard: true,
-                  isCompleted: false,
-                  canShowSubmitActions: false,
-                ),
+            localLearningScreenContractProvider.overrideWithValue(
+              const LocalLearningScreenContract(
+                isInitial: false,
+                isLoading: false,
+                hasError: false,
+                hasActiveCard: true,
+                isCompleted: false,
+                canShowSubmitActions: true,
               ),
-            ],
-            child: const MaterialApp(
-              home: LocalLearningTestScreen(categoryId: 'test-category'),
+            ),
+          ],
+          child: MaterialApp(
+            home: LocalLearningTestScreen(
+              categoryId: 'test-category',
+              nowProvider: () => fixedNow,
+              onSubmitWrong: ({required now}) async {
+                callCount += 1;
+                capturedNow = now;
+              },
             ),
           ),
-        );
+        ),
+      );
 
-        final disabledCorrectButton = tester.widget<ElevatedButton>(
-          find.widgetWithText(ElevatedButton, 'Richtig'),
-        );
-        final disabledWrongButton = tester.widget<ElevatedButton>(
-          find.widgetWithText(ElevatedButton, 'Falsch'),
-        );
+      await tester.tap(find.text('Falsch'));
+      await tester.pump();
 
-        expect(disabledCorrectButton.onPressed, isNull);
-        expect(disabledWrongButton.onPressed, isNull);
+      expect(callCount, 1);
+      expect(capturedNow, fixedNow);
+    });
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(
-                const LocalLearningViewModelState(
-                  isLoading: false,
-                  hasSession: true,
-                  sessionId: 'test-session',
-                  categoryId: 'test-category',
-                  mode: LearningMode.adaptive,
-                  trainingArea: TrainingArea.all,
-                  status: 'active',
-                  currentWordId: 'test-word',
-                  term: 'hello',
-                  translation: 'hallo',
-                  currentStage: SrsStage.s0,
-                  currentPosition: 0,
-                  totalItems: 3,
-                  answeredCount: 0,
-                  remainingCount: 3,
-                  canSubmitAnswer: true,
-                  canCompleteSession: false,
-                  lastAction: LocalLearningControllerAction.startOrResume,
-                ),
+    testWidgets('local_learning_test_screen_buttons_follow_contract_flags', (
+      tester,
+    ) async {
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: true,
+        sessionId: 'test-session',
+        categoryId: 'test-category',
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        status: 'active',
+        currentWordId: 'test-word',
+        term: 'hello',
+        translation: 'hallo',
+        currentStage: SrsStage.s0,
+        currentPosition: 0,
+        totalItems: 3,
+        answeredCount: 0,
+        remainingCount: 3,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.startOrResume,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localLearningScreenContractProvider.overrideWithValue(
+              const LocalLearningScreenContract(
+                isInitial: false,
+                isLoading: false,
+                hasError: false,
+                hasActiveCard: true,
+                isCompleted: false,
+                canShowSubmitActions: false,
               ),
-              localLearningScreenContractProvider.overrideWithValue(
-                const LocalLearningScreenContract(
-                  isInitial: false,
-                  isLoading: false,
-                  hasError: false,
-                  hasActiveCard: true,
-                  isCompleted: false,
-                  canShowSubmitActions: true,
-                ),
-              ),
-            ],
-            child: const MaterialApp(
-              home: LocalLearningTestScreen(categoryId: 'test-category'),
             ),
+          ],
+          child: const MaterialApp(
+            home: LocalLearningTestScreen(categoryId: 'test-category'),
           ),
-        );
+        ),
+      );
 
-        final enabledCorrectButton = tester.widget<ElevatedButton>(
-          find.widgetWithText(ElevatedButton, 'Richtig'),
-        );
-        final enabledWrongButton = tester.widget<ElevatedButton>(
-          find.widgetWithText(ElevatedButton, 'Falsch'),
-        );
+      final disabledCorrectButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Richtig'),
+      );
+      final disabledWrongButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Falsch'),
+      );
 
-        expect(enabledCorrectButton.onPressed, isNotNull);
-        expect(enabledWrongButton.onPressed, isNotNull);
-      },
-    );
+      expect(disabledCorrectButton.onPressed, isNull);
+      expect(disabledWrongButton.onPressed, isNull);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(
+              const LocalLearningViewModelState(
+                isLoading: false,
+                hasSession: true,
+                sessionId: 'test-session',
+                categoryId: 'test-category',
+                mode: LearningMode.adaptive,
+                trainingArea: TrainingArea.all,
+                status: 'active',
+                currentWordId: 'test-word',
+                term: 'hello',
+                translation: 'hallo',
+                currentStage: SrsStage.s0,
+                currentPosition: 0,
+                totalItems: 3,
+                answeredCount: 0,
+                remainingCount: 3,
+                canSubmitAnswer: true,
+                canCompleteSession: false,
+                lastAction: LocalLearningControllerAction.startOrResume,
+              ),
+            ),
+            localLearningScreenContractProvider.overrideWithValue(
+              const LocalLearningScreenContract(
+                isInitial: false,
+                isLoading: false,
+                hasError: false,
+                hasActiveCard: true,
+                isCompleted: false,
+                canShowSubmitActions: true,
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: LocalLearningTestScreen(categoryId: 'test-category'),
+          ),
+        ),
+      );
+
+      final enabledCorrectButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Richtig'),
+      );
+      final enabledWrongButton = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Falsch'),
+      );
+
+      expect(enabledCorrectButton.onPressed, isNotNull);
+      expect(enabledWrongButton.onPressed, isNotNull);
+    });
 
     testWidgets('local_learning_test_screen_handles_completed_state', (
       tester,
@@ -616,4 +744,28 @@ void main() {
       expect(find.text('Noch keine Session'), findsNothing);
     });
   });
+}
+
+class _FakeDebugImportControllerNotifier
+    extends LocalDebugImportControllerNotifier {
+  var importCallCount = 0;
+  DateTime? capturedNow;
+
+  @override
+  Future<LocalDebugImportControllerState> build() async {
+    return const LocalDebugImportControllerState();
+  }
+
+  @override
+  Future<void> importDefaultWords({required DateTime now}) async {
+    importCallCount += 1;
+    capturedNow = now;
+    state = AsyncValue.data(
+      LocalDebugImportControllerState(
+        wasSuccessful: true,
+        lastImportedAt: now,
+        lastAction: LocalDebugImportControllerAction.importDefaultWords,
+      ),
+    );
+  }
 }

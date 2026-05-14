@@ -1,20 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../local_app_bootstrap.dart';
 import '../local_app_bootstrap_result.dart';
 import '../services/local_learning_session_facade.dart';
 
-final localBootstrapDatabasesPathProvider = Provider<String>((ref) {
-  throw UnimplementedError(
-    'Override localBootstrapDatabasesPathProvider before reading '
-    'localBootstrapProvider.',
-  );
+final localBootstrapDatabasesPathProvider = Provider<FutureOr<String>>((ref) {
+  return getDatabasesPath();
 });
 
 final localBootstrapProvider = FutureProvider<LocalAppBootstrapResult>((
   ref,
 ) async {
-  final databasesPath = ref.watch(localBootstrapDatabasesPathProvider);
+  final databasesPath = await ref.watch(localBootstrapDatabasesPathProvider);
 
   final result = await const LocalAppBootstrap().bootstrap(
     databasesPath: databasesPath,
