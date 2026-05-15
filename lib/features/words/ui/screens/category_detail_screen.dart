@@ -1,12 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
+import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
+import 'package:talvori/core/local_database/adapters/category_detail_local_start_path.dart';
+import 'package:talvori/core/local_database/adapters/local_category_id_resolver.dart';
+import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
-import 'package:talvori/features/words/ui/widgets/mode_toggle.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
@@ -14,7 +19,6 @@ import 'package:talvori/features/words/application/category_detail_state.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/theme/theme.dart';
 // removed srs_mode_provider import to avoid SrsSystem conflicts; we use controller enum
-import 'package:talvori/features/words/ui/widgets/srs_mode_toggle.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
@@ -24,9 +28,15 @@ import 'package:talvori/features/words/application/learn_mode_controller.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
 import 'package:talvori/features/words/application/tooltip_settings_provider.dart'
-    show showTooltipsAlwaysProvider, hasSeenLockTooltipProvider, hasSeenSingleTooltipProvider,
-        hasSeenTrainingTooltipProvider, hasSeenVocabsTooltipProvider, hasSeenWheelTooltipProvider,
-        hasSeenAutoTooltipProvider, resetCategoryDetailTooltipFlags;
+    show
+        showTooltipsAlwaysProvider,
+        hasSeenLockTooltipProvider,
+        hasSeenSingleTooltipProvider,
+        hasSeenTrainingTooltipProvider,
+        hasSeenVocabsTooltipProvider,
+        hasSeenWheelTooltipProvider,
+        hasSeenAutoTooltipProvider,
+        resetCategoryDetailTooltipFlags;
 import 'package:talvori/features/words/ui/widgets/contextual_tooltip.dart';
 
 // ===== KONSTANTEN =====
@@ -36,9 +46,10 @@ const kAccentBlue = Color(0xFFB1CCFE);
 /// SCREEN
 /// ==============================
 class CategoryDetailScreen extends ConsumerStatefulWidget {
-  final String title;              // z.B. "Health & Fitness"
-  final String? categoryId;        // Supabase UUID (word_categories.id); kann null sein
-  final String? categorySlug;    // fallback:
+  final String title; // z.B. "Health & Fitness"
+  final String?
+  categoryId; // Supabase UUID (word_categories.id); kann null sein
+  final String? categorySlug; // fallback:
   final WordListFilter listFilter; // Fallback/Anzeige-Liste
 
   const CategoryDetailScreen({
@@ -50,10 +61,12 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CategoryDetailScreen> createState() => _CategoryDetailScreenState();
+  ConsumerState<CategoryDetailScreen> createState() =>
+      _CategoryDetailScreenState();
 }
 
-class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> with WidgetsBindingObserver {
+class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
+    with WidgetsBindingObserver {
   ProviderSubscription<CategoryDetailState>? _controllerSub;
 
   final _vocabsKey = GlobalKey();
@@ -67,7 +80,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Controller-Listener ohne ref in dispose
     _controllerSub = ref.listenManual<CategoryDetailState>(
       categoryDetailControllerProvider,
@@ -75,13 +88,15 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
         // Optional: auf State-Änderungen reagieren
       },
     );
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(categoryDetailControllerProvider.notifier).init(
-        categoryId: widget.categoryId,
-        categorySlug: widget.categorySlug,
-        fallbackTitle: widget.title,
-      );
+      ref
+          .read(categoryDetailControllerProvider.notifier)
+          .init(
+            categoryId: widget.categoryId,
+            categorySlug: widget.categorySlug,
+            fallbackTitle: widget.title,
+          );
       // Sicherstellen: Toggle startet NICHT im Hybrid-Modus
       final ctrl = ref.read(srsModeControllerProvider.notifier);
       final st = ref.read(srsModeControllerProvider);
@@ -202,7 +217,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     required String overallLabel,
     required List<int> stages,
   }) {
-    final showDaily = ref.watch(returnedFromLearnSessionProvider) &&
+    final showDaily =
+        ref.watch(returnedFromLearnSessionProvider) &&
         !ref.watch(userHasInteractedWithModeProvider);
     if (showDaily) {
       return LearningStatusPanel(
@@ -217,10 +233,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     }
     final s0Locked = currentId.isEmpty
         ? false
-        : ref.watch(s0LockedProvider(currentId)).maybeWhen(
-              data: (v) => v,
-              orElse: () => false,
-            );
+        : ref
+              .watch(s0LockedProvider(currentId))
+              .maybeWhen(data: (v) => v, orElse: () => false);
     return Center(
       child: CategoryDetailHintBubble(
         categoryId: currentId.isEmpty ? null : currentId,
@@ -255,38 +270,49 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     final cats = s.categories;
     final selIndex = s.selectedIndex;
     // Sicherstellen, dass selIndex gültig ist
-    final validSelIndex = cats.isNotEmpty && selIndex >= 0 && selIndex < cats.length 
-        ? selIndex 
+    final validSelIndex =
+        cats.isNotEmpty && selIndex >= 0 && selIndex < cats.length
+        ? selIndex
         : 0;
-    final currentId = cats.isNotEmpty && validSelIndex < cats.length 
-        ? cats[validSelIndex].id 
+    final currentId = cats.isNotEmpty && validSelIndex < cats.length
+        ? cats[validSelIndex].id
         : (widget.categoryId ?? '');
 
     // Fix 4: Loader nur zeigen, wenn wirklich leer
     if (loading && s.categories.isEmpty) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // ⬇️ WICHTIG: Progress aus mode-abhängigem Provider (nicht aus Controller-State)
     // Provider-Key muss (categoryId, mode) sein, damit beim Mode-Wechsel neu geladen wird
     final srs = ref.watch(srsModeControllerProvider);
-    
+
     // 1️⃣ LearnMode-State abfragen
     final learnState = ref.watch(learnModeControllerProvider);
-    final isLearning = learnState.inLearnScreen && learnState.categoryId.isNotEmpty && learnState.categoryId == currentId;
-    
+    final isLearning =
+        learnState.inLearnScreen &&
+        learnState.categoryId.isNotEmpty &&
+        learnState.categoryId == currentId;
+
     // ✅ Im Learn-Mode: learnState nutzen (wird nach jedem Review aus serverProgress aktualisiert).
     // Ohne Invalidate von categoryProgressProvider bleibt dessen Cache sonst veraltet.
     final useLearnState = isLearning;
-    
+
     // ✅ Für A-SRS: categoryProgressProvider immer laden (auch wenn isLearning)
     final progAsync = currentId.isNotEmpty
         ? ref.watch(categoryProgressProvider((catId: currentId, srs: srs.mode)))
-        : AsyncValue.data(CategoryProgress(total: 0, stages: [0,0,0,0,0,0], dueToday: 0, newTotal: 0));
+        : AsyncValue.data(
+            CategoryProgress(
+              total: 0,
+              stages: [0, 0, 0, 0, 0, 0],
+              dueToday: 0,
+              newTotal: 0,
+            ),
+          );
 
-    debugPrint('🧭 CategoryDetail: mode=${srs.mode} isLearning=$isLearning useLearnState=$useLearnState progState=${progAsync.runtimeType} loading=${progAsync.isLoading} hasValue=${progAsync.hasValue}');
+    debugPrint(
+      '🧭 CategoryDetail: mode=${srs.mode} isLearning=$isLearning useLearnState=$useLearnState progState=${progAsync.runtimeType} loading=${progAsync.isLoading} hasValue=${progAsync.hasValue}',
+    );
 
     // 2️⃣ Stage-Quelle korrekt wählen
     // ✅ Für A-SRS: IMMER Server-Daten verwenden, auch während Learn-Mode
@@ -295,11 +321,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
     final (stages, totalWords) = useLearnState
         ? (learnState.stages, learnState.totalWordsInCategory)
         : (
-            progAsync.valueOrNull?.stages ?? const [-1,-1,-1,-1,-1,-1],
+            progAsync.valueOrNull?.stages ?? const [-1, -1, -1, -1, -1, -1],
             progAsync.valueOrNull?.total ?? -1,
           );
-    
-    debugPrint('✅ CategoryDetail: stages=$stages (isLearning=$isLearning, useLearnState=$useLearnState, source=${useLearnState ? "learnState" : "categoryProgressProvider"})');
+
+    debugPrint(
+      '✅ CategoryDetail: stages=$stages (isLearning=$isLearning, useLearnState=$useLearnState, source=${useLearnState ? "learnState" : "categoryProgressProvider"})',
+    );
 
     // ⬇️ FIX für A-SRS und Hybrid: Stage 0 = vocabsTotal - learnedWords (TEMPORÄR AUS für Debugging)
     // TODO: Wieder aktivieren nach Backend-Fix
@@ -311,14 +339,27 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
       stages = [correctedStage0, ...stages.skip(1)];
     }
     */
-    final learnedWords = stages.skip(1).fold<int>(0,(a,b)=>a+b);
+    final learnedWords = stages.skip(1).fold<int>(0, (a, b) => a + b);
 
     final dailyTotal = s.dailyNew + s.dailyRepeats;
     const dailyTarget = 20;
-    final dailyPercent = dailyTarget == 0 ? 0.0 : (dailyTotal / dailyTarget).clamp(0.0,1.0);
+    final dailyPercent = dailyTarget == 0
+        ? 0.0
+        : (dailyTotal / dailyTarget).clamp(0.0, 1.0);
 
-    final overallPercent = totalWords == 0 ? 0.0 : (learnedWords/totalWords).clamp(0.0,1.0);
+    final overallPercent = totalWords == 0
+        ? 0.0
+        : (learnedWords / totalWords).clamp(0.0, 1.0);
     final overallLabel = '$learnedWords/$totalWords';
+    final debugLocalStartPath = CategoryDetailLocalStartPath(
+      categoryAdapter: CategoryDetailLocalCategoryAdapter(
+        resolver: const LocalCategoryIdResolver(),
+      ),
+    ).resolve(categorySlug: widget.categorySlug);
+    final debugLocalButtonState =
+        const CategoryDetailDebugLocalButtonPresenter().present(
+          debugLocalStartPath,
+        );
 
     return Scaffold(
       body: SafeArea(
@@ -327,208 +368,342 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen> wit
             Listener(
               onPointerDown: (_) {
                 if (ref.read(returnedFromLearnSessionProvider)) {
-                  ref.read(userHasInteractedWithModeProvider.notifier).state = true;
-                  ref.read(returnedFromLearnSessionProvider.notifier).state = false;
+                  ref.read(userHasInteractedWithModeProvider.notifier).state =
+                      true;
+                  ref.read(returnedFromLearnSessionProvider.notifier).state =
+                      false;
                 }
               },
               child: Column(
-              children: [
-                // FIX: fester Header
-                SizedBox(
-                  height: WordsLayout.topCapsuleH,
-                  child: CategoryHeaderCapsule(
+                children: [
+                  // FIX: fester Header
+                  SizedBox(
                     height: WordsLayout.topCapsuleH,
-                    title: cats.isNotEmpty && validSelIndex < cats.length ? cats[validSelIndex].name : widget.title,
-                    vocabsCount: s.vocabsTotal,
-                    categories: cats.map((e)=>e.name).toList(),
-                    selectedIndex: cats.isEmpty ? 0 : validSelIndex.clamp(0, cats.length - 1),
-                    vocabsKey: _vocabsKey,
-                    wheelKey: _wheelKey,
-                    onWheelChanged: (idx, label) {
-                      _maybeShowWheelTooltip();
-                      ref.read(categoryDetailControllerProvider.notifier).switchTo(idx);
-                    },
-                    onBack: () async {
-                      await resetCategoryDetailTooltipFlags(ref);
-                      if (context.mounted) Navigator.of(context).pop();
-                    },
-                    onVocabs: () {
-                      _maybeShowVocabsTooltip();
-                      if (currentId.isEmpty) return;
-                      final currentName = cats.isNotEmpty && validSelIndex < cats.length ? cats[validSelIndex].name : widget.title;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => WordListScreen(
-                            filter: widget.listFilter,
-                            overrideCategoryId: currentId,
-                            overrideCategoryLabel: currentName,
+                    child: CategoryHeaderCapsule(
+                      height: WordsLayout.topCapsuleH,
+                      title: cats.isNotEmpty && validSelIndex < cats.length
+                          ? cats[validSelIndex].name
+                          : widget.title,
+                      vocabsCount: s.vocabsTotal,
+                      categories: cats.map((e) => e.name).toList(),
+                      selectedIndex: cats.isEmpty
+                          ? 0
+                          : validSelIndex.clamp(0, cats.length - 1),
+                      vocabsKey: _vocabsKey,
+                      wheelKey: _wheelKey,
+                      onWheelChanged: (idx, label) {
+                        _maybeShowWheelTooltip();
+                        ref
+                            .read(categoryDetailControllerProvider.notifier)
+                            .switchTo(idx);
+                      },
+                      onBack: () async {
+                        await resetCategoryDetailTooltipFlags(ref);
+                        if (context.mounted) Navigator.of(context).pop();
+                      },
+                      onVocabs: () {
+                        _maybeShowVocabsTooltip();
+                        if (currentId.isEmpty) return;
+                        final currentName =
+                            cats.isNotEmpty && validSelIndex < cats.length
+                            ? cats[validSelIndex].name
+                            : widget.title;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => WordListScreen(
+                              filter: widget.listFilter,
+                              overrideCategoryId: currentId,
+                              overrideCategoryLabel: currentName,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    onAdd: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Add tapped')),
-                      );
-                    },
-                    onSettings: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => const CategorySettingsDialog(),
-                      );
-                    },
-                    // Offsets wie im Learn-Mode:
-                    wheelOffsetX: WordsLayout.wheelOffsetX,
-                    wheelOffsetY: WordsLayout.wheelOffsetY,
-                    rowOffsetX: WordsLayout.rowOffsetX,
-                    rowOffsetY: WordsLayout.rowOffsetY,
-                    vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
-                    vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
-                    rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
-                    rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
-                    wheelBottomGap: WordsLayout.wheelBottomGap,
-                    accentColor: kAccentBlue,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    trailingRightBelow: SrsModeToggleWithHint(
-                      onUserTap: () {
-                        ref.read(userHasInteractedWithModeProvider.notifier).state = true;
-                        ref.read(returnedFromLearnSessionProvider.notifier).state = false;
+                        );
+                      },
+                      onAdd: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Add tapped')),
+                        );
+                      },
+                      onSettings: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const CategorySettingsDialog(),
+                        );
+                      },
+                      // Offsets wie im Learn-Mode:
+                      wheelOffsetX: WordsLayout.wheelOffsetX,
+                      wheelOffsetY: WordsLayout.wheelOffsetY,
+                      rowOffsetX: WordsLayout.rowOffsetX,
+                      rowOffsetY: WordsLayout.rowOffsetY,
+                      vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+                      vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+                      rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+                      rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+                      wheelBottomGap: WordsLayout.wheelBottomGap,
+                      accentColor: kAccentBlue,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
+                      trailingRightBelow: SrsModeToggleWithHint(
+                        onUserTap: () {
+                          ref
+                                  .read(
+                                    userHasInteractedWithModeProvider.notifier,
+                                  )
+                                  .state =
+                              true;
+                          ref
+                                  .read(
+                                    returnedFromLearnSessionProvider.notifier,
+                                  )
+                                  .state =
+                              false;
+                        },
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: WordsLayout.gapBelowTop),
+
+                  // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
+                  Flexible(
+                    child: _buildHintOrProgress(
+                      ref: ref,
+                      currentId: currentId,
+                      dailyPercent: dailyPercent,
+                      dailyTotal: dailyTotal,
+                      dailyTarget: dailyTarget,
+                      s: s,
+                      overallPercent: overallPercent,
+                      overallLabel: overallLabel,
+                      stages: stages,
+                    ),
+                  ),
+
+                  // Reduzierter Abstand zwischen Overall Progress und Level-Selection-Buttons
+                  const SizedBox(height: 17),
+
+                  // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
+                  SizedBox(
+                    height: WordsLayout.levelsCardH,
+                    child: Builder(
+                      builder: (context) {
+                        debugPrint(
+                          '🧾 UI stages: mode=${srs.mode} cat=$currentId '
+                          'loading=${progAsync.isLoading} hasValue=${progAsync.valueOrNull != null} '
+                          'total=$totalWords stages=$stages',
+                        );
+
+                        // Wenn stages -1 enthält, dann Loading-State (während Refresh)
+                        final displayStages = stages.any((s) => s == -1)
+                            ? const [
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                              ] // Loading: Zeige 0 statt -1
+                            : stages;
+
+                        return LevelsCard(
+                          height: WordsLayout.levelsCardH,
+                          stages: displayStages,
+                          goalPerStage: 100,
+                          mode: mode,
+                          selectingSingle: selecting,
+                          visibleMask: mask,
+                          categoryId: currentId.isEmpty
+                              ? null
+                              : currentId, // Für Dialog
+                          lockKey: _lockKey,
+                          autoButtonKey: _autoButtonKey,
+                          trainingButtonKey: _trainingButtonKey,
+                          singleButtonKey: _singleButtonKey,
+                          onSelectSingleStage: (stg) {
+                            ref
+                                    .read(
+                                      userHasInteractedWithModeProvider
+                                          .notifier,
+                                    )
+                                    .state =
+                                true;
+                            ref
+                                    .read(
+                                      returnedFromLearnSessionProvider.notifier,
+                                    )
+                                    .state =
+                                false;
+                            ref.read(singleStageProvider.notifier).state = stg;
+                            ref.read(selectingSingleProvider.notifier).state =
+                                false;
+                          },
+                          onModeChanged: (m) async {
+                            if (m == LevelSelectionMode.s0toS5) {
+                              _maybeShowAutoTooltip();
+                            } else if (m == LevelSelectionMode.single) {
+                              _maybeShowSingleTooltip();
+                            } else if (m == LevelSelectionMode.s1toS5) {
+                              _maybeShowTrainingTooltip();
+                            }
+                            ref
+                                    .read(
+                                      userHasInteractedWithModeProvider
+                                          .notifier,
+                                    )
+                                    .state =
+                                true;
+                            ref
+                                    .read(
+                                      returnedFromLearnSessionProvider.notifier,
+                                    )
+                                    .state =
+                                false;
+                            ref.read(levelSelectionProvider.notifier).state = m;
+                            if (m == LevelSelectionMode.single) {
+                              ref.read(selectingSingleProvider.notifier).state =
+                                  true;
+                            } else {
+                              ref.read(selectingSingleProvider.notifier).state =
+                                  false;
+                            }
+                          },
+                          onBeforeLockTap: _maybeShowLockTooltip,
+                          onS0LockTapped: () {
+                            ref
+                                    .read(
+                                      userHasInteractedWithModeProvider
+                                          .notifier,
+                                    )
+                                    .state =
+                                true;
+                            ref
+                                    .read(
+                                      returnedFromLearnSessionProvider.notifier,
+                                    )
+                                    .state =
+                                false;
+                          },
+                          titleOffsetY: -15,
+                          onStartPressed: () async {
+                            if (currentId.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Kategorie konnte nicht geladen werden',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            try {
+                              await ref
+                                  .read(
+                                    categoryDetailControllerProvider.notifier,
+                                  )
+                                  .seedForStart(currentId);
+                              if (!context.mounted) return;
+                              if (mounted) {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => LearnModeScreen(
+                                      categoryId: currentId,
+                                      title:
+                                          cats.isNotEmpty &&
+                                              validSelIndex < cats.length
+                                          ? cats[validSelIndex].name
+                                          : widget.title,
+                                      navigationOrigin:
+                                          LearnNavigationOrigin.category(
+                                            categoryId: currentId,
+                                            categoryTitle:
+                                                cats.isNotEmpty &&
+                                                    validSelIndex < cats.length
+                                                ? cats[validSelIndex].name
+                                                : widget.title,
+                                          ),
+                                    ),
+                                  ),
+                                );
+                                if (mounted) {
+                                  ref
+                                          .read(
+                                            returnedFromLearnSessionProvider
+                                                .notifier,
+                                          )
+                                          .state =
+                                      true;
+                                  ref
+                                          .read(
+                                            userHasInteractedWithModeProvider
+                                                .notifier,
+                                          )
+                                          .state =
+                                      false;
+                                }
+                                if (mounted) {
+                                  // Progress Provider immer invalidieren bei Rückkehr (Fortschritt wurde im Learn-Mode gespeichert)
+                                  final srs = ref
+                                      .read(srsModeControllerProvider)
+                                      .mode;
+                                  ref.invalidate(
+                                    categoryProgressProvider((
+                                      catId: currentId,
+                                      srs: srs,
+                                    )),
+                                  );
+                                  ref.invalidate(
+                                    learnedInStage5Provider(currentId),
+                                  );
+                                  // Controller neu laden (lädt vocabsTotal, categories, progress)
+                                  await ref
+                                      .read(
+                                        categoryDetailControllerProvider
+                                            .notifier,
+                                      )
+                                      .reload();
+                                }
+                              }
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Fehler beim Starten: $e'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        );
                       },
                     ),
                   ),
-                ),
 
-                const SizedBox(height: WordsLayout.gapBelowTop),
-
-                // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
-                Flexible(
-                  child: _buildHintOrProgress(
-                    ref: ref,
-                    currentId: currentId,
-                    dailyPercent: dailyPercent,
-                    dailyTotal: dailyTotal,
-                    dailyTarget: dailyTarget,
-                    s: s,
-                    overallPercent: overallPercent,
-                    overallLabel: overallLabel,
-                    stages: stages,
-                  ),
-                ),
-
-                // Reduzierter Abstand zwischen Overall Progress und Level-Selection-Buttons
-                const SizedBox(height: 17),
-
-                // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
-                SizedBox(
-                  height: WordsLayout.levelsCardH,
-                  child: Builder(
-                    builder: (context) {
-                      debugPrint(
-                        '🧾 UI stages: mode=${srs.mode} cat=$currentId '
-                        'loading=${progAsync.isLoading} hasValue=${progAsync.valueOrNull != null} '
-                        'total=$totalWords stages=$stages',
-                      );
-                      
-                      // Wenn stages -1 enthält, dann Loading-State (während Refresh)
-                      final displayStages = stages.any((s) => s == -1) 
-                          ? const [0,0,0,0,0,0] // Loading: Zeige 0 statt -1
-                          : stages;
-                      
-                      return LevelsCard(
-                    height: WordsLayout.levelsCardH,
-                    stages: displayStages,
-                    goalPerStage: 100,
-                    mode: mode,
-                    selectingSingle: selecting,
-                    visibleMask: mask,
-                    categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
-                    lockKey: _lockKey,
-                    autoButtonKey: _autoButtonKey,
-                    trainingButtonKey: _trainingButtonKey,
-                    singleButtonKey: _singleButtonKey,
-                    onSelectSingleStage: (stg) {
-                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
-                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
-                      ref.read(singleStageProvider.notifier).state = stg;
-                      ref.read(selectingSingleProvider.notifier).state = false;
-                    },
-                    onModeChanged: (m) async {
-                      if (m == LevelSelectionMode.s0toS5) {
-                        _maybeShowAutoTooltip();
-                      } else if (m == LevelSelectionMode.single) {
-                        _maybeShowSingleTooltip();
-                      } else if (m == LevelSelectionMode.s1toS5) {
-                        _maybeShowTrainingTooltip();
-                      }
-                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
-                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
-                      ref.read(levelSelectionProvider.notifier).state = m;
-                      if (m == LevelSelectionMode.single) {
-                        ref.read(selectingSingleProvider.notifier).state = true;
-                      } else {
-                        ref.read(selectingSingleProvider.notifier).state = false;
-                      }
-                    },
-                    onBeforeLockTap: _maybeShowLockTooltip,
-                    onS0LockTapped: () {
-                      ref.read(userHasInteractedWithModeProvider.notifier).state = true;
-                      ref.read(returnedFromLearnSessionProvider.notifier).state = false;
-                    },
-                    titleOffsetY: -15,
-                    onStartPressed: () async {
-                      if (currentId.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Kategorie konnte nicht geladen werden')),
-                        );
-                        return;
-                      }
-                      try {
-                        await ref.read(categoryDetailControllerProvider.notifier).seedForStart(currentId);
-                        if (mounted) {
-                          final didReset = await Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => LearnModeScreen(
-                              categoryId: currentId,
-                              title: cats.isNotEmpty && validSelIndex < cats.length 
-                                  ? cats[validSelIndex].name 
-                                  : widget.title,
-                              navigationOrigin: LearnNavigationOrigin.category(
-                                categoryId: currentId,
-                                categoryTitle: cats.isNotEmpty && validSelIndex < cats.length 
-                                    ? cats[validSelIndex].name 
-                                    : widget.title,
+                  if (kDebugMode && debugLocalButtonState.isVisible)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: TextButton.icon(
+                        onPressed: () {
+                          final localCategoryId =
+                              debugLocalButtonState.localCategoryId;
+                          if (localCategoryId == null) return;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => buildLocalLearningDebugScreen(
+                                categoryId: localCategoryId,
                               ),
                             ),
-                          ));
-                          if (mounted) {
-                            ref.read(returnedFromLearnSessionProvider.notifier).state = true;
-                            ref.read(userHasInteractedWithModeProvider.notifier).state = false;
-                          }
-                          if (mounted) {
-                            // Progress Provider immer invalidieren bei Rückkehr (Fortschritt wurde im Learn-Mode gespeichert)
-                            final srs = ref.read(srsModeControllerProvider).mode;
-                            ref.invalidate(categoryProgressProvider((catId: currentId, srs: srs)));
-                            ref.invalidate(learnedInStage5Provider(currentId));
-                            // Controller neu laden (lädt vocabsTotal, categories, progress)
-                            await ref.read(categoryDetailControllerProvider.notifier).reload();
-                          }
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Fehler beim Starten: $e')),
                           );
-                        }
-                      }
-                    },
-                      );
-                    },
-                  ),
-                ),
-                
-                // Minimales Padding am Ende
-                const SizedBox(height: 5),
-              ],
-            ),
+                        },
+                        icon: const Icon(Icons.bug_report_outlined, size: 18),
+                        label: const Text('Lokalen Debug-Lernscreen öffnen'),
+                      ),
+                    ),
+
+                  // Minimales Padding am Ende
+                  const SizedBox(height: 5),
+                ],
+              ),
             ),
           ],
         ),
