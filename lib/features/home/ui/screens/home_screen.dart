@@ -14,7 +14,7 @@ import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
 import 'package:talvori/features/push/data/daily_picks_store.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
-import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
+import 'package:talvori/features/local_learning_debug/ui/local_debug_hub_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -311,8 +311,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: kDebugMode
           ? FloatingActionButton.small(
               tooltip: 'Local Learning Debug',
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(localLearningDebugRoutePath),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const LocalDebugHubScreen(),
+                ),
+              ),
               child: const Icon(Icons.bug_report_outlined),
             )
           : null,
