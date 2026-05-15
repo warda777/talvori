@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.dart';
 import 'package:talvori/core/local_database/adapters/local_learn_mode_ui_adapter.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/features/local_learning_debug/ui/learnmode_card_view.dart';
 
 class LocalLearnModeScreen extends ConsumerWidget {
   const LocalLearnModeScreen({super.key});
@@ -59,29 +61,7 @@ class _LocalLearnModeScreenBody extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(uiState.term ?? ''),
-        if (uiState.translation != null) ...[
-          const SizedBox(height: 8),
-          Text(uiState.translation!),
-        ],
-        if (uiState.exampleSentence != null) ...[
-          const SizedBox(height: 8),
-          Text(uiState.exampleSentence!),
-        ],
-        if (uiState.notes != null) ...[
-          const SizedBox(height: 8),
-          Text(uiState.notes!),
-        ],
-        if (uiState.currentStage != null) ...[
-          const SizedBox(height: 8),
-          Text(uiState.currentStage!.name),
-        ],
-        const SizedBox(height: 8),
-        Text('Fortschritt ${uiState.progressLabel}'),
-      ],
-    );
+    final cardState = const LearnModeCardPresenter().map(uiState);
+    return LearnModeCardView(state: cardState);
   }
 }

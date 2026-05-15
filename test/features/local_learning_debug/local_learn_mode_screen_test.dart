@@ -41,7 +41,7 @@ void main() {
       expect(find.text('hallo'), findsOneWidget);
       expect(find.text('Hello, how are you?'), findsOneWidget);
       expect(find.text('Common greeting.'), findsOneWidget);
-      expect(find.text('Fortschritt 1 / 3'), findsOneWidget);
+      expect(find.text('1 / 3'), findsOneWidget);
       expect(find.text('s0'), findsOneWidget);
     });
 
