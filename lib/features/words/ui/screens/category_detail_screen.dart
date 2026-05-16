@@ -595,6 +595,33 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                               );
                               return;
                             }
+                            final localCategoryId =
+                                debugLocalButtonState.localCategoryId;
+                            final currentTitle =
+                                cats.isNotEmpty && validSelIndex < cats.length
+                                ? cats[validSelIndex].name
+                                : widget.title;
+                            final navigationOrigin =
+                                LearnNavigationOrigin.category(
+                                  categoryId: currentId,
+                                  categoryTitle: currentTitle,
+                                );
+
+                            if (localCategoryId != null) {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => LearnModeScreen(
+                                    categoryId: currentId,
+                                    title: currentTitle,
+                                    useLocalOfflineFlow: true,
+                                    localCategoryId: localCategoryId,
+                                    navigationOrigin: navigationOrigin,
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
                             try {
                               await ref
                                   .read(
@@ -607,20 +634,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                   MaterialPageRoute(
                                     builder: (_) => LearnModeScreen(
                                       categoryId: currentId,
-                                      title:
-                                          cats.isNotEmpty &&
-                                              validSelIndex < cats.length
-                                          ? cats[validSelIndex].name
-                                          : widget.title,
-                                      navigationOrigin:
-                                          LearnNavigationOrigin.category(
-                                            categoryId: currentId,
-                                            categoryTitle:
-                                                cats.isNotEmpty &&
-                                                    validSelIndex < cats.length
-                                                ? cats[validSelIndex].name
-                                                : widget.title,
-                                          ),
+                                      title: currentTitle,
+                                      navigationOrigin: navigationOrigin,
                                     ),
                                   ),
                                 );
