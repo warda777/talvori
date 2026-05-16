@@ -377,365 +377,301 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
           debugLocalStartPath,
         );
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Listener(
-              onPointerDown: (_) {
-                if (ref.read(returnedFromLearnSessionProvider)) {
+    return _buildCategoryDetailFrame(
+      onPointerDown: (_) {
+        if (ref.read(returnedFromLearnSessionProvider)) {
+          ref.read(userHasInteractedWithModeProvider.notifier).state = true;
+          ref.read(returnedFromLearnSessionProvider.notifier).state = false;
+        }
+      },
+      children: [
+        // FIX: fester Header
+        SizedBox(
+          height: WordsLayout.topCapsuleH,
+          child: CategoryHeaderCapsule(
+            height: WordsLayout.topCapsuleH,
+            title: cats.isNotEmpty && validSelIndex < cats.length
+                ? cats[validSelIndex].name
+                : widget.title,
+            vocabsCount: s.vocabsTotal,
+            categories: cats.map((e) => e.name).toList(),
+            selectedIndex: cats.isEmpty
+                ? 0
+                : validSelIndex.clamp(0, cats.length - 1),
+            vocabsKey: _vocabsKey,
+            wheelKey: _wheelKey,
+            onWheelChanged: (idx, label) {
+              _maybeShowWheelTooltip();
+              ref.read(categoryDetailControllerProvider.notifier).switchTo(idx);
+            },
+            onBack: () async {
+              await resetCategoryDetailTooltipFlags(ref);
+              if (context.mounted) Navigator.of(context).pop();
+            },
+            onVocabs: () {
+              _maybeShowVocabsTooltip();
+              if (currentId.isEmpty) return;
+              final currentName = cats.isNotEmpty && validSelIndex < cats.length
+                  ? cats[validSelIndex].name
+                  : widget.title;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => WordListScreen(
+                    filter: widget.listFilter,
+                    overrideCategoryId: currentId,
+                    overrideCategoryLabel: currentName,
+                  ),
+                ),
+              );
+            },
+            onAdd: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Add tapped')));
+            },
+            onSettings: () {
+              showDialog(
+                context: context,
+                builder: (_) => const CategorySettingsDialog(),
+              );
+            },
+            // Offsets wie im Learn-Mode:
+            wheelOffsetX: WordsLayout.wheelOffsetX,
+            wheelOffsetY: WordsLayout.wheelOffsetY,
+            rowOffsetX: WordsLayout.rowOffsetX,
+            rowOffsetY: WordsLayout.rowOffsetY,
+            vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+            vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+            rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+            rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+            wheelBottomGap: WordsLayout.wheelBottomGap,
+            accentColor: kAccentBlue,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            trailingRightBelow: SrsModeToggleWithHint(
+              onUserTap: () {
+                ref.read(userHasInteractedWithModeProvider.notifier).state =
+                    true;
+                ref.read(returnedFromLearnSessionProvider.notifier).state =
+                    false;
+              },
+            ),
+          ),
+        ),
+
+        const SizedBox(height: WordsLayout.gapBelowTop),
+
+        // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
+        Flexible(
+          child: _buildHintOrProgress(
+            ref: ref,
+            currentId: currentId,
+            dailyPercent: dailyPercent,
+            dailyTotal: dailyTotal,
+            dailyTarget: dailyTarget,
+            s: s,
+            overallPercent: overallPercent,
+            overallLabel: overallLabel,
+            stages: stages,
+          ),
+        ),
+
+        // Reduzierter Abstand zwischen Overall Progress und Level-Selection-Buttons
+        const SizedBox(height: 17),
+
+        // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
+        SizedBox(
+          height: WordsLayout.levelsCardH,
+          child: Builder(
+            builder: (context) {
+              debugPrint(
+                '🧾 UI stages: mode=${srs.mode} cat=$currentId '
+                'loading=${progAsync.isLoading} hasValue=${progAsync.valueOrNull != null} '
+                'total=$totalWords stages=$stages',
+              );
+
+              // Wenn stages -1 enthält, dann Loading-State (während Refresh)
+              final displayStages = stages.any((s) => s == -1)
+                  ? const [0, 0, 0, 0, 0, 0] // Loading: Zeige 0 statt -1
+                  : stages;
+
+              return LevelsCard(
+                height: WordsLayout.levelsCardH,
+                stages: displayStages,
+                goalPerStage: 100,
+                mode: mode,
+                selectingSingle: selecting,
+                visibleMask: mask,
+                categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
+                lockKey: _lockKey,
+                autoButtonKey: _autoButtonKey,
+                trainingButtonKey: _trainingButtonKey,
+                singleButtonKey: _singleButtonKey,
+                onSelectSingleStage: (stg) {
                   ref.read(userHasInteractedWithModeProvider.notifier).state =
                       true;
                   ref.read(returnedFromLearnSessionProvider.notifier).state =
                       false;
-                }
-              },
-              child: Column(
-                children: [
-                  // FIX: fester Header
-                  SizedBox(
-                    height: WordsLayout.topCapsuleH,
-                    child: CategoryHeaderCapsule(
-                      height: WordsLayout.topCapsuleH,
-                      title: cats.isNotEmpty && validSelIndex < cats.length
-                          ? cats[validSelIndex].name
-                          : widget.title,
-                      vocabsCount: s.vocabsTotal,
-                      categories: cats.map((e) => e.name).toList(),
-                      selectedIndex: cats.isEmpty
-                          ? 0
-                          : validSelIndex.clamp(0, cats.length - 1),
-                      vocabsKey: _vocabsKey,
-                      wheelKey: _wheelKey,
-                      onWheelChanged: (idx, label) {
-                        _maybeShowWheelTooltip();
-                        ref
-                            .read(categoryDetailControllerProvider.notifier)
-                            .switchTo(idx);
-                      },
-                      onBack: () async {
-                        await resetCategoryDetailTooltipFlags(ref);
-                        if (context.mounted) Navigator.of(context).pop();
-                      },
-                      onVocabs: () {
-                        _maybeShowVocabsTooltip();
-                        if (currentId.isEmpty) return;
-                        final currentName =
-                            cats.isNotEmpty && validSelIndex < cats.length
-                            ? cats[validSelIndex].name
-                            : widget.title;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => WordListScreen(
-                              filter: widget.listFilter,
-                              overrideCategoryId: currentId,
-                              overrideCategoryLabel: currentName,
-                            ),
+                  ref.read(singleStageProvider.notifier).state = stg;
+                  ref.read(selectingSingleProvider.notifier).state = false;
+                },
+                onModeChanged: (m) async {
+                  if (m == LevelSelectionMode.s0toS5) {
+                    _maybeShowAutoTooltip();
+                  } else if (m == LevelSelectionMode.single) {
+                    _maybeShowSingleTooltip();
+                  } else if (m == LevelSelectionMode.s1toS5) {
+                    _maybeShowTrainingTooltip();
+                  }
+                  ref.read(userHasInteractedWithModeProvider.notifier).state =
+                      true;
+                  ref.read(returnedFromLearnSessionProvider.notifier).state =
+                      false;
+                  ref.read(levelSelectionProvider.notifier).state = m;
+                  if (m == LevelSelectionMode.single) {
+                    ref.read(selectingSingleProvider.notifier).state = true;
+                  } else {
+                    ref.read(selectingSingleProvider.notifier).state = false;
+                  }
+                },
+                onBeforeLockTap: _maybeShowLockTooltip,
+                onS0LockTapped: () {
+                  ref.read(userHasInteractedWithModeProvider.notifier).state =
+                      true;
+                  ref.read(returnedFromLearnSessionProvider.notifier).state =
+                      false;
+                },
+                titleOffsetY: -15,
+                onStartPressed: () async {
+                  if (currentId.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Kategorie konnte nicht geladen werden'),
+                      ),
+                    );
+                    return;
+                  }
+                  final localCategoryId = debugLocalButtonState.localCategoryId;
+                  final currentTitle =
+                      cats.isNotEmpty && validSelIndex < cats.length
+                      ? cats[validSelIndex].name
+                      : widget.title;
+                  final navigationOrigin = LearnNavigationOrigin.category(
+                    categoryId: currentId,
+                    categoryTitle: currentTitle,
+                  );
+
+                  if (localCategoryId != null) {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LearnModeScreen(
+                          categoryId: currentId,
+                          title: currentTitle,
+                          useLocalOfflineFlow: true,
+                          localCategoryId: localCategoryId,
+                          navigationOrigin: navigationOrigin,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await ref
+                        .read(categoryDetailControllerProvider.notifier)
+                        .seedForStart(currentId);
+                    if (!context.mounted) return;
+                    if (mounted) {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => LearnModeScreen(
+                            categoryId: currentId,
+                            title: currentTitle,
+                            navigationOrigin: navigationOrigin,
                           ),
+                        ),
+                      );
+                      if (mounted) {
+                        ref
+                                .read(returnedFromLearnSessionProvider.notifier)
+                                .state =
+                            true;
+                        ref
+                                .read(
+                                  userHasInteractedWithModeProvider.notifier,
+                                )
+                                .state =
+                            false;
+                      }
+                      if (mounted) {
+                        // Progress Provider immer invalidieren bei Rückkehr (Fortschritt wurde im Learn-Mode gespeichert)
+                        final srs = ref.read(srsModeControllerProvider).mode;
+                        ref.invalidate(
+                          categoryProgressProvider((
+                            catId: currentId,
+                            srs: srs,
+                          )),
                         );
-                      },
-                      onAdd: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Add tapped')),
-                        );
-                      },
-                      onSettings: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => const CategorySettingsDialog(),
-                        );
-                      },
-                      // Offsets wie im Learn-Mode:
-                      wheelOffsetX: WordsLayout.wheelOffsetX,
-                      wheelOffsetY: WordsLayout.wheelOffsetY,
-                      rowOffsetX: WordsLayout.rowOffsetX,
-                      rowOffsetY: WordsLayout.rowOffsetY,
-                      vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
-                      vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
-                      rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
-                      rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
-                      wheelBottomGap: WordsLayout.wheelBottomGap,
-                      accentColor: kAccentBlue,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).scaffoldBackgroundColor,
-                      trailingRightBelow: SrsModeToggleWithHint(
-                        onUserTap: () {
-                          ref
-                                  .read(
-                                    userHasInteractedWithModeProvider.notifier,
-                                  )
-                                  .state =
-                              true;
-                          ref
-                                  .read(
-                                    returnedFromLearnSessionProvider.notifier,
-                                  )
-                                  .state =
-                              false;
-                        },
-                      ),
+                        ref.invalidate(learnedInStage5Provider(currentId));
+                        // Controller neu laden (lädt vocabsTotal, categories, progress)
+                        await ref
+                            .read(categoryDetailControllerProvider.notifier)
+                            .reload();
+                      }
+                    }
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Fehler beim Starten: $e')),
+                      );
+                    }
+                  }
+                },
+              );
+            },
+          ),
+        ),
+
+        if (kDebugMode && debugLocalButtonState.isVisible)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: TextButton.icon(
+              onPressed: () {
+                final localCategoryId = debugLocalButtonState.localCategoryId;
+                if (localCategoryId == null) return;
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => buildLocalLearningDebugScreen(
+                      categoryId: localCategoryId,
                     ),
                   ),
-
-                  const SizedBox(height: WordsLayout.gapBelowTop),
-
-                  // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
-                  Flexible(
-                    child: _buildHintOrProgress(
-                      ref: ref,
-                      currentId: currentId,
-                      dailyPercent: dailyPercent,
-                      dailyTotal: dailyTotal,
-                      dailyTarget: dailyTarget,
-                      s: s,
-                      overallPercent: overallPercent,
-                      overallLabel: overallLabel,
-                      stages: stages,
-                    ),
-                  ),
-
-                  // Reduzierter Abstand zwischen Overall Progress und Level-Selection-Buttons
-                  const SizedBox(height: 17),
-
-                  // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
-                  SizedBox(
-                    height: WordsLayout.levelsCardH,
-                    child: Builder(
-                      builder: (context) {
-                        debugPrint(
-                          '🧾 UI stages: mode=${srs.mode} cat=$currentId '
-                          'loading=${progAsync.isLoading} hasValue=${progAsync.valueOrNull != null} '
-                          'total=$totalWords stages=$stages',
-                        );
-
-                        // Wenn stages -1 enthält, dann Loading-State (während Refresh)
-                        final displayStages = stages.any((s) => s == -1)
-                            ? const [
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                              ] // Loading: Zeige 0 statt -1
-                            : stages;
-
-                        return LevelsCard(
-                          height: WordsLayout.levelsCardH,
-                          stages: displayStages,
-                          goalPerStage: 100,
-                          mode: mode,
-                          selectingSingle: selecting,
-                          visibleMask: mask,
-                          categoryId: currentId.isEmpty
-                              ? null
-                              : currentId, // Für Dialog
-                          lockKey: _lockKey,
-                          autoButtonKey: _autoButtonKey,
-                          trainingButtonKey: _trainingButtonKey,
-                          singleButtonKey: _singleButtonKey,
-                          onSelectSingleStage: (stg) {
-                            ref
-                                    .read(
-                                      userHasInteractedWithModeProvider
-                                          .notifier,
-                                    )
-                                    .state =
-                                true;
-                            ref
-                                    .read(
-                                      returnedFromLearnSessionProvider.notifier,
-                                    )
-                                    .state =
-                                false;
-                            ref.read(singleStageProvider.notifier).state = stg;
-                            ref.read(selectingSingleProvider.notifier).state =
-                                false;
-                          },
-                          onModeChanged: (m) async {
-                            if (m == LevelSelectionMode.s0toS5) {
-                              _maybeShowAutoTooltip();
-                            } else if (m == LevelSelectionMode.single) {
-                              _maybeShowSingleTooltip();
-                            } else if (m == LevelSelectionMode.s1toS5) {
-                              _maybeShowTrainingTooltip();
-                            }
-                            ref
-                                    .read(
-                                      userHasInteractedWithModeProvider
-                                          .notifier,
-                                    )
-                                    .state =
-                                true;
-                            ref
-                                    .read(
-                                      returnedFromLearnSessionProvider.notifier,
-                                    )
-                                    .state =
-                                false;
-                            ref.read(levelSelectionProvider.notifier).state = m;
-                            if (m == LevelSelectionMode.single) {
-                              ref.read(selectingSingleProvider.notifier).state =
-                                  true;
-                            } else {
-                              ref.read(selectingSingleProvider.notifier).state =
-                                  false;
-                            }
-                          },
-                          onBeforeLockTap: _maybeShowLockTooltip,
-                          onS0LockTapped: () {
-                            ref
-                                    .read(
-                                      userHasInteractedWithModeProvider
-                                          .notifier,
-                                    )
-                                    .state =
-                                true;
-                            ref
-                                    .read(
-                                      returnedFromLearnSessionProvider.notifier,
-                                    )
-                                    .state =
-                                false;
-                          },
-                          titleOffsetY: -15,
-                          onStartPressed: () async {
-                            if (currentId.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Kategorie konnte nicht geladen werden',
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            final localCategoryId =
-                                debugLocalButtonState.localCategoryId;
-                            final currentTitle =
-                                cats.isNotEmpty && validSelIndex < cats.length
-                                ? cats[validSelIndex].name
-                                : widget.title;
-                            final navigationOrigin =
-                                LearnNavigationOrigin.category(
-                                  categoryId: currentId,
-                                  categoryTitle: currentTitle,
-                                );
-
-                            if (localCategoryId != null) {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => LearnModeScreen(
-                                    categoryId: currentId,
-                                    title: currentTitle,
-                                    useLocalOfflineFlow: true,
-                                    localCategoryId: localCategoryId,
-                                    navigationOrigin: navigationOrigin,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            try {
-                              await ref
-                                  .read(
-                                    categoryDetailControllerProvider.notifier,
-                                  )
-                                  .seedForStart(currentId);
-                              if (!context.mounted) return;
-                              if (mounted) {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => LearnModeScreen(
-                                      categoryId: currentId,
-                                      title: currentTitle,
-                                      navigationOrigin: navigationOrigin,
-                                    ),
-                                  ),
-                                );
-                                if (mounted) {
-                                  ref
-                                          .read(
-                                            returnedFromLearnSessionProvider
-                                                .notifier,
-                                          )
-                                          .state =
-                                      true;
-                                  ref
-                                          .read(
-                                            userHasInteractedWithModeProvider
-                                                .notifier,
-                                          )
-                                          .state =
-                                      false;
-                                }
-                                if (mounted) {
-                                  // Progress Provider immer invalidieren bei Rückkehr (Fortschritt wurde im Learn-Mode gespeichert)
-                                  final srs = ref
-                                      .read(srsModeControllerProvider)
-                                      .mode;
-                                  ref.invalidate(
-                                    categoryProgressProvider((
-                                      catId: currentId,
-                                      srs: srs,
-                                    )),
-                                  );
-                                  ref.invalidate(
-                                    learnedInStage5Provider(currentId),
-                                  );
-                                  // Controller neu laden (lädt vocabsTotal, categories, progress)
-                                  await ref
-                                      .read(
-                                        categoryDetailControllerProvider
-                                            .notifier,
-                                      )
-                                      .reload();
-                                }
-                              }
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Fehler beim Starten: $e'),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ),
-
-                  if (kDebugMode && debugLocalButtonState.isVisible)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: TextButton.icon(
-                        onPressed: () {
-                          final localCategoryId =
-                              debugLocalButtonState.localCategoryId;
-                          if (localCategoryId == null) return;
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => buildLocalLearningDebugScreen(
-                                categoryId: localCategoryId,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.bug_report_outlined, size: 18),
-                        label: const Text('Lokalen Debug-Lernscreen öffnen'),
-                      ),
-                    ),
-
-                  // Minimales Padding am Ende
-                  const SizedBox(height: 5),
-                ],
-              ),
+                );
+              },
+              icon: const Icon(Icons.bug_report_outlined, size: 18),
+              label: const Text('Lokalen Debug-Lernscreen öffnen'),
             ),
+          ),
+
+        // Minimales Padding am Ende
+        const SizedBox(height: 5),
+      ],
+    );
+  }
+
+  Widget _buildCategoryDetailFrame({
+    required List<Widget> children,
+    PointerDownEventListener? onPointerDown,
+  }) {
+    final content = Column(children: children);
+
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            if (onPointerDown == null)
+              content
+            else
+              Listener(onPointerDown: onPointerDown, child: content),
           ],
         ),
       ),
@@ -777,127 +713,118 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(
+    return _buildCategoryDetailFrame(
+      children: [
+        SizedBox(
+          height: WordsLayout.topCapsuleH,
+          child: MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(0.65)),
+            child: CategoryHeaderCapsule(
               height: WordsLayout.topCapsuleH,
-              child: MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: const TextScaler.linear(0.65)),
-                child: CategoryHeaderCapsule(
-                  height: WordsLayout.topCapsuleH,
-                  title: title,
-                  vocabsCount: 0,
-                  categories: [title],
-                  selectedIndex: 0,
-                  vocabsKey: _vocabsKey,
-                  wheelKey: _wheelKey,
-                  onWheelChanged: (_, _) {},
-                  onBack: () => Navigator.of(context).pop(),
-                  onVocabs: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Lokale Wortliste noch nicht angebunden'),
-                      ),
-                    );
-                  },
-                  onAdd: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Lokales Hinzufügen noch nicht angebunden',
-                        ),
-                      ),
-                    );
-                  },
-                  onSettings: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Lokale Einstellungen noch nicht angebunden',
-                        ),
-                      ),
-                    );
-                  },
-                  wheelOffsetX: WordsLayout.wheelOffsetX,
-                  wheelOffsetY: WordsLayout.wheelOffsetY,
-                  rowOffsetX: WordsLayout.rowOffsetX,
-                  rowOffsetY: WordsLayout.rowOffsetY,
-                  vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
-                  vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
-                  rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
-                  rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
-                  wheelBottomGap: WordsLayout.wheelBottomGap,
-                  accentColor: kAccentBlue,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                ),
-              ),
+              title: title,
+              vocabsCount: 0,
+              categories: [title],
+              selectedIndex: 0,
+              vocabsKey: _vocabsKey,
+              wheelKey: _wheelKey,
+              onWheelChanged: (_, _) {},
+              onBack: () => Navigator.of(context).pop(),
+              onVocabs: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lokale Wortliste noch nicht angebunden'),
+                  ),
+                );
+              },
+              onAdd: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lokales Hinzufügen noch nicht angebunden'),
+                  ),
+                );
+              },
+              onSettings: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lokale Einstellungen noch nicht angebunden'),
+                  ),
+                );
+              },
+              wheelOffsetX: WordsLayout.wheelOffsetX,
+              wheelOffsetY: WordsLayout.wheelOffsetY,
+              rowOffsetX: WordsLayout.rowOffsetX,
+              rowOffsetY: WordsLayout.rowOffsetY,
+              vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+              vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+              rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+              rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+              wheelBottomGap: WordsLayout.wheelBottomGap,
+              accentColor: kAccentBlue,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
-            const SizedBox(height: WordsLayout.gapBelowTop),
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ),
+        ),
+        const SizedBox(height: WordsLayout.gapBelowTop),
+        Expanded(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Lokale Kategorie',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    localCategoryId.isEmpty ? title : localCategoryId,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFFB1CCFE),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
                     children: [
-                      Text(
-                        'Lokale Kategorie',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        localCategoryId.isEmpty ? title : localCategoryId,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFFB1CCFE),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          for (var i = 0; i < stages.length; i++)
-                            _LocalStageBadge(label: 'S$i', count: stages[i]),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: 148,
-                        height: 48,
-                        child: FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF2D2D2F),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              side: const BorderSide(
-                                color: Color(0xFFB1CCFE),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          onPressed: openLocalLearnMode,
-                          child: const Text('Start'),
-                        ),
-                      ),
+                      for (var i = 0; i < stages.length; i++)
+                        _LocalStageBadge(label: 'S$i', count: stages[i]),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 148,
+                    height: 48,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF2D2D2F),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: const BorderSide(
+                            color: Color(0xFFB1CCFE),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                      onPressed: openLocalLearnMode,
+                      child: const Text('Start'),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 5),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 5),
+      ],
     );
   }
 }
