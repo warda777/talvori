@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,8 +11,8 @@ enum SrsSystem { time, adaptive, hybrid }
 class SrsModeState {
   final SrsSystem mode;
   final SrsSystem lastNonHybrid;
-  final bool counting;   // läuft der Countdown?
-  final int count;       // 3..1 (0 = aus)
+  final bool counting; // läuft der Countdown?
+  final int count; // 3..1 (0 = aus)
 
   const SrsModeState({
     required this.mode,
@@ -28,11 +27,11 @@ class SrsModeState {
     bool? counting,
     int? count,
   }) => SrsModeState(
-        mode: mode ?? this.mode,
-        lastNonHybrid: lastNonHybrid ?? this.lastNonHybrid,
-        counting: counting ?? this.counting,
-        count: count ?? this.count,
-      );
+    mode: mode ?? this.mode,
+    lastNonHybrid: lastNonHybrid ?? this.lastNonHybrid,
+    counting: counting ?? this.counting,
+    count: count ?? this.count,
+  );
 
   static const initial = SrsModeState(
     mode: SrsSystem.time,
@@ -63,10 +62,14 @@ class SrsModeController extends StateNotifier<SrsModeState> {
 
   static SrsSystem? _parseMode(String? s) {
     switch (s) {
-      case 'time': return SrsSystem.time;
-      case 'adaptive': return SrsSystem.adaptive;
-      case 'hybrid': return SrsSystem.hybrid;
-      default: return null;
+      case 'time':
+        return SrsSystem.time;
+      case 'adaptive':
+        return SrsSystem.adaptive;
+      case 'hybrid':
+        return SrsSystem.hybrid;
+      default:
+        return null;
     }
   }
 
@@ -82,6 +85,24 @@ class SrsModeController extends StateNotifier<SrsModeState> {
   }
 
   // UI ruft nur diese Methoden:
+
+  void setMode(SrsSystem mode) {
+    final lastNonHybrid = switch (mode) {
+      SrsSystem.time || SrsSystem.adaptive => mode,
+      SrsSystem.hybrid =>
+        state.mode == SrsSystem.hybrid ? state.lastNonHybrid : state.mode,
+    };
+
+    _updateState(
+      state.copyWith(
+        mode: mode,
+        lastNonHybrid: lastNonHybrid,
+        counting: false,
+        count: 0,
+      ),
+    );
+    HapticFeedback.selectionClick();
+  }
 
   void tap() {
     if (state.mode == SrsSystem.hybrid) {
@@ -108,12 +129,14 @@ class SrsModeController extends StateNotifier<SrsModeState> {
   }
 
   void _toHybrid() {
-    _updateState(state.copyWith(
-      counting: false,
-      count: 0,
-      lastNonHybrid: state.mode,
-      mode: SrsSystem.hybrid,
-    ));
+    _updateState(
+      state.copyWith(
+        counting: false,
+        count: 0,
+        lastNonHybrid: state.mode,
+        mode: SrsSystem.hybrid,
+      ),
+    );
     HapticFeedback.mediumImpact();
   }
 }
@@ -121,14 +144,17 @@ class SrsModeController extends StateNotifier<SrsModeState> {
 // Riverpod Provider
 final srsModeControllerProvider =
     StateNotifierProvider<SrsModeController, SrsModeState>(
-  (ref) => SrsModeController(),
-);
+      (ref) => SrsModeController(),
+    );
 
 // (Optional) abgeleitete Farbe pro Modus
 final srsAccentColorProvider = Provider<Color>((ref) {
   switch (ref.watch(srsModeControllerProvider).mode) {
-    case SrsSystem.time:    return const Color(0xFF6FD3FF);
-    case SrsSystem.adaptive:return const Color(0xFF66FFA8);
-    case SrsSystem.hybrid:  return const Color(0xFFE5B966);
+    case SrsSystem.time:
+      return const Color(0xFF6FD3FF);
+    case SrsSystem.adaptive:
+      return const Color(0xFF66FFA8);
+    case SrsSystem.hybrid:
+      return const Color(0xFFE5B966);
   }
 });
