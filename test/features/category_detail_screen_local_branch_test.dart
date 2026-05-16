@@ -34,6 +34,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Basics'), findsWidgets);
+      expect(find.text('Vocabs'), findsOneWidget);
       expect(find.text('Lokale Kategorie'), findsOneWidget);
       expect(find.text('basics'), findsWidgets);
       expect(find.text('Start'), findsOneWidget);

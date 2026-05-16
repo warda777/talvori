@@ -783,33 +783,57 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
           children: [
             SizedBox(
               height: WordsLayout.topCapsuleH,
-              child: _LocalCategoryHeader(
-                title: title,
-                localCategoryId: localCategoryId,
-                onBack: () => Navigator.of(context).pop(),
-                onVocabs: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lokale Wortliste noch nicht angebunden'),
-                    ),
-                  );
-                },
-                onAdd: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lokales Hinzufügen noch nicht angebunden'),
-                    ),
-                  );
-                },
-                onSettings: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Lokale Einstellungen noch nicht angebunden',
+              child: MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(0.65)),
+                child: CategoryHeaderCapsule(
+                  height: WordsLayout.topCapsuleH,
+                  title: title,
+                  vocabsCount: 0,
+                  categories: [title],
+                  selectedIndex: 0,
+                  vocabsKey: _vocabsKey,
+                  wheelKey: _wheelKey,
+                  onWheelChanged: (_, _) {},
+                  onBack: () => Navigator.of(context).pop(),
+                  onVocabs: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Lokale Wortliste noch nicht angebunden'),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                  onAdd: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Lokales Hinzufügen noch nicht angebunden',
+                        ),
+                      ),
+                    );
+                  },
+                  onSettings: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Lokale Einstellungen noch nicht angebunden',
+                        ),
+                      ),
+                    );
+                  },
+                  wheelOffsetX: WordsLayout.wheelOffsetX,
+                  wheelOffsetY: WordsLayout.wheelOffsetY,
+                  rowOffsetX: WordsLayout.rowOffsetX,
+                  rowOffsetY: WordsLayout.rowOffsetY,
+                  vocabsTileOffsetX: WordsLayout.vocabsTileOffsetX,
+                  vocabsTileOffsetY: WordsLayout.vocabsTileOffsetY,
+                  rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
+                  rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
+                  wheelBottomGap: WordsLayout.wheelBottomGap,
+                  accentColor: kAccentBlue,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                ),
               ),
             ),
             const SizedBox(height: WordsLayout.gapBelowTop),
@@ -873,180 +897,6 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             const SizedBox(height: 5),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _LocalCategoryHeader extends StatelessWidget {
-  const _LocalCategoryHeader({
-    required this.title,
-    required this.localCategoryId,
-    required this.onBack,
-    required this.onVocabs,
-    required this.onAdd,
-    required this.onSettings,
-  });
-
-  final String title;
-  final String localCategoryId;
-  final VoidCallback onBack;
-  final VoidCallback onVocabs;
-  final VoidCallback onAdd;
-  final VoidCallback onSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      padding: WordsLayout.topPadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: WordsLayout.wheelHeight,
-            child: Row(
-              children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(22),
-                  onTap: onBack,
-                  child: const SizedBox(
-                    width: 44,
-                    height: 44,
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF151515),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: kAccentBlue, width: 1.4),
-                      ),
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 28),
-              ],
-            ),
-          ),
-          SizedBox(height: WordsLayout.wheelBottomGap),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: onVocabs,
-                  child: Container(
-                    width: 84,
-                    height: 85,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF111111),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: kAccentBlue, width: 1.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: kAccentBlue.withValues(alpha: 0.28),
-                          blurRadius: 18,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          localCategoryId.isEmpty ? '0' : localCategoryId,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: kAccentBlue,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.only(right: 24),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _LocalCircleButton(icon: Icons.add, onTap: onAdd),
-                    const SizedBox(width: 10),
-                    _LocalCircleButton(
-                      icon: Icons.tune_rounded,
-                      onTap: onSettings,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LocalCircleButton extends StatelessWidget {
-  const _LocalCircleButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(31),
-      onTap: onTap,
-      child: Container(
-        width: 62,
-        height: 62,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFF111111),
-          border: Border.all(color: kAccentBlue, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: kAccentBlue.withValues(alpha: 0.25),
-              blurRadius: 18,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Icon(icon, color: Colors.white, size: 26),
       ),
     );
   }
