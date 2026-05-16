@@ -26,12 +26,6 @@ class LevelSelectorButtons extends ConsumerWidget {
   final GlobalKey? trainingButtonKey;
   final GlobalKey? singleButtonKey;
 
-  static const _w = 87.0;
-  static const _h = 27.0;
-  static const _r = 13.5;
-  static const _activeFill = Color(0xFF2D2C2E);
-  static const _inactiveStroke = Color(0xFF2D2C2E);
-
   /// Gibt das Label für S1-S5 basierend auf dem SRS-Modus zurück
   String _getS1ToS5Label(SrsSystem srsMode) {
     switch (srsMode) {
@@ -49,6 +43,46 @@ class LevelSelectorButtons extends ConsumerWidget {
     final srsMode = ref.watch(srsModeControllerProvider).mode;
     final s1ToS5Label = _getS1ToS5Label(srsMode);
 
+    return LevelSelectorButtonsView(
+      mode: mode,
+      s1ToS5Label: s1ToS5Label,
+      onModeChanged: onModeChanged,
+      spacing: spacing,
+      autoButtonKey: autoButtonKey,
+      trainingButtonKey: trainingButtonKey,
+      singleButtonKey: singleButtonKey,
+    );
+  }
+}
+
+class LevelSelectorButtonsView extends StatelessWidget {
+  const LevelSelectorButtonsView({
+    super.key,
+    required this.mode,
+    required this.s1ToS5Label,
+    required this.onModeChanged,
+    this.spacing = 20,
+    this.autoButtonKey,
+    this.trainingButtonKey,
+    this.singleButtonKey,
+  });
+
+  final LevelSelectionMode mode;
+  final String s1ToS5Label;
+  final ValueChanged<LevelSelectionMode> onModeChanged;
+  final double spacing;
+  final GlobalKey? autoButtonKey;
+  final GlobalKey? trainingButtonKey;
+  final GlobalKey? singleButtonKey;
+
+  static const _w = 87.0;
+  static const _h = 27.0;
+  static const _r = 13.5;
+  static const _activeFill = Color(0xFF2D2C2E);
+  static const _inactiveStroke = Color(0xFF2D2C2E);
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -95,9 +129,9 @@ class _ModeButton extends StatefulWidget {
 
 class _ModeButtonState extends State<_ModeButton>
     with SingleTickerProviderStateMixin {
-  static const _w = LevelSelectorButtons._w;
-  static const _h = LevelSelectorButtons._h;
-  static const _r = LevelSelectorButtons._r;
+  static const _w = LevelSelectorButtonsView._w;
+  static const _h = LevelSelectorButtonsView._h;
+  static const _r = LevelSelectorButtonsView._r;
 
   late AnimationController _ctrl;
   late Animation<double> _glowScale;
@@ -109,9 +143,10 @@ class _ModeButtonState extends State<_ModeButton>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _glowScale = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
-    );
+    _glowScale = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     if (widget.selected) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && widget.selected) _ctrl.forward();
@@ -126,7 +161,11 @@ class _ModeButtonState extends State<_ModeButton>
       if (widget.selected) {
         _ctrl.forward(from: 0);
       } else {
-        _ctrl.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
+        _ctrl.animateTo(
+          0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeIn,
+        );
       }
     }
   }
@@ -141,11 +180,9 @@ class _ModeButtonState extends State<_ModeButton>
   Widget build(BuildContext context) {
     final selected = widget.selected;
     final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: selected
-              ? Colors.white
-              : Colors.white.withOpacity(0.45),
-        );
+      fontWeight: FontWeight.w600,
+      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.45),
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -158,16 +195,20 @@ class _ModeButtonState extends State<_ModeButton>
           final scale = 1.0 + 0.04 * v;
 
           final decoration = BoxDecoration(
-            color: selected ? LevelSelectorButtons._activeFill : Colors.transparent,
+            color: selected
+                ? LevelSelectorButtonsView._activeFill
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(_r),
             border: Border.all(
-              color: selected ? Colors.white : LevelSelectorButtons._inactiveStroke,
+              color: selected
+                  ? Colors.white
+                  : LevelSelectorButtonsView._inactiveStroke,
               width: selected ? 1.5 : 1.0,
             ),
             boxShadow: _glowScale.value > 0.01
                 ? [
                     BoxShadow(
-                      color: Colors.white.withOpacity(glowOpacity),
+                      color: Colors.white.withValues(alpha: glowOpacity),
                       blurRadius: 16 + 4 * v,
                       spreadRadius: 1 + v,
                     ),
