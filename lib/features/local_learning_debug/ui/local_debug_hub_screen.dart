@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_screen.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_wordhub_debug_screen.dart';
+import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
 class LocalDebugHubScreen extends StatelessWidget {
   const LocalDebugHubScreen({super.key});
@@ -30,6 +31,17 @@ class LocalDebugHubScreen extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const LocalWordHubDebugScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('Lokaler WordHub'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const WordHubScreen(useLocalOfflineFlow: true),
                 ),
               );
             },

@@ -24,6 +24,7 @@ void main() {
       expect(find.text('Lokaler Debug-Hub'), findsOneWidget);
       expect(find.text('Lokaler Lernscreen'), findsOneWidget);
       expect(find.text('Lokale Kategorien'), findsOneWidget);
+      expect(find.text('Lokaler WordHub'), findsOneWidget);
     });
 
     testWidgets('debug_hub_opens_local_learnmode_screen', (tester) async {
@@ -78,6 +79,23 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Lokale Kategorien'), findsWidgets);
+      expect(find.text('Keine lokalen Kategorien gefunden'), findsOneWidget);
+    });
+
+    testWidgets('debug_hub_opens_local_wordhub_screen', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localCategoriesProvider.overrideWith((ref) async => const []),
+          ],
+          child: const MaterialApp(home: LocalDebugHubScreen()),
+        ),
+      );
+
+      await tester.tap(find.text('Lokaler WordHub'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Word Hub'), findsOneWidget);
       expect(find.text('Keine lokalen Kategorien gefunden'), findsOneWidget);
     });
   });
