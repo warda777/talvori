@@ -9,7 +9,6 @@ import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
-import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
@@ -23,7 +22,6 @@ import 'package:talvori/features/words/ui/widgets/radial_palette_tools.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
 import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
-import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
 Widget debugBorder(Widget child, {bool focused = false}) {
   // nur noch Platzhalter – Fokus wird komplett von FocusGlow übernommen
@@ -1052,15 +1050,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => LearnModeScreen(
+                            builder: (_) => CategoryDetailScreen(
                               categoryId: item.categoryId,
                               title: item.label,
+                              listFilter: WordListFilter(
+                                WordFilterKind.category,
+                                item.categoryId,
+                              ),
                               useLocalOfflineFlow: true,
                               localCategoryId: item.categoryId,
-                              navigationOrigin: LearnNavigationOrigin.category(
-                                categoryId: item.categoryId,
-                                categoryTitle: item.label,
-                              ),
                             ),
                           ),
                         );

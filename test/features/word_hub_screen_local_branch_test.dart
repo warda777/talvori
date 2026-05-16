@@ -40,7 +40,7 @@ void main() {
     expect(find.text('Basics'), findsOneWidget);
   });
 
-  testWidgets('word_hub_screen_local_mode_opens_local_learnmode_screen', (
+  testWidgets('word_hub_screen_local_mode_opens_local_category_detail_screen', (
     tester,
   ) async {
     final fixedNow = DateTime(2026, 1, 1);
@@ -72,7 +72,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Keine aktive lokale Session'), findsOneWidget);
-    expect(find.text('Starten/Fortsetzen'), findsOneWidget);
+    expect(find.text('Lokale Kategorie'), findsOneWidget);
+    expect(find.text('basics'), findsWidgets);
+    expect(find.text('Start'), findsOneWidget);
+    expect(find.text('Keine aktive lokale Session'), findsNothing);
   });
 }
