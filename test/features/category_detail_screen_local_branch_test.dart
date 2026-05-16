@@ -36,8 +36,15 @@ void main() {
 
       expect(find.text('Basics'), findsWidgets);
       expect(find.text('Vocabs'), findsOneWidget);
-      expect(find.text('Lokale Kategorie'), findsOneWidget);
-      expect(find.text('basics'), findsWidgets);
+      expect(find.text('Lokale Kategorie'), findsNothing);
+      expect(find.text('Lernmodus'), findsOneWidget);
+      expect(find.text('Zeitplan'), findsOneWidget);
+      expect(find.text('Limitlos'), findsOneWidget);
+      expect(find.text('Kombiniert'), findsOneWidget);
+      expect(find.text('Wiederholungsauswahl'), findsOneWidget);
+      expect(find.text('Alle Stufen'), findsOneWidget);
+      expect(find.text('Einzelstufe'), findsOneWidget);
+      expect(find.text('AUTO'), findsNothing);
       expect(find.text('Start'), findsOneWidget);
     },
   );

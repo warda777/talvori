@@ -95,6 +95,8 @@ class StageSwitchRowView extends StatefulWidget {
   final bool s0Locked;
   final void Function(int stage)? onTapStage;
   final Map<int, GlobalKey>? switchKeys;
+  final bool showSwitchNotes;
+  final bool useNumericSwitchNotes;
 
   const StageSwitchRowView({
     super.key,
@@ -128,6 +130,8 @@ class StageSwitchRowView extends StatefulWidget {
     this.s0Locked = false,
     this.onTapStage,
     this.switchKeys,
+    this.showSwitchNotes = true,
+    this.useNumericSwitchNotes = false,
   });
 
   @override
@@ -207,7 +211,8 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           highlight: locked ? false : counts[0] > 0,
           completed: false,
           label: widget.labels.newLabel,
-          note: locked ? '' : 'Fach 0',
+          note: locked ? '' : (widget.useNumericSwitchNotes ? '0' : 'Fach 0'),
+          showNote: widget.showSwitchNotes,
           isFirst: true,
           glow: false,
           isLocked: locked,
@@ -234,7 +239,10 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           highlight: counts[stage] > 0 && counts[stage] < widget.goalPerStage,
           completed: counts[stage] >= widget.goalPerStage,
           label: '${widget.labels.stagePrefix}$stage',
-          note: '${widget.labels.stagePrefix}$stage',
+          note: widget.useNumericSwitchNotes
+              ? '$stage'
+              : '${widget.labels.stagePrefix}$stage',
+          showNote: widget.showSwitchNotes,
           glow: hardGlow || softGlow || isSelected,
           pulseAnimation: softGlow ? _pulse : null,
           selectedHighlight: isSelected,

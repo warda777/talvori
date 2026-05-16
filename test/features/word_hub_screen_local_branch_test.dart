@@ -4,9 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
 void main() {
+  void usePhoneViewport(WidgetTester tester) {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
   testWidgets('word_hub_screen_local_mode_shows_taxonomy_categories', (
     tester,
   ) async {
+    usePhoneViewport(tester);
+
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
@@ -25,6 +34,8 @@ void main() {
   testWidgets('word_hub_screen_local_mode_opens_local_category_detail_screen', (
     tester,
   ) async {
+    usePhoneViewport(tester);
+
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
@@ -36,8 +47,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Lokale Kategorie'), findsOneWidget);
-    expect(find.text('basics'), findsWidgets);
+    expect(find.text('Lokale Kategorie'), findsNothing);
+    expect(find.text('Lernmodus'), findsOneWidget);
+    expect(find.text('Wiederholungsauswahl'), findsOneWidget);
     expect(find.text('Start'), findsOneWidget);
     expect(find.text('Keine aktive lokale Session'), findsNothing);
   });
@@ -45,6 +57,8 @@ void main() {
   testWidgets('word_hub_screen_local_mode_unmapped_category_shows_snackbar', (
     tester,
   ) async {
+    usePhoneViewport(tester);
+
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),

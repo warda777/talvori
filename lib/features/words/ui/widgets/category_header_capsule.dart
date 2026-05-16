@@ -33,7 +33,8 @@ class CategoryHeaderCapsule extends StatelessWidget {
 
   final Color accentColor;
   final Color? backgroundColor;
-  
+  final bool neonStyle;
+
   // Optional: zusätzliches Widget rechts unter den Add/Settings-Buttons (z. B. Toggle)
   final Widget? trailingRightBelow;
 
@@ -64,6 +65,7 @@ class CategoryHeaderCapsule extends StatelessWidget {
     this.wheelBottomGap = WordsLayout.wheelBottomGap,
     this.accentColor = const Color(0xFFB1CCFE),
     this.backgroundColor,
+    this.neonStyle = false,
     this.trailingRightBelow,
     this.vocabsKey,
     this.wheelKey,
@@ -83,112 +85,134 @@ class CategoryHeaderCapsule extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-            // Back + Wheel - mit fester Höhe wie im Learn-Mode
-            SizedBox(
-              height: WordsLayout.wheelHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(22),
-                    onTap: onBack,
-                    child: const SizedBox(
-                      width: 44, height: 44,
-                      child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: KeyedSubtree(
-                        key: wheelKey,
-                        child: CategoryWheel(
-                          categories: categories,
-                          initialIndex: selectedIndex,
-                          onChanged: onWheelChanged,
+              // Back + Wheel - mit fester Höhe wie im Learn-Mode
+              SizedBox(
+                height: WordsLayout.wheelHeight,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: onBack,
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 28),
-                ],
+                    Expanded(
+                      child: Center(
+                        child: KeyedSubtree(
+                          key: wheelKey,
+                          child: CategoryWheel(
+                            categories: categories,
+                            initialIndex: selectedIndex,
+                            onChanged: onWheelChanged,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 28),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: wheelBottomGap), // ← statt const SizedBox(height: 10),
-
-            // Vocabs-Kachel + Buttons
-            Transform.translate(
-              offset: Offset(rowOffsetX, rowOffsetY),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Transform.translate(
-                    offset: Offset(vocabsTileOffsetX, vocabsTileOffsetY),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Material(
-                        key: vocabsKey,
-                        color: Colors.transparent,
-                        child: VocabsTileTapAnimation(
-                          onTap: onVocabs,
-                          child: GlowRectTile(
-                            width: 84,
-                            height: 85,
-                            radius: 15,
-                            title: 'Vocabs',
-                            icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 28),
-                            outlineColor: accentColor,
-                            glowColor: accentColor,
-                            badgeText: '$vocabsCount',
+              SizedBox(
+                height: wheelBottomGap,
+              ), // ← statt const SizedBox(height: 10),
+              // Vocabs-Kachel + Buttons
+              Transform.translate(
+                offset: Offset(rowOffsetX, rowOffsetY),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Transform.translate(
+                      offset: Offset(vocabsTileOffsetX, vocabsTileOffsetY),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Material(
+                          key: vocabsKey,
+                          color: Colors.transparent,
+                          child: VocabsTileTapAnimation(
+                            onTap: onVocabs,
+                            child: GlowRectTile(
+                              width: 84,
+                              height: 85,
+                              radius: neonStyle ? 24 : 15,
+                              title: 'Vocabs',
+                              icon: const Icon(
+                                Icons.menu_book_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              outlineColor: accentColor,
+                              glowColor: accentColor,
+                              badgeText: '$vocabsCount',
+                              neonStyle: neonStyle,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  Transform.translate(
-                    offset: Offset(rightBtnsOffsetX, rightBtnsOffsetY),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 24),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                            GlowCircleButton(
-                              size: 62,
-                              onTap: onAdd,
-                              child: const Icon(Icons.add, color: Colors.white, size: 28),
-                              outlineColor: accentColor,
-                              glowColor: accentColor,
+                    const Spacer(),
+                    Transform.translate(
+                      offset: Offset(rightBtnsOffsetX, rightBtnsOffsetY),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 24),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GlowCircleButton(
+                                  size: 62,
+                                  onTap: onAdd,
+                                  outlineColor: accentColor,
+                                  glowColor: accentColor,
+                                  neonStyle: neonStyle,
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                GlowCircleButton(
+                                  size: 62,
+                                  onTap: onSettings,
+                                  outlineColor: accentColor,
+                                  glowColor: accentColor,
+                                  neonStyle: neonStyle,
+                                  child: const Icon(
+                                    Icons.tune_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            GlowCircleButton(
-                              size: 62,
-                              onTap: onSettings,
-                              child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
-                              outlineColor: accentColor,
-                              glowColor: accentColor,
-                            ),
-                            ],
                           ),
-                        ),
-                        if (trailingRightBelow != null) ...[
-                          const SizedBox(height: 25), // weiter nach unten
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 70), // mehr nach innen
-                              child: trailingRightBelow!,
+                          if (trailingRightBelow != null) ...[
+                            const SizedBox(height: 25), // weiter nach unten
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 70,
+                                ), // mehr nach innen
+                                child: trailingRightBelow!,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             ],
           ),
         ),

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talvori/features/words/application/srs_mode_controller.dart';
 
 /// Auswahl-Modi für die Levels-Schaltung
 enum LevelSelectionMode { s0toS5, s1toS5, single }
 
-/// Drei schlanke Buttons: [AUTO] [T1–T5/A1–A5/H1–H5] [SINGLE]
+/// Wiederholungsauswahl: [Alle Stufen] [Einzelstufe].
 /// - Aktiv: Füllung #2D2C2E, weißer Rand + Glow, Text weiß
 /// - Inaktiv: nur Rand #2D2C2E, Innen transparent, Text ausgegraut
-class LevelSelectorButtons extends ConsumerWidget {
+class LevelSelectorButtons extends StatelessWidget {
   const LevelSelectorButtons({
     super.key,
     required this.mode,
@@ -26,26 +24,10 @@ class LevelSelectorButtons extends ConsumerWidget {
   final GlobalKey? trainingButtonKey;
   final GlobalKey? singleButtonKey;
 
-  /// Gibt das Label für S1-S5 basierend auf dem SRS-Modus zurück
-  String _getS1ToS5Label(SrsSystem srsMode) {
-    switch (srsMode) {
-      case SrsSystem.time:
-        return 'T1–T5';
-      case SrsSystem.adaptive:
-        return 'A1–A5';
-      case SrsSystem.hybrid:
-        return 'H1–H5';
-    }
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final srsMode = ref.watch(srsModeControllerProvider).mode;
-    final s1ToS5Label = _getS1ToS5Label(srsMode);
-
+  Widget build(BuildContext context) {
     return LevelSelectorButtonsView(
       mode: mode,
-      s1ToS5Label: s1ToS5Label,
       onModeChanged: onModeChanged,
       spacing: spacing,
       autoButtonKey: autoButtonKey,
@@ -59,7 +41,6 @@ class LevelSelectorButtonsView extends StatelessWidget {
   const LevelSelectorButtonsView({
     super.key,
     required this.mode,
-    required this.s1ToS5Label,
     required this.onModeChanged,
     this.spacing = 20,
     this.autoButtonKey,
@@ -68,18 +49,15 @@ class LevelSelectorButtonsView extends StatelessWidget {
   });
 
   final LevelSelectionMode mode;
-  final String s1ToS5Label;
   final ValueChanged<LevelSelectionMode> onModeChanged;
   final double spacing;
   final GlobalKey? autoButtonKey;
   final GlobalKey? trainingButtonKey;
   final GlobalKey? singleButtonKey;
 
-  static const _w = 87.0;
-  static const _h = 27.0;
-  static const _r = 13.5;
-  static const _activeFill = Color(0xFF2D2C2E);
-  static const _inactiveStroke = Color(0xFF2D2C2E);
+  static const _w = 112.0;
+  static const _h = 38.0;
+  static const _r = 19.0;
 
   @override
   Widget build(BuildContext context) {
@@ -87,22 +65,15 @@ class LevelSelectorButtonsView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _ModeButton(
-          key: autoButtonKey,
-          label: 'AUTO',
-          selected: mode == LevelSelectionMode.s0toS5,
-          onTap: () => onModeChanged(LevelSelectionMode.s0toS5),
-        ),
-        SizedBox(width: spacing),
-        _ModeButton(
           key: trainingButtonKey,
-          label: s1ToS5Label,
+          label: 'Alle Stufen',
           selected: mode == LevelSelectionMode.s1toS5,
           onTap: () => onModeChanged(LevelSelectionMode.s1toS5),
         ),
         SizedBox(width: spacing),
         _ModeButton(
           key: singleButtonKey,
-          label: 'SINGLE',
+          label: 'Einzelstufe',
           selected: mode == LevelSelectionMode.single,
           onTap: () => onModeChanged(LevelSelectionMode.single),
         ),
@@ -180,8 +151,17 @@ class _ModeButtonState extends State<_ModeButton>
   Widget build(BuildContext context) {
     final selected = widget.selected;
     final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.45),
+      fontWeight: FontWeight.w800,
+      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.82),
+      letterSpacing: 0.1,
+      shadows: [
+        Shadow(
+          color: const Color(
+            0xFF8DBBFF,
+          ).withValues(alpha: selected ? 0.48 : 0.24),
+          blurRadius: selected ? 12 : 8,
+        ),
+      ],
     );
 
     return GestureDetector(
@@ -191,39 +171,61 @@ class _ModeButtonState extends State<_ModeButton>
         animation: _glowScale,
         builder: (context, child) {
           final v = _glowScale.value;
-          final glowOpacity = 0.6 * v;
-          final scale = 1.0 + 0.04 * v;
+          final glowOpacity = 0.2 + (0.14 * v);
 
           final decoration = BoxDecoration(
-            color: selected
-                ? LevelSelectorButtonsView._activeFill
-                : Colors.transparent,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: selected
+                  ? const [Color(0xFF202129), Color(0xFF050505)]
+                  : const [Color(0xFF151519), Color(0xFF030303)],
+            ),
             borderRadius: BorderRadius.circular(_r),
             border: Border.all(
               color: selected
-                  ? Colors.white
-                  : LevelSelectorButtonsView._inactiveStroke,
-              width: selected ? 1.5 : 1.0,
+                  ? const Color(0xFFA8C7FF)
+                  : const Color(0xFF8A5CFF),
+              width: selected ? 1.7 : 1.1,
             ),
-            boxShadow: _glowScale.value > 0.01
-                ? [
-                    BoxShadow(
-                      color: Colors.white.withValues(alpha: glowOpacity),
-                      blurRadius: 16 + 4 * v,
-                      spreadRadius: 1 + v,
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF8DBBFF).withValues(alpha: glowOpacity),
+                blurRadius: 12 + 4 * v,
+                spreadRadius: selected ? 0.8 : 0,
+              ),
+              BoxShadow(
+                color: const Color(
+                  0xFF8A5CFF,
+                ).withValues(alpha: selected ? 0.34 : 0.16),
+                blurRadius: selected ? 20 : 12,
+                spreadRadius: selected ? 0.5 : 0,
+                offset: const Offset(0, 3),
+              ),
+            ],
           );
 
-          return Transform.scale(
-            scale: scale.clamp(1.0, 1.04),
+          return Container(
+            width: _w,
+            height: _h,
+            alignment: Alignment.center,
+            decoration: decoration,
             child: Container(
-              width: _w,
-              height: _h,
+              margin: const EdgeInsets.all(3),
               alignment: Alignment.center,
-              decoration: decoration,
-              child: Text(widget.label, style: textStyle),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_r - 3),
+                border: Border.all(
+                  color: selected
+                      ? Colors.white.withValues(alpha: 0.42)
+                      : const Color(0xFF8DBBFF).withValues(alpha: 0.22),
+                  width: 0.8,
+                ),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(widget.label, style: textStyle, maxLines: 1),
+              ),
             ),
           );
         },

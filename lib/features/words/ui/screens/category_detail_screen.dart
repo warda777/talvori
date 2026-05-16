@@ -13,6 +13,7 @@ import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/ui/widgets/learning_mode_selector.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
@@ -42,6 +43,8 @@ import 'package:talvori/features/words/ui/widgets/contextual_tooltip.dart';
 
 // ===== KONSTANTEN =====
 const kAccentBlue = Color(0xFFB1CCFE);
+const _levelsCardWithLearningModeH = WordsLayout.levelsCardH + 100;
+const _localLevelsCardWithLearningModeH = WordsLayout.levelsCardH + 220;
 
 /// ==============================
 /// SCREEN
@@ -459,7 +462,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
           ),
         ),
 
-        const SizedBox(height: WordsLayout.gapBelowTop),
+        const SizedBox(height: 4),
 
         // Daily Progress nur nach Rückkehr aus Learn-Session; sonst Sprechblase
         Flexible(
@@ -481,7 +484,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
         // Levels Card mit Start-Button - ohne Transform.translate, damit es besser passt
         SizedBox(
-          height: WordsLayout.levelsCardH,
+          height: _levelsCardWithLearningModeH,
           child: Builder(
             builder: (context) {
               debugPrint(
@@ -496,14 +499,17 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                   : stages;
 
               return LevelsCard(
-                height: WordsLayout.levelsCardH,
+                height: _levelsCardWithLearningModeH,
                 stages: displayStages,
                 goalPerStage: 100,
+                learningModeSelector: const LearningModeSelector(),
                 mode: mode,
                 selectingSingle: selecting,
                 visibleMask: mask,
                 categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
                 lockKey: _lockKey,
+                switchesOffsetY: 0,
+                startBtnOffsetY: 8,
                 autoButtonKey: _autoButtonKey,
                 trainingButtonKey: _trainingButtonKey,
                 singleButtonKey: _singleButtonKey,
@@ -541,7 +547,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                   ref.read(returnedFromLearnSessionProvider.notifier).state =
                       false;
                 },
-                titleOffsetY: -15,
+                titleOffsetY: 0,
                 onStartPressed: () async {
                   if (currentId.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -662,8 +668,20 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   Widget _buildCategoryDetailFrame({
     required List<Widget> children,
     PointerDownEventListener? onPointerDown,
+    bool scrollable = false,
   }) {
-    final content = Column(children: children);
+    final content = scrollable
+        ? LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(children: children),
+                ),
+              );
+            },
+          )
+        : Column(children: children);
 
     return Scaffold(
       body: SafeArea(
@@ -688,6 +706,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     final title = widget.title;
     const stages = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
+    final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;
+    final selectedReviewMode = ref.watch(levelSelectionProvider);
 
     Future<void> openLocalLearnMode() async {
       if (localCategoryId.isEmpty) {
@@ -716,6 +736,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     }
 
     return _buildCategoryDetailFrame(
+      scrollable: true,
       children: [
         SizedBox(
           height: WordsLayout.topCapsuleH,
@@ -765,60 +786,56 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               wheelBottomGap: WordsLayout.wheelBottomGap,
               accentColor: kAccentBlue,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              neonStyle: true,
             ),
           ),
         ),
-        const SizedBox(height: WordsLayout.gapBelowTop),
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Lokale Kategorie',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    localCategoryId.isEmpty ? title : localCategoryId,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFFB1CCFE),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 17),
+        const SizedBox(height: 0),
         SizedBox(
-          height: WordsLayout.levelsCardH,
+          height: _localLevelsCardWithLearningModeH,
           child: LevelsCardView(
-            height: WordsLayout.levelsCardH,
+            height: _localLevelsCardWithLearningModeH,
             onStartPressed: openLocalLearnMode,
             isHybrid: false,
             s0Locked: false,
             onS0LockTap: () {},
             lockKey: _lockKey,
-            titleOffsetY: -15,
+            showLockControl: false,
+            switchesOffsetY: 0,
+            startBtnOffsetY: 0,
+            titleOffsetY: 0,
+            useFixedStageLayout: true,
+            learningModeBelowStages: true,
+            stageSectionLabel: 'Merkstufen',
+            repeatSectionTopGap: 0,
+            stageSectionLabelAlignment: Alignment.bottomCenter,
+            stageSectionLabelBottomGap: 12,
+            stageTopGap: 82,
+            startTopGap: 42,
+            learningModeSelector: LearningModeSelectorView(
+              selectedMode: selectedLearningMode,
+              onModeSelected: (mode) {
+                ref.read(srsModeControllerProvider.notifier).setMode(mode);
+                ref.read(levelSelectionProvider.notifier).state =
+                    LevelSelectionMode.s0toS5;
+                ref.read(selectingSingleProvider.notifier).state = false;
+              },
+            ),
             levelSelector: LevelSelectorButtonsView(
-              mode: LevelSelectionMode.s0toS5,
-              s1ToS5Label: 'T1–T5',
-              onModeChanged: (_) {},
+              mode: selectedReviewMode,
+              onModeChanged: (mode) {
+                ref.read(levelSelectionProvider.notifier).state = mode;
+                ref.read(selectingSingleProvider.notifier).state =
+                    mode == LevelSelectionMode.single;
+              },
             ),
             stageSwitchRow: StageSwitchRowView(
               counts: stages,
               goalPerStage: 100,
               visibleMask: visibleMask,
               showLearnedCounterInStage5: true,
+              showSwitchNotes: true,
+              useNumericSwitchNotes: true,
               learnedInStage5: 0,
               s0Locked: false,
               labels: const StageSwitchLabels(
@@ -827,10 +844,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 stagePrefix: 'T',
               ),
               colors: const StageSwitchColors(
-                newOuter: Color(0xFFA05260),
-                stageOuter: Color(0xFFE4B866),
-                inner: Color(0xFF1A1A1A),
-                disabledOuter: Colors.white,
+                newOuter: Color(0xFF8DBBFF),
+                stageOuter: Color(0xFF8DBBFF),
+                inner: Color(0xFF0B0B0D),
+                disabledOuter: Color(0xFFE9F1FF),
+                innerStroke: Color(0xFFB36BFF),
               ),
             ),
           ),

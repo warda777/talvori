@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
-import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
-import 'package:talvori/features/words/ui/widgets/stage_words_dialog.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
-import 'package:talvori/features/words/ui/theme/theme.dart';
-import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
-import 'package:talvori/features/words/application/srs_logic.dart';
 import 'package:talvori/features/words/application/srs_config.dart';
+import 'package:talvori/features/words/application/srs_logic.dart';
+import 'package:talvori/features/words/application/srs_mode_controller.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
+import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+import 'package:talvori/features/words/ui/widgets/stage_words_dialog.dart';
 
 class LevelsCard extends ConsumerStatefulWidget {
   final double height;
   final List<int> stages;
   final int goalPerStage;
   final Future<void> Function() onStartPressed;
+  final Widget? learningModeSelector;
   final LevelSelectionMode mode;
   final void Function(LevelSelectionMode) onModeChanged;
   final String? categoryId; // ← NEU: Für Dialog mit Wörtern
@@ -49,6 +50,7 @@ class LevelsCard extends ConsumerStatefulWidget {
     required this.stages,
     required this.goalPerStage,
     required this.onStartPressed,
+    this.learningModeSelector,
     required this.mode,
     required this.onModeChanged,
     this.categoryId, // ← NEU
@@ -81,12 +83,14 @@ class LevelsCard extends ConsumerStatefulWidget {
 class LevelsCardView extends StatelessWidget {
   final double height;
   final Future<void> Function() onStartPressed;
+  final Widget? learningModeSelector;
   final Widget levelSelector;
   final Widget stageSwitchRow;
   final bool isHybrid;
   final bool s0Locked;
   final VoidCallback onS0LockTap;
   final GlobalKey? lockKey;
+  final bool showLockControl;
 
   // Layout-Knobs (standard-Werte wie vorher)
   final double outerPadL;
@@ -99,17 +103,27 @@ class LevelsCardView extends StatelessWidget {
   final double switchesOffsetY;
   final double startBtnOffsetX;
   final double startBtnOffsetY;
+  final bool useFixedStageLayout;
+  final bool learningModeBelowStages;
+  final String? stageSectionLabel;
+  final double repeatSectionTopGap;
+  final AlignmentGeometry stageSectionLabelAlignment;
+  final double stageSectionLabelBottomGap;
+  final double stageTopGap;
+  final double startTopGap;
 
   const LevelsCardView({
     super.key,
     required this.height,
     required this.onStartPressed,
+    this.learningModeSelector,
     required this.levelSelector,
     required this.stageSwitchRow,
     required this.isHybrid,
     required this.s0Locked,
     required this.onS0LockTap,
     this.lockKey,
+    this.showLockControl = true,
     this.outerPadL = 20.0,
     this.outerPadT = 8.0,
     this.outerPadR = 20.0,
@@ -120,6 +134,14 @@ class LevelsCardView extends StatelessWidget {
     this.switchesOffsetY = WordsLayout.switchesOffsetY,
     this.startBtnOffsetX = WordsLayout.startBtnOffsetX,
     this.startBtnOffsetY = WordsLayout.startBtnOffsetY,
+    this.useFixedStageLayout = false,
+    this.learningModeBelowStages = false,
+    this.stageSectionLabel,
+    this.repeatSectionTopGap = 6.0,
+    this.stageSectionLabelAlignment = Alignment.topCenter,
+    this.stageSectionLabelBottomGap = 0,
+    this.stageTopGap = 24.0,
+    this.startTopGap = 12.0,
   });
 
   @override
@@ -136,21 +158,56 @@ class LevelsCardView extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 32),
+            SizedBox(height: repeatSectionTopGap),
+            if (learningModeSelector != null && !learningModeBelowStages) ...[
+              _SectionLabel('Lernmodus'),
+              const SizedBox(height: 5),
+              Center(child: learningModeSelector),
+              const SizedBox(height: 22),
+            ] else if (!learningModeBelowStages)
+              const SizedBox(height: 22),
+            _SectionLabel('Wiederholungsauswahl'),
+            const SizedBox(height: 8),
             Transform.translate(
               offset: Offset(titleOffsetX, titleOffsetY),
               child: Center(child: levelSelector),
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Center(
-                child: Transform.translate(
-                  offset: Offset(switchesOffsetX, switchesOffsetY),
-                  child: stageSwitchRow,
+            SizedBox(
+              height: stageTopGap,
+              child: stageSectionLabel == null
+                  ? null
+                  : Align(
+                      alignment: stageSectionLabelAlignment,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: stageSectionLabelBottomGap,
+                        ),
+                        child: _SectionLabel(stageSectionLabel!),
+                      ),
+                    ),
+            ),
+            if (useFixedStageLayout)
+              Transform.translate(
+                offset: Offset(switchesOffsetX, switchesOffsetY),
+                child: stageSwitchRow,
+              )
+            else
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Transform.translate(
+                    offset: Offset(switchesOffsetX, switchesOffsetY),
+                    child: stageSwitchRow,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+            SizedBox(height: startTopGap),
+            if (learningModeSelector != null && learningModeBelowStages) ...[
+              _SectionLabel('Lernmodus'),
+              const SizedBox(height: 12),
+              Center(child: learningModeSelector),
+              const SizedBox(height: 28),
+            ],
             Transform.translate(
               offset: Offset(startBtnOffsetX, startBtnOffsetY),
               child: LayoutBuilder(
@@ -180,55 +237,11 @@ class LevelsCardView extends StatelessWidget {
                             height: buttonH,
                             child: StartButtonPulse(
                               onPressed: onStartPressed,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: const Color(0xFFB1CCFE),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFFB1CCFE,
-                                      ).withValues(alpha: 0.5),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, -2),
-                                    ),
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFFB1CCFE,
-                                      ).withValues(alpha: 0.4),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFFB1CCFE,
-                                      ).withValues(alpha: 0.3),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: FilledButton(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2D2D2F),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                      side: BorderSide.none,
-                                    ),
-                                  ),
-                                  onPressed: () {},
-                                  child: const Text('Start'),
-                                ),
-                              ),
+                              child: const _NeonStartButtonLabel(),
                             ),
                           ),
                         ),
-                        if (!isHybrid)
+                        if (!isHybrid && showLockControl)
                           Positioned(
                             left: buttonLeft - gap - iconBoxW,
                             top: buttonTop + (buttonH - 40) / 2 - 10,
@@ -264,6 +277,87 @@ class LevelsCardView extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        color: const Color(0xFF9E9EA6),
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.2,
+        shadows: [
+          Shadow(
+            color: const Color(0xFF8A5CFF).withValues(alpha: 0.35),
+            blurRadius: 18,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NeonStartButtonLabel extends StatelessWidget {
+  const _NeonStartButtonLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1A1A1D), Color(0xFF050505)],
+        ),
+        border: Border.all(color: Color(0xFF7FFFE7), width: 1.7),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7FFFE7).withValues(alpha: 0.3),
+            blurRadius: 14,
+            spreadRadius: 0.6,
+          ),
+          BoxShadow(
+            color: const Color(0xFFF5BFCB).withValues(alpha: 0.2),
+            blurRadius: 18,
+            spreadRadius: 0.4,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.12),
+            blurRadius: 4,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(3),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(21),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.45),
+            width: 0.8,
+          ),
+        ),
+        child: Text(
+          'Start',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
+          ),
         ),
       ),
     );
@@ -384,6 +478,7 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
           }
         },
       ),
+      learningModeSelector: widget.learningModeSelector,
       stageSwitchRow: StageSwitchRow(
         controller: _switchCtrl,
         counts: s,
