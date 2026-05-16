@@ -33,7 +33,9 @@ void main() {
           overrides: [
             localLearningViewModelProvider.overrideWithValue(viewModelState),
           ],
-          child: const MaterialApp(home: LocalLearnModeScreen()),
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
+          ),
         ),
       );
 
@@ -88,7 +90,9 @@ void main() {
             overrides: [
               localLearningViewModelProvider.overrideWithValue(loadingState),
             ],
-            child: const MaterialApp(home: LocalLearnModeScreen()),
+            child: const MaterialApp(
+              home: LocalLearnModeScreen(categoryId: 'basics'),
+            ),
           ),
         );
 
@@ -99,7 +103,9 @@ void main() {
             overrides: [
               localLearningViewModelProvider.overrideWithValue(errorState),
             ],
-            child: const MaterialApp(home: LocalLearnModeScreen()),
+            child: const MaterialApp(
+              home: LocalLearnModeScreen(categoryId: 'basics'),
+            ),
           ),
         );
 
@@ -111,7 +117,9 @@ void main() {
             overrides: [
               localLearningViewModelProvider.overrideWithValue(emptyState),
             ],
-            child: const MaterialApp(home: LocalLearnModeScreen()),
+            child: const MaterialApp(
+              home: LocalLearnModeScreen(categoryId: 'basics'),
+            ),
           ),
         );
 
@@ -139,7 +147,9 @@ void main() {
           overrides: [
             localLearningViewModelProvider.overrideWithValue(viewModelState),
           ],
-          child: const MaterialApp(home: LocalLearnModeScreen()),
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
+          ),
         ),
       );
 
@@ -149,5 +159,177 @@ void main() {
       expect(find.text('Richtig'), findsNothing);
       expect(find.text('Falsch'), findsNothing);
     });
+
+    testWidgets('local_learnmode_screen_start_button_calls_start_or_resume', (
+      tester,
+    ) async {
+      final fixedNow = DateTime.utc(2026, 5, 16, 10);
+      String? capturedCategoryId;
+      DateTime? capturedNow;
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: MaterialApp(
+            home: LocalLearnModeScreen(
+              categoryId: 'basics',
+              nowProvider: () => fixedNow,
+              onStartOrResume: ({required categoryId, required now}) async {
+                capturedCategoryId = categoryId;
+                capturedNow = now;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Starten/Fortsetzen'));
+      await tester.pump();
+
+      expect(capturedCategoryId, 'basics');
+      expect(capturedNow, fixedNow);
+    });
+
+    testWidgets('local_learnmode_screen_correct_button_calls_submit_correct', (
+      tester,
+    ) async {
+      final fixedNow = DateTime.utc(2026, 5, 16, 11);
+      DateTime? capturedNow;
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: true,
+        currentWordId: 'word-1',
+        term: 'hello',
+        translation: 'hallo',
+        currentStage: SrsStage.s0,
+        currentPosition: 1,
+        totalItems: 3,
+        answeredCount: 1,
+        remainingCount: 2,
+        canSubmitAnswer: true,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.startOrResume,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: MaterialApp(
+            home: LocalLearnModeScreen(
+              categoryId: 'basics',
+              nowProvider: () => fixedNow,
+              onSubmitCorrect: ({required now}) async {
+                capturedNow = now;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Richtig'));
+      await tester.pump();
+
+      expect(capturedNow, fixedNow);
+    });
+
+    testWidgets('local_learnmode_screen_wrong_button_calls_submit_wrong', (
+      tester,
+    ) async {
+      final fixedNow = DateTime.utc(2026, 5, 16, 12);
+      DateTime? capturedNow;
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: true,
+        currentWordId: 'word-1',
+        term: 'hello',
+        translation: 'hallo',
+        currentStage: SrsStage.s0,
+        currentPosition: 1,
+        totalItems: 3,
+        answeredCount: 1,
+        remainingCount: 2,
+        canSubmitAnswer: true,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.startOrResume,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: MaterialApp(
+            home: LocalLearnModeScreen(
+              categoryId: 'basics',
+              nowProvider: () => fixedNow,
+              onSubmitWrong: ({required now}) async {
+                capturedNow = now;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Falsch'));
+      await tester.pump();
+
+      expect(capturedNow, fixedNow);
+    });
+
+    testWidgets(
+      'local_learnmode_screen_complete_button_calls_complete_if_finished',
+      (tester) async {
+        final fixedNow = DateTime.utc(2026, 5, 16, 13);
+        DateTime? capturedNow;
+        const viewModelState = LocalLearningViewModelState(
+          isLoading: false,
+          hasSession: true,
+          currentPosition: 3,
+          totalItems: 3,
+          answeredCount: 3,
+          remainingCount: 0,
+          canSubmitAnswer: false,
+          canCompleteSession: true,
+          lastAction: LocalLearningControllerAction.submitCorrect,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              localLearningViewModelProvider.overrideWithValue(viewModelState),
+            ],
+            child: MaterialApp(
+              home: LocalLearnModeScreen(
+                categoryId: 'basics',
+                nowProvider: () => fixedNow,
+                onCompleteIfFinished: ({required now}) async {
+                  capturedNow = now;
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Session abschließen'));
+        await tester.pump();
+
+        expect(capturedNow, fixedNow);
+      },
+    );
   });
 }

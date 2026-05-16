@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
+import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_screen.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_wordhub_debug_screen.dart';
 
 class LocalDebugHubScreen extends StatelessWidget {
@@ -16,7 +17,7 @@ class LocalDebugHubScreen extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => buildLocalLearningDebugScreen(
+                  builder: (_) => const LocalLearnModeScreen(
                     categoryId: localLearningDebugDefaultCategoryId,
                   ),
                 ),

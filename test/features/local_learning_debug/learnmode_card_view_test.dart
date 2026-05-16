@@ -56,5 +56,65 @@ void main() {
       expect(find.text('0 / 0'), findsNothing);
       expect(find.byType(LearnModeCardView), findsOneWidget);
     });
+
+    testWidgets('learnmode_card_view_calls_correct_callback', (tester) async {
+      var callCount = 0;
+      const state = LearnModeCardPresenterState(
+        hasCard: true,
+        frontText: 'hello',
+        backText: 'hallo',
+        progressLabel: '1 / 3',
+        canSubmitAnswer: true,
+        isCompleted: false,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LearnModeCardView(
+              state: state,
+              onCorrect: () async {
+                callCount += 1;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Richtig'));
+      await tester.pump();
+
+      expect(callCount, 1);
+    });
+
+    testWidgets('learnmode_card_view_calls_wrong_callback', (tester) async {
+      var callCount = 0;
+      const state = LearnModeCardPresenterState(
+        hasCard: true,
+        frontText: 'hello',
+        backText: 'hallo',
+        progressLabel: '1 / 3',
+        canSubmitAnswer: true,
+        isCompleted: false,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LearnModeCardView(
+              state: state,
+              onWrong: () async {
+                callCount += 1;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Falsch'));
+      await tester.pump();
+
+      expect(callCount, 1);
+    });
   });
 }

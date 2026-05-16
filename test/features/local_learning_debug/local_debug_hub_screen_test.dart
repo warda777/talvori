@@ -30,7 +30,7 @@ void main() {
       expect(find.text('Lokale Kategorien'), findsOneWidget);
     });
 
-    testWidgets('debug_hub_opens_local_learning_screen', (tester) async {
+    testWidgets('debug_hub_opens_local_learnmode_screen', (tester) async {
       const viewModelState = LocalLearningViewModelState(
         isLoading: false,
         hasSession: false,
@@ -64,9 +64,9 @@ void main() {
       await tester.tap(find.text('Lokaler Lernscreen'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Noch keine Session'), findsOneWidget);
-      expect(find.text('Intensiv lernen'), findsWidgets);
-      expect(find.text('Alles lernen'), findsOneWidget);
+      expect(find.text('Lokaler Lernmodus'), findsOneWidget);
+      expect(find.text('Keine aktive lokale Session'), findsOneWidget);
+      expect(find.text('Starten/Fortsetzen'), findsOneWidget);
     });
 
     testWidgets('debug_hub_opens_local_wordhub_debug_screen', (tester) async {
