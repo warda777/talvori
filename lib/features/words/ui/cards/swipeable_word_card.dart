@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
 import 'package:talvori/features/words/application/card_glow_settings_provider.dart';
 import '../widgets/level_badge.dart';
@@ -12,21 +11,25 @@ typedef SwipeDecision = Future<void> Function(bool correct);
 class SwipeableWordCard extends StatefulWidget {
   final String frontText;
   final String backText;
-  final String? level;               // CEFR Level (A1-C2)
+  final String? level; // CEFR Level (A1-C2)
   final bool showTranslation;
-  final bool gesturesEnabled;        // blockt Flip/Swipe bei pausiertem Timer
-  final Widget? footer;              // TimerBar etc.
-  final int? srsStage;               // 0..5 (für Streak-Progress Anzeige)
-  final int? streak;                 // korrekt-in-a-row in current stage
-  final int? passCount;              // A-SRS: wie oft in aktueller Stage richtig (0, 1, 2)
-  final SwipeDecision onSwipe;       // true = right/correct, false = left/incorrect
-  final VoidCallback onFlip;         // UI -> Controller.toggleFlip()
-  final void Function(double dx)? onDragUpdate; // ← NEU: für Plasma-Link (dx für Stage-Berechnung)
-  final VoidCallback? onDragEnd;     // ← NEU: für Plasma-Link verstecken
-  final VoidCallback? onDragReturn;  // ← NEU: für Plasma-Link wieder anzeigen wenn Karte zurückkommt
-  final VoidCallback? onSettingsTap; // Glow-Einstellungen (fest auf der Vorderseite)
+  final bool gesturesEnabled; // blockt Flip/Swipe bei pausiertem Timer
+  final Widget? footer; // TimerBar etc.
+  final int? srsStage; // 0..5 (für Streak-Progress Anzeige)
+  final int? streak; // korrekt-in-a-row in current stage
+  final int? passCount; // A-SRS: wie oft in aktueller Stage richtig (0, 1, 2)
+  final SwipeDecision onSwipe; // true = right/correct, false = left/incorrect
+  final VoidCallback onFlip; // UI -> Controller.toggleFlip()
+  final void Function(double dx)?
+  onDragUpdate; // ← NEU: für Plasma-Link (dx für Stage-Berechnung)
+  final VoidCallback? onDragEnd; // ← NEU: für Plasma-Link verstecken
+  final VoidCallback?
+  onDragReturn; // ← NEU: für Plasma-Link wieder anzeigen wenn Karte zurückkommt
+  final VoidCallback?
+  onSettingsTap; // Glow-Einstellungen (fest auf der Vorderseite)
   final GlobalKey? passCountButtonKey; // Für Sparkle-Effekt bei Stage-Up
-  final void Function(BuildContext context, bool correct)? onSwipeWillStart; // Vor Karten-Animation (für Sparkle)
+  final void Function(BuildContext context, bool correct)?
+  onSwipeWillStart; // Vor Karten-Animation (für Sparkle)
 
   const SwipeableWordCard({
     super.key,
@@ -41,9 +44,9 @@ class SwipeableWordCard extends StatefulWidget {
     this.srsStage,
     this.streak,
     this.passCount,
-    this.onDragUpdate,                // ← NEU
-    this.onDragEnd,                   // ← NEU
-    this.onDragReturn,                // ← NEU
+    this.onDragUpdate, // ← NEU
+    this.onDragEnd, // ← NEU
+    this.onDragReturn, // ← NEU
     this.onSettingsTap,
     this.passCountButtonKey,
     this.onSwipeWillStart,
@@ -77,7 +80,9 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   void didUpdateWidget(covariant SwipeableWordCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Sync Flip-Animation mit showTranslation
-    if (widget.showTranslation && _flipCtrl.status != AnimationStatus.forward && _flipCtrl.value == 0) {
+    if (widget.showTranslation &&
+        _flipCtrl.status != AnimationStatus.forward &&
+        _flipCtrl.value == 0) {
       _flipCtrl.forward();
     } else if (!widget.showTranslation && _flipCtrl.value != 0) {
       _flipCtrl.reverse();
@@ -129,6 +134,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
     final threshold = MediaQuery.of(context).size.width * 0.35;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         if (!widget.gesturesEnabled) return;
         HapticFeedback.selectionClick();
@@ -171,8 +177,8 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
         duration: _dragging
             ? Duration.zero
             : (_slidingIn
-                ? const Duration(milliseconds: 400)
-                : const Duration(milliseconds: 300)),
+                  ? const Duration(milliseconds: 400)
+                  : const Duration(milliseconds: 300)),
         curve: _slidingIn ? Curves.easeOutCubic : Curves.easeOut,
         transform: Matrix4.identity()
           ..translate(_offset.dx, _offset.dy)
@@ -194,27 +200,35 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             ..setEntry(3, 2, 0.001)
             ..rotateY(angle),
           alignment: Alignment.center,
-          child: isFront ? _buildFront() : Transform(
-            transform: Matrix4.identity()..rotateY(math.pi),
-            alignment: Alignment.center,
-            child: _buildBack(),
-          ),
+          child: isFront
+              ? _buildFront()
+              : Transform(
+                  transform: Matrix4.identity()..rotateY(math.pi),
+                  alignment: Alignment.center,
+                  child: _buildBack(),
+                ),
         );
       },
     );
   }
 
   Widget _buildFront() {
-    final isDiagnostic = widget.frontText.contains('Keine Wörter verfügbar') ||
+    final isDiagnostic =
+        widget.frontText.contains('Keine Wörter verfügbar') ||
         widget.frontText.contains('All words reached Stage 5') ||
         widget.frontText.contains('Alle Wörter sind in Stufe 5');
-    final isCongratulation = widget.frontText.contains('Herzlichen Glückwunsch') ||
+    final isCongratulation =
+        widget.frontText.contains('Herzlichen Glückwunsch') ||
         widget.frontText.contains('Congratulations');
     return _CardShell(
       child: Stack(
         children: [
           if (!isDiagnostic && !isCongratulation)
-            Positioned(top: 12, right: 12, child: LevelBadge(level: widget.level)),
+            Positioned(
+              top: 12,
+              right: 12,
+              child: LevelBadge(level: widget.level),
+            ),
           if (!isDiagnostic && !isCongratulation && widget.passCount != null)
             Positioned(
               bottom: 28,
@@ -229,17 +243,20 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
               child: isDiagnostic
                   ? SingleChildScrollView(
-                      child: _AdaptiveText(widget.frontText, forceMultiline: true),
+                      child: _AdaptiveText(
+                        widget.frontText,
+                        forceMultiline: true,
+                      ),
                     )
                   : isCongratulation
-                      ? SingleChildScrollView(
-                          child: _AdaptiveText(
-                            widget.frontText,
-                            forceMultiline: true,
-                            compactFont: true,
-                          ),
-                        )
-                      : _AdaptiveText(widget.frontText),
+                  ? SingleChildScrollView(
+                      child: _AdaptiveText(
+                        widget.frontText,
+                        forceMultiline: true,
+                        compactFont: true,
+                      ),
+                    )
+                  : _AdaptiveText(widget.frontText),
             ),
           ),
           if (widget.footer != null)
@@ -262,7 +279,11 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                       border: Border.all(color: Colors.white24, width: 1),
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(Icons.settings_rounded, color: Colors.white70, size: 22),
+                    child: const Icon(
+                      Icons.settings_rounded,
+                      color: Colors.white70,
+                      size: 22,
+                    ),
                   ),
                 ),
               ),
@@ -284,7 +305,10 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
               child: _AdaptiveText(widget.backText, back: true),
             ),
           ),
-          _StreakProgressBadge(srsStage: widget.srsStage, streak: widget.streak),
+          _StreakProgressBadge(
+            srsStage: widget.srsStage,
+            streak: widget.streak,
+          ),
           if (widget.passCount != null)
             Positioned(
               bottom: 28,
@@ -312,19 +336,26 @@ class _PassCountIndicator extends StatelessWidget {
 
   static Color _colorFor(int count) {
     switch (count) {
-      case 0: return Colors.white;
-      case 1: return const Color(0xFF64B5F6); // Hellblau
-      case 2: return const Color(0xFF81C784);  // Hellgrün
-      default: return Colors.white;
+      case 0:
+        return Colors.white;
+      case 1:
+        return const Color(0xFF64B5F6); // Hellblau
+      case 2:
+        return const Color(0xFF81C784); // Hellgrün
+      default:
+        return Colors.white;
     }
   }
 
   static Color _textColorFor(int count) {
     switch (count) {
-      case 0: return const Color(0xFF333333); // Dunkel auf Weiß
+      case 0:
+        return const Color(0xFF333333); // Dunkel auf Weiß
       case 1:
-      case 2: return Colors.white; // Weiß auf Blau/Grün
-      default: return const Color(0xFF333333);
+      case 2:
+        return Colors.white; // Weiß auf Blau/Grün
+      default:
+        return const Color(0xFF333333);
     }
   }
 
@@ -337,13 +368,24 @@ class _PassCountIndicator extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Der Button links unten zeigt die Zahl (0, 1, 2) und die Farbe – wie oft du diese Karte schon richtig beantwortet hast:'),
+            Text(
+              'Der Button links unten zeigt die Zahl (0, 1, 2) und die Farbe – wie oft du diese Karte schon richtig beantwortet hast:',
+            ),
             SizedBox(height: 16),
             _LegendRow(color: Colors.white, text: 'Weiß – erstes Mal dran'),
-            _LegendRow(color: Color(0xFF64B5F6), text: 'Hellblau – einmal richtig'),
-            _LegendRow(color: Color(0xFF81C784), text: 'Grün – zweimal richtig'),
+            _LegendRow(
+              color: Color(0xFF64B5F6),
+              text: 'Hellblau – einmal richtig',
+            ),
+            _LegendRow(
+              color: Color(0xFF81C784),
+              text: 'Grün – zweimal richtig',
+            ),
             SizedBox(height: 12),
-            Text('Nach drei richtigen Antworten wird die Karte gemastert.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              'Nach drei richtigen Antworten wird die Karte gemastert.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
         actions: [
@@ -478,7 +520,8 @@ class _CardShell extends ConsumerStatefulWidget {
   ConsumerState<_CardShell> createState() => _CardShellState();
 }
 
-class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProviderStateMixin {
+class _CardShellState extends ConsumerState<_CardShell>
+    with SingleTickerProviderStateMixin {
   late AnimationController _glowController;
 
   @override
@@ -487,7 +530,9 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
     // Feste Dauer für kontinuierliche Atmung (wie vorher)
     _glowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000), // Langsame, sanfte Pulsierung wie Atmung
+      duration: const Duration(
+        milliseconds: 3000,
+      ), // Langsame, sanfte Pulsierung wie Atmung
     )..repeat();
   }
 
@@ -502,7 +547,7 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
     final cardWidth = MediaQuery.of(context).size.width * 0.78;
     final cardHeight = MediaQuery.of(context).size.height * 0.52;
     final borderRadius = WordsUIConstants.borderRadius;
-    
+
     // Lade persistente Einstellungen aus Provider (Steuerung jetzt im Settings-Popup)
     final settings = ref.watch(cardGlowSettingsProvider);
 
@@ -512,57 +557,77 @@ class _CardShellState extends ConsumerState<_CardShell> with SingleTickerProvide
         // Kontinuierliche Atmung: Animation läuft immer mit konstanter Geschwindigkeit
         // Die Amplitude wird mit pulseSpeed multipliziert für smooth Übergang
         final baseValue = _glowController.value;
-        
+
         // Phase bleibt konstant (kontinuierliche Atmung)
         final pulseValue = baseValue * 2 * math.pi;
-        
-        // Amplitude wird mit pulseSpeed multipliziert: 
+
+        // Amplitude wird mit pulseSpeed multipliziert:
         // - Bei speed = 0: Amplitude = 0 → pulse = 0.5 (statisch)
         // - Bei speed > 0: Amplitude steigt smooth → pulse atmet smooth
         final pulse = 0.5 + 0.5 * math.sin(pulseValue) * settings.pulseSpeed;
-        
+
         final glowSpread = 12.0 + (48.0 - 12.0) * pulse;
-        
+
         return Stack(
           children: [
             Container(
               width: cardWidth,
               height: cardHeight,
               decoration: BoxDecoration(
-            color: widget.dark ? const Color(0xFF3A3939) : WordsUIConstants.cardBackground,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: const Color(0xFFB16CFF).withOpacity(0.6), // Plasma-Link-Farbe
-              width: 1.5,
+                color: widget.dark
+                    ? const Color(0xFF3A3939)
+                    : WordsUIConstants.cardBackground,
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: Border.all(
+                  color: const Color(
+                    0xFFB16CFF,
+                  ).withOpacity(0.6), // Plasma-Link-Farbe
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  // Ursprüngliche Schatten beibehalten
+                  ...WordsUIConstants.cardShadow,
+                  // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
+                  BoxShadow(
+                    color: const Color(0xFFB16CFF).withOpacity(
+                      0.25 * (0.6 + 0.4 * pulse) * settings.intensity,
+                    ),
+                    blurRadius:
+                        (60 + glowSpread * 2.0).clamp(0.0, 100.0) *
+                        settings.intensity,
+                    spreadRadius: glowSpread * 1.5 * settings.intensity,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF9B7CFF).withOpacity(
+                      0.30 * (0.5 + 0.5 * pulse) * settings.intensity,
+                    ),
+                    blurRadius:
+                        (45 + glowSpread * 1.5).clamp(0.0, 100.0) *
+                        settings.intensity,
+                    spreadRadius: glowSpread * 1.2 * settings.intensity,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF7B5CFF).withOpacity(
+                      0.35 * (0.5 + 0.5 * pulse) * settings.intensity,
+                    ),
+                    blurRadius:
+                        (35 + glowSpread * 1.2).clamp(0.0, 100.0) *
+                        settings.intensity,
+                    spreadRadius: glowSpread * 0.9 * settings.intensity,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFFEFE9FF).withOpacity(
+                      0.45 * (0.3 + 0.7 * pulse) * settings.intensity,
+                    ),
+                    blurRadius:
+                        (18 + glowSpread * 0.5).clamp(0.0, 100.0) *
+                        settings.intensity,
+                    spreadRadius: glowSpread * 0.3 * settings.intensity,
+                  ),
+                ],
+              ),
+              child: widget.child,
             ),
-            boxShadow: [
-              // Ursprüngliche Schatten beibehalten
-              ...WordsUIConstants.cardShadow,
-              // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
-              BoxShadow(
-                color: const Color(0xFFB16CFF).withOpacity(0.25 * (0.6 + 0.4 * pulse) * settings.intensity),
-                blurRadius: (60 + glowSpread * 2.0).clamp(0.0, 100.0) * settings.intensity,
-                spreadRadius: glowSpread * 1.5 * settings.intensity,
-              ),
-              BoxShadow(
-                color: const Color(0xFF9B7CFF).withOpacity(0.30 * (0.5 + 0.5 * pulse) * settings.intensity),
-                blurRadius: (45 + glowSpread * 1.5).clamp(0.0, 100.0) * settings.intensity,
-                spreadRadius: glowSpread * 1.2 * settings.intensity,
-              ),
-              BoxShadow(
-                color: const Color(0xFF7B5CFF).withOpacity(0.35 * (0.5 + 0.5 * pulse) * settings.intensity),
-                blurRadius: (35 + glowSpread * 1.2).clamp(0.0, 100.0) * settings.intensity,
-                spreadRadius: glowSpread * 0.9 * settings.intensity,
-              ),
-              BoxShadow(
-                color: const Color(0xFFEFE9FF).withOpacity(0.45 * (0.3 + 0.7 * pulse) * settings.intensity),
-                blurRadius: (18 + glowSpread * 0.5).clamp(0.0, 100.0) * settings.intensity,
-                spreadRadius: glowSpread * 0.3 * settings.intensity,
-              ),
-            ],
-          ),
-          child: widget.child,
-        ),
           ],
         );
       },
@@ -575,7 +640,12 @@ class _AdaptiveText extends StatelessWidget {
   final bool back;
   final bool forceMultiline;
   final bool compactFont;
-  const _AdaptiveText(this.text, {this.back = false, this.forceMultiline = false, this.compactFont = false});
+  const _AdaptiveText(
+    this.text, {
+    this.back = false,
+    this.forceMultiline = false,
+    this.compactFont = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +653,8 @@ class _AdaptiveText extends StatelessWidget {
     final isPhrase = wordCount > 1 || forceMultiline;
     final total = text.length;
 
-    double fontSize; int maxLines;
+    double fontSize;
+    int maxLines;
 
     const double bump = 4.0; // Größere Schrift auf der Karte
     if (isPhrase || forceMultiline) {
@@ -591,25 +662,57 @@ class _AdaptiveText extends StatelessWidget {
         fontSize = compactFont ? 16 : 22;
         maxLines = 20;
       } else if (back) {
-        if (total > 50) { fontSize = 24 + bump; maxLines = 5; }
-        else if (total > 35) { fontSize = 26 + bump; maxLines = 4; }
-        else if (total > 20) { fontSize = 28 + bump; maxLines = 3; }
-        else { fontSize = 30 + bump; maxLines = 2; }
+        if (total > 50) {
+          fontSize = 24 + bump;
+          maxLines = 5;
+        } else if (total > 35) {
+          fontSize = 26 + bump;
+          maxLines = 4;
+        } else if (total > 20) {
+          fontSize = 28 + bump;
+          maxLines = 3;
+        } else {
+          fontSize = 30 + bump;
+          maxLines = 2;
+        }
       } else {
-        if (total > 40) { fontSize = 26 + bump; maxLines = 4; }
-        else if (total > 25) { fontSize = 28 + bump; maxLines = 3; }
-        else { fontSize = 30 + bump; maxLines = 2; }
+        if (total > 40) {
+          fontSize = 26 + bump;
+          maxLines = 4;
+        } else if (total > 25) {
+          fontSize = 28 + bump;
+          maxLines = 3;
+        } else {
+          fontSize = 30 + bump;
+          maxLines = 2;
+        }
       }
     } else {
       if (back) {
-        if (total > 20) { fontSize = 26 + bump; maxLines = 3; }
-        else if (total > 14) { fontSize = 28 + bump; maxLines = 2; }
-        else if (total > 10) { fontSize = 30 + bump; maxLines = 2; }
-        else { fontSize = 32 + bump; maxLines = 1; }
+        if (total > 20) {
+          fontSize = 26 + bump;
+          maxLines = 3;
+        } else if (total > 14) {
+          fontSize = 28 + bump;
+          maxLines = 2;
+        } else if (total > 10) {
+          fontSize = 30 + bump;
+          maxLines = 2;
+        } else {
+          fontSize = 32 + bump;
+          maxLines = 1;
+        }
       } else {
-        if (total > 18) { fontSize = 28 + bump; maxLines = 2; }
-        else if (total > 12) { fontSize = 30 + bump; maxLines = 2; }
-        else { fontSize = 34 + bump; maxLines = 1; }
+        if (total > 18) {
+          fontSize = 28 + bump;
+          maxLines = 2;
+        } else if (total > 12) {
+          fontSize = 30 + bump;
+          maxLines = 2;
+        } else {
+          fontSize = 34 + bump;
+          maxLines = 1;
+        }
       }
     }
 
@@ -640,11 +743,25 @@ class _SwipeHint extends StatelessWidget {
     children: [
       Icon(Icons.swipe_left, color: Colors.red.withOpacity(0.6), size: 16),
       const SizedBox(width: 4),
-      Text('Falsch', style: TextStyle(color: Colors.red.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+      Text(
+        'Falsch',
+        style: TextStyle(
+          color: Colors.red.withOpacity(0.7),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       const SizedBox(width: 16),
       Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
       const SizedBox(width: 16),
-      Text('Richtig', style: TextStyle(color: Colors.green.withOpacity(0.7), fontSize: 11, fontWeight: FontWeight.w600)),
+      Text(
+        'Richtig',
+        style: TextStyle(
+          color: Colors.green.withOpacity(0.7),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       const SizedBox(width: 4),
       Icon(Icons.swipe_right, color: Colors.green.withOpacity(0.6), size: 16),
     ],

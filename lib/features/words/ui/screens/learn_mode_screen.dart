@@ -20,6 +20,7 @@ import 'package:talvori/features/words/application/word_list_controller.dart'
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
@@ -96,6 +97,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
   DateTime? _lastSwipeCommitAt;
+  bool _localShowTranslation = false;
 
   // ✅ Provider Subscription für Stage-Änderungen
   ProviderSubscription<LearnModeState>? _stagesSub;
@@ -1085,6 +1087,20 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           );
     }
 
+    Future<void> submitCorrect() async {
+      setState(() => _localShowTranslation = false);
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .submitCorrect(now: DateTime.now());
+    }
+
+    Future<void> submitWrong() async {
+      setState(() => _localShowTranslation = false);
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .submitWrong(now: DateTime.now());
+    }
+
     Widget cardContent;
     if (uiState.isLoading) {
       cardContent = const Center(
@@ -1109,46 +1125,26 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
       );
     } else if (cardState.hasCard) {
-      cardContent = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            cardState.frontText ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            cardState.backText ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 24),
-          ),
-          if (cardState.exampleSentence != null) ...[
-            const SizedBox(height: 18),
-            Text(
-              cardState.exampleSentence!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white60),
-            ),
-          ],
-          if (cardState.notes != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              cardState.notes!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ],
-          const SizedBox(height: 18),
-          Text(
-            cardState.progressLabel,
-            style: const TextStyle(color: Colors.white70),
-          ),
-        ],
+      cardContent = SwipeableWordCard(
+        key: cardKey,
+        frontText: cardState.frontText ?? '',
+        backText: cardState.backText ?? '',
+        level: null,
+        showTranslation: _localShowTranslation,
+        gesturesEnabled: cardState.canSubmitAnswer,
+        srsStage: uiState.currentStage?.index,
+        streak: null,
+        passCount: null,
+        onFlip: () {
+          setState(() => _localShowTranslation = !_localShowTranslation);
+        },
+        onSwipe: (correct) async {
+          if (correct) {
+            await submitCorrect();
+          } else {
+            await submitWrong();
+          }
+        },
       );
     } else if (uiState.isCompleted) {
       cardContent = Center(
@@ -1190,7 +1186,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       );
     }
 
-    final cardFrame = _LocalLearnModeCardFrame(child: cardContent);
+    final cardFrame = cardState.hasCard
+        ? cardContent
+        : _LocalLearnModeCardFrame(child: cardContent);
     const localStageCounts = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
 
