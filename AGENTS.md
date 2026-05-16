@@ -27,10 +27,31 @@
 - Sessions werden persistent gespeichert und nach Neustart fortgesetzt.
 - S5 ist kein endgültiges Verschwinden, sondern ein wiederholbarer Langzeitstatus.
 
+## Neue Projektphase: Existing UI Offline Integration
+
+- Die bestehende Talvori-UI ist die Zieloberfläche.
+- Debug-Screens bleiben Referenz- und Prüfwerkzeuge, sind aber nicht mehr der Hauptweg.
+- Nicht primär neue separate Debug-UI bauen, wenn die bestehende UI kontrolliert angepasst werden kann.
+- Bestehendes Design soll erhalten bleiben und schrittweise mit der lokalen Offline-first-Logik verbunden werden.
+- Änderungen an bestehenden UI-Dateien sind erlaubt, wenn sie explizit beauftragt und vorher geplant wurden.
+- `HomeScreen`, `WordHubScreen`, `CategoryDetailScreen`, `LearnModeScreen` und bestehende visuelle Widgets sind die relevanten Zielbereiche.
+- `LearnModeScreen` ist die Ziel-UI für den lokalen Offline-Lernflow.
+- `WordHubScreen` und `CategoryDetailScreen` sollen später lokale Kategorien und lokale Lernpfade unterstützen.
+- Supabase-Logik soll schrittweise aus dem Lernflow gelöst werden, nicht blind entfernt werden.
+- Keine Supabase-Entfernung ohne Analyse, Rückbaupfad und Tests.
+- Keine alte Daten-, Controller-, Queue-, Timer-, Hybrid- oder FinalRound-Logik übernehmen, nur weil sie optisch mit UI-Code vermischt ist.
+- Design, Layout, Farben, Abstände und visuelle Struktur dürfen übernommen oder lokal nachgebaut werden.
+- Alte Daten-/Controller-/Supabase-Logik darf nicht übernommen werden.
+- Bei UI-Arbeiten immer prüfen:
+  1. Ist es Design/Layout?
+  2. Ist es Datenlogik?
+  3. Ist es Supabase oder alter Controller?
+  4. Kann der Designteil ohne alte Logik genutzt werden?
+
 ## Sicherheitsregeln für Änderungen
 
 - Bestehende App-Dateien nicht ohne explizite Freigabe ändern.
+- Bestehende UI-Dateien nur ändern, wenn die Änderung explizit beauftragt und vorher geplant wurde.
 - Keine destruktiven Git- oder Dateisystembefehle ohne ausdrückliche Zustimmung.
 - Keine Windows-spezifischen Annahmen; Arbeitsumgebung ist macOS mit Flutter/Dart.
 - Bei Unsicherheit erst dokumentieren, nicht implementieren.
-

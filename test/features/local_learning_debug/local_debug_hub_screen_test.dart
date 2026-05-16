@@ -12,18 +12,14 @@ import 'package:talvori/features/local_learning_debug/ui/local_debug_hub_screen.
 void main() {
   group('LocalDebugHubScreen', () {
     testWidgets('debug_hub_shows_local_learning_entry', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: LocalDebugHubScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: LocalDebugHubScreen()));
 
       expect(find.text('Lokaler Debug-Hub'), findsOneWidget);
       expect(find.text('Lokaler Lernscreen'), findsOneWidget);
     });
 
     testWidgets('debug_hub_shows_local_wordhub_entry', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: LocalDebugHubScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: LocalDebugHubScreen()));
 
       expect(find.text('Lokaler Debug-Hub'), findsOneWidget);
       expect(find.text('Lokaler Lernscreen'), findsOneWidget);
@@ -64,7 +60,6 @@ void main() {
       await tester.tap(find.text('Lokaler Lernscreen'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Lokaler Lernmodus'), findsOneWidget);
       expect(find.text('Keine aktive lokale Session'), findsOneWidget);
       expect(find.text('Starten/Fortsetzen'), findsOneWidget);
     });

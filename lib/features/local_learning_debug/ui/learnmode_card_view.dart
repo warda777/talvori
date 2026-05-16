@@ -8,11 +8,13 @@ class LearnModeCardView extends StatelessWidget {
     required this.state,
     this.onCorrect,
     this.onWrong,
+    this.showActions = true,
   });
 
   final LearnModeCardPresenterState state;
   final Future<void> Function()? onCorrect;
   final Future<void> Function()? onWrong;
+  final bool showActions;
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +24,8 @@ class LearnModeCardView extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colors = theme.extension<WordsColors>();
-    final cardColor = colors?.cardBg ?? theme.colorScheme.surface;
-    final borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: 0.45,
-    );
+    final cardColor = colors?.cardBg ?? const Color(0xFF151518);
+    final borderColor = Colors.white.withValues(alpha: 0.1);
     final hasMeta = state.stageLabel != null || state.progressLabel.isNotEmpty;
 
     return Column(
@@ -34,13 +34,17 @@ class LearnModeCardView extends StatelessWidget {
         DecoratedBox(
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(30),
             border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: Colors.black.withValues(alpha: 0.36),
+                blurRadius: 32,
+                offset: const Offset(0, 18),
+              ),
+              BoxShadow(
+                color: const Color(0xFFB1CCFE).withValues(alpha: 0.08),
+                blurRadius: 42,
               ),
             ],
           ),
@@ -61,7 +65,7 @@ class LearnModeCardView extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                   ),
                 if (state.backText != null) ...[
@@ -71,15 +75,16 @@ class LearnModeCardView extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.82,
-                      ),
+                      color: Colors.white.withValues(alpha: 0.82),
                     ),
                   ),
                 ],
                 if (state.exampleSentence != null || state.notes != null) ...[
                   const SizedBox(height: 22),
-                  const Divider(height: 1),
+                  Divider(
+                    height: 1,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                   const SizedBox(height: 18),
                   if (state.exampleSentence != null)
                     _LearnModeCardDetail(text: state.exampleSentence!),
@@ -93,7 +98,7 @@ class LearnModeCardView extends StatelessWidget {
             ),
           ),
         ),
-        if (state.canSubmitAnswer) ...[
+        if (showActions && state.canSubmitAnswer) ...[
           const SizedBox(height: 16),
           Row(
             children: [
@@ -102,6 +107,10 @@ class LearnModeCardView extends StatelessWidget {
                   onPressed: onWrong,
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
+                    foregroundColor: Colors.white,
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.24),
+                    ),
                   ),
                   child: const Text('Falsch'),
                 ),
@@ -112,6 +121,8 @@ class LearnModeCardView extends StatelessWidget {
                   onPressed: onCorrect,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
+                    backgroundColor: const Color(0xFFB1CCFE),
+                    foregroundColor: const Color(0xFF111111),
                   ),
                   child: const Text('Richtig'),
                 ),
@@ -159,7 +170,7 @@ class _LearnModeCardMetaRow extends StatelessWidget {
           Text(
             progressLabel,
             style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.64),
+              color: Colors.white.withValues(alpha: 0.64),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -182,7 +193,7 @@ class _LearnModeCardDetail extends StatelessWidget {
       textAlign: TextAlign.center,
       style: theme.textTheme.bodyLarge?.copyWith(
         height: 1.35,
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+        color: Colors.white.withValues(alpha: 0.72),
       ),
     );
   }

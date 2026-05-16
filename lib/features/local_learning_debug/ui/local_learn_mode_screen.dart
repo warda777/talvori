@@ -7,7 +7,11 @@ import 'package:talvori/core/local_database/providers/local_learning_view_model_
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/local_learning_debug/ui/learnmode_card_view.dart';
+import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_action_bar.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_header.dart';
+import 'package:talvori/features/local_learning_debug/ui/local_stage_panel.dart';
+import 'package:talvori/features/words/ui/ui_constants.dart';
+import 'package:talvori/features/words/ui/theme/theme.dart';
 
 typedef LocalLearnModeStartCallback =
     Future<void> Function({required String categoryId, required DateTime now});
@@ -38,68 +42,95 @@ class LocalLearnModeScreen extends ConsumerWidget {
     final uiState = const LocalLearnModeUiAdapter().map(viewModelState);
     final now = nowProvider ?? DateTime.now;
     final controller = ref.read(localLearningControllerProvider.notifier);
+    final theme = Theme.of(context);
+    final colors = theme.extension<WordsColors>();
+    final backgroundColor = colors?.surfaceBg ?? const Color(0xFF08080A);
+    Future<void> startOrResume() async {
+      final actionNow = now();
+      final callback = onStartOrResume;
+      if (callback != null) {
+        await callback(categoryId: categoryId, now: actionNow);
+        return;
+      }
+
+      await controller.startOrResume(
+        categoryId: categoryId,
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        now: actionNow,
+      );
+    }
+
+    Future<void> submitCorrect() async {
+      final actionNow = now();
+      final callback = onSubmitCorrect;
+      if (callback != null) {
+        await callback(now: actionNow);
+        return;
+      }
+
+      await controller.submitCorrect(now: actionNow);
+    }
+
+    Future<void> submitWrong() async {
+      final actionNow = now();
+      final callback = onSubmitWrong;
+      if (callback != null) {
+        await callback(now: actionNow);
+        return;
+      }
+
+      await controller.submitWrong(now: actionNow);
+    }
+
+    Future<void> completeIfFinished() async {
+      final actionNow = now();
+      final callback = onCompleteIfFinished;
+      if (callback != null) {
+        await callback(now: actionNow);
+        return;
+      }
+
+      await controller.completeIfFinished(now: actionNow);
+    }
 
     return Scaffold(
-      body: Column(
-        children: [
-          LocalLearnModeHeader(
-            categoryId: categoryId,
-            modeLabel: 'Intensiv lernen',
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _LocalLearnModeScreenBody(
-                uiState: uiState,
-                onStartOrResume: () async {
-                  final actionNow = now();
-                  final callback = onStartOrResume;
-                  if (callback != null) {
-                    await callback(categoryId: categoryId, now: actionNow);
-                    return;
-                  }
-
-                  await controller.startOrResume(
-                    categoryId: categoryId,
-                    mode: LearningMode.adaptive,
-                    trainingArea: TrainingArea.all,
-                    now: actionNow,
-                  );
-                },
-                onSubmitCorrect: () async {
-                  final actionNow = now();
-                  final callback = onSubmitCorrect;
-                  if (callback != null) {
-                    await callback(now: actionNow);
-                    return;
-                  }
-
-                  await controller.submitCorrect(now: actionNow);
-                },
-                onSubmitWrong: () async {
-                  final actionNow = now();
-                  final callback = onSubmitWrong;
-                  if (callback != null) {
-                    await callback(now: actionNow);
-                    return;
-                  }
-
-                  await controller.submitWrong(now: actionNow);
-                },
-                onCompleteIfFinished: () async {
-                  final actionNow = now();
-                  final callback = onCompleteIfFinished;
-                  if (callback != null) {
-                    await callback(now: actionNow);
-                    return;
-                  }
-
-                  await controller.completeIfFinished(now: actionNow);
-                },
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            LocalLearnModeHeader(
+              categoryId: categoryId,
+              modeLabel: 'Intensiv lernen',
+            ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: WordsUIConstants.screenPadding,
+                  child: _LocalLearnModeScreenBody(
+                    uiState: uiState,
+                    onStartOrResume: startOrResume,
+                    onSubmitCorrect: submitCorrect,
+                    onSubmitWrong: submitWrong,
+                    onCompleteIfFinished: completeIfFinished,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+            LocalStagePanel(currentStage: uiState.currentStage),
+            const SizedBox(height: WordsUIConstants.sectionSpacing),
+            LocalLearnModeActionBar(
+              showAnswerActions: uiState.canSubmitAnswer,
+              showStartAction: !uiState.hasCard && !uiState.isCompleted,
+              showCompleteAction: uiState.isCompleted,
+              onStartOrResume: startOrResume,
+              onCorrect: submitCorrect,
+              onWrong: submitWrong,
+              onCompleteIfFinished: completeIfFinished,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,48 +154,40 @@ class _LocalLearnModeScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (uiState.isLoading) {
-      return const Text('Lädt...');
+      return const _LocalLearnModeMessageCard(child: Text('Lädt...'));
     }
 
     final errorMessage = uiState.errorMessage;
     if (errorMessage != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('Fehler'),
-          const SizedBox(height: 8),
-          Text(errorMessage),
-        ],
+      return _LocalLearnModeMessageCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Fehler'),
+            const SizedBox(height: 8),
+            Text(errorMessage),
+          ],
+        ),
       );
     }
 
     if (!uiState.hasCard && !uiState.isCompleted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('Keine aktive lokale Session'),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: onStartOrResume,
-            child: const Text('Starten/Fortsetzen'),
-          ),
-        ],
+      return const _LocalLearnModeMessageCard(
+        child: Text('Keine aktive lokale Session', textAlign: TextAlign.center),
       );
     }
 
     if (uiState.isCompleted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('Session abgeschlossen'),
-          const SizedBox(height: 8),
-          Text(uiState.progressLabel),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: onCompleteIfFinished,
-            child: const Text('Session abschließen'),
-          ),
-        ],
+      return _LocalLearnModeMessageCard(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Session abgeschlossen', textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(uiState.progressLabel, textAlign: TextAlign.center),
+          ],
+        ),
       );
     }
 
@@ -173,6 +196,60 @@ class _LocalLearnModeScreenBody extends StatelessWidget {
       state: cardState,
       onCorrect: onSubmitCorrect,
       onWrong: onSubmitWrong,
+      showActions: false,
+    );
+  }
+}
+
+class _LocalLearnModeMessageCard extends StatelessWidget {
+  const _LocalLearnModeMessageCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<WordsColors>();
+    final cardColor = colors?.cardBg ?? const Color(0xFF151518);
+    final size = MediaQuery.sizeOf(context);
+
+    return Center(
+      child: Container(
+        width: size.width * 0.78,
+        constraints: BoxConstraints(
+          minHeight: size.height * 0.34,
+          maxWidth: 560,
+        ),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(WordsUIConstants.borderRadius),
+          border: Border.all(
+            color: const Color(0xFFB16CFF).withValues(alpha: 0.48),
+            width: 1.5,
+          ),
+          boxShadow: [
+            ...WordsUIConstants.cardShadow,
+            BoxShadow(
+              color: const Color(0xFFB16CFF).withValues(alpha: 0.22),
+              blurRadius: 72,
+              spreadRadius: 18,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Center(
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

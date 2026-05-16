@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.dart';
+import 'package:talvori/core/local_database/adapters/local_learn_mode_ui_adapter.dart';
+import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/application/application.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
@@ -9,27 +15,29 @@ import 'package:talvori/features/words/ui/widgets/single_mode_switch_row.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
 import 'package:talvori/features/words/ui/widgets/srs_visuals.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
-import 'package:talvori/features/words/application/word_list_controller.dart' show WordListFilter, WordFilterKind;
+import 'package:talvori/features/words/application/word_list_controller.dart'
+    show WordListFilter, WordFilterKind;
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
-import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
-import 'package:talvori/features/words/data/supabase_word_repository.dart' show WordUserView;
+import 'package:talvori/features/words/data/supabase_word_repository.dart'
+    show WordUserView;
 import 'package:talvori/core/ui/effects/fireworks_service.dart';
 import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
-
 
 class LearnModeScreen extends ConsumerStatefulWidget {
   final String categoryId;
   final String title; // z. B. "Money & Shopping"
-  
+  final bool useLocalOfflineFlow;
+  final String? localCategoryId;
+
   // ⬇️ NEU: Custom Wheel für QuickSets
   final List<String>? customWheelLabels;
   final int? customWheelInitialIndex;
-  
+
   // ⬇️ NEU: Navigation-Herkunft für Back-Button-Logik
   final LearnNavigationOrigin? navigationOrigin;
 
@@ -37,9 +45,11 @@ class LearnModeScreen extends ConsumerStatefulWidget {
     super.key,
     required this.categoryId,
     required this.title,
-    this.customWheelLabels,        // <— NEU
-    this.customWheelInitialIndex,  // <— NEU
-    this.navigationOrigin,        // <— NEU
+    this.useLocalOfflineFlow = false,
+    this.localCategoryId,
+    this.customWheelLabels, // <— NEU
+    this.customWheelInitialIndex, // <— NEU
+    this.navigationOrigin, // <— NEU
   });
 
   @override
@@ -49,7 +59,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
 class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     with TickerProviderStateMixin {
   // Controller (Business-Logik)
-  late final LearnModeController _controller;
+  LearnModeController? _controller;
   // Controller für Switch-Row Blink-Effekte
   final _switchCtrl = StageSwitchRowController();
 
@@ -67,7 +77,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     4: GlobalKey(),
     5: GlobalKey(),
   };
-  
+
   // Keys für Single-Modus Switches (SRC, R1, R2)
   final Map<String, GlobalKey> singleSwitchKeys = {
     'SRC': GlobalKey(),
@@ -83,10 +93,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   late final AnimationController pulse;
   int? pulseStage; // Für normale Stages (0-5)
   String? pulseSingleBucket; // Für Single-Modus ('SRC', 'R1', 'R2')
-  
+
   // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
   DateTime? _lastSwipeCommitAt;
-  
+
   // ✅ Provider Subscription für Stage-Änderungen
   ProviderSubscription<LearnModeState>? _stagesSub;
 
@@ -160,7 +170,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       targetKey = switchKeys[targetStage];
     }
     if (targetKey == null) return;
-    if (cardKey.currentContext == null || targetKey!.currentContext == null) return;
+    if (cardKey.currentContext == null || targetKey!.currentContext == null)
+      return;
     setState(() {
       cardRect = _rectInStack(cardKey);
       switchRect = _rectInStack(targetKey!);
@@ -171,7 +182,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void _hideLink() => setState(() => linkVisible = false);
 
   void triggerPulse(int stage) {
-    debugPrint('🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}');
+    debugPrint(
+      '🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}',
+    );
     setState(() {
       pulseStage = stage;
       pulseSingleBucket = null; // Normal-Modus
@@ -234,10 +247,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final currentStage = current.srsStage ?? 0;
     // S1-S3: 2× richtig, S4-S5: 3× richtig
     final requiredPass = switch (currentStage) {
-      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
+      0 => 1,
+      1 => 2,
+      2 => 2,
+      3 => 2,
+      4 => 3,
+      5 => 3,
+      _ => 1,
     };
     // S5: pass_count auf 0..2 clamps (DB kann veraltete Werte haben), sonst korrekt
-    final effectivePassCount = (currentStage == 5) ? passCount.clamp(0, 2) : passCount;
+    final effectivePassCount = (currentStage == 5)
+        ? passCount.clamp(0, 2)
+        : passCount;
     final futurePassCount = effectivePassCount + 1;
     // Zauberstaub nur bei S1→S2, S2→S3, … S5→mastered (grün→richtig), NICHT bei S0→S1 oder weiß/blau
     if (currentStage > 0 && futurePassCount >= requiredPass) {
@@ -250,10 +271,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   void _handleSwipeCommit(bool correct) {
     final state = ref.read(learnModeControllerProvider);
-    debugPrint('🔥 ANSWER CHECK | finalPassActive=${state.finalPassActive} | '
-        'queue=${state.wordQueue.length} | index=${state.index}');
-    if (state.shuffledWordIds.isEmpty || state.index >= state.shuffledWordIds.length) {
-      debugPrint('⛔ _handleSwipeCommit abgebrochen: kein aktives Deck vorhanden');
+    debugPrint(
+      '🔥 ANSWER CHECK | finalPassActive=${state.finalPassActive} | '
+      'queue=${state.wordQueue.length} | index=${state.index}',
+    );
+    if (state.shuffledWordIds.isEmpty ||
+        state.index >= state.shuffledWordIds.length) {
+      debugPrint(
+        '⛔ _handleSwipeCommit abgebrochen: kein aktives Deck vorhanden',
+      );
       return;
     }
     if (state.isSubmitting) return;
@@ -262,19 +288,22 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes innerhalb von 250ms)
     final now = DateTime.now();
     if (_lastSwipeCommitAt != null &&
-        now.difference(_lastSwipeCommitAt!) < const Duration(milliseconds: 250)) {
+        now.difference(_lastSwipeCommitAt!) <
+            const Duration(milliseconds: 250)) {
       debugPrint('🧯 SwipeCommit THROTTLED (duplicate within 250ms)');
       ref.read(learnModeControllerProvider.notifier).setSubmitting(false);
       return;
     }
     _lastSwipeCommitAt = now;
-    
+
     final mode = ref.read(levelSelectionProvider);
     final srs = ref.read(srsModeControllerProvider).mode;
-    
+
     // ✅ Routing nach SRS-System (explizit für Klarheit)
-    debugPrint('🧭 UI _handleSwipeCommit: srs=$srs mode=$mode correct=$correct');
-    
+    debugPrint(
+      '🧭 UI _handleSwipeCommit: srs=$srs mode=$mode correct=$correct',
+    );
+
     // Alle SRS-Systeme verwenden aktuell denselben Controller,
     // aber die Routing-Logik ist explizit nach SRS-System getrennt
     switch (srs) {
@@ -283,9 +312,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       case SrsSystem.hybrid:
         // Alle verwenden den gleichen Controller, aber die Logik ist explizit geroutet
         if (correct) {
-          _controller.onSwipeRight();
+          _controller!.onSwipeRight();
         } else {
-          _controller.onSwipeLeft();
+          _controller!.onSwipeLeft();
         }
         break;
     }
@@ -294,14 +323,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       // Im Single-Modus: Bestimme den Ziel-Bucket basierend auf correct
       // Die Counts werden im Controller aktualisiert, wir müssen darauf warten
       final countsBefore = ref.read(singleSessionCountsProvider);
-      
+
       // Verwende ref.listen, um auf Counts-Änderungen zu reagieren
       // Aber nur einmal, deshalb verwenden wir einen Timer
       Future.delayed(const Duration(milliseconds: 200), () {
         if (!mounted) return;
-        
+
         final countsAfter = ref.read(singleSessionCountsProvider);
-        
+
         // Bestimme, welcher Bucket größer geworden ist
         String? targetBucket;
         if (correct) {
@@ -318,7 +347,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           // Incorrect: Wort bleibt in SRC oder geht zurück zu SRC
           targetBucket = 'SRC';
         }
-        
+
         // Pulse-Animation auf den Ziel-Bucket
         if (targetBucket != null && mounted) {
           triggerPulseSingle(targetBucket);
@@ -328,7 +357,11 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       // Normal-Modus: Pulse bei correct (Ziel-Stage) und bei wrong (bleibt in derselben Stage)
       final current = ref.read(currentWordProvider);
       if (current != null) {
-        final targetStage = _getTargetStageForBounce(current.srsStage, current.passCount, correct);
+        final targetStage = _getTargetStageForBounce(
+          current.srsStage,
+          current.passCount,
+          correct,
+        );
         if (targetStage != null) {
           triggerPulse(targetStage);
         }
@@ -358,7 +391,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
       // Wrong: S0→S0, T1/H1→T1/H1 (bleibt!), T2/H2→T1/H1, ...
       if (currentStage <= 0) return 0;
-      if (currentStage == 1) return 1;  // T1/H1 wrong bleibt in T1/H1
+      if (currentStage == 1) return 1; // T1/H1 wrong bleibt in T1/H1
       return currentStage - 1;
     }
 
@@ -368,9 +401,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       return (currentStage - 1).clamp(1, 5);
     }
     final requiredStreak = switch (currentStage) {
-      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
+      0 => 1,
+      1 => 2,
+      2 => 2,
+      3 => 2,
+      4 => 3,
+      5 => 3,
+      _ => 1,
     };
-    if (currentStreak + 1 < requiredStreak) return currentStage;  // bleibt
+    if (currentStreak + 1 < requiredStreak) return currentStage; // bleibt
     return currentStage < 5 ? currentStage + 1 : 5;
   }
 
@@ -386,11 +425,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       if (correct) {
         targetStage = currentStage < 5 ? currentStage + 1 : 5;
       } else {
-        if (currentStage <= 0) targetStage = 0;
-        else if (currentStage == 1) targetStage = 1;  // T1/H1 wrong bleibt
-        else targetStage = currentStage - 1;
+        if (currentStage <= 0)
+          targetStage = 0;
+        else if (currentStage == 1)
+          targetStage = 1; // T1/H1 wrong bleibt
+        else
+          targetStage = currentStage - 1;
       }
-      if (targetStage == 0) return null;  // S0 wird nie gebounct
+      if (targetStage == 0) return null; // S0 wird nie gebounct
       return targetStage;
     }
 
@@ -398,17 +440,25 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     if (!correct) {
       return (currentStage - 1).clamp(1, 5);
     }
-    final effectivePassCount = (currentStage == 5) ? passCount.clamp(0, 2) : passCount;
+    final effectivePassCount = (currentStage == 5)
+        ? passCount.clamp(0, 2)
+        : passCount;
     final futurePassCount = effectivePassCount + 1;
     // S1-S3: 2× richtig, S4-S5: 3× richtig
     final requiredPass = switch (currentStage) {
-      0 => 1, 1 => 2, 2 => 2, 3 => 2, 4 => 3, 5 => 3, _ => 1,
+      0 => 1,
+      1 => 2,
+      2 => 2,
+      3 => 2,
+      4 => 3,
+      5 => 3,
+      _ => 1,
     };
     if (futurePassCount >= requiredPass) {
       final targetStage = currentStage < 5 ? currentStage + 1 : 5;
       return targetStage;
     }
-    return currentStage;  // bleibt in currentStage (Wiederholung zählt)
+    return currentStage; // bleibt in currentStage (Wiederholung zählt)
   }
 
   /// Ziel-Stage für Idle-Karte (noch nicht geswiped)
@@ -417,7 +467,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   /// A-SRS Phase 1: S5 nie berühren – erst in Final Round (Phase 2).
   int? _targetStageForIdleCard() {
     final state = ref.read(learnModeControllerProvider);
-    if (state.categoryMastered) return null; // Kein Link bei Kategorie-Abschluss
+    if (state.categoryMastered)
+      return null; // Kein Link bei Kategorie-Abschluss
     final mode = ref.read(levelSelectionProvider);
     if (mode == LevelSelectionMode.single) {
       return -1; // Single-Modus: SRC-Switch
@@ -436,12 +487,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
     // A-SRS Final Round aktiv: S5 erlaubt
     if (state.finalPassActive) {
-      return stages.length > 5 && stages[5] > 0 ? 5 : _highestNonEmptyStage() ?? 5;
+      return stages.length > 5 && stages[5] > 0
+          ? 5
+          : _highestNonEmptyStage() ?? 5;
     }
     // A-SRS Phase 1: S5 niemals – auch nicht bei showFinalStartButton
     final maxStage = isA_SrsPhase1 ? 4 : 5;
     if (state.showFinalStartButton) {
-      return _highestNonEmptyStage(maxStage: maxStage) ?? (isA_SrsPhase1 ? 4 : 5);
+      return _highestNonEmptyStage(maxStage: maxStage) ??
+          (isA_SrsPhase1 ? 4 : 5);
     }
     final current = ref.read(currentWordProvider);
     if (current == null) return _highestNonEmptyStage(maxStage: maxStage) ?? 0;
@@ -465,11 +519,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void dispose() {
     // ✅ Provider Subscription schließen
     _stagesSub?.close();
-    // Learn-Screen ist nicht mehr aktiv (wichtig, damit CategoryDetail sofort mode-aktuelle Server-Counts zeigt).
-    // WICHTIG: Nach dem Build setzen, nicht während dispose (verursacht Provider-Modifikation-Fehler)
-    Future.microtask(() {
-      _controller.setInLearnScreen(false);
-    });
+    if (!widget.useLocalOfflineFlow) {
+      // Learn-Screen ist nicht mehr aktiv (wichtig, damit CategoryDetail sofort mode-aktuelle Server-Counts zeigt).
+      // WICHTIG: Nach dem Build setzen, nicht während dispose (verursacht Provider-Modifikation-Fehler)
+      Future.microtask(() {
+        _controller?.setInLearnScreen(false);
+      });
+    }
     fx.dispose();
     pulse.dispose();
     super.dispose();
@@ -478,25 +534,28 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   // ⬇️ NEU: State für Custom Wheel
   late List<String> _wheelLabels;
   late int _wheelIndex;
-  
+
   // ⬇️ NEU: Track ob Wheel gedreht wurde (für Back-Button-Logik)
   bool _wheelChanged = false;
 
   @override
   void initState() {
     super.initState();
-    
-    // ✅ Listener für Stage-Änderungen (statt Logs in build())
-    _stagesSub = ref.listenManual<LearnModeState>(
-      learnModeControllerProvider,
-      (prev, next) {
+
+    if (!widget.useLocalOfflineFlow) {
+      // ✅ Listener für Stage-Änderungen (statt Logs in build())
+      _stagesSub = ref.listenManual<LearnModeState>(learnModeControllerProvider, (
+        prev,
+        next,
+      ) {
         final prevStages = prev?.stages;
         final nextStages = next.stages;
         if (prevStages != nextStages) {
           debugPrint("📊 stages changed: $prevStages -> $nextStages");
         }
         // PlasmaLink sofort aktualisieren, wenn Final Round startet (Layout hat sich geändert)
-        if (prev?.finalPassActive != next.finalPassActive && next.finalPassActive &&
+        if (prev?.finalPassActive != next.finalPassActive &&
+            next.finalPassActive &&
             next.shuffledWordIds.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -506,60 +565,71 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             }
           });
         }
-      },
-    );
-    
+      });
+    }
+
     // Animation Controller initialisieren - sehr langsame Animation
     fx = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 10000), // 10 Sekunden Animation (3x schneller)
+      duration: const Duration(
+        milliseconds: 10000,
+      ), // 10 Sekunden Animation (3x schneller)
     )..repeat();
-    
+
     pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000), // Doppelt so langer Bounce-Effekt
+      duration: const Duration(
+        milliseconds: 2000,
+      ), // Doppelt so langer Bounce-Effekt
     );
-    
+
     // ⬇️ NEU: Wheel-Labels initialisieren (ganz am Anfang)
     // Wenn übergeben, nutze die QuickSets-Wheel, sonst die bisherigen Kategorien
-    if (widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty) {
+    if (widget.customWheelLabels != null &&
+        widget.customWheelLabels!.isNotEmpty) {
       _wheelLabels = widget.customWheelLabels!;
-      _wheelIndex = (widget.customWheelInitialIndex ?? 0)
-          .clamp(0, _wheelLabels.length - 1);
+      _wheelIndex = (widget.customWheelInitialIndex ?? 0).clamp(
+        0,
+        _wheelLabels.length - 1,
+      );
     } else {
       // Behalte die bestehende Logik für die normale Kategorie-Wheel
       // Die Labels werden später aus categoriesProvider geholt
       _wheelLabels = [];
       _wheelIndex = 0;
     }
-    
-    _controller = ref.read(learnModeControllerProvider.notifier);
-    // Markiere Learn-Screen als aktiv, damit Hub/CategoryDetail nur dann LearnState-Live-Counts nutzt,
-    // wenn dieser Screen wirklich offen ist.
-    // WICHTIG: Nach dem Build setzen, nicht während initState (verursacht Provider-Modifikation-Fehler)
-    Future.microtask(() {
-      if (mounted) {
-        _controller.setInLearnScreen(true);
-      }
-    });
 
-    // Init nach 1. Frame (damit Provider hängt)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.init(
-        categoryId: widget.categoryId,
-        title: widget.title,
-        initialQuickSetsIndex: widget.categoryId == 'quicksets' ? _wheelIndex : null,
-      );
-      
-      // Link für erste Karte schnell aktivieren
-      Future.delayed(const Duration(milliseconds: 150), () {
+    if (!widget.useLocalOfflineFlow) {
+      _controller = ref.read(learnModeControllerProvider.notifier);
+      // Markiere Learn-Screen als aktiv, damit Hub/CategoryDetail nur dann LearnState-Live-Counts nutzt,
+      // wenn dieser Screen wirklich offen ist.
+      // WICHTIG: Nach dem Build setzen, nicht während initState (verursacht Provider-Modifikation-Fehler)
+      Future.microtask(() {
         if (mounted) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _showLinkForCurrentCard();
-          });
+          _controller?.setInLearnScreen(true);
         }
       });
-    });
+
+      // Init nach 1. Frame (damit Provider hängt)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _controller?.init(
+          categoryId: widget.categoryId,
+          title: widget.title,
+          initialQuickSetsIndex: widget.categoryId == 'quicksets'
+              ? _wheelIndex
+              : null,
+        );
+
+        // Link für erste Karte schnell aktivieren
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showLinkForCurrentCard();
+            });
+          }
+        });
+      });
+    }
   }
 
   // ⬇️ NEU: Helper-Funktion für QuickSets-Filter
@@ -569,37 +639,45 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       return const WordListFilter(WordFilterKind.query, '');
     }
     switch (idx) {
-      case 0: return const WordListFilter(WordFilterKind.query, '');
-      case 1: return const WordListFilter(WordFilterKind.about, 'my-words');
-      case 2: return const WordListFilter(WordFilterKind.about, 'favorites');
-      case 3: return const WordListFilter(WordFilterKind.about, 'known-words');
-      case 4: return const WordListFilter(WordFilterKind.about, 'my-mix');
-      default: return const WordListFilter(WordFilterKind.query, '');
+      case 0:
+        return const WordListFilter(WordFilterKind.query, '');
+      case 1:
+        return const WordListFilter(WordFilterKind.about, 'my-words');
+      case 2:
+        return const WordListFilter(WordFilterKind.about, 'favorites');
+      case 3:
+        return const WordListFilter(WordFilterKind.about, 'known-words');
+      case 4:
+        return const WordListFilter(WordFilterKind.about, 'my-mix');
+      default:
+        return const WordListFilter(WordFilterKind.query, '');
     }
   }
 
   // ⬇️ NEU: Back-Button-Logik basierend auf Herkunft und Wheel-Status
   void _handleBackNavigation(BuildContext context) {
     final origin = widget.navigationOrigin;
-    
+
     // Wenn keine Herkunft definiert → Standard-Navigation (pop)
     if (origin == null) {
       final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
       Navigator.of(context).pop(didReset);
       return;
     }
-    
+
     // Wenn von Category kommt → zur aktuell ausgewählten Kategorie navigieren
     if (origin.isFromCategory) {
       // QuickSets-Sonderbehandlung
       if (origin.isQuickSets) {
         final originalIndex = origin.initialIndex ?? _wheelIndex;
         final currentIndex = _wheelIndex;
-        
+
         // Wenn sich der Index geändert hat → zur neuen QuickSets Detail Screen navigieren
         if (currentIndex != originalIndex) {
           // Pop LearnMode und die alte QuickSets Detail Screen
-          final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+          final didReset = ref
+              .read(learnModeControllerProvider.notifier)
+              .didReset;
           Navigator.of(context).pop(didReset); // Pop LearnMode
           Navigator.of(context).pop(); // Pop alte QuickSets Detail Screen
           // Push neue QuickSets Detail Screen mit neuem Index
@@ -610,28 +688,34 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           );
           return;
         }
-        
+
         // Fallback: Wenn keine Änderung → einfach zurück (pop)
-        final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+        final didReset = ref
+            .read(learnModeControllerProvider.notifier)
+            .didReset;
         Navigator.of(context).pop(didReset);
         return;
       }
-      
+
       // Normale Category-Navigation (nicht QuickSets)
       // Hinweis: s ist hier nicht verfügbar (außerhalb von build), daher read verwenden
       final state = ref.read(learnModeControllerProvider);
       final categories = state.categories;
       final selectedIndex = state.selectedCategoryIndex;
-      
+
       // Wenn Kategorien vorhanden sind und Index gültig ist
-      if (categories.isNotEmpty && selectedIndex >= 0 && selectedIndex < categories.length) {
+      if (categories.isNotEmpty &&
+          selectedIndex >= 0 &&
+          selectedIndex < categories.length) {
         final currentCat = categories[selectedIndex];
         final originalCatId = origin.categoryId;
-        
+
         // Wenn die aktuelle Kategorie anders ist als die ursprüngliche → zur neuen Kategorie navigieren
         if (originalCatId != null && currentCat.id != originalCatId) {
           // Pop LearnMode und die alte Category Detail Screen
-          final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
+          final didReset = ref
+              .read(learnModeControllerProvider.notifier)
+              .didReset;
           Navigator.of(context).pop(didReset); // Pop LearnMode
           Navigator.of(context).pop(); // Pop alte Category Detail Screen
           // Push neue Category Detail Screen
@@ -641,20 +725,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                 title: currentCat.name,
                 categoryId: currentCat.id,
                 categorySlug: currentCat.slug,
-                listFilter: WordListFilter(WordFilterKind.category, currentCat.id),
+                listFilter: WordListFilter(
+                  WordFilterKind.category,
+                  currentCat.id,
+                ),
               ),
             ),
           );
           return;
         }
       }
-      
+
       // Fallback: Wenn keine Änderung oder gleiche Kategorie → einfach zurück (pop)
       final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
       Navigator.of(context).pop(didReset);
       return;
     }
-    
+
     // Wenn von Home kommt (nur für QuickSets relevant)
     if (origin.isFromHome && widget.categoryId == 'quicksets') {
       // Wenn Wheel auf "My words" (Index 1) UND nicht gedreht → zurück zu Home
@@ -662,7 +749,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         Navigator.of(context).popUntil((route) => route.isFirst);
         return;
       }
-      
+
       // Wenn Wheel gedreht wurde oder nicht auf "My words" → zurück zu QuickSets-Detail
       // Pop LearnMode, dann navigiere zu QuickSetsDetailScreen mit aktuellem Index
       final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
@@ -675,34 +762,42 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       );
       return;
     }
-    
+
     // Fallback: Standard pop
     final didReset = ref.read(learnModeControllerProvider.notifier).didReset;
     Navigator.of(context).pop(didReset);
   }
 
-
   // === Build ===
 
   @override
   Widget build(BuildContext context) {
+    if (widget.useLocalOfflineFlow) {
+      return _buildLocalOfflineFlow(context);
+    }
+
     final s = ref.watch(learnModeControllerProvider);
     final mode = ref.watch(levelSelectionProvider);
     final allowed = ref.watch(allowedStagesProvider);
     final mask = List<bool>.generate(6, (i) => allowed.contains(i));
-    
+
     // Kategorie mastered: PlasmaLink ausblenden, Feuerwerk starten, nach 5s Restart-Button freischalten
-    ref.listen<bool>(learnModeControllerProvider.select((s) => s.categoryMastered), (prev, next) {
-      if (next && prev != true && mounted) {
-        _hideLink(); // PlasmaLink verschwindet, wenn Finale erreicht
-        FireworksService.show(context, duration: const Duration(seconds: 10));
-        Future.delayed(const Duration(seconds: 10), () {
-          if (mounted) {
-            ref.read(learnModeControllerProvider.notifier).setCategoryMasteredRestartReady();
-          }
-        });
-      }
-    });
+    ref.listen<bool>(
+      learnModeControllerProvider.select((s) => s.categoryMastered),
+      (prev, next) {
+        if (next && prev != true && mounted) {
+          _hideLink(); // PlasmaLink verschwindet, wenn Finale erreicht
+          FireworksService.show(context, duration: const Duration(seconds: 10));
+          Future.delayed(const Duration(seconds: 10), () {
+            if (mounted) {
+              ref
+                  .read(learnModeControllerProvider.notifier)
+                  .setCategoryMasteredRestartReady();
+            }
+          });
+        }
+      },
+    );
 
     // Link aktualisieren, wenn sich die Karte ändert (nur wenn nicht gerade gedragt wird)
     // ABER: Warte bis die Karten-Animation fertig ist
@@ -722,10 +817,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     Widget switchesRow;
     if (s.categoryMastered) {
       // Kategorie absolviert: Switch verschwindet, Mastered-Zahl blinkend in der Mitte
-      switchesRow = _MasteredCountBlink(count: s.masteredCount, restartReady: s.categoryMasteredRestartReady);
+      switchesRow = _MasteredCountBlink(
+        count: s.masteredCount,
+        restartReady: s.categoryMasteredRestartReady,
+      );
     } else if (mode == LevelSelectionMode.single) {
-      final st = ref.watch(singleStageProvider);                 // z.B. 2
-      final counts = ref.watch(singleSessionCountsProvider);     // (src, sr1, sr2)
+      final st = ref.watch(singleStageProvider); // z.B. 2
+      final counts = ref.watch(singleSessionCountsProvider); // (src, sr1, sr2)
 
       // Modus → Stroke & Prefix ableiten
       final srsMode = ref.watch(srsModeControllerProvider);
@@ -769,10 +867,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         srcCount: counts.src,
         sr1Count: counts.sr1,
         sr2Count: counts.sr2,
-        srPrefix: srPrefix,               // ← NEU
-        innerStrokeColor: stroke,         // ← NEU
-        innerFillColor: innerFill,        // ← NEU
-        switchKeys: singleSwitchKeys,     // ← NEU: Keys für Plasma-Link
+        srPrefix: srPrefix, // ← NEU
+        innerStrokeColor: stroke, // ← NEU
+        innerFillColor: innerFill, // ← NEU
+        switchKeys: singleSwitchKeys, // ← NEU: Keys für Plasma-Link
       );
     } else {
       // Non-Single: S0–S5 / S1–S5
@@ -818,12 +916,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
       switchesRow = StageSwitchRow(
         controller: _switchCtrl,
-        counts: stageCounts, 
-        goalPerStage: 100, 
+        counts: stageCounts,
+        goalPerStage: 100,
         gap: 12, // kSwitchGap
-        showLearnedCounterInStage5: true, // show same learned counter as in Category Detail
+        showLearnedCounterInStage5:
+            true, // show same learned counter as in Category Detail
         learnedCounterCategoryId: widget.categoryId,
-        sizes: const StageSwitchSizes(width: 42, height: 75, knobTop: 2, knobBottom: 18),
+        sizes: const StageSwitchSizes(
+          width: 42,
+          height: 75,
+          knobTop: 2,
+          knobBottom: 18,
+        ),
         colors: StageSwitchColors(
           newOuter: const Color(0xFFA05260),
           stageOuter: const Color(0xFFE4B866),
@@ -831,13 +935,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           disabledOuter: Colors.white,
           innerStroke: stroke,
         ),
-        labels: StageSwitchLabels(newLabel: 'New', newNote: '0', stagePrefix: prefix),
-        visibleMask: mask,                        // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
-        s0Locked: ref.watch(s0LockedProvider(widget.categoryId)).maybeWhen(
-          data: (v) => v,
-          orElse: () => false,
+        labels: StageSwitchLabels(
+          newLabel: 'New',
+          newNote: '0',
+          stagePrefix: prefix,
         ),
-        onTapS0: null, // Icon ist im Category Detail Screen, hier nicht benötigt
+        visibleMask:
+            mask, // ⚠️ KEINE visibleMask hier für Single – diese Branch rendert nur für non-Single
+        s0Locked: ref
+            .watch(s0LockedProvider(widget.categoryId))
+            .maybeWhen(data: (v) => v, orElse: () => false),
+        onTapS0:
+            null, // Icon ist im Category Detail Screen, hier nicht benötigt
         switchKeys: switchKeys, // ← NEU: Keys für Plasma-Link
       );
     }
@@ -853,21 +962,28 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               children: [
                 HeaderBar(
                   // ⬇️ NEU: Custom Wheel Labels übergeben, wenn vorhanden
-                  customWheelLabels: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  customWheelLabels:
+                      widget.customWheelLabels != null &&
+                          widget.customWheelLabels!.isNotEmpty
                       ? _wheelLabels
                       : null,
-                  customWheelInitialIndex: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  customWheelInitialIndex:
+                      widget.customWheelLabels != null &&
+                          widget.customWheelLabels!.isNotEmpty
                       ? _wheelIndex
                       : null,
-                  customOnWheelChanged: widget.customWheelLabels != null && widget.customWheelLabels!.isNotEmpty
+                  customOnWheelChanged:
+                      widget.customWheelLabels != null &&
+                          widget.customWheelLabels!.isNotEmpty
                       ? (idx, label) {
                           setState(() {
                             _wheelIndex = idx;
-                            _wheelChanged = true; // ⬇️ NEU: Markiere dass Wheel gedreht wurde
+                            _wheelChanged =
+                                true; // ⬇️ NEU: Markiere dass Wheel gedreht wurde
                           });
                           // ⬇️ NEU: Bei QuickSets Wörter neu laden mit neuem Filter
                           if (widget.categoryId == 'quicksets') {
-                            _controller.loadWordsForQuickSets(idx);
+                            _controller!.loadWordsForQuickSets(idx);
                           }
                         }
                       : null,
@@ -878,14 +994,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   cardKey: cardKey, // ← NEU
                   onDragUpdate: _handleDragUpdate, // ← NEU
                   onDragEnd: _handleDragEnd, // ← NEU
-                  onDragReturn: _handleDragReturn, // ← NEU: Link wieder anzeigen wenn Karte zurückkommt
+                  onDragReturn:
+                      _handleDragReturn, // ← NEU: Link wieder anzeigen wenn Karte zurückkommt
                   onSwipeCommit: _handleSwipeCommit, // ← NEU: Pulse-Animation
                   onSettingsTap: () => showCardGlowSettingsPopup(context),
                   passCountButtonKey: passCountButtonKey,
                   onSwipeWillStart: _handleSwipeWillStart,
                 ),
                 switchesRow,
-                const SizedBox(height: WordsUIConstants.sectionSpacing), // Mehr Luft zwischen Switches und Buttons
+                const SizedBox(
+                  height: WordsUIConstants.sectionSpacing,
+                ), // Mehr Luft zwischen Switches und Buttons
                 const BottomControls(),
               ],
             ),
@@ -895,13 +1014,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               child: AnimatedBuilder(
                 animation: fx,
                 builder: (_, __) {
-                  final hideForMastered = ref.watch(learnModeControllerProvider.select((s) => s.categoryMastered));
+                  final hideForMastered = ref.watch(
+                    learnModeControllerProvider.select(
+                      (s) => s.categoryMastered,
+                    ),
+                  );
                   return CustomPaint(
                     painter: PlasmaBandPainter(
                       cardRect: cardRect,
                       switchRect: switchRect,
                       phase: fx.value,
-                      visible: _plasmaLinkEnabled && linkVisible && !hideForMastered,
+                      visible:
+                          _plasmaLinkEnabled && linkVisible && !hideForMastered,
                     ),
                     size: Size.infinite,
                   );
@@ -937,6 +1061,203 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                 },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocalOfflineFlow(BuildContext context) {
+    final localCategoryId = widget.localCategoryId;
+    final viewModelState = ref.watch(localLearningViewModelProvider);
+    final uiState = const LocalLearnModeUiAdapter().map(viewModelState);
+    final cardState = const LearnModeCardPresenter().map(uiState);
+
+    Future<void> startOrResume() async {
+      if (localCategoryId == null || localCategoryId.isEmpty) return;
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .startOrResume(
+            categoryId: localCategoryId,
+            mode: LearningMode.adaptive,
+            trainingArea: TrainingArea.all,
+            now: DateTime.now(),
+          );
+    }
+
+    Future<void> submitCorrect() async {
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .submitCorrect(now: DateTime.now());
+    }
+
+    Future<void> submitWrong() async {
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .submitWrong(now: DateTime.now());
+    }
+
+    Widget body;
+    if (uiState.isLoading) {
+      body = const Center(
+        child: Text('Laedt...', style: TextStyle(color: Colors.white)),
+      );
+    } else if (uiState.errorMessage != null) {
+      body = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Fehler',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              uiState.errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      );
+    } else if (cardState.hasCard) {
+      body = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            cardState.frontText ?? '',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 36,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            cardState.backText ?? '',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 24),
+          ),
+          if (cardState.exampleSentence != null) ...[
+            const SizedBox(height: 18),
+            Text(
+              cardState.exampleSentence!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white60),
+            ),
+          ],
+          if (cardState.notes != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              cardState.notes!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white54),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Text(
+            cardState.progressLabel,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
+      );
+    } else if (uiState.isCompleted) {
+      body = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Session abgeschlossen',
+              style: TextStyle(color: Colors.white, fontSize: 22),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              uiState.progressLabel,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      );
+    } else {
+      body = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              localCategoryId == null || localCategoryId.isEmpty
+                  ? 'Keine lokale Kategorie'
+                  : 'Keine aktive lokale Session',
+              style: const TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            const SizedBox(height: 18),
+            FilledButton(
+              onPressed: localCategoryId == null || localCategoryId.isEmpty
+                  ? null
+                  : startOrResume,
+              child: const Text('Starten/Fortsetzen'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(padding: const EdgeInsets.all(24), child: body),
+            ),
+            if (cardState.hasCard && cardState.canSubmitAnswer)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: submitWrong,
+                        child: const Text('Falsch'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: submitCorrect,
+                        child: const Text('Richtig'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -1006,9 +1327,7 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
               fontSize: 48,
               fontWeight: FontWeight.bold,
               color: _white,
-              shadows: [
-                Shadow(color: _white.withOpacity(0.6), blurRadius: 12),
-              ],
+              shadows: [Shadow(color: _white.withOpacity(0.6), blurRadius: 12)],
             ),
           ),
         ),
@@ -1017,7 +1336,8 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (context, _) {
-        final color = _colors[(_ctrl.value * _colors.length).floor() % _colors.length];
+        final color =
+            _colors[(_ctrl.value * _colors.length).floor() % _colors.length];
         return SizedBox(
           height: 75,
           child: Center(
@@ -1038,6 +1358,3 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
     );
   }
 }
-
-
-

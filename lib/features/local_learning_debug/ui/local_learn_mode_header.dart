@@ -17,60 +17,97 @@ class LocalLearnModeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.extension<WordsColors>();
-    final backgroundColor = colors?.surfaceBg ?? theme.colorScheme.surface;
-    final foregroundColor = theme.colorScheme.onSurface;
+    final backgroundColor = colors?.surfaceBg ?? const Color(0xFF08080A);
     final displayTitle = title ?? categoryId;
 
     return Container(
       width: double.infinity,
-      padding: WordsLayout.topPadding,
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              constraints: const BoxConstraints(minHeight: 72),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.72),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.4,
+        child: SizedBox(
+          height: WordsLayout.wheelHeight,
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 44,
+                height: 44,
+                child: Icon(Icons.school_rounded, color: Color(0xFFB1CCFE)),
+              ),
+              Expanded(
+                child: Container(
+                  height: 54,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF151518),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFB1CCFE).withValues(alpha: 0.12),
+                        blurRadius: 24,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        displayTitle,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          height: 1.0,
+                        ),
+                      ),
+                      if (modeLabel != null) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          modeLabel!,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.66),
+                            fontWeight: FontWeight.w700,
+                            height: 1.0,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    displayTitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: foregroundColor,
-                      fontWeight: FontWeight.w800,
-                    ),
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFB1CCFE).withValues(alpha: 0.45),
                   ),
-                  if (modeLabel != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      modeLabel!,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: foregroundColor.withValues(alpha: 0.68),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
+                child: const Text(
+                  'L',
+                  style: TextStyle(
+                    color: Color(0xFFB1CCFE),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

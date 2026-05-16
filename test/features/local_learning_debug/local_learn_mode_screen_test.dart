@@ -37,6 +37,43 @@ void main() {
       expect(find.text('Intensiv lernen'), findsOneWidget);
     });
 
+    testWidgets('local_learnmode_screen_shows_stage_panel', (tester) async {
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: true,
+        currentWordId: 'word-1',
+        term: 'hello',
+        translation: 'hallo',
+        currentStage: SrsStage.s2,
+        currentPosition: 1,
+        totalItems: 3,
+        answeredCount: 1,
+        remainingCount: 2,
+        canSubmitAnswer: true,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.startOrResume,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
+          ),
+        ),
+      );
+
+      expect(find.text('Stufen'), findsOneWidget);
+      expect(find.text('S0'), findsOneWidget);
+      expect(find.text('S1'), findsOneWidget);
+      expect(find.text('S2'), findsOneWidget);
+      expect(find.text('S3'), findsOneWidget);
+      expect(find.text('S4'), findsOneWidget);
+      expect(find.text('S5'), findsOneWidget);
+    });
+
     testWidgets('local_learnmode_screen_shows_active_card', (tester) async {
       const viewModelState = LocalLearningViewModelState(
         isLoading: false,
