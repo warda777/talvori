@@ -7,6 +7,7 @@ import 'package:talvori/core/local_database/providers/local_learning_view_model_
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/local_learning_debug/ui/learnmode_card_view.dart';
+import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_header.dart';
 
 typedef LocalLearnModeStartCallback =
     Future<void> Function({required String categoryId, required DateTime now});
@@ -39,57 +40,66 @@ class LocalLearnModeScreen extends ConsumerWidget {
     final controller = ref.read(localLearningControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lokaler Lernmodus')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: _LocalLearnModeScreenBody(
-          uiState: uiState,
-          onStartOrResume: () async {
-            final actionNow = now();
-            final callback = onStartOrResume;
-            if (callback != null) {
-              await callback(categoryId: categoryId, now: actionNow);
-              return;
-            }
+      body: Column(
+        children: [
+          LocalLearnModeHeader(
+            categoryId: categoryId,
+            modeLabel: 'Intensiv lernen',
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _LocalLearnModeScreenBody(
+                uiState: uiState,
+                onStartOrResume: () async {
+                  final actionNow = now();
+                  final callback = onStartOrResume;
+                  if (callback != null) {
+                    await callback(categoryId: categoryId, now: actionNow);
+                    return;
+                  }
 
-            await controller.startOrResume(
-              categoryId: categoryId,
-              mode: LearningMode.adaptive,
-              trainingArea: TrainingArea.all,
-              now: actionNow,
-            );
-          },
-          onSubmitCorrect: () async {
-            final actionNow = now();
-            final callback = onSubmitCorrect;
-            if (callback != null) {
-              await callback(now: actionNow);
-              return;
-            }
+                  await controller.startOrResume(
+                    categoryId: categoryId,
+                    mode: LearningMode.adaptive,
+                    trainingArea: TrainingArea.all,
+                    now: actionNow,
+                  );
+                },
+                onSubmitCorrect: () async {
+                  final actionNow = now();
+                  final callback = onSubmitCorrect;
+                  if (callback != null) {
+                    await callback(now: actionNow);
+                    return;
+                  }
 
-            await controller.submitCorrect(now: actionNow);
-          },
-          onSubmitWrong: () async {
-            final actionNow = now();
-            final callback = onSubmitWrong;
-            if (callback != null) {
-              await callback(now: actionNow);
-              return;
-            }
+                  await controller.submitCorrect(now: actionNow);
+                },
+                onSubmitWrong: () async {
+                  final actionNow = now();
+                  final callback = onSubmitWrong;
+                  if (callback != null) {
+                    await callback(now: actionNow);
+                    return;
+                  }
 
-            await controller.submitWrong(now: actionNow);
-          },
-          onCompleteIfFinished: () async {
-            final actionNow = now();
-            final callback = onCompleteIfFinished;
-            if (callback != null) {
-              await callback(now: actionNow);
-              return;
-            }
+                  await controller.submitWrong(now: actionNow);
+                },
+                onCompleteIfFinished: () async {
+                  final actionNow = now();
+                  final callback = onCompleteIfFinished;
+                  if (callback != null) {
+                    await callback(now: actionNow);
+                    return;
+                  }
 
-            await controller.completeIfFinished(now: actionNow);
-          },
-        ),
+                  await controller.completeIfFinished(now: actionNow);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -9,6 +9,34 @@ import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_screen
 
 void main() {
   group('LocalLearnModeScreen', () {
+    testWidgets('local_learnmode_screen_shows_header', (tester) async {
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
+          ),
+        ),
+      );
+
+      expect(find.text('basics'), findsOneWidget);
+      expect(find.text('Intensiv lernen'), findsOneWidget);
+    });
+
     testWidgets('local_learnmode_screen_shows_active_card', (tester) async {
       const viewModelState = LocalLearningViewModelState(
         isLoading: false,
@@ -47,85 +75,84 @@ void main() {
       expect(find.text('s0'), findsOneWidget);
     });
 
-    testWidgets(
-      'local_learnmode_screen_handles_loading_error_empty',
-      (tester) async {
-        const loadingState = LocalLearningViewModelState(
-          isLoading: true,
-          hasSession: false,
-          currentPosition: 0,
-          totalItems: 0,
-          answeredCount: 0,
-          remainingCount: 0,
-          canSubmitAnswer: false,
-          canCompleteSession: false,
-          lastAction: LocalLearningControllerAction.none,
-        );
-        const errorState = LocalLearningViewModelState(
-          isLoading: false,
-          errorMessage: 'Local session failed.',
-          hasSession: false,
-          currentPosition: 0,
-          totalItems: 0,
-          answeredCount: 0,
-          remainingCount: 0,
-          canSubmitAnswer: false,
-          canCompleteSession: false,
-          lastAction: LocalLearningControllerAction.none,
-        );
-        const emptyState = LocalLearningViewModelState(
-          isLoading: false,
-          hasSession: false,
-          currentPosition: 0,
-          totalItems: 0,
-          answeredCount: 0,
-          remainingCount: 0,
-          canSubmitAnswer: false,
-          canCompleteSession: false,
-          lastAction: LocalLearningControllerAction.none,
-        );
+    testWidgets('local_learnmode_screen_handles_loading_error_empty', (
+      tester,
+    ) async {
+      const loadingState = LocalLearningViewModelState(
+        isLoading: true,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+      const errorState = LocalLearningViewModelState(
+        isLoading: false,
+        errorMessage: 'Local session failed.',
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+      const emptyState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(loadingState),
-            ],
-            child: const MaterialApp(
-              home: LocalLearnModeScreen(categoryId: 'basics'),
-            ),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(loadingState),
+          ],
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
           ),
-        );
+        ),
+      );
 
-        expect(find.text('Lädt...'), findsOneWidget);
+      expect(find.text('Lädt...'), findsOneWidget);
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(errorState),
-            ],
-            child: const MaterialApp(
-              home: LocalLearnModeScreen(categoryId: 'basics'),
-            ),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(errorState),
+          ],
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
           ),
-        );
+        ),
+      );
 
-        expect(find.text('Fehler'), findsOneWidget);
-        expect(find.text('Local session failed.'), findsOneWidget);
+      expect(find.text('Fehler'), findsOneWidget);
+      expect(find.text('Local session failed.'), findsOneWidget);
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              localLearningViewModelProvider.overrideWithValue(emptyState),
-            ],
-            child: const MaterialApp(
-              home: LocalLearnModeScreen(categoryId: 'basics'),
-            ),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(emptyState),
+          ],
+          child: const MaterialApp(
+            home: LocalLearnModeScreen(categoryId: 'basics'),
           ),
-        );
+        ),
+      );
 
-        expect(find.text('Keine aktive lokale Session'), findsOneWidget);
-      },
-    );
+      expect(find.text('Keine aktive lokale Session'), findsOneWidget);
+    });
 
     testWidgets('local_learnmode_screen_handles_completed_state', (
       tester,
