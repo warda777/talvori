@@ -565,7 +565,8 @@ Future<void> showCategoryPopup({
                       glowBlur: 34,
                       glowSpread: 8,
                     ),
-                    openBuilder: (_, __) => const WordHubScreen(),
+                    openBuilder: (_, __) =>
+                        const WordHubScreen(useLocalOfflineFlow: true),
                   ),
                 ),
                 const SizedBox(height: 24),
