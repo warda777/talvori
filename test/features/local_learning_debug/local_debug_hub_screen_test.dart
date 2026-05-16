@@ -96,7 +96,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Word Hub'), findsOneWidget);
-      expect(find.text('Keine lokalen Kategorien gefunden'), findsOneWidget);
+      expect(find.text('Life & Daily Flow'), findsOneWidget);
+      expect(find.text('Health & Fitness'), findsOneWidget);
     });
   });
 }

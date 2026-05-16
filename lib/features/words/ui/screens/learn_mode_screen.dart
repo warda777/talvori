@@ -1085,25 +1085,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           );
     }
 
-    Future<void> submitCorrect() async {
-      await ref
-          .read(localLearningControllerProvider.notifier)
-          .submitCorrect(now: DateTime.now());
-    }
-
-    Future<void> submitWrong() async {
-      await ref
-          .read(localLearningControllerProvider.notifier)
-          .submitWrong(now: DateTime.now());
-    }
-
-    Widget body;
+    Widget cardContent;
     if (uiState.isLoading) {
-      body = const Center(
+      cardContent = const Center(
         child: Text('Laedt...', style: TextStyle(color: Colors.white)),
       );
     } else if (uiState.errorMessage != null) {
-      body = Center(
+      cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1121,7 +1109,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
       );
     } else if (cardState.hasCard) {
-      body = Column(
+      cardContent = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
@@ -1163,7 +1151,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ],
       );
     } else if (uiState.isCompleted) {
-      body = Center(
+      cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1180,7 +1168,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
       );
     } else {
-      body = Center(
+      cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1202,65 +1190,90 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       );
     }
 
+    final cardFrame = _LocalLearnModeCardFrame(child: cardContent);
+    const localStageCounts = [0, 0, 0, 0, 0, 0];
+    const visibleMask = [true, true, true, true, true, true];
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
+          key: stackKey,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      widget.title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(padding: const EdgeInsets.all(24), child: body),
-            ),
-            if (cardState.hasCard && cardState.canSubmitAnswer)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: submitWrong,
-                        child: const Text('Falsch'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: submitCorrect,
-                        child: const Text('Richtig'),
-                      ),
-                    ),
-                  ],
+            Column(
+              children: [
+                HeaderBar(
+                  customWheelLabels: [widget.title],
+                  customWheelInitialIndex: 0,
+                  customOnWheelChanged: (_, _) {},
+                  onBack: () => Navigator.of(context).maybePop(),
                 ),
-              ),
+                Expanded(child: Center(child: cardFrame)),
+                StageSwitchRowView(
+                  counts: localStageCounts,
+                  goalPerStage: 100,
+                  gap: 12,
+                  visibleMask: visibleMask,
+                  showLearnedCounterInStage5: true,
+                  showSwitchNotes: true,
+                  useNumericSwitchNotes: true,
+                  learnedInStage5: 0,
+                  s0Locked: false,
+                  switchKeys: switchKeys,
+                  labels: const StageSwitchLabels(
+                    newLabel: 'New',
+                    newNote: '0',
+                    stagePrefix: 'T',
+                  ),
+                  colors: const StageSwitchColors(
+                    newOuter: Color(0xFF8DBBFF),
+                    stageOuter: Color(0xFF8DBBFF),
+                    inner: Color(0xFF0B0B0D),
+                    disabledOuter: Color(0xFFE9F1FF),
+                    innerStroke: Color(0xFFB36BFF),
+                  ),
+                ),
+                const SizedBox(height: WordsUIConstants.sectionSpacing),
+                SizedBox(height: WordsUIConstants.bottomControlsPadding.bottom),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LocalLearnModeCardFrame extends StatelessWidget {
+  const _LocalLearnModeCardFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('local-learn-mode-card-frame'),
+      width: MediaQuery.of(context).size.width * 0.78,
+      height: MediaQuery.of(context).size.height * 0.52,
+      decoration: BoxDecoration(
+        color: const Color(0xFF151518),
+        borderRadius: BorderRadius.circular(WordsUIConstants.borderRadius),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.36),
+            blurRadius: 32,
+            offset: const Offset(0, 18),
+          ),
+          BoxShadow(
+            color: const Color(0xFFB1CCFE).withValues(alpha: 0.08),
+            blurRadius: 42,
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Padding(padding: const EdgeInsets.all(24), child: child),
     );
   }
 }

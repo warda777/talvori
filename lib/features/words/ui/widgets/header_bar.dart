@@ -10,7 +10,7 @@ class HeaderBar extends ConsumerWidget {
   final List<String>? customWheelLabels;
   final int? customWheelInitialIndex;
   final void Function(int index, String label)? customOnWheelChanged;
-  
+
   // ⬇️ NEU: Custom Back-Button-Handler
   final VoidCallback? onBack;
 
@@ -24,14 +24,16 @@ class HeaderBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLoading = ref.watch(isLoadingProvider);
-    
     // ⬇️ NEU: Verwende Custom Wheel wenn vorhanden, sonst normale Kategorien
-    final useCustomWheel = customWheelLabels != null && customWheelLabels!.isNotEmpty;
-    
+    final useCustomWheel =
+        customWheelLabels != null && customWheelLabels!.isNotEmpty;
+
+    final isLoading = useCustomWheel ? false : ref.watch(isLoadingProvider);
     final categories = useCustomWheel ? null : ref.watch(categoriesProvider);
     final s = useCustomWheel ? null : ref.watch(learnModeControllerProvider);
-    final c = useCustomWheel ? null : ref.read(learnModeControllerProvider.notifier);
+    final c = useCustomWheel
+        ? null
+        : ref.read(learnModeControllerProvider.notifier);
 
     return SizedBox(
       height: WordsUIConstants.headerHeight,
@@ -43,7 +45,10 @@ class HeaderBar extends ConsumerWidget {
             child: const SizedBox(
               width: WordsUIConstants.iconSize,
               height: WordsUIConstants.iconSize,
-              child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(width: WordsUIConstants.mediumSpacing),
@@ -56,7 +61,9 @@ class HeaderBar extends ConsumerWidget {
                         width: WordsUIConstants.loadingSize.width,
                         height: WordsUIConstants.loadingSize.height,
                         child: const Center(
-                          child: CircularProgressIndicator(color: WordsUIConstants.loadingIndicator),
+                          child: CircularProgressIndicator(
+                            color: WordsUIConstants.loadingIndicator,
+                          ),
                         ),
                       )
                     : CategoryWheel(
@@ -76,7 +83,9 @@ class HeaderBar extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: WordsUIConstants.iconSize + WordsUIConstants.mediumSpacing),
+          const SizedBox(
+            width: WordsUIConstants.iconSize + WordsUIConstants.mediumSpacing,
+          ),
         ],
       ),
     );
