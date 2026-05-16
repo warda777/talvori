@@ -3,10 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:talvori/core/local_database/adapters/local_wordhub_debug_entry_presenter.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
@@ -20,6 +23,7 @@ import 'package:talvori/features/words/ui/widgets/radial_palette_tools.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
 import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
+import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
 Widget debugBorder(Widget child, {bool focused = false}) {
   // nur noch Platzhalter – Fokus wird komplett von FocusGlow übernommen
@@ -46,7 +50,8 @@ class FocusGlow extends ConsumerWidget {
 
     final radius = borderRadius ?? BorderRadius.circular(16);
     // Standard-Padding für Texte, aber überschreibbar für Buttons/Suchfeld
-    final effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+    final effectivePadding =
+        padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 120),
@@ -54,10 +59,7 @@ class FocusGlow extends ConsumerWidget {
       padding: effectivePadding,
       decoration: BoxDecoration(
         borderRadius: radius,
-        border: Border.all(
-          color: Colors.white,
-          width: 2,
-        ),
+        border: Border.all(color: Colors.white, width: 2),
         boxShadow: [], // Kein Glow mehr, nur Rahmen
       ),
       child: child,
@@ -66,7 +68,9 @@ class FocusGlow extends ConsumerWidget {
 }
 
 class WordHubScreen extends ConsumerStatefulWidget {
-  const WordHubScreen({super.key});
+  const WordHubScreen({super.key, this.useLocalOfflineFlow = false});
+
+  final bool useLocalOfflineFlow;
 
   @override
   ConsumerState<WordHubScreen> createState() => _WordHubScreenState();
@@ -81,9 +85,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   final ScrollController _scroll = ScrollController();
   bool _allowHints = true;
   bool _isRadialOpen = false;
-  bool _callbackSet = false; // Flag um zu verhindern, dass Callback mehrfach gesetzt wird
-  bool _headerTargetsRegistered = false; // Flag um zu verhindern, dass Header-Targets mehrfach registriert werden
-  
+  bool _callbackSet =
+      false; // Flag um zu verhindern, dass Callback mehrfach gesetzt wird
+  bool _headerTargetsRegistered =
+      false; // Flag um zu verhindern, dass Header-Targets mehrfach registriert werden
+
   // Farb-Overrides für Header-Elemente
   Color? _searchFieldStrokeColor;
   Color? _searchFieldFillColor;
@@ -100,29 +106,47 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final overridesJson = prefs.getString(_headerOverridesKey);
-      
+
       if (overridesJson != null) {
         final Map<String, dynamic> overridesMap = json.decode(overridesJson);
-        
+
         if (mounted) {
           setState(() {
-            _searchFieldStrokeColor = overridesMap['searchFieldStrokeColor'] != null
-                ? Color(int.parse(overridesMap['searchFieldStrokeColor'] as String))
+            _searchFieldStrokeColor =
+                overridesMap['searchFieldStrokeColor'] != null
+                ? Color(
+                    int.parse(overridesMap['searchFieldStrokeColor'] as String),
+                  )
                 : null;
             _searchFieldFillColor = overridesMap['searchFieldFillColor'] != null
-                ? Color(int.parse(overridesMap['searchFieldFillColor'] as String))
+                ? Color(
+                    int.parse(overridesMap['searchFieldFillColor'] as String),
+                  )
                 : null;
             _searchFieldIconColor = overridesMap['searchFieldIconColor'] != null
-                ? Color(int.parse(overridesMap['searchFieldIconColor'] as String))
+                ? Color(
+                    int.parse(overridesMap['searchFieldIconColor'] as String),
+                  )
                 : null;
-            _unlockButtonStrokeColor = overridesMap['unlockButtonStrokeColor'] != null
-                ? Color(int.parse(overridesMap['unlockButtonStrokeColor'] as String))
+            _unlockButtonStrokeColor =
+                overridesMap['unlockButtonStrokeColor'] != null
+                ? Color(
+                    int.parse(
+                      overridesMap['unlockButtonStrokeColor'] as String,
+                    ),
+                  )
                 : null;
-            _unlockButtonFillColor = overridesMap['unlockButtonFillColor'] != null
-                ? Color(int.parse(overridesMap['unlockButtonFillColor'] as String))
+            _unlockButtonFillColor =
+                overridesMap['unlockButtonFillColor'] != null
+                ? Color(
+                    int.parse(overridesMap['unlockButtonFillColor'] as String),
+                  )
                 : null;
-            _unlockButtonTextColor = overridesMap['unlockButtonTextColor'] != null
-                ? Color(int.parse(overridesMap['unlockButtonTextColor'] as String))
+            _unlockButtonTextColor =
+                overridesMap['unlockButtonTextColor'] != null
+                ? Color(
+                    int.parse(overridesMap['unlockButtonTextColor'] as String),
+                  )
                 : null;
             _hubBackgroundColor = overridesMap['hubBackgroundColor'] != null
                 ? Color(int.parse(overridesMap['hubBackgroundColor'] as String))
@@ -130,8 +154,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
           });
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Speichert die Header-Overrides in SharedPreferences
@@ -139,35 +162,42 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final Map<String, dynamic> overridesMap = {};
-      
+
       if (_searchFieldStrokeColor != null) {
-        overridesMap['searchFieldStrokeColor'] = _searchFieldStrokeColor!.value.toString();
+        overridesMap['searchFieldStrokeColor'] = _searchFieldStrokeColor!.value
+            .toString();
       }
       if (_searchFieldFillColor != null) {
-        overridesMap['searchFieldFillColor'] = _searchFieldFillColor!.value.toString();
+        overridesMap['searchFieldFillColor'] = _searchFieldFillColor!.value
+            .toString();
       }
       if (_searchFieldIconColor != null) {
-        overridesMap['searchFieldIconColor'] = _searchFieldIconColor!.value.toString();
+        overridesMap['searchFieldIconColor'] = _searchFieldIconColor!.value
+            .toString();
       }
       if (_unlockButtonStrokeColor != null) {
-        overridesMap['unlockButtonStrokeColor'] = _unlockButtonStrokeColor!.value.toString();
+        overridesMap['unlockButtonStrokeColor'] = _unlockButtonStrokeColor!
+            .value
+            .toString();
       }
       if (_unlockButtonFillColor != null) {
-        overridesMap['unlockButtonFillColor'] = _unlockButtonFillColor!.value.toString();
+        overridesMap['unlockButtonFillColor'] = _unlockButtonFillColor!.value
+            .toString();
       }
       if (_unlockButtonTextColor != null) {
-        overridesMap['unlockButtonTextColor'] = _unlockButtonTextColor!.value.toString();
+        overridesMap['unlockButtonTextColor'] = _unlockButtonTextColor!.value
+            .toString();
       }
       if (_hubBackgroundColor != null) {
-        overridesMap['hubBackgroundColor'] = _hubBackgroundColor!.value.toString();
+        overridesMap['hubBackgroundColor'] = _hubBackgroundColor!.value
+            .toString();
       }
-      
+
       final overridesJson = json.encode(overridesMap);
       await prefs.setString(_headerOverridesKey, overridesJson);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
-  
+
   // Keys für Auto-Scroll
   final _keysById = <String, GlobalKey>{
     'wordHub.title': GlobalKey(),
@@ -177,14 +207,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     'wordHub.glowToggle': GlobalKey(), // NEU: Key für GlowToggleButton
   };
   String? _lastPrimaryId;
-  
+
   // Header-Keys (werden nur einmal erstellt)
   late final GlobalKey _titleKey = GlobalKey();
   late final GlobalKey _backKey = GlobalKey();
   late final GlobalKey _unlockKey = GlobalKey();
   late final GlobalKey _searchKey = GlobalKey();
   late final GlobalKey _searchIconKey = GlobalKey();
-  late final GlobalKey _glowToggleKey = GlobalKey(); // NEU: Key für GlowToggleButton
+  late final GlobalKey _glowToggleKey =
+      GlobalKey(); // NEU: Key für GlowToggleButton
 
   Future<void> _handleGlowToggle(bool glowEnabled) async {
     if (mounted) setState(() => _allowHints = false);
@@ -203,7 +234,8 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         if (!_callbackSet) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && _isRadialOpen && !_callbackSet) {
-              ref.read(radialPaletteProvider.notifier).onFocusChange = _handleFocusChange;
+              ref.read(radialPaletteProvider.notifier).onFocusChange =
+                  _handleFocusChange;
               _callbackSet = true;
             }
           });
@@ -234,16 +266,16 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
     // 1) Primäre ID bestimmen
     final String? primaryId = ids.isEmpty ? null : ids.first;
-    
+
     // WICHTIG: Wenn leere IDs gesendet werden, setze _lastPrimaryId zurück (für Position-Wiederherstellung)
     if (primaryId == null) {
       _lastPrimaryId = null;
       return;
     }
-    
+
     // 2) Basis-ID extrahieren (falls es .title oder .count ist, zur Kachel-ID zurückfallen)
     final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
-    
+
     // WICHTIG: Wenn die ID gleich _lastPrimaryId ist, prüfe ob wir trotzdem scrollen sollten
     // (z.B. wenn die Position wiederhergestellt wurde und das Widget noch nicht gerendert ist)
     final bool shouldScroll = primaryId != _lastPrimaryId;
@@ -291,7 +323,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         break;
       }
     }
-    
+
     // Fallback: Falls keine Tile gefunden wurde, versuche die ursprüngliche ID
     if (target == null) {
       for (final t in paletteState.targets) {
@@ -301,7 +333,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         }
       }
     }
-    
+
     if (target == null) {
       return;
     }
@@ -314,7 +346,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       if (!mounted || !_isRadialOpen) {
         return;
       }
-      
+
       final ctx = key.currentContext;
       if (ctx == null) {
         // Widget noch nicht gerendert
@@ -325,7 +357,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
           if (parts.length >= 3) {
             final sectionKey = parts[1]; // z.B. "society_systems"
             final sectionTitleId = 'wordHub.sectionTitle.$sectionKey';
-            
+
             final paletteState = ref.read(radialPaletteProvider);
             PaletteTarget? sectionTitleTarget;
             for (final t in paletteState.targets) {
@@ -334,7 +366,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                 break;
               }
             }
-            
+
             if (sectionTitleTarget != null) {
               final sectionTitleCtx = sectionTitleTarget.key.currentContext;
               if (sectionTitleCtx != null) {
@@ -357,12 +389,19 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             }
           }
         }
-        
+
         if (attempt < 20) {
           // Widget noch nicht gerendert - erneut versuchen nach längerer Verzögerung
-          final delay = (attempt < 5) ? 100 : (attempt < 10) ? 200 : 300;
+          final delay = (attempt < 5)
+              ? 100
+              : (attempt < 10)
+              ? 200
+              : 300;
           Future.delayed(Duration(milliseconds: delay), () {
-            _tryScroll(attempt + 1, scrolledToSectionTitle: scrolledToSectionTitle);
+            _tryScroll(
+              attempt + 1,
+              scrolledToSectionTitle: scrolledToSectionTitle,
+            );
           });
         }
         return;
@@ -372,7 +411,9 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         // Smooth Animation mit längerer Duration und besserer Curve
         Scrollable.ensureVisible(
           ctx,
-          duration: const Duration(milliseconds: 300), // Längere Duration für smooth Animation
+          duration: const Duration(
+            milliseconds: 300,
+          ), // Längere Duration für smooth Animation
           curve: Curves.easeInOutCubic, // Smooth, fließende Kurve
           // 0 = ganz oben, 1 = ganz unten
           // etwas über der Mitte, damit es nicht vom Rad verdeckt wird
@@ -382,7 +423,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
         // Scroll-Fehler ignorieren
       }
     }
-    
+
     // Starte den ersten Versuch nach einem Frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tryScroll(0);
@@ -416,13 +457,18 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.useLocalOfflineFlow) {
+      return _buildLocalOfflineFlow(context);
+    }
+
     // ✅ Einmalig beim WordHub-Start: Ensure Progress-Rows für alle Kategorien
     // Fehler werden ignoriert, damit WordHub trotzdem lädt
     final ensureAsync = ref.watch(ensureAllProgressProvider);
     ensureAsync.when(
       data: (count) => debugPrint('✅ ensureAllProgress: $count Rows'),
       loading: () => debugPrint('⏳ ensureAllProgress: Loading...'),
-      error: (err, st) => debugPrint('⚠️ ensureAllProgress Fehler (ignoriert): $err'),
+      error: (err, st) =>
+          debugPrint('⚠️ ensureAllProgress Fehler (ignoriert): $err'),
     );
 
     final bottomInset = MediaQuery.of(context).padding.bottom;
@@ -432,20 +478,23 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final focusedIds = radialPalette.focusedIds;
 
     // Extra Platz nur, wenn der Fokus auf einer der letzten Kacheln ist (Levels & Progress)
-    final bool isNearBottom = _isRadialOpen && focusedIds.isNotEmpty && () {
-      // Basis-ID extrahieren (ohne .title oder .count)
-      final primaryId = focusedIds.first;
-      final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
-      
-      // Prüfen, ob es eine Levels & Progress Kachel ist (a1, a2, b1, b2, c1, c2)
-      final lastTileKeys = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
-      for (final key in lastTileKeys) {
-        if (baseId.endsWith('levels_progress.$key')) {
-          return true;
-        }
-      }
-      return false;
-    }();
+    final bool isNearBottom =
+        _isRadialOpen &&
+        focusedIds.isNotEmpty &&
+        () {
+          // Basis-ID extrahieren (ohne .title oder .count)
+          final primaryId = focusedIds.first;
+          final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
+
+          // Prüfen, ob es eine Levels & Progress Kachel ist (a1, a2, b1, b2, c1, c2)
+          final lastTileKeys = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
+          for (final key in lastTileKeys) {
+            if (baseId.endsWith('levels_progress.$key')) {
+              return true;
+            }
+          }
+          return false;
+        }();
 
     // Header-Overrides beim ersten Build laden
     if (!_headerTargetsRegistered) {
@@ -557,66 +606,71 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final sectionWidgets = <Widget>[];
     for (final section in hubSections) {
       sectionWidgets.add(_SectionHeader(section.title, section.key));
-      sectionWidgets.add(_GridSection(
-        sectionKey: section.key,
-        subs: section.subcats,
-        repo: repo,
-        onTapSub: (sub) async {
-          String? catId;
-          try {
-            catId =
-                (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
-                ? sub.supabaseId
-                : await repo.findCategoryIdByName(sub.label);
-          } catch (_) {
-            catId = null;
-          }
+      sectionWidgets.add(
+        _GridSection(
+          sectionKey: section.key,
+          subs: section.subcats,
+          repo: repo,
+          onTapSub: (sub) async {
+            String? catId;
+            try {
+              catId = (sub.supabaseId != null && sub.supabaseId!.isNotEmpty)
+                  ? sub.supabaseId
+                  : await repo.findCategoryIdByName(sub.label);
+            } catch (_) {
+              catId = null;
+            }
 
-          if (!context.mounted) return;
-          if (catId == null && sub.supabaseId == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
-                ),
-              ),
-            );
-          }
-
-          final categoryRoute = catId != null
-              ? MaterialPageRoute(
-                  builder: (_) => CategoryDetailScreen(
-                    title: sub.label,
-                    categoryId: catId!,
-                    categorySlug: null,
-                    listFilter: WordListFilter(
-                      WordFilterKind.category,
-                      catId!,
-                    ),
+            if (!context.mounted) return;
+            if (catId == null && sub.supabaseId == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
                   ),
-                )
-              : MaterialPageRoute(
-                  builder: (_) {
-                    final (kind, value) = _mapToFilter(section.key, sub.label);
-                    return CategoryDetailScreen(
-                      title: sub.label,
-                      categoryId: null,
-                      categorySlug: _slugifyLocal(sub.label),
-                      listFilter: WordListFilter(kind, value),
-                    );
-                  },
-                );
+                ),
+              );
+            }
 
-          Navigator.of(context).push(categoryRoute);
-        },
-      ));
+            final categoryRoute = catId != null
+                ? MaterialPageRoute(
+                    builder: (_) => CategoryDetailScreen(
+                      title: sub.label,
+                      categoryId: catId!,
+                      categorySlug: null,
+                      listFilter: WordListFilter(
+                        WordFilterKind.category,
+                        catId!,
+                      ),
+                    ),
+                  )
+                : MaterialPageRoute(
+                    builder: (_) {
+                      final (kind, value) = _mapToFilter(
+                        section.key,
+                        sub.label,
+                      );
+                      return CategoryDetailScreen(
+                        title: sub.label,
+                        categoryId: null,
+                        categorySlug: _slugifyLocal(sub.label),
+                        listFilter: WordListFilter(kind, value),
+                      );
+                    },
+                  );
+
+            Navigator.of(context).push(categoryRoute);
+          },
+        ),
+      );
     }
 
     return Scaffold(
       backgroundColor: _hubBackgroundColor ?? Colors.black,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: _hubBackgroundColor?.withOpacity(0.87) ?? Colors.black87,
+        backgroundColor:
+            _hubBackgroundColor?.withOpacity(0.87) ?? Colors.black87,
         elevation: 0,
         toolbarHeight: 56,
         leading: IconButton(
@@ -640,7 +694,9 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     key: _keysById['wordHub.title'],
                     child: FocusGlow(
                       isFocused: focusedIds.contains('wordHub.title'),
-                      borderRadius: BorderRadius.circular(12), // kleine Radien an den Ecken
+                      borderRadius: BorderRadius.circular(
+                        12,
+                      ), // kleine Radien an den Ecken
                       child: Text(
                         'Word Hub',
                         key: _titleKey,
@@ -657,15 +713,20 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   key: _keysById['wordHub.glowToggle'],
                   child: FocusGlow(
                     isFocused: focusedIds.contains('wordHub.glowToggle'),
-                    borderRadius: BorderRadius.circular(24), // Gleiche Form wie Button
+                    borderRadius: BorderRadius.circular(
+                      24,
+                    ), // Gleiche Form wie Button
                     padding: EdgeInsets.zero, // kein Padding für Buttons
                     child: GlowToggleButton(
                       key: _glowToggleKey,
                       glowEnabled: glowEnabled,
                       onToggle: () => _handleGlowToggle(glowEnabled),
-                      strokeColor: _unlockButtonStrokeColor, // NEU: Override-Farbe für Border
-                      fillColor: _unlockButtonFillColor, // NEU: Override-Farbe für Fill
-                      textColor: _unlockButtonTextColor, // NEU: Override-Farbe für Icon
+                      strokeColor:
+                          _unlockButtonStrokeColor, // NEU: Override-Farbe für Border
+                      fillColor:
+                          _unlockButtonFillColor, // NEU: Override-Farbe für Fill
+                      textColor:
+                          _unlockButtonTextColor, // NEU: Override-Farbe für Icon
                     ),
                   ),
                 ),
@@ -692,7 +753,9 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   },
                   child: KeyedSubtree(
                     key: _keysById['wordHub.unlockButton'],
-                    child: _buildFrontButton(key: _unlockKey), // NEU: Kein FocusGlow mehr, nicht selektierbar
+                    child: _buildFrontButton(
+                      key: _unlockKey,
+                    ), // NEU: Kein FocusGlow mehr, nicht selektierbar
                   ),
                 ),
               ),
@@ -713,88 +776,105 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
               child: CustomScrollView(
                 controller: _scroll,
                 slivers: [
-                // Suche
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                    child: KeyedSubtree(
-                      key: _keysById['wordHub.search'],
-                      child: FocusGlow(
-                        isFocused: focusedIds.contains('wordHub.search'),
-                        borderRadius: BorderRadius.circular(999), // gleiche Pill-Form wie Feld
-                        padding: EdgeInsets.zero, // kein Padding für Suchfeld
-                        child: TextField(
-                          key: _searchKey,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (q) {
-                            final query = q.trim();
-                            if (query.isEmpty) return;
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => WordListScreen(
-                                  filter: WordListFilter(WordFilterKind.query, query),
+                  // Suche
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      child: KeyedSubtree(
+                        key: _keysById['wordHub.search'],
+                        child: FocusGlow(
+                          isFocused: focusedIds.contains('wordHub.search'),
+                          borderRadius: BorderRadius.circular(
+                            999,
+                          ), // gleiche Pill-Form wie Feld
+                          padding: EdgeInsets.zero, // kein Padding für Suchfeld
+                          child: TextField(
+                            key: _searchKey,
+                            textInputAction: TextInputAction.search,
+                            onSubmitted: (q) {
+                              final query = q.trim();
+                              if (query.isEmpty) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => WordListScreen(
+                                    filter: WordListFilter(
+                                      WordFilterKind.query,
+                                      query,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Suchen',
+                              prefixIcon: KeyedSubtree(
+                                key: _keysById['wordHub.searchIcon'],
+                                child: FocusGlow(
+                                  isFocused: focusedIds.contains(
+                                    'wordHub.searchIcon',
+                                  ),
+                                  borderRadius: BorderRadius.circular(999),
+                                  padding: EdgeInsets.zero,
+                                  child: Icon(
+                                    Icons.search,
+                                    key: _searchIconKey,
+                                    color:
+                                        _searchFieldIconColor ??
+                                        const Color(0xFFF1C86B),
+                                  ),
                                 ),
                               ),
-                            );
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Suchen',
-                            prefixIcon: KeyedSubtree(
-                              key: _keysById['wordHub.searchIcon'],
-                              child: FocusGlow(
-                                isFocused: focusedIds.contains('wordHub.searchIcon'),
+                              filled: true,
+                              fillColor:
+                                  _searchFieldFillColor ??
+                                  Colors.white.withOpacity(0.12),
+                              border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(999),
-                                padding: EdgeInsets.zero,
-                                child: Icon(
-                                  Icons.search,
-                                  key: _searchIconKey,
-                                  color: _searchFieldIconColor ?? const Color(0xFFF1C86B),
+                                borderSide: BorderSide(
+                                  color:
+                                      _searchFieldStrokeColor ??
+                                      const Color(0xFFF1C86B).withOpacity(0.85),
+                                  width: 2,
                                 ),
                               ),
-                            ),
-                            filled: true,
-                            fillColor: _searchFieldFillColor ?? Colors.white.withOpacity(0.12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(999),
-                              borderSide: BorderSide(
-                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B).withOpacity(0.85),
-                                width: 2,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(999),
+                                borderSide: BorderSide(
+                                  color:
+                                      _searchFieldStrokeColor ??
+                                      const Color(0xFFF1C86B),
+                                  width: 1.6,
+                                ),
                               ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(999),
-                              borderSide: BorderSide(
-                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B),
-                                width: 1.6,
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(999),
+                                borderSide: BorderSide(
+                                  color:
+                                      _searchFieldStrokeColor ??
+                                      const Color(0xFFF1C86B),
+                                  width: 2.2,
+                                ),
                               ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(999),
-                              borderSide: BorderSide(
-                                color: _searchFieldStrokeColor ?? const Color(0xFFF1C86B),
-                                width: 2.2,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 14,
                               ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 14,
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                // Sektionen
-                ...sectionWidgets,
+                  // Sektionen
+                  ...sectionWidgets,
 
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: bottomInset + (isNearBottom ? 260 : 10),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: bottomInset + (isNearBottom ? 260 : 10),
+                    ),
                   ),
-                ),
-              ],
+                ],
               ),
             ),
           ),
@@ -852,8 +932,10 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     // NEU: Alle Overrides und Header-Elemente zurücksetzen
                     if (mounted) {
                       // Alle Tile-Overrides zurücksetzen
-                      ref.read(wordHubTileOverridesProvider.notifier).resetAllOverrides();
-                      
+                      ref
+                          .read(wordHubTileOverridesProvider.notifier)
+                          .resetAllOverrides();
+
                       // Alle Header-Elemente zurücksetzen
                       setState(() {
                         _searchFieldStrokeColor = null;
@@ -878,11 +960,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             ),
 
           // 4) Toggle-Button unten rechts – immer ganz oben
-          Positioned(
-            right: 24,
-            bottom: 24,
-            child: _buildRadialToggleButton(),
-          ),
+          Positioned(right: 24, bottom: 24, child: _buildRadialToggleButton()),
 
           const RadialDebugBanner(),
         ],
@@ -900,6 +978,161 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       ),
     );
   }
+
+  Widget _buildLocalOfflineFlow(BuildContext context) {
+    final categoriesAsync = ref.watch(localCategoriesProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.black87,
+        elevation: 0,
+        toolbarHeight: 56,
+        leading: IconButton(
+          key: _backKey,
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Close',
+        ),
+        titleSpacing: 8,
+        title: const Text('Word Hub'),
+      ),
+      body: categoriesAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFFF1C86B)),
+        ),
+        error: (error, stackTrace) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Text(
+              'Lokale Kategorien konnten nicht geladen werden.\n$error',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+        ),
+        data: (categories) {
+          final entryState = const LocalWordHubDebugEntryPresenter().present(
+            categories,
+          );
+
+          if (!entryState.isVisible) {
+            return const Center(
+              child: Text(
+                'Keine lokalen Kategorien gefunden',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          return CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
+                  child: Text(
+                    'Lokale Kategorien',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final item = entryState.items[index];
+                    return _LocalWordHubCategoryCard(
+                      item: item,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LearnModeScreen(
+                              categoryId: item.categoryId,
+                              title: item.label,
+                              useLocalOfflineFlow: true,
+                              localCategoryId: item.categoryId,
+                              navigationOrigin: LearnNavigationOrigin.category(
+                                categoryId: item.categoryId,
+                                categoryTitle: item.label,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }, childCount: entryState.items.length),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.1,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LocalWordHubCategoryCard extends StatelessWidget {
+  const _LocalWordHubCategoryCard({required this.item, required this.onTap});
+
+  final LocalWordHubDebugItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF040404),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: const Color(0xFFF1C86B).withValues(alpha: 0.85),
+              width: 2,
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.label,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
+              const Spacer(),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  item.categoryId,
+                  style: const TextStyle(
+                    color: Color(0xFFF1C86B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 (WordFilterKind, String) _mapToFilter(String sectionKey, String label) {
@@ -912,7 +1145,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 class _SectionHeader extends ConsumerStatefulWidget {
   final String title;
   final String sectionKey;
-  
+
   const _SectionHeader(this.title, this.sectionKey);
 
   @override
@@ -930,7 +1163,7 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
     final focusedIds = palette.focusedIds;
     final sectionId = 'wordHub.sectionTitle.${widget.sectionKey}';
     final isFocused = focusedIds.contains(sectionId);
-    
+
     // Target registrieren (nur einmal)
     if (!_registered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -941,10 +1174,7 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
             id: sectionId,
             key: _titleKey,
             kind: TargetKind.sectionTitle,
-            tools: {
-              PaletteTool.text,
-              PaletteTool.paint,
-            },
+            tools: {PaletteTool.text, PaletteTool.paint},
             onApply: (tool, color, scope) {
               if (tool == PaletteTool.text && mounted) {
                 setState(() {
@@ -956,7 +1186,7 @@ class _SectionHeaderState extends ConsumerState<_SectionHeader> {
         ]);
       });
     }
-    
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
@@ -998,17 +1228,21 @@ class _GridSectionState extends ConsumerState<_GridSection> {
   late final List<GlobalKey> _titleKeys;
   late final List<GlobalKey> _countKeys;
   late final List<GlobalKey> _iconKeys; // NEU: Keys für Icons/Emojis
-  Map<String, bool>? _lastIconEmojiState; // NEU: Speichert vorherigen Zustand der Icons/Emojis
+  Map<String, bool>?
+  _lastIconEmojiState; // NEU: Speichert vorherigen Zustand der Icons/Emojis
   bool _registered = false; // NEU: Flag für einmalige Registrierung
 
   @override
   void initState() {
     super.initState();
     final len = widget.subs.length;
-    _tileKeys  = List.generate(len, (_) => GlobalKey());
+    _tileKeys = List.generate(len, (_) => GlobalKey());
     _titleKeys = List.generate(len, (_) => GlobalKey());
     _countKeys = List.generate(len, (_) => GlobalKey());
-    _iconKeys = List.generate(len, (_) => GlobalKey()); // NEU: Keys für Icons/Emojis
+    _iconKeys = List.generate(
+      len,
+      (_) => GlobalKey(),
+    ); // NEU: Keys für Icons/Emojis
   }
 
   // Hilfsmethode zum Vergleichen von Maps
@@ -1024,114 +1258,127 @@ class _GridSectionState extends ConsumerState<_GridSection> {
   Widget build(BuildContext context) {
     // Aktuelle Overrides lesen, um zu prüfen, welche Kacheln Icons/Emojis haben
     final overrides = ref.watch(wordHubTileOverridesProvider);
-    
+
     // NEU: Prüfe, ob sich der Icon/Emoji-Zustand geändert hat
     final currentIconEmojiState = <String, bool>{};
     for (var i = 0; i < widget.subs.length; i++) {
       final sub = widget.subs[i];
       final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
       final tileOverrides = overrides[baseId];
-      currentIconEmojiState[baseId] = tileOverrides?.icon != null || tileOverrides?.emoji != null;
+      currentIconEmojiState[baseId] =
+          tileOverrides?.icon != null || tileOverrides?.emoji != null;
     }
-    
-    final iconEmojiStateChanged = _lastIconEmojiState == null || 
+
+    final iconEmojiStateChanged =
+        _lastIconEmojiState == null ||
         !_mapsEqual(_lastIconEmojiState!, currentIconEmojiState);
-    
+
     // 2) Zu JEDEM Sub: Tile + Titel + Counter als eigene Targets
     final targets = <PaletteTarget>[];
     for (var i = 0; i < widget.subs.length; i++) {
       final sub = widget.subs[i];
       final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
       final tileOverrides = overrides[baseId];
-      final hasIconOrEmoji = tileOverrides?.icon != null || tileOverrides?.emoji != null;
+      final hasIconOrEmoji =
+          tileOverrides?.icon != null || tileOverrides?.emoji != null;
 
       // a) Ganze Kachel
-      targets.add(PaletteTarget(
-        id: baseId,
-        key: _tileKeys[i],
-        kind: TargetKind.tile,
-        tools: {
-          PaletteTool.stroke,
-          PaletteTool.fill,
-          // PaletteTool.icon wird NICHT unterstützt - nur Icon-Targets haben Icon-Tool
-          // Tile-Targets werden nur zum Platzieren von Icons/Emojis verwendet, nicht zum Einfärben
-          PaletteTool.image,
-          PaletteTool.paint,
-          // Text-Tool wird NICHT unterstützt - nur Titel und Counter haben Text-Tool
-        },
-        onApply: (tool, color, scope) {
-          // WICHTIG: Tile-Targets unterstützen nur stroke und fill, NICHT icon!
-          if (tool == PaletteTool.stroke) {
-            ref.read(wordHubTileOverridesProvider.notifier)
-                .setStrokeColor(baseId, color);
-          } else if (tool == PaletteTool.fill) {
-            ref.read(wordHubTileOverridesProvider.notifier)
-                .setFillColor(baseId, color);
-          }
-        },
-        onApplyIcon: (icon, scope) {
-          ref.read(wordHubTileOverridesProvider.notifier)
-              .setIcon(baseId, icon);
-        },
-        onApplyEmoji: (emoji, scope) {
-          ref.read(wordHubTileOverridesProvider.notifier)
-              .setEmoji(baseId, emoji);
-        },
-        onClearIconEmoji: (scope) {
-          ref.read(wordHubTileOverridesProvider.notifier)
-              .clearIconEmoji(baseId);
-        },
-      ));
+      targets.add(
+        PaletteTarget(
+          id: baseId,
+          key: _tileKeys[i],
+          kind: TargetKind.tile,
+          tools: {
+            PaletteTool.stroke,
+            PaletteTool.fill,
+            // PaletteTool.icon wird NICHT unterstützt - nur Icon-Targets haben Icon-Tool
+            // Tile-Targets werden nur zum Platzieren von Icons/Emojis verwendet, nicht zum Einfärben
+            PaletteTool.image,
+            PaletteTool.paint,
+            // Text-Tool wird NICHT unterstützt - nur Titel und Counter haben Text-Tool
+          },
+          onApply: (tool, color, scope) {
+            // WICHTIG: Tile-Targets unterstützen nur stroke und fill, NICHT icon!
+            if (tool == PaletteTool.stroke) {
+              ref
+                  .read(wordHubTileOverridesProvider.notifier)
+                  .setStrokeColor(baseId, color);
+            } else if (tool == PaletteTool.fill) {
+              ref
+                  .read(wordHubTileOverridesProvider.notifier)
+                  .setFillColor(baseId, color);
+            }
+          },
+          onApplyIcon: (icon, scope) {
+            ref
+                .read(wordHubTileOverridesProvider.notifier)
+                .setIcon(baseId, icon);
+          },
+          onApplyEmoji: (emoji, scope) {
+            ref
+                .read(wordHubTileOverridesProvider.notifier)
+                .setEmoji(baseId, emoji);
+          },
+          onClearIconEmoji: (scope) {
+            ref
+                .read(wordHubTileOverridesProvider.notifier)
+                .clearIconEmoji(baseId);
+          },
+        ),
+      );
 
       // NEU: d) Icon/Emoji in der Kachel (nur wenn vorhanden)
       if (hasIconOrEmoji) {
-        targets.add(PaletteTarget(
-          id: '$baseId.icon',
-          key: _iconKeys[i],
-          kind: TargetKind.icon,
-          tools: {PaletteTool.icon}, // Nur Icon Tool unterstützt
-          onApply: (tool, color, scope) {
-            if (tool == PaletteTool.icon) {
-              ref.read(wordHubTileOverridesProvider.notifier)
-                  .setIconColor(baseId, color);
-            }
-          },
-        ));
+        targets.add(
+          PaletteTarget(
+            id: '$baseId.icon',
+            key: _iconKeys[i],
+            kind: TargetKind.icon,
+            tools: {PaletteTool.icon}, // Nur Icon Tool unterstützt
+            onApply: (tool, color, scope) {
+              if (tool == PaletteTool.icon) {
+                ref
+                    .read(wordHubTileOverridesProvider.notifier)
+                    .setIconColor(baseId, color);
+              }
+            },
+          ),
+        );
       }
 
       // b) Titel-Text in der Kachel
-      targets.add(PaletteTarget(
-        id: '$baseId.title',
-        key: _titleKeys[i],
-        kind: TargetKind.text,
-        tools: {
-          PaletteTool.text,
-          PaletteTool.paint,
-        },
-        onApply: (tool, color, scope) {
-          if (tool == PaletteTool.text) {
-            ref.read(wordHubTileOverridesProvider.notifier)
-                .setTitleColor(baseId, color);
-          }
-        },
-      ));
+      targets.add(
+        PaletteTarget(
+          id: '$baseId.title',
+          key: _titleKeys[i],
+          kind: TargetKind.text,
+          tools: {PaletteTool.text, PaletteTool.paint},
+          onApply: (tool, color, scope) {
+            if (tool == PaletteTool.text) {
+              ref
+                  .read(wordHubTileOverridesProvider.notifier)
+                  .setTitleColor(baseId, color);
+            }
+          },
+        ),
+      );
 
       // c) Counter-Zahl in der Kachel
-      targets.add(PaletteTarget(
-        id: '$baseId.count',
-        key: _countKeys[i],
-        kind: TargetKind.text,
-        tools: {
-          PaletteTool.text,
-          PaletteTool.paint,
-        },
-        onApply: (tool, color, scope) {
-          if (tool == PaletteTool.text) {
-            ref.read(wordHubTileOverridesProvider.notifier)
-                .setCountColor(baseId, color);
-          }
-        },
-      ));
+      targets.add(
+        PaletteTarget(
+          id: '$baseId.count',
+          key: _countKeys[i],
+          kind: TargetKind.text,
+          tools: {PaletteTool.text, PaletteTool.paint},
+          onApply: (tool, color, scope) {
+            if (tool == PaletteTool.text) {
+              ref
+                  .read(wordHubTileOverridesProvider.notifier)
+                  .setCountColor(baseId, color);
+            }
+          },
+        ),
+      );
     }
 
     // 3) Targets nach dem Frame registrieren (nur wenn sich etwas geändert hat)
@@ -1154,28 +1401,27 @@ class _GridSectionState extends ConsumerState<_GridSection> {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (context, i) {
-            final sub = widget.subs[i];
-            final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+        delegate: SliverChildBuilderDelegate((context, i) {
+          final sub = widget.subs[i];
+          final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
 
-            return _HighlightableTarget(
-              id: baseId, // ganze Kachel
-              child: CategoryCard(
-                key: _tileKeys[i],
-                paletteId: baseId,
-                sectionKey: widget.sectionKey,
-                sub: sub,
-                // 🔽 NEU: Keys für Titel & Counter in die Kachel hineinreichen
-                titleKey: _titleKeys[i],
-                countKey: _countKeys[i],
-                iconKey: _iconKeys[i], // NEU: Icon-Key übergeben
-                onTap: widget.onTapSub == null ? null : () => widget.onTapSub!(sub),
-              ),
-            );
-          },
-          childCount: widget.subs.length,
-        ),
+          return _HighlightableTarget(
+            id: baseId, // ganze Kachel
+            child: CategoryCard(
+              key: _tileKeys[i],
+              paletteId: baseId,
+              sectionKey: widget.sectionKey,
+              sub: sub,
+              // 🔽 NEU: Keys für Titel & Counter in die Kachel hineinreichen
+              titleKey: _titleKeys[i],
+              countKey: _countKeys[i],
+              iconKey: _iconKeys[i], // NEU: Icon-Key übergeben
+              onTap: widget.onTapSub == null
+                  ? null
+                  : () => widget.onTapSub!(sub),
+            ),
+          );
+        }, childCount: widget.subs.length),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 16,
@@ -1201,7 +1447,8 @@ class _HighlightableTarget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = ref.watch(radialPaletteProvider);
 
-    final glowColor = palette.selectionGlowColor ?? Colors.white.withOpacity(0.6);
+    final glowColor =
+        palette.selectionGlowColor ?? Colors.white.withOpacity(0.6);
     bool isFocused = false;
 
     if (palette.activeTool != null) {
@@ -1216,7 +1463,7 @@ class _HighlightableTarget extends ConsumerWidget {
 
     // Bei ONE und ALL: nur Rahmen, kein Glow
     final showGlow = false; // Kein Glow mehr, nur Rahmen
-    
+
     // Rahmenfarbe: Rot wenn gelockt, sonst weiß
     final borderColor = palette.isBallLocked ? Colors.redAccent : Colors.white;
 
@@ -1227,7 +1474,9 @@ class _HighlightableTarget extends ConsumerWidget {
           child: IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24), // Angepasst an Kachel-Radius
+                borderRadius: BorderRadius.circular(
+                  24,
+                ), // Angepasst an Kachel-Radius
                 border: Border.all(
                   color: borderColor, // Rot wenn gelockt, sonst weiß
                   width: 6, // Deutlich fetterer Rahmen
