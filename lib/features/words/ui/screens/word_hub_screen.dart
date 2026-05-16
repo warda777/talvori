@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:talvori/core/local_database/adapters/local_wordhub_debug_entry_presenter.dart';
-import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -978,7 +976,6 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   }
 
   Widget _buildLocalOfflineFlow(BuildContext context) {
-    final categoriesAsync = ref.watch(localCategoriesProvider);
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final glowEnabled = ref.watch(wordHubGlowProvider);
     final radialPalette = ref.watch(radialPaletteProvider);
@@ -1161,97 +1158,55 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   ),
                 ),
               ),
-              ...categoriesAsync.when(
-                loading: () => [
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFF1C86B),
-                      ),
-                    ),
-                  ),
-                ],
-                error: (error, stackTrace) => [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Center(
-                        child: Text(
-                          'Lokale Kategorien konnten nicht geladen werden.\n$error',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                data: (categories) {
-                  final entryState = const LocalWordHubDebugEntryPresenter()
-                      .present(categories);
+              for (final section in hubSections) ...[
+                _SectionHeader(section.title, section.key),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final sub = section.subcats[index];
+                      final mappedLocalCategoryId = _mapLocalCategoryId(sub);
+                      return _LocalTaxonomyCategoryCard(
+                        sub: sub,
+                        localCategoryId: mappedLocalCategoryId,
+                        glowEnabled: glowEnabled,
+                        onTap: () {
+                          if (mappedLocalCategoryId == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Noch nicht lokal verfügbar'),
+                              ),
+                            );
+                            return;
+                          }
 
-                  if (!entryState.isVisible) {
-                    return [
-                      const _SectionHeader(
-                        'Lokale Kategorien',
-                        'local_categories',
-                      ),
-                      const SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Text(
-                            'Keine lokalen Kategorien gefunden',
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                      ),
-                    ];
-                  }
-
-                  return [
-                    const _SectionHeader(
-                      'Lokale Kategorien',
-                      'local_categories',
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverGrid(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = entryState.items[index];
-                          return _LocalWordHubCategoryCard(
-                            item: item,
-                            glowEnabled: glowEnabled,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => CategoryDetailScreen(
-                                    categoryId: item.categoryId,
-                                    title: item.label,
-                                    listFilter: WordListFilter(
-                                      WordFilterKind.category,
-                                      item.categoryId,
-                                    ),
-                                    useLocalOfflineFlow: true,
-                                    localCategoryId: item.categoryId,
-                                  ),
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CategoryDetailScreen(
+                                categoryId: mappedLocalCategoryId,
+                                title: sub.label,
+                                listFilter: WordListFilter(
+                                  WordFilterKind.category,
+                                  mappedLocalCategoryId,
                                 ),
-                              );
-                            },
-                          );
-                        }, childCount: entryState.items.length),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 1.1,
+                                useLocalOfflineFlow: true,
+                                localCategoryId: mappedLocalCategoryId,
+                              ),
                             ),
-                      ),
-                    ),
-                  ];
-                },
-              ),
+                          );
+                        },
+                      );
+                    }, childCount: section.subcats.length),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.1,
+                        ),
+                  ),
+                ),
+              ],
               SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
             ],
           ),
@@ -1261,14 +1216,23 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   }
 }
 
-class _LocalWordHubCategoryCard extends StatelessWidget {
-  const _LocalWordHubCategoryCard({
-    required this.item,
+String? _mapLocalCategoryId(HubSubcat sub) {
+  if (sub.key == 'health_fitness') {
+    return 'basics';
+  }
+  return null;
+}
+
+class _LocalTaxonomyCategoryCard extends StatelessWidget {
+  const _LocalTaxonomyCategoryCard({
+    required this.sub,
+    required this.localCategoryId,
     required this.glowEnabled,
     required this.onTap,
   });
 
-  final LocalWordHubDebugItem item;
+  final HubSubcat sub;
+  final String? localCategoryId;
   final bool glowEnabled;
   final VoidCallback onTap;
 
@@ -1321,7 +1285,7 @@ class _LocalWordHubCategoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.label,
+                      sub.label,
                       style: Theme.of(
                         context,
                       ).textTheme.titleMedium?.copyWith(color: Colors.white),
@@ -1330,9 +1294,11 @@ class _LocalWordHubCategoryCard extends StatelessWidget {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        item.categoryId,
-                        style: const TextStyle(
-                          color: strokeColor,
+                        localCategoryId ?? 'local pending',
+                        style: TextStyle(
+                          color: localCategoryId == null
+                              ? Colors.white54
+                              : strokeColor,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
