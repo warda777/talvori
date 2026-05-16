@@ -6,6 +6,7 @@ import 'package:talvori/core/local_database/controllers/local_learning_controlle
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 
 void main() {
   testWidgets(
@@ -80,7 +81,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.tap(find.text('Start'));
+    await tester.tap(find.byType(StartButtonPulse));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

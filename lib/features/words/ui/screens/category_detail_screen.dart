@@ -13,6 +13,7 @@ import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
 import 'package:talvori/features/words/application/category_detail_state.dart';
@@ -686,6 +687,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         '';
     final title = widget.title;
     const stages = [0, 0, 0, 0, 0, 0];
+    const visibleMask = [true, true, true, true, true, true];
 
     Future<void> openLocalLearnMode() async {
       if (localCategoryId.isEmpty) {
@@ -767,15 +769,17 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
           ),
         ),
         const SizedBox(height: WordsLayout.gapBelowTop),
-        Expanded(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Lokale Kategorie',
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white70,
                       fontWeight: FontWeight.w600,
@@ -784,38 +788,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                   const SizedBox(height: 8),
                   Text(
                     localCategoryId.isEmpty ? title : localCategoryId,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: const Color(0xFFB1CCFE),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      for (var i = 0; i < stages.length; i++)
-                        _LocalStageBadge(label: 'S$i', count: stages[i]),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: 148,
-                    height: 48,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2D2D2F),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          side: const BorderSide(
-                            color: Color(0xFFB1CCFE),
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      onPressed: openLocalLearnMode,
-                      child: const Text('Start'),
                     ),
                   ),
                 ],
@@ -823,42 +798,45 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             ),
           ),
         ),
-        const SizedBox(height: 5),
-      ],
-    );
-  }
-}
-
-class _LocalStageBadge extends StatelessWidget {
-  const _LocalStageBadge({required this.label, required this.count});
-
-  final String label;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 70,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE4B866), width: 1.5),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFFE4B866),
-              fontWeight: FontWeight.w700,
+        const SizedBox(height: 17),
+        SizedBox(
+          height: WordsLayout.levelsCardH,
+          child: LevelsCardView(
+            height: WordsLayout.levelsCardH,
+            onStartPressed: openLocalLearnMode,
+            isHybrid: false,
+            s0Locked: false,
+            onS0LockTap: () {},
+            lockKey: _lockKey,
+            titleOffsetY: -15,
+            levelSelector: LevelSelectorButtonsView(
+              mode: LevelSelectionMode.s0toS5,
+              s1ToS5Label: 'T1–T5',
+              onModeChanged: (_) {},
+            ),
+            stageSwitchRow: StageSwitchRowView(
+              counts: stages,
+              goalPerStage: 100,
+              visibleMask: visibleMask,
+              showLearnedCounterInStage5: true,
+              learnedInStage5: 0,
+              s0Locked: false,
+              labels: const StageSwitchLabels(
+                newLabel: 'New',
+                newNote: '0',
+                stagePrefix: 'T',
+              ),
+              colors: const StageSwitchColors(
+                newOuter: Color(0xFFA05260),
+                stageOuter: Color(0xFFE4B866),
+                inner: Color(0xFF1A1A1A),
+                disabledOuter: Colors.white,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text('$count', style: const TextStyle(color: Colors.white)),
-        ],
-      ),
+        ),
+        const SizedBox(height: 5),
+      ],
     );
   }
 }
