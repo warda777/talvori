@@ -979,153 +979,368 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
   Widget _buildLocalOfflineFlow(BuildContext context) {
     final categoriesAsync = ref.watch(localCategoriesProvider);
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final glowEnabled = ref.watch(wordHubGlowProvider);
+    final radialPalette = ref.watch(radialPaletteProvider);
+    final focusedIds = radialPalette.focusedIds;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: _hubBackgroundColor ?? Colors.black,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.black87,
+        backgroundColor:
+            _hubBackgroundColor?.withValues(alpha: 0.87) ?? Colors.black87,
         elevation: 0,
         toolbarHeight: 56,
         leading: IconButton(
           key: _backKey,
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () => Navigator.of(context).pop(),
           tooltip: 'Close',
         ),
         titleSpacing: 8,
-        title: const Text('Word Hub'),
-      ),
-      body: categoriesAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: Color(0xFFF1C86B)),
-        ),
-        error: (error, stackTrace) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Text(
-              'Lokale Kategorien konnten nicht geladen werden.\n$error',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ),
-        ),
-        data: (categories) {
-          final entryState = const LocalWordHubDebugEntryPresenter().present(
-            categories,
-          );
-
-          if (!entryState.isVisible) {
-            return const Center(
-              child: Text(
-                'Keine lokalen Kategorien gefunden',
-                style: TextStyle(color: Colors.white70),
-              ),
-            );
-          }
-
-          return CustomScrollView(
-            controller: _scroll,
-            slivers: [
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
-                  child: Text(
-                    'Lokale Kategorien',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+        title: SizedBox(
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: KeyedSubtree(
+                    key: _keysById['wordHub.title'],
+                    child: FocusGlow(
+                      isFocused: focusedIds.contains('wordHub.title'),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Text(
+                        'Word Hub',
+                        key: _titleKey,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverGrid(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final item = entryState.items[index];
-                    return _LocalWordHubCategoryCard(
-                      item: item,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => CategoryDetailScreen(
-                              categoryId: item.categoryId,
-                              title: item.label,
-                              listFilter: WordListFilter(
-                                WordFilterKind.category,
-                                item.categoryId,
-                              ),
-                              useLocalOfflineFlow: true,
-                              localCategoryId: item.categoryId,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }, childCount: entryState.items.length),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.1,
+              Positioned(
+                right: 12,
+                top: 8,
+                child: KeyedSubtree(
+                  key: _keysById['wordHub.glowToggle'],
+                  child: FocusGlow(
+                    isFocused: focusedIds.contains('wordHub.glowToggle'),
+                    borderRadius: BorderRadius.circular(24),
+                    padding: EdgeInsets.zero,
+                    child: GlowToggleButton(
+                      key: _glowToggleKey,
+                      glowEnabled: glowEnabled,
+                      onToggle: () => _handleGlowToggle(glowEnabled),
+                      strokeColor: _unlockButtonStrokeColor,
+                      fillColor: _unlockButtonFillColor,
+                      textColor: _unlockButtonTextColor,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 12,
+                top: 6,
+                child: SlideHintButton(
+                  key: ValueKey(_allowHints),
+                  controller: _slideCtrl,
+                  buttonWidth: _frontButtonWidth,
+                  reveal: _maxReveal,
+                  enableDrag: true,
+                  autoHint: _allowHints,
+                  firstHintDelay: const Duration(milliseconds: 800),
+                  hintInterval: const Duration(seconds: 5),
+                  hintFraction: 2 / 3,
+                  hintOutDuration: const Duration(milliseconds: 1200),
+                  hintBackDuration: const Duration(milliseconds: 600),
+                  onUnderlayTap: () {
+                    if (mounted) setState(() => _allowHints = false);
+                    final glow = ref.read(wordHubGlowProvider);
+                    ref.read(wordHubGlowProvider.notifier).state = !glow;
+                  },
+                  child: KeyedSubtree(
+                    key: _keysById['wordHub.unlockButton'],
+                    child: _buildFrontButton(key: _unlockKey),
                   ),
                 ),
               ),
             ],
-          );
-        },
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: KeyedSubtree(
+                    key: _keysById['wordHub.search'],
+                    child: FocusGlow(
+                      isFocused: focusedIds.contains('wordHub.search'),
+                      borderRadius: BorderRadius.circular(999),
+                      padding: EdgeInsets.zero,
+                      child: TextField(
+                        key: _searchKey,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (q) {
+                          final query = q.trim();
+                          if (query.isEmpty) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Lokale Suche ist noch nicht angebunden',
+                              ),
+                            ),
+                          );
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Suchen',
+                          prefixIcon: KeyedSubtree(
+                            key: _keysById['wordHub.searchIcon'],
+                            child: FocusGlow(
+                              isFocused: focusedIds.contains(
+                                'wordHub.searchIcon',
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                              padding: EdgeInsets.zero,
+                              child: Icon(
+                                Icons.search,
+                                key: _searchIconKey,
+                                color:
+                                    _searchFieldIconColor ??
+                                    const Color(0xFFF1C86B),
+                              ),
+                            ),
+                          ),
+                          filled: true,
+                          fillColor:
+                              _searchFieldFillColor ??
+                              Colors.white.withValues(alpha: 0.12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(999),
+                            borderSide: BorderSide(
+                              color:
+                                  _searchFieldStrokeColor ??
+                                  const Color(
+                                    0xFFF1C86B,
+                                  ).withValues(alpha: 0.85),
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(999),
+                            borderSide: BorderSide(
+                              color:
+                                  _searchFieldStrokeColor ??
+                                  const Color(0xFFF1C86B),
+                              width: 1.6,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(999),
+                            borderSide: BorderSide(
+                              color:
+                                  _searchFieldStrokeColor ??
+                                  const Color(0xFFF1C86B),
+                              width: 2.2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ...categoriesAsync.when(
+                loading: () => [
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFF1C86B),
+                      ),
+                    ),
+                  ),
+                ],
+                error: (error, stackTrace) => [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Text(
+                          'Lokale Kategorien konnten nicht geladen werden.\n$error',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                data: (categories) {
+                  final entryState = const LocalWordHubDebugEntryPresenter()
+                      .present(categories);
+
+                  if (!entryState.isVisible) {
+                    return [
+                      const _SectionHeader(
+                        'Lokale Kategorien',
+                        'local_categories',
+                      ),
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Text(
+                            'Keine lokalen Kategorien gefunden',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                    ];
+                  }
+
+                  return [
+                    const _SectionHeader(
+                      'Lokale Kategorien',
+                      'local_categories',
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = entryState.items[index];
+                          return _LocalWordHubCategoryCard(
+                            item: item,
+                            glowEnabled: glowEnabled,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => CategoryDetailScreen(
+                                    categoryId: item.categoryId,
+                                    title: item.label,
+                                    listFilter: WordListFilter(
+                                      WordFilterKind.category,
+                                      item.categoryId,
+                                    ),
+                                    useLocalOfflineFlow: true,
+                                    localCategoryId: item.categoryId,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }, childCount: entryState.items.length),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 1.1,
+                            ),
+                      ),
+                    ),
+                  ];
+                },
+              ),
+              SliverToBoxAdapter(child: SizedBox(height: bottomInset + 10)),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
 class _LocalWordHubCategoryCard extends StatelessWidget {
-  const _LocalWordHubCategoryCard({required this.item, required this.onTap});
+  const _LocalWordHubCategoryCard({
+    required this.item,
+    required this.glowEnabled,
+    required this.onTap,
+  });
 
   final LocalWordHubDebugItem item;
+  final bool glowEnabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    const strokeColor = Color(0xFFF1C86B);
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.none,
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
-        child: Container(
+        overlayColor: WidgetStatePropertyAll(
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+        ),
+        splashFactory: InkRipple.splashFactory,
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: const Color(0xFF040404),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: const Color(0xFFF1C86B).withValues(alpha: 0.85),
-              width: 2,
-            ),
+            boxShadow: glowEnabled
+                ? [
+                    BoxShadow(
+                      color: strokeColor.withValues(alpha: 0.32),
+                      blurRadius: 22,
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: strokeColor.withValues(alpha: 0.18),
+                      blurRadius: 36,
+                      spreadRadius: 8,
+                    ),
+                  ]
+                : const [],
           ),
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.label,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF040404),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: strokeColor.withValues(alpha: 0.85),
+                width: 2,
               ),
-              const Spacer(),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  item.categoryId,
-                  style: const TextStyle(
-                    color: Color(0xFFF1C86B),
-                    fontWeight: FontWeight.w600,
-                  ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.label,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                    ),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        item.categoryId,
+                        style: const TextStyle(
+                          color: strokeColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
