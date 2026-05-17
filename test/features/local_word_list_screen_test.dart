@@ -24,40 +24,65 @@ void main() {
     );
   }
 
-  testWidgets('local_word_list_screen_shows_words_and_translations', (
-    tester,
-  ) async {
+  Future<void> pumpLocalWordList(
+    WidgetTester tester, {
+    required List<LocalWord> words,
+    String title = 'Health & Fitness',
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          localWordsForCategoryProvider.overrideWith((ref, categoryId) async {
-            return [
-              localWord(
-                id: 'seed-basics-hello',
-                term: 'hello',
-                translation: 'hallo',
-              ),
-              localWord(
-                id: 'seed-basics-water',
-                term: 'water',
-                translation: 'Wasser',
-              ),
-            ];
-          }),
+          localWordsForCategoryProvider.overrideWith(
+            (ref, categoryId) async => words,
+          ),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           home: LocalWordListScreen(
             categoryId: 'seed-category-basics',
-            title: 'Health & Fitness',
+            title: title,
           ),
         ),
       ),
     );
 
     await tester.pump();
+  }
+
+  List<LocalWord> sampleWords() {
+    return [
+      localWord(id: 'seed-basics-water', term: 'water', translation: 'Wasser'),
+      localWord(id: 'seed-basics-apple', term: 'apple', translation: 'Apfel'),
+      localWord(
+        id: 'seed-basics-ticket',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      ),
+    ];
+  }
+
+  double topOf(String text, WidgetTester tester) {
+    return tester.getTopLeft(find.text(text)).dy;
+  }
+
+  testWidgets('local_word_list_screen_shows_words_and_translations', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(id: 'seed-basics-hello', term: 'hello', translation: 'hallo'),
+        localWord(
+          id: 'seed-basics-water',
+          term: 'water',
+          translation: 'Wasser',
+        ),
+      ],
+    );
 
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('seed-category-basics'), findsNothing);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('Sortierung'), findsOneWidget);
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('water'), findsOneWidget);
@@ -65,26 +90,91 @@ void main() {
   });
 
   testWidgets('local_word_list_screen_shows_empty_state', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          localWordsForCategoryProvider.overrideWith(
-            (ref, categoryId) async => const [],
-          ),
-        ],
-        child: const MaterialApp(
-          home: LocalWordListScreen(
-            categoryId: 'empty-local',
-            title: 'Empty Local',
-          ),
-        ),
-      ),
-    );
-
-    await tester.pump();
+    await pumpLocalWordList(tester, words: const [], title: 'Empty Local');
 
     expect(find.text('Empty Local'), findsOneWidget);
     expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
     expect(find.text('empty-local'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_search_finds_term', (tester) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.enterText(find.byType(TextField), 'ticket');
+    await tester.pump();
+
+    expect(find.widgetWithText(ListTile, 'ticket'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Fahrkarte'), findsOneWidget);
+    expect(find.text('water'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_search_finds_translation', (
+    tester,
+  ) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.enterText(find.byType(TextField), 'Wasser');
+    await tester.pump();
+
+    expect(find.widgetWithText(ListTile, 'water'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Wasser'), findsOneWidget);
+    expect(find.text('ticket'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_search_is_case_insensitive', (
+    tester,
+  ) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.enterText(find.byType(TextField), 'WAS');
+    await tester.pump();
+
+    expect(find.widgetWithText(ListTile, 'water'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Wasser'), findsOneWidget);
+  });
+
+  testWidgets('local_word_list_screen_search_empty_result_state', (
+    tester,
+  ) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.enterText(find.byType(TextField), 'zzzz');
+    await tester.pump();
+
+    expect(find.text('Keine passenden Wörter gefunden'), findsOneWidget);
+    expect(find.text('Keine lokalen Wörter verfügbar'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_sorts_term_az_by_default', (
+    tester,
+  ) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    expect(topOf('apple', tester), lessThan(topOf('ticket', tester)));
+    expect(topOf('ticket', tester), lessThan(topOf('water', tester)));
+  });
+
+  testWidgets('local_word_list_screen_sorts_term_za', (tester) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.tap(find.text('A–Z nach Wort'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Z–A nach Wort').last);
+    await tester.pumpAndSettle();
+
+    expect(topOf('water', tester), lessThan(topOf('ticket', tester)));
+    expect(topOf('ticket', tester), lessThan(topOf('apple', tester)));
+  });
+
+  testWidgets('local_word_list_screen_sorts_by_translation', (tester) async {
+    await pumpLocalWordList(tester, words: sampleWords());
+
+    await tester.tap(find.text('A–Z nach Wort'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Z–A nach Übersetzung').last);
+    await tester.pumpAndSettle();
+
+    expect(topOf('Wasser', tester), lessThan(topOf('Fahrkarte', tester)));
+    expect(topOf('Fahrkarte', tester), lessThan(topOf('Apfel', tester)));
   });
 }
