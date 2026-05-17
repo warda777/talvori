@@ -1131,7 +1131,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         backText: cardState.backText ?? '',
         level: null,
         showTranslation: _localShowTranslation,
-        gesturesEnabled: cardState.canSubmitAnswer,
+        gesturesEnabled: true,
         srsStage: uiState.currentStage?.index,
         streak: null,
         passCount: null,
@@ -1164,12 +1164,16 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
       );
     } else {
+      final hasEmptyLocalSession =
+          viewModelState.hasSession && viewModelState.totalItems == 0;
       cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              localCategoryId == null || localCategoryId.isEmpty
+              hasEmptyLocalSession
+                  ? 'Keine lokalen Wörter verfügbar'
+                  : localCategoryId == null || localCategoryId.isEmpty
                   ? 'Keine lokale Kategorie'
                   : 'Keine aktive lokale Session',
               style: const TextStyle(color: Colors.white, fontSize: 20),

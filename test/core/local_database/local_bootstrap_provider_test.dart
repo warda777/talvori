@@ -43,7 +43,10 @@ void main() {
       expect(result.databasePath, endsWith(LocalAppDatabasePath.databaseName));
       expect(result.repositoryFactory, isA<LocalRepositoryFactory>());
       expect(result.learningSessionFacade, isA<LocalLearningSessionFacade>());
-      expect(categories, isEmpty);
+      expect(
+        categories.map((row) => row['id']),
+        contains('seed-category-basics'),
+      );
     });
 
     test('local_bootstrap_provider_closes_database_on_dispose', () async {
@@ -102,7 +105,10 @@ void main() {
         final result = await container.read(localBootstrapProvider.future);
         final oldDatabaseFile = File('${tempDir.path}/word_progress.db');
 
-        expect(result.databasePath, endsWith(LocalAppDatabasePath.databaseName));
+        expect(
+          result.databasePath,
+          endsWith(LocalAppDatabasePath.databaseName),
+        );
         expect(result.databasePath, isNot(contains('word_progress.db')));
         expect(oldDatabaseFile.existsSync(), isFalse);
 
@@ -134,12 +140,21 @@ void main() {
       );
       final result = await container.read(localBootstrapProvider.future);
       final categories = await result.database.query('categories');
+      final words = await result.database.query(
+        'words',
+        where: 'category_id = ?',
+        whereArgs: ['seed-category-basics'],
+      );
       final learningSessions = await result.database.query('learning_sessions');
       final reviewHistory = await result.database.query('review_history');
       final oldDatabaseFile = File('${tempDir.path}/word_progress.db');
 
       expect(facade, isA<LocalLearningSessionFacade>());
-      expect(categories, isEmpty);
+      expect(
+        categories.map((row) => row['id']),
+        contains('seed-category-basics'),
+      );
+      expect(words, isNotEmpty);
       expect(learningSessions, isEmpty);
       expect(reviewHistory, isEmpty);
       expect(oldDatabaseFile.existsSync(), isFalse);
@@ -172,10 +187,9 @@ void main() {
         final facade = await container.read(
           localLearningSessionFacadeProvider.future,
         );
-        final databaseFiles = Directory(tempDir.path)
-            .listSync()
-            .whereType<File>()
-            .toList();
+        final databaseFiles = Directory(
+          tempDir.path,
+        ).listSync().whereType<File>().toList();
         final categories = await result.database.query('categories');
         final learningSessions = await result.database.query(
           'learning_sessions',
@@ -190,7 +204,10 @@ void main() {
           hasLength(1),
         );
         expect(oldDatabaseFile.existsSync(), isFalse);
-        expect(categories, isEmpty);
+        expect(
+          categories.map((row) => row['id']),
+          contains('seed-category-basics'),
+        );
         expect(learningSessions, isEmpty);
 
         container.dispose();

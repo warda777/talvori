@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
 void main() {
@@ -47,6 +48,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
+    final screen = tester.widget<CategoryDetailScreen>(
+      find.byType(CategoryDetailScreen),
+    );
+
+    expect(screen.useLocalOfflineFlow, isTrue);
+    expect(screen.localCategoryId, 'seed-category-basics');
+    expect(screen.categoryId, 'seed-category-basics');
     expect(find.text('Lokale Kategorie'), findsNothing);
     expect(find.text('Lernmodus'), findsOneWidget);
     expect(find.text('Wiederholungsauswahl'), findsOneWidget);

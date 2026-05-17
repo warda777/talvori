@@ -18,7 +18,7 @@ final localBootstrapProvider = FutureProvider<LocalAppBootstrapResult>((
 
   final result = await const LocalAppBootstrap().bootstrap(
     databasesPath: databasesPath,
-    seedDefaults: false,
+    seedDefaults: true,
     now: DateTime.now(),
   );
 

@@ -1218,7 +1218,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
 String? _mapLocalCategoryId(HubSubcat sub) {
   if (sub.key == 'health_fitness') {
-    return 'basics';
+    return 'seed-category-basics';
   }
   return null;
 }
