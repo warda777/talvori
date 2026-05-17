@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -1165,7 +1166,13 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   sliver: SliverGrid(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final sub = section.subcats[index];
-                      final mappedLocalCategoryId = _mapLocalCategoryId(sub);
+                      final localCategoryIds =
+                          const LocalCategoryDetailGroupResolver().resolve(
+                            sub.key,
+                          );
+                      final mappedLocalCategoryId = localCategoryIds.isEmpty
+                          ? null
+                          : localCategoryIds.first;
                       return _LocalTaxonomyCategoryCard(
                         sub: sub,
                         localCategoryId: mappedLocalCategoryId,
@@ -1214,13 +1221,6 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       ),
     );
   }
-}
-
-String? _mapLocalCategoryId(HubSubcat sub) {
-  if (sub.key == 'health_fitness') {
-    return 'seed-category-basics';
-  }
-  return null;
 }
 
 class _LocalTaxonomyCategoryCard extends StatelessWidget {

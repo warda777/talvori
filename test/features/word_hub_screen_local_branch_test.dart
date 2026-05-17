@@ -32,52 +32,55 @@ void main() {
     expect(find.text('Basics'), findsNothing);
   });
 
-  testWidgets('word_hub_screen_local_mode_opens_local_category_detail_screen', (
-    tester,
-  ) async {
-    usePhoneViewport(tester);
+  testWidgets(
+    'word_hub_screen_local_mode_uses_resolver_and_opens_local_category_detail_screen',
+    (tester) async {
+      usePhoneViewport(tester);
 
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
-      ),
-    );
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
+        ),
+      );
 
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Health & Fitness'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Health & Fitness'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    final screen = tester.widget<CategoryDetailScreen>(
-      find.byType(CategoryDetailScreen),
-    );
+      final screen = tester.widget<CategoryDetailScreen>(
+        find.byType(CategoryDetailScreen),
+      );
 
-    expect(screen.useLocalOfflineFlow, isTrue);
-    expect(screen.localCategoryId, 'seed-category-basics');
-    expect(screen.categoryId, 'seed-category-basics');
-    expect(find.text('Lokale Kategorie'), findsNothing);
-    expect(find.text('Lernmodus'), findsOneWidget);
-    expect(find.text('Wiederholungsauswahl'), findsOneWidget);
-    expect(find.text('Start'), findsOneWidget);
-    expect(find.text('Keine aktive lokale Session'), findsNothing);
-  });
+      expect(screen.useLocalOfflineFlow, isTrue);
+      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.categoryId, 'seed-category-basics');
+      expect(find.text('Lokale Kategorie'), findsNothing);
+      expect(find.text('Lernmodus'), findsOneWidget);
+      expect(find.text('Wiederholungsauswahl'), findsOneWidget);
+      expect(find.text('Start'), findsOneWidget);
+      expect(find.text('Keine aktive lokale Session'), findsNothing);
+    },
+  );
 
-  testWidgets('word_hub_screen_local_mode_unmapped_category_shows_snackbar', (
-    tester,
-  ) async {
-    usePhoneViewport(tester);
+  testWidgets(
+    'word_hub_screen_local_mode_unmapped_category_shows_snackbar_without_basics_fallback',
+    (tester) async {
+      usePhoneViewport(tester);
 
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
-      ),
-    );
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
+        ),
+      );
 
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Home & Living'));
-    await tester.pump();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Home & Living'));
+      await tester.pump();
 
-    expect(find.text('Noch nicht lokal verfügbar'), findsOneWidget);
-    expect(find.text('Keine aktive lokale Session'), findsNothing);
-  });
+      expect(find.text('Noch nicht lokal verfügbar'), findsOneWidget);
+      expect(find.byType(CategoryDetailScreen), findsNothing);
+      expect(find.text('Keine aktive lokale Session'), findsNothing);
+    },
+  );
 }
