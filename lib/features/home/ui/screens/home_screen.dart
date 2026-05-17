@@ -102,174 +102,185 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             Padding(
               padding: HomeTheme.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedBuilder(
-                    animation: DailyPicksStore.I,
-                    builder: (context, _) {
-                      final count = DailyPicksStore.I.items.length;
-                      final max = DailyPicksStore.I.maxCount;
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimatedBuilder(
+                      animation: DailyPicksStore.I,
+                      builder: (context, _) {
+                        final count = DailyPicksStore.I.items.length;
+                        final max = DailyPicksStore.I.maxCount;
 
-                      // Wenn count >= max, aber Animation noch läuft, zeige Pill weiterhin
-                      final shouldShowProgress =
-                          count < max || _progressAnimationRunning;
+                        // Wenn count >= max, aber Animation noch läuft, zeige Pill weiterhin
+                        final shouldShowProgress =
+                            count < max || _progressAnimationRunning;
 
-                      return HomeTopBar(
-                        buttonKey: _rightButtonKey,
-                        progressPillKey: _progressPillKey,
-                        counterKey: _counterKey, // <-- NEU: Counter Key
-                        crownButtonKey: _crownButtonKey,
-                        fireballKey: _fireballKey,
-                        onAllWords: () {
-                          // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                        },
-                        onRewards: () => _todo('Rewards/Leaderboard/Stats'),
-                        onProgressTap: () => _todo('Daily picks settings'),
-                        selected: count,
-                        max: max,
-                        showProgress: shouldShowProgress,
-                        onProgressAnimationStart: () {
-                          // Animation gestartet - verzögere setState
-                          if (mounted) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                setState(() {
-                                  _progressAnimationRunning = true;
-                                });
-                              }
-                            });
-                          }
-                        },
-                        onProgressAnimationComplete: () {
-                          // Animation fertig - jetzt kann die Pill ausgeblendet werden
-                          // Verzögere setState, damit es nicht während des Builds aufgerufen wird
-                          if (mounted) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                setState(() {
-                                  _progressAnimationRunning = false;
-                                });
-                              }
-                            });
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 360),
-                      child: LayoutBuilder(
-                        builder: (ctx, box) {
-                          final w = box.maxWidth;
-                          final h = w * (570 / 360);
-
-                          return SizedBox(
-                            width: w,
-                            height: h,
-                            child: wc.WordCard(
-                              key: ValueKey((
-                                state.imageIsDark,
-                                state.imageExpanded,
-                              )),
-                              progressPillKey: _progressPillKey,
-                              counterKey: _counterKey, // <-- NEU: Counter Key
-                              initialWord:
-                                  null, // lastSharedWordProvider regelt das
-                              onQuickSend: (String wordText) {
-                                // Füge nur das aktuell ausgewählte Wort hinzu
-                                final res = DailyPicksStore.I.add(wordText);
-
-                                if (!context.mounted) return res;
-
-                                switch (res) {
-                                  case AddResult.ok:
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Wort hinzugefügt'),
-                                      ),
-                                    );
-                                    break;
-                                  case AddResult.duplicate:
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Bereits in Today\'s Picks',
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                  case AddResult.full:
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})',
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                  case AddResult.invalid:
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Ungültiges Wort'),
-                                      ),
-                                    );
-                                    break;
+                        return HomeTopBar(
+                          buttonKey: _rightButtonKey,
+                          progressPillKey: _progressPillKey,
+                          counterKey: _counterKey, // <-- NEU: Counter Key
+                          crownButtonKey: _crownButtonKey,
+                          fireballKey: _fireballKey,
+                          onAllWords: () {
+                            // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                          },
+                          onRewards: () => _todo('Rewards/Leaderboard/Stats'),
+                          onProgressTap: () => _todo('Daily picks settings'),
+                          selected: count,
+                          max: max,
+                          showProgress: shouldShowProgress,
+                          onProgressAnimationStart: () {
+                            // Animation gestartet - verzögere setState
+                            if (mounted) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  setState(() {
+                                    _progressAnimationRunning = true;
+                                  });
                                 }
+                              });
+                            }
+                          },
+                          onProgressAnimationComplete: () {
+                            // Animation fertig - jetzt kann die Pill ausgeblendet werden
+                            // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                            if (mounted) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  setState(() {
+                                    _progressAnimationRunning = false;
+                                  });
+                                }
+                              });
+                            }
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        child: LayoutBuilder(
+                          builder: (ctx, box) {
+                            final w = box.maxWidth;
+                            final h = w * (570 / 360);
 
-                                return res; // Gib das Ergebnis zurück
-                              },
-                              isImageExpanded: state.imageExpanded,
-                              onToggleImage: () => ref
-                                  .read(homeControllerProvider.notifier)
-                                  .toggleImage(),
-                              isImageDark: state.imageIsDark,
-                              onImageBrightnessChanged: (isDark) => ref
-                                  .read(homeControllerProvider.notifier)
-                                  .setImageDark(isDark),
-                              contentPadding: HomeTheme.contentPadding,
-                              userWordCount: state.myWordsCount,
-                              onCountTap: () async {
-                                final nav = Navigator.of(context);
-                                await nav.push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const MyWordsScreen(),
-                                  ),
-                                );
-                                if (!context.mounted) return;
-                              },
-                              onSpeak: () => _todo('Speak word'),
-                              onMarkWords: () => _todo('Open Mark Words (web)'),
-                              onGo: () async {
-                                const quickSetsLabels = [
-                                  'All words',
-                                  'My words',
-                                  'Favorites',
-                                  'Words I know',
-                                  'My mix',
-                                ];
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => LearnModeScreen(
-                                      categoryId: 'quicksets',
-                                      title: 'My words',
-                                      customWheelLabels: quickSetsLabels,
-                                      customWheelInitialIndex: 1,
-                                      navigationOrigin:
-                                          const LearnNavigationOrigin.home(),
+                            return SizedBox(
+                              width: w,
+                              height: h,
+                              child: wc.WordCard(
+                                key: ValueKey((
+                                  state.imageIsDark,
+                                  state.imageExpanded,
+                                )),
+                                progressPillKey: _progressPillKey,
+                                counterKey: _counterKey, // <-- NEU: Counter Key
+                                initialWord:
+                                    null, // lastSharedWordProvider regelt das
+                                onQuickSend: (String wordText) {
+                                  // Füge nur das aktuell ausgewählte Wort hinzu
+                                  final res = DailyPicksStore.I.add(wordText);
+
+                                  if (!context.mounted) return res;
+
+                                  switch (res) {
+                                    case AddResult.ok:
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Wort hinzugefügt'),
+                                        ),
+                                      );
+                                      break;
+                                    case AddResult.duplicate:
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Bereits in Today\'s Picks',
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case AddResult.full:
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})',
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case AddResult.invalid:
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Ungültiges Wort'),
+                                        ),
+                                      );
+                                      break;
+                                  }
+
+                                  return res; // Gib das Ergebnis zurück
+                                },
+                                isImageExpanded: state.imageExpanded,
+                                onToggleImage: () => ref
+                                    .read(homeControllerProvider.notifier)
+                                    .toggleImage(),
+                                isImageDark: state.imageIsDark,
+                                onImageBrightnessChanged: (isDark) => ref
+                                    .read(homeControllerProvider.notifier)
+                                    .setImageDark(isDark),
+                                contentPadding: HomeTheme.contentPadding,
+                                userWordCount: state.myWordsCount,
+                                onCountTap: () async {
+                                  final nav = Navigator.of(context);
+                                  await nav.push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const MyWordsScreen(),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
+                                  );
+                                  if (!context.mounted) return;
+                                },
+                                onSpeak: () => _todo('Speak word'),
+                                onMarkWords: () =>
+                                    _todo('Open Mark Words (web)'),
+                                onGo: () async {
+                                  const quickSetsLabels = [
+                                    'All words',
+                                    'My words',
+                                    'Favorites',
+                                    'Words I know',
+                                    'My mix',
+                                  ];
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => LearnModeScreen(
+                                        categoryId: 'quicksets',
+                                        title: 'My words',
+                                        customWheelLabels: quickSetsLabels,
+                                        customWheelInitialIndex: 1,
+                                        navigationOrigin:
+                                            const LearnNavigationOrigin.home(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -312,9 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? FloatingActionButton.small(
               tooltip: 'Local Learning Debug',
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const LocalDebugHubScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const LocalDebugHubScreen()),
               ),
               child: const Icon(Icons.bug_report_outlined),
             )
