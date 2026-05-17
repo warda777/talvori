@@ -200,6 +200,20 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }, growable: false);
   }
 
+  int? _localPulseTargetStageFromCounts({
+    required List<int> before,
+    required List<int> after,
+  }) {
+    final normalizedBefore = _normalizeLocalStageCounts(before);
+    final normalizedAfter = _normalizeLocalStageCounts(after);
+    for (var index = 0; index < normalizedAfter.length; index++) {
+      if (normalizedAfter[index] > normalizedBefore[index]) {
+        return index;
+      }
+    }
+    return null;
+  }
+
   void _updateLocalLink(int? targetStage) {
     if (!_plasmaLinkEnabled || !widget.useLocalOfflineFlow) return;
     if (targetStage == null) {
@@ -1121,6 +1135,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final localTargetStage = cardState.hasCard
         ? _localTargetStageForCard(uiState)
         : null;
+    final localStageCounts = _normalizeLocalStageCounts(
+      viewModelState.stageCounts,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.useLocalOfflineFlow) return;
@@ -1156,17 +1173,39 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }
 
     Future<void> submitCorrect() async {
+      final stageCountsBefore = localStageCounts;
       setState(() => _localShowTranslation = false);
       await ref
           .read(localLearningControllerProvider.notifier)
           .submitCorrect(now: DateTime.now());
+      final stageCountsAfter = ref
+          .read(localLearningViewModelProvider)
+          .stageCounts;
+      final pulseTargetStage = _localPulseTargetStageFromCounts(
+        before: stageCountsBefore,
+        after: stageCountsAfter,
+      );
+      if (pulseTargetStage != null && mounted) {
+        triggerPulse(pulseTargetStage);
+      }
     }
 
     Future<void> submitWrong() async {
+      final stageCountsBefore = localStageCounts;
       setState(() => _localShowTranslation = false);
       await ref
           .read(localLearningControllerProvider.notifier)
           .submitWrong(now: DateTime.now());
+      final stageCountsAfter = ref
+          .read(localLearningViewModelProvider)
+          .stageCounts;
+      final pulseTargetStage = _localPulseTargetStageFromCounts(
+        before: stageCountsBefore,
+        after: stageCountsAfter,
+      );
+      if (pulseTargetStage != null && mounted) {
+        triggerPulse(pulseTargetStage);
+      }
     }
 
     Widget cardContent;
@@ -1268,9 +1307,6 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final cardFrame = cardState.hasCard
         ? cardContent
         : _LocalLearnModeCardFrame(child: cardContent);
-    final localStageCounts = _normalizeLocalStageCounts(
-      viewModelState.stageCounts,
-    );
     const visibleMask = [true, true, true, true, true, true];
 
     return Scaffold(
@@ -1327,6 +1363,27 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       switchRect: switchRect,
                       phase: fx.value,
                       visible: _plasmaLinkEnabled && linkVisible,
+                    ),
+                    size: Size.infinite,
+                  );
+                },
+              ),
+            ),
+            IgnorePointer(
+              child: AnimatedBuilder(
+                animation: pulse,
+                builder: (_, __) {
+                  if (!mounted || pulseStage == null) {
+                    return const SizedBox.shrink();
+                  }
+                  final targetKey = switchKeys[pulseStage!];
+                  if (targetKey == null) return const SizedBox.shrink();
+                  final rect = _tryRectInStack(targetKey);
+                  if (rect == null) return const SizedBox.shrink();
+                  return CustomPaint(
+                    painter: SwitchPulsePainter(
+                      rect: rect,
+                      t: Curves.easeOutCubic.transform(pulse.value),
                     ),
                     size: Size.infinite,
                   );

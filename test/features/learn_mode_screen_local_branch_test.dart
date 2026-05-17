@@ -12,17 +12,20 @@ import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 
 class _TestLocalLearningController extends LocalLearningController {
   _TestLocalLearningController(
     this.initialState, {
     this.startedReadState,
     this.correctReadState,
+    this.wrongReadState,
   });
 
   final LocalLearningControllerState initialState;
   final LocalSessionReadState? startedReadState;
   final LocalSessionReadState? correctReadState;
+  final LocalSessionReadState? wrongReadState;
   int startOrResumeCalls = 0;
   int resetAndStartCalls = 0;
   String? capturedCategoryId;
@@ -80,6 +83,12 @@ class _TestLocalLearningController extends LocalLearningController {
   @override
   Future<void> submitWrong({required DateTime now}) async {
     submitWrongCalls += 1;
+    if (wrongReadState != null) {
+      state = state.copyWith(
+        readState: wrongReadState,
+        lastAction: LocalLearningControllerAction.submitWrong,
+      );
+    }
   }
 }
 
@@ -241,6 +250,90 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   });
 
+  testWidgets('learn_mode_screen_local_mode_swipe_left_submits_wrong', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      stageCounts: [0, 0, 1, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s2,
+    );
+    const wrongReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 2,
+      totalItems: 3,
+      answeredCount: 1,
+      remainingCount: 2,
+      stageCounts: [0, 1, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-2',
+      currentTerm: 'water',
+      currentTranslation: 'Wasser',
+      currentStage: SrsStage.s1,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: readState),
+      wrongReadState: wrongReadState,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('hello'), findsOneWidget);
+
+    await tester.drag(find.byType(SwipeableWordCard), const Offset(-500, -40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(controller.submitCorrectCalls, 0);
+    expect(controller.submitWrongCalls, 1);
+    expect(find.text('water'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CustomPaint && widget.painter is SwitchPulsePainter,
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(milliseconds: 500));
+  });
+
   testWidgets('learn_mode_screen_local_mode_uses_updated_stage_counts', (
     tester,
   ) async {
@@ -319,6 +412,13 @@ void main() {
     expect(
       tester.widget<StageSwitchRowView>(find.byType(StageSwitchRowView)).counts,
       [2, 1, 0, 0, 0, 0],
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CustomPaint && widget.painter is SwitchPulsePainter,
+      ),
+      findsOneWidget,
     );
 
     await tester.pump(const Duration(milliseconds: 500));
