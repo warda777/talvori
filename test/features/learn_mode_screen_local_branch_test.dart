@@ -10,6 +10,8 @@ import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
+import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
+import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 
 class _TestLocalLearningController extends LocalLearningController {
   _TestLocalLearningController(this.initialState, {this.startedReadState});
@@ -132,6 +134,17 @@ void main() {
     expect(find.text('Basics'), findsOneWidget);
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('Keine aktive lokale Session'), findsNothing);
+    expect(find.byType(StageSwitchRowView), findsOneWidget);
+
+    await tester.pump();
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CustomPaint && widget.painter is PlasmaBandPainter,
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byType(SwipeableWordCard));
     await tester.pump();

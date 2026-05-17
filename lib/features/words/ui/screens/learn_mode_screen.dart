@@ -183,6 +183,44 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   void _hideLink() => setState(() => linkVisible = false);
 
+  void _hideLinkIfVisible() {
+    if (!linkVisible) return;
+    _hideLink();
+  }
+
+  int? _localTargetStageForCard(LocalLearnModeUiState uiState) {
+    final stage = uiState.currentStage;
+    if (stage == null) return null;
+    return stage.index.clamp(0, 5);
+  }
+
+  void _updateLocalLink(int? targetStage) {
+    if (!_plasmaLinkEnabled || !widget.useLocalOfflineFlow) return;
+    if (targetStage == null) {
+      _hideLinkIfVisible();
+      return;
+    }
+
+    final targetKey = switchKeys[targetStage];
+    if (targetKey == null) return;
+
+    final nextCardRect = _tryRectInStack(cardKey);
+    final nextSwitchRect = _tryRectInStack(targetKey);
+    if (nextCardRect == null || nextSwitchRect == null) return;
+
+    if (linkVisible &&
+        cardRect == nextCardRect &&
+        switchRect == nextSwitchRect) {
+      return;
+    }
+
+    setState(() {
+      cardRect = nextCardRect;
+      switchRect = nextSwitchRect;
+      linkVisible = true;
+    });
+  }
+
   void triggerPulse(int stage) {
     debugPrint(
       '🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}',
@@ -1074,6 +1112,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final viewModelState = ref.watch(localLearningViewModelProvider);
     final uiState = const LocalLearnModeUiAdapter().map(viewModelState);
     final cardState = const LearnModeCardPresenter().map(uiState);
+    final localTargetStage = cardState.hasCard
+        ? _localTargetStageForCard(uiState)
+        : null;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !widget.useLocalOfflineFlow) return;
+      if (cardState.hasCard) {
+        _updateLocalLink(localTargetStage);
+      } else {
+        _hideLinkIfVisible();
+      }
+    });
 
     Future<void> startOrResume() async {
       if (localCategoryId == null || localCategoryId.isEmpty) return;
@@ -1239,6 +1289,22 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                 const SizedBox(height: WordsUIConstants.sectionSpacing),
                 SizedBox(height: WordsUIConstants.bottomControlsPadding.bottom),
               ],
+            ),
+            IgnorePointer(
+              child: AnimatedBuilder(
+                animation: fx,
+                builder: (_, __) {
+                  return CustomPaint(
+                    painter: PlasmaBandPainter(
+                      cardRect: cardRect,
+                      switchRect: switchRect,
+                      phase: fx.value,
+                      visible: _plasmaLinkEnabled && linkVisible,
+                    ),
+                    size: Size.infinite,
+                  );
+                },
+              ),
             ),
           ],
         ),
