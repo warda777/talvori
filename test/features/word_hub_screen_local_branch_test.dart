@@ -49,13 +49,24 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Word Hub'), findsOneWidget);
+    expect(find.text('Wortwelten'), findsOneWidget);
+    expect(find.text('Word Hub'), findsNothing);
     expect(find.text('Life & Daily Flow'), findsOneWidget);
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('Home & Living'), findsOneWidget);
     expect(find.text('Basics'), findsNothing);
     expect(find.text('seed-category-basics'), findsNothing);
     expect(find.text('3'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Travel'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Travel'), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
   });
 
   testWidgets(

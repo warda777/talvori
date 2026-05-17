@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -1012,7 +1013,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                       isFocused: focusedIds.contains('wordHub.title'),
                       borderRadius: BorderRadius.circular(12),
                       child: Text(
-                        'Word Hub',
+                        'Wortwelten',
                         key: _titleKey,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1268,7 +1269,8 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const strokeColor = Color(0xFFF1C86B);
+    final strokeColor = CategoryStrokeColors.getStrokeColor(sub.label);
+    final fillColor = Color.lerp(const Color(0xFF050505), strokeColor, 0.10)!;
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(24),
@@ -1286,56 +1288,75 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: strokeColor.withValues(alpha: 0.32),
-                      blurRadius: 22,
-                      spreadRadius: 2,
+                      color: strokeColor.withValues(alpha: 0.20),
+                      blurRadius: 18,
+                      spreadRadius: 1,
                     ),
                     BoxShadow(
-                      color: strokeColor.withValues(alpha: 0.18),
-                      blurRadius: 36,
-                      spreadRadius: 8,
+                      color: strokeColor.withValues(alpha: 0.10),
+                      blurRadius: 30,
+                      spreadRadius: 5,
                     ),
                   ]
                 : const [],
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF040404),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [fillColor, const Color(0xFF050507)],
+              ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: strokeColor.withValues(alpha: 0.85),
-                width: 2,
+                color: strokeColor.withValues(alpha: 0.72),
+                width: 1.6,
               ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      sub.label,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                padding: const EdgeInsets.all(5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      width: 1,
                     ),
-                    const Spacer(),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Text(
-                        localCategoryId == null
-                            ? 'local pending'
-                            : '${localWordCount ?? 0}',
-                        style: TextStyle(
-                          color: localCategoryId == null
-                              ? Colors.white54
-                              : strokeColor,
-                          fontWeight: FontWeight.w700,
+                    color: const Color(0xFF08080A).withValues(alpha: 0.74),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          sub.label,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
-                      ),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            localCategoryId == null
+                                ? 'local pending'
+                                : '${localWordCount ?? 0}',
+                            style: TextStyle(
+                              color: localCategoryId == null
+                                  ? Colors.white54
+                                  : strokeColor,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

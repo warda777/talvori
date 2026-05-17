@@ -95,7 +95,8 @@ void main() {
       await tester.tap(find.text('Lokaler WordHub'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Word Hub'), findsOneWidget);
+      expect(find.text('Wortwelten'), findsOneWidget);
+      expect(find.text('Word Hub'), findsNothing);
       expect(find.text('Life & Daily Flow'), findsOneWidget);
       expect(find.text('Health & Fitness'), findsOneWidget);
     });
