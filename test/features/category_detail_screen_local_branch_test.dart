@@ -8,9 +8,11 @@ import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 
@@ -300,6 +302,56 @@ void main() {
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-travel');
       expect(screen.categoryId, 'seed-category-travel');
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_vocabs_opens_local_word_list_with_display_label',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+            localWordsForCategoryProvider.overrideWith(
+              (ref, categoryId) async => const [],
+            ),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Vocabs'));
+      await tester.pumpAndSettle();
+
+      final screen = tester.widget<LocalWordListScreen>(
+        find.byType(LocalWordListScreen),
+      );
+      expect(screen.categoryId, 'seed-category-basics');
+      expect(screen.title, 'Health & Fitness');
+      expect(find.text('Health & Fitness'), findsWidgets);
+      expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
+      expect(find.text('seed-category-basics'), findsNothing);
     },
   );
 

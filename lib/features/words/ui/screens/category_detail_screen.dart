@@ -10,6 +10,7 @@ import 'package:talvori/core/local_database/adapters/category_detail_local_start
 import 'package:talvori/core/local_database/adapters/local_category_id_resolver.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
@@ -837,9 +838,19 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               },
               onBack: () => Navigator.of(context).pop(),
               onVocabs: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Lokale Wortliste noch nicht angebunden'),
+                if (selectedCategoryId.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+                  );
+                  return;
+                }
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => LocalWordListScreen(
+                      categoryId: selectedCategoryId,
+                      title: selectedLocalCategoryItem?.displayLabel ?? title,
+                    ),
                   ),
                 );
               },
