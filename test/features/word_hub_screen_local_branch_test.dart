@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
@@ -18,8 +19,13 @@ void main() {
     usePhoneViewport(tester);
 
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+        ],
+        child: const MaterialApp(
+          home: WordHubScreen(useLocalOfflineFlow: true),
+        ),
       ),
     );
 
@@ -30,6 +36,8 @@ void main() {
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('Home & Living'), findsOneWidget);
     expect(find.text('Basics'), findsNothing);
+    expect(find.text('seed-category-basics'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
   });
 
   testWidgets(
@@ -38,8 +46,13 @@ void main() {
       usePhoneViewport(tester);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          ],
+          child: const MaterialApp(
+            home: WordHubScreen(useLocalOfflineFlow: true),
+          ),
         ),
       );
 
@@ -56,6 +69,8 @@ void main() {
       expect(screen.localCategoryId, 'seed-category-basics');
       expect(screen.localCategoryIds, ['seed-category-basics']);
       expect(screen.categoryId, 'seed-category-basics');
+      expect(find.text('Health & Fitness'), findsWidgets);
+      expect(find.text('seed-category-basics'), findsNothing);
       expect(find.text('Lokale Kategorie'), findsNothing);
       expect(find.text('Lernmodus'), findsOneWidget);
       expect(find.text('Wiederholungsauswahl'), findsOneWidget);
@@ -70,8 +85,13 @@ void main() {
       usePhoneViewport(tester);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: WordHubScreen(useLocalOfflineFlow: true)),
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          ],
+          child: const MaterialApp(
+            home: WordHubScreen(useLocalOfflineFlow: true),
+          ),
         ),
       );
 

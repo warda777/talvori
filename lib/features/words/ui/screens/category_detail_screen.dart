@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
@@ -724,9 +725,19 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         ? ''
         : wheelCategoryIds[selectedIndex];
     final title = widget.title;
-    final wheelLabels = wheelCategoryIds.length == 1
-        ? [title]
-        : wheelCategoryIds;
+    final localCategoriesAsync = ref.watch(localCategoriesProvider);
+    final localCategoryNamesById = {
+      for (final category in localCategoriesAsync.valueOrNull ?? const [])
+        category.id: category.name,
+    };
+    final wheelLabels = <String>[
+      for (final categoryId in wheelCategoryIds)
+        localCategoryNamesById[categoryId] ??
+            (wheelCategoryIds.length == 1 ? title : categoryId),
+    ];
+    if (wheelLabels.length == 1) {
+      wheelLabels[0] = title;
+    }
     const stages = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;

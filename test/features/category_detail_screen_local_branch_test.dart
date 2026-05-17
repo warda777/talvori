@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
@@ -11,6 +13,18 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 
 void main() {
+  LocalCategory localCategory(String id, String name) {
+    final now = DateTime(2026, 1, 1);
+    return LocalCategory(
+      id: id,
+      name: name,
+      sortOrder: 0,
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
   testWidgets(
     'category_detail_screen_local_mode_renders_without_online_progress',
     (tester) async {
@@ -22,6 +36,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            localCategoriesProvider.overrideWith((ref) async => const []),
             localWordCountProvider.overrideWith((ref, categoryId) async => 0),
           ],
           child: const MaterialApp(
@@ -78,6 +93,7 @@ void main() {
       ProviderScope(
         overrides: [
           localLearningViewModelProvider.overrideWithValue(viewModelState),
+          localCategoriesProvider.overrideWith((ref) async => const []),
           localWordCountProvider.overrideWith((ref, categoryId) async => 0),
         ],
         child: const MaterialApp(
@@ -126,6 +142,9 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localCategoriesProvider.overrideWith(
+              (ref) async => [localCategory('seed-category-basics', 'Basics')],
+            ),
             localWordCountProvider.overrideWith((ref, categoryId) async => 3),
           ],
           child: const MaterialApp(
@@ -148,6 +167,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Health & Fitness'), findsWidgets);
+      expect(find.text('Basics'), findsNothing);
       expect(find.text('Vocabs'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
@@ -183,6 +203,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            localCategoriesProvider.overrideWith((ref) async => const []),
             localWordCountProvider.overrideWith((ref, categoryId) async => 0),
           ],
           child: const MaterialApp(
@@ -206,6 +227,49 @@ void main() {
       expect(find.text('Empty Local'), findsWidgets);
       expect(find.text('Vocabs'), findsOneWidget);
       expect(find.text('0'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_mode_falls_back_when_local_category_name_is_missing',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localCategoriesProvider.overrideWith(
+              (ref) async => [localCategory('seed-category-basics', 'Basics')],
+            ),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: const MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Fallback Group',
+              categoryId: 'missing-local-category',
+              listFilter: WordListFilter(
+                WordFilterKind.category,
+                'missing-local-category',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'missing-local-category',
+              localCategoryIds: [
+                'seed-category-basics',
+                'missing-local-category',
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Basics'), findsWidgets);
+      expect(find.text('missing-local-category'), findsWidgets);
     },
   );
 }

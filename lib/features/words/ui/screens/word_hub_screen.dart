@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -1173,9 +1174,17 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                       final mappedLocalCategoryId = localCategoryIds.isEmpty
                           ? null
                           : localCategoryIds.first;
+                      final localWordCount = mappedLocalCategoryId == null
+                          ? null
+                          : ref
+                                .watch(
+                                  localWordCountProvider(mappedLocalCategoryId),
+                                )
+                                .valueOrNull;
                       return _LocalTaxonomyCategoryCard(
                         sub: sub,
                         localCategoryId: mappedLocalCategoryId,
+                        localWordCount: localWordCount,
                         glowEnabled: glowEnabled,
                         onTap: () {
                           if (mappedLocalCategoryId == null) {
@@ -1228,12 +1237,14 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
   const _LocalTaxonomyCategoryCard({
     required this.sub,
     required this.localCategoryId,
+    required this.localWordCount,
     required this.glowEnabled,
     required this.onTap,
   });
 
   final HubSubcat sub;
   final String? localCategoryId;
+  final int? localWordCount;
   final bool glowEnabled;
   final VoidCallback onTap;
 
@@ -1295,7 +1306,9 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        localCategoryId ?? 'local pending',
+                        localCategoryId == null
+                            ? 'local pending'
+                            : '${localWordCount ?? 0}',
                         style: TextStyle(
                           color: localCategoryId == null
                               ? Colors.white54
