@@ -11,6 +11,7 @@ void main() {
       expect(items, hasLength(1));
       expect(items.single.displayLabel, 'Health & Fitness');
       expect(items.single.localCategoryId, 'seed-category-basics');
+      expect(items.single.vocabsCount, isNull);
     });
 
     test('returns_empty_list_for_unknown_key', () {

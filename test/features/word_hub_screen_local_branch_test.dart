@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
+import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
@@ -13,6 +14,19 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
+  List<LocalCategoryDetailGroupItem> localItemsFor(String wordHubKey) {
+    if (wordHubKey == 'health_fitness') {
+      return const [
+        LocalCategoryDetailGroupItem(
+          displayLabel: 'Health & Fitness',
+          localCategoryId: 'seed-category-basics',
+          vocabsCount: 3,
+        ),
+      ];
+    }
+    return const [];
+  }
+
   testWidgets('word_hub_screen_local_mode_shows_taxonomy_categories', (
     tester,
   ) async {
@@ -21,7 +35,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          localCategoryDetailGroupItemsProvider.overrideWith(
+            (ref, wordHubKey) async => localItemsFor(wordHubKey),
+          ),
         ],
         child: const MaterialApp(
           home: WordHubScreen(useLocalOfflineFlow: true),
@@ -48,7 +64,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localCategoryDetailGroupItemsProvider.overrideWith(
+              (ref, wordHubKey) async => localItemsFor(wordHubKey),
+            ),
           ],
           child: const MaterialApp(
             home: WordHubScreen(useLocalOfflineFlow: true),
@@ -96,7 +114,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localCategoryDetailGroupItemsProvider.overrideWith(
+              (ref, wordHubKey) async => localItemsFor(wordHubKey),
+            ),
           ],
           child: const MaterialApp(
             home: WordHubScreen(useLocalOfflineFlow: true),

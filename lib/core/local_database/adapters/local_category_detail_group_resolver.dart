@@ -2,10 +2,24 @@ class LocalCategoryDetailGroupItem {
   const LocalCategoryDetailGroupItem({
     required this.displayLabel,
     required this.localCategoryId,
+    this.vocabsCount,
   });
 
   final String displayLabel;
   final String localCategoryId;
+  final int? vocabsCount;
+
+  LocalCategoryDetailGroupItem copyWith({
+    String? displayLabel,
+    String? localCategoryId,
+    int? vocabsCount,
+  }) {
+    return LocalCategoryDetailGroupItem(
+      displayLabel: displayLabel ?? this.displayLabel,
+      localCategoryId: localCategoryId ?? this.localCategoryId,
+      vocabsCount: vocabsCount ?? this.vocabsCount,
+    );
+  }
 }
 
 class LocalCategoryDetailGroupResolver {

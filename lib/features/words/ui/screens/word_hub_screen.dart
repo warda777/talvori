@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
-import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -1168,26 +1168,24 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final sub = section.subcats[index];
                       final localCategoryItems =
-                          const LocalCategoryDetailGroupResolver().resolve(
-                            sub.key,
-                          );
+                          ref
+                              .watch(
+                                localCategoryDetailGroupItemsProvider(sub.key),
+                              )
+                              .valueOrNull ??
+                          const <LocalCategoryDetailGroupItem>[];
                       final localCategoryIds = localCategoryItems
                           .map((item) => item.localCategoryId)
                           .toList(growable: false);
                       final mappedLocalCategoryId = localCategoryItems.isEmpty
                           ? null
                           : localCategoryItems.first.localCategoryId;
-                      final localWordCount = mappedLocalCategoryId == null
-                          ? null
-                          : ref
-                                .watch(
-                                  localWordCountProvider(mappedLocalCategoryId),
-                                )
-                                .valueOrNull;
                       return _LocalTaxonomyCategoryCard(
                         sub: sub,
                         localCategoryId: mappedLocalCategoryId,
-                        localWordCount: localWordCount,
+                        localWordCount: localCategoryItems.isEmpty
+                            ? null
+                            : localCategoryItems.first.vocabsCount,
                         glowEnabled: glowEnabled,
                         onTap: () {
                           if (mappedLocalCategoryId == null) {

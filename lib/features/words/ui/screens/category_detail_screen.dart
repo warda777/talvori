@@ -754,6 +754,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     final selectedCategoryId = wheelCategoryIds.isEmpty
         ? ''
         : wheelCategoryIds[selectedIndex];
+    final selectedLocalCategoryItem = localCategoryItems.isEmpty
+        ? null
+        : localCategoryItems[selectedIndex];
     final title = widget.title;
     final wheelLabels = localCategoryItems.isNotEmpty
         ? localCategoryItems.map((item) => item.displayLabel).toList()
@@ -762,10 +765,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;
     final selectedReviewMode = ref.watch(levelSelectionProvider);
-    final localVocabsCountAsync = selectedCategoryId.isEmpty
+    final localVocabsCount = selectedLocalCategoryItem?.vocabsCount;
+    final fallbackLocalVocabsCountAsync =
+        localVocabsCount != null || selectedCategoryId.isEmpty
         ? const AsyncValue<int>.data(0)
         : ref.watch(localWordCountProvider(selectedCategoryId));
-    final localVocabsCount = localVocabsCountAsync.valueOrNull ?? 0;
+    final resolvedLocalVocabsCount =
+        localVocabsCount ?? fallbackLocalVocabsCountAsync.valueOrNull ?? 0;
 
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
@@ -805,7 +811,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             child: CategoryHeaderCapsule(
               height: WordsLayout.topCapsuleH,
               title: title,
-              vocabsCount: localVocabsCount,
+              vocabsCount: resolvedLocalVocabsCount,
               categories: wheelLabels,
               selectedIndex: selectedIndex,
               vocabsKey: _vocabsKey,
