@@ -54,6 +54,7 @@ void main() {
 
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.localCategoryIds, ['seed-category-basics']);
       expect(screen.categoryId, 'seed-category-basics');
       expect(find.text('Lokale Kategorie'), findsNothing);
       expect(find.text('Lernmodus'), findsOneWidget);

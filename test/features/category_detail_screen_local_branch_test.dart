@@ -6,6 +6,7 @@ import 'package:talvori/core/local_database/controllers/local_learning_controlle
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 
 void main() {
@@ -95,4 +96,63 @@ void main() {
     expect(find.text('Keine aktive lokale Session'), findsOneWidget);
     expect(find.text('Starten/Fortsetzen'), findsOneWidget);
   });
+
+  testWidgets(
+    'category_detail_screen_local_mode_accepts_group_and_starts_selected_category',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+          ],
+          child: const MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localCategoryIds: ['seed-category-basics'],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('Health & Fitness'), findsWidgets);
+      expect(find.text('Vocabs'), findsOneWidget);
+
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final screen = tester.widget<LearnModeScreen>(
+        find.byType(LearnModeScreen),
+      );
+      expect(screen.useLocalOfflineFlow, isTrue);
+      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.categoryId, 'seed-category-basics');
+    },
+  );
 }

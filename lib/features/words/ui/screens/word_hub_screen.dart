@@ -1198,6 +1198,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                                 ),
                                 useLocalOfflineFlow: true,
                                 localCategoryId: mappedLocalCategoryId,
+                                localCategoryIds: localCategoryIds,
                               ),
                             ),
                           );

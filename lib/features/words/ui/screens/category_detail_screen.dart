@@ -57,6 +57,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
   final WordListFilter listFilter; // Fallback/Anzeige-Liste
   final bool useLocalOfflineFlow;
   final String? localCategoryId;
+  final List<String>? localCategoryIds;
 
   const CategoryDetailScreen({
     super.key,
@@ -66,6 +67,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
     required this.listFilter,
     this.useLocalOfflineFlow = false,
     this.localCategoryId,
+    this.localCategoryIds,
   });
 
   @override
@@ -83,6 +85,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   final _autoButtonKey = GlobalKey();
   final _trainingButtonKey = GlobalKey();
   final _singleButtonKey = GlobalKey();
+  int _localSelectedIndex = 0;
 
   @override
   void initState() {
@@ -698,19 +701,38 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   }
 
   Widget _buildLocalOfflineFlow(BuildContext context) {
-    final localCategoryId =
+    final localCategoryIds =
+        widget.localCategoryIds
+            ?.where((id) => id.trim().isNotEmpty)
+            .toList(growable: false) ??
+        const <String>[];
+    final fallbackLocalCategoryId =
         widget.localCategoryId ??
         widget.categoryId ??
         widget.categorySlug ??
         '';
+    final wheelCategoryIds = localCategoryIds.isNotEmpty
+        ? localCategoryIds
+        : fallbackLocalCategoryId.isEmpty
+        ? const <String>[]
+        : <String>[fallbackLocalCategoryId];
+    final selectedIndex = wheelCategoryIds.isEmpty
+        ? 0
+        : _localSelectedIndex.clamp(0, wheelCategoryIds.length - 1);
+    final selectedCategoryId = wheelCategoryIds.isEmpty
+        ? ''
+        : wheelCategoryIds[selectedIndex];
     final title = widget.title;
+    final wheelLabels = wheelCategoryIds.length == 1
+        ? [title]
+        : wheelCategoryIds;
     const stages = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;
     final selectedReviewMode = ref.watch(levelSelectionProvider);
 
     Future<void> openLocalLearnMode() async {
-      if (localCategoryId.isEmpty) {
+      if (selectedCategoryId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Lokale Kategorie konnte nicht geladen werden'),
@@ -722,12 +744,12 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => LearnModeScreen(
-            categoryId: localCategoryId,
+            categoryId: selectedCategoryId,
             title: title,
             useLocalOfflineFlow: true,
-            localCategoryId: localCategoryId,
+            localCategoryId: selectedCategoryId,
             navigationOrigin: LearnNavigationOrigin.category(
-              categoryId: localCategoryId,
+              categoryId: selectedCategoryId,
               categoryTitle: title,
             ),
           ),
@@ -748,11 +770,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               height: WordsLayout.topCapsuleH,
               title: title,
               vocabsCount: 0,
-              categories: [title],
-              selectedIndex: 0,
+              categories: wheelLabels,
+              selectedIndex: selectedIndex,
               vocabsKey: _vocabsKey,
               wheelKey: _wheelKey,
-              onWheelChanged: (_, _) {},
+              onWheelChanged: (index, _) {
+                setState(() => _localSelectedIndex = index);
+              },
               onBack: () => Navigator.of(context).pop(),
               onVocabs: () {
                 ScaffoldMessenger.of(context).showSnackBar(
