@@ -15,16 +15,18 @@ void main() {
   }
 
   List<LocalCategoryDetailGroupItem> localItemsFor(String wordHubKey) {
-    if (wordHubKey == 'health_fitness') {
-      return const [
-        LocalCategoryDetailGroupItem(
-          displayLabel: 'Health & Fitness',
-          localCategoryId: 'seed-category-basics',
-          vocabsCount: 3,
-        ),
-      ];
-    }
-    return const [];
+    return const LocalCategoryDetailGroupResolver()
+        .resolve(wordHubKey)
+        .map(
+          (item) => item.copyWith(
+            vocabsCount: item.wordHubKey == 'health_fitness'
+                ? 3
+                : item.wordHubKey == 'travel'
+                ? 4
+                : 0,
+          ),
+        )
+        .toList(growable: false);
   }
 
   testWidgets('word_hub_screen_local_mode_shows_taxonomy_categories', (
@@ -85,18 +87,53 @@ void main() {
 
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-basics');
-      expect(screen.localCategoryIds, ['seed-category-basics']);
-      expect(screen.localCategoryItems, hasLength(1));
-      expect(
-        screen.localCategoryItems!.single.displayLabel,
-        'Health & Fitness',
-      );
-      expect(
-        screen.localCategoryItems!.single.localCategoryId,
+      expect(screen.localCategoryIds, [
         'seed-category-basics',
-      );
+        'seed-category-travel',
+      ]);
+      expect(screen.localSelectedWordHubKey, 'health_fitness');
+      expect(screen.localCategoryItems!.length, greaterThan(30));
+      expect(screen.localCategoryItems!.map((item) => item.displayLabel), [
+        'Health & Fitness',
+        'Home & Living',
+        'Food & Cooking',
+        'Style & Fashion',
+        'Money & Shopping',
+        'Productivity',
+        'Personality',
+        'Feelings',
+        'Relationships',
+        'Thoughts',
+        'Tech & Innovation',
+        'Work & Careers',
+        'School & Studies',
+        'Media & News',
+        'Law & Politics',
+        'Environment',
+        'Animals',
+        'Nature',
+        'Space',
+        'Science',
+        'Sports',
+        'Travel',
+        'Gaming',
+        'Transport',
+        'Music & Entertainment',
+        'Art & Literature',
+        'Top 500 Words',
+        'Phrases & Idioms',
+        'Irregular Verbs',
+        'Grammar & Syntax',
+        'A1',
+        'A2',
+        'B1',
+        'B2',
+        'C1',
+        'C2',
+      ]);
       expect(screen.categoryId, 'seed-category-basics');
       expect(find.text('Health & Fitness'), findsWidgets);
+      expect(find.text('Basics'), findsNothing);
       expect(find.text('seed-category-basics'), findsNothing);
       expect(find.text('Lokale Kategorie'), findsNothing);
       expect(find.text('Lernmodus'), findsOneWidget);

@@ -1176,16 +1176,18 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                           const <LocalCategoryDetailGroupItem>[];
                       final localCategoryIds = localCategoryItems
                           .map((item) => item.localCategoryId)
+                          .whereType<String>()
                           .toList(growable: false);
-                      final mappedLocalCategoryId = localCategoryItems.isEmpty
-                          ? null
-                          : localCategoryItems.first.localCategoryId;
+                      final tappedLocalItem = _localItemForWordHubKey(
+                        localCategoryItems,
+                        sub.key,
+                      );
+                      final mappedLocalCategoryId =
+                          tappedLocalItem?.localCategoryId;
                       return _LocalTaxonomyCategoryCard(
                         sub: sub,
                         localCategoryId: mappedLocalCategoryId,
-                        localWordCount: localCategoryItems.isEmpty
-                            ? null
-                            : localCategoryItems.first.vocabsCount,
+                        localWordCount: tappedLocalItem?.vocabsCount,
                         glowEnabled: glowEnabled,
                         onTap: () {
                           if (mappedLocalCategoryId == null) {
@@ -1210,6 +1212,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                                 localCategoryId: mappedLocalCategoryId,
                                 localCategoryIds: localCategoryIds,
                                 localCategoryItems: localCategoryItems,
+                                localSelectedWordHubKey: sub.key,
                               ),
                             ),
                           );
@@ -1233,6 +1236,19 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       ),
     );
   }
+}
+
+LocalCategoryDetailGroupItem? _localItemForWordHubKey(
+  List<LocalCategoryDetailGroupItem> items,
+  String wordHubKey,
+) {
+  final normalizedKey = wordHubKey.trim().toLowerCase();
+  for (final item in items) {
+    if (item.wordHubKey == normalizedKey) {
+      return item;
+    }
+  }
+  return null;
 }
 
 class _LocalTaxonomyCategoryCard extends StatelessWidget {

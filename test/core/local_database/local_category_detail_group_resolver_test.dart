@@ -3,22 +3,51 @@ import 'package:talvori/core/local_database/adapters/local_category_detail_group
 
 void main() {
   group('LocalCategoryDetailGroupResolver', () {
-    test('maps_health_fitness_to_seed_category_basics', () {
+    test('returns_wordhub_category_items_for_known_taxonomy_key', () {
       const resolver = LocalCategoryDetailGroupResolver();
 
       final items = resolver.resolve('health_fitness');
 
-      expect(items, hasLength(1));
-      expect(items.single.displayLabel, 'Health & Fitness');
-      expect(items.single.localCategoryId, 'seed-category-basics');
-      expect(items.single.vocabsCount, isNull);
+      expect(items.length, greaterThan(30));
+      expect(items.take(6).map((item) => item.displayLabel), [
+        'Health & Fitness',
+        'Home & Living',
+        'Food & Cooking',
+        'Style & Fashion',
+        'Money & Shopping',
+        'Productivity',
+      ]);
+      expect(items.map((item) => item.displayLabel), contains('Travel'));
+      expect(
+        items.map((item) => item.displayLabel),
+        isNot(contains('Exam Practice')),
+      );
+
+      final health = items.singleWhere(
+        (item) => item.wordHubKey == 'health_fitness',
+      );
+      final travel = items.singleWhere((item) => item.wordHubKey == 'travel');
+      final home = items.singleWhere(
+        (item) => item.wordHubKey == 'home_living',
+      );
+
+      expect(health.displayLabel, 'Health & Fitness');
+      expect(health.localCategoryId, 'seed-category-basics');
+      expect(travel.displayLabel, 'Travel');
+      expect(travel.localCategoryId, 'seed-category-travel');
+      expect(home.displayLabel, 'Home & Living');
+      expect(home.localCategoryId, isNull);
+      expect(items.map((item) => item.localCategoryId).whereType<String>(), [
+        'seed-category-basics',
+        'seed-category-travel',
+      ]);
+      expect(items.every((item) => item.vocabsCount == null), isTrue);
     });
 
     test('returns_empty_list_for_unknown_key', () {
       const resolver = LocalCategoryDetailGroupResolver();
 
       expect(resolver.resolve('unknown'), isEmpty);
-      expect(resolver.resolve('travel'), isEmpty);
       expect(resolver.resolve(''), isEmpty);
     });
 
@@ -26,7 +55,9 @@ void main() {
       const resolver = LocalCategoryDetailGroupResolver();
 
       expect(resolver.resolve('basics'), isEmpty);
-      expect(resolver.resolve('food_cooking'), isEmpty);
+      expect(resolver.resolveCategory('basics'), isNull);
+      expect(resolver.resolve('food_cooking'), isNotEmpty);
+      expect(resolver.resolveCategory('food_cooking')?.localCategoryId, isNull);
     });
   });
 }

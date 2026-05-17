@@ -62,6 +62,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
   final String? localCategoryId;
   final List<String>? localCategoryIds;
   final List<LocalCategoryDetailGroupItem>? localCategoryItems;
+  final String? localSelectedWordHubKey;
 
   const CategoryDetailScreen({
     super.key,
@@ -73,6 +74,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
     this.localCategoryId,
     this.localCategoryIds,
     this.localCategoryItems,
+    this.localSelectedWordHubKey,
   });
 
   @override
@@ -728,9 +730,25 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   Widget _buildLocalOfflineFlow(BuildContext context) {
     final localCategoryItems =
         widget.localCategoryItems
-            ?.where((item) => item.localCategoryId.trim().isNotEmpty)
+            ?.where((item) => item.displayLabel.trim().isNotEmpty)
             .toList(growable: false) ??
         const <LocalCategoryDetailGroupItem>[];
+    if (localCategoryItems.isNotEmpty) {
+      final selectedWordHubKey = widget.localSelectedWordHubKey
+          ?.trim()
+          .toLowerCase();
+      if (selectedWordHubKey != null && selectedWordHubKey.isNotEmpty) {
+        final selectedItemIndex = localCategoryItems.indexWhere(
+          (item) => item.wordHubKey == selectedWordHubKey,
+        );
+        if (selectedItemIndex >= 0 &&
+            _localSelectedIndex >= localCategoryItems.length) {
+          _localSelectedIndex = selectedItemIndex;
+        } else if (selectedItemIndex >= 0 && _localSelectedIndex == 0) {
+          _localSelectedIndex = selectedItemIndex;
+        }
+      }
+    }
     final localCategoryIds =
         widget.localCategoryIds
             ?.where((id) => id.trim().isNotEmpty)
@@ -742,7 +760,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         widget.categorySlug ??
         '';
     final wheelCategoryIds = localCategoryItems.isNotEmpty
-        ? localCategoryItems.map((item) => item.localCategoryId).toList()
+        ? localCategoryItems.map((item) => item.localCategoryId ?? '').toList()
         : localCategoryIds.isNotEmpty
         ? localCategoryIds
         : fallbackLocalCategoryId.isEmpty
@@ -776,9 +794,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lokale Kategorie konnte nicht geladen werden'),
-          ),
+          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
         );
         return;
       }

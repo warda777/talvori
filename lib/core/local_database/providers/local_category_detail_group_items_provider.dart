@@ -20,8 +20,14 @@ final localCategoryDetailGroupItemsProvider =
 
       final resolvedItems = <LocalCategoryDetailGroupItem>[];
       for (final item in items) {
+        final localCategoryId = item.localCategoryId;
+        if (localCategoryId == null || localCategoryId.trim().isEmpty) {
+          resolvedItems.add(item.copyWith(vocabsCount: 0));
+          continue;
+        }
+
         final words = await wordRepository.loadWordsForCategory(
-          categoryId: item.localCategoryId,
+          categoryId: localCategoryId,
         );
         resolvedItems.add(item.copyWith(vocabsCount: words.length));
       }

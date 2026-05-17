@@ -11,6 +11,7 @@ import 'package:talvori/core/local_database/providers/local_word_count_provider.
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
+import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 
 void main() {
@@ -24,6 +25,21 @@ void main() {
       createdAt: now,
       updatedAt: now,
     );
+  }
+
+  List<LocalCategoryDetailGroupItem> localWordHubItems() {
+    return const LocalCategoryDetailGroupResolver()
+        .resolve('health_fitness')
+        .map(
+          (item) => item.copyWith(
+            vocabsCount: item.wordHubKey == 'health_fitness'
+                ? 3
+                : item.wordHubKey == 'travel'
+                ? 4
+                : 0,
+          ),
+        )
+        .toList(growable: false);
   }
 
   testWidgets(
@@ -148,7 +164,7 @@ void main() {
             ),
             localWordCountProvider.overrideWith((ref, categoryId) async => 3),
           ],
-          child: const MaterialApp(
+          child: MaterialApp(
             home: CategoryDetailScreen(
               title: 'Health & Fitness',
               categoryId: 'seed-category-basics',
@@ -158,12 +174,8 @@ void main() {
               ),
               useLocalOfflineFlow: true,
               localCategoryId: 'seed-category-basics',
-              localCategoryItems: [
-                LocalCategoryDetailGroupItem(
-                  displayLabel: 'Health & Fitness',
-                  localCategoryId: 'seed-category-basics',
-                ),
-              ],
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
             ),
           ),
         ),
@@ -172,8 +184,24 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      final header = tester.widget<CategoryHeaderCapsule>(
+        find.byType(CategoryHeaderCapsule),
+      );
+      expect(header.categories.take(6), [
+        'Health & Fitness',
+        'Home & Living',
+        'Food & Cooking',
+        'Style & Fashion',
+        'Money & Shopping',
+        'Productivity',
+      ]);
+      expect(header.categories, contains('Travel'));
+      expect(header.categories, isNot(contains('Basics')));
+      expect(header.categories, isNot(contains('Exam Practice')));
+      expect(header.selectedIndex, 0);
       expect(find.text('Health & Fitness'), findsWidgets);
-      expect(find.text('Basics'), findsNothing);
+      expect(find.text('Home & Living'), findsWidgets);
+      expect(find.text('seed-category-basics'), findsNothing);
       expect(find.text('Vocabs'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
@@ -195,6 +223,130 @@ void main() {
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-basics');
       expect(screen.categoryId, 'seed-category-basics');
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_mode_wheel_change_updates_count_and_start_target',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      const viewModelState = LocalLearningViewModelState(
+        isLoading: false,
+        hasSession: false,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        canSubmitAnswer: false,
+        canCompleteSession: false,
+        lastAction: LocalLearningControllerAction.none,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      final header = tester.widget<CategoryHeaderCapsule>(
+        find.byType(CategoryHeaderCapsule),
+      );
+      final travelIndex = header.categories.indexOf('Travel');
+      expect(travelIndex, greaterThan(0));
+      header.onWheelChanged(travelIndex, 'Travel');
+      await tester.pump();
+
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              widget.data == '4' &&
+              widget.style?.fontSize == 14,
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final screen = tester.widget<LearnModeScreen>(
+        find.byType(LearnModeScreen),
+      );
+      expect(screen.useLocalOfflineFlow, isTrue);
+      expect(screen.localCategoryId, 'seed-category-travel');
+      expect(screen.categoryId, 'seed-category-travel');
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_mode_unmapped_wheel_item_does_not_start_basics',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Home & Living',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'home_living',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      final header = tester.widget<CategoryHeaderCapsule>(
+        find.byType(CategoryHeaderCapsule),
+      );
+      expect(header.categories[header.selectedIndex], 'Home & Living');
+      expect(header.vocabsCount, 0);
+
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+
+      expect(find.text('Noch nicht lokal verfügbar'), findsOneWidget);
+      expect(find.byType(LearnModeScreen), findsNothing);
     },
   );
 

@@ -38,10 +38,28 @@ void main() {
         localCategoryDetailGroupItemsProvider('health_fitness').future,
       );
 
-      expect(items, hasLength(1));
-      expect(items.single.displayLabel, 'Health & Fitness');
-      expect(items.single.localCategoryId, 'seed-category-basics');
-      expect(items.single.vocabsCount, 3);
+      expect(items.length, greaterThan(30));
+      final health = items.singleWhere(
+        (item) => item.wordHubKey == 'health_fitness',
+      );
+      final travel = items.singleWhere((item) => item.wordHubKey == 'travel');
+      final home = items.singleWhere(
+        (item) => item.wordHubKey == 'home_living',
+      );
+
+      expect(health.displayLabel, 'Health & Fitness');
+      expect(health.localCategoryId, 'seed-category-basics');
+      expect(health.vocabsCount, 3);
+      expect(travel.displayLabel, 'Travel');
+      expect(travel.localCategoryId, 'seed-category-travel');
+      expect(travel.vocabsCount, 3);
+      expect(home.displayLabel, 'Home & Living');
+      expect(home.localCategoryId, isNull);
+      expect(home.vocabsCount, 0);
+      expect(
+        items.map((item) => item.displayLabel),
+        isNot(contains('Exam Practice')),
+      );
     });
 
     test('returns_empty_list_for_unknown_key_without_fallback_count', () async {
