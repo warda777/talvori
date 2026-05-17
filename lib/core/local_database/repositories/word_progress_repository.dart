@@ -81,6 +81,52 @@ class WordProgressRepository {
     return _loadProgress(wordId: wordId, categoryId: categoryId, mode: mode);
   }
 
+  Future<List<int>> countByStage({
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT stage, COUNT(*) AS count
+FROM word_progress
+WHERE category_id = ? AND mode_id = ?
+GROUP BY stage
+''',
+      [categoryId, mode.name],
+    );
+
+    final counts = List<int>.filled(SrsStage.values.length, 0);
+    for (final row in rows) {
+      final stageName = row['stage'] as String?;
+      final count = row['count'] as int? ?? 0;
+      if (stageName == null) continue;
+      final stage = SrsStage.values.byName(stageName);
+      counts[stage.index] = count;
+    }
+
+    return counts;
+  }
+
+  Future<void> resetCategoryProgressToS0({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime updatedAt,
+  }) async {
+    await _database.update(
+      'word_progress',
+      {
+        'stage': SrsStage.s0.name,
+        'pass_count': 0,
+        'wrong_count': 0,
+        'next_due_at': null,
+        'last_reviewed_at': null,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: 'category_id = ? AND mode_id = ?',
+      whereArgs: [categoryId, mode.name],
+    );
+  }
+
   Future<List<WordProgress>> loadDueProgresses({
     required String categoryId,
     required LearningMode mode,

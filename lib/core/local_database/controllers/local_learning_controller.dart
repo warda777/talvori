@@ -12,6 +12,7 @@ enum LocalLearningControllerAction {
   submitCorrect,
   submitWrong,
   completeIfFinished,
+  resetAndStart,
 }
 
 class LocalLearningControllerState {
@@ -50,8 +51,7 @@ final localLearningControllerProvider =
       LocalLearningController.new,
     );
 
-class LocalLearningController
-    extends Notifier<LocalLearningControllerState> {
+class LocalLearningController extends Notifier<LocalLearningControllerState> {
   @override
   LocalLearningControllerState build() {
     return const LocalLearningControllerState();
@@ -83,10 +83,37 @@ class LocalLearningController
         clearErrorMessage: true,
       );
     } catch (error) {
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
+    }
+  }
+
+  Future<void> resetAndStart({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+    required DateTime now,
+    int? sessionSize,
+  }) async {
+    state = state.copyWith(isLoading: true, clearErrorMessage: true);
+
+    try {
+      final facade = await ref.read(localLearningSessionFacadeProvider.future);
+      final readState = await facade.resetAndStartLearning(
+        categoryId: categoryId,
+        mode: mode,
+        trainingArea: trainingArea,
+        now: now,
+        sessionSize: sessionSize,
+      );
+
       state = state.copyWith(
         isLoading: false,
-        errorMessage: error.toString(),
+        readState: readState,
+        lastAction: LocalLearningControllerAction.resetAndStart,
+        clearErrorMessage: true,
       );
+    } catch (error) {
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
 
@@ -114,10 +141,7 @@ class LocalLearningController
         clearErrorMessage: true,
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: error.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
 
@@ -145,10 +169,7 @@ class LocalLearningController
         clearErrorMessage: true,
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: error.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
 
@@ -175,10 +196,7 @@ class LocalLearningController
         clearErrorMessage: true,
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: error.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
 }

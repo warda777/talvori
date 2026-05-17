@@ -194,6 +194,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     return stage.index.clamp(0, 5);
   }
 
+  List<int> _normalizeLocalStageCounts(List<int> counts) {
+    return List<int>.generate(6, (index) {
+      return index < counts.length ? counts[index] : 0;
+    }, growable: false);
+  }
+
   void _updateLocalLink(int? targetStage) {
     if (!_plasmaLinkEnabled || !widget.useLocalOfflineFlow) return;
     if (targetStage == null) {
@@ -1137,6 +1143,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           );
     }
 
+    Future<void> resetAndStart() async {
+      if (localCategoryId == null || localCategoryId.isEmpty) return;
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .resetAndStart(
+            categoryId: localCategoryId,
+            mode: LearningMode.adaptive,
+            trainingArea: TrainingArea.all,
+            now: DateTime.now(),
+          );
+    }
+
     Future<void> submitCorrect() async {
       setState(() => _localShowTranslation = false);
       await ref
@@ -1210,6 +1228,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               uiState.progressLabel,
               style: const TextStyle(color: Colors.white70),
             ),
+            const SizedBox(height: 18),
+            FilledButton(
+              onPressed: localCategoryId == null || localCategoryId.isEmpty
+                  ? null
+                  : resetAndStart,
+              child: const Text('Neue Session starten'),
+            ),
           ],
         ),
       );
@@ -1243,7 +1268,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     final cardFrame = cardState.hasCard
         ? cardContent
         : _LocalLearnModeCardFrame(child: cardContent);
-    const localStageCounts = [0, 0, 0, 0, 0, 0];
+    final localStageCounts = _normalizeLocalStageCounts(
+      viewModelState.stageCounts,
+    );
     const visibleMask = [true, true, true, true, true, true];
 
     return Scaffold(

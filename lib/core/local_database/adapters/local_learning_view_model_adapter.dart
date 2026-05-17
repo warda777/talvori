@@ -28,6 +28,7 @@ class LocalLearningViewModelAdapter {
       totalItems: readState?.totalItems ?? 0,
       answeredCount: readState?.answeredCount ?? 0,
       remainingCount: readState?.remainingCount ?? 0,
+      stageCounts: readState?.stageCounts ?? const [0, 0, 0, 0, 0, 0],
       canSubmitAnswer: readState?.canSubmitAnswer ?? false,
       canCompleteSession: readState?.canCompleteSession ?? false,
       lastAction: controllerState.lastAction,

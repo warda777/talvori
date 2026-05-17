@@ -77,6 +77,38 @@ void main() {
     );
   }
 
+  Future<void> seedAdditionalWordAtStage(
+    Database db, {
+    required String wordId,
+    required SrsStage stage,
+  }) async {
+    final wordRepository = WordRepository(database: db);
+    final progressRepository = WordProgressRepository(database: db);
+
+    await wordRepository.upsertWord(
+      id: wordId,
+      categoryId: categoryId,
+      term: wordId,
+      translation: 'translation-$wordId',
+      now: now,
+    );
+    await progressRepository.ensureProgressForWord(
+      wordId: wordId,
+      categoryId: categoryId,
+      mode: LearningMode.adaptive,
+      now: now,
+    );
+    final progress = await progressRepository.loadProgress(
+      wordId: wordId,
+      categoryId: categoryId,
+      mode: LearningMode.adaptive,
+    );
+    await progressRepository.saveProgress(
+      updatedProgress: progress!.copyWith(stage: stage),
+      updatedAt: now.add(const Duration(minutes: 1)),
+    );
+  }
+
   group('LocalSessionReadService', () {
     test('read_state_contains_current_word_data', () async {
       final db = await openSchemaDatabase();
@@ -106,6 +138,26 @@ void main() {
       final readState = await service.buildReadState(sessionState());
 
       expect(readState.currentStage, SrsStage.s0);
+    });
+
+    test('read_state_contains_stage_counts', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      final service = await seedService(db);
+      await seedAdditionalWordAtStage(
+        db,
+        wordId: 'word-stage-0',
+        stage: SrsStage.s0,
+      );
+      await seedAdditionalWordAtStage(
+        db,
+        wordId: 'word-stage-2',
+        stage: SrsStage.s2,
+      );
+
+      final readState = await service.buildReadState(sessionState());
+
+      expect(readState.stageCounts, [2, 0, 1, 0, 0, 0]);
     });
 
     test(

@@ -198,6 +198,151 @@ void main() {
       },
     );
 
+    test('count_by_stage_returns_counts_for_category_and_mode', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertCategory(db, id: 'category-2');
+      for (var index = 1; index <= 5; index++) {
+        await insertWord(
+          db,
+          id: 'word-$index',
+          categoryId: index == 5 ? 'category-2' : 'category-1',
+        );
+      }
+      await seedWordProgress(
+        db,
+        id: 'progress-1',
+        wordId: 'word-1',
+        stage: SrsStage.s0,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-2',
+        wordId: 'word-2',
+        stage: SrsStage.s0,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-3',
+        wordId: 'word-3',
+        stage: SrsStage.s2,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-other-mode',
+        wordId: 'word-4',
+        mode: LearningMode.hybrid,
+        stage: SrsStage.s5,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-other-category',
+        wordId: 'word-5',
+        categoryId: 'category-2',
+        stage: SrsStage.s3,
+      );
+      final repository = WordProgressRepository(database: db);
+
+      final counts = await repository.countByStage(
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+      );
+
+      expect(counts, [2, 0, 1, 0, 0, 0]);
+    });
+
+    test(
+      'reset_category_progress_to_s0_resets_only_category_and_mode',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertCategory(db, id: 'category-2');
+        for (var index = 1; index <= 4; index++) {
+          await insertWord(
+            db,
+            id: 'word-$index',
+            categoryId: index == 4 ? 'category-2' : 'category-1',
+            term: 'term-$index',
+          );
+        }
+        final reviewedAt = now.subtract(const Duration(days: 1));
+        final dueAt = now.add(const Duration(days: 2));
+        final updatedAt = now.add(const Duration(minutes: 7));
+        await seedWordProgress(
+          db,
+          id: 'progress-target',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s5,
+          passCount: 5,
+          wrongCount: 2,
+          nextDueAt: dueAt,
+          lastReviewedAt: reviewedAt,
+        );
+        await seedWordProgress(
+          db,
+          id: 'progress-same-category-other-mode',
+          wordId: 'word-2',
+          mode: LearningMode.time,
+          stage: SrsStage.s4,
+          passCount: 4,
+          nextDueAt: dueAt,
+        );
+        await seedWordProgress(
+          db,
+          id: 'progress-other-category',
+          wordId: 'word-4',
+          categoryId: 'category-2',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s3,
+          passCount: 3,
+          nextDueAt: dueAt,
+        );
+        final repository = WordProgressRepository(database: db);
+
+        await repository.resetCategoryProgressToS0(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          updatedAt: updatedAt,
+        );
+
+        final targetRows = await db.query(
+          'word_progress',
+          where: 'id = ?',
+          whereArgs: ['progress-target'],
+        );
+        expect(targetRows.single['stage'], SrsStage.s0.name);
+        expect(targetRows.single['pass_count'], 0);
+        expect(targetRows.single['wrong_count'], 0);
+        expect(targetRows.single['next_due_at'], isNull);
+        expect(targetRows.single['last_reviewed_at'], isNull);
+        expect(targetRows.single['updated_at'], updatedAt.toIso8601String());
+
+        final otherModeRows = await db.query(
+          'word_progress',
+          where: 'id = ?',
+          whereArgs: ['progress-same-category-other-mode'],
+        );
+        expect(otherModeRows.single['stage'], SrsStage.s4.name);
+        expect(otherModeRows.single['pass_count'], 4);
+        expect(otherModeRows.single['next_due_at'], dueAt.toIso8601String());
+
+        final otherCategoryRows = await db.query(
+          'word_progress',
+          where: 'id = ?',
+          whereArgs: ['progress-other-category'],
+        );
+        expect(otherCategoryRows.single['stage'], SrsStage.s3.name);
+        expect(otherCategoryRows.single['pass_count'], 3);
+        expect(
+          otherCategoryRows.single['next_due_at'],
+          dueAt.toIso8601String(),
+        );
+      },
+    );
+
     test(
       'load_due_progresses_returns_only_due_non_s0_for_category_and_mode',
       () async {

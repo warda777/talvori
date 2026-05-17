@@ -48,6 +48,7 @@ void main() {
     Database db, {
     required String id,
     required String wordId,
+    LearningMode mode = LearningMode.time,
     SrsStage stage = SrsStage.s0,
     int passCount = 0,
     int wrongCount = 0,
@@ -58,7 +59,7 @@ void main() {
       'id': id,
       'word_id': wordId,
       'category_id': 'category-1',
-      'mode_id': LearningMode.time.name,
+      'mode_id': mode.name,
       'stage': stage.name,
       'pass_count': passCount,
       'wrong_count': wrongCount,
@@ -177,6 +178,55 @@ void main() {
     });
 
     test(
+      'start_or_resume_session_replaces_active_session_with_finished_queue',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategoryWordsAndProgress(db);
+        final localService = service(db);
+
+        final first = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        await db.update(
+          'session_items',
+          {
+            'status': QueueItemStatus.answered.name,
+            'answered_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          },
+          where: 'session_id = ?',
+          whereArgs: [first.sessionId],
+        );
+
+        final second = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 5)),
+        );
+        final sessionRows = await db.query('learning_sessions');
+
+        expect(second.sessionId, isNot(first.sessionId));
+        expect(second.status, 'active');
+        expect(second.currentWordId, isNotNull);
+        expect(sessionRows, hasLength(2));
+        expect(
+          sessionRows.where((row) => row['status'] == 'completed'),
+          hasLength(1),
+        );
+        expect(
+          sessionRows.where((row) => row['status'] == 'active'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test(
       'submit_answer_correct_updates_progress_history_item_and_position',
       () async {
         final db = await openSchemaDatabase();
@@ -225,6 +275,54 @@ void main() {
         expect(state.answeredCount, 1);
         expect(state.remainingCount, 2);
         expect(state.currentWordId, 'word-2');
+        expect(state.canCompleteSession, isFalse);
+      },
+    );
+
+    test(
+      'adaptive_submit_correct_requeues_non_s5_card_until_learning_continues',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s0,
+        );
+        final localService = service(db);
+        final started = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        final state = await localService.submitAnswer(
+          sessionId: started.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(const Duration(minutes: 1)),
+        );
+        final progressRows = await db.query('word_progress');
+        final itemRows = await db.query(
+          'session_items',
+          orderBy: 'position ASC',
+        );
+        final sessionRows = await db.query('learning_sessions');
+
+        expect(progressRows.single['stage'], SrsStage.s1.name);
+        expect(itemRows, hasLength(2));
+        expect(itemRows.first['status'], QueueItemStatus.answered.name);
+        expect(itemRows.last['status'], QueueItemStatus.queued.name);
+        expect(itemRows.last['stage_at_enqueue'], SrsStage.s1.name);
+        expect(sessionRows.single['status'], 'active');
+        expect(state.status, 'active');
+        expect(state.currentWordId, 'word-1');
+        expect(state.totalItems, 2);
+        expect(state.remainingCount, 1);
         expect(state.canCompleteSession, isFalse);
       },
     );
@@ -469,6 +567,132 @@ void main() {
         );
         expect(
           sessionRows.where((row) => row['status'] == 'completed'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test(
+      'finished_active_session_returns_completed_when_all_progress_is_s5',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s5,
+          nextDueAt: now,
+        );
+        final localService = service(db);
+        final first = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        await db.update(
+          'session_items',
+          {
+            'status': QueueItemStatus.answered.name,
+            'answered_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          },
+          where: 'session_id = ?',
+          whereArgs: [first.sessionId],
+        );
+
+        final second = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 5)),
+        );
+        final sessionRows = await db.query('learning_sessions');
+
+        expect(second.sessionId, first.sessionId);
+        expect(second.status, 'completed');
+        expect(second.currentWordId, isNull);
+        expect(second.canCompleteSession, isTrue);
+        expect(sessionRows, hasLength(1));
+        expect(sessionRows.single['status'], 'completed');
+      },
+    );
+
+    test(
+      'reset_and_start_session_resets_s5_progress_and_starts_new_active_session',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s5,
+          passCount: 5,
+          wrongCount: 2,
+          nextDueAt: now.add(const Duration(days: 7)),
+          lastReviewedAt: now.subtract(const Duration(minutes: 5)),
+        );
+        final localService = service(db);
+        final first = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        await db.update(
+          'session_items',
+          {
+            'status': QueueItemStatus.answered.name,
+            'answered_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          },
+          where: 'session_id = ?',
+          whereArgs: [first.sessionId],
+        );
+
+        final restarted = await localService.resetAndStartSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 10)),
+        );
+        final progressRows = await db.query('word_progress');
+        final sessionRows = await db.query('learning_sessions');
+        final itemRows = await db.query(
+          'session_items',
+          where: 'session_id = ?',
+          whereArgs: [restarted.sessionId],
+        );
+
+        expect(restarted.sessionId, isNot(first.sessionId));
+        expect(restarted.status, 'active');
+        expect(restarted.currentWordId, 'word-1');
+        expect(restarted.remainingCount, 1);
+        expect(restarted.canCompleteSession, isFalse);
+        expect(progressRows.single['stage'], SrsStage.s0.name);
+        expect(progressRows.single['pass_count'], 0);
+        expect(progressRows.single['wrong_count'], 0);
+        expect(progressRows.single['next_due_at'], isNull);
+        expect(progressRows.single['last_reviewed_at'], isNull);
+        expect(itemRows.single['stage_at_enqueue'], SrsStage.s0.name);
+        expect(itemRows.single['status'], QueueItemStatus.queued.name);
+        expect(sessionRows, hasLength(2));
+        expect(
+          sessionRows.where((row) => row['status'] == 'completed'),
+          hasLength(1),
+        );
+        expect(
+          sessionRows.where((row) => row['status'] == 'active'),
           hasLength(1),
         );
       },

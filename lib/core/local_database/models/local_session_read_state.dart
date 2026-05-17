@@ -14,6 +14,7 @@ class LocalSessionReadState {
     required this.totalItems,
     required this.answeredCount,
     required this.remainingCount,
+    this.stageCounts = const [0, 0, 0, 0, 0, 0],
     required this.canSubmitAnswer,
     required this.canCompleteSession,
     this.currentWordId,
@@ -34,6 +35,7 @@ class LocalSessionReadState {
   final int totalItems;
   final int answeredCount;
   final int remainingCount;
+  final List<int> stageCounts;
   final String? currentWordId;
   final String? currentTerm;
   final String? currentTranslation;

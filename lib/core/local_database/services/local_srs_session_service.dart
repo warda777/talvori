@@ -5,6 +5,7 @@ import '../../srs/models/review_answer.dart';
 import '../../srs/models/review_input.dart';
 import '../../srs/models/session_config.dart';
 import '../../srs/models/session_context.dart';
+import '../../srs/models/srs_stage.dart';
 import '../../srs/models/training_area.dart';
 import '../../srs/services/srs_engine.dart';
 import '../models/local_srs_session_state.dart';
@@ -52,7 +53,22 @@ class LocalSrsSessionService {
       final existingItems = await _learningSessionRepository.loadSessionItems(
         existingSession.id,
       );
-      return _toState(session: existingSession, items: existingItems);
+      final hasFinishedQueue =
+          existingItems.isNotEmpty && !existingItems.any(_isRemaining);
+      if (hasFinishedQueue) {
+        await _learningSessionRepository.completeSession(
+          sessionId: existingSession.id,
+          completedAt: now,
+        );
+        if (await _allProgressInStage5(categoryId: categoryId, mode: mode)) {
+          final completedSession = await _learningSessionRepository.loadSession(
+            existingSession.id,
+          );
+          return _toState(session: completedSession!, items: existingItems);
+        }
+      } else {
+        return _toState(session: existingSession, items: existingItems);
+      }
     }
 
     final dueReviewProgresses = await _wordProgressRepository.loadDueProgresses(
@@ -97,6 +113,40 @@ class LocalSrsSessionService {
     final items = await _learningSessionRepository.loadSessionItems(session.id);
 
     return _toState(session: session, items: items);
+  }
+
+  Future<LocalSrsSessionState> resetAndStartSession({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+    required DateTime now,
+    int sessionSize = defaultSessionSize,
+  }) async {
+    final existingSession = await _learningSessionRepository.findActiveSession(
+      categoryId: categoryId,
+      mode: mode,
+      trainingArea: trainingArea,
+    );
+    if (existingSession != null) {
+      await _learningSessionRepository.completeSession(
+        sessionId: existingSession.id,
+        completedAt: now,
+      );
+    }
+
+    await _wordProgressRepository.resetCategoryProgressToS0(
+      categoryId: categoryId,
+      mode: mode,
+      updatedAt: now,
+    );
+
+    return startOrResumeSession(
+      categoryId: categoryId,
+      mode: mode,
+      trainingArea: trainingArea,
+      now: now,
+      sessionSize: sessionSize,
+    );
   }
 
   Future<LocalSrsSessionState> submitAnswer({
@@ -244,6 +294,19 @@ class LocalSrsSessionService {
     return item.status == QueueItemStatus.queued ||
         item.status == QueueItemStatus.shown ||
         item.status == QueueItemStatus.retryPending;
+  }
+
+  Future<bool> _allProgressInStage5({
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
+    final counts = await _wordProgressRepository.countByStage(
+      categoryId: categoryId,
+      mode: mode,
+    );
+    final total = counts.fold<int>(0, (sum, count) => sum + count);
+    if (total == 0) return false;
+    return counts[SrsStage.s5.index] == total;
   }
 
   int _remainingQueueSizeAfterCurrent(

@@ -14,11 +14,17 @@ import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 
 class _TestLocalLearningController extends LocalLearningController {
-  _TestLocalLearningController(this.initialState, {this.startedReadState});
+  _TestLocalLearningController(
+    this.initialState, {
+    this.startedReadState,
+    this.correctReadState,
+  });
 
   final LocalLearningControllerState initialState;
   final LocalSessionReadState? startedReadState;
+  final LocalSessionReadState? correctReadState;
   int startOrResumeCalls = 0;
+  int resetAndStartCalls = 0;
   String? capturedCategoryId;
   int submitCorrectCalls = 0;
   int submitWrongCalls = 0;
@@ -45,8 +51,30 @@ class _TestLocalLearningController extends LocalLearningController {
   }
 
   @override
+  Future<void> resetAndStart({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+    required DateTime now,
+    int? sessionSize,
+  }) async {
+    resetAndStartCalls += 1;
+    capturedCategoryId = categoryId;
+    state = state.copyWith(
+      readState: startedReadState,
+      lastAction: LocalLearningControllerAction.resetAndStart,
+    );
+  }
+
+  @override
   Future<void> submitCorrect({required DateTime now}) async {
     submitCorrectCalls += 1;
+    if (correctReadState != null) {
+      state = state.copyWith(
+        readState: correctReadState,
+        lastAction: LocalLearningControllerAction.submitCorrect,
+      );
+    }
   }
 
   @override
@@ -108,6 +136,7 @@ void main() {
       totalItems: 3,
       answeredCount: 0,
       remainingCount: 3,
+      stageCounts: [3, 0, 0, 0, 0, 0],
       canSubmitAnswer: true,
       canCompleteSession: false,
       lastAction: LocalLearningControllerAction.none,
@@ -135,6 +164,10 @@ void main() {
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('Keine aktive lokale Session'), findsNothing);
     expect(find.byType(StageSwitchRowView), findsOneWidget);
+    final stageRow = tester.widget<StageSwitchRowView>(
+      find.byType(StageSwitchRowView),
+    );
+    expect(stageRow.counts, [3, 0, 0, 0, 0, 0]);
 
     await tester.pump();
 
@@ -204,6 +237,89 @@ void main() {
 
     expect(controller.submitCorrectCalls, 1);
     expect(controller.submitWrongCalls, 0);
+
+    await tester.pump(const Duration(milliseconds: 500));
+  });
+
+  testWidgets('learn_mode_screen_local_mode_uses_updated_stage_counts', (
+    tester,
+  ) async {
+    const initialReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      stageCounts: [3, 0, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    const updatedReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 2,
+      totalItems: 3,
+      answeredCount: 1,
+      remainingCount: 2,
+      stageCounts: [2, 1, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-2',
+      currentTerm: 'water',
+      currentTranslation: 'Wasser',
+      currentStage: SrsStage.s1,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: initialReadState),
+      correctReadState: updatedReadState,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(
+      tester.widget<StageSwitchRowView>(find.byType(StageSwitchRowView)).counts,
+      [3, 0, 0, 0, 0, 0],
+    );
+
+    await tester.drag(find.byType(SwipeableWordCard), const Offset(500, -40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(controller.submitCorrectCalls, 1);
+    expect(find.text('water'), findsOneWidget);
+    expect(
+      tester.widget<StageSwitchRowView>(find.byType(StageSwitchRowView)).counts,
+      [2, 1, 0, 0, 0, 0],
+    );
 
     await tester.pump(const Duration(milliseconds: 500));
   });
@@ -317,4 +433,78 @@ void main() {
       expect(find.byType(SwipeableWordCard), findsNothing);
     },
   );
+
+  testWidgets('learn_mode_screen_local_completed_state_can_start_new_session', (
+    tester,
+  ) async {
+    const completedState = LocalSessionReadState(
+      sessionId: 'completed-session',
+      categoryId: 'seed-category-basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'completed',
+      sessionSize: 4,
+      currentPosition: 4,
+      totalItems: 4,
+      answeredCount: 4,
+      remainingCount: 0,
+      canSubmitAnswer: false,
+      canCompleteSession: true,
+    );
+    const restartedState = LocalSessionReadState(
+      sessionId: 'new-session',
+      categoryId: 'seed-category-basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 4,
+      currentPosition: 0,
+      totalItems: 4,
+      answeredCount: 0,
+      remainingCount: 4,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: completedState),
+      startedReadState: restartedState,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'seed-category-basics',
+            title: 'Health & Fitness',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'seed-category-basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('Session abgeschlossen'), findsOneWidget);
+    expect(find.text('4 / 4'), findsOneWidget);
+    expect(find.text('Neue Session starten'), findsOneWidget);
+
+    await tester.tap(find.text('Neue Session starten'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(controller.startOrResumeCalls, 0);
+    expect(controller.resetAndStartCalls, 1);
+    expect(controller.capturedCategoryId, 'seed-category-basics');
+    expect(find.byType(SwipeableWordCard), findsOneWidget);
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('Session abgeschlossen'), findsNothing);
+  });
 }

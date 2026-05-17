@@ -43,6 +43,30 @@ class LocalLearningSessionFacade {
     return _sessionReadService.buildReadState(sessionState);
   }
 
+  Future<LocalSessionReadState> resetAndStartLearning({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+    required DateTime now,
+    int? sessionSize,
+  }) async {
+    await _progressInitializationService.initializeProgressForCategoryAndMode(
+      categoryId: categoryId,
+      mode: mode,
+      now: now,
+    );
+
+    final sessionState = await _srsSessionService.resetAndStartSession(
+      categoryId: categoryId,
+      mode: mode,
+      trainingArea: trainingArea,
+      now: now,
+      sessionSize: sessionSize ?? LocalSrsSessionService.defaultSessionSize,
+    );
+
+    return _sessionReadService.buildReadState(sessionState);
+  }
+
   Future<LocalSessionReadState> submitAnswerAndReadNext({
     required String sessionId,
     required ReviewAnswer answer,

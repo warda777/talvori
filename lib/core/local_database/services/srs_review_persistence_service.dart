@@ -2,8 +2,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../srs/models/queue_item_status.dart';
+import '../../srs/models/learning_mode.dart';
 import '../../srs/models/review_input.dart';
 import '../../srs/models/review_result.dart';
+import '../../srs/models/srs_stage.dart';
 import '../../srs/models/training_area.dart';
 
 class SrsReviewPersistenceService {
@@ -32,6 +34,8 @@ class SrsReviewPersistenceService {
       final requeueDecision = reviewResult.requeueDecision;
       if (requeueDecision != null && requeueDecision.shouldRequeue) {
         await _insertRequeueItem(transaction, reviewInput, reviewResult);
+      } else if (_shouldContinueInSession(reviewResult)) {
+        await _insertContinuationItem(transaction, reviewInput, reviewResult);
       }
 
       await _updateSessionPosition(
@@ -41,6 +45,12 @@ class SrsReviewPersistenceService {
         reviewedAt: reviewInput.reviewedAt,
       );
     });
+  }
+
+  bool _shouldContinueInSession(ReviewResult reviewResult) {
+    final progress = reviewResult.updatedProgress;
+    if (progress.mode != LearningMode.adaptive) return false;
+    return progress.stage != SrsStage.s5;
   }
 
   Future<void> _updateProgress(
@@ -150,6 +160,40 @@ class SrsReviewPersistenceService {
       'retry_after_position': retryAfterPosition,
       'requeue_reason': decision.reason.name,
       'same_session_wrong_count': sameSessionWrongCount,
+      'shown_at': null,
+      'answered_at': null,
+      'created_at': _encodeDateTime(reviewInput.reviewedAt),
+      'updated_at': _encodeDateTime(reviewInput.reviewedAt),
+    });
+  }
+
+  Future<void> _insertContinuationItem(
+    Transaction transaction,
+    ReviewInput reviewInput,
+    ReviewResult reviewResult,
+  ) async {
+    final progress = reviewResult.updatedProgress;
+    final nextPosition = await _nextSessionItemPosition(
+      transaction,
+      reviewInput.sessionContext.sessionId,
+    );
+
+    await transaction.insert('session_items', {
+      'id': _uuid.v4(),
+      'session_id': reviewInput.sessionContext.sessionId,
+      'word_id': progress.wordId,
+      'category_id': progress.categoryId,
+      'mode_id': progress.mode.name,
+      'stage_at_enqueue': progress.stage.name,
+      'position': nextPosition,
+      'status': QueueItemStatus.queued.name,
+      'is_new_card': 0,
+      'due_at_enqueue': _encodeDateTime(reviewResult.nextDueAt),
+      'retry_after_position': null,
+      'requeue_reason': null,
+      'same_session_wrong_count': reviewInput.sessionContext.wrongCountForWord(
+        progress.wordId,
+      ),
       'shown_at': null,
       'answered_at': null,
       'created_at': _encodeDateTime(reviewInput.reviewedAt),

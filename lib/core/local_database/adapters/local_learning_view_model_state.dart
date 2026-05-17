@@ -11,6 +11,7 @@ class LocalLearningViewModelState {
     required this.totalItems,
     required this.answeredCount,
     required this.remainingCount,
+    this.stageCounts = const [0, 0, 0, 0, 0, 0],
     required this.canSubmitAnswer,
     required this.canCompleteSession,
     required this.lastAction,
@@ -46,6 +47,7 @@ class LocalLearningViewModelState {
   final int totalItems;
   final int answeredCount;
   final int remainingCount;
+  final List<int> stageCounts;
   final bool canSubmitAnswer;
   final bool canCompleteSession;
   final LocalLearningControllerAction lastAction;

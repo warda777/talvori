@@ -18,9 +18,17 @@ class LocalSessionReadService {
     LocalSrsSessionState sessionState,
   ) async {
     final currentWordId = sessionState.currentWordId;
+    final stageCounts = await _wordProgressRepository.countByStage(
+      categoryId: sessionState.categoryId,
+      mode: sessionState.mode,
+    );
 
     if (currentWordId == null) {
-      return _fromSessionState(sessionState, canSubmitAnswer: false);
+      return _fromSessionState(
+        sessionState,
+        stageCounts: stageCounts,
+        canSubmitAnswer: false,
+      );
     }
 
     final word = await _wordRepository.loadWordById(currentWordId);
@@ -32,6 +40,7 @@ class LocalSessionReadService {
 
     return _fromSessionState(
       sessionState,
+      stageCounts: stageCounts,
       currentTerm: word?.term,
       currentTranslation: word?.translation,
       currentExampleSentence: word?.exampleSentence,
@@ -44,6 +53,7 @@ class LocalSessionReadService {
 
   LocalSessionReadState _fromSessionState(
     LocalSrsSessionState sessionState, {
+    required List<int> stageCounts,
     String? currentTerm,
     String? currentTranslation,
     String? currentExampleSentence,
@@ -62,6 +72,7 @@ class LocalSessionReadService {
       totalItems: sessionState.totalItems,
       answeredCount: sessionState.answeredCount,
       remainingCount: sessionState.remainingCount,
+      stageCounts: stageCounts,
       currentWordId: sessionState.currentWordId,
       currentTerm: currentTerm,
       currentTranslation: currentTranslation,
