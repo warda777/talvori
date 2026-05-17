@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
@@ -60,6 +61,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
   final bool useLocalOfflineFlow;
   final String? localCategoryId;
   final List<String>? localCategoryIds;
+  final List<LocalCategoryDetailGroupItem>? localCategoryItems;
 
   const CategoryDetailScreen({
     super.key,
@@ -70,6 +72,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
     this.useLocalOfflineFlow = false,
     this.localCategoryId,
     this.localCategoryIds,
+    this.localCategoryItems,
   });
 
   @override
@@ -702,29 +705,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     );
   }
 
-  Widget _buildLocalOfflineFlow(BuildContext context) {
-    final localCategoryIds =
-        widget.localCategoryIds
-            ?.where((id) => id.trim().isNotEmpty)
-            .toList(growable: false) ??
-        const <String>[];
-    final fallbackLocalCategoryId =
-        widget.localCategoryId ??
-        widget.categoryId ??
-        widget.categorySlug ??
-        '';
-    final wheelCategoryIds = localCategoryIds.isNotEmpty
-        ? localCategoryIds
-        : fallbackLocalCategoryId.isEmpty
-        ? const <String>[]
-        : <String>[fallbackLocalCategoryId];
-    final selectedIndex = wheelCategoryIds.isEmpty
-        ? 0
-        : _localSelectedIndex.clamp(0, wheelCategoryIds.length - 1);
-    final selectedCategoryId = wheelCategoryIds.isEmpty
-        ? ''
-        : wheelCategoryIds[selectedIndex];
-    final title = widget.title;
+  List<String> _localWheelLabelsFromCategoryIds(
+    List<String> wheelCategoryIds,
+    String title,
+  ) {
     final localCategoriesAsync = ref.watch(localCategoriesProvider);
     final localCategoryNamesById = {
       for (final category in localCategoriesAsync.valueOrNull ?? const [])
@@ -738,6 +722,42 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     if (wheelLabels.length == 1) {
       wheelLabels[0] = title;
     }
+    return wheelLabels;
+  }
+
+  Widget _buildLocalOfflineFlow(BuildContext context) {
+    final localCategoryItems =
+        widget.localCategoryItems
+            ?.where((item) => item.localCategoryId.trim().isNotEmpty)
+            .toList(growable: false) ??
+        const <LocalCategoryDetailGroupItem>[];
+    final localCategoryIds =
+        widget.localCategoryIds
+            ?.where((id) => id.trim().isNotEmpty)
+            .toList(growable: false) ??
+        const <String>[];
+    final fallbackLocalCategoryId =
+        widget.localCategoryId ??
+        widget.categoryId ??
+        widget.categorySlug ??
+        '';
+    final wheelCategoryIds = localCategoryItems.isNotEmpty
+        ? localCategoryItems.map((item) => item.localCategoryId).toList()
+        : localCategoryIds.isNotEmpty
+        ? localCategoryIds
+        : fallbackLocalCategoryId.isEmpty
+        ? const <String>[]
+        : <String>[fallbackLocalCategoryId];
+    final selectedIndex = wheelCategoryIds.isEmpty
+        ? 0
+        : _localSelectedIndex.clamp(0, wheelCategoryIds.length - 1);
+    final selectedCategoryId = wheelCategoryIds.isEmpty
+        ? ''
+        : wheelCategoryIds[selectedIndex];
+    final title = widget.title;
+    final wheelLabels = localCategoryItems.isNotEmpty
+        ? localCategoryItems.map((item) => item.displayLabel).toList()
+        : _localWheelLabelsFromCategoryIds(wheelCategoryIds, title);
     const stages = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;

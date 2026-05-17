@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
@@ -157,7 +158,12 @@ void main() {
               ),
               useLocalOfflineFlow: true,
               localCategoryId: 'seed-category-basics',
-              localCategoryIds: ['seed-category-basics'],
+              localCategoryItems: [
+                LocalCategoryDetailGroupItem(
+                  displayLabel: 'Health & Fitness',
+                  localCategoryId: 'seed-category-basics',
+                ),
+              ],
             ),
           ),
         ),

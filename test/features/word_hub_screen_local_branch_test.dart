@@ -68,6 +68,15 @@ void main() {
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-basics');
       expect(screen.localCategoryIds, ['seed-category-basics']);
+      expect(screen.localCategoryItems, hasLength(1));
+      expect(
+        screen.localCategoryItems!.single.displayLabel,
+        'Health & Fitness',
+      );
+      expect(
+        screen.localCategoryItems!.single.localCategoryId,
+        'seed-category-basics',
+      );
       expect(screen.categoryId, 'seed-category-basics');
       expect(find.text('Health & Fitness'), findsWidgets);
       expect(find.text('seed-category-basics'), findsNothing);

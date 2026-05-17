@@ -6,9 +6,11 @@ void main() {
     test('maps_health_fitness_to_seed_category_basics', () {
       const resolver = LocalCategoryDetailGroupResolver();
 
-      final categoryIds = resolver.resolve('health_fitness');
+      final items = resolver.resolve('health_fitness');
 
-      expect(categoryIds, ['seed-category-basics']);
+      expect(items, hasLength(1));
+      expect(items.single.displayLabel, 'Health & Fitness');
+      expect(items.single.localCategoryId, 'seed-category-basics');
     });
 
     test('returns_empty_list_for_unknown_key', () {

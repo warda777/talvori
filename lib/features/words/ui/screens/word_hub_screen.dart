@@ -1167,13 +1167,16 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   sliver: SliverGrid(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final sub = section.subcats[index];
-                      final localCategoryIds =
+                      final localCategoryItems =
                           const LocalCategoryDetailGroupResolver().resolve(
                             sub.key,
                           );
-                      final mappedLocalCategoryId = localCategoryIds.isEmpty
+                      final localCategoryIds = localCategoryItems
+                          .map((item) => item.localCategoryId)
+                          .toList(growable: false);
+                      final mappedLocalCategoryId = localCategoryItems.isEmpty
                           ? null
-                          : localCategoryIds.first;
+                          : localCategoryItems.first.localCategoryId;
                       final localWordCount = mappedLocalCategoryId == null
                           ? null
                           : ref
@@ -1208,6 +1211,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                                 useLocalOfflineFlow: true,
                                 localCategoryId: mappedLocalCategoryId,
                                 localCategoryIds: localCategoryIds,
+                                localCategoryItems: localCategoryItems,
                               ),
                             ),
                           );
