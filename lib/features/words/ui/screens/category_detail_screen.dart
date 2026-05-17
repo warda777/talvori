@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_start_path.dart';
@@ -730,6 +731,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;
     final selectedReviewMode = ref.watch(levelSelectionProvider);
+    final localVocabsCountAsync = selectedCategoryId.isEmpty
+        ? const AsyncValue<int>.data(0)
+        : ref.watch(localWordCountProvider(selectedCategoryId));
+    final localVocabsCount = localVocabsCountAsync.valueOrNull ?? 0;
 
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
@@ -769,7 +774,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             child: CategoryHeaderCapsule(
               height: WordsLayout.topCapsuleH,
               title: title,
-              vocabsCount: 0,
+              vocabsCount: localVocabsCount,
               categories: wheelLabels,
               selectedIndex: selectedIndex,
               vocabsKey: _vocabsKey,

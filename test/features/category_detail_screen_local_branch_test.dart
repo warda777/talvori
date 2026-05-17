@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
@@ -19,8 +20,11 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: const MaterialApp(
             home: CategoryDetailScreen(
               title: 'Basics',
               categoryId: 'legacy-basics',
@@ -74,6 +78,7 @@ void main() {
       ProviderScope(
         overrides: [
           localLearningViewModelProvider.overrideWithValue(viewModelState),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
         ],
         child: const MaterialApp(
           home: CategoryDetailScreen(
@@ -121,6 +126,7 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningViewModelProvider.overrideWithValue(viewModelState),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
           ],
           child: const MaterialApp(
             home: CategoryDetailScreen(
@@ -139,9 +145,19 @@ void main() {
       );
 
       await tester.pump();
+      await tester.pump();
 
       expect(find.text('Health & Fitness'), findsWidgets);
       expect(find.text('Vocabs'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              widget.data == '3' &&
+              widget.style?.fontSize == 14,
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byType(StartButtonPulse));
       await tester.pump();
@@ -153,6 +169,43 @@ void main() {
       expect(screen.useLocalOfflineFlow, isTrue);
       expect(screen.localCategoryId, 'seed-category-basics');
       expect(screen.categoryId, 'seed-category-basics');
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_mode_shows_zero_vocabs_when_selected_category_has_no_words',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: const MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Empty Local',
+              categoryId: 'empty-local',
+              listFilter: WordListFilter(
+                WordFilterKind.category,
+                'empty-local',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'empty-local',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Empty Local'), findsWidgets);
+      expect(find.text('Vocabs'), findsOneWidget);
+      expect(find.text('0'), findsWidgets);
     },
   );
 }
