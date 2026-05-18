@@ -4,8 +4,10 @@ import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.da
 import 'package:talvori/core/local_database/adapters/local_learn_mode_ui_adapter.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
+import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
@@ -40,6 +42,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
   final bool useLocalOfflineFlow;
   final String? localCategoryId;
   final LearningMode? localLearningMode;
+  final LocalPracticeSelection? localPracticeSelection;
 
   // ⬇️ NEU: Custom Wheel für QuickSets
   final List<String>? customWheelLabels;
@@ -55,6 +58,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
     this.useLocalOfflineFlow = false,
     this.localCategoryId,
     this.localLearningMode,
+    this.localPracticeSelection,
     this.customWheelLabels, // <— NEU
     this.customWheelInitialIndex, // <— NEU
     this.navigationOrigin, // <— NEU
@@ -109,6 +113,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   bool _localTimeReplayMode = false;
   bool _localReplayShowTranslation = false;
   int _localReplayIndex = 0;
+  bool _localPracticeShowTranslation = false;
+  int _localPracticeIndex = 0;
+  final Set<String> _localPracticePracticedWordIds = <String>{};
 
   // ✅ Provider Subscription für Stage-Änderungen
   ProviderSubscription<LearnModeState>? _stagesSub;
@@ -1255,7 +1262,108 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }
 
     Widget cardContent;
-    if (uiState.isLoading) {
+    final isLocalPracticeMode = widget.localPracticeSelection != null;
+
+    if (isLocalPracticeMode &&
+        localCategoryId != null &&
+        localCategoryId.isNotEmpty) {
+      final practiceCardsAsync = ref.watch(
+        localPracticeCardsProvider(
+          LocalPracticeCardsRequest(
+            categoryId: localCategoryId,
+            mode: localLearningMode,
+            selection: widget.localPracticeSelection!,
+          ),
+        ),
+      );
+      cardContent = practiceCardsAsync.when(
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+        error: (_, _) => const Center(
+          child: Text(
+            'Übungsmodus konnte nicht geladen werden',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        data: (cards) {
+          if (cards.isEmpty) {
+            return _LocalPracticeInfo(
+              message:
+                  widget.localPracticeSelection!.type ==
+                      LocalPracticeSelectionType.singleStage
+                  ? 'Keine Wörter in dieser Stufe'
+                  : 'Keine Wörter in den Stufen 1-5',
+            );
+          }
+          final index = _localPracticeIndex.clamp(0, cards.length - 1);
+          final card = cards[index];
+          return _LocalPracticeModeSurface(
+            child: Column(
+              key: const ValueKey('local-practice-mode'),
+              children: [
+                const _LocalPracticeBadge(),
+                const SizedBox(height: 10),
+                _LocalPracticeProgress(
+                  openCount:
+                      cards.length - _localPracticePracticedWordIds.length,
+                  practicedCount: _localPracticePracticedWordIds.length,
+                ),
+                const SizedBox(height: 14),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardWidth =
+                          MediaQuery.of(context).size.width * 0.86;
+                      final cardHeight = (constraints.maxHeight - 6)
+                          .clamp(0.0, MediaQuery.of(context).size.height * 0.62)
+                          .toDouble();
+                      return Center(
+                        child: SwipeableWordCard(
+                          frontText: card.term,
+                          backText: card.translation,
+                          level: null,
+                          showTranslation: _localPracticeShowTranslation,
+                          gesturesEnabled: true,
+                          srsStage: null,
+                          cardWidth: cardWidth,
+                          cardHeight: cardHeight,
+                          cardBackgroundColor: const Color(0xFF071A22),
+                          cardBorderColor: const Color(0xFF5DDCFF),
+                          cardGlowColor: const Color(0xFF29F4FF),
+                          onFlip: () {
+                            setState(
+                              () => _localPracticeShowTranslation =
+                                  !_localPracticeShowTranslation,
+                            );
+                          },
+                          onSwipe: (_) async {
+                            setState(() {
+                              _localPracticeShowTranslation = false;
+                              _localPracticePracticedWordIds.add(card.wordId);
+                              _localPracticeIndex =
+                                  (_localPracticeIndex + 1) % cards.length;
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${index + 1} / ${cards.length} · Übungsrunde',
+                  style: const TextStyle(
+                    color: Color(0xFFB8FFF6),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else if (uiState.isLoading) {
       cardContent = const Center(
         child: Text('Laedt...', style: TextStyle(color: Colors.white)),
       );
@@ -1511,7 +1619,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       );
     }
 
-    final cardFrame = cardState.hasCard
+    final cardFrame = cardState.hasCard || isLocalPracticeMode
         ? cardContent
         : _LocalLearnModeCardFrame(child: cardContent);
     const visibleMask = [true, true, true, true, true, true];
@@ -1532,35 +1640,37 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   onBack: () => Navigator.of(context).maybePop(),
                 ),
                 Expanded(child: Center(child: cardFrame)),
-                StageSwitchRowView(
-                  counts: localStageCounts,
-                  goalPerStage: 100,
-                  gap: 12,
-                  visibleMask: visibleMask,
-                  showLearnedCounterInStage5: true,
-                  showSwitchNotes: true,
-                  useNumericSwitchNotes: true,
-                  learnedInStage5: 0,
-                  s0Locked: false,
-                  switchKeys: switchKeys,
-                  onTapStage: openStageInspector,
-                  activePulseStage: pulseStage,
-                  activePulseColor: pulseColor,
-                  activePulseAnimation: pulse,
-                  labels: const StageSwitchLabels(
-                    newLabel: 'New',
-                    newNote: '0',
-                    stagePrefix: 'T',
+                if (!isLocalPracticeMode) ...[
+                  StageSwitchRowView(
+                    counts: localStageCounts,
+                    goalPerStage: 100,
+                    gap: 12,
+                    visibleMask: visibleMask,
+                    showLearnedCounterInStage5: true,
+                    showSwitchNotes: true,
+                    useNumericSwitchNotes: true,
+                    learnedInStage5: 0,
+                    s0Locked: false,
+                    switchKeys: switchKeys,
+                    onTapStage: openStageInspector,
+                    activePulseStage: pulseStage,
+                    activePulseColor: pulseColor,
+                    activePulseAnimation: pulse,
+                    labels: const StageSwitchLabels(
+                      newLabel: 'New',
+                      newNote: '0',
+                      stagePrefix: 'T',
+                    ),
+                    colors: const StageSwitchColors(
+                      newOuter: Color(0xFF8DBBFF),
+                      stageOuter: Color(0xFF8DBBFF),
+                      inner: Color(0xFF0B0B0D),
+                      disabledOuter: Color(0xFFE9F1FF),
+                      innerStroke: Color(0xFFB36BFF),
+                    ),
                   ),
-                  colors: const StageSwitchColors(
-                    newOuter: Color(0xFF8DBBFF),
-                    stageOuter: Color(0xFF8DBBFF),
-                    inner: Color(0xFF0B0B0D),
-                    disabledOuter: Color(0xFFE9F1FF),
-                    innerStroke: Color(0xFFB36BFF),
-                  ),
-                ),
-                const SizedBox(height: WordsUIConstants.sectionSpacing),
+                  const SizedBox(height: WordsUIConstants.sectionSpacing),
+                ],
                 SizedBox(height: WordsUIConstants.bottomControlsPadding.bottom),
               ],
             ),
@@ -1701,6 +1811,166 @@ class _LocalTimeReplayInfo extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           TextButton(onPressed: onExit, child: const Text('Zurück')),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalPracticeBadge extends StatelessWidget {
+  const _LocalPracticeBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF141520),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFF7FFFE7), width: 1.1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7FFFE7).withValues(alpha: 0.2),
+            blurRadius: 18,
+          ),
+        ],
+      ),
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Übungsmodus',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+          SizedBox(height: 2),
+          Text(
+            'Ohne Einfluss auf deinen Lernfortschritt',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalPracticeModeSurface extends StatelessWidget {
+  const _LocalPracticeModeSurface({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('local-practice-mode-surface'),
+      width: double.infinity,
+      height: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF050B12),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: const Color(0xFF29F4FF).withValues(alpha: 0.38),
+          width: 1.2,
+        ),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF061721), Color(0xFF0D0820), Color(0xFF020406)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF29F4FF).withValues(alpha: 0.14),
+            blurRadius: 34,
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: const Color(0xFF8B5CFF).withValues(alpha: 0.1),
+            blurRadius: 42,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _LocalPracticeProgress extends StatelessWidget {
+  const _LocalPracticeProgress({
+    required this.openCount,
+    required this.practicedCount,
+  });
+
+  final int openCount;
+  final int practicedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _LocalPracticePill(label: 'Noch offen', value: openCount),
+        const SizedBox(width: 8),
+        _LocalPracticePill(label: 'Geübt', value: practicedCount),
+      ],
+    );
+  }
+}
+
+class _LocalPracticePill extends StatelessWidget {
+  const _LocalPracticePill({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+      ),
+      child: Text(
+        '$label $value',
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _LocalPracticeInfo extends StatelessWidget {
+  const _LocalPracticeInfo({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _LocalPracticeBadge(),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70),
+          ),
         ],
       ),
     );

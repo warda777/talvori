@@ -30,6 +30,13 @@ class SwipeableWordCard extends StatefulWidget {
   final GlobalKey? passCountButtonKey; // Für Sparkle-Effekt bei Stage-Up
   final void Function(BuildContext context, bool correct)?
   onSwipeWillStart; // Vor Karten-Animation (für Sparkle)
+  final double cardWidthFactor;
+  final double cardHeightFactor;
+  final Color? cardBackgroundColor;
+  final Color? cardBorderColor;
+  final Color? cardGlowColor;
+  final double? cardWidth;
+  final double? cardHeight;
 
   const SwipeableWordCard({
     super.key,
@@ -50,6 +57,13 @@ class SwipeableWordCard extends StatefulWidget {
     this.onSettingsTap,
     this.passCountButtonKey,
     this.onSwipeWillStart,
+    this.cardWidthFactor = 0.78,
+    this.cardHeightFactor = 0.52,
+    this.cardBackgroundColor,
+    this.cardBorderColor,
+    this.cardGlowColor,
+    this.cardWidth,
+    this.cardHeight,
   });
 
   @override
@@ -221,6 +235,13 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
         widget.frontText.contains('Herzlichen Glückwunsch') ||
         widget.frontText.contains('Congratulations');
     return _CardShell(
+      widthFactor: widget.cardWidthFactor,
+      heightFactor: widget.cardHeightFactor,
+      backgroundColor: widget.cardBackgroundColor,
+      borderColor: widget.cardBorderColor,
+      glowColor: widget.cardGlowColor,
+      width: widget.cardWidth,
+      height: widget.cardHeight,
       child: Stack(
         children: [
           if (!isDiagnostic && !isCongratulation)
@@ -295,6 +316,13 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
 
   Widget _buildBack() {
     return _CardShell(
+      widthFactor: widget.cardWidthFactor,
+      heightFactor: widget.cardHeightFactor,
+      backgroundColor: widget.cardBackgroundColor,
+      borderColor: widget.cardBorderColor,
+      glowColor: widget.cardGlowColor,
+      width: widget.cardWidth,
+      height: widget.cardHeight,
       dark: true,
       child: Stack(
         children: [
@@ -514,7 +542,24 @@ class _StreakProgressBadge extends StatelessWidget {
 class _CardShell extends ConsumerStatefulWidget {
   final Widget child;
   final bool dark;
-  const _CardShell({required this.child, this.dark = false});
+  final double widthFactor;
+  final double heightFactor;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final Color? glowColor;
+  final double? width;
+  final double? height;
+  const _CardShell({
+    required this.child,
+    this.dark = false,
+    this.widthFactor = 0.78,
+    this.heightFactor = 0.52,
+    this.backgroundColor,
+    this.borderColor,
+    this.glowColor,
+    this.width,
+    this.height,
+  });
 
   @override
   ConsumerState<_CardShell> createState() => _CardShellState();
@@ -544,9 +589,13 @@ class _CardShellState extends ConsumerState<_CardShell>
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = MediaQuery.of(context).size.width * 0.78;
-    final cardHeight = MediaQuery.of(context).size.height * 0.52;
+    final cardWidth =
+        widget.width ?? MediaQuery.of(context).size.width * widget.widthFactor;
+    final cardHeight =
+        widget.height ??
+        MediaQuery.of(context).size.height * widget.heightFactor;
     final borderRadius = WordsUIConstants.borderRadius;
+    final accentColor = widget.glowColor ?? const Color(0xFFB16CFF);
 
     // Lade persistente Einstellungen aus Provider (Steuerung jetzt im Settings-Popup)
     final settings = ref.watch(cardGlowSettingsProvider);
@@ -575,13 +624,12 @@ class _CardShellState extends ConsumerState<_CardShell>
               height: cardHeight,
               decoration: BoxDecoration(
                 color: widget.dark
-                    ? const Color(0xFF3A3939)
-                    : WordsUIConstants.cardBackground,
+                    ? (widget.backgroundColor ?? const Color(0xFF3A3939))
+                    : (widget.backgroundColor ??
+                          WordsUIConstants.cardBackground),
                 borderRadius: BorderRadius.circular(borderRadius),
                 border: Border.all(
-                  color: const Color(
-                    0xFFB16CFF,
-                  ).withOpacity(0.6), // Plasma-Link-Farbe
+                  color: (widget.borderColor ?? accentColor).withOpacity(0.6),
                   width: 1.5,
                 ),
                 boxShadow: [
@@ -589,7 +637,7 @@ class _CardShellState extends ConsumerState<_CardShell>
                   ...WordsUIConstants.cardShadow,
                   // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
                   BoxShadow(
-                    color: const Color(0xFFB16CFF).withOpacity(
+                    color: accentColor.withOpacity(
                       0.25 * (0.6 + 0.4 * pulse) * settings.intensity,
                     ),
                     blurRadius:
@@ -598,7 +646,7 @@ class _CardShellState extends ConsumerState<_CardShell>
                     spreadRadius: glowSpread * 1.5 * settings.intensity,
                   ),
                   BoxShadow(
-                    color: const Color(0xFF9B7CFF).withOpacity(
+                    color: accentColor.withOpacity(
                       0.30 * (0.5 + 0.5 * pulse) * settings.intensity,
                     ),
                     blurRadius:
@@ -607,7 +655,7 @@ class _CardShellState extends ConsumerState<_CardShell>
                     spreadRadius: glowSpread * 1.2 * settings.intensity,
                   ),
                   BoxShadow(
-                    color: const Color(0xFF7B5CFF).withOpacity(
+                    color: accentColor.withOpacity(
                       0.35 * (0.5 + 0.5 * pulse) * settings.intensity,
                     ),
                     blurRadius:

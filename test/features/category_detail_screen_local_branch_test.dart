@@ -5,12 +5,14 @@ import 'package:talvori/core/local_database/adapters/local_category_detail_group
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
+import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/models/local_session_read_state.dart';
 import 'package:talvori/core/local_database/models/local_stage_due_summary.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_due_summary_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
@@ -188,6 +190,155 @@ void main() {
 
     expect(find.text('Keine aktive lokale Session'), findsOneWidget);
     expect(find.text('Starten/Fortsetzen'), findsOneWidget);
+  });
+
+  testWidgets('category_detail_local_all_stages_opens_neutral_practice_mode', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningViewModelProvider.overrideWithValue(
+            const LocalLearningViewModelState(
+              isLoading: false,
+              hasSession: false,
+              currentPosition: 0,
+              totalItems: 0,
+              answeredCount: 0,
+              remainingCount: 0,
+              canSubmitAnswer: false,
+              canCompleteSession: false,
+              lastAction: LocalLearningControllerAction.none,
+            ),
+          ),
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          localPracticeCardsProvider(
+            const LocalPracticeCardsRequest(
+              categoryId: 'basics',
+              mode: LearningMode.time,
+              selection: LocalPracticeSelection.allStages(),
+            ),
+          ).overrideWith(
+            (ref) async => const [
+              LocalPracticeCard(
+                wordId: 'word-1',
+                term: 'hello',
+                translation: 'hallo',
+                stage: SrsStage.s1,
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.text('Alle Stufen'));
+    await tester.pump();
+    expect(find.text('Alle Stufen aktiviert'), findsOneWidget);
+
+    await tester.tap(find.byType(StartButtonPulse));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Übungsmodus'), findsOneWidget);
+    expect(
+      find.text('Ohne Einfluss auf deinen Lernfortschritt'),
+      findsOneWidget,
+    );
+    expect(find.text('hello'), findsOneWidget);
+  });
+
+  testWidgets('category_detail_local_single_stage_selects_stage_for_practice', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningViewModelProvider.overrideWithValue(
+            const LocalLearningViewModelState(
+              isLoading: false,
+              hasSession: false,
+              currentPosition: 0,
+              totalItems: 0,
+              answeredCount: 0,
+              remainingCount: 0,
+              canSubmitAnswer: false,
+              canCompleteSession: false,
+              lastAction: LocalLearningControllerAction.none,
+            ),
+          ),
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          localPracticeCardsProvider(
+            const LocalPracticeCardsRequest(
+              categoryId: 'basics',
+              mode: LearningMode.time,
+              selection: LocalPracticeSelection.singleStage(SrsStage.s2),
+            ),
+          ).overrideWith(
+            (ref) async => const [
+              LocalPracticeCard(
+                wordId: 'word-2',
+                term: 'water',
+                translation: 'Wasser',
+                stage: SrsStage.s2,
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.text('Einzelstufe'));
+    await tester.pump();
+    expect(find.text('Wähle eine Stufe aus'), findsOneWidget);
+
+    final stageRow = tester.widget<StageSwitchRowView>(
+      find.byType(StageSwitchRowView),
+    );
+    stageRow.onSelectStage!(2);
+    await tester.pump();
+    expect(find.text('Drücke Start, um zu beginnen'), findsOneWidget);
+
+    await tester.tap(find.byType(StartButtonPulse));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Übungsmodus'), findsOneWidget);
+    expect(find.text('water'), findsOneWidget);
   });
 
   testWidgets(

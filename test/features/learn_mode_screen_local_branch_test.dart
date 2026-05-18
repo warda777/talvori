@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/models/local_session_read_state.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
 import 'package:talvori/core/local_database/models/local_time_replay_card.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
@@ -1070,6 +1072,92 @@ void main() {
       expect(controller.submitWrongCalls, 0);
     },
   );
+
+  testWidgets('learn_mode_local_practice_mode_is_progress_neutral', (
+    tester,
+  ) async {
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+          localPracticeCardsProvider(
+            const LocalPracticeCardsRequest(
+              categoryId: 'basics',
+              mode: LearningMode.time,
+              selection: LocalPracticeSelection.singleStage(SrsStage.s2),
+            ),
+          ).overrideWith(
+            (ref) async => const [
+              LocalPracticeCard(
+                wordId: 'word-1',
+                term: 'hello',
+                translation: 'hallo',
+                stage: SrsStage.s2,
+              ),
+              LocalPracticeCard(
+                wordId: 'word-2',
+                term: 'water',
+                translation: 'Wasser',
+                stage: SrsStage.s2,
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'basics',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+            localLearningMode: LearningMode.time,
+            localPracticeSelection: LocalPracticeSelection.singleStage(
+              SrsStage.s2,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Übungsmodus'), findsOneWidget);
+    expect(
+      find.text('Ohne Einfluss auf deinen Lernfortschritt'),
+      findsOneWidget,
+    );
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('Noch offen 2'), findsOneWidget);
+    expect(find.text('Geübt 0'), findsOneWidget);
+    expect(find.byType(StageSwitchRowView), findsNothing);
+    expect(
+      find.byKey(const ValueKey('local-practice-mode-surface')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byType(SwipeableWordCard));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.text('hallo'), findsOneWidget);
+
+    await tester
+        .widget<SwipeableWordCard>(find.byType(SwipeableWordCard))
+        .onSwipe(false);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.text('water'), findsOneWidget);
+    expect(find.text('Noch offen 1'), findsOneWidget);
+    expect(find.text('Geübt 1'), findsOneWidget);
+    expect(controller.startOrResumeCalls, 0);
+    expect(controller.submitCorrectCalls, 0);
+    expect(controller.submitWrongCalls, 0);
+    expect(controller.resetAndStartCalls, 0);
+  });
 
   testWidgets('learn_mode_screen_local_completed_state_can_start_new_session', (
     tester,

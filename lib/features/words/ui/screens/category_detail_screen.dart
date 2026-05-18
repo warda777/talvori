@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
@@ -97,7 +100,7 @@ class CategoryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   ProviderSubscription<CategoryDetailState>? _controllerSub;
 
   final _vocabsKey = GlobalKey();
@@ -107,11 +110,19 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   final _trainingButtonKey = GlobalKey();
   final _singleButtonKey = GlobalKey();
   int _localSelectedIndex = 0;
+  late final AnimationController _practicePulseController;
+  Timer? _singleStagePulseTimer;
+  int? _practicePulseStage;
+  Set<int>? _practicePulseStages;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _practicePulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
 
     if (widget.useLocalOfflineFlow) {
       return;
@@ -146,6 +157,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _singleStagePulseTimer?.cancel();
+    _practicePulseController.dispose();
     // ✅ Subscription ohne ref schließen
     _controllerSub?.close();
     _controllerSub = null;
@@ -225,6 +238,48 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       );
       await ref.read(hasSeenAutoTooltipProvider.notifier).markSeen();
     }
+  }
+
+  void _stopSingleStagePracticePulse({bool clearStage = true}) {
+    _singleStagePulseTimer?.cancel();
+    _singleStagePulseTimer = null;
+    if (clearStage && mounted) {
+      setState(() {
+        _practicePulseStage = null;
+        _practicePulseStages = null;
+      });
+    }
+  }
+
+  void _pulsePracticeStage(int stage) {
+    if (!mounted) return;
+    setState(() {
+      _practicePulseStage = stage;
+      _practicePulseStages = null;
+    });
+    _practicePulseController.forward(from: 0);
+  }
+
+  void _pulseAllPracticeStages() {
+    _stopSingleStagePracticePulse();
+    if (!mounted) return;
+    setState(() {
+      _practicePulseStage = null;
+      _practicePulseStages = {1, 2, 3, 4, 5};
+    });
+    _practicePulseController.forward(from: 0);
+  }
+
+  void _startSingleStagePracticePulse() {
+    _stopSingleStagePracticePulse();
+    var stage = 0;
+    _singleStagePulseTimer = Timer.periodic(const Duration(milliseconds: 420), (
+      _,
+    ) {
+      stage = stage % 5 + 1;
+      _pulsePracticeStage(stage);
+    });
+    _pulsePracticeStage(1);
   }
 
   Future<void> _maybeShowWheelTooltip() async {
@@ -799,6 +854,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       selectedLearningMode,
     );
     final selectedReviewMode = ref.watch(levelSelectionProvider);
+    final selectedSingleStage = ref.watch(singleStageProvider).clamp(1, 5);
     final stageCountsRequest = LocalStageCountsRequest(
       categoryId: selectedCategoryId,
       mode: selectedLocalLearningMode,
@@ -847,6 +903,14 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         return;
       }
 
+      final practiceSelection = switch (selectedReviewMode) {
+        LevelSelectionMode.s1toS5 => const LocalPracticeSelection.allStages(),
+        LevelSelectionMode.single => LocalPracticeSelection.singleStage(
+          SrsStage.values[selectedSingleStage],
+        ),
+        LevelSelectionMode.s0toS5 => null,
+      };
+
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => LearnModeScreen(
@@ -855,6 +919,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             useLocalOfflineFlow: true,
             localCategoryId: selectedCategoryId,
             localLearningMode: selectedLocalLearningMode,
+            localPracticeSelection: practiceSelection,
             navigationOrigin: LearnNavigationOrigin.category(
               categoryId: selectedCategoryId,
               categoryTitle: selectedLocalCategoryItem?.displayLabel ?? title,
@@ -1031,6 +1096,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             learningModeSelector: LearningModeSelectorView(
               selectedMode: selectedLearningMode,
               onModeSelected: (mode) {
+                _stopSingleStagePracticePulse();
                 ref.read(srsModeControllerProvider.notifier).setMode(mode);
                 ref.read(levelSelectionProvider.notifier).state =
                     LevelSelectionMode.s0toS5;
@@ -1043,6 +1109,21 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 ref.read(levelSelectionProvider.notifier).state = mode;
                 ref.read(selectingSingleProvider.notifier).state =
                     mode == LevelSelectionMode.single;
+                if (mode == LevelSelectionMode.s1toS5) {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Alle Stufen aktiviert')),
+                  );
+                  _pulseAllPracticeStages();
+                } else if (mode == LevelSelectionMode.single) {
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Wähle eine Stufe aus')),
+                  );
+                  _startSingleStagePracticePulse();
+                } else {
+                  _stopSingleStagePracticePulse();
+                }
               },
             ),
             stageSwitchRow: StageSwitchRowView(
@@ -1053,6 +1134,26 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               showSwitchNotes: true,
               useNumericSwitchNotes: true,
               blockedMask: blockedMask,
+              selectable: selectedReviewMode == LevelSelectionMode.single,
+              selectableAllowsEmptyStages: true,
+              selectedStageHighlight:
+                  selectedReviewMode == LevelSelectionMode.single
+                  ? selectedSingleStage
+                  : null,
+              activePulseStage: _practicePulseStage,
+              activePulseStages: _practicePulseStages,
+              activePulseColor: const Color(0xFF36F58A),
+              activePulseAnimation: _practicePulseController,
+              onSelectStage: (stage) {
+                _stopSingleStagePracticePulse(clearStage: false);
+                ref.read(singleStageProvider.notifier).state = stage;
+                ref.read(selectingSingleProvider.notifier).state = false;
+                _pulsePracticeStage(stage);
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Drücke Start, um zu beginnen')),
+                );
+              },
               learnedInStage5: 0,
               s0Locked: false,
               labels: const StageSwitchLabels(
@@ -1067,7 +1168,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 disabledOuter: Color(0xFFE9F1FF),
                 innerStroke: Color(0xFFB36BFF),
               ),
-              onTapStage: openStageInspector,
+              onTapStage: selectedReviewMode == LevelSelectionMode.single
+                  ? null
+                  : openStageInspector,
             ),
             startTrailingControl: _LocalResetButton(
               onPressed: resetLocalProgress,

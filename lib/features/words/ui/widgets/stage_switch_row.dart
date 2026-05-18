@@ -96,11 +96,13 @@ class StageSwitchRowView extends StatefulWidget {
   final void Function(int stage)? onTapStage;
   final Map<int, GlobalKey>? switchKeys;
   final int? activePulseStage;
+  final Set<int>? activePulseStages;
   final Color? activePulseColor;
   final Animation<double>? activePulseAnimation;
   final bool showSwitchNotes;
   final bool useNumericSwitchNotes;
   final List<bool>? blockedMask;
+  final bool selectableAllowsEmptyStages;
 
   const StageSwitchRowView({
     super.key,
@@ -135,11 +137,13 @@ class StageSwitchRowView extends StatefulWidget {
     this.onTapStage,
     this.switchKeys,
     this.activePulseStage,
+    this.activePulseStages,
     this.activePulseColor,
     this.activePulseAnimation,
     this.showSwitchNotes = true,
     this.useNumericSwitchNotes = false,
     this.blockedMask,
+    this.selectableAllowsEmptyStages = false,
   });
 
   @override
@@ -210,7 +214,9 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
 
       if (i == 0) {
         final locked = widget.s0Locked;
-        final isActivePulse = widget.activePulseStage == 0;
+        final isActivePulse =
+            widget.activePulseStage == 0 ||
+            (widget.activePulseStages?.contains(0) ?? false);
         switchBody = VerticalStageSwitch(
           containerKey: widget.switchKeys?[0],
           count: counts[0],
@@ -246,7 +252,9 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
         final learnedCount = widget.showLearnedCounterInStage5 && stage == 5
             ? widget.learnedInStage5
             : null;
-        final isActivePulse = widget.activePulseStage == stage;
+        final isActivePulse =
+            widget.activePulseStage == stage ||
+            (widget.activePulseStages?.contains(stage) ?? false);
 
         switchBody = VerticalStageSwitch(
           containerKey: widget.switchKeys?[stage],
@@ -299,7 +307,9 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
       if (widget.selectable && i >= 1) {
         switchBody = GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: disabled ? null : () => widget.onSelectStage?.call(i),
+          onTap: disabled && !widget.selectableAllowsEmptyStages
+              ? null
+              : () => widget.onSelectStage?.call(i),
           child: switchBody,
         );
       } else if (widget.onTapStage != null) {
