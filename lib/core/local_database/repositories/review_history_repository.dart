@@ -124,6 +124,22 @@ class ReviewHistoryRepository {
     return rows.map(_mapEvent).toList(growable: false);
   }
 
+  Future<List<ReviewHistoryEvent>> loadHistoryForWordInContext({
+    required String wordId,
+    required String categoryId,
+    required LearningMode mode,
+    bool descending = false,
+  }) async {
+    final rows = await _database.query(
+      'review_history',
+      where: 'word_id = ? AND category_id = ? AND mode_id = ?',
+      whereArgs: [wordId, categoryId, mode.name],
+      orderBy: descending ? 'reviewed_at DESC' : 'reviewed_at ASC',
+    );
+
+    return rows.map(_mapEvent).toList(growable: false);
+  }
+
   Future<List<ReviewAnswer>> loadRecentAnswers({
     required String categoryId,
     required LearningMode mode,

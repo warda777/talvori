@@ -178,6 +178,78 @@ void main() {
     });
 
     test(
+      'load_history_for_word_in_context_filters_category_and_mode',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertCategory(db, id: 'category-2');
+        await insertWord(db, id: 'word-1');
+        await insertWord(db, id: 'word-1-other', categoryId: 'category-2');
+        final repository = ReviewHistoryRepository(database: db);
+
+        await insertReviewEvent(
+          repository,
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          reviewedAt: now,
+        );
+        await insertReviewEvent(
+          repository,
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.hybrid,
+          reviewedAt: now.add(const Duration(minutes: 1)),
+        );
+        await insertReviewEvent(
+          repository,
+          wordId: 'word-1',
+          categoryId: 'category-2',
+          mode: LearningMode.adaptive,
+          reviewedAt: now.add(const Duration(minutes: 2)),
+        );
+        await insertReviewEvent(
+          repository,
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          reviewedAt: now.add(const Duration(minutes: 3)),
+        );
+
+        final ascending = await repository.loadHistoryForWordInContext(
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+        );
+        final descending = await repository.loadHistoryForWordInContext(
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          descending: true,
+        );
+
+        expect(ascending, hasLength(2));
+        expect(ascending.map((event) => event.reviewedAt), [
+          now,
+          now.add(const Duration(minutes: 3)),
+        ]);
+        expect(descending.map((event) => event.reviewedAt), [
+          now.add(const Duration(minutes: 3)),
+          now,
+        ]);
+        expect(
+          ascending.every(
+            (event) =>
+                event.categoryId == 'category-1' &&
+                event.mode == LearningMode.adaptive,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
       'load_recent_answers_returns_latest_answers_for_category_and_mode',
       () async {
         final db = await openSchemaDatabase();

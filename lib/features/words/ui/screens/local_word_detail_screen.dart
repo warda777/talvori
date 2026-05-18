@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
+import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
 import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
 
@@ -10,17 +13,32 @@ class LocalWordDetailScreen extends ConsumerWidget {
     required this.wordId,
     required this.categoryId,
     required this.title,
+    this.mode = LearningMode.adaptive,
   });
 
   final String wordId;
   final String categoryId;
   final String title;
+  final LearningMode mode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailAsync = ref.watch(
       localWordDetailProvider(
-        LocalWordDetailRequest(wordId: wordId, categoryId: categoryId),
+        LocalWordDetailRequest(
+          wordId: wordId,
+          categoryId: categoryId,
+          mode: mode,
+        ),
+      ),
+    );
+    final historyAsync = ref.watch(
+      localWordReviewHistoryProvider(
+        LocalWordReviewHistoryRequest(
+          wordId: wordId,
+          categoryId: categoryId,
+          mode: mode,
+        ),
       ),
     );
 
@@ -51,6 +69,16 @@ class LocalWordDetailScreen extends ConsumerWidget {
                     LocalWordDetailRequest(
                       wordId: wordId,
                       categoryId: categoryId,
+                      mode: mode,
+                    ),
+                  ),
+                );
+                ref.invalidate(
+                  localWordReviewHistoryProvider(
+                    LocalWordReviewHistoryRequest(
+                      wordId: wordId,
+                      categoryId: categoryId,
+                      mode: mode,
                     ),
                   ),
                 );
@@ -120,9 +148,156 @@ class LocalWordDetailScreen extends ConsumerWidget {
               _NeonPanel(
                 child: _LearningStatusSection(progress: detail.progress),
               ),
+              const SizedBox(height: 18),
+              _NeonPanel(
+                child: _ReviewHistorySection(historyAsync: historyAsync),
+              ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ReviewHistorySection extends StatelessWidget {
+  const _ReviewHistorySection({required this.historyAsync});
+
+  final AsyncValue<List<LocalReviewHistoryTimelineItem>> historyAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return historyAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) => const Text(
+        'Lernverlauf konnte nicht geladen werden',
+        style: TextStyle(color: Color(0xFF9E9EA6)),
+      ),
+      data: (items) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Verlauf',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (items.isEmpty)
+            const Text(
+              'Noch kein Lernverlauf vorhanden',
+              style: TextStyle(color: Color(0xFF9E9EA6)),
+            )
+          else
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ReviewHistoryTile(item: item),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewHistoryTile extends StatelessWidget {
+  const _ReviewHistoryTile({required this.item});
+
+  final LocalReviewHistoryTimelineItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Color(item.colorValue);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF101014),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.45), width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            margin: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.5),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.description,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _LearningStatusSection._formatDateTime(item.reviewedAt),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF9E9EA6),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _StageBadge(
+            sourceStage: item.sourceStage.index,
+            targetStage: item.targetStage.index,
+            color: color,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StageBadge extends StatelessWidget {
+  const _StageBadge({
+    required this.sourceStage,
+    required this.targetStage,
+    required this.color,
+  });
+
+  final int sourceStage;
+  final int targetStage;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.6)),
+      ),
+      child: Text(
+        'S$sourceStage -> S$targetStage',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

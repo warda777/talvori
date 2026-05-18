@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
+import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
@@ -86,6 +90,7 @@ void main() {
   Future<void> pumpDetail(
     WidgetTester tester, {
     required LocalWordDetailData? detail,
+    List<LocalReviewHistoryTimelineItem> history = const [],
   }) async {
     _FakeLocalWordEditController.currentWord = detail?.word;
 
@@ -100,6 +105,9 @@ void main() {
               progress: detail?.progress,
             );
           }),
+          localWordReviewHistoryProvider.overrideWith(
+            (ref, request) async => history,
+          ),
           localWordEditControllerProvider.overrideWith(
             _FakeLocalWordEditController.new,
           ),
@@ -161,6 +169,52 @@ void main() {
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('Noch kein Lernfortschritt'), findsOneWidget);
+    expect(find.text('Noch kein Lernverlauf vorhanden'), findsOneWidget);
+  });
+
+  testWidgets('local_word_detail_screen_shows_review_history_items', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(word: word(), progress: null),
+      history: [
+        LocalReviewHistoryTimelineItem(
+          id: 'history-2',
+          wordId: 'seed-basics-hello',
+          categoryId: 'seed-category-basics',
+          reviewedAt: DateTime(2026, 1, 2, 9, 15),
+          answer: ReviewAnswer.wrong,
+          sourceStage: SrsStage.s3,
+          targetStage: SrsStage.s2,
+          outcomeType: LocalReviewOutcomeType.demoted,
+          repeatIndex: 0,
+          description: 'Falsch: S3 -> S2',
+          colorValue: 0xFFFF4B6E,
+        ),
+        LocalReviewHistoryTimelineItem(
+          id: 'history-1',
+          wordId: 'seed-basics-hello',
+          categoryId: 'seed-category-basics',
+          reviewedAt: DateTime(2026, 1, 1, 10),
+          answer: ReviewAnswer.correct,
+          sourceStage: SrsStage.s0,
+          targetStage: SrsStage.s1,
+          outcomeType: LocalReviewOutcomeType.promoted,
+          repeatIndex: 0,
+          description: 'Richtig: S0 -> S1',
+          colorValue: 0xFF36F58A,
+        ),
+      ],
+    );
+
+    expect(find.text('Verlauf'), findsOneWidget);
+    expect(find.text('Falsch: S3 -> S2'), findsOneWidget);
+    expect(find.text('Richtig: S0 -> S1'), findsOneWidget);
+    expect(find.text('S3 -> S2'), findsOneWidget);
+    expect(find.text('S0 -> S1'), findsOneWidget);
+    expect(find.text('02.01.2026 09:15'), findsOneWidget);
+    expect(find.text('01.01.2026 10:00'), findsOneWidget);
   });
 
   testWidgets('local_word_detail_screen_shows_missing_state', (tester) async {
