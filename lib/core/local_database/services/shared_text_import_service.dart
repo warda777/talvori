@@ -36,21 +36,21 @@ class SharedTextImportService {
       if (_containsMultipleWords(normalized)) {
         return const SharedTextImportResult(
           status: SharedTextImportStatus.invalid,
-          message: 'Bitte markiere fuer Phase 1 nur ein einzelnes Wort.',
+          message: 'Bitte markiere für Phase 1 nur ein einzelnes Wort.',
         );
       }
 
       if (!_containsLetter(normalized)) {
         return const SharedTextImportResult(
           status: SharedTextImportStatus.invalid,
-          message: 'Der markierte Text enthaelt kein gueltiges Wort.',
+          message: 'Der markierte Text enthält kein gültiges Wort.',
         );
       }
 
       await _categoryRepository.upsertCategory(
         id: localMyWordsCategoryId,
         name: localMyWordsCategoryLabel,
-        description: 'Lokal importierte Woerter.',
+        description: 'Lokal importierte Wörter.',
         sortOrder: 10000,
         now: now,
       );
@@ -62,7 +62,7 @@ class SharedTextImportService {
         if (word.term.trim().toLowerCase() == normalized.toLowerCase()) {
           return SharedTextImportResult(
             status: SharedTextImportStatus.duplicate,
-            message: 'Dieses Wort ist bereits in Meine Woerter.',
+            message: 'Dieses Wort ist bereits in Meine Wörter.',
             word: word,
           );
         }
@@ -73,7 +73,7 @@ class SharedTextImportService {
         categoryId: localMyWordsCategoryId,
         term: normalized,
         translation: '',
-        notes: 'Importiert. Uebersetzung ausstehend.',
+        notes: 'Importiert. Übersetzung ausstehend.',
         sortOrder: existingWords.length + 1,
         now: now,
       );
@@ -89,7 +89,7 @@ class SharedTextImportService {
 
       return SharedTextImportResult(
         status: SharedTextImportStatus.imported,
-        message: 'Wort wurde in Meine Woerter gespeichert.',
+        message: 'Wort wurde in Meine Wörter gespeichert.',
         word: importedWord,
       );
     } catch (_) {
