@@ -548,6 +548,7 @@ void main() {
       totalItems: 4,
       answeredCount: 4,
       remainingCount: 0,
+      stageCounts: [0, 0, 0, 0, 0, 4],
       canSubmitAnswer: false,
       canCompleteSession: true,
     );
@@ -562,6 +563,7 @@ void main() {
       totalItems: 4,
       answeredCount: 0,
       remainingCount: 4,
+      stageCounts: [4, 0, 0, 0, 0, 0],
       canSubmitAnswer: true,
       canCompleteSession: false,
       currentWordId: 'word-1',
@@ -595,6 +597,13 @@ void main() {
     expect(find.text('Session abgeschlossen'), findsOneWidget);
     expect(find.text('4 / 4'), findsOneWidget);
     expect(find.text('Neue Session starten'), findsOneWidget);
+    expect(find.byType(SwipeableWordCard), findsNothing);
+    expect(controller.startOrResumeCalls, 0);
+    expect(controller.resetAndStartCalls, 0);
+    expect(
+      tester.widget<StageSwitchRowView>(find.byType(StageSwitchRowView)).counts,
+      [0, 0, 0, 0, 0, 4],
+    );
 
     await tester.tap(find.text('Neue Session starten'));
     await tester.pump();
@@ -603,8 +612,16 @@ void main() {
     expect(controller.startOrResumeCalls, 0);
     expect(controller.resetAndStartCalls, 1);
     expect(controller.capturedCategoryId, 'seed-category-basics');
+    expect(
+      controller.state.lastAction,
+      LocalLearningControllerAction.resetAndStart,
+    );
     expect(find.byType(SwipeableWordCard), findsOneWidget);
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('Session abgeschlossen'), findsNothing);
+    expect(
+      tester.widget<StageSwitchRowView>(find.byType(StageSwitchRowView)).counts,
+      [4, 0, 0, 0, 0, 0],
+    );
   });
 }
