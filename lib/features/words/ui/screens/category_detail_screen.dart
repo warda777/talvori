@@ -6,11 +6,14 @@ import 'package:talvori/core/local_database/controllers/local_learning_controlle
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/models/local_stage_due_summary.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_due_summary_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
+import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
@@ -806,6 +809,25 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     final stages =
         localStageCountsAsync.valueOrNull ??
         List<int>.filled(SrsStage.values.length, 0);
+    final stageDueSummaryAsync = selectedLocalLearningMode == LearningMode.time
+        ? ref.watch(
+            localStageDueSummaryProvider(
+              LocalStageDueSummaryRequest(
+                categoryId: selectedCategoryId,
+                mode: selectedLocalLearningMode,
+              ),
+            ),
+          )
+        : const AsyncValue<List<LocalStageDueSummary>>.data(
+            <LocalStageDueSummary>[],
+          );
+    final stageDueSummaries = stageDueSummaryAsync.valueOrNull;
+    final blockedMask = stageDueSummaries == null
+        ? null
+        : List<bool>.generate(SrsStage.values.length, (index) {
+            if (index == 0 || index >= stageDueSummaries.length) return false;
+            return stageDueSummaries[index].isBlocked;
+          });
     final localVocabsCount = selectedLocalCategoryItem?.vocabsCount;
     final fallbackLocalVocabsCountAsync =
         localVocabsCount != null || selectedCategoryId.isEmpty
@@ -1027,6 +1049,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               showLearnedCounterInStage5: true,
               showSwitchNotes: true,
               useNumericSwitchNotes: true,
+              blockedMask: blockedMask,
               learnedInStage5: 0,
               s0Locked: false,
               labels: const StageSwitchLabels(

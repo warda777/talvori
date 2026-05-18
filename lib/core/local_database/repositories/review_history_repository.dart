@@ -174,6 +174,58 @@ class ReviewHistoryRepository {
     return rows.isNotEmpty;
   }
 
+  Future<bool> hasNewCardHistoryBeforeDay({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime day,
+  }) async {
+    final dayStart = DateTime(day.year, day.month, day.day);
+    final rows = await _database.query(
+      'review_history',
+      columns: ['id'],
+      where:
+          'category_id = ? AND mode_id = ? AND old_stage = ? AND reviewed_at < ?',
+      whereArgs: [
+        categoryId,
+        mode.name,
+        SrsStage.s0.name,
+        _encodeDateTime(dayStart),
+      ],
+      limit: 1,
+    );
+
+    return rows.isNotEmpty;
+  }
+
+  Future<int> countNewCardReviewsOnDay({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime day,
+  }) async {
+    final dayStart = DateTime(day.year, day.month, day.day);
+    final nextDayStart = dayStart.add(const Duration(days: 1));
+    final rows = await _database.rawQuery(
+      '''
+SELECT COUNT(*) AS count
+FROM review_history
+WHERE category_id = ?
+AND mode_id = ?
+AND old_stage = ?
+AND reviewed_at >= ?
+AND reviewed_at < ?
+''',
+      [
+        categoryId,
+        mode.name,
+        SrsStage.s0.name,
+        _encodeDateTime(dayStart),
+        _encodeDateTime(nextDayStart),
+      ],
+    );
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
   Future<int> deleteForCategoryAndMode({
     required String categoryId,
     required LearningMode mode,

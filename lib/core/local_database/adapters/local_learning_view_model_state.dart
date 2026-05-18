@@ -28,6 +28,7 @@ class LocalLearningViewModelState {
     this.exampleSentence,
     this.notes,
     this.currentStage,
+    this.nextAvailableAt,
     this.lastReviewFeedback,
   });
 
@@ -45,6 +46,7 @@ class LocalLearningViewModelState {
   final String? exampleSentence;
   final String? notes;
   final SrsStage? currentStage;
+  final DateTime? nextAvailableAt;
   final LocalReviewVisualFeedback? lastReviewFeedback;
   final int currentPosition;
   final int totalItems;

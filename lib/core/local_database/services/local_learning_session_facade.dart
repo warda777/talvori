@@ -44,7 +44,7 @@ class LocalLearningSessionFacade {
       sessionSize: resolvedSessionSize,
     );
 
-    return _sessionReadService.buildReadState(sessionState);
+    return _sessionReadService.buildReadStateAt(sessionState, now: now);
   }
 
   Future<LocalSessionReadState> resetAndStartLearning({
@@ -72,7 +72,7 @@ class LocalLearningSessionFacade {
       sessionSize: resolvedSessionSize,
     );
 
-    return _sessionReadService.buildReadState(sessionState);
+    return _sessionReadService.buildReadStateAt(sessionState, now: now);
   }
 
   Future<int> _sessionSizeForMode({
@@ -101,7 +101,7 @@ class LocalLearningSessionFacade {
       now: now,
     );
 
-    return _sessionReadService.buildReadState(sessionState);
+    return _sessionReadService.buildReadStateAt(sessionState, now: now);
   }
 
   Future<LocalSessionReadState> completeIfFinished({
@@ -113,6 +113,6 @@ class LocalLearningSessionFacade {
       now: now,
     );
 
-    return _sessionReadService.buildReadState(sessionState);
+    return _sessionReadService.buildReadStateAt(sessionState, now: now);
   }
 }

@@ -138,6 +138,63 @@ AND status = ?
     return _mapSession(rows.single);
   }
 
+  Future<LearningSessionRecord?> findLatestSession({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+  }) async {
+    final rows = await _database.query(
+      'learning_sessions',
+      where: '''
+category_id = ?
+AND mode_id = ?
+AND training_area_id = ?
+''',
+      whereArgs: [categoryId, mode.name, trainingArea.name],
+      orderBy: 'updated_at DESC, started_at DESC',
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return _mapSession(rows.single);
+  }
+
+  Future<LearningSessionRecord?> findLatestSessionWithItems({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT sessions.*
+FROM learning_sessions AS sessions
+WHERE sessions.category_id = ?
+  AND sessions.mode_id = ?
+  AND sessions.training_area_id = ?
+  AND EXISTS (
+    SELECT 1
+    FROM session_items AS items
+    WHERE items.session_id = sessions.id
+  )
+ORDER BY
+  COALESCE(sessions.completed_at, sessions.updated_at) DESC,
+  sessions.updated_at DESC,
+  sessions.started_at DESC
+LIMIT 1
+''',
+      [categoryId, mode.name, trainingArea.name],
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return _mapSession(rows.single);
+  }
+
   Future<LearningSessionRecord?> loadSession(String sessionId) async {
     final rows = await _database.query(
       'learning_sessions',

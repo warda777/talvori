@@ -6,11 +6,13 @@ import 'package:talvori/core/local_database/adapters/local_learning_view_model_s
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_session_read_state.dart';
+import 'package:talvori/core/local_database/models/local_stage_due_summary.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_due_summary_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
@@ -427,6 +429,124 @@ void main() {
     },
   );
 
+  testWidgets('category_detail_time_mode_marks_waiting_stages_as_blocked', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          localStageCountsProvider.overrideWith(
+            (ref, request) async => [0, 2, 1, 0, 0, 0],
+          ),
+          localStageDueSummaryProvider.overrideWith(
+            (ref, request) async => [
+              const LocalStageDueSummary(stage: 0, totalCount: 0, dueCount: 0),
+              LocalStageDueSummary(
+                stage: 1,
+                totalCount: 2,
+                dueCount: 0,
+                nextDueAt: DateTime(2026, 1, 2),
+              ),
+              const LocalStageDueSummary(stage: 2, totalCount: 1, dueCount: 1),
+              const LocalStageDueSummary(stage: 3, totalCount: 0, dueCount: 0),
+              const LocalStageDueSummary(stage: 4, totalCount: 0, dueCount: 0),
+              const LocalStageDueSummary(stage: 5, totalCount: 0, dueCount: 0),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Health & Fitness',
+            categoryId: 'seed-category-basics',
+            listFilter: const WordListFilter(
+              WordFilterKind.category,
+              'seed-category-basics',
+            ),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'seed-category-basics',
+            localSelectedWordHubKey: 'health_fitness',
+            localCategoryItems: localWordHubItems(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+
+    final row = tester.widget<StageSwitchRowView>(
+      find.byType(StageSwitchRowView),
+    );
+    expect(row.blockedMask?[1], isTrue);
+    expect(row.blockedMask?[2], isFalse);
+  });
+
+  testWidgets(
+    'category_detail_screen_local_start_passes_time_mode_by_default',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(
+              const LocalLearningViewModelState(
+                isLoading: false,
+                hasSession: false,
+                currentPosition: 0,
+                totalItems: 0,
+                answeredCount: 0,
+                remainingCount: 0,
+                canSubmitAnswer: false,
+                canCompleteSession: false,
+                lastAction: LocalLearningControllerAction.none,
+              ),
+            ),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localStageCountsProvider.overrideWith(
+              (ref, request) async => [25, 0, 0, 0, 0, 0],
+            ),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final screen = tester.widget<LearnModeScreen>(
+        find.byType(LearnModeScreen),
+      );
+      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.localLearningMode, LearningMode.time);
+    },
+  );
+
   testWidgets(
     'category_detail_screen_local_start_passes_selected_learning_mode',
     (tester) async {
@@ -489,6 +609,54 @@ void main() {
       expect(screen.localLearningMode, LearningMode.adaptive);
     },
   );
+
+  testWidgets('category_detail_screen_local_reset_defaults_to_time_mode', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final resetService = _FakeLocalCategoryProgressResetService();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          localStageCountsProvider.overrideWith(
+            (ref, request) async => [25, 0, 0, 0, 0, 0],
+          ),
+          localCategoryProgressResetServiceProvider.overrideWithValue(
+            resetService,
+          ),
+        ],
+        child: MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Health & Fitness',
+            categoryId: 'seed-category-basics',
+            listFilter: const WordListFilter(
+              WordFilterKind.category,
+              'seed-category-basics',
+            ),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'seed-category-basics',
+            localSelectedWordHubKey: 'health_fitness',
+            localCategoryItems: localWordHubItems(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.restart_alt_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Zurücksetzen'));
+    await tester.pumpAndSettle();
+
+    expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+    expect(resetService.lastRequest?.mode, LearningMode.time);
+  });
 
   testWidgets(
     'category_detail_screen_local_reset_confirms_and_resets_selected_category_mode',
@@ -917,8 +1085,10 @@ void main() {
 
   Future<void> pumpStageInspectorLegend(
     WidgetTester tester,
-    SrsStage stage,
-  ) async {
+    SrsStage stage, {
+    LearningMode mode = LearningMode.adaptive,
+    DateTime? nextDueAt,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -933,6 +1103,7 @@ void main() {
                 currentStage: request.stage,
                 passCount: 0,
                 wrongCount: 0,
+                nextDueAt: nextDueAt,
               ),
             ],
           ),
@@ -944,7 +1115,7 @@ void main() {
                 showLocalStageInspectorSheet(
                   context: context,
                   categoryId: 'seed-category-basics',
-                  mode: LearningMode.adaptive,
+                  mode: mode,
                   stage: stage,
                   categoryLabel: 'Health & Fitness',
                 );
@@ -992,5 +1163,23 @@ void main() {
     expect(find.text('1. Wiederholung'), findsOneWidget);
     expect(find.text('2. Wiederholung'), findsOneWidget);
     expect(find.text('3. Wiederholung'), findsNothing);
+  });
+
+  testWidgets('stage_inspector_time_mode_shows_due_wait_and_word_countdown', (
+    tester,
+  ) async {
+    await pumpStageInspectorLegend(
+      tester,
+      SrsStage.s2,
+      mode: LearningMode.time,
+      nextDueAt: DateTime.now().add(const Duration(days: 3, hours: 2)),
+    );
+
+    expect(
+      find.textContaining('Zeitplan: Merkstufe 2 hat 3 Tage'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Nächster Termin:'), findsOneWidget);
+    expect(find.textContaining('in 3T'), findsOneWidget);
   });
 }

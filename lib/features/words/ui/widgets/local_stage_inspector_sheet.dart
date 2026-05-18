@@ -102,7 +102,7 @@ class LocalStageInspectorSheet extends ConsumerWidget {
                   modeLabel: modeLabel ?? _modeLabel(mode),
                 ),
                 const SizedBox(height: 18),
-                _Legend(stage: stage),
+                _Legend(stage: stage, mode: mode),
                 const SizedBox(height: 18),
                 if (items.isEmpty)
                   const _EmptyState()
@@ -112,6 +112,7 @@ class LocalStageInspectorSheet extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: _WordStageRow(
                         item: item,
+                        mode: mode,
                         onDemoteTo: (targetStage) async {
                           await ref
                               .read(localStageAdjustmentControllerProvider)
@@ -236,19 +237,31 @@ class _CountPill extends StatelessWidget {
 }
 
 class _Legend extends StatelessWidget {
-  const _Legend({required this.stage});
+  const _Legend({required this.stage, required this.mode});
 
   final SrsStage stage;
+  final LearningMode mode;
 
   @override
   Widget build(BuildContext context) {
     final entries = _legendEntriesForStage(stage);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: entries
-          .map((entry) => _LegendChip(color: entry.color, label: entry.label))
-          .toList(growable: false),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: entries
+              .map(
+                (entry) => _LegendChip(color: entry.color, label: entry.label),
+              )
+              .toList(growable: false),
+        ),
+        if (mode == LearningMode.time && stage != SrsStage.s0) ...[
+          const SizedBox(height: 10),
+          _TimeDueHint(stage: stage),
+        ],
+      ],
     );
   }
 
@@ -330,9 +343,14 @@ class _LegendChip extends StatelessWidget {
 }
 
 class _WordStageRow extends StatelessWidget {
-  const _WordStageRow({required this.item, required this.onDemoteTo});
+  const _WordStageRow({
+    required this.item,
+    required this.mode,
+    required this.onDemoteTo,
+  });
 
   final LocalStageInspectorItem item;
+  final LearningMode mode;
   final ValueChanged<SrsStage> onDemoteTo;
 
   @override
@@ -388,6 +406,17 @@ class _WordStageRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (mode == LearningMode.time) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    _timeDueLabel(item.nextDueAt, DateTime.now()),
+                    style: const TextStyle(
+                      color: Color(0xFF8DBBFF),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -440,6 +469,75 @@ class _WordStageRow extends StatelessWidget {
         '${feedback.repeatIndex}. Wiederholung',
     };
   }
+}
+
+class _TimeDueHint extends StatelessWidget {
+  const _TimeDueHint({required this.stage});
+
+  final SrsStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C1320),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x668DBBFF), width: 1),
+      ),
+      child: Text(
+        'Zeitplan: Merkstufe ${stage.index} hat ${_timeWaitLabel(stage)} Wartezeit. '
+        'Wörter sind regulär erst ab ihrem nächsten Termin wieder fällig.',
+        style: const TextStyle(
+          color: Color(0xFFC8DFFF),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+      ),
+    );
+  }
+}
+
+String _timeWaitLabel(SrsStage stage) {
+  return switch (stage) {
+    SrsStage.s0 => 'keine',
+    SrsStage.s1 => '1 Tag',
+    SrsStage.s2 => '3 Tage',
+    SrsStage.s3 => '7 Tage',
+    SrsStage.s4 => '14 Tage',
+    SrsStage.s5 => '30 Tage',
+  };
+}
+
+String _timeDueLabel(DateTime? nextDueAt, DateTime now) {
+  if (nextDueAt == null || !nextDueAt.isAfter(now)) {
+    return 'Jetzt fällig';
+  }
+  final remaining = nextDueAt.difference(now);
+  final countdown = _formatDuration(remaining);
+  final date =
+      '${nextDueAt.day.toString().padLeft(2, '0')}.'
+      '${nextDueAt.month.toString().padLeft(2, '0')}. '
+      '${nextDueAt.hour.toString().padLeft(2, '0')}:'
+      '${nextDueAt.minute.toString().padLeft(2, '0')}';
+  return 'Nächster Termin: $date · in $countdown';
+}
+
+String _formatDuration(Duration duration) {
+  final totalMinutes = duration.inMinutes;
+  if (totalMinutes <= 0) return '0 Min.';
+  final days = duration.inDays;
+  final hours = duration.inHours.remainder(24);
+  final minutes = duration.inMinutes.remainder(60);
+  if (days > 0) {
+    return '${days}T ${hours}Std.';
+  }
+  if (hours > 0) {
+    return '${hours}Std. ${minutes}Min.';
+  }
+  return '${minutes}Min.';
 }
 
 class _StatusBadge extends StatelessWidget {

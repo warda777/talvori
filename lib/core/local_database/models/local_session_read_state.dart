@@ -23,6 +23,7 @@ class LocalSessionReadState {
     this.currentExampleSentence,
     this.currentNotes,
     this.currentStage,
+    this.nextAvailableAt,
   });
 
   final String sessionId;
@@ -42,6 +43,7 @@ class LocalSessionReadState {
   final String? currentExampleSentence;
   final String? currentNotes;
   final SrsStage? currentStage;
+  final DateTime? nextAvailableAt;
   final bool canSubmitAnswer;
   final bool canCompleteSession;
 }

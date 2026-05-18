@@ -16,18 +16,32 @@ class LocalSessionReadService {
 
   Future<LocalSessionReadState> buildReadState(
     LocalSrsSessionState sessionState,
-  ) async {
+  ) {
+    return buildReadStateAt(sessionState, now: DateTime.now());
+  }
+
+  Future<LocalSessionReadState> buildReadStateAt(
+    LocalSrsSessionState sessionState, {
+    required DateTime now,
+  }) async {
     final currentWordId = sessionState.currentWordId;
     final stageCounts = await _wordProgressRepository.countByStage(
       categoryId: sessionState.categoryId,
       mode: sessionState.mode,
     );
+    final nextAvailableAt = await _wordProgressRepository
+        .loadEarliestFutureDueAt(
+          categoryId: sessionState.categoryId,
+          mode: sessionState.mode,
+          now: now,
+        );
 
     if (currentWordId == null) {
       return _fromSessionState(
         sessionState,
         stageCounts: stageCounts,
         canSubmitAnswer: false,
+        nextAvailableAt: nextAvailableAt,
       );
     }
 
@@ -46,6 +60,7 @@ class LocalSessionReadService {
       currentExampleSentence: word?.exampleSentence,
       currentNotes: word?.notes,
       currentStage: progress?.stage,
+      nextAvailableAt: nextAvailableAt,
       canSubmitAnswer:
           sessionState.status == 'active' && sessionState.remainingCount > 0,
     );
@@ -59,6 +74,7 @@ class LocalSessionReadService {
     String? currentExampleSentence,
     String? currentNotes,
     SrsStage? currentStage,
+    DateTime? nextAvailableAt,
     required bool canSubmitAnswer,
   }) {
     return LocalSessionReadState(
@@ -79,6 +95,7 @@ class LocalSessionReadService {
       currentExampleSentence: currentExampleSentence,
       currentNotes: currentNotes,
       currentStage: currentStage,
+      nextAvailableAt: nextAvailableAt,
       canSubmitAnswer: canSubmitAnswer,
       canCompleteSession: sessionState.canCompleteSession,
     );

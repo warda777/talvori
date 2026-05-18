@@ -6,6 +6,7 @@ import 'package:talvori/core/local_database/adapters/local_learning_view_model_s
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
+import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
@@ -105,6 +106,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
   DateTime? _lastSwipeCommitAt;
   bool _localShowTranslation = false;
+  bool _localTimeReplayMode = false;
+  bool _localReplayShowTranslation = false;
+  int _localReplayIndex = 0;
 
   // ✅ Provider Subscription für Stage-Änderungen
   ProviderSubscription<LearnModeState>? _stagesSub;
@@ -1273,6 +1277,85 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           ],
         ),
       );
+    } else if (_localTimeReplayMode &&
+        localLearningMode == LearningMode.time &&
+        localCategoryId != null &&
+        localCategoryId.isNotEmpty) {
+      final replayCardsAsync = ref.watch(
+        localTimeReplayCardsProvider(localCategoryId),
+      );
+      cardContent = replayCardsAsync.when(
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+        error: (_, _) => const Center(
+          child: Text(
+            'Wiederholungsmodus konnte nicht geladen werden',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        data: (cards) {
+          if (cards.isEmpty) {
+            return _LocalTimeReplayInfo(
+              message: 'Keine Wiederholungskarten aus der letzten Session.',
+              onExit: () {
+                setState(() => _localTimeReplayMode = false);
+              },
+            );
+          }
+          final index = _localReplayIndex.clamp(0, cards.length - 1);
+          final card = cards[index];
+          return SingleChildScrollView(
+            child: Column(
+              key: const ValueKey('local-time-replay-mode'),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const _LocalTimeReplayBadge(),
+                const SizedBox(height: 14),
+                SizedBox(
+                  height: 260,
+                  child: SwipeableWordCard(
+                    frontText: card.term,
+                    backText: card.translation,
+                    level: null,
+                    showTranslation: _localReplayShowTranslation,
+                    gesturesEnabled: true,
+                    onFlip: () {
+                      setState(
+                        () => _localReplayShowTranslation =
+                            !_localReplayShowTranslation,
+                      );
+                    },
+                    onSwipe: (_) async {
+                      setState(() {
+                        _localReplayShowTranslation = false;
+                        _localReplayIndex =
+                            (_localReplayIndex + 1) % cards.length;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${index + 1} / ${cards.length}',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                TextButton(
+                  key: const ValueKey('local-time-replay-back-button'),
+                  onPressed: () {
+                    setState(() {
+                      _localTimeReplayMode = false;
+                      _localReplayShowTranslation = false;
+                      _localReplayIndex = 0;
+                    });
+                  },
+                  child: const Text('Zurück zum Zeitplan'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
     } else if (cardState.hasCard) {
       cardContent = SwipeableWordCard(
         key: cardKey,
@@ -1322,18 +1405,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     } else {
       final hasEmptyLocalSession =
           viewModelState.hasSession && viewModelState.totalItems == 0;
+      final isTimePlanEmpty =
+          hasEmptyLocalSession && localLearningMode == LearningMode.time;
       cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              hasEmptyLocalSession
+              isTimePlanEmpty
+                  ? 'Für heute sind keine Zeitplan-Karten fällig'
+                  : hasEmptyLocalSession
                   ? 'Keine lokalen Wörter verfügbar'
                   : localCategoryId == null || localCategoryId.isEmpty
                   ? 'Keine lokale Kategorie'
                   : 'Keine aktive lokale Session',
               style: const TextStyle(color: Colors.white, fontSize: 20),
             ),
+            if (isTimePlanEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                _localTimePlanNextDueLabel(uiState.nextAvailableAt),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ],
             const SizedBox(height: 18),
             FilledButton(
               onPressed: localCategoryId == null || localCategoryId.isEmpty
@@ -1341,6 +1436,20 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   : startOrResume,
               child: const Text('Starten/Fortsetzen'),
             ),
+            if (isTimePlanEmpty) ...[
+              const SizedBox(height: 10),
+              OutlinedButton(
+                key: const ValueKey('local-time-replay-start-button'),
+                onPressed: () {
+                  setState(() {
+                    _localTimeReplayMode = true;
+                    _localReplayShowTranslation = false;
+                    _localReplayIndex = 0;
+                  });
+                },
+                child: const Text('Im Wiederholungsmodus üben'),
+              ),
+            ],
           ],
         ),
       );
@@ -1439,6 +1548,84 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  String _localTimePlanNextDueLabel(DateTime? nextAvailableAt) {
+    if (nextAvailableAt == null) {
+      return 'Heute ist dein Zeitplan erledigt. Reset gibt es nur im CategoryDetail.';
+    }
+    final now = DateTime.now();
+    if (!nextAvailableAt.isAfter(now)) {
+      return 'Die nächste Karte ist jetzt fällig.';
+    }
+    final remaining = nextAvailableAt.difference(now);
+    final days = remaining.inDays;
+    final hours = remaining.inHours.remainder(24);
+    final minutes = remaining.inMinutes.remainder(60);
+    final countdown = days > 0
+        ? '${days}T ${hours}Std.'
+        : hours > 0
+        ? '${hours}Std. ${minutes}Min.'
+        : '${minutes}Min.';
+    return 'Nächste Zeitplan-Karte verfügbar in $countdown.';
+  }
+}
+
+class _LocalTimeReplayBadge extends StatelessWidget {
+  const _LocalTimeReplayBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1820),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFF5DDCFF), width: 1.1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5DDCFF).withValues(alpha: 0.22),
+            blurRadius: 18,
+          ),
+        ],
+      ),
+      child: const Text(
+        'Wiederholungsmodus · ohne Einfluss auf deinen Zeitplan',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _LocalTimeReplayInfo extends StatelessWidget {
+  const _LocalTimeReplayInfo({required this.message, required this.onExit});
+
+  final String message;
+  final VoidCallback onExit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _LocalTimeReplayBadge(),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: 14),
+          TextButton(onPressed: onExit, child: const Text('Zurück')),
+        ],
       ),
     );
   }

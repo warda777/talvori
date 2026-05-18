@@ -208,6 +208,43 @@ void main() {
       expect(items.map((item) => item.wordId), ['word-1', 'word-2', 'word-0']);
     });
 
+    test('find_latest_session_with_items_skips_newer_empty_sessions', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWords(db, 3);
+      final repository = LearningSessionRepository(database: db);
+
+      final learnedSession = await createSession(
+        repository,
+        itemCount: 2,
+        createdAt: now,
+      );
+      await repository.completeSession(
+        sessionId: learnedSession.id,
+        completedAt: now.add(const Duration(minutes: 10)),
+      );
+      final emptySession = await createSession(
+        repository,
+        itemCount: 0,
+        createdAt: now.add(const Duration(minutes: 20)),
+      );
+
+      final latest = await repository.findLatestSession(
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+      );
+      final latestWithItems = await repository.findLatestSessionWithItems(
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+      );
+
+      expect(latest!.id, emptySession.id);
+      expect(latestWithItems!.id, learnedSession.id);
+    });
+
     test('update_current_position_persists_position', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);

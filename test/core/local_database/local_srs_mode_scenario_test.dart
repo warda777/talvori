@@ -279,6 +279,209 @@ void main() {
     );
 
     test(
+      'time_first_session_with_twenty_five_s0_words_introduces_twenty_new_cards',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        for (var index = 1; index <= 25; index += 1) {
+          final wordId = 'word-$index';
+          await insertWord(db, wordId);
+          await insertProgress(db, wordId: wordId, mode: LearningMode.time);
+        }
+
+        final localService = service(db);
+        final state = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+        final items = await sessionItemRows(db, state.sessionId);
+
+        expect(items, hasLength(20));
+        expect(items.where((item) => item['is_new_card'] == 1), hasLength(20));
+        expect(items.map((item) => item['word_id']), contains('word-20'));
+        expect(
+          items.map((item) => item['word_id']),
+          isNot(contains('word-21')),
+        );
+      },
+    );
+
+    test(
+      'time_later_session_limits_new_s0_to_five_after_due_reviews',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        for (var index = 1; index <= 3; index += 1) {
+          final wordId = 'review-$index';
+          await insertWord(db, wordId);
+          await insertProgress(
+            db,
+            wordId: wordId,
+            mode: LearningMode.time,
+            stage: SrsStage.s1,
+            nextDueAt: now,
+            lastReviewedAt: now.subtract(const Duration(days: 1)),
+          );
+        }
+        for (var index = 1; index <= 25; index += 1) {
+          final wordId = 'new-$index';
+          await insertWord(db, wordId);
+          await insertProgress(db, wordId: wordId, mode: LearningMode.time);
+        }
+        await ReviewHistoryRepository(database: db).insertReviewEvent(
+          wordId: 'review-1',
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          answer: ReviewAnswer.correct,
+          reviewedAt: now.subtract(const Duration(days: 1)),
+          oldStage: SrsStage.s0,
+          newStage: SrsStage.s1,
+          oldPassCount: 0,
+          newPassCount: 0,
+          createdAt: now.subtract(const Duration(days: 1)),
+        );
+
+        final localService = service(db);
+        final state = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+        final items = await sessionItemRows(db, state.sessionId);
+        final reviewItems = items.where((item) => item['is_new_card'] == 0);
+        final newItems = items.where((item) => item['is_new_card'] == 1);
+
+        expect(items, hasLength(8));
+        expect(reviewItems, hasLength(3));
+        expect(newItems, hasLength(5));
+        expect(items.take(3).map((item) => item['word_id']), [
+          'review-1',
+          'review-2',
+          'review-3',
+        ]);
+        expect(newItems.map((item) => item['word_id']), [
+          'new-1',
+          'new-2',
+          'new-3',
+          'new-4',
+          'new-5',
+        ]);
+      },
+    );
+
+    test(
+      'time_second_session_same_day_does_not_introduce_more_than_twenty_new_cards',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        final history = ReviewHistoryRepository(database: db);
+
+        for (var index = 1; index <= 25; index += 1) {
+          final wordId = 'word-$index';
+          await insertWord(db, wordId);
+          await insertProgress(
+            db,
+            wordId: wordId,
+            mode: LearningMode.time,
+            stage: index <= 20 ? SrsStage.s1 : SrsStage.s0,
+            nextDueAt: index <= 20 ? now.add(const Duration(days: 1)) : null,
+            lastReviewedAt: index <= 20 ? now : null,
+          );
+          if (index <= 20) {
+            await history.insertReviewEvent(
+              wordId: wordId,
+              categoryId: 'category-1',
+              mode: LearningMode.time,
+              trainingArea: TrainingArea.all,
+              answer: ReviewAnswer.correct,
+              reviewedAt: now.add(Duration(minutes: index)),
+              oldStage: SrsStage.s0,
+              newStage: SrsStage.s1,
+              oldPassCount: 0,
+              newPassCount: 0,
+              createdAt: now.add(Duration(minutes: index)),
+            );
+          }
+        }
+
+        final sameDay = await service(db).startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(hours: 2)),
+        );
+        final sameDayItems = await sessionItemRows(db, sameDay.sessionId);
+
+        expect(sameDay.totalItems, 0);
+        expect(sameDayItems, isEmpty);
+      },
+    );
+
+    test('time_progress_updates_do_not_touch_other_modes', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWord(db, 'word-1');
+      await insertProgress(db, wordId: 'word-1', mode: LearningMode.time);
+      await insertProgress(
+        db,
+        wordId: 'word-1',
+        mode: LearningMode.adaptive,
+        stage: SrsStage.s4,
+        passCount: 2,
+      );
+      await insertProgress(
+        db,
+        wordId: 'word-1',
+        mode: LearningMode.hybrid,
+        stage: SrsStage.s3,
+        passCount: 1,
+      );
+
+      final localService = service(db);
+      final state = await localService.startOrResumeSession(
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+        now: now,
+      );
+      await localService.submitAnswer(
+        sessionId: state.sessionId,
+        answer: ReviewAnswer.correct,
+        now: now.add(const Duration(minutes: 1)),
+      );
+
+      final timeRow = await progressRow(
+        db,
+        wordId: 'word-1',
+        mode: LearningMode.time,
+      );
+      final adaptiveRow = await progressRow(
+        db,
+        wordId: 'word-1',
+        mode: LearningMode.adaptive,
+      );
+      final hybridRow = await progressRow(
+        db,
+        wordId: 'word-1',
+        mode: LearningMode.hybrid,
+      );
+
+      expect(timeRow['stage'], SrsStage.s1.name);
+      expect(adaptiveRow['stage'], SrsStage.s4.name);
+      expect(adaptiveRow['pass_count'], 2);
+      expect(hybridRow['stage'], SrsStage.s3.name);
+      expect(hybridRow['pass_count'], 1);
+    });
+
+    test(
       'requeue_scenario_positions_retries_and_keeps_difficult_open',
       () async {
         final db = await openSchemaDatabase();

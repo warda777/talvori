@@ -100,6 +100,7 @@ class StageSwitchRowView extends StatefulWidget {
   final Animation<double>? activePulseAnimation;
   final bool showSwitchNotes;
   final bool useNumericSwitchNotes;
+  final List<bool>? blockedMask;
 
   const StageSwitchRowView({
     super.key,
@@ -138,6 +139,7 @@ class StageSwitchRowView extends StatefulWidget {
     this.activePulseAnimation,
     this.showSwitchNotes = true,
     this.useNumericSwitchNotes = false,
+    this.blockedMask,
   });
 
   @override
@@ -200,6 +202,10 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
       final isLast = vi == visibleIndices.length - 1;
       final count = counts[i];
       final disabled = count == 0;
+      final blocked =
+          widget.blockedMask != null &&
+          i < widget.blockedMask!.length &&
+          widget.blockedMask![i];
       Widget switchBody;
 
       if (i == 0) {
@@ -210,12 +216,16 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           count: counts[0],
           outerColor: locked
               ? widget.colors.disabledOuter
+              : blocked
+              ? const Color(0xFFFF4B6E)
               : (counts[0] > 0
                     ? widget.colors.newOuter
                     : widget.colors.disabledOuter),
           innerColor: widget.colors.inner,
-          innerStrokeColor: widget.colors.innerStroke,
-          highlight: locked ? false : counts[0] > 0,
+          innerStrokeColor: blocked
+              ? const Color(0xFFFF8AA0)
+              : widget.colors.innerStroke,
+          highlight: locked || blocked ? false : counts[0] > 0,
           completed: false,
           label: widget.labels.newLabel,
           note: locked ? '' : (widget.useNumericSwitchNotes ? '0' : 'Fach 0'),
@@ -242,11 +252,18 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           containerKey: widget.switchKeys?[stage],
           count: counts[stage],
           outerColor: counts[stage] > 0
-              ? widget.colors.stageOuter
+              ? blocked
+                    ? const Color(0xFFFF4B6E)
+                    : widget.colors.stageOuter
               : widget.colors.disabledOuter,
           innerColor: widget.colors.inner,
-          innerStrokeColor: widget.colors.innerStroke,
-          highlight: counts[stage] > 0 && counts[stage] < widget.goalPerStage,
+          innerStrokeColor: blocked
+              ? const Color(0xFFFF8AA0)
+              : widget.colors.innerStroke,
+          highlight:
+              !blocked &&
+              counts[stage] > 0 &&
+              counts[stage] < widget.goalPerStage,
           completed: counts[stage] >= widget.goalPerStage,
           label: '${widget.labels.stagePrefix}$stage',
           note: widget.useNumericSwitchNotes

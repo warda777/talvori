@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../srs/models/learning_mode.dart';
 import '../../srs/models/srs_stage.dart';
 import '../../srs/models/word_progress.dart';
+import '../models/local_stage_due_summary.dart';
 
 class WordProgressRepository {
   WordProgressRepository({required Database database, Uuid uuid = const Uuid()})
@@ -158,6 +159,10 @@ AND next_due_at <= ?
     required LearningMode mode,
     required int limit,
   }) async {
+    if (limit <= 0) {
+      return const <WordProgress>[];
+    }
+
     final rows = await _database.query(
       'word_progress',
       where: 'category_id = ? AND mode_id = ? AND stage = ?',
@@ -167,6 +172,75 @@ AND next_due_at <= ?
     );
 
     return rows.map(_mapProgress).toList(growable: false);
+  }
+
+  Future<DateTime?> loadEarliestFutureDueAt({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime now,
+  }) async {
+    final rows = await _database.query(
+      'word_progress',
+      columns: ['next_due_at'],
+      where: '''
+category_id = ?
+AND mode_id = ?
+AND next_due_at IS NOT NULL
+AND next_due_at > ?
+''',
+      whereArgs: [categoryId, mode.name, _encodeDateTime(now)],
+      orderBy: 'next_due_at ASC',
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+    return _decodeDateTime(rows.single['next_due_at'] as String?);
+  }
+
+  Future<List<LocalStageDueSummary>> loadStageDueSummaries({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime now,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT
+  stage,
+  COUNT(*) AS total_count,
+  SUM(CASE
+    WHEN next_due_at IS NOT NULL AND next_due_at <= ? THEN 1
+    ELSE 0
+  END) AS due_count,
+  MIN(CASE
+    WHEN next_due_at IS NOT NULL AND next_due_at > ? THEN next_due_at
+    ELSE NULL
+  END) AS next_due_at
+FROM word_progress
+WHERE category_id = ? AND mode_id = ?
+GROUP BY stage
+''',
+      [_encodeDateTime(now), _encodeDateTime(now), categoryId, mode.name],
+    );
+
+    final summaries = List<LocalStageDueSummary>.generate(
+      SrsStage.values.length,
+      (index) => LocalStageDueSummary(stage: index, totalCount: 0, dueCount: 0),
+    );
+    for (final row in rows) {
+      final stageName = row['stage'] as String?;
+      if (stageName == null) continue;
+      final stage = SrsStage.values.byName(stageName);
+      summaries[stage.index] = LocalStageDueSummary(
+        stage: stage.index,
+        totalCount: row['total_count'] as int? ?? 0,
+        dueCount: row['due_count'] as int? ?? 0,
+        nextDueAt: _decodeDateTime(row['next_due_at'] as String?),
+      );
+    }
+
+    return summaries;
   }
 
   Future<WordProgress?> _loadProgress({

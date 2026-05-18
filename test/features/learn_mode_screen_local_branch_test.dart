@@ -6,8 +6,10 @@ import 'package:talvori/core/local_database/controllers/local_learning_controlle
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/models/local_session_read_state.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
+import 'package:talvori/core/local_database/models/local_time_replay_card.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
+import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
@@ -698,6 +700,15 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningControllerProvider.overrideWith(() => controller),
+            localTimeReplayCardsProvider('basics').overrideWith(
+              (ref) async => const [
+                LocalTimeReplayCard(
+                  wordId: 'hello',
+                  term: 'hello',
+                  translation: 'hallo',
+                ),
+              ],
+            ),
           ],
           child: const MaterialApp(
             home: LearnModeScreen(
@@ -755,6 +766,20 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningControllerProvider.overrideWith(() => controller),
+            localTimeReplayCardsProvider('basics').overrideWith(
+              (ref) async => const [
+                LocalTimeReplayCard(
+                  wordId: 'word-1',
+                  term: 'hello',
+                  translation: 'hallo',
+                ),
+                LocalTimeReplayCard(
+                  wordId: 'word-2',
+                  term: 'water',
+                  translation: 'Wasser',
+                ),
+              ],
+            ),
           ],
           child: const MaterialApp(
             home: LearnModeScreen(
@@ -777,6 +802,123 @@ void main() {
       expect(controller.capturedCategoryId, 'basics');
       expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
       expect(find.byType(SwipeableWordCard), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'learn_mode_screen_local_time_mode_shows_clear_no_due_cards_state',
+    (tester) async {
+      final readState = LocalSessionReadState(
+        sessionId: 'empty-time-session',
+        categoryId: 'basics',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+        status: 'active',
+        sessionSize: 20,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        nextAvailableAt: DateTime.now().add(const Duration(days: 1)),
+        canSubmitAnswer: false,
+        canCompleteSession: true,
+      );
+      final controller = _TestLocalLearningController(
+        const LocalLearningControllerState(),
+        startedReadState: readState,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningControllerProvider.overrideWith(() => controller),
+            localTimeReplayCardsProvider('basics').overrideWith(
+              (ref) async => const [
+                LocalTimeReplayCard(
+                  wordId: 'word-1',
+                  term: 'hello',
+                  translation: 'hallo',
+                ),
+                LocalTimeReplayCard(
+                  wordId: 'word-2',
+                  term: 'water',
+                  translation: 'Wasser',
+                ),
+              ],
+            ),
+          ],
+          child: const MaterialApp(
+            home: LearnModeScreen(
+              categoryId: 'basics',
+              title: 'Basics',
+              useLocalOfflineFlow: true,
+              localCategoryId: 'basics',
+              localLearningMode: LearningMode.time,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Starten/Fortsetzen'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.text('Für heute sind keine Zeitplan-Karten fällig'),
+        findsOneWidget,
+      );
+      expect(find.text('Keine lokalen Wörter verfügbar'), findsNothing);
+      expect(
+        find.textContaining('Nächste Zeitplan-Karte verfügbar in'),
+        findsOneWidget,
+      );
+      expect(find.text('Im Wiederholungsmodus üben'), findsOneWidget);
+      expect(find.byType(SwipeableWordCard), findsNothing);
+
+      final replayButton = find.byKey(
+        const ValueKey('local-time-replay-start-button'),
+      );
+      await tester.ensureVisible(replayButton);
+      tester.widget<OutlinedButton>(replayButton).onPressed?.call();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.byKey(const ValueKey('local-time-replay-mode')),
+        findsOneWidget,
+      );
+      expect(find.byType(SwipeableWordCard), findsOneWidget);
+      expect(find.text('hello'), findsOneWidget);
+
+      await tester.tap(find.byType(SwipeableWordCard));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(find.text('hallo'), findsOneWidget);
+
+      await tester
+          .widget<SwipeableWordCard>(find.byType(SwipeableWordCard))
+          .onSwipe(true);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(find.text('water'), findsOneWidget);
+
+      final replayBackButton = find.byKey(
+        const ValueKey('local-time-replay-back-button'),
+      );
+      await tester.ensureVisible(replayBackButton);
+      tester.widget<TextButton>(replayBackButton).onPressed?.call();
+      await tester.pump();
+      expect(
+        find.text('Für heute sind keine Zeitplan-Karten fällig'),
+        findsOneWidget,
+      );
+      expect(find.byType(SwipeableWordCard), findsNothing);
+
+      expect(controller.submitCorrectCalls, 0);
+      expect(controller.submitWrongCalls, 0);
+      expect(controller.startOrResumeCalls, 1);
     },
   );
 

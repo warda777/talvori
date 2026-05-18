@@ -14,6 +14,7 @@ class LocalLearnModeUiState {
     this.exampleSentence,
     this.notes,
     this.currentStage,
+    this.nextAvailableAt,
   });
 
   final bool isLoading;
@@ -24,6 +25,7 @@ class LocalLearnModeUiState {
   final String? exampleSentence;
   final String? notes;
   final SrsStage? currentStage;
+  final DateTime? nextAvailableAt;
   final String progressLabel;
   final bool canSubmitAnswer;
   final bool isCompleted;
@@ -49,6 +51,7 @@ class LocalLearnModeUiAdapter {
       exampleSentence: state.exampleSentence,
       notes: state.notes,
       currentStage: state.currentStage,
+      nextAvailableAt: state.nextAvailableAt,
       progressLabel: '${state.answeredCount} / ${state.totalItems}',
       canSubmitAnswer: state.canSubmitAnswer,
       isCompleted: isCompleted,

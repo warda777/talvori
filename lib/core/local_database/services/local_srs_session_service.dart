@@ -54,7 +54,7 @@ class LocalSrsSessionService {
         existingSession.id,
       );
       final hasFinishedQueue =
-          existingItems.isNotEmpty && !existingItems.any(_isRemaining);
+          existingItems.isEmpty || !existingItems.any(_isRemaining);
       if (hasFinishedQueue) {
         await _learningSessionRepository.completeSession(
           sessionId: existingSession.id,
@@ -90,11 +90,6 @@ class LocalSrsSessionService {
       mode: mode,
       now: now,
     );
-    final newProgresses = await _wordProgressRepository.loadNewProgresses(
-      categoryId: categoryId,
-      mode: mode,
-      limit: sessionSize,
-    );
     final recentAnswers = await _reviewHistoryRepository.loadRecentAnswers(
       categoryId: categoryId,
       mode: mode,
@@ -107,6 +102,19 @@ class LocalSrsSessionService {
         !hasReviewHistory &&
         dueReviewProgresses.isEmpty &&
         await _allProgressInStage0(categoryId: categoryId, mode: mode);
+    final newCardLimit = mode == LearningMode.time
+        ? await _remainingTimeNewCardsForDay(
+            categoryId: categoryId,
+            mode: mode,
+            now: now,
+            allowExpandedTimeNewCards: allowExpandedTimeNewCards,
+          )
+        : sessionSize;
+    final newProgresses = await _wordProgressRepository.loadNewProgresses(
+      categoryId: categoryId,
+      mode: mode,
+      limit: newCardLimit,
+    );
 
     final queueBuildResult = _srsEngine.buildSessionQueue(
       QueueBuildInput(
@@ -342,6 +350,26 @@ class LocalSrsSessionService {
     final total = counts.fold<int>(0, (sum, count) => sum + count);
     if (total == 0) return false;
     return counts[SrsStage.s0.index] == total;
+  }
+
+  Future<int> _remainingTimeNewCardsForDay({
+    required String categoryId,
+    required LearningMode mode,
+    required DateTime now,
+    required bool allowExpandedTimeNewCards,
+  }) async {
+    final hadNewCardsBeforeToday = await _reviewHistoryRepository
+        .hasNewCardHistoryBeforeDay(
+          categoryId: categoryId,
+          mode: mode,
+          day: now,
+        );
+    final introducedToday = await _reviewHistoryRepository
+        .countNewCardReviewsOnDay(categoryId: categoryId, mode: mode, day: now);
+    final dailyLimit = allowExpandedTimeNewCards && !hadNewCardsBeforeToday
+        ? 20
+        : 5;
+    return (dailyLimit - introducedToday).clamp(0, dailyLimit);
   }
 
   int _remainingQueueSizeAfterCurrent(
