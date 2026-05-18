@@ -71,6 +71,20 @@ class LocalSrsSessionService {
       }
     }
 
+    if (await _allProgressInStage5(categoryId: categoryId, mode: mode)) {
+      final completedSession = await _learningSessionRepository
+          .findLatestCompletedSession(
+            categoryId: categoryId,
+            mode: mode,
+            trainingArea: trainingArea,
+          );
+      if (completedSession != null) {
+        final completedItems = await _learningSessionRepository
+            .loadSessionItems(completedSession.id);
+        return _toState(session: completedSession, items: completedItems);
+      }
+    }
+
     final dueReviewProgresses = await _wordProgressRepository.loadDueProgresses(
       categoryId: categoryId,
       mode: mode,

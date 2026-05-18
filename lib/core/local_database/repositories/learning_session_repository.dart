@@ -113,6 +113,31 @@ AND status = ?
     return _mapSession(rows.single);
   }
 
+  Future<LearningSessionRecord?> findLatestCompletedSession({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+  }) async {
+    final rows = await _database.query(
+      'learning_sessions',
+      where: '''
+category_id = ?
+AND mode_id = ?
+AND training_area_id = ?
+AND status = ?
+''',
+      whereArgs: [categoryId, mode.name, trainingArea.name, 'completed'],
+      orderBy: 'completed_at DESC, updated_at DESC',
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return _mapSession(rows.single);
+  }
+
   Future<LearningSessionRecord?> loadSession(String sessionId) async {
     final rows = await _database.query(
       'learning_sessions',

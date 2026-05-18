@@ -332,66 +332,80 @@ void main() {
       expect(progressAfterReopen['stage'], SrsStage.s1.name);
     });
 
-    test('completed_session_survives_reopen_and_allows_new_session', () async {
-      final tempDir = await createTempDatabaseDir();
-      final databasePath = databasePathFor(tempDir);
-      addTearDown(() async {
-        await databaseFactoryFfi.deleteDatabase(databasePath);
-        if (await tempDir.exists()) {
-          await tempDir.delete(recursive: true);
-        }
-      });
+    test(
+      'completed_session_survives_reopen_until_explicit_reset_starts_new_session',
+      () async {
+        final tempDir = await createTempDatabaseDir();
+        final databasePath = databasePathFor(tempDir);
+        addTearDown(() async {
+          await databaseFactoryFfi.deleteDatabase(databasePath);
+          if (await tempDir.exists()) {
+            await tempDir.delete(recursive: true);
+          }
+        });
 
-      var db = await openFileDatabase(databasePath);
-      await insertCategory(db);
-      await insertWord(db, 'word-1');
-      await insertProgress(db, wordId: 'word-1', mode: LearningMode.adaptive);
-      var localService = service(db);
-      var state = await localService.startOrResumeSession(
-        categoryId: 'category-1',
-        mode: LearningMode.adaptive,
-        trainingArea: TrainingArea.all,
-        now: now,
-      );
-      for (var index = 0; index < 11; index++) {
-        state = await localService.submitAnswer(
-          sessionId: state.sessionId,
-          answer: ReviewAnswer.correct,
-          now: now.add(Duration(minutes: index + 1)),
+        var db = await openFileDatabase(databasePath);
+        await insertCategory(db);
+        await insertWord(db, 'word-1');
+        await insertProgress(db, wordId: 'word-1', mode: LearningMode.adaptive);
+        var localService = service(db);
+        var state = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
         );
-      }
-      final completed = await localService.startOrResumeSession(
-        categoryId: 'category-1',
-        mode: LearningMode.adaptive,
-        trainingArea: TrainingArea.all,
-        now: now.add(const Duration(minutes: 20)),
-      );
-      expect(completed.status, 'completed');
-      final completedSessionId = completed.sessionId;
+        for (var index = 0; index < 11; index++) {
+          state = await localService.submitAnswer(
+            sessionId: state.sessionId,
+            answer: ReviewAnswer.correct,
+            now: now.add(Duration(minutes: index + 1)),
+          );
+        }
+        final completed = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 20)),
+        );
+        expect(completed.status, 'completed');
+        final completedSessionId = completed.sessionId;
 
-      await db.close();
-      db = await openFileDatabase(databasePath);
-      addTearDown(db.close);
-      localService = service(db);
-      final completedRows = await db.query(
-        'learning_sessions',
-        where: 'id = ?',
-        whereArgs: [completedSessionId],
-      );
-      expect(completedRows.single['status'], 'completed');
+        await db.close();
+        db = await openFileDatabase(databasePath);
+        addTearDown(db.close);
+        localService = service(db);
+        final completedRows = await db.query(
+          'learning_sessions',
+          where: 'id = ?',
+          whereArgs: [completedSessionId],
+        );
+        expect(completedRows.single['status'], 'completed');
 
-      final newSession = await localService.startOrResumeSession(
-        categoryId: 'category-1',
-        mode: LearningMode.adaptive,
-        trainingArea: TrainingArea.all,
-        now: now.add(const Duration(minutes: 21)),
-      );
-      final rows = await sessionRows(db);
+        final stillCompleted = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 21)),
+        );
+        expect(stillCompleted.sessionId, completedSessionId);
+        expect(stillCompleted.status, 'completed');
 
-      expect(newSession.sessionId, isNot(completedSessionId));
-      expect(rows, hasLength(2));
-      expect(rows.where((row) => row['status'] == 'completed'), hasLength(1));
-      expect(rows.where((row) => row['status'] == 'active'), hasLength(1));
-    });
+        final newSession = await localService.resetAndStartSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 22)),
+        );
+        final rows = await sessionRows(db);
+
+        expect(newSession.sessionId, isNot(completedSessionId));
+        expect(newSession.status, 'active');
+        expect(newSession.currentWordId, 'word-1');
+        expect(rows, hasLength(2));
+        expect(rows.where((row) => row['status'] == 'completed'), hasLength(1));
+        expect(rows.where((row) => row['status'] == 'active'), hasLength(1));
+      },
+    );
   });
 }
