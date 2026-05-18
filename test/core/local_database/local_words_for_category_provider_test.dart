@@ -38,7 +38,7 @@ void main() {
         localWordsForCategoryProvider('seed-category-basics').future,
       );
 
-      expect(words, hasLength(3));
+      expect(words, hasLength(25));
       expect(words.map((word) => word.term), containsAll(['hello', 'water']));
     });
 

@@ -38,7 +38,7 @@ void main() {
         localWordCountProvider('seed-category-basics').future,
       );
 
-      expect(count, 3);
+      expect(count, 25);
     });
 
     test('returns_zero_for_empty_or_unknown_category', () async {

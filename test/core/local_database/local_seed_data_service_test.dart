@@ -65,7 +65,7 @@ void main() {
       expect(basics, isNotNull);
       expect(travel, isNotNull);
       expect(examPractice, isNotNull);
-      expect(basicsWords, isNotEmpty);
+      expect(basicsWords, hasLength(25));
       expect(travelWords, isNotEmpty);
       expect(examPracticeWords, isNotEmpty);
       for (final word in [
@@ -103,7 +103,8 @@ void main() {
           .toSet();
 
       await seedService.seedDefaults(now: now.add(const Duration(minutes: 5)));
-      final categoriesAfterSecondRun = await categoryRepository.loadCategories();
+      final categoriesAfterSecondRun = await categoryRepository
+          .loadCategories();
       final wordsAfterSecondRun = await db.query('words');
       final categoryIdsAfterSecondRun = categoriesAfterSecondRun
           .map((category) => category.id)
@@ -134,7 +135,10 @@ void main() {
       expect(basics, isNotNull);
       expect(travel, isNotNull);
       expect(examPractice, isNotNull);
-      expect(categoryIdsAfterSecondRun, hasLength(categoriesAfterSecondRun.length));
+      expect(
+        categoryIdsAfterSecondRun,
+        hasLength(categoriesAfterSecondRun.length),
+      );
       expect(wordIdsAfterSecondRun, hasLength(wordsAfterSecondRun.length));
       expect(progressRows, isEmpty);
       expect(sessionRows, isEmpty);
