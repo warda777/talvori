@@ -174,6 +174,17 @@ class ReviewHistoryRepository {
     return rows.isNotEmpty;
   }
 
+  Future<int> deleteForCategoryAndMode({
+    required String categoryId,
+    required LearningMode mode,
+  }) {
+    return _database.delete(
+      'review_history',
+      where: 'category_id = ? AND mode_id = ?',
+      whereArgs: [categoryId, mode.name],
+    );
+  }
+
   ReviewHistoryEvent _mapEvent(Map<String, Object?> row) {
     return ReviewHistoryEvent(
       id: row['id']! as String,

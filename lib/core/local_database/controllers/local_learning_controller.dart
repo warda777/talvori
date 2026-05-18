@@ -6,6 +6,10 @@ import '../../srs/models/training_area.dart';
 import '../models/local_review_visual_feedback.dart';
 import '../models/local_session_read_state.dart';
 import '../providers/local_bootstrap_provider.dart';
+import '../providers/local_stage_counts_provider.dart';
+import '../providers/local_stage_inspector_provider.dart';
+import '../providers/local_word_detail_provider.dart';
+import '../providers/local_word_review_history_provider.dart';
 
 enum LocalLearningControllerAction {
   none,
@@ -130,6 +134,8 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
   Future<void> submitCorrect({required DateTime now}) async {
     final sessionId = state.readState?.sessionId;
     final reviewedWordId = state.readState?.currentWordId;
+    final categoryId = state.readState?.categoryId;
+    final mode = state.readState?.mode;
     if (sessionId == null) {
       state = state.copyWith(errorMessage: 'No active local session.');
       return;
@@ -144,9 +150,17 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
         answer: ReviewAnswer.correct,
         now: now,
       );
-      final feedback = reviewedWordId == null
+      if (categoryId != null && mode != null) {
+        _invalidateProgressViews(categoryId: categoryId, mode: mode);
+      }
+      final feedback =
+          reviewedWordId == null || categoryId == null || mode == null
           ? null
-          : await _loadLatestFeedbackForWord(reviewedWordId);
+          : await _loadLatestFeedbackForWord(
+              wordId: reviewedWordId,
+              categoryId: categoryId,
+              mode: mode,
+            );
 
       state = state.copyWith(
         isLoading: false,
@@ -163,6 +177,8 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
   Future<void> submitWrong({required DateTime now}) async {
     final sessionId = state.readState?.sessionId;
     final reviewedWordId = state.readState?.currentWordId;
+    final categoryId = state.readState?.categoryId;
+    final mode = state.readState?.mode;
     if (sessionId == null) {
       state = state.copyWith(errorMessage: 'No active local session.');
       return;
@@ -177,9 +193,17 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
         answer: ReviewAnswer.wrong,
         now: now,
       );
-      final feedback = reviewedWordId == null
+      if (categoryId != null && mode != null) {
+        _invalidateProgressViews(categoryId: categoryId, mode: mode);
+      }
+      final feedback =
+          reviewedWordId == null || categoryId == null || mode == null
           ? null
-          : await _loadLatestFeedbackForWord(reviewedWordId);
+          : await _loadLatestFeedbackForWord(
+              wordId: reviewedWordId,
+              categoryId: categoryId,
+              mode: mode,
+            );
 
       state = state.copyWith(
         isLoading: false,
@@ -231,16 +255,23 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
     state = const LocalLearningControllerState();
   }
 
-  Future<LocalReviewVisualFeedback?> _loadLatestFeedbackForWord(
-    String wordId,
-  ) async {
+  Future<LocalReviewVisualFeedback?> _loadLatestFeedbackForWord({
+    required String wordId,
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
     final bootstrap = await ref.read(localBootstrapProvider.future);
     final events = await bootstrap.repositoryFactory.reviewHistoryRepository
-        .loadHistoryForWord(wordId);
+        .loadHistoryForWordInContext(
+          wordId: wordId,
+          categoryId: categoryId,
+          mode: mode,
+          descending: true,
+        );
     if (events.isEmpty) {
       return null;
     }
-    final event = events.last;
+    final event = events.first;
     final outcomeType = event.newStage.index > event.oldStage.index
         ? LocalReviewOutcomeType.promoted
         : event.newStage.index < event.oldStage.index
@@ -259,5 +290,19 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
       wasDemoted: event.newStage.index < event.oldStage.index,
       timestamp: event.reviewedAt,
     );
+  }
+
+  void _invalidateProgressViews({
+    required String categoryId,
+    required LearningMode mode,
+  }) {
+    ref.invalidate(
+      localStageCountsProvider(
+        LocalStageCountsRequest(categoryId: categoryId, mode: mode),
+      ),
+    );
+    ref.invalidate(localStageInspectorProvider);
+    ref.invalidate(localWordDetailProvider);
+    ref.invalidate(localWordReviewHistoryProvider);
   }
 }

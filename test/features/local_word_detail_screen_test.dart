@@ -177,7 +177,17 @@ void main() {
   ) async {
     await pumpDetail(
       tester,
-      detail: LocalWordDetailData(word: word(), progress: null),
+      detail: LocalWordDetailData(
+        word: word(),
+        progress: WordProgress(
+          wordId: 'seed-basics-hello',
+          categoryId: 'seed-category-basics',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s2,
+          passCount: 1,
+          wrongCount: 1,
+        ),
+      ),
       history: [
         LocalReviewHistoryTimelineItem(
           id: 'history-2',
@@ -209,6 +219,11 @@ void main() {
     );
 
     expect(find.text('Verlauf'), findsOneWidget);
+    expect(find.text('Insgesamt richtig'), findsOneWidget);
+    expect(find.text('Insgesamt falsch'), findsOneWidget);
+    expect(find.text('Reviews gesamt'), findsOneWidget);
+    expect(find.text('Aktuelle Merkstufe'), findsOneWidget);
+    expect(find.text('S2'), findsOneWidget);
     expect(find.text('Falsch: S3 -> S2'), findsOneWidget);
     expect(find.text('Richtig: S0 -> S1'), findsOneWidget);
     expect(find.text('S3 -> S2'), findsOneWidget);

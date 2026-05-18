@@ -304,6 +304,68 @@ void main() {
       },
     );
 
+    test('delete_for_category_and_mode_preserves_other_contexts', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertCategory(db, id: 'category-2');
+      await insertWord(db, id: 'word-1');
+      await insertWord(db, id: 'word-2', categoryId: 'category-2');
+      final repository = ReviewHistoryRepository(database: db);
+
+      await insertReviewEvent(
+        repository,
+        wordId: 'word-1',
+        categoryId: 'category-1',
+        mode: LearningMode.adaptive,
+      );
+      await insertReviewEvent(
+        repository,
+        wordId: 'word-1',
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+      );
+      await insertReviewEvent(
+        repository,
+        wordId: 'word-2',
+        categoryId: 'category-2',
+        mode: LearningMode.adaptive,
+      );
+
+      final deleted = await repository.deleteForCategoryAndMode(
+        categoryId: 'category-1',
+        mode: LearningMode.adaptive,
+      );
+      final rows = await db.query('review_history', orderBy: 'category_id ASC');
+
+      expect(deleted, 1);
+      expect(rows, hasLength(2));
+      expect(
+        rows.any(
+          (row) =>
+              row['category_id'] == 'category-1' &&
+              row['mode_id'] == LearningMode.adaptive.name,
+        ),
+        isFalse,
+      );
+      expect(
+        rows.any(
+          (row) =>
+              row['category_id'] == 'category-1' &&
+              row['mode_id'] == LearningMode.time.name,
+        ),
+        isTrue,
+      );
+      expect(
+        rows.any(
+          (row) =>
+              row['category_id'] == 'category-2' &&
+              row['mode_id'] == LearningMode.adaptive.name,
+        ),
+        isTrue,
+      );
+    });
+
     test(
       'focused_review_event_can_be_stored_without_progress_change',
       () async {

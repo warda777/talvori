@@ -102,7 +102,7 @@ class LocalStageInspectorSheet extends ConsumerWidget {
                   modeLabel: modeLabel ?? _modeLabel(mode),
                 ),
                 const SizedBox(height: 18),
-                const _Legend(),
+                _Legend(stage: stage),
                 const SizedBox(height: 18),
                 if (items.isEmpty)
                   const _EmptyState()
@@ -236,22 +236,63 @@ class _CountPill extends StatelessWidget {
 }
 
 class _Legend extends StatelessWidget {
-  const _Legend();
+  const _Legend({required this.stage});
+
+  final SrsStage stage;
 
   @override
   Widget build(BuildContext context) {
+    final entries = _legendEntriesForStage(stage);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: const [
-        _LegendChip(color: Color(0xFF36F58A), label: 'hochgestuft'),
-        _LegendChip(color: Color(0xFFFF4B6E), label: 'falsch/zurück'),
-        _LegendChip(color: Color(0xFF5DDCFF), label: '1. Wiederholung'),
-        _LegendChip(color: Color(0xFFB36BFF), label: '2. Wiederholung'),
-        _LegendChip(color: Color(0xFFFFB84A), label: '3. Wiederholung'),
-      ],
+      children: entries
+          .map((entry) => _LegendChip(color: entry.color, label: entry.label))
+          .toList(growable: false),
     );
   }
+
+  List<_LegendEntry> _legendEntriesForStage(SrsStage stage) {
+    if (stage == SrsStage.s5) {
+      return const [
+        _LegendEntry(color: Color(0xFF5DDCFF), label: 'richtig/Wiederholung'),
+        _LegendEntry(color: Color(0xFFFF4B6E), label: 'falsch/zurück'),
+      ];
+    }
+
+    final entries = <_LegendEntry>[
+      const _LegendEntry(color: Color(0xFF36F58A), label: 'hochgestuft'),
+      const _LegendEntry(color: Color(0xFFFF4B6E), label: 'falsch/zurück'),
+    ];
+    final repeatCount = _requiredCorrectsForStage(stage) - 1;
+    if (repeatCount >= 1) {
+      entries.add(
+        const _LegendEntry(color: Color(0xFF5DDCFF), label: '1. Wiederholung'),
+      );
+    }
+    if (repeatCount >= 2) {
+      entries.add(
+        const _LegendEntry(color: Color(0xFFB36BFF), label: '2. Wiederholung'),
+      );
+    }
+    return entries;
+  }
+
+  int _requiredCorrectsForStage(SrsStage stage) {
+    return switch (stage) {
+      SrsStage.s0 => 1,
+      SrsStage.s1 || SrsStage.s2 => 2,
+      SrsStage.s3 || SrsStage.s4 => 3,
+      SrsStage.s5 => 1,
+    };
+  }
+}
+
+class _LegendEntry {
+  const _LegendEntry({required this.color, required this.label});
+
+  final Color color;
+  final String label;
 }
 
 class _LegendChip extends StatelessWidget {

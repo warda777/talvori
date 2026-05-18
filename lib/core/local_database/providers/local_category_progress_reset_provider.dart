@@ -59,6 +59,11 @@ class LocalCategoryProgressResetServiceImpl
       mode: request.mode,
       updatedAt: now,
     );
+
+    await repositories.reviewHistoryRepository.deleteForCategoryAndMode(
+      categoryId: request.categoryId,
+      mode: request.mode,
+    );
   }
 }
 

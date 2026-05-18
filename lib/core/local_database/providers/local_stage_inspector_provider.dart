@@ -39,15 +39,12 @@ final localStageInspectorProvider =
           continue;
         }
 
-        final history = await repositories.reviewHistoryRepository
-            .loadHistoryForWord(word.id);
-        final matchingHistory = history
-            .where(
-              (event) =>
-                  event.categoryId == request.categoryId &&
-                  event.mode == request.mode,
-            )
-            .toList(growable: false);
+        final matchingHistory = await repositories.reviewHistoryRepository
+            .loadHistoryForWordInContext(
+              wordId: word.id,
+              categoryId: request.categoryId,
+              mode: request.mode,
+            );
         final lastEvent = matchingHistory.isEmpty ? null : matchingHistory.last;
 
         items.add(

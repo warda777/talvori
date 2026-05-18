@@ -23,6 +23,7 @@ import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 
@@ -912,5 +913,84 @@ void main() {
     expect(find.text('hochgestuft'), findsOneWidget);
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('hallo'), findsOneWidget);
+  });
+
+  Future<void> pumpStageInspectorLegend(
+    WidgetTester tester,
+    SrsStage stage,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStageInspectorProvider.overrideWith(
+            (ref, request) async => [
+              LocalStageInspectorItem(
+                wordId: 'word-1',
+                term: 'hello',
+                translation: 'hallo',
+                categoryId: request.categoryId,
+                mode: request.mode,
+                currentStage: request.stage,
+                passCount: 0,
+                wrongCount: 0,
+              ),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () {
+                showLocalStageInspectorSheet(
+                  context: context,
+                  categoryId: 'seed-category-basics',
+                  mode: LearningMode.adaptive,
+                  stage: stage,
+                  categoryLabel: 'Health & Fitness',
+                );
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('stage_inspector_s0_legend_shows_only_possible_entries', (
+    tester,
+  ) async {
+    await pumpStageInspectorLegend(tester, SrsStage.s0);
+
+    expect(find.text('hochgestuft'), findsOneWidget);
+    expect(find.text('falsch/zurück'), findsOneWidget);
+    expect(find.text('1. Wiederholung'), findsNothing);
+    expect(find.text('2. Wiederholung'), findsNothing);
+    expect(find.text('3. Wiederholung'), findsNothing);
+  });
+
+  testWidgets('stage_inspector_s1_legend_hides_third_repeat', (tester) async {
+    await pumpStageInspectorLegend(tester, SrsStage.s1);
+
+    expect(find.text('hochgestuft'), findsOneWidget);
+    expect(find.text('falsch/zurück'), findsOneWidget);
+    expect(find.text('1. Wiederholung'), findsOneWidget);
+    expect(find.text('2. Wiederholung'), findsNothing);
+    expect(find.text('3. Wiederholung'), findsNothing);
+  });
+
+  testWidgets('stage_inspector_s3_legend_shows_two_repeat_steps', (
+    tester,
+  ) async {
+    await pumpStageInspectorLegend(tester, SrsStage.s3);
+
+    expect(find.text('hochgestuft'), findsOneWidget);
+    expect(find.text('falsch/zurück'), findsOneWidget);
+    expect(find.text('1. Wiederholung'), findsOneWidget);
+    expect(find.text('2. Wiederholung'), findsOneWidget);
+    expect(find.text('3. Wiederholung'), findsNothing);
   });
 }

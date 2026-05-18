@@ -48,15 +48,35 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      backgroundColor: const Color(0xFF050507),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF050507),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          widget.title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
       body: wordsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => const Center(
-          child: Text('Lokale Wörter konnten nicht geladen werden'),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF8DBBFF)),
+        ),
+        error: (error, stackTrace) => const _LocalWordListEmptyState(
+          title: 'Lokale Wörter konnten nicht geladen werden',
+          subtitle: 'Bitte versuche es gleich noch einmal.',
         ),
         data: (words) {
           if (words.isEmpty) {
-            return const Center(child: Text('Keine lokalen Wörter verfügbar'));
+            return const _LocalWordListEmptyState(
+              title: 'Keine lokalen Wörter verfügbar',
+              subtitle: 'Für diese Kategorie sind lokal noch keine Wörter da.',
+            );
           }
 
           final visibleWords = _sortWords(_filterWords(words));
@@ -64,37 +84,16 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: TextField(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+                child: _NeonSearchField(
                   controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Suchen',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
                   onChanged: (value) => setState(() => _query = value),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: DropdownButtonFormField<_LocalWordSortMode>(
-                  initialValue: _sortMode,
-                  decoration: InputDecoration(
-                    labelText: 'Sortierung',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  items: _LocalWordSortMode.values
-                      .map(
-                        (mode) => DropdownMenuItem(
-                          value: mode,
-                          child: Text(mode.label),
-                        ),
-                      )
-                      .toList(growable: false),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: _NeonSortControl(
+                  value: _sortMode,
                   onChanged: (mode) {
                     if (mode == null) return;
                     setState(() => _sortMode = mode);
@@ -103,18 +102,17 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
               ),
               Expanded(
                 child: visibleWords.isEmpty
-                    ? const Center(
-                        child: Text('Keine passenden Wörter gefunden'),
+                    ? const _LocalWordListEmptyState(
+                        title: 'Keine passenden Wörter gefunden',
+                        subtitle: 'Passe deine Suche an oder lösche sie.',
                       )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(16),
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 2, 20, 28),
                         itemCount: visibleWords.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final word = visibleWords[index];
-                          return ListTile(
-                            title: Text(word.term),
-                            subtitle: Text(word.translation),
+                          return _LocalWordCard(
+                            word: word,
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -174,5 +172,258 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
     });
 
     return sorted;
+  }
+}
+
+class _NeonSearchField extends StatelessWidget {
+  const _NeonSearchField({required this.controller, required this.onChanged});
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _NeonFieldShell(
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        cursorColor: const Color(0xFF8DBBFF),
+        decoration: const InputDecoration(
+          hintText: 'Suchen',
+          hintStyle: TextStyle(
+            color: Color(0xFF7F8494),
+            fontWeight: FontWeight.w600,
+          ),
+          prefixIcon: Icon(Icons.search, color: Color(0xFF8DBBFF)),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        ),
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _NeonSortControl extends StatelessWidget {
+  const _NeonSortControl({required this.value, required this.onChanged});
+
+  final _LocalWordSortMode value;
+  final ValueChanged<_LocalWordSortMode?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _NeonFieldShell(
+      child: DropdownButtonHideUnderline(
+        child: DropdownButtonFormField<_LocalWordSortMode>(
+          initialValue: value,
+          dropdownColor: const Color(0xFF101116),
+          iconEnabledColor: const Color(0xFF8DBBFF),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Sortierung',
+            labelStyle: TextStyle(
+              color: Color(0xFF8DBBFF),
+              fontWeight: FontWeight.w700,
+            ),
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          items: _LocalWordSortMode.values
+              .map(
+                (mode) =>
+                    DropdownMenuItem(value: mode, child: Text(mode.label)),
+              )
+              .toList(growable: false),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _NeonFieldShell extends StatelessWidget {
+  const _NeonFieldShell({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C0D12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF8DBBFF), width: 1),
+        boxShadow: const [
+          BoxShadow(color: Color(0x223A8DFF), blurRadius: 18, spreadRadius: 1),
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _LocalWordCard extends StatelessWidget {
+  const _LocalWordCard({required this.word, required this.onTap});
+
+  final LocalWord word;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0E0F14),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFF2F557D), width: 1),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1F8DBBFF),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                  offset: Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: Color(0x66000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        word.term,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        word.translation,
+                        style: const TextStyle(
+                          color: Color(0xFFB8C4D9),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF101827),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF8DBBFF),
+                      width: 1,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x338DBBFF), blurRadius: 12),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xFFBFD5FF),
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocalWordListEmptyState extends StatelessWidget {
+  const _LocalWordListEmptyState({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0C0D12),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFF2F557D), width: 1),
+            boxShadow: const [
+              BoxShadow(color: Color(0x223A8DFF), blurRadius: 22),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.auto_stories_outlined,
+                color: Color(0xFF8DBBFF),
+                size: 30,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF9E9EA6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

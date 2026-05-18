@@ -7,7 +7,10 @@ import 'package:talvori/core/local_database/providers/local_category_progress_re
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
@@ -884,6 +887,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
           );
       ref.invalidate(localLearningViewModelProvider);
       ref.invalidate(localStageCountsProvider(stageCountsRequest));
+      ref.invalidate(localStageInspectorProvider);
+      ref.invalidate(localWordDetailProvider);
+      ref.invalidate(localWordReviewHistoryProvider);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lernfortschritt wurde zurückgesetzt')),

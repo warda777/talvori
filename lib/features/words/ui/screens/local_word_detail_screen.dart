@@ -4,6 +4,7 @@ import 'package:talvori/core/local_database/models/local_review_history_timeline
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
 import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
 
@@ -150,7 +151,10 @@ class LocalWordDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 18),
               _NeonPanel(
-                child: _ReviewHistorySection(historyAsync: historyAsync),
+                child: _ReviewHistorySection(
+                  historyAsync: historyAsync,
+                  progress: detail.progress,
+                ),
               ),
             ],
           );
@@ -161,9 +165,13 @@ class LocalWordDetailScreen extends ConsumerWidget {
 }
 
 class _ReviewHistorySection extends StatelessWidget {
-  const _ReviewHistorySection({required this.historyAsync});
+  const _ReviewHistorySection({
+    required this.historyAsync,
+    required this.progress,
+  });
 
   final AsyncValue<List<LocalReviewHistoryTimelineItem>> historyAsync;
+  final WordProgress? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -189,13 +197,87 @@ class _ReviewHistorySection extends StatelessWidget {
               'Noch kein Lernverlauf vorhanden',
               style: TextStyle(color: Color(0xFF9E9EA6)),
             )
-          else
+          else ...[
+            _ReviewHistorySummary(items: items, progress: progress),
+            const SizedBox(height: 14),
             ...items.map(
               (item) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _ReviewHistoryTile(item: item),
               ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewHistorySummary extends StatelessWidget {
+  const _ReviewHistorySummary({required this.items, required this.progress});
+
+  final List<LocalReviewHistoryTimelineItem> items;
+  final WordProgress? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final correctCount = items
+        .where((item) => item.answer == ReviewAnswer.correct)
+        .length;
+    final wrongCount = items
+        .where((item) => item.answer == ReviewAnswer.wrong)
+        .length;
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _SummaryPill(label: 'Insgesamt richtig', value: '$correctCount'),
+        _SummaryPill(label: 'Insgesamt falsch', value: '$wrongCount'),
+        _SummaryPill(label: 'Reviews gesamt', value: '${items.length}'),
+        _SummaryPill(
+          label: 'Aktuelle Merkstufe',
+          value: progress == null ? '-' : 'S${progress!.stage.index}',
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryPill extends StatelessWidget {
+  const _SummaryPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFF101014),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF2B3C5F), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: const Color(0xFF9E9EA6),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );

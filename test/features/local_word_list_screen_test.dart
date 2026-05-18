@@ -161,8 +161,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'ticket');
     await tester.pump();
 
-    expect(find.widgetWithText(ListTile, 'ticket'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'Fahrkarte'), findsOneWidget);
+    expect(find.text('ticket'), findsWidgets);
+    expect(find.text('Fahrkarte'), findsOneWidget);
     expect(find.text('water'), findsNothing);
   });
 
@@ -174,8 +174,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Wasser');
     await tester.pump();
 
-    expect(find.widgetWithText(ListTile, 'water'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'Wasser'), findsOneWidget);
+    expect(find.text('water'), findsOneWidget);
+    expect(find.text('Wasser'), findsWidgets);
     expect(find.text('ticket'), findsNothing);
   });
 
@@ -187,8 +187,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'WAS');
     await tester.pump();
 
-    expect(find.widgetWithText(ListTile, 'water'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'Wasser'), findsOneWidget);
+    expect(find.text('water'), findsOneWidget);
+    expect(find.text('Wasser'), findsOneWidget);
   });
 
   testWidgets('local_word_list_screen_search_empty_result_state', (
@@ -246,7 +246,7 @@ void main() {
       ],
     );
 
-    await tester.tap(find.widgetWithText(ListTile, 'hello'));
+    await tester.tap(find.text('hello'));
     await tester.pumpAndSettle();
 
     expect(find.byType(LocalWordDetailScreen), findsOneWidget);
@@ -266,7 +266,7 @@ void main() {
 
     await pumpLocalWordList(tester, words: words);
 
-    expect(find.widgetWithText(ListTile, 'hello'), findsOneWidget);
+    expect(find.text('hello'), findsOneWidget);
 
     words[0] = localWord(
       id: 'seed-basics-hello',
@@ -275,8 +275,8 @@ void main() {
     );
     await pumpLocalWordList(tester, words: words);
 
-    expect(find.widgetWithText(ListTile, 'hi'), findsOneWidget);
-    expect(find.widgetWithText(ListTile, 'servus'), findsOneWidget);
+    expect(find.text('hi'), findsOneWidget);
+    expect(find.text('servus'), findsOneWidget);
     expect(find.text('hello'), findsNothing);
   });
 }
