@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
+import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
@@ -874,6 +876,13 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               mode: selectedLocalLearningMode,
             ),
           );
+      ref
+          .read(localLearningControllerProvider.notifier)
+          .clearForContext(
+            categoryId: selectedCategoryId,
+            mode: selectedLocalLearningMode,
+          );
+      ref.invalidate(localLearningViewModelProvider);
       ref.invalidate(localStageCountsProvider(stageCountsRequest));
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

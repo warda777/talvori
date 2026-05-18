@@ -221,6 +221,16 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
     }
   }
 
+  void clearForContext({
+    required String categoryId,
+    required LearningMode mode,
+  }) {
+    final readState = state.readState;
+    if (readState == null) return;
+    if (readState.categoryId != categoryId || readState.mode != mode) return;
+    state = const LocalLearningControllerState();
+  }
+
   Future<LocalReviewVisualFeedback?> _loadLatestFeedbackForWord(
     String wordId,
   ) async {

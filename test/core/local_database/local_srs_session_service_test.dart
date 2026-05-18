@@ -983,6 +983,88 @@ void main() {
     );
 
     test(
+      'start_or_resume_after_external_reset_ignores_completed_stale_session_and_uses_s0',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s2,
+          passCount: 1,
+          wrongCount: 0,
+          nextDueAt: now,
+          lastReviewedAt: now.subtract(const Duration(minutes: 5)),
+        );
+        final localService = service(db);
+        final stale = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        await db.update(
+          'learning_sessions',
+          {
+            'status': 'completed',
+            'completed_at': now
+                .add(const Duration(minutes: 1))
+                .toIso8601String(),
+            'updated_at': now.add(const Duration(minutes: 1)).toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [stale.sessionId],
+        );
+        await db.update(
+          'word_progress',
+          {
+            'stage': SrsStage.s0.name,
+            'pass_count': 0,
+            'wrong_count': 0,
+            'next_due_at': null,
+            'last_reviewed_at': null,
+            'updated_at': now.add(const Duration(minutes: 2)).toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: ['progress-1'],
+        );
+
+        final fresh = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now.add(const Duration(minutes: 3)),
+        );
+        final freshItems = await db.query(
+          'session_items',
+          where: 'session_id = ?',
+          whereArgs: [fresh.sessionId],
+        );
+        final progressRows = await db.query('word_progress');
+        final sessionRows = await db.query('learning_sessions');
+
+        expect(fresh.sessionId, isNot(stale.sessionId));
+        expect(fresh.status, 'active');
+        expect(fresh.currentWordId, 'word-1');
+        expect(progressRows.single['stage'], SrsStage.s0.name);
+        expect(freshItems.single['stage_at_enqueue'], SrsStage.s0.name);
+        expect(
+          sessionRows.where((row) => row['status'] == 'completed'),
+          hasLength(1),
+        );
+        expect(
+          sessionRows.where((row) => row['status'] == 'active'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test(
       'reset_and_start_session_resets_s5_progress_and_starts_new_active_session',
       () async {
         final db = await openSchemaDatabase();

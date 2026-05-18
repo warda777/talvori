@@ -5,6 +5,7 @@ import 'package:talvori/core/local_database/adapters/local_category_detail_group
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
+import 'package:talvori/core/local_database/models/local_session_read_state.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
@@ -14,7 +15,10 @@ import 'package:talvori/core/local_database/providers/local_stage_inspector_prov
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/srs_stage.dart';
+import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
@@ -29,6 +33,36 @@ class _FakeLocalCategoryProgressResetService
   @override
   Future<void> resetToS0(LocalCategoryProgressResetRequest request) async {
     lastRequest = request;
+  }
+}
+
+class _ResetInvalidationLocalLearningController
+    extends LocalLearningController {
+  _ResetInvalidationLocalLearningController({
+    required this.initialState,
+    required this.startedReadState,
+  });
+
+  final LocalLearningControllerState initialState;
+  final LocalSessionReadState startedReadState;
+  int startOrResumeCalls = 0;
+
+  @override
+  LocalLearningControllerState build() => initialState;
+
+  @override
+  Future<void> startOrResume({
+    required String categoryId,
+    required LearningMode mode,
+    required TrainingArea trainingArea,
+    required DateTime now,
+    int? sessionSize,
+  }) async {
+    startOrResumeCalls += 1;
+    state = state.copyWith(
+      readState: startedReadState,
+      lastAction: LocalLearningControllerAction.startOrResume,
+    );
   }
 }
 
@@ -508,6 +542,141 @@ void main() {
       expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
       expect(resetService.lastRequest?.mode, LearningMode.adaptive);
       expect(find.text('Lernfortschritt wurde zurückgesetzt'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_reset_clears_stale_learn_mode_state_before_start',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final resetService = _FakeLocalCategoryProgressResetService();
+      var controllerCreations = 0;
+
+      const staleReadState = LocalSessionReadState(
+        sessionId: 'old-session',
+        categoryId: 'seed-category-basics',
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        status: 'active',
+        sessionSize: 4,
+        currentPosition: 2,
+        totalItems: 4,
+        answeredCount: 2,
+        remainingCount: 2,
+        stageCounts: [0, 0, 2, 0, 0, 0],
+        canSubmitAnswer: true,
+        canCompleteSession: false,
+        currentWordId: 'old-word',
+        currentTerm: 'old progress',
+        currentTranslation: 'alter Fortschritt',
+        currentStage: SrsStage.s2,
+      );
+      const freshReadState = LocalSessionReadState(
+        sessionId: 'fresh-session',
+        categoryId: 'seed-category-basics',
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        status: 'active',
+        sessionSize: 4,
+        currentPosition: 0,
+        totalItems: 4,
+        answeredCount: 0,
+        remainingCount: 4,
+        stageCounts: [4, 0, 0, 0, 0, 0],
+        canSubmitAnswer: true,
+        canCompleteSession: false,
+        currentWordId: 'fresh-word',
+        currentTerm: 'fresh start',
+        currentTranslation: 'frischer Start',
+        currentStage: SrsStage.s0,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 4),
+          localStageCountsProvider.overrideWith(
+            (ref, request) async => [4, 0, 0, 0, 0, 0],
+          ),
+          localCategoryProgressResetServiceProvider.overrideWithValue(
+            resetService,
+          ),
+          localLearningControllerProvider.overrideWith(() {
+            controllerCreations += 1;
+            return _ResetInvalidationLocalLearningController(
+              initialState: controllerCreations == 1
+                  ? const LocalLearningControllerState(
+                      readState: staleReadState,
+                    )
+                  : const LocalLearningControllerState(),
+              startedReadState: freshReadState,
+            );
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        container.read(localLearningViewModelProvider).term,
+        'old progress',
+      );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.text('Limitlos'));
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.restart_alt_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+      expect(resetService.lastRequest?.mode, LearningMode.adaptive);
+
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(LearnModeScreen), findsOneWidget);
+      expect(find.text('old progress'), findsNothing);
+      expect(find.text('Keine aktive lokale Session'), findsOneWidget);
+
+      await tester.tap(find.text('Starten/Fortsetzen'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(SwipeableWordCard), findsOneWidget);
+      expect(find.text('fresh start'), findsOneWidget);
+      expect(find.text('old progress'), findsNothing);
+      expect(
+        tester
+            .widget<StageSwitchRowView>(find.byType(StageSwitchRowView))
+            .counts,
+        [4, 0, 0, 0, 0, 0],
+      );
     },
   );
 
