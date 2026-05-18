@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
@@ -25,11 +29,13 @@ Future<void> showCategoryPopup({
   const textSecondary = Color(0xFFB8C7D9);
 
   Widget buildTile({
+    Key? key,
     required BuildContext context,
     required FutureOr<void> Function() onTapAfter,
     required String title,
     required IconData icon,
     required Color accentColor,
+    VoidCallback? onTapBefore,
     String? subtitle,
     double width = 129,
     double height = 90,
@@ -37,6 +43,7 @@ Future<void> showCategoryPopup({
     Duration holdDelay = const Duration(milliseconds: 120),
   }) {
     return SizedBox(
+      key: key,
       width: width,
       height: height,
       child: TapFlash(
@@ -48,6 +55,7 @@ Future<void> showCategoryPopup({
         spread: 1,
         duration: const Duration(milliseconds: 220),
         holdForward: true,
+        onTapBefore: onTapBefore,
         onTapAfter: () async {
           if (holdDelay > Duration.zero) {
             await Future.delayed(holdDelay);
@@ -220,31 +228,47 @@ Future<void> showCategoryPopup({
                       openBuilder: (_, __) =>
                           const QuickSetsDetailScreen(initialIndex: 0),
                     ),
-                    OpenContainer(
-                      transitionDuration: const Duration(milliseconds: 350),
-                      transitionType: ContainerTransitionType.fadeThrough,
-                      closedElevation: 0,
-                      openElevation: 0,
-                      useRootNavigator: true,
-                      closedColor: cs.surfaceContainerHighest,
-                      openColor: Theme.of(context).scaffoldBackgroundColor,
-                      closedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      tappable: false,
-                      onClosed: (_) => onRefreshMyWords(),
-                      closedBuilder: (c, open) => buildTile(
-                        context: c,
-                        onTapAfter: () async {
-                          onBeginOpen();
-                          open();
-                        },
-                        title: 'Meine Wörter',
-                        icon: Icons.edit_note_rounded,
-                        accentColor: violet,
-                      ),
-                      openBuilder: (_, __) =>
-                          const QuickSetsDetailScreen(initialIndex: 1),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final count = ref.watch(
+                          localWordCountProvider(localMyWordsCategoryId),
+                        );
+                        final subtitle = count.maybeWhen(
+                          data: (value) =>
+                              value == 1 ? '1 Wort' : '$value Wörter',
+                          orElse: () => null,
+                        );
+                        return buildTile(
+                          key: const Key('category-popup-my-words-tile'),
+                          context: context,
+                          onTapBefore: () {
+                            final navigator = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
+                            onBeginOpen();
+                            unawaited(
+                              navigator
+                                  .push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const LocalWordListScreen(
+                                        categoryId: localMyWordsCategoryId,
+                                        title: localMyWordsCategoryLabel,
+                                      ),
+                                    ),
+                                  )
+                                  .then((_) => onRefreshMyWords()),
+                            );
+                          },
+                          onTapAfter: () async {},
+                          holdDelay: Duration.zero,
+                          title: 'Meine Wörter',
+                          subtitle: subtitle,
+                          icon: Icons.edit_note_rounded,
+                          accentColor: violet,
+                          height: 106,
+                        );
+                      },
                     ),
                   ],
                 ),

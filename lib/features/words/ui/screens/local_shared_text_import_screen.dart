@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
 import 'package:talvori/core/local_database/providers/shared_text_import_service_provider.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 typedef LocalSharedTextImportCallback =
     Future<SharedTextImportResult> Function(String rawText);
@@ -169,6 +171,32 @@ class _LocalSharedTextImportScreenState
             if (result != null) ...[
               const SizedBox(height: 18),
               _ResultPanel(result: result),
+              if (result.status == SharedTextImportStatus.imported) ...[
+                const SizedBox(height: 14),
+                OutlinedButton.icon(
+                  key: const Key('open-local-my-words-button'),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const LocalWordListScreen(
+                          categoryId: localMyWordsCategoryId,
+                          title: localMyWordsCategoryLabel,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.list_alt_rounded),
+                  label: const Text('Meine Wörter öffnen'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: _cyan.withValues(alpha: 0.82)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ],
             ],
           ],
         ),

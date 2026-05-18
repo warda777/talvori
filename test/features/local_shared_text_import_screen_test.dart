@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
+import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/features/words/ui/screens/local_shared_text_import_screen.dart';
 
 void main() {
@@ -68,6 +70,7 @@ void main() {
       find.text('Wort wurde in Meine Wörter gespeichert.'),
       findsOneWidget,
     );
+    expect(find.text('Meine Wörter öffnen'), findsOneWidget);
   });
 
   testWidgets('duplicate_word_shows_duplicate_message', (tester) async {
@@ -118,6 +121,52 @@ void main() {
       find.text('Bitte markiere für Phase 1 nur ein einzelnes Wort.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('successful_import_can_open_local_my_words_list', (tester) async {
+    final now = DateTime(2026, 5, 18, 10);
+    final importedWord = LocalWord(
+      id: 'local-my-words-umbrella',
+      categoryId: 'local-category-my-words',
+      term: 'umbrella',
+      translation: '',
+      sortOrder: 1,
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForCategoryProvider.overrideWith(
+            (ref, categoryId) async => [importedWord],
+          ),
+        ],
+        child: MaterialApp(
+          home: LocalSharedTextImportScreen(
+            importText: (_) async => _imported(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(
+      find.byKey(const Key('local-shared-text-import-input')),
+      'umbrella',
+    );
+    await tester.tap(find.byKey(const Key('local-shared-text-import-button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('open-local-my-words-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+
+    expect(find.text('Meine Wörter'), findsWidgets);
+    expect(find.text('umbrella'), findsOneWidget);
+    expect(find.text('local-category-my-words'), findsNothing);
   });
 }
 
