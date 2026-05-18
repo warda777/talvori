@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
   termAz('A–Z nach Wort'),
@@ -114,6 +115,17 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
                           return ListTile(
                             title: Text(word.term),
                             subtitle: Text(word.translation),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => LocalWordDetailScreen(
+                                    wordId: word.id,
+                                    categoryId: word.categoryId,
+                                    title: widget.title,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

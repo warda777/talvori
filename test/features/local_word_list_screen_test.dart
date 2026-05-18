@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 void main() {
@@ -35,6 +37,18 @@ void main() {
           localWordsForCategoryProvider.overrideWith(
             (ref, categoryId) async => words,
           ),
+          localWordDetailProvider.overrideWith((ref, request) async {
+            LocalWord? selectedWord;
+            for (final word in words) {
+              if (word.id == request.wordId) {
+                selectedWord = word;
+                break;
+              }
+            }
+            final word = selectedWord;
+            if (word == null) return null;
+            return LocalWordDetailData(word: word, progress: null);
+          }),
         ],
         child: MaterialApp(
           home: LocalWordListScreen(
@@ -176,5 +190,26 @@ void main() {
 
     expect(topOf('Wasser', tester), lessThan(topOf('Fahrkarte', tester)));
     expect(topOf('Fahrkarte', tester), lessThan(topOf('Apfel', tester)));
+  });
+
+  testWidgets('local_word_list_screen_opens_detail_on_word_tap', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(id: 'seed-basics-hello', term: 'hello', translation: 'hallo'),
+      ],
+    );
+
+    await tester.tap(find.widgetWithText(ListTile, 'hello'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LocalWordDetailScreen), findsOneWidget);
+    expect(find.text('Health & Fitness'), findsWidgets);
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('hallo'), findsOneWidget);
+    expect(find.text('Noch kein Lernfortschritt'), findsOneWidget);
+    expect(find.text('seed-category-basics'), findsNothing);
   });
 }
