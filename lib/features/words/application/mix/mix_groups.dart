@@ -16,13 +16,45 @@ class MixSearchResult {
 
 /// Quelle für Gruppen (später leicht ersetzbar durch Taxonomy aus Supabase)
 const mixGroups = <MixGroup>[
-  MixGroup('Your collections', ['Want to memorize']),
-  MixGroup('Action & Adventure', ['Gaming', 'Sports', 'Transport', 'Travel']),
-  MixGroup('Culture & Creativity', ['Art & Literature', 'Music & Entertainment']),
-  MixGroup('Language Tools', ['Grammar & Syntax', 'Irregular Verbs', 'Phrases & Idioms', 'Top 500 Words']),
-  MixGroup('Levels & Progress', ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
-  MixGroup('Life & Daily Flow', ['Food & Cooking', 'Health & Fitness', 'Home & Living', 'Money & Shopping', 'Produktivitie', 'Style & Fashion']),
-  MixGroup('Nature & Beyond', ['Animals', 'Environment', 'Nature', 'Science', 'Space']),
-  MixGroup('People & Mind', ['Feelings', 'Personality', 'Relationships', 'Thoughts']),
-  MixGroup('Society & Systems', ['Law & Politics', 'Media & News', 'School & Studies', 'Tech & Innovation', 'Work & Careers']),
+  MixGroup('Deine Sammlungen', ['Möchte ich lernen']),
+  MixGroup('Action & Abenteuer', ['Gaming', 'Sport', 'Verkehr', 'Reisen']),
+  MixGroup('Kultur & Kreativität', [
+    'Kunst & Literatur',
+    'Musik & Unterhaltung',
+  ]),
+  MixGroup('Sprachwerkzeuge', [
+    'Grammatik & Syntax',
+    'Unregelmäßige Verben',
+    'Phrasen & Redewendungen',
+    'Top 500 Wörter',
+  ]),
+  MixGroup('Level & Fortschritt', ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
+  MixGroup('Alltag & Leben', [
+    'Essen & Kochen',
+    'Gesundheit & Fitness',
+    'Wohnen & Zuhause',
+    'Geld & Einkaufen',
+    'Produktivität',
+    'Stil & Mode',
+  ]),
+  MixGroup('Natur & Weltall', [
+    'Tiere',
+    'Umwelt',
+    'Natur',
+    'Wissenschaft',
+    'Weltall',
+  ]),
+  MixGroup('Menschen & Gedanken', [
+    'Gefühle',
+    'Persönlichkeit',
+    'Beziehungen',
+    'Gedanken',
+  ]),
+  MixGroup('Gesellschaft & Systeme', [
+    'Recht & Politik',
+    'Medien & Nachrichten',
+    'Schule & Studium',
+    'Technik & Innovation',
+    'Arbeit & Karriere',
+  ]),
 ];

@@ -7,31 +7,33 @@ class MixTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 2),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded),
             onPressed: onBack,
             style: IconButton.styleFrom(
-              foregroundColor: cs.onSurface,
-              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF0C1622),
+              side: BorderSide(
+                color: const Color(0xFF5DDCFF).withValues(alpha: 0.32),
+              ),
             ),
           ),
           const SizedBox(width: 8),
-          Text('Make your own mix',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.more_horiz_rounded, color: Colors.white),
-            onPressed: onMore,
-            style: IconButton.styleFrom(
-              backgroundColor: const Color(0xFF2C2C2E),
-              foregroundColor: Colors.white,
+          Expanded(
+            child: Text(
+              'Eigenen Mix erstellen',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
+          const SizedBox(width: 56),
         ],
       ),
     );

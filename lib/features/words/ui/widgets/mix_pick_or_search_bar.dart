@@ -1,89 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talvori/features/words/application/mix/mix_groups.dart';
 import 'package:talvori/features/words/application/mix/mix_search_providers.dart';
-import 'package:talvori/features/words/application/mix/mix_selection_controller.dart';
 
 class MixPickOrSearchBar extends ConsumerWidget {
   const MixPickOrSearchBar({super.key});
 
-  static const gold = Color(0xFFF1C86B);
+  static const cyan = Color(0xFF5DDCFF);
+  static const surface = Color(0xFF0B1420);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final isSearch = ref.watch(mixIsSearchModeProvider);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
       child: SizedBox(
-        height: 46,
+        height: 52,
         child: isSearch
             ? TextField(
                 autofocus: true,
-                onSubmitted: (_) => ref.read(mixIsSearchModeProvider.notifier).state = false,
-                onChanged: (t) => ref.read(mixSearchTextProvider.notifier).state = t,
-                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                onSubmitted: (_) =>
+                    ref.read(mixIsSearchModeProvider.notifier).state = false,
+                onChanged: (t) =>
+                    ref.read(mixSearchTextProvider.notifier).state = t,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Suchen...',
                   prefixIcon: IconButton(
                     icon: const Icon(Icons.search_rounded),
-                    onPressed: () => ref.read(mixIsSearchModeProvider.notifier).state = false,
-                    color: Colors.white,
-                    style: IconButton.styleFrom(backgroundColor: Colors.transparent),
+                    onPressed: () =>
+                        ref.read(mixIsSearchModeProvider.notifier).state =
+                            false,
+                    color: cyan,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                    ),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF2C2C2E),
+                  fillColor: surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(22),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide(color: cyan.withValues(alpha: 0.45)),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide(color: cyan.withValues(alpha: 0.45)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: cyan, width: 1.4),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  hintStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.62),
+                  ),
                 ),
               )
             : FilledButton(
                 onPressed: () {
-                  final sel = ref.read(mixSelectionProvider.notifier);
-                  sel.toggleAll(mixGroups.expand((g) => g.items));
+                  ref.read(mixIsSearchModeProvider.notifier).state = true;
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: gold,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                  backgroundColor: surface,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: BorderSide(color: cyan.withValues(alpha: 0.74)),
+                  ),
                   padding: EdgeInsets.zero,
+                  elevation: 0,
+                  shadowColor: cyan.withValues(alpha: 0.22),
                 ),
                 child: SizedBox(
-                  height: 46,
+                  height: 52,
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const SizedBox(width: 8), // Verschiebt Icon nach rechts
-                      GestureDetector(
-                        onTap: () => ref.read(mixIsSearchModeProvider.notifier).state = true,
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          width: 52,
-                          height: 46,
-                          alignment: const Alignment(0, 0.3), // Etwas tiefer
-                          child: const Icon(
-                            Icons.search_rounded,
-                            size: 36,
-                            color: Color(0xFF2D2D2E),
-                          ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 52,
+                        height: 52,
+                        alignment: const Alignment(0, 0.2),
+                        child: const Icon(
+                          Icons.search_rounded,
+                          size: 30,
+                          color: cyan,
                         ),
                       ),
                       const Expanded(
                         child: Center(
                           child: Text(
-                            'Pick all',
-                            style: TextStyle(fontWeight: FontWeight.w800),
+                            'Suchen',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 60), // Balance für zentrierte Ausrichtung (52 Icon + 8 Spacer)
+                      const SizedBox(width: 60),
                     ],
                   ),
                 ),
