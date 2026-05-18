@@ -83,6 +83,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Stack(
           fit: StackFit.expand, // wichtig: voller Bereich für die Animation
           children: [
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF07101A),
+                      Color(0xFF02050A),
+                      Color(0xFF000000),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             // 🔥 Fireball HINTER dem Button
             FireballBounceAnimation(
               key: _fireballKey,
@@ -201,7 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ).showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                            'Bereits in Today\'s Picks',
+                                            'Bereits in deinen Tageswörtern',
                                           ),
                                         ),
                                       );
@@ -212,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'Today\'s Picks ist voll (${DailyPicksStore.I.maxCount})',
+                                            'Tageswörter ist voll (${DailyPicksStore.I.maxCount})',
                                           ),
                                         ),
                                       );
@@ -249,9 +264,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   );
                                   if (!context.mounted) return;
                                 },
-                                onSpeak: () => _todo('Speak word'),
-                                onMarkWords: () =>
-                                    _todo('Open Mark Words (web)'),
+                                onSpeak: () => _todo('Wort sprechen'),
+                                onMarkWords: () => _todo('Wörter markieren'),
                                 onGo: () async {
                                   const quickSetsLabels = [
                                     'All words',

@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/v_icon_controller.dart';
@@ -9,7 +8,7 @@ class TopLeftButton extends ConsumerStatefulWidget {
   final Widget icon;
   final double size;
   final VoidCallback onTap;
-  
+
   const TopLeftButton({
     super.key,
     required this.icon,
@@ -18,8 +17,8 @@ class TopLeftButton extends ConsumerStatefulWidget {
   });
 
   // konstante Farben müssen static const sein
-  static const Color gold = Color(0xFFF1C86B);
-  static const Color buttonColor = Color(0xFF2D2D2E);
+  static const Color gold = Color(0xFF5DDCFF);
+  static const Color buttonColor = Color(0xFF07101A);
 
   @override
   ConsumerState<TopLeftButton> createState() => _TopLeftButtonState();
@@ -44,7 +43,9 @@ class _TopLeftButtonState extends ConsumerState<TopLeftButton>
   @override
   Widget build(BuildContext context) {
     final dim = widget.size;
-    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
+    final glowEnabled = ref.watch(
+      homeControllerProvider.select((s) => s.glowEnabled),
+    );
 
     return SizedBox.square(
       dimension: dim,
@@ -62,25 +63,23 @@ class _TopLeftButtonState extends ConsumerState<TopLeftButton>
             decoration: BoxDecoration(
               color: TopLeftButton.buttonColor,
               shape: BoxShape.circle,
-              border: Border.all(color: TopLeftButton.gold, width: 2), // Goldener Rand
-              boxShadow: glowEnabled ? [
-                // Durchgehender goldener Glow
-                BoxShadow(
-                  color: TopLeftButton.gold.withValues(alpha: 0.55),
-                  blurRadius: 20,
-                  spreadRadius: 1,
-                ),
-              ] : null,
+              border: Border.all(color: TopLeftButton.gold, width: 2),
+              boxShadow: glowEnabled
+                  ? [
+                      BoxShadow(
+                        color: TopLeftButton.gold.withValues(alpha: 0.42),
+                        blurRadius: 20,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
             ),
             alignment: Alignment.center,
             child: AnimatedBuilder(
               animation: _c.rotation,
-              builder: (_, child) => Transform.rotate(
-                angle: _c.angleRad,       // nur Icon dreht sich
-                child: child,
-              ),
-              child: widget.icon
-                  ?? Icon(Icons.check, size: dim * 0.55, color: TopLeftButton.gold),
+              builder: (_, child) =>
+                  Transform.rotate(angle: _c.angleRad, child: child),
+              child: widget.icon,
             ),
           ),
         ),

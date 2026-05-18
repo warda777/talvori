@@ -12,7 +12,7 @@ class HomeBottomNav extends ConsumerWidget {
   final VoidCallback onProfile;
   final bool categoriesActive;
   final bool practiceActive;
-  final GlobalKey? practiceButtonKey;  // <-- NEU: Key für Practice-Button
+  final GlobalKey? practiceButtonKey;
 
   const HomeBottomNav({
     super.key,
@@ -21,30 +21,30 @@ class HomeBottomNav extends ConsumerWidget {
     required this.onProfile,
     this.categoriesActive = false,
     this.practiceActive = false,
-    this.practiceButtonKey,  // <-- NEU
+    this.practiceButtonKey,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final glowEnabled = ref.watch(homeControllerProvider.select((s) => s.glowEnabled));
-    const gold = Color(0xFFF1C86B);
-    const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
-    const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
+    final glowEnabled = ref.watch(
+      homeControllerProvider.select((s) => s.glowEnabled),
+    );
+    const wheelBlue = Color(0xFF5DDCFF);
+    const violet = Color(0xFFB36BFF);
+    const buttonColor = Color(0xFF07101A);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // ⬅︎ Category (links) – identische Größe + volle Ausdehnung
           SizedBox.square(
             dimension: kTopBtnSize,
             child: Stack(
-              fit: StackFit.expand, // Kinder füllen die ganze Fläche
+              fit: StackFit.expand,
               children: [
                 TapFlash(
-                  color: wheelBlue, // Blauer Glow für Category-Button
+                  color: wheelBlue,
                   shape: BoxShape.circle,
                   maxOpacity: 1.0,
                   blur: 28,
@@ -55,15 +55,16 @@ class HomeBottomNav extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: buttonColor,
                       shape: BoxShape.circle,
-                      border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
-                      boxShadow: glowEnabled ? [
-                        // Durchgehender blauer Glow
-                        BoxShadow(
-                          color: wheelBlue.withValues(alpha: 0.55),
-                          blurRadius: 20,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
+                      border: Border.all(color: wheelBlue, width: 1.5),
+                      boxShadow: glowEnabled
+                          ? [
+                              BoxShadow(
+                                color: wheelBlue.withValues(alpha: 0.38),
+                                blurRadius: 20,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Center(
                       child: Icon(
@@ -79,7 +80,7 @@ class HomeBottomNav extends ConsumerWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
+                        border: Border.all(color: wheelBlue, width: 1.5),
                       ),
                     ),
                   ),
@@ -91,28 +92,29 @@ class HomeBottomNav extends ConsumerWidget {
             width: 140,
             height: 52,
             child: TapFlash(
-              color: wheelBlue,                                          // Blau für Practice-Button
+              color: violet,
               shape: BoxShape.rectangle,
               borderRadius: const BorderRadius.all(Radius.circular(999)),
               maxOpacity: 1.0,
               blur: 28,
               spread: 6,
               duration: const Duration(milliseconds: 220),
-              onTapAfter: onPractice,                               // nach dem Flash ausführen
+              onTapAfter: onPractice,
               child: Container(
-                key: practiceButtonKey,  // <-- NEU: Key für Practice-Button
+                key: practiceButtonKey,
                 decoration: BoxDecoration(
-                  color: buttonColor,                     // Button-Farbe
+                  color: buttonColor,
                   borderRadius: const BorderRadius.all(Radius.circular(999)),
-                  border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
-                  boxShadow: glowEnabled ? [
-                    // Durchgehender blauer Glow
-                    BoxShadow(
-                      color: wheelBlue.withValues(alpha: 0.55),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                  ] : null,
+                  border: Border.all(color: violet, width: 1.5),
+                  boxShadow: glowEnabled
+                      ? [
+                          BoxShadow(
+                            color: violet.withValues(alpha: 0.34),
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
                 padding: EdgeInsets.zero,
                 alignment: Alignment.center,
@@ -122,8 +124,12 @@ class HomeBottomNav extends ConsumerWidget {
                     Icon(Icons.school_rounded, size: 22, color: Colors.white),
                     const SizedBox(width: 8),
                     const Text(
-                      'practice',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+                      'Üben',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -131,30 +137,30 @@ class HomeBottomNav extends ConsumerWidget {
             ),
           ),
 
-          // ───────── PROFILE (Kreis, 52×52) ─────────
           SizedBox.square(
             dimension: 52,
             child: TapFlash(
-              color: wheelBlue,                                    // Blau für Profile-Button
+              color: wheelBlue,
               shape: BoxShape.circle,
               maxOpacity: 1.0,
               blur: 28,
               spread: 6,
               duration: const Duration(milliseconds: 220),
-              onTapAfter: onProfile,                                // nach dem Flash ausführen
+              onTapAfter: onProfile,
               child: Container(
                 decoration: BoxDecoration(
-                  color: buttonColor,                     // Button-Farbe
+                  color: buttonColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: wheelBlue, width: 2), // Blauer Rand
-                  boxShadow: glowEnabled ? [
-                    // Durchgehender blauer Glow
-                    BoxShadow(
-                      color: wheelBlue.withValues(alpha: 0.55),
-                      blurRadius: 20,
-                      spreadRadius: 1,
-                    ),
-                  ] : null,
+                  border: Border.all(color: wheelBlue, width: 1.5),
+                  boxShadow: glowEnabled
+                      ? [
+                          BoxShadow(
+                            color: wheelBlue.withValues(alpha: 0.38),
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
                 alignment: Alignment.center,
                 child: const Icon(Icons.person_rounded, color: Colors.white),

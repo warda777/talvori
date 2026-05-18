@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +6,6 @@ import 'package:animations/animations.dart';
 
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
-import 'package:talvori/features/home/ui/widgets/fireball_gesture_wrapper.dart';
 import 'package:talvori/features/home/ui/widgets/top_left_button.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'progress_pill.dart';
@@ -64,7 +62,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
   static const double _quickBtnSize =
       52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
   static const double _gap = 16.0; // Abstand zwischen Krone und Quick-Buttons
-  static const Color gold = Color(0xFFF1C86B); // Gold für Progress Pill
+  static const Color gold = Color(0xFF5DDCFF);
 
   final GlobalKey _crownKey = GlobalKey();
   final GlobalKey<_TapFlashWithoutGestureState> _tapFlashKey = GlobalKey();
@@ -341,13 +339,11 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final glowEnabled = ref.watch(
       homeControllerProvider.select((s) => s.glowEnabled),
     );
-    const wheelBlue = Color(0xFFB0CCFE); // Blau aus Word Wheel
-    const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
-    const gold = Color(0xFFF1C86B); // Gold für Krone
+    const buttonColor = Color(0xFF07101A);
+    const gold = Color(0xFFB36BFF);
 
     return SizedBox(
       height: _dim,
@@ -411,7 +407,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                 dimension: _dim,
                 child: _TapFlashWithoutGesture(
                   key: _tapFlashKey,
-                  color: gold, // Gold für Krone
+                  color: gold,
                   shape: BoxShape.circle,
                   maxOpacity: 1.0,
                   blur: 28,
@@ -438,15 +434,11 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                     decoration: BoxDecoration(
                       color: buttonColor,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: gold,
-                        width: 2,
-                      ), // Goldener Rand
+                      border: Border.all(color: gold, width: 2),
                       boxShadow: glowEnabled
                           ? [
-                              // Durchgehender goldener Glow
                               BoxShadow(
-                                color: gold.withValues(alpha: 0.55),
+                                color: gold.withValues(alpha: 0.42),
                                 blurRadius: 20,
                                 spreadRadius: 1,
                               ),
@@ -468,7 +460,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                                   controller: _fireballIconController,
                                   autoPlay: false,
                                   size: 38,
-                                  baseColor: gold, // Ursprungsfarbe (gold)
+                                  baseColor: gold,
                                   animationColor: const Color(
                                     0xFFA05260,
                                   ), // #A05260
@@ -488,7 +480,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                           controller: _fireballIconController,
                           autoPlay: false,
                           size: 38,
-                          baseColor: gold, // Ursprungsfarbe (gold)
+                          baseColor: gold,
                           animationColor: const Color(0xFFA05260), // #A05260
                           animationInterval: const Duration(
                             seconds: 5,
