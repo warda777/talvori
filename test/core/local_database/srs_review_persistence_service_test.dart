@@ -3,6 +3,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/local_database_schema.dart';
 import 'package:talvori/core/local_database/services/srs_review_persistence_service.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/queue_item_status.dart';
 import 'package:talvori/core/srs/models/requeue_decision.dart';
 import 'package:talvori/core/srs/models/requeue_reason.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
@@ -78,6 +79,32 @@ void main() {
       'created_at': now.toIso8601String(),
       'updated_at': now.toIso8601String(),
     });
+  }
+
+  Future<void> seedAdditionalSessionItems(Database db, int count) async {
+    for (var index = 2; index <= count + 1; index++) {
+      final wordId = 'word-$index';
+      await db.insert('words', {
+        'id': wordId,
+        'category_id': 'category-1',
+        'term': wordId,
+        'translation': 'translation-$wordId',
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+      await db.insert('session_items', {
+        'id': 'item-$index',
+        'session_id': 'session-1',
+        'word_id': wordId,
+        'category_id': 'category-1',
+        'mode_id': LearningMode.time.name,
+        'stage_at_enqueue': SrsStage.s1.name,
+        'position': index - 1,
+        'status': 'queued',
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+    }
   }
 
   ReviewInput reviewInput({
@@ -184,7 +211,11 @@ void main() {
         nextPosition: 1,
       );
 
-      final item = (await db.query('session_items')).single;
+      final item = (await db.query(
+        'session_items',
+        where: 'id = ?',
+        whereArgs: ['item-1'],
+      )).single;
       expect(item['status'], 'answered');
       expect(item['answered_at'], reviewedAt.toIso8601String());
       expect(item['updated_at'], reviewedAt.toIso8601String());
@@ -199,8 +230,8 @@ void main() {
         shouldRequeue: true,
         reason: RequeueReason.repeatedWrongAnswer,
         targetOffset: 5,
-        effectiveOffset: 5,
-        moveToQueueEnd: false,
+        effectiveOffset: null,
+        moveToQueueEnd: true,
         markDifficult: false,
         shouldRemoveFromReview: false,
       );
@@ -231,8 +262,117 @@ void main() {
         RequeueReason.repeatedWrongAnswer.name,
       );
       expect(items.last['same_session_wrong_count'], 2);
-      expect(items.last['retry_after_position'], 5);
+      expect(items.last['retry_after_position'], isNull);
     });
+
+    test('persist_review_result_inserts_retry_at_effective_position', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedBaseData(db);
+      await seedAdditionalSessionItems(db, 12);
+      final service = SrsReviewPersistenceService(database: db);
+      const requeueDecision = RequeueDecision(
+        shouldRequeue: true,
+        reason: RequeueReason.wrongAnswer,
+        targetOffset: 10,
+        effectiveOffset: 10,
+        moveToQueueEnd: false,
+        markDifficult: false,
+        shouldRemoveFromReview: false,
+      );
+
+      await service.persistReviewResult(
+        reviewInput: reviewInput(answer: ReviewAnswer.wrong),
+        reviewResult: reviewResult(
+          newStage: SrsStage.s0,
+          wrongCount: 1,
+          requeueDecision: requeueDecision,
+        ),
+        sessionItemId: 'item-1',
+        nextPosition: 1,
+      );
+
+      final items = await db.query('session_items', orderBy: 'position ASC');
+      final retry = items.singleWhere(
+        (row) => row['requeue_reason'] == RequeueReason.wrongAnswer.name,
+      );
+
+      expect(retry['word_id'], 'word-1');
+      expect(retry['position'], 10);
+      expect(items.map((row) => row['position']).toSet(), hasLength(14));
+    });
+
+    test(
+      'persist_review_result_deactivates_existing_open_retry_for_word',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedBaseData(db);
+        await seedAdditionalSessionItems(db, 4);
+        await db.insert('session_items', {
+          'id': 'existing-retry',
+          'session_id': 'session-1',
+          'word_id': 'word-1',
+          'category_id': 'category-1',
+          'mode_id': LearningMode.time.name,
+          'stage_at_enqueue': SrsStage.s0.name,
+          'position': 5,
+          'status': QueueItemStatus.retryPending.name,
+          'is_new_card': 0,
+          'same_session_wrong_count': 1,
+          'created_at': now.toIso8601String(),
+          'updated_at': now.toIso8601String(),
+        });
+        final service = SrsReviewPersistenceService(database: db);
+        const requeueDecision = RequeueDecision(
+          shouldRequeue: true,
+          reason: RequeueReason.repeatedWrongAnswer,
+          targetOffset: 5,
+          effectiveOffset: 5,
+          moveToQueueEnd: true,
+          markDifficult: false,
+          shouldRemoveFromReview: false,
+        );
+
+        await service.persistReviewResult(
+          reviewInput: reviewInput(
+            answer: ReviewAnswer.wrong,
+            wrongCounts: const {'word-1': 1},
+          ),
+          reviewResult: reviewResult(
+            newStage: SrsStage.s0,
+            wrongCount: 2,
+            requeueDecision: requeueDecision,
+          ),
+          sessionItemId: 'item-1',
+          nextPosition: 1,
+        );
+
+        final openWordItems = await db.query(
+          'session_items',
+          where: 'word_id = ? AND status IN (?, ?, ?, ?)',
+          whereArgs: [
+            'word-1',
+            QueueItemStatus.queued.name,
+            QueueItemStatus.shown.name,
+            QueueItemStatus.retryPending.name,
+            QueueItemStatus.difficult.name,
+          ],
+        );
+        final oldRetry = await db.query(
+          'session_items',
+          where: 'id = ?',
+          whereArgs: ['existing-retry'],
+        );
+
+        expect(openWordItems, hasLength(1));
+        expect(
+          openWordItems.single['requeue_reason'],
+          RequeueReason.repeatedWrongAnswer.name,
+        );
+        expect(oldRetry.single['status'], QueueItemStatus.answered.name);
+      },
+    );
 
     test('persist_review_result_updates_current_position', () async {
       final db = await openSchemaDatabase();

@@ -33,7 +33,12 @@ class SrsReviewPersistenceService {
 
       final requeueDecision = reviewResult.requeueDecision;
       if (requeueDecision != null && requeueDecision.shouldRequeue) {
-        await _insertRequeueItem(transaction, reviewInput, reviewResult);
+        await _insertRequeueItem(
+          transaction,
+          reviewInput,
+          reviewResult,
+          sessionItemId,
+        );
       } else if (_shouldContinueInSession(reviewResult)) {
         await _insertContinuationItem(transaction, reviewInput, reviewResult);
       }
@@ -49,8 +54,17 @@ class SrsReviewPersistenceService {
 
   bool _shouldContinueInSession(ReviewResult reviewResult) {
     final progress = reviewResult.updatedProgress;
-    if (progress.mode != LearningMode.adaptive) return false;
-    return progress.stage != SrsStage.s5;
+    if (progress.mode == LearningMode.adaptive) {
+      return progress.stage != SrsStage.s5;
+    }
+    if (progress.mode == LearningMode.hybrid) {
+      return progress.stage.index <= SrsStage.s2.index;
+    }
+    if (progress.mode == LearningMode.time) {
+      return reviewResult.oldStage == SrsStage.s0 &&
+          reviewResult.newStage == SrsStage.s1;
+    }
+    return false;
   }
 
   Future<void> _updateProgress(
@@ -129,9 +143,18 @@ class SrsReviewPersistenceService {
     Transaction transaction,
     ReviewInput reviewInput,
     ReviewResult reviewResult,
+    String sessionItemId,
   ) async {
     final progress = reviewResult.updatedProgress;
     final decision = reviewResult.requeueDecision!;
+    await _deactivateOpenDuplicateItems(
+      transaction,
+      sessionId: reviewInput.sessionContext.sessionId,
+      wordId: progress.wordId,
+      exceptItemId: sessionItemId,
+      updatedAt: reviewInput.reviewedAt,
+    );
+
     final nextPosition = await _nextSessionItemPosition(
       transaction,
       reviewInput.sessionContext.sessionId,
@@ -143,6 +166,20 @@ class SrsReviewPersistenceService {
         ? null
         : reviewInput.sessionContext.currentPosition +
               decision.effectiveOffset!;
+    final insertPosition = retryAfterPosition == null
+        ? nextPosition
+        : _max(
+            nextPosition: reviewInput.sessionContext.currentPosition + 1,
+            retryAfterPosition: retryAfterPosition,
+          );
+
+    if (insertPosition < nextPosition) {
+      await _makePositionAvailable(
+        transaction,
+        sessionId: reviewInput.sessionContext.sessionId,
+        position: insertPosition,
+      );
+    }
 
     await transaction.insert('session_items', {
       'id': _uuid.v4(),
@@ -151,7 +188,7 @@ class SrsReviewPersistenceService {
       'category_id': progress.categoryId,
       'mode_id': progress.mode.name,
       'stage_at_enqueue': progress.stage.name,
-      'position': nextPosition,
+      'position': insertPosition,
       'status': decision.markDifficult
           ? QueueItemStatus.difficult.name
           : QueueItemStatus.retryPending.name,
@@ -165,6 +202,69 @@ class SrsReviewPersistenceService {
       'created_at': _encodeDateTime(reviewInput.reviewedAt),
       'updated_at': _encodeDateTime(reviewInput.reviewedAt),
     });
+  }
+
+  Future<void> _deactivateOpenDuplicateItems(
+    Transaction transaction, {
+    required String sessionId,
+    required String wordId,
+    required String exceptItemId,
+    required DateTime updatedAt,
+  }) async {
+    await transaction.update(
+      'session_items',
+      {
+        'status': QueueItemStatus.answered.name,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: '''
+session_id = ?
+AND word_id = ?
+AND id != ?
+AND status IN (?, ?, ?, ?)
+''',
+      whereArgs: [
+        sessionId,
+        wordId,
+        exceptItemId,
+        QueueItemStatus.queued.name,
+        QueueItemStatus.shown.name,
+        QueueItemStatus.retryPending.name,
+        QueueItemStatus.difficult.name,
+      ],
+    );
+  }
+
+  Future<void> _makePositionAvailable(
+    Transaction transaction, {
+    required String sessionId,
+    required int position,
+  }) async {
+    const temporaryOffset = 100000;
+    await transaction.rawUpdate(
+      '''
+UPDATE session_items
+SET position = position + ?
+WHERE session_id = ?
+AND position >= ?
+''',
+      [temporaryOffset, sessionId, position],
+    );
+    await transaction.rawUpdate(
+      '''
+UPDATE session_items
+SET position = position - ?
+WHERE session_id = ?
+AND position >= ?
+''',
+      [temporaryOffset - 1, sessionId, position + temporaryOffset],
+    );
+  }
+
+  int _max({required int nextPosition, required int retryAfterPosition}) {
+    return nextPosition > retryAfterPosition
+        ? nextPosition
+        : retryAfterPosition;
   }
 
   Future<void> _insertContinuationItem(

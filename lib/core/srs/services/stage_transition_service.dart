@@ -11,20 +11,27 @@ class StageTransitionService {
     required WordProgress progress,
     required ReviewAnswer answer,
     required TrainingArea trainingArea,
+    bool preventPromotionFromS1 = false,
   }) {
     if (trainingArea == TrainingArea.focused) {
       return _result(progress: progress, oldProgress: progress);
     }
 
     final updatedProgress = switch (answer) {
-      ReviewAnswer.correct => _applyCorrectAnswer(progress),
+      ReviewAnswer.correct => _applyCorrectAnswer(
+        progress,
+        preventPromotionFromS1: preventPromotionFromS1,
+      ),
       ReviewAnswer.wrong => _applyWrongAnswer(progress),
     };
 
     return _result(progress: updatedProgress, oldProgress: progress);
   }
 
-  WordProgress _applyCorrectAnswer(WordProgress progress) {
+  WordProgress _applyCorrectAnswer(
+    WordProgress progress, {
+    required bool preventPromotionFromS1,
+  }) {
     final requiredPasses = _requiredPassesForPromotion(progress.stage);
 
     if (requiredPasses == null) {
@@ -32,12 +39,20 @@ class StageTransitionService {
     }
 
     final nextPassCount = progress.passCount + 1;
+    if (preventPromotionFromS1 && progress.stage == SrsStage.s1) {
+      return progress.copyWith(
+        passCount: _min(nextPassCount, requiredPasses - 1),
+      );
+    }
+
     if (nextPassCount < requiredPasses) {
       return progress.copyWith(passCount: nextPassCount);
     }
 
     return progress.copyWith(stage: _nextStage(progress.stage), passCount: 0);
   }
+
+  int _min(int left, int right) => left < right ? left : right;
 
   WordProgress _applyWrongAnswer(WordProgress progress) {
     return progress.copyWith(

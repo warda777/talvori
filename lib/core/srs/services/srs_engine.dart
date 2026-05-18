@@ -1,9 +1,11 @@
+import '../models/learning_mode.dart';
 import '../models/queue_build_input.dart';
 import '../models/queue_build_result.dart';
 import '../models/requeue_decision.dart';
 import '../models/review_answer.dart';
 import '../models/review_input.dart';
 import '../models/review_result.dart';
+import '../models/srs_stage.dart';
 import '../models/training_area.dart';
 import 'due_date_calculator.dart';
 import 'queue_builder.dart';
@@ -32,6 +34,7 @@ class SrsEngine {
       progress: input.progress,
       answer: input.answer,
       trainingArea: input.trainingArea,
+      preventPromotionFromS1: _preventsSameDayTimePromotion(input),
     );
 
     if (input.trainingArea == TrainingArea.focused) {
@@ -87,5 +90,20 @@ class SrsEngine {
       sameSessionWrongCount: sameSessionWrongCount,
       remainingQueueSize: input.sessionContext.remainingQueueSize,
     );
+  }
+
+  bool _preventsSameDayTimePromotion(ReviewInput input) {
+    final lastReviewedAt = input.progress.lastReviewedAt;
+    return input.progress.mode == LearningMode.time &&
+        input.answer == ReviewAnswer.correct &&
+        input.progress.stage == SrsStage.s1 &&
+        lastReviewedAt != null &&
+        _isSameDate(lastReviewedAt, input.reviewedAt);
+  }
+
+  bool _isSameDate(DateTime left, DateTime right) {
+    return left.year == right.year &&
+        left.month == right.month &&
+        left.day == right.day;
   }
 }

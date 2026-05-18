@@ -22,6 +22,7 @@ void main() {
     int passCount = 0,
     int wrongCount = 0,
     DateTime? nextDueAt,
+    DateTime? lastReviewedAt,
   }) {
     return WordProgress(
       wordId: wordId,
@@ -31,6 +32,7 @@ void main() {
       passCount: passCount,
       wrongCount: wrongCount,
       nextDueAt: nextDueAt,
+      lastReviewedAt: lastReviewedAt,
     );
   }
 
@@ -168,6 +170,46 @@ void main() {
 
       expect(result.updatedProgress.stage, SrsStage.s1);
       expect(result.nextDueAt, now);
+    });
+
+    test('time_srs_same_day_s1_correct_stays_in_s1', () {
+      final result = engine.reviewCard(
+        reviewInput(
+          progress: progress(
+            mode: LearningMode.time,
+            stage: SrsStage.s1,
+            passCount: 1,
+            lastReviewedAt: now.subtract(const Duration(hours: 1)),
+          ),
+          answer: ReviewAnswer.correct,
+        ),
+      );
+
+      expect(result.oldStage, SrsStage.s1);
+      expect(result.newStage, SrsStage.s1);
+      expect(result.stageChanged, isFalse);
+      expect(result.updatedProgress.passCount, 1);
+      expect(result.nextDueAt, now.add(const Duration(days: 1)));
+    });
+
+    test('time_srs_next_day_s1_correct_can_promote_to_s2', () {
+      final result = engine.reviewCard(
+        reviewInput(
+          progress: progress(
+            mode: LearningMode.time,
+            stage: SrsStage.s1,
+            passCount: 1,
+            lastReviewedAt: now.subtract(const Duration(days: 1)),
+          ),
+          answer: ReviewAnswer.correct,
+        ),
+      );
+
+      expect(result.oldStage, SrsStage.s1);
+      expect(result.newStage, SrsStage.s2);
+      expect(result.stageChanged, isTrue);
+      expect(result.updatedProgress.passCount, 0);
+      expect(result.nextDueAt, now.add(const Duration(days: 3)));
     });
   });
 }

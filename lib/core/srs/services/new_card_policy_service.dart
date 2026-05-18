@@ -16,10 +16,14 @@ class NewCardPolicyService {
     required TrainingArea trainingArea,
     required List<ReviewAnswer> recentAnswers,
     required int remainingSessionSlots,
+    bool allowExpandedTimeNewCards = false,
   }) {
     assert(remainingSessionSlots >= 0);
 
-    final maxNewCardsForMode = _maxNewCardsForMode(mode);
+    final maxNewCardsForMode = _maxNewCardsForMode(
+      mode,
+      allowExpandedTimeNewCards: allowExpandedTimeNewCards,
+    );
 
     if (trainingArea == TrainingArea.reviewOnly ||
         trainingArea == TrainingArea.focused) {
@@ -55,9 +59,13 @@ class NewCardPolicyService {
     );
   }
 
-  int _maxNewCardsForMode(LearningMode mode) {
+  int _maxNewCardsForMode(
+    LearningMode mode, {
+    required bool allowExpandedTimeNewCards,
+  }) {
     return switch (mode) {
-      LearningMode.time => timeModeMaxNewCards,
+      LearningMode.time =>
+        allowExpandedTimeNewCards ? v1SessionSize : timeModeMaxNewCards,
       LearningMode.hybrid => hybridModeMaxNewCards,
       LearningMode.adaptive => v1SessionSize,
     };

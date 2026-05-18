@@ -43,6 +43,7 @@ class QueueBuilder {
       trainingArea: config.trainingArea,
       recentAnswers: input.recentAnswers,
       remainingSessionSlots: config.sessionSize - items.length,
+      allowExpandedTimeNewCards: config.allowExpandedTimeNewCards,
     );
 
     while (items.length < config.sessionSize &&
@@ -68,6 +69,7 @@ class QueueBuilder {
       trainingArea: config.trainingArea,
       recentAnswers: input.recentAnswers,
       remainingSessionSlots: config.sessionSize,
+      allowExpandedTimeNewCards: config.allowExpandedTimeNewCards,
     );
     final maxNewCards = policyResult.allowedNewCardCount;
 

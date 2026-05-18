@@ -143,6 +143,21 @@ class ReviewHistoryRepository {
         .toList(growable: false);
   }
 
+  Future<bool> hasHistoryForCategoryAndMode({
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
+    final rows = await _database.query(
+      'review_history',
+      columns: ['id'],
+      where: 'category_id = ? AND mode_id = ?',
+      whereArgs: [categoryId, mode.name],
+      limit: 1,
+    );
+
+    return rows.isNotEmpty;
+  }
+
   ReviewHistoryEvent _mapEvent(Map<String, Object?> row) {
     return ReviewHistoryEvent(
       id: row['id']! as String,

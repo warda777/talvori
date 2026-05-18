@@ -160,6 +160,62 @@ void main() {
       expect(rows, hasLength(3));
     });
 
+    test('saving_one_mode_does_not_overwrite_other_mode_progress', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWord(db);
+      await seedWordProgress(
+        db,
+        id: 'progress-time',
+        wordId: 'word-1',
+        mode: LearningMode.time,
+        stage: SrsStage.s4,
+        passCount: 2,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-adaptive',
+        wordId: 'word-1',
+        mode: LearningMode.adaptive,
+        stage: SrsStage.s2,
+        passCount: 1,
+      );
+      await seedWordProgress(
+        db,
+        id: 'progress-hybrid',
+        wordId: 'word-1',
+        mode: LearningMode.hybrid,
+        stage: SrsStage.s3,
+        passCount: 2,
+      );
+      final repository = WordProgressRepository(database: db);
+
+      await repository.saveProgress(
+        updatedProgress: WordProgress(
+          wordId: 'word-1',
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s5,
+          passCount: 0,
+          wrongCount: 1,
+          nextDueAt: now,
+          lastReviewedAt: now,
+        ),
+        updatedAt: now,
+      );
+
+      final rows = await db.query('word_progress', orderBy: 'mode_id ASC');
+      final byMode = {for (final row in rows) row['mode_id']: row};
+
+      expect(byMode[LearningMode.time.name]!['stage'], SrsStage.s4.name);
+      expect(byMode[LearningMode.time.name]!['pass_count'], 2);
+      expect(byMode[LearningMode.adaptive.name]!['stage'], SrsStage.s5.name);
+      expect(byMode[LearningMode.adaptive.name]!['wrong_count'], 1);
+      expect(byMode[LearningMode.hybrid.name]!['stage'], SrsStage.s3.name);
+      expect(byMode[LearningMode.hybrid.name]!['pass_count'], 2);
+    });
+
     test(
       'save_progress_updates_stage_pass_count_wrong_count_and_due_dates',
       () async {

@@ -86,6 +86,13 @@ class LocalSrsSessionService {
       mode: mode,
       limit: recentAnswerLimit,
     );
+    final hasReviewHistory = await _reviewHistoryRepository
+        .hasHistoryForCategoryAndMode(categoryId: categoryId, mode: mode);
+    final allowExpandedTimeNewCards =
+        mode == LearningMode.time &&
+        !hasReviewHistory &&
+        dueReviewProgresses.isEmpty &&
+        await _allProgressInStage0(categoryId: categoryId, mode: mode);
 
     final queueBuildResult = _srsEngine.buildSessionQueue(
       QueueBuildInput(
@@ -94,6 +101,7 @@ class LocalSrsSessionService {
           trainingArea: trainingArea,
           now: now,
           sessionSize: sessionSize,
+          allowExpandedTimeNewCards: allowExpandedTimeNewCards,
         ),
         dueReviewProgresses: dueReviewProgresses,
         newProgresses: newProgresses,
@@ -286,14 +294,14 @@ class LocalSrsSessionService {
 
   bool _isAnswered(LocalSessionItemRecord item) {
     return item.status == QueueItemStatus.answered ||
-        item.status == QueueItemStatus.done ||
-        item.status == QueueItemStatus.difficult;
+        item.status == QueueItemStatus.done;
   }
 
   bool _isRemaining(LocalSessionItemRecord item) {
     return item.status == QueueItemStatus.queued ||
         item.status == QueueItemStatus.shown ||
-        item.status == QueueItemStatus.retryPending;
+        item.status == QueueItemStatus.retryPending ||
+        item.status == QueueItemStatus.difficult;
   }
 
   Future<bool> _allProgressInStage5({
@@ -307,6 +315,19 @@ class LocalSrsSessionService {
     final total = counts.fold<int>(0, (sum, count) => sum + count);
     if (total == 0) return false;
     return counts[SrsStage.s5.index] == total;
+  }
+
+  Future<bool> _allProgressInStage0({
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
+    final counts = await _wordProgressRepository.countByStage(
+      categoryId: categoryId,
+      mode: mode,
+    );
+    final total = counts.fold<int>(0, (sum, count) => sum + count);
+    if (total == 0) return false;
+    return counts[SrsStage.s0.index] == total;
   }
 
   int _remainingQueueSizeAfterCurrent(

@@ -49,6 +49,7 @@ void main() {
     int reviewCount = 0,
     int newCount = 0,
     List<ReviewAnswer> recentAnswers = const [],
+    bool allowExpandedTimeNewCards = false,
   }) {
     return QueueBuildInput(
       config: SessionConfig(
@@ -56,6 +57,7 @@ void main() {
         trainingArea: trainingArea,
         now: now,
         sessionSize: sessionSize,
+        allowExpandedTimeNewCards: allowExpandedTimeNewCards,
       ),
       dueReviewProgresses: reviews(reviewCount, mode),
       newProgresses: newCards(newCount, mode),
@@ -111,6 +113,37 @@ void main() {
       expect(result.items, hasLength(15));
       expect(result.reviewsIncluded, 10);
       expect(result.newCardsIncluded, 5);
+    });
+
+    test('time_mode_initial_session_can_include_twenty_new_s0_cards', () {
+      final result = builder.buildSessionQueue(
+        input(
+          mode: LearningMode.time,
+          reviewCount: 0,
+          newCount: 30,
+          allowExpandedTimeNewCards: true,
+        ),
+      );
+
+      expect(result.items, hasLength(20));
+      expect(result.reviewsIncluded, 0);
+      expect(result.newCardsIncluded, 20);
+    });
+
+    test('time_mode_initial_session_keeps_due_reviews_first', () {
+      final result = builder.buildSessionQueue(
+        input(
+          mode: LearningMode.time,
+          reviewCount: 6,
+          newCount: 30,
+          allowExpandedTimeNewCards: true,
+        ),
+      );
+
+      expect(result.items, hasLength(20));
+      expect(result.reviewsIncluded, 6);
+      expect(result.newCardsIncluded, 14);
+      expect(result.items.take(6).every((item) => !item.isNewCard), isTrue);
     });
 
     test('hybrid_mode_includes_max_eight_new_s0_cards', () {

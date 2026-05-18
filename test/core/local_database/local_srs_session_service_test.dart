@@ -70,6 +70,24 @@ void main() {
     });
   }
 
+  Future<void> seedNewWordsAndProgress(
+    Database db, {
+    required int count,
+    LearningMode mode = LearningMode.time,
+  }) async {
+    await insertCategory(db);
+    for (var index = 1; index <= count; index++) {
+      final wordId = 'word-$index';
+      await insertWord(db, id: wordId);
+      await seedWordProgress(
+        db,
+        id: 'progress-$wordId-${mode.name}',
+        wordId: wordId,
+        mode: mode,
+      );
+    }
+  }
+
   Future<void> seedCategoryWordsAndProgress(Database db) async {
     await insertCategory(db);
 
@@ -328,6 +346,143 @@ void main() {
     );
 
     test(
+      'time_first_session_without_history_can_include_twenty_new_s0',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedNewWordsAndProgress(db, count: 25, mode: LearningMode.time);
+
+        final state = await service(db).startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+        final itemRows = await db.query('session_items');
+
+        expect(state.totalItems, 20);
+        expect(itemRows.where((row) => row['is_new_card'] == 1), hasLength(20));
+      },
+    );
+
+    test('time_later_session_with_history_limits_new_s0_to_five', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedNewWordsAndProgress(db, count: 25, mode: LearningMode.time);
+      await db.insert('review_history', {
+        'id': 'history-1',
+        'word_id': 'word-1',
+        'category_id': 'category-1',
+        'mode_id': LearningMode.time.name,
+        'training_area_id': TrainingArea.all.name,
+        'answer': ReviewAnswer.correct.name,
+        'reviewed_at': now.subtract(const Duration(days: 1)).toIso8601String(),
+        'old_stage': SrsStage.s0.name,
+        'new_stage': SrsStage.s1.name,
+        'old_pass_count': 0,
+        'new_pass_count': 0,
+        'created_at': now.subtract(const Duration(days: 1)).toIso8601String(),
+      });
+
+      final state = await service(db).startOrResumeSession(
+        categoryId: 'category-1',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+        now: now,
+      );
+      final itemRows = await db.query('session_items');
+
+      expect(state.totalItems, 5);
+      expect(itemRows.where((row) => row['is_new_card'] == 1), hasLength(5));
+    });
+
+    test(
+      'time_s0_to_s1_gets_same_day_consolidation_without_s2_promotion',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.time,
+          stage: SrsStage.s0,
+        );
+        final localService = service(db);
+        var state = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          now: now,
+        );
+
+        state = await localService.submitAnswer(
+          sessionId: state.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(const Duration(minutes: 1)),
+        );
+        state = await localService.submitAnswer(
+          sessionId: state.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(const Duration(minutes: 2)),
+        );
+
+        final progressRows = await db.query('word_progress');
+        final itemRows = await db.query(
+          'session_items',
+          orderBy: 'position ASC',
+        );
+
+        expect(progressRows.single['stage'], SrsStage.s1.name);
+        expect(progressRows.single['pass_count'], 1);
+        expect(state.currentWordId, isNull);
+        expect(state.canCompleteSession, isTrue);
+        expect(itemRows, hasLength(2));
+        expect(itemRows.last['stage_at_enqueue'], SrsStage.s1.name);
+      },
+    );
+
+    test('hybrid_correct_continues_inside_session_until_s3', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWord(db, id: 'word-1');
+      await seedWordProgress(
+        db,
+        id: 'progress-1',
+        wordId: 'word-1',
+        mode: LearningMode.hybrid,
+        stage: SrsStage.s0,
+      );
+      final localService = service(db);
+      var state = await localService.startOrResumeSession(
+        categoryId: 'category-1',
+        mode: LearningMode.hybrid,
+        trainingArea: TrainingArea.all,
+        now: now,
+      );
+
+      for (var index = 0; index < 5; index++) {
+        state = await localService.submitAnswer(
+          sessionId: state.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(Duration(minutes: index + 1)),
+        );
+      }
+
+      final progressRows = await db.query('word_progress');
+      final itemRows = await db.query('session_items', orderBy: 'position ASC');
+
+      expect(progressRows.single['stage'], SrsStage.s3.name);
+      expect(progressRows.single['next_due_at'], isNotNull);
+      expect(state.currentWordId, isNull);
+      expect(state.canCompleteSession, isTrue);
+      expect(itemRows, hasLength(5));
+    });
+
+    test(
       'submit_answer_wrong_updates_progress_history_item_position_and_adds_requeue_item',
       () async {
         final db = await openSchemaDatabase();
@@ -524,6 +679,116 @@ void main() {
         expect(state.canCompleteSession, isTrue);
       },
     );
+
+    test(
+      'complete_session_if_finished_keeps_difficult_item_remaining',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db);
+        await insertWord(db, id: 'word-1');
+        await seedWordProgress(
+          db,
+          id: 'progress-1',
+          wordId: 'word-1',
+          mode: LearningMode.adaptive,
+          stage: SrsStage.s3,
+        );
+        await db.insert('learning_sessions', {
+          'id': 'session-1',
+          'category_id': 'category-1',
+          'mode_id': LearningMode.adaptive.name,
+          'training_area_id': TrainingArea.all.name,
+          'status': 'active',
+          'session_size': 20,
+          'current_position': 0,
+          'started_at': now.toIso8601String(),
+          'last_activity_at': now.toIso8601String(),
+          'created_at': now.toIso8601String(),
+          'updated_at': now.toIso8601String(),
+        });
+        await db.insert('session_items', {
+          'id': 'item-1',
+          'session_id': 'session-1',
+          'word_id': 'word-1',
+          'category_id': 'category-1',
+          'mode_id': LearningMode.adaptive.name,
+          'stage_at_enqueue': SrsStage.s3.name,
+          'position': 0,
+          'status': QueueItemStatus.difficult.name,
+          'is_new_card': 0,
+          'same_session_wrong_count': 3,
+          'created_at': now.toIso8601String(),
+          'updated_at': now.toIso8601String(),
+        });
+
+        final state = await service(db).completeSessionIfFinished(
+          sessionId: 'session-1',
+          now: now.add(const Duration(minutes: 1)),
+        );
+        final sessionRows = await db.query('learning_sessions');
+
+        expect(sessionRows.single['status'], 'active');
+        expect(state.status, 'active');
+        expect(state.remainingCount, 1);
+        expect(state.currentWordId, 'word-1');
+        expect(state.canCompleteSession, isFalse);
+      },
+    );
+
+    test('start_or_resume_session_keeps_difficult_item_open', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWord(db, id: 'word-1');
+      await seedWordProgress(
+        db,
+        id: 'progress-1',
+        wordId: 'word-1',
+        mode: LearningMode.adaptive,
+        stage: SrsStage.s3,
+      );
+      await db.insert('learning_sessions', {
+        'id': 'session-1',
+        'category_id': 'category-1',
+        'mode_id': LearningMode.adaptive.name,
+        'training_area_id': TrainingArea.all.name,
+        'status': 'active',
+        'session_size': 20,
+        'current_position': 0,
+        'started_at': now.toIso8601String(),
+        'last_activity_at': now.toIso8601String(),
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+      await db.insert('session_items', {
+        'id': 'item-1',
+        'session_id': 'session-1',
+        'word_id': 'word-1',
+        'category_id': 'category-1',
+        'mode_id': LearningMode.adaptive.name,
+        'stage_at_enqueue': SrsStage.s3.name,
+        'position': 0,
+        'status': QueueItemStatus.difficult.name,
+        'is_new_card': 0,
+        'same_session_wrong_count': 3,
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+
+      final state = await service(db).startOrResumeSession(
+        categoryId: 'category-1',
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        now: now.add(const Duration(minutes: 1)),
+      );
+      final sessionRows = await db.query('learning_sessions');
+
+      expect(sessionRows.single['status'], 'active');
+      expect(state.sessionId, 'session-1');
+      expect(state.remainingCount, 1);
+      expect(state.currentWordId, 'word-1');
+    });
 
     test(
       'completed_session_allows_new_active_session_for_same_context',
