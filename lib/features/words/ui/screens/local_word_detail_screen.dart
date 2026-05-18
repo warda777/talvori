@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
+import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
 
 class LocalWordDetailScreen extends ConsumerWidget {
   const LocalWordDetailScreen({
@@ -29,6 +30,34 @@ class LocalWordDetailScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFF050507),
         foregroundColor: Colors.white,
         title: Text(title),
+        actions: [
+          IconButton(
+            tooltip: 'Bearbeiten',
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              final updated = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => LocalWordEditScreen(
+                    wordId: wordId,
+                    categoryId: categoryId,
+                    title: title,
+                  ),
+                ),
+              );
+
+              if (updated == true) {
+                ref.invalidate(
+                  localWordDetailProvider(
+                    LocalWordDetailRequest(
+                      wordId: wordId,
+                      categoryId: categoryId,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

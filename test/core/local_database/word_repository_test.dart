@@ -165,6 +165,56 @@ void main() {
       expect(missing, isNull);
     });
 
+    test('update_word_changes_term_translation_and_updated_at', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedWord(
+        db,
+        id: 'word-house',
+        categoryId: 'category-basics',
+        term: 'Haus',
+        translation: 'house',
+        exampleSentence: 'Das Haus ist klein.',
+        notes: 'Noun',
+        createdAt: now,
+        updatedAt: now,
+      );
+      final repository = WordRepository(database: db);
+      final updatedAt = now.add(const Duration(minutes: 12));
+
+      final updated = await repository.updateWord(
+        id: 'word-house',
+        term: 'Zuhause',
+        translation: 'home',
+        updatedAt: updatedAt,
+      );
+
+      expect(updated, isNotNull);
+      expect(updated!.term, 'Zuhause');
+      expect(updated.translation, 'home');
+      expect(updated.categoryId, 'category-basics');
+      expect(updated.exampleSentence, 'Das Haus ist klein.');
+      expect(updated.notes, 'Noun');
+      expect(updated.createdAt, now);
+      expect(updated.updatedAt, updatedAt);
+    });
+
+    test('update_word_returns_null_for_missing_word', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      final repository = WordRepository(database: db);
+
+      final updated = await repository.updateWord(
+        id: 'missing',
+        term: 'Missing',
+        translation: 'missing',
+        updatedAt: now,
+      );
+
+      expect(updated, isNull);
+    });
+
     test('load_words_for_category_returns_only_that_category_sorted', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);

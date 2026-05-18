@@ -3,9 +3,48 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
+
+class _FakeLocalWordEditController extends LocalWordEditController {
+  static List<LocalWord> words = const <LocalWord>[];
+
+  @override
+  LocalWordEditControllerState build() {
+    return const LocalWordEditControllerState();
+  }
+
+  @override
+  Future<LocalWord?> updateWord({
+    required String wordId,
+    required String categoryId,
+    required String term,
+    required String translation,
+    required DateTime updatedAt,
+  }) async {
+    for (var i = 0; i < words.length; i += 1) {
+      final word = words[i];
+      if (word.id == wordId) {
+        final updatedWord = LocalWord(
+          id: word.id,
+          categoryId: word.categoryId,
+          term: term,
+          translation: translation,
+          sortOrder: word.sortOrder,
+          isArchived: word.isArchived,
+          createdAt: word.createdAt,
+          updatedAt: updatedAt,
+        );
+        words[i] = updatedWord;
+        return updatedWord;
+      }
+    }
+
+    return null;
+  }
+}
 
 void main() {
   LocalWord localWord({
@@ -31,6 +70,8 @@ void main() {
     required List<LocalWord> words,
     String title = 'Health & Fitness',
   }) async {
+    _FakeLocalWordEditController.words = words;
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -49,6 +90,9 @@ void main() {
             if (word == null) return null;
             return LocalWordDetailData(word: word, progress: null);
           }),
+          localWordEditControllerProvider.overrideWith(
+            _FakeLocalWordEditController.new,
+          ),
         ],
         child: MaterialApp(
           home: LocalWordListScreen(
@@ -211,5 +255,28 @@ void main() {
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('Noch kein Lernfortschritt'), findsOneWidget);
     expect(find.text('seed-category-basics'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_shows_updated_provider_data', (
+    tester,
+  ) async {
+    final words = [
+      localWord(id: 'seed-basics-hello', term: 'hello', translation: 'hallo'),
+    ];
+
+    await pumpLocalWordList(tester, words: words);
+
+    expect(find.widgetWithText(ListTile, 'hello'), findsOneWidget);
+
+    words[0] = localWord(
+      id: 'seed-basics-hello',
+      term: 'hi',
+      translation: 'servus',
+    );
+    await pumpLocalWordList(tester, words: words);
+
+    expect(find.widgetWithText(ListTile, 'hi'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'servus'), findsOneWidget);
+    expect(find.text('hello'), findsNothing);
   });
 }

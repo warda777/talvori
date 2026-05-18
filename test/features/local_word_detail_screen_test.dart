@@ -3,20 +3,79 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
+import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
+
+class _FakeLocalWordEditController extends LocalWordEditController {
+  static LocalWord? currentWord;
+
+  @override
+  LocalWordEditControllerState build() {
+    return const LocalWordEditControllerState();
+  }
+
+  @override
+  Future<LocalWord?> updateWord({
+    required String wordId,
+    required String categoryId,
+    required String term,
+    required String translation,
+    required DateTime updatedAt,
+  }) async {
+    final updatedWord = LocalWord(
+      id: wordId,
+      categoryId: categoryId,
+      term: term,
+      translation: translation,
+      sortOrder: currentWord?.sortOrder ?? 0,
+      isArchived: currentWord?.isArchived ?? false,
+      createdAt: currentWord?.createdAt ?? DateTime(2026, 1, 1),
+      updatedAt: updatedAt,
+    );
+    currentWord = updatedWord;
+    return updatedWord;
+  }
+}
 
 void main() {
   final now = DateTime(2026, 1, 1);
 
-  LocalWord word() {
+  Future<void> pumpUntilFound(
+    WidgetTester tester,
+    Finder finder, {
+    int maxPumps = 20,
+  }) async {
+    for (var i = 0; i < maxPumps; i += 1) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (finder.evaluate().isNotEmpty) {
+        return;
+      }
+    }
+  }
+
+  Future<void> pumpUntilNotFound(
+    WidgetTester tester,
+    Finder finder, {
+    int maxPumps = 20,
+  }) async {
+    for (var i = 0; i < maxPumps; i += 1) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (finder.evaluate().isEmpty) {
+        return;
+      }
+    }
+  }
+
+  LocalWord word({String term = 'hello', String translation = 'hallo'}) {
     return LocalWord(
       id: 'seed-basics-hello',
       categoryId: 'seed-category-basics',
-      term: 'hello',
-      translation: 'hallo',
+      term: term,
+      translation: translation,
       sortOrder: 0,
       isArchived: false,
       createdAt: now,
@@ -28,10 +87,22 @@ void main() {
     WidgetTester tester, {
     required LocalWordDetailData? detail,
   }) async {
+    _FakeLocalWordEditController.currentWord = detail?.word;
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          localWordDetailProvider.overrideWith((ref, request) async => detail),
+          localWordDetailProvider.overrideWith((ref, request) async {
+            final currentWord = _FakeLocalWordEditController.currentWord;
+            if (currentWord == null) return null;
+            return LocalWordDetailData(
+              word: currentWord,
+              progress: detail?.progress,
+            );
+          }),
+          localWordEditControllerProvider.overrideWith(
+            _FakeLocalWordEditController.new,
+          ),
         ],
         child: const MaterialApp(
           home: LocalWordDetailScreen(
@@ -96,5 +167,43 @@ void main() {
     await pumpDetail(tester, detail: null);
 
     expect(find.text('Lokales Wort nicht gefunden'), findsOneWidget);
+  });
+
+  testWidgets('local_word_detail_screen_opens_edit_screen', (tester) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(word: word(), progress: null),
+    );
+
+    await tester.tap(find.byTooltip('Bearbeiten'));
+    await pumpUntilFound(tester, find.byType(LocalWordEditScreen));
+
+    expect(find.byType(LocalWordEditScreen), findsOneWidget);
+  });
+
+  testWidgets('local_word_detail_screen_shows_updated_values_after_save', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(word: word(), progress: null),
+    );
+
+    await tester.tap(find.byTooltip('Bearbeiten'));
+    await pumpUntilFound(tester, find.byType(LocalWordEditScreen));
+    await tester.enterText(find.widgetWithText(TextFormField, 'Wort'), 'hi');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Übersetzung'),
+      'servus',
+    );
+    await tester.tap(find.text('Speichern'));
+    await pumpUntilNotFound(tester, find.byType(LocalWordEditScreen));
+    await pumpUntilFound(tester, find.text('hi'));
+
+    expect(find.byType(LocalWordEditScreen), findsNothing);
+    expect(find.text('hi'), findsOneWidget);
+    expect(find.text('servus'), findsOneWidget);
+    expect(find.text('hello'), findsNothing);
+    expect(find.text('hallo'), findsNothing);
   });
 }

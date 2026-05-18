@@ -74,6 +74,30 @@ class WordRepository {
     return _mapWord(rows.single);
   }
 
+  Future<LocalWord?> updateWord({
+    required String id,
+    required String term,
+    required String translation,
+    required DateTime updatedAt,
+  }) async {
+    final updatedRows = await _database.update(
+      'words',
+      {
+        'term': term,
+        'translation': translation,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (updatedRows == 0) {
+      return null;
+    }
+
+    return loadWordById(id);
+  }
+
   Future<List<LocalWord>> loadWordsForCategory({
     required String categoryId,
     bool includeArchived = false,
