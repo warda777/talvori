@@ -1278,11 +1278,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         ),
       );
     } else if (_localTimeReplayMode &&
-        localLearningMode == LearningMode.time &&
+        (localLearningMode == LearningMode.time ||
+            localLearningMode == LearningMode.hybrid) &&
         localCategoryId != null &&
         localCategoryId.isNotEmpty) {
       final replayCardsAsync = ref.watch(
-        localTimeReplayCardsProvider(localCategoryId),
+        localReplayCardsProvider(
+          LocalReplayCardsRequest(
+            categoryId: localCategoryId,
+            mode: localLearningMode,
+          ),
+        ),
       );
       cardContent = replayCardsAsync.when(
         loading: () =>
@@ -1305,54 +1311,67 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           }
           final index = _localReplayIndex.clamp(0, cards.length - 1);
           final card = cards[index];
-          return SingleChildScrollView(
-            child: Column(
-              key: const ValueKey('local-time-replay-mode'),
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const _LocalTimeReplayBadge(),
-                const SizedBox(height: 14),
-                SizedBox(
-                  height: 260,
-                  child: SwipeableWordCard(
-                    frontText: card.term,
-                    backText: card.translation,
-                    level: null,
-                    showTranslation: _localReplayShowTranslation,
-                    gesturesEnabled: true,
-                    onFlip: () {
-                      setState(
-                        () => _localReplayShowTranslation =
-                            !_localReplayShowTranslation,
-                      );
-                    },
-                    onSwipe: (_) async {
-                      setState(() {
-                        _localReplayShowTranslation = false;
-                        _localReplayIndex =
-                            (_localReplayIndex + 1) % cards.length;
-                      });
-                    },
-                  ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.hasBoundedHeight
+                  ? constraints.maxHeight
+                  : 360.0;
+              return SizedBox(
+                height: availableHeight,
+                child: Column(
+                  key: const ValueKey('local-time-replay-mode'),
+                  children: [
+                    const _LocalTimeReplayBadge(),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: SwipeableWordCard(
+                        frontText: card.term,
+                        backText: card.translation,
+                        level: null,
+                        showTranslation: _localReplayShowTranslation,
+                        gesturesEnabled: true,
+                        onFlip: () {
+                          setState(
+                            () => _localReplayShowTranslation =
+                                !_localReplayShowTranslation,
+                          );
+                        },
+                        onSwipe: (_) async {
+                          setState(() {
+                            _localReplayShowTranslation = false;
+                            _localReplayIndex =
+                                (_localReplayIndex + 1) % cards.length;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${index + 1} / ${cards.length}',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    SizedBox(
+                      height: 34,
+                      child: TextButton(
+                        key: const ValueKey('local-time-replay-back-button'),
+                        onPressed: () {
+                          setState(() {
+                            _localTimeReplayMode = false;
+                            _localReplayShowTranslation = false;
+                            _localReplayIndex = 0;
+                          });
+                        },
+                        child: Text(
+                          localLearningMode == LearningMode.hybrid
+                              ? 'Zurück zur Kombination'
+                              : 'Zurück zum Zeitplan',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  '${index + 1} / ${cards.length}',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                TextButton(
-                  key: const ValueKey('local-time-replay-back-button'),
-                  onPressed: () {
-                    setState(() {
-                      _localTimeReplayMode = false;
-                      _localReplayShowTranslation = false;
-                      _localReplayIndex = 0;
-                    });
-                  },
-                  child: const Text('Zurück zum Zeitplan'),
-                ),
-              ],
-            ),
+              );
+            },
           );
         },
       );
@@ -1407,6 +1426,22 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           viewModelState.hasSession && viewModelState.totalItems == 0;
       final isTimePlanEmpty =
           hasEmptyLocalSession && localLearningMode == LearningMode.time;
+      final isHybridPlanEmpty =
+          hasEmptyLocalSession && localLearningMode == LearningMode.hybrid;
+      final hasDueBasedEmptyState = isTimePlanEmpty || isHybridPlanEmpty;
+      final replayCardsAsync =
+          hasDueBasedEmptyState &&
+              localCategoryId != null &&
+              localCategoryId.isNotEmpty
+          ? ref.watch(
+              localReplayCardsProvider(
+                LocalReplayCardsRequest(
+                  categoryId: localCategoryId,
+                  mode: localLearningMode,
+                ),
+              ),
+            )
+          : null;
       cardContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1414,6 +1449,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             Text(
               isTimePlanEmpty
                   ? 'Für heute sind keine Zeitplan-Karten fällig'
+                  : isHybridPlanEmpty
+                  ? 'Aktuell sind keine Kombinations-Karten fällig'
                   : hasEmptyLocalSession
                   ? 'Keine lokalen Wörter verfügbar'
                   : localCategoryId == null || localCategoryId.isEmpty
@@ -1421,33 +1458,52 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   : 'Keine aktive lokale Session',
               style: const TextStyle(color: Colors.white, fontSize: 20),
             ),
-            if (isTimePlanEmpty) ...[
+            if (hasDueBasedEmptyState) ...[
               const SizedBox(height: 8),
               Text(
-                _localTimePlanNextDueLabel(uiState.nextAvailableAt),
+                isTimePlanEmpty
+                    ? _localTimePlanNextDueLabel(uiState.nextAvailableAt)
+                    : _localHybridNextDueLabel(uiState.nextAvailableAt),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),
             ],
             const SizedBox(height: 18),
             FilledButton(
-              onPressed: localCategoryId == null || localCategoryId.isEmpty
+              onPressed:
+                  hasDueBasedEmptyState ||
+                      localCategoryId == null ||
+                      localCategoryId.isEmpty
                   ? null
                   : startOrResume,
               child: const Text('Starten/Fortsetzen'),
             ),
-            if (isTimePlanEmpty) ...[
+            if (hasDueBasedEmptyState) ...[
               const SizedBox(height: 10),
-              OutlinedButton(
-                key: const ValueKey('local-time-replay-start-button'),
-                onPressed: () {
-                  setState(() {
-                    _localTimeReplayMode = true;
-                    _localReplayShowTranslation = false;
-                    _localReplayIndex = 0;
-                  });
-                },
-                child: const Text('Im Wiederholungsmodus üben'),
+              replayCardsAsync!.when(
+                loading: () => const OutlinedButton(
+                  key: ValueKey('local-time-replay-start-button'),
+                  onPressed: null,
+                  child: Text('Im Wiederholungsmodus üben'),
+                ),
+                error: (_, _) => const OutlinedButton(
+                  key: ValueKey('local-time-replay-start-button'),
+                  onPressed: null,
+                  child: Text('Im Wiederholungsmodus üben'),
+                ),
+                data: (cards) => OutlinedButton(
+                  key: const ValueKey('local-time-replay-start-button'),
+                  onPressed: cards.isEmpty
+                      ? null
+                      : () {
+                          setState(() {
+                            _localTimeReplayMode = true;
+                            _localReplayShowTranslation = false;
+                            _localReplayIndex = 0;
+                          });
+                        },
+                  child: const Text('Im Wiederholungsmodus üben'),
+                ),
               ),
             ],
           ],
@@ -1571,6 +1627,26 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         : '${minutes}Min.';
     return 'Nächste Zeitplan-Karte verfügbar in $countdown.';
   }
+
+  String _localHybridNextDueLabel(DateTime? nextAvailableAt) {
+    if (nextAvailableAt == null) {
+      return 'Die nächsten Kombinations-Karten sind noch nicht verfügbar.';
+    }
+    final now = DateTime.now();
+    if (!nextAvailableAt.isAfter(now)) {
+      return 'Die nächste Kombinations-Karte ist jetzt fällig.';
+    }
+    final remaining = nextAvailableAt.difference(now);
+    final days = remaining.inDays;
+    final hours = remaining.inHours.remainder(24);
+    final minutes = remaining.inMinutes.remainder(60);
+    final countdown = days > 0
+        ? '${days}T ${hours}Std.'
+        : hours > 0
+        ? '${hours}Std. ${minutes}Min.'
+        : '${minutes}Min.';
+    return 'Nächste Kombinations-Karte verfügbar in $countdown.';
+  }
 }
 
 class _LocalTimeReplayBadge extends StatelessWidget {
@@ -1592,7 +1668,7 @@ class _LocalTimeReplayBadge extends StatelessWidget {
         ],
       ),
       child: const Text(
-        'Wiederholungsmodus · ohne Einfluss auf deinen Zeitplan',
+        'Wiederholungsmodus · ohne Einfluss auf deinen Fortschritt',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.white,

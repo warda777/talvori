@@ -257,9 +257,9 @@ class _Legend extends StatelessWidget {
               )
               .toList(growable: false),
         ),
-        if (mode == LearningMode.time && stage != SrsStage.s0) ...[
+        if (_showsDueHint(mode, stage)) ...[
           const SizedBox(height: 10),
-          _TimeDueHint(stage: stage),
+          _DueHint(mode: mode, stage: stage),
         ],
       ],
     );
@@ -406,10 +406,10 @@ class _WordStageRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (mode == LearningMode.time) ...[
+                if (_showsWordDue(mode, item.currentStage)) ...[
                   const SizedBox(height: 6),
                   Text(
-                    _timeDueLabel(item.nextDueAt, DateTime.now()),
+                    _dueLabel(item.nextDueAt, DateTime.now()),
                     style: const TextStyle(
                       color: Color(0xFF8DBBFF),
                       fontSize: 12,
@@ -471,13 +471,19 @@ class _WordStageRow extends StatelessWidget {
   }
 }
 
-class _TimeDueHint extends StatelessWidget {
-  const _TimeDueHint({required this.stage});
+class _DueHint extends StatelessWidget {
+  const _DueHint({required this.mode, required this.stage});
 
+  final LearningMode mode;
   final SrsStage stage;
 
   @override
   Widget build(BuildContext context) {
+    final modeLabel = switch (mode) {
+      LearningMode.time => 'Zeitplan',
+      LearningMode.hybrid => 'Kombination',
+      LearningMode.adaptive => 'Limitlos',
+    };
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -487,7 +493,7 @@ class _TimeDueHint extends StatelessWidget {
         border: Border.all(color: const Color(0x668DBBFF), width: 1),
       ),
       child: Text(
-        'Zeitplan: Merkstufe ${stage.index} hat ${_timeWaitLabel(stage)} Wartezeit. '
+        '$modeLabel: Merkstufe ${stage.index} hat ${_waitLabel(mode, stage)} Wartezeit. '
         'Wörter sind regulär erst ab ihrem nächsten Termin wieder fällig.',
         style: const TextStyle(
           color: Color(0xFFC8DFFF),
@@ -500,18 +506,43 @@ class _TimeDueHint extends StatelessWidget {
   }
 }
 
-String _timeWaitLabel(SrsStage stage) {
-  return switch (stage) {
-    SrsStage.s0 => 'keine',
-    SrsStage.s1 => '1 Tag',
-    SrsStage.s2 => '3 Tage',
-    SrsStage.s3 => '7 Tage',
-    SrsStage.s4 => '14 Tage',
-    SrsStage.s5 => '30 Tage',
+bool _showsDueHint(LearningMode mode, SrsStage stage) {
+  return switch (mode) {
+    LearningMode.time => stage != SrsStage.s0,
+    LearningMode.hybrid => stage.index >= SrsStage.s3.index,
+    LearningMode.adaptive => false,
   };
 }
 
-String _timeDueLabel(DateTime? nextDueAt, DateTime now) {
+bool _showsWordDue(LearningMode mode, SrsStage stage) {
+  return switch (mode) {
+    LearningMode.time => true,
+    LearningMode.hybrid => stage.index >= SrsStage.s3.index,
+    LearningMode.adaptive => false,
+  };
+}
+
+String _waitLabel(LearningMode mode, SrsStage stage) {
+  return switch (mode) {
+    LearningMode.time => switch (stage) {
+      SrsStage.s0 => 'keine',
+      SrsStage.s1 => '1 Tag',
+      SrsStage.s2 => '3 Tage',
+      SrsStage.s3 => '7 Tage',
+      SrsStage.s4 => '14 Tage',
+      SrsStage.s5 => '30 Tage',
+    },
+    LearningMode.hybrid => switch (stage) {
+      SrsStage.s0 || SrsStage.s1 || SrsStage.s2 => 'keine',
+      SrsStage.s3 => '1 Tag',
+      SrsStage.s4 => '3 Tage',
+      SrsStage.s5 => '5 Tage',
+    },
+    LearningMode.adaptive => 'keine',
+  };
+}
+
+String _dueLabel(DateTime? nextDueAt, DateTime now) {
   if (nextDueAt == null || !nextDueAt.isAfter(now)) {
     return 'Jetzt fällig';
   }

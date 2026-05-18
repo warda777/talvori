@@ -9,8 +9,10 @@ final localStageDueSummaryProvider =
       List<LocalStageDueSummary>,
       LocalStageDueSummaryRequest
     >((ref, request) async {
-      if (request.categoryId.trim().isEmpty ||
-          request.mode != LearningMode.time) {
+      final supportsDueSummaries =
+          request.mode == LearningMode.time ||
+          request.mode == LearningMode.hybrid;
+      if (request.categoryId.trim().isEmpty || !supportsDueSummaries) {
         return const <LocalStageDueSummary>[];
       }
 

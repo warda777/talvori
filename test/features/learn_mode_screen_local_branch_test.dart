@@ -766,14 +766,19 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningControllerProvider.overrideWith(() => controller),
-            localTimeReplayCardsProvider('basics').overrideWith(
+            localReplayCardsProvider(
+              const LocalReplayCardsRequest(
+                categoryId: 'basics',
+                mode: LearningMode.time,
+              ),
+            ).overrideWith(
               (ref) async => const [
-                LocalTimeReplayCard(
+                LocalReplayCard(
                   wordId: 'word-1',
                   term: 'hello',
                   translation: 'hallo',
                 ),
-                LocalTimeReplayCard(
+                LocalReplayCard(
                   wordId: 'word-2',
                   term: 'water',
                   translation: 'Wasser',
@@ -832,14 +837,19 @@ void main() {
         ProviderScope(
           overrides: [
             localLearningControllerProvider.overrideWith(() => controller),
-            localTimeReplayCardsProvider('basics').overrideWith(
+            localReplayCardsProvider(
+              const LocalReplayCardsRequest(
+                categoryId: 'basics',
+                mode: LearningMode.time,
+              ),
+            ).overrideWith(
               (ref) async => const [
-                LocalTimeReplayCard(
+                LocalReplayCard(
                   wordId: 'word-1',
                   term: 'hello',
                   translation: 'hallo',
                 ),
-                LocalTimeReplayCard(
+                LocalReplayCard(
                   wordId: 'word-2',
                   term: 'water',
                   translation: 'Wasser',
@@ -875,12 +885,17 @@ void main() {
       );
       expect(find.text('Im Wiederholungsmodus üben'), findsOneWidget);
       expect(find.byType(SwipeableWordCard), findsNothing);
+      final startButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Starten/Fortsetzen'),
+      );
+      expect(startButton.onPressed, isNull);
 
       final replayButton = find.byKey(
         const ValueKey('local-time-replay-start-button'),
       );
       await tester.ensureVisible(replayButton);
-      tester.widget<OutlinedButton>(replayButton).onPressed?.call();
+      expect(tester.widget<OutlinedButton>(replayButton).onPressed, isNotNull);
+      tester.widget<OutlinedButton>(replayButton).onPressed!.call();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 500));
@@ -888,6 +903,13 @@ void main() {
       expect(
         find.byKey(const ValueKey('local-time-replay-mode')),
         findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('local-time-replay-mode')),
+          matching: find.byType(SingleChildScrollView),
+        ),
+        findsNothing,
       );
       expect(find.byType(SwipeableWordCard), findsOneWidget);
       expect(find.text('hello'), findsOneWidget);
@@ -903,6 +925,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.text('water'), findsOneWidget);
+      expect(tester.takeException(), isNull);
 
       final replayBackButton = find.byKey(
         const ValueKey('local-time-replay-back-button'),
@@ -919,6 +942,132 @@ void main() {
       expect(controller.submitCorrectCalls, 0);
       expect(controller.submitWrongCalls, 0);
       expect(controller.startOrResumeCalls, 1);
+    },
+  );
+
+  testWidgets(
+    'learn_mode_screen_local_hybrid_mode_shows_clear_no_due_cards_state',
+    (tester) async {
+      final readState = LocalSessionReadState(
+        sessionId: 'empty-hybrid-session',
+        categoryId: 'basics',
+        mode: LearningMode.hybrid,
+        trainingArea: TrainingArea.all,
+        status: 'active',
+        sessionSize: 20,
+        currentPosition: 0,
+        totalItems: 0,
+        answeredCount: 0,
+        remainingCount: 0,
+        nextAvailableAt: DateTime.now().add(const Duration(days: 1)),
+        canSubmitAnswer: false,
+        canCompleteSession: true,
+      );
+      final controller = _TestLocalLearningController(
+        const LocalLearningControllerState(),
+        startedReadState: readState,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningControllerProvider.overrideWith(() => controller),
+            localReplayCardsProvider(
+              const LocalReplayCardsRequest(
+                categoryId: 'basics',
+                mode: LearningMode.hybrid,
+              ),
+            ).overrideWith(
+              (ref) async => const [
+                LocalReplayCard(
+                  wordId: 'word-1',
+                  term: 'hybrid',
+                  translation: 'kombiniert',
+                ),
+                LocalReplayCard(
+                  wordId: 'word-2',
+                  term: 'review',
+                  translation: 'Wiederholung',
+                ),
+              ],
+            ),
+          ],
+          child: const MaterialApp(
+            home: LearnModeScreen(
+              categoryId: 'basics',
+              title: 'Basics',
+              useLocalOfflineFlow: true,
+              localCategoryId: 'basics',
+              localLearningMode: LearningMode.hybrid,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Starten/Fortsetzen'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.text('Aktuell sind keine Kombinations-Karten fällig'),
+        findsOneWidget,
+      );
+      expect(find.text('Keine lokalen Wörter verfügbar'), findsNothing);
+      expect(
+        find.textContaining('Nächste Kombinations-Karte verfügbar in'),
+        findsOneWidget,
+      );
+      expect(find.text('Im Wiederholungsmodus üben'), findsOneWidget);
+      final startButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Starten/Fortsetzen'),
+      );
+      expect(startButton.onPressed, isNull);
+
+      final replayButton = find.byKey(
+        const ValueKey('local-time-replay-start-button'),
+      );
+      await tester.ensureVisible(replayButton);
+      expect(tester.widget<OutlinedButton>(replayButton).onPressed, isNotNull);
+      tester.widget<OutlinedButton>(replayButton).onPressed!.call();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.byKey(const ValueKey('local-time-replay-mode')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('local-time-replay-mode')),
+          matching: find.byType(SingleChildScrollView),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(SwipeableWordCard), findsOneWidget);
+      expect(find.text('hybrid'), findsOneWidget);
+
+      await tester
+          .widget<SwipeableWordCard>(find.byType(SwipeableWordCard))
+          .onSwipe(true);
+      await tester.pump();
+      expect(find.text('review'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      final replayBackButton = find.byKey(
+        const ValueKey('local-time-replay-back-button'),
+      );
+      await tester.ensureVisible(replayBackButton);
+      tester.widget<TextButton>(replayBackButton).onPressed?.call();
+      await tester.pump();
+      expect(
+        find.text('Aktuell sind keine Kombinations-Karten fällig'),
+        findsOneWidget,
+      );
+      expect(controller.startOrResumeCalls, 1);
+      expect(controller.capturedMode, LearningMode.hybrid);
+      expect(controller.submitCorrectCalls, 0);
+      expect(controller.submitWrongCalls, 0);
     },
   );
 

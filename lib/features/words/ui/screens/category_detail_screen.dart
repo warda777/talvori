@@ -809,7 +809,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     final stages =
         localStageCountsAsync.valueOrNull ??
         List<int>.filled(SrsStage.values.length, 0);
-    final stageDueSummaryAsync = selectedLocalLearningMode == LearningMode.time
+    final usesLocalDueSummary =
+        selectedLocalLearningMode == LearningMode.time ||
+        selectedLocalLearningMode == LearningMode.hybrid;
+    final stageDueSummaryAsync = usesLocalDueSummary
         ? ref.watch(
             localStageDueSummaryProvider(
               LocalStageDueSummaryRequest(

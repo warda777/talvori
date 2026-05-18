@@ -487,6 +487,69 @@ void main() {
     expect(row.blockedMask?[2], isFalse);
   });
 
+  testWidgets('category_detail_hybrid_mode_marks_waiting_stages_as_blocked', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+          localStageCountsProvider.overrideWith(
+            (ref, request) async => [0, 0, 0, 2, 1, 0],
+          ),
+          localStageDueSummaryProvider.overrideWith((ref, request) async {
+            if (request.mode != LearningMode.hybrid) {
+              return const <LocalStageDueSummary>[];
+            }
+            return [
+              const LocalStageDueSummary(stage: 0, totalCount: 0, dueCount: 0),
+              const LocalStageDueSummary(stage: 1, totalCount: 0, dueCount: 0),
+              const LocalStageDueSummary(stage: 2, totalCount: 0, dueCount: 0),
+              LocalStageDueSummary(
+                stage: 3,
+                totalCount: 2,
+                dueCount: 0,
+                nextDueAt: DateTime(2026, 1, 2),
+              ),
+              const LocalStageDueSummary(stage: 4, totalCount: 1, dueCount: 1),
+              const LocalStageDueSummary(stage: 5, totalCount: 0, dueCount: 0),
+            ];
+          }),
+        ],
+        child: MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Health & Fitness',
+            categoryId: 'seed-category-basics',
+            listFilter: const WordListFilter(
+              WordFilterKind.category,
+              'seed-category-basics',
+            ),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'seed-category-basics',
+            localSelectedWordHubKey: 'health_fitness',
+            localCategoryItems: localWordHubItems(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.text('Kombiniert'));
+    await tester.pump();
+    await tester.pump();
+
+    final row = tester.widget<StageSwitchRowView>(
+      find.byType(StageSwitchRowView),
+    );
+    expect(row.blockedMask?[3], isTrue);
+    expect(row.blockedMask?[4], isFalse);
+  });
+
   testWidgets(
     'category_detail_screen_local_start_passes_time_mode_by_default',
     (tester) async {
@@ -1181,5 +1244,23 @@ void main() {
     );
     expect(find.textContaining('Nächster Termin:'), findsOneWidget);
     expect(find.textContaining('in 3T'), findsOneWidget);
+  });
+
+  testWidgets('stage_inspector_hybrid_mode_shows_due_wait_from_s3', (
+    tester,
+  ) async {
+    await pumpStageInspectorLegend(
+      tester,
+      SrsStage.s3,
+      mode: LearningMode.hybrid,
+      nextDueAt: DateTime.now().add(const Duration(days: 1, hours: 2)),
+    );
+
+    expect(
+      find.textContaining('Kombination: Merkstufe 3 hat 1 Tag'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Nächster Termin:'), findsOneWidget);
+    expect(find.textContaining('in 1T'), findsOneWidget);
   });
 }

@@ -1,5 +1,5 @@
-class LocalTimeReplayCard {
-  const LocalTimeReplayCard({
+class LocalReplayCard {
+  const LocalReplayCard({
     required this.wordId,
     required this.term,
     required this.translation,
@@ -9,3 +9,5 @@ class LocalTimeReplayCard {
   final String term;
   final String translation;
 }
+
+typedef LocalTimeReplayCard = LocalReplayCard;
