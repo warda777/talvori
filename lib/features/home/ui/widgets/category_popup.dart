@@ -1,18 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
-import 'category_popup_settings.dart';
-import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
 import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
-import 'package:talvori/features/home/ui/widgets/all_words_neural_bg.dart';
-import 'package:talvori/features/home/ui/widgets/my_words_bg.dart';
-import 'package:talvori/features/home/ui/widgets/favorites_heart_bg.dart';
-import 'package:talvori/features/home/ui/widgets/words_i_know_puzzle_bg.dart';
-import 'package:talvori/features/home/ui/widgets/word_hub_rising_glow_bg.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
 typedef VoidSnack = void Function(String);
@@ -23,62 +15,37 @@ Future<void> showCategoryPopup({
   required VoidSnack onTodo,
 }) {
   final cs = Theme.of(context).colorScheme;
-  const gold = Color(0xFFF1C86B);
-  final bool initialAnimationsEnabled = CategoryPopupSettings.animationsEnabled;
-  final bool initialGlowEnabled = CategoryPopupSettings.glowEnabled;
-  bool animationsEnabled = initialAnimationsEnabled;
-  bool glowEnabled = initialGlowEnabled;
+  const surface = Color(0xFF070B12);
+  const surfaceAlt = Color(0xFF0C1220);
+  const cyan = Color(0xFF5DDCFF);
+  const violet = Color(0xFFB36BFF);
+  const green = Color(0xFF36F58A);
+  const pink = Color(0xFFFF4B9A);
+  const textPrimary = Color(0xFFF4F8FF);
+  const textSecondary = Color(0xFFB8C7D9);
 
-  ButtonStyle pill(BuildContext ctx) => FilledButton.styleFrom(
-    backgroundColor: cs.surfaceContainerHighest,
-    foregroundColor: cs.onSurface,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-    padding: EdgeInsets.zero,
-    fixedSize: const Size(129, 90),
-    minimumSize: const Size(129, 90),
-    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    visualDensity: VisualDensity.compact,
-  );
-
-  Widget _buildTile({
+  Widget buildTile({
     required BuildContext context,
     required FutureOr<void> Function() onTapAfter,
-    required Widget background,
-    required Widget overlay,
+    required String title,
+    required IconData icon,
+    required Color accentColor,
+    String? subtitle,
     double width = 129,
     double height = 90,
     BorderRadius borderRadius = const BorderRadius.all(Radius.circular(18)),
-    Color glowColor = gold,
-    double glowBlur = 28,
-    double glowSpread = 6,
-    double borderWidth = 0,
-    Color? borderColor,
-    bool innerGlow = false,
-    Color? innerGlowColor,
-    bool animationsActive = true,
-    bool glowActive = true,
     Duration holdDelay = const Duration(milliseconds: 120),
   }) {
-    final Color effectiveInnerGlowColor = innerGlowColor ?? glowColor;
-    final bool showGlow = glowActive;
-    final Color fallbackBorderColor = const Color(0xFFF1C86B);
-    final double fallbackBorderWidth = 1.8;
-    final Color effectiveBorderColor = showGlow
-        ? (borderColor ?? glowColor)
-        : fallbackBorderColor;
-    final double effectiveBorderWidth = borderWidth > 0
-        ? borderWidth
-        : (showGlow ? 0 : fallbackBorderWidth);
     return SizedBox(
       width: width,
       height: height,
       child: TapFlash(
-        color: showGlow ? glowColor : Colors.transparent,
+        color: accentColor,
         shape: BoxShape.rectangle,
         borderRadius: borderRadius,
         maxOpacity: 1.0,
-        blur: showGlow ? glowBlur : 0,
-        spread: showGlow ? glowSpread : 0,
+        blur: 18,
+        spread: 1,
         duration: const Duration(milliseconds: 220),
         holdForward: true,
         onTapAfter: () async {
@@ -89,230 +56,123 @@ Future<void> showCategoryPopup({
         },
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: surfaceAlt,
             borderRadius: borderRadius,
-            border: Border.all(
-              color: effectiveBorderColor,
-              width: effectiveBorderWidth,
-            ),
-            boxShadow: showGlow
-                ? [
-                    BoxShadow(
-                      color: glowColor.withValues(alpha: 0.55),
-                      blurRadius: glowBlur,
-                      spreadRadius: glowSpread,
-                    ),
-                  ]
-                : null,
+            border: Border.all(color: accentColor.withValues(alpha: 0.72)),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.18),
+                blurRadius: 22,
+                spreadRadius: -2,
+              ),
+              const BoxShadow(
+                color: Colors.black54,
+                blurRadius: 14,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
           child: ClipRRect(
             borderRadius: borderRadius,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                TickerMode(enabled: animationsActive, child: background),
-                if (innerGlow && showGlow)
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: Alignment.center,
-                        radius: 0.95,
-                        colors: [
-                          effectiveInnerGlowColor.withOpacity(0.45),
-                          effectiveInnerGlowColor.withOpacity(0.0),
-                        ],
-                        stops: const [0.0, 1.0],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    accentColor.withValues(alpha: 0.18),
+                    const Color(0xFF07101A),
+                    const Color(0xFF05070C),
+                  ],
+                  stops: const [0.0, 0.48, 1.0],
+                ),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    right: -18,
+                    top: -20,
+                    child: Container(
+                      width: 86,
+                      height: 86,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accentColor.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
-                overlay,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGlowToggleButton({
-    required bool animationsActive,
-    required bool glowActive,
-    required VoidCallback onTap,
-    required VoidCallback onLongPress,
-  }) {
-    final bool bothActive = animationsActive && glowActive;
-    final bool glowOnly = glowActive && !animationsActive;
-    final bool animationOnly = animationsActive && !glowActive;
-    final bool allOff = !animationsActive && !glowActive;
-
-    final Color borderColor;
-    final List<BoxShadow>? shadow;
-    final Gradient innerGradient;
-    final Color iconColor;
-
-    if (bothActive) {
-      borderColor = const Color(0xFFAFCCFE);
-      shadow = [
-        BoxShadow(
-          color: const Color(0xFFAFCCFE).withOpacity(0.45),
-          blurRadius: 28,
-          spreadRadius: 3,
-        ),
-      ];
-      innerGradient = const RadialGradient(
-        center: Alignment.center,
-        radius: 0.92,
-        colors: [Color(0xFFE7F0FF), Color(0xFFAFCCFE), Color(0x000D1A2E)],
-        stops: [0.0, 0.52, 1.0],
-      );
-      iconColor = const Color(0xFF142746);
-    } else if (glowOnly) {
-      borderColor = const Color(0xFFFFC66A);
-      shadow = [
-        BoxShadow(
-          color: const Color(0xFFFFC66A).withOpacity(0.45),
-          blurRadius: 26,
-          spreadRadius: 2,
-        ),
-      ];
-      innerGradient = const RadialGradient(
-        center: Alignment.center,
-        radius: 0.9,
-        colors: [Color(0xFFFFF5D6), Color(0xFFFFCB73), Color(0x00FFC66A)],
-        stops: [0.0, 0.48, 1.0],
-      );
-      iconColor = const Color(0xFF4A320B);
-    } else if (animationOnly) {
-      borderColor = const Color(0xFFA05260);
-      shadow = [
-        BoxShadow(
-          color: const Color(0xFFA05260).withOpacity(0.45),
-          blurRadius: 24,
-          spreadRadius: 2,
-        ),
-      ];
-      innerGradient = const RadialGradient(
-        center: Alignment.center,
-        radius: 0.9,
-        colors: [Color(0xFFFFDBD0), Color(0xFFA05260), Color(0x00A05260)],
-        stops: [0.0, 0.52, 1.0],
-      );
-      iconColor = const Color(0xFF471821);
-    } else {
-      borderColor = const Color(0xFF3B2E1A);
-      shadow = [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.55),
-          blurRadius: 18,
-          spreadRadius: -4,
-        ),
-      ];
-      innerGradient = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF1B140A), Color(0xFF15110A)],
-      );
-      iconColor = const Color(0xFF8C7A5C);
-    }
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: () {
-        HapticFeedback.mediumImpact();
-        onLongPress();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeInOut,
-        width: 78,
-        height: 36,
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0E0A05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: borderColor, width: 1.6),
-          boxShadow: shadow,
-        ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: innerGradient,
-          ),
-          child: Align(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.power_settings_new_rounded,
-              size: 18,
-              color: iconColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget content(
-    BuildContext context, {
-    required VoidCallback onBeginOpen,
-  }) => Material(
-    color: Colors.transparent,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    child: StatefulBuilder(
-      builder: (context, setLocalState) {
-        const tileTextColor = Color(0xFFFCD27D);
-
-        void toggleMaster() {
-          final bool next = !(animationsEnabled && glowEnabled);
-          setLocalState(() {
-            animationsEnabled = next;
-            glowEnabled = next;
-          });
-          CategoryPopupSettings.animationsEnabled = animationsEnabled;
-          CategoryPopupSettings.glowEnabled = glowEnabled;
-        }
-
-        void toggleGlowOnly() {
-          setLocalState(() {
-            glowEnabled = !glowEnabled;
-          });
-          CategoryPopupSettings.glowEnabled = glowEnabled;
-        }
-
-        final bool masterActive = animationsEnabled && glowEnabled;
-        final BoxDecoration decoration = glowEnabled
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const RadialGradient(
-                  center: Alignment(0, -0.4),
-                  radius: 1.2,
-                  colors: [
-                    Color(0xFFFFE4A8),
-                    Color(0xFFF1C86B),
-                    Color(0xFF8A5A1E),
-                  ],
-                  stops: [0.0, 0.55, 1.0],
-                ),
-                border: Border.all(color: gold.withOpacity(0.85), width: 1.6),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xAAF1C86B),
-                    blurRadius: 30,
-                    spreadRadius: 2,
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(icon, color: accentColor, size: 22),
+                        const Spacer(),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: textPrimary,
+                                fontWeight: FontWeight.w800,
+                                height: 1.05,
+                              ),
+                        ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ],
-              )
-            : BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: const Color(0xFF060504),
-                border: Border.all(color: const Color(0xFFF1C86B), width: 2),
-              );
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          decoration: decoration,
+  Widget content(BuildContext context, {required VoidCallback onBeginOpen}) =>
+      Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: surface,
+            border: Border.all(color: cyan.withValues(alpha: 0.42), width: 1.4),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0E1522), Color(0xFF060B12), Color(0xFF030508)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: cyan.withValues(alpha: 0.16),
+                blurRadius: 34,
+                spreadRadius: 1,
+              ),
+              BoxShadow(color: violet.withValues(alpha: 0.10), blurRadius: 42),
+              const BoxShadow(
+                color: Colors.black87,
+                blurRadius: 24,
+                offset: Offset(0, 14),
+              ),
+            ],
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
             child: Column(
@@ -322,19 +182,11 @@ Future<void> showCategoryPopup({
                   alignment: Alignment.center,
                   children: [
                     Text(
-                      'Category',
+                      'Kategorie',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: _buildGlowToggleButton(
-                        animationsActive: animationsEnabled,
-                        glowActive: glowEnabled,
-                        onTap: toggleMaster,
-                        onLongPress: toggleGlowOnly,
+                        color: textPrimary,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ],
@@ -355,40 +207,15 @@ Future<void> showCategoryPopup({
                         borderRadius: BorderRadius.circular(18),
                       ),
                       tappable: false,
-                      closedBuilder: (c, open) => _buildTile(
+                      closedBuilder: (c, open) => buildTile(
                         context: c,
                         onTapAfter: () async {
                           onBeginOpen();
                           open();
                         },
-                        background: const NeuralGlowBackground(
-                          density: 12,
-                          nodeCount: 14,
-                          speed: 0.20,
-                          focus: Alignment.center,
-                          spread: 0.24,
-                          lineColor: Color(0xFFE6C27A),
-                          bgColor: Color(0xFF000000),
-                        ),
-                        animationsActive: animationsEnabled,
-                        glowActive: glowEnabled,
-                        overlay: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              'All words',
-                              style: Theme.of(c).textTheme.titleLarge?.copyWith(
-                                color: tileTextColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        glowBlur: 34,
-                        glowSpread: 6,
-                        innerGlow: true,
-                        innerGlowColor: tileTextColor,
+                        title: 'Alle Wörter',
+                        icon: Icons.auto_stories_rounded,
+                        accentColor: cyan,
                       ),
                       openBuilder: (_, __) =>
                           const QuickSetsDetailScreen(initialIndex: 0),
@@ -406,30 +233,15 @@ Future<void> showCategoryPopup({
                       ),
                       tappable: false,
                       onClosed: (_) => onRefreshMyWords(),
-                      closedBuilder: (c, open) => _buildTile(
+                      closedBuilder: (c, open) => buildTile(
                         context: c,
                         onTapAfter: () async {
                           onBeginOpen();
                           open();
                         },
-                        background: const MyWordsBackground(),
-                        animationsActive: animationsEnabled,
-                        glowActive: glowEnabled,
-                        overlay: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              'My words',
-                              style: Theme.of(c).textTheme.titleLarge?.copyWith(
-                                color: tileTextColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        glowBlur: 34,
-                        glowSpread: 6,
+                        title: 'Meine Wörter',
+                        icon: Icons.edit_note_rounded,
+                        accentColor: violet,
                       ),
                       openBuilder: (_, __) =>
                           const QuickSetsDetailScreen(initialIndex: 1),
@@ -452,30 +264,15 @@ Future<void> showCategoryPopup({
                         borderRadius: BorderRadius.circular(18),
                       ),
                       tappable: false,
-                      closedBuilder: (c, open) => _buildTile(
+                      closedBuilder: (c, open) => buildTile(
                         context: c,
                         onTapAfter: () async {
                           onBeginOpen();
                           open();
                         },
-                        background: const FavoritesHeartBackground(),
-                        animationsActive: animationsEnabled,
-                        glowActive: glowEnabled,
-                        overlay: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              'Favorites',
-                              style: Theme.of(c).textTheme.titleLarge?.copyWith(
-                                color: tileTextColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        glowBlur: 34,
-                        glowSpread: 6,
+                        title: 'Favoriten',
+                        icon: Icons.favorite_rounded,
+                        accentColor: pink,
                       ),
                       openBuilder: (_, __) =>
                           const QuickSetsDetailScreen(initialIndex: 2),
@@ -492,30 +289,15 @@ Future<void> showCategoryPopup({
                         borderRadius: BorderRadius.circular(18),
                       ),
                       tappable: false,
-                      closedBuilder: (c, open) => _buildTile(
+                      closedBuilder: (c, open) => buildTile(
                         context: c,
                         onTapAfter: () async {
                           onBeginOpen();
                           open();
                         },
-                        background: const WordsIKnowPuzzleBackground(),
-                        animationsActive: animationsEnabled,
-                        glowActive: glowEnabled,
-                        overlay: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              'Words I know',
-                              style: Theme.of(c).textTheme.titleLarge?.copyWith(
-                                color: tileTextColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        glowBlur: 34,
-                        glowSpread: 6,
+                        title: 'Wörter, die ich kenne',
+                        icon: Icons.verified_rounded,
+                        accentColor: green,
                       ),
                       openBuilder: (_, __) =>
                           const QuickSetsDetailScreen(initialIndex: 3),
@@ -537,33 +319,19 @@ Future<void> showCategoryPopup({
                       borderRadius: BorderRadius.circular(18),
                     ),
                     tappable: false,
-                    closedBuilder: (c, open) => _buildTile(
+                    closedBuilder: (c, open) => buildTile(
                       context: c,
                       onTapAfter: () async {
                         onBeginOpen();
                         open();
                       },
-                      background: const WordHubRisingGlowBackground(),
-                      animationsActive: animationsEnabled,
-                      glowActive: glowEnabled,
-                      overlay: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(
-                            'Word hub',
-                            style: Theme.of(c).textTheme.titleLarge?.copyWith(
-                              color: tileTextColor,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
+                      title: 'Wortwelten',
+                      subtitle: 'Themen und Lernbereiche',
+                      icon: Icons.public_rounded,
+                      accentColor: cyan,
                       width: 280,
                       height: 100,
                       borderRadius: BorderRadius.circular(22),
-                      glowBlur: 34,
-                      glowSpread: 8,
                     ),
                     openBuilder: (_, __) =>
                         const WordHubScreen(useLocalOfflineFlow: true),
@@ -588,25 +356,27 @@ Future<void> showCategoryPopup({
                         );
                       },
                       style: FilledButton.styleFrom(
-                        backgroundColor: gold,
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF0E1A24),
+                        foregroundColor: textPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
-                          side: const BorderSide(color: Colors.black, width: 2),
+                          side: BorderSide(
+                            color: violet.withValues(alpha: 0.74),
+                            width: 1.2,
+                          ),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 24),
+                        elevation: 0,
                       ),
-                      child: const Text('Make your own mix'),
+                      child: const Text('Mix erstellen'),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
-    ),
-  );
+        ),
+      );
 
   return showDialog(
     context: context,
