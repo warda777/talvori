@@ -32,12 +32,16 @@ class LocalLearningSessionFacade {
       now: now,
     );
 
+    final resolvedSessionSize =
+        sessionSize ??
+        await _sessionSizeForMode(categoryId: categoryId, mode: mode);
+
     final sessionState = await _srsSessionService.startOrResumeSession(
       categoryId: categoryId,
       mode: mode,
       trainingArea: trainingArea,
       now: now,
-      sessionSize: sessionSize ?? LocalSrsSessionService.defaultSessionSize,
+      sessionSize: resolvedSessionSize,
     );
 
     return _sessionReadService.buildReadState(sessionState);
@@ -56,15 +60,34 @@ class LocalLearningSessionFacade {
       now: now,
     );
 
+    final resolvedSessionSize =
+        sessionSize ??
+        await _sessionSizeForMode(categoryId: categoryId, mode: mode);
+
     final sessionState = await _srsSessionService.resetAndStartSession(
       categoryId: categoryId,
       mode: mode,
       trainingArea: trainingArea,
       now: now,
-      sessionSize: sessionSize ?? LocalSrsSessionService.defaultSessionSize,
+      sessionSize: resolvedSessionSize,
     );
 
     return _sessionReadService.buildReadState(sessionState);
+  }
+
+  Future<int> _sessionSizeForMode({
+    required String categoryId,
+    required LearningMode mode,
+  }) async {
+    if (mode != LearningMode.adaptive) {
+      return LocalSrsSessionService.defaultSessionSize;
+    }
+
+    final wordCount = await _progressInitializationService
+        .countWordsForCategory(categoryId: categoryId);
+    return wordCount > LocalSrsSessionService.defaultSessionSize
+        ? wordCount
+        : LocalSrsSessionService.defaultSessionSize;
   }
 
   Future<LocalSessionReadState> submitAnswerAndReadNext({

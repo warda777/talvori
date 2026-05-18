@@ -5,16 +5,32 @@ import 'package:talvori/core/local_database/adapters/local_category_detail_group
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
+import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
+import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
+import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
+
+class _FakeLocalCategoryProgressResetService
+    implements LocalCategoryProgressResetService {
+  LocalCategoryProgressResetRequest? lastRequest;
+
+  @override
+  Future<void> resetToS0(LocalCategoryProgressResetRequest request) async {
+    lastRequest = request;
+  }
+}
 
 void main() {
   LocalCategory localCategory(String id, String name) {
@@ -306,6 +322,196 @@ void main() {
   );
 
   testWidgets(
+    'category_detail_screen_local_stage_counts_follow_selected_learning_mode',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localStageCountsProvider.overrideWith((ref, request) async {
+              return switch (request.mode) {
+                LearningMode.time => [25, 0, 0, 0, 0, 0],
+                LearningMode.adaptive => [20, 3, 2, 0, 0, 0],
+                LearningMode.hybrid => [10, 5, 4, 3, 2, 1],
+              };
+            }),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<StageSwitchRowView>(find.byType(StageSwitchRowView))
+            .counts,
+        [25, 0, 0, 0, 0, 0],
+      );
+
+      await tester.tap(find.text('Limitlos'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<StageSwitchRowView>(find.byType(StageSwitchRowView))
+            .counts,
+        [20, 3, 2, 0, 0, 0],
+      );
+
+      await tester.tap(find.text('Kombiniert'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<StageSwitchRowView>(find.byType(StageSwitchRowView))
+            .counts,
+        [10, 5, 4, 3, 2, 1],
+      );
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_start_passes_selected_learning_mode',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localLearningViewModelProvider.overrideWithValue(
+              const LocalLearningViewModelState(
+                isLoading: false,
+                hasSession: false,
+                currentPosition: 0,
+                totalItems: 0,
+                answeredCount: 0,
+                remainingCount: 0,
+                canSubmitAnswer: false,
+                canCompleteSession: false,
+                lastAction: LocalLearningControllerAction.none,
+              ),
+            ),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localStageCountsProvider.overrideWith(
+              (ref, request) async => [25, 0, 0, 0, 0, 0],
+            ),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.text('Limitlos'));
+      await tester.pump();
+
+      await tester.tap(find.byType(StartButtonPulse));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final screen = tester.widget<LearnModeScreen>(
+        find.byType(LearnModeScreen),
+      );
+      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.localLearningMode, LearningMode.adaptive);
+    },
+  );
+
+  testWidgets(
+    'category_detail_screen_local_reset_confirms_and_resets_selected_category_mode',
+    (tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final resetService = _FakeLocalCategoryProgressResetService();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+            localStageCountsProvider.overrideWith(
+              (ref, request) async => [20, 3, 2, 0, 0, 0],
+            ),
+            localCategoryProgressResetServiceProvider.overrideWithValue(
+              resetService,
+            ),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: 'Health & Fitness',
+              categoryId: 'seed-category-basics',
+              listFilter: const WordListFilter(
+                WordFilterKind.category,
+                'seed-category-basics',
+              ),
+              useLocalOfflineFlow: true,
+              localCategoryId: 'seed-category-basics',
+              localSelectedWordHubKey: 'health_fitness',
+              localCategoryItems: localWordHubItems(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.text('Limitlos'));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.restart_alt_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.restart_alt_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fortschritt zurücksetzen?'), findsOneWidget);
+      await tester.tap(find.text('Zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+      expect(resetService.lastRequest?.mode, LearningMode.adaptive);
+      expect(find.text('Lernfortschritt wurde zurückgesetzt'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'category_detail_screen_local_vocabs_opens_local_word_list_with_display_label',
     (tester) async {
       tester.view.physicalSize = const Size(430, 932);
@@ -482,4 +688,60 @@ void main() {
       expect(find.text('missing-local-category'), findsWidgets);
     },
   );
+
+  testWidgets('category_detail_local_stage_switch_opens_stage_inspector', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 1),
+          localStageCountsProvider.overrideWith(
+            (ref, request) async => [1, 0, 0, 0, 0, 0],
+          ),
+          localStageInspectorProvider.overrideWith(
+            (ref, request) async => [
+              LocalStageInspectorItem(
+                wordId: 'word-1',
+                term: 'hello',
+                translation: 'hallo',
+                categoryId: request.categoryId,
+                mode: request.mode,
+                currentStage: request.stage,
+                passCount: 0,
+                wrongCount: 0,
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Health & Fitness',
+            categoryId: 'legacy-basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'seed-category-basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final row = tester.widget<StageSwitchRowView>(
+      find.byType(StageSwitchRowView),
+    );
+    row.onTapStage?.call(0);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Merkstufe 0'), findsOneWidget);
+    expect(find.text('hochgestuft'), findsOneWidget);
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('hallo'), findsOneWidget);
+  });
 }

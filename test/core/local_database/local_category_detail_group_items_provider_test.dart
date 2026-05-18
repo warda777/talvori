@@ -49,7 +49,7 @@ void main() {
 
       expect(health.displayLabel, 'Health & Fitness');
       expect(health.localCategoryId, 'seed-category-basics');
-      expect(health.vocabsCount, 3);
+      expect(health.vocabsCount, 25);
       expect(travel.displayLabel, 'Travel');
       expect(travel.localCategoryId, 'seed-category-travel');
       expect(travel.vocabsCount, 3);

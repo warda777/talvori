@@ -17,6 +17,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final bool isFirst;
   final bool glow; // NEU: für Blink-Effekt
   final Animation<double>? pulseAnimation; // NEU: für sanftes Pulsieren
+  final Color? pulseColor;
   final bool selectedHighlight; // NEU: für Single-Modus Hervorhebung
   final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
   final Widget Function(Widget knob)?
@@ -45,6 +46,7 @@ class VerticalStageSwitch extends StatelessWidget {
     this.isFirst = false,
     this.glow = false, // NEU: Standard false
     this.pulseAnimation, // NEU: für sanftes Pulsieren
+    this.pulseColor,
     this.selectedHighlight = false, // NEU: für Single-Modus Hervorhebung
     this.innerStrokeColor,
     this.knobWrapper,
@@ -122,10 +124,22 @@ class VerticalStageSwitch extends StatelessWidget {
                               final double soft =
                                   0.15 +
                                   0.35 * pulseAnimation!.value; // 0.15..0.5
-                              final Color glowColor = const Color(0xFF00FF88);
+                              final Color glowColor =
+                                  pulseColor ?? const Color(0xFF00FF88);
                               final Color accentColor = const Color(
                                 0xFF6FD3FF,
                               ); // hellblau für "gewählt"
+                              final double tempPulse = pulseColor == null
+                                  ? 0
+                                  : (1 - pulseAnimation!.value).clamp(0.0, 1.0);
+                              final Color resolvedInnerColor =
+                                  pulseColor == null
+                                  ? innerColor
+                                  : Color.lerp(
+                                      innerColor,
+                                      pulseColor,
+                                      0.58 * tempPulse,
+                                    )!;
                               final List<BoxShadow>? boxShadow = glow
                                   ? [
                                       BoxShadow(
@@ -147,7 +161,9 @@ class VerticalStageSwitch extends StatelessWidget {
                                         : [
                                             BoxShadow(
                                               color: glowColor.withOpacity(
-                                                soft,
+                                                pulseColor == null
+                                                    ? soft
+                                                    : 0.75 * tempPulse,
                                               ),
                                               blurRadius: 18,
                                               spreadRadius: 2.0,
@@ -159,21 +175,25 @@ class VerticalStageSwitch extends StatelessWidget {
                                 width: 38,
                                 height: 52,
                                 decoration: BoxDecoration(
-                                  color: innerColor,
+                                  color: resolvedInnerColor,
                                   borderRadius: BorderRadius.circular(21),
-                                  border: glow
+                                  border: pulseColor != null && tempPulse > 0
+                                      ? Border.all(
+                                          color: pulseColor!.withOpacity(
+                                            0.45 + 0.45 * tempPulse,
+                                          ),
+                                          width: 1.8,
+                                        )
+                                      : glow
                                       ? Border.all(color: glowColor, width: 1)
-                                      : (selectedHighlight
-                                            ? Border.all(
-                                                color: accentColor,
-                                                width: 1,
-                                              )
-                                            : Border.all(
-                                                color:
-                                                    innerStrokeColor ??
-                                                    Colors.white24,
-                                                width: 1.6,
-                                              )),
+                                      : selectedHighlight
+                                      ? Border.all(color: accentColor, width: 1)
+                                      : Border.all(
+                                          color:
+                                              innerStrokeColor ??
+                                              Colors.white24,
+                                          width: 1.6,
+                                        ),
                                   boxShadow: boxShadow,
                                 ),
                                 alignment: Alignment.center,

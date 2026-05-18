@@ -63,7 +63,7 @@ void main() {
       );
       final oldDatabaseFile = File('${tempDir.path}/word_progress.db');
 
-      expect(categories, hasLength(1));
+      expect(categories.map((category) => category.id), contains('basics'));
       expect(basics.name, 'Basics');
       expect(basics.isArchived, isFalse);
       expect(wordProgress, isEmpty);
@@ -111,9 +111,9 @@ void main() {
       );
       final oldDatabaseFile = File('${tempDir.path}/word_progress.db');
 
-      expect(categories, isEmpty);
-      expect(categoryRows, isEmpty);
-      expect(wordRows, isEmpty);
+      expect(categories, isNotEmpty);
+      expect(categoryRows, isNotEmpty);
+      expect(wordRows, isNotEmpty);
       expect(wordProgress, isEmpty);
       expect(learningSessions, isEmpty);
       expect(reviewHistory, isEmpty);

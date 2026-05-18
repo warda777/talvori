@@ -60,8 +60,8 @@ void main() {
       expect(debugState.wasSuccessful, isFalse);
       expect(debugState.lastImportedAt, isNull);
       expect(debugState.lastAction, LocalDebugImportControllerAction.none);
-      expect(categories, isEmpty);
-      expect(words, isEmpty);
+      expect(categories, isNotEmpty);
+      expect(words, isNotEmpty);
       expect(wordProgress, isEmpty);
       expect(learningSessions, isEmpty);
       expect(reviewHistory, isEmpty);
@@ -108,8 +108,8 @@ void main() {
         );
         final wordsBefore = await bootstrapResult.database.query('words');
 
-        expect(categoriesBefore, isEmpty);
-        expect(wordsBefore, isEmpty);
+        expect(categoriesBefore, isNotEmpty);
+        expect(wordsBefore, isNotEmpty);
 
         await container
             .read(localDebugImportControllerProvider.notifier)

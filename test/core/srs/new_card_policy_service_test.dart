@@ -105,6 +105,19 @@ void main() {
       },
     );
 
+    test('adaptive_mode_can_use_more_than_twenty_session_slots', () {
+      final result = service.evaluate(
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        recentAnswers: stableRecentAnswers,
+        remainingSessionSlots: 25,
+      );
+
+      expect(result.policy, NewCardPolicy.allowed);
+      expect(result.maxNewCardsForMode, 25);
+      expect(result.allowedNewCardCount, 25);
+    });
+
     test(
       'three_wrong_answers_in_last_ten_blocks_time_and_hybrid_new_cards',
       () {

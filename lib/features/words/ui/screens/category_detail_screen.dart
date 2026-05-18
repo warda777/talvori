@@ -2,13 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
+import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
+import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_start_path.dart';
 import 'package:talvori/core/local_database/adapters/local_category_id_resolver.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
+import 'package:talvori/features/words/application/local_learning_mode_mapper.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
@@ -18,6 +22,7 @@ import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/widgets/learning_mode_selector.dart';
+import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/application/category_detail_controller.dart';
@@ -780,10 +785,22 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     final wheelLabels = localCategoryItems.isNotEmpty
         ? localCategoryItems.map((item) => item.displayLabel).toList()
         : _localWheelLabelsFromCategoryIds(wheelCategoryIds, title);
-    const stages = [0, 0, 0, 0, 0, 0];
     const visibleMask = [true, true, true, true, true, true];
     final selectedLearningMode = ref.watch(srsModeControllerProvider).mode;
+    final selectedLocalLearningMode = localLearningModeFromSrsSystem(
+      selectedLearningMode,
+    );
     final selectedReviewMode = ref.watch(levelSelectionProvider);
+    final stageCountsRequest = LocalStageCountsRequest(
+      categoryId: selectedCategoryId,
+      mode: selectedLocalLearningMode,
+    );
+    final localStageCountsAsync = ref.watch(
+      localStageCountsProvider(stageCountsRequest),
+    );
+    final stages =
+        localStageCountsAsync.valueOrNull ??
+        List<int>.filled(SrsStage.values.length, 0);
     final localVocabsCount = selectedLocalCategoryItem?.vocabsCount;
     final fallbackLocalVocabsCountAsync =
         localVocabsCount != null || selectedCategoryId.isEmpty
@@ -804,16 +821,82 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         MaterialPageRoute(
           builder: (_) => LearnModeScreen(
             categoryId: selectedCategoryId,
-            title: title,
+            title: selectedLocalCategoryItem?.displayLabel ?? title,
             useLocalOfflineFlow: true,
             localCategoryId: selectedCategoryId,
+            localLearningMode: selectedLocalLearningMode,
             navigationOrigin: LearnNavigationOrigin.category(
               categoryId: selectedCategoryId,
-              categoryTitle: title,
+              categoryTitle: selectedLocalCategoryItem?.displayLabel ?? title,
             ),
           ),
         ),
       );
+      ref.invalidate(localStageCountsProvider(stageCountsRequest));
+    }
+
+    Future<void> resetLocalProgress() async {
+      if (selectedCategoryId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+        );
+        return;
+      }
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Fortschritt zurücksetzen?'),
+          content: const Text(
+            'Fortschritt für diese Kategorie und diesen Lernmodus '
+            'zurücksetzen?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Zurücksetzen'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !context.mounted) return;
+
+      await ref
+          .read(localCategoryProgressResetServiceProvider)
+          .resetToS0(
+            LocalCategoryProgressResetRequest(
+              categoryId: selectedCategoryId,
+              mode: selectedLocalLearningMode,
+            ),
+          );
+      ref.invalidate(localStageCountsProvider(stageCountsRequest));
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lernfortschritt wurde zurückgesetzt')),
+      );
+    }
+
+    Future<void> openStageInspector(int stageIndex) async {
+      if (selectedCategoryId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+        );
+        return;
+      }
+
+      await showLocalStageInspectorSheet(
+        context: context,
+        categoryId: selectedCategoryId,
+        mode: selectedLocalLearningMode,
+        stage: SrsStage.values[stageIndex],
+        categoryLabel: selectedLocalCategoryItem?.displayLabel ?? title,
+      );
+      ref.invalidate(localStageCountsProvider(stageCountsRequest));
     }
 
     return _buildCategoryDetailFrame(
@@ -943,11 +1026,70 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 disabledOuter: Color(0xFFE9F1FF),
                 innerStroke: Color(0xFFB36BFF),
               ),
+              onTapStage: openStageInspector,
+            ),
+            startTrailingControl: _LocalResetButton(
+              onPressed: resetLocalProgress,
             ),
           ),
         ),
         const SizedBox(height: 5),
       ],
+    );
+  }
+}
+
+class _LocalResetButton extends StatelessWidget {
+  const _LocalResetButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1A1A1D), Color(0xFF050505)],
+            ),
+            border: Border.all(color: Color(0xFFF5BFCB), width: 1.4),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFF5BFCB).withValues(alpha: 0.2),
+                blurRadius: 10,
+                spreadRadius: 0.2,
+              ),
+            ],
+          ),
+          child: Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.34),
+                width: 0.8,
+              ),
+            ),
+            child: const Icon(
+              Icons.restart_alt_rounded,
+              color: Colors.white,
+              size: 23,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -40,7 +40,12 @@ class SrsReviewPersistenceService {
           sessionItemId,
         );
       } else if (_shouldContinueInSession(reviewResult)) {
-        await _insertContinuationItem(transaction, reviewInput, reviewResult);
+        await _insertContinuationItem(
+          transaction,
+          reviewInput,
+          reviewResult,
+          sessionItemId,
+        );
       }
 
       await _updateSessionPosition(
@@ -271,12 +276,37 @@ AND position >= ?
     Transaction transaction,
     ReviewInput reviewInput,
     ReviewResult reviewResult,
+    String sessionItemId,
   ) async {
     final progress = reviewResult.updatedProgress;
+    await _deactivateOpenDuplicateItems(
+      transaction,
+      sessionId: reviewInput.sessionContext.sessionId,
+      wordId: progress.wordId,
+      exceptItemId: sessionItemId,
+      updatedAt: reviewInput.reviewedAt,
+    );
+
     final nextPosition = await _nextSessionItemPosition(
       transaction,
       reviewInput.sessionContext.sessionId,
     );
+    final insertPosition = await _continuationInsertPosition(
+      transaction: transaction,
+      sessionId: reviewInput.sessionContext.sessionId,
+      mode: progress.mode,
+      nextPosition: nextPosition,
+      currentPosition: reviewInput.sessionContext.currentPosition,
+      remainingQueueSize: reviewInput.sessionContext.remainingQueueSize,
+    );
+
+    if (insertPosition < nextPosition) {
+      await _makePositionAvailable(
+        transaction,
+        sessionId: reviewInput.sessionContext.sessionId,
+        position: insertPosition,
+      );
+    }
 
     await transaction.insert('session_items', {
       'id': _uuid.v4(),
@@ -285,7 +315,7 @@ AND position >= ?
       'category_id': progress.categoryId,
       'mode_id': progress.mode.name,
       'stage_at_enqueue': progress.stage.name,
-      'position': nextPosition,
+      'position': insertPosition,
       'status': QueueItemStatus.queued.name,
       'is_new_card': 0,
       'due_at_enqueue': _encodeDateTime(reviewResult.nextDueAt),
@@ -299,6 +329,59 @@ AND position >= ?
       'created_at': _encodeDateTime(reviewInput.reviewedAt),
       'updated_at': _encodeDateTime(reviewInput.reviewedAt),
     });
+  }
+
+  Future<int> _continuationInsertPosition({
+    required Transaction transaction,
+    required String sessionId,
+    required LearningMode mode,
+    required int nextPosition,
+    required int currentPosition,
+    required int remainingQueueSize,
+  }) async {
+    const continuationOffset = 7;
+    if (remainingQueueSize <= continuationOffset) {
+      return nextPosition;
+    }
+
+    final targetPosition = currentPosition + continuationOffset;
+    final basePosition = targetPosition < nextPosition
+        ? targetPosition
+        : nextPosition;
+
+    if (mode != LearningMode.adaptive || basePosition >= nextPosition) {
+      return basePosition;
+    }
+
+    final upcomingNewRows = await transaction.query(
+      'session_items',
+      columns: ['position'],
+      where: '''
+session_id = ?
+AND position >= ?
+AND is_new_card = ?
+AND status IN (?, ?)
+''',
+      whereArgs: [
+        sessionId,
+        basePosition,
+        1,
+        QueueItemStatus.queued.name,
+        QueueItemStatus.shown.name,
+      ],
+      orderBy: 'position ASC',
+      limit: 2,
+    );
+
+    if (upcomingNewRows.length < 2) {
+      return basePosition;
+    }
+
+    final secondUpcomingNewPosition = upcomingNewRows.last['position']! as int;
+    final adaptiveMixedPosition = secondUpcomingNewPosition + 1;
+    return adaptiveMixedPosition < nextPosition
+        ? adaptiveMixedPosition
+        : nextPosition;
   }
 
   Future<void> _updateSessionPosition(

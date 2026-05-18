@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.dart';
 import 'package:talvori/core/local_database/adapters/local_learn_mode_ui_adapter.dart';
+import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
+import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
+import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/application/application.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
@@ -22,6 +25,7 @@ import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart'
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
+import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart'
@@ -34,6 +38,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
   final String title; // z. B. "Money & Shopping"
   final bool useLocalOfflineFlow;
   final String? localCategoryId;
+  final LearningMode? localLearningMode;
 
   // ⬇️ NEU: Custom Wheel für QuickSets
   final List<String>? customWheelLabels;
@@ -48,6 +53,7 @@ class LearnModeScreen extends ConsumerStatefulWidget {
     required this.title,
     this.useLocalOfflineFlow = false,
     this.localCategoryId,
+    this.localLearningMode,
     this.customWheelLabels, // <— NEU
     this.customWheelInitialIndex, // <— NEU
     this.navigationOrigin, // <— NEU
@@ -93,6 +99,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   late final AnimationController fx;
   late final AnimationController pulse;
   int? pulseStage; // Für normale Stages (0-5)
+  Color pulseColor = const Color(0xFFB16CFF);
   String? pulseSingleBucket; // Für Single-Modus ('SRC', 'R1', 'R2')
 
   // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
@@ -200,18 +207,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     }, growable: false);
   }
 
-  int? _localPulseTargetStageFromCounts({
-    required List<int> before,
-    required List<int> after,
-  }) {
-    final normalizedBefore = _normalizeLocalStageCounts(before);
-    final normalizedAfter = _normalizeLocalStageCounts(after);
-    for (var index = 0; index < normalizedAfter.length; index++) {
-      if (normalizedAfter[index] > normalizedBefore[index]) {
-        return index;
-      }
-    }
-    return null;
+  Color _localPulseColorForFeedback(LocalReviewVisualFeedback feedback) {
+    return switch (feedback.outcomeType) {
+      LocalReviewOutcomeType.promoted => const Color(0xFF36F58A),
+      LocalReviewOutcomeType.demoted ||
+      LocalReviewOutcomeType.unchangedWrong => const Color(0xFFFF4B6E),
+      LocalReviewOutcomeType.repeatedSameStage => switch (feedback.repeatIndex
+          .clamp(1, 3)) {
+        1 => const Color(0xFF5DDCFF),
+        2 => const Color(0xFFB36BFF),
+        _ => const Color(0xFFFFB84A),
+      },
+    };
   }
 
   void _updateLocalLink(int? targetStage) {
@@ -241,12 +248,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     });
   }
 
-  void triggerPulse(int stage) {
+  void triggerPulse(int stage, {Color? color}) {
     debugPrint(
       '🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}',
     );
     setState(() {
       pulseStage = stage;
+      pulseColor = color ?? const Color(0xFFB16CFF);
       pulseSingleBucket = null; // Normal-Modus
     });
     pulse.forward(from: 0);
@@ -259,6 +267,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       pulseStage = null; // Single-Modus
     });
     pulse.forward(from: 0);
+  }
+
+  void _handlePulseStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !mounted) return;
+    setState(() {
+      pulseStage = null;
+      pulseSingleBucket = null;
+      pulseColor = const Color(0xFFB16CFF);
+    });
   }
 
   void _handleDragUpdate(double dx) {
@@ -587,6 +604,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       });
     }
     fx.dispose();
+    pulse.removeStatusListener(_handlePulseStatus);
     pulse.dispose();
     super.dispose();
   }
@@ -642,6 +660,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         milliseconds: 2000,
       ), // Doppelt so langer Bounce-Effekt
     );
+    pulse.addStatusListener(_handlePulseStatus);
 
     // ⬇️ NEU: Wheel-Labels initialisieren (ganz am Anfang)
     // Wenn übergeben, nutze die QuickSets-Wheel, sonst die bisherigen Kategorien
@@ -1115,6 +1134,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                     painter: SwitchPulsePainter(
                       rect: rect,
                       t: Curves.easeOutCubic.transform(pulse.value),
+                      color: pulseColor,
                     ),
                     size: Size.infinite,
                   );
@@ -1129,7 +1149,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
   Widget _buildLocalOfflineFlow(BuildContext context) {
     final localCategoryId = widget.localCategoryId;
-    final viewModelState = ref.watch(localLearningViewModelProvider);
+    final localLearningMode = widget.localLearningMode ?? LearningMode.adaptive;
+    final rawViewModelState = ref.watch(localLearningViewModelProvider);
+    final viewModelState =
+        rawViewModelState.categoryId == localCategoryId &&
+            rawViewModelState.mode == localLearningMode
+        ? rawViewModelState
+        : const LocalLearningViewModelState(
+            isLoading: false,
+            hasSession: false,
+            currentPosition: 0,
+            totalItems: 0,
+            answeredCount: 0,
+            remainingCount: 0,
+            canSubmitAnswer: false,
+            canCompleteSession: false,
+            lastAction: LocalLearningControllerAction.none,
+          );
     final uiState = const LocalLearnModeUiAdapter().map(viewModelState);
     final cardState = const LearnModeCardPresenter().map(uiState);
     final localTargetStage = cardState.hasCard
@@ -1154,58 +1190,64 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           .read(localLearningControllerProvider.notifier)
           .startOrResume(
             categoryId: localCategoryId,
-            mode: LearningMode.adaptive,
-            trainingArea: TrainingArea.all,
-            now: DateTime.now(),
-          );
-    }
-
-    Future<void> resetAndStart() async {
-      if (localCategoryId == null || localCategoryId.isEmpty) return;
-      await ref
-          .read(localLearningControllerProvider.notifier)
-          .resetAndStart(
-            categoryId: localCategoryId,
-            mode: LearningMode.adaptive,
+            mode: localLearningMode,
             trainingArea: TrainingArea.all,
             now: DateTime.now(),
           );
     }
 
     Future<void> submitCorrect() async {
-      final stageCountsBefore = localStageCounts;
       setState(() => _localShowTranslation = false);
       await ref
           .read(localLearningControllerProvider.notifier)
           .submitCorrect(now: DateTime.now());
-      final stageCountsAfter = ref
+      final feedback = ref
           .read(localLearningViewModelProvider)
-          .stageCounts;
-      final pulseTargetStage = _localPulseTargetStageFromCounts(
-        before: stageCountsBefore,
-        after: stageCountsAfter,
-      );
-      if (pulseTargetStage != null && mounted) {
-        triggerPulse(pulseTargetStage);
+          .lastReviewFeedback;
+      final pulseTargetStage = feedback?.targetStage.index;
+      if (feedback != null && pulseTargetStage != null && mounted) {
+        triggerPulse(
+          pulseTargetStage,
+          color: _localPulseColorForFeedback(feedback),
+        );
       }
     }
 
     Future<void> submitWrong() async {
-      final stageCountsBefore = localStageCounts;
       setState(() => _localShowTranslation = false);
       await ref
           .read(localLearningControllerProvider.notifier)
           .submitWrong(now: DateTime.now());
-      final stageCountsAfter = ref
+      final feedback = ref
           .read(localLearningViewModelProvider)
-          .stageCounts;
-      final pulseTargetStage = _localPulseTargetStageFromCounts(
-        before: stageCountsBefore,
-        after: stageCountsAfter,
-      );
-      if (pulseTargetStage != null && mounted) {
-        triggerPulse(pulseTargetStage);
+          .lastReviewFeedback;
+      final pulseTargetStage = feedback?.targetStage.index;
+      if (feedback != null && pulseTargetStage != null && mounted) {
+        triggerPulse(
+          pulseTargetStage,
+          color: _localPulseColorForFeedback(feedback),
+        );
       }
+    }
+
+    Future<void> openStageInspector(int stageIndex) async {
+      if (localCategoryId == null || localCategoryId.isEmpty) return;
+      await showLocalStageInspectorSheet(
+        context: context,
+        categoryId: localCategoryId,
+        mode: localLearningMode,
+        stage: SrsStage.values[stageIndex],
+        categoryLabel: widget.title,
+      );
+      if (!mounted) return;
+      await ref
+          .read(localLearningControllerProvider.notifier)
+          .startOrResume(
+            categoryId: localCategoryId,
+            mode: localLearningMode,
+            trainingArea: TrainingArea.all,
+            now: DateTime.now(),
+          );
     }
 
     Widget cardContent;
@@ -1271,8 +1313,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             FilledButton(
               onPressed: localCategoryId == null || localCategoryId.isEmpty
                   ? null
-                  : resetAndStart,
-              child: const Text('Neue Session starten'),
+                  : startOrResume,
+              child: const Text('Weiterlernen'),
             ),
           ],
         ),
@@ -1336,6 +1378,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   learnedInStage5: 0,
                   s0Locked: false,
                   switchKeys: switchKeys,
+                  onTapStage: openStageInspector,
+                  activePulseStage: pulseStage,
+                  activePulseColor: pulseColor,
+                  activePulseAnimation: pulse,
                   labels: const StageSwitchLabels(
                     newLabel: 'New',
                     newNote: '0',
@@ -1384,6 +1430,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                     painter: SwitchPulsePainter(
                       rect: rect,
                       t: Curves.easeOutCubic.transform(pulse.value),
+                      color: pulseColor,
                     ),
                     size: Size.infinite,
                   );

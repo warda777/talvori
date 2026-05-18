@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../srs/models/learning_mode.dart';
 import '../../srs/models/review_answer.dart';
 import '../../srs/models/training_area.dart';
+import '../models/local_review_visual_feedback.dart';
 import '../models/local_session_read_state.dart';
 import '../providers/local_bootstrap_provider.dart';
 
@@ -20,12 +21,14 @@ class LocalLearningControllerState {
     this.isLoading = false,
     this.errorMessage,
     this.readState,
+    this.lastReviewFeedback,
     this.lastAction = LocalLearningControllerAction.none,
   });
 
   final bool isLoading;
   final String? errorMessage;
   final LocalSessionReadState? readState;
+  final LocalReviewVisualFeedback? lastReviewFeedback;
   final LocalLearningControllerAction lastAction;
 
   LocalLearningControllerState copyWith({
@@ -33,6 +36,8 @@ class LocalLearningControllerState {
     String? errorMessage,
     bool clearErrorMessage = false,
     LocalSessionReadState? readState,
+    LocalReviewVisualFeedback? lastReviewFeedback,
+    bool clearLastReviewFeedback = false,
     LocalLearningControllerAction? lastAction,
   }) {
     return LocalLearningControllerState(
@@ -41,6 +46,9 @@ class LocalLearningControllerState {
           ? null
           : (errorMessage ?? this.errorMessage),
       readState: readState ?? this.readState,
+      lastReviewFeedback: clearLastReviewFeedback
+          ? null
+          : (lastReviewFeedback ?? this.lastReviewFeedback),
       lastAction: lastAction ?? this.lastAction,
     );
   }
@@ -79,6 +87,7 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
       state = state.copyWith(
         isLoading: false,
         readState: readState,
+        clearLastReviewFeedback: true,
         lastAction: LocalLearningControllerAction.startOrResume,
         clearErrorMessage: true,
       );
@@ -109,6 +118,7 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
       state = state.copyWith(
         isLoading: false,
         readState: readState,
+        clearLastReviewFeedback: true,
         lastAction: LocalLearningControllerAction.resetAndStart,
         clearErrorMessage: true,
       );
@@ -119,6 +129,7 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
 
   Future<void> submitCorrect({required DateTime now}) async {
     final sessionId = state.readState?.sessionId;
+    final reviewedWordId = state.readState?.currentWordId;
     if (sessionId == null) {
       state = state.copyWith(errorMessage: 'No active local session.');
       return;
@@ -133,10 +144,14 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
         answer: ReviewAnswer.correct,
         now: now,
       );
+      final feedback = reviewedWordId == null
+          ? null
+          : await _loadLatestFeedbackForWord(reviewedWordId);
 
       state = state.copyWith(
         isLoading: false,
         readState: readState,
+        lastReviewFeedback: feedback,
         lastAction: LocalLearningControllerAction.submitCorrect,
         clearErrorMessage: true,
       );
@@ -147,6 +162,7 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
 
   Future<void> submitWrong({required DateTime now}) async {
     final sessionId = state.readState?.sessionId;
+    final reviewedWordId = state.readState?.currentWordId;
     if (sessionId == null) {
       state = state.copyWith(errorMessage: 'No active local session.');
       return;
@@ -161,10 +177,14 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
         answer: ReviewAnswer.wrong,
         now: now,
       );
+      final feedback = reviewedWordId == null
+          ? null
+          : await _loadLatestFeedbackForWord(reviewedWordId);
 
       state = state.copyWith(
         isLoading: false,
         readState: readState,
+        lastReviewFeedback: feedback,
         lastAction: LocalLearningControllerAction.submitWrong,
         clearErrorMessage: true,
       );
@@ -192,11 +212,42 @@ class LocalLearningController extends Notifier<LocalLearningControllerState> {
       state = state.copyWith(
         isLoading: false,
         readState: readState,
+        clearLastReviewFeedback: true,
         lastAction: LocalLearningControllerAction.completeIfFinished,
         clearErrorMessage: true,
       );
     } catch (error) {
       state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
+  }
+
+  Future<LocalReviewVisualFeedback?> _loadLatestFeedbackForWord(
+    String wordId,
+  ) async {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    final events = await bootstrap.repositoryFactory.reviewHistoryRepository
+        .loadHistoryForWord(wordId);
+    if (events.isEmpty) {
+      return null;
+    }
+    final event = events.last;
+    final outcomeType = event.newStage.index > event.oldStage.index
+        ? LocalReviewOutcomeType.promoted
+        : event.newStage.index < event.oldStage.index
+        ? LocalReviewOutcomeType.demoted
+        : event.answer == ReviewAnswer.wrong
+        ? LocalReviewOutcomeType.unchangedWrong
+        : LocalReviewOutcomeType.repeatedSameStage;
+
+    return LocalReviewVisualFeedback(
+      wordId: event.wordId,
+      sourceStage: event.oldStage,
+      targetStage: event.newStage,
+      outcomeType: outcomeType,
+      repeatIndex: event.oldStage == event.newStage ? event.newPassCount : 0,
+      wasPromoted: event.newStage.index > event.oldStage.index,
+      wasDemoted: event.newStage.index < event.oldStage.index,
+      timestamp: event.reviewedAt,
+    );
   }
 }

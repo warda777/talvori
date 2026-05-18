@@ -30,4 +30,8 @@ class LocalProgressInitializationService {
       );
     }
   }
+
+  Future<int> countWordsForCategory({required String categoryId}) {
+    return _wordRepository.countWordsForCategory(categoryId: categoryId);
+  }
 }

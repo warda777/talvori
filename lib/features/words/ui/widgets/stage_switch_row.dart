@@ -95,6 +95,9 @@ class StageSwitchRowView extends StatefulWidget {
   final bool s0Locked;
   final void Function(int stage)? onTapStage;
   final Map<int, GlobalKey>? switchKeys;
+  final int? activePulseStage;
+  final Color? activePulseColor;
+  final Animation<double>? activePulseAnimation;
   final bool showSwitchNotes;
   final bool useNumericSwitchNotes;
 
@@ -130,6 +133,9 @@ class StageSwitchRowView extends StatefulWidget {
     this.s0Locked = false,
     this.onTapStage,
     this.switchKeys,
+    this.activePulseStage,
+    this.activePulseColor,
+    this.activePulseAnimation,
     this.showSwitchNotes = true,
     this.useNumericSwitchNotes = false,
   });
@@ -198,6 +204,7 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
 
       if (i == 0) {
         final locked = widget.s0Locked;
+        final isActivePulse = widget.activePulseStage == 0;
         switchBody = VerticalStageSwitch(
           containerKey: widget.switchKeys?[0],
           count: counts[0],
@@ -215,6 +222,8 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           showNote: widget.showSwitchNotes,
           isFirst: true,
           glow: false,
+          pulseAnimation: isActivePulse ? widget.activePulseAnimation : null,
+          pulseColor: isActivePulse ? widget.activePulseColor : null,
           isLocked: locked,
         );
       } else {
@@ -227,6 +236,7 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
         final learnedCount = widget.showLearnedCounterInStage5 && stage == 5
             ? widget.learnedInStage5
             : null;
+        final isActivePulse = widget.activePulseStage == stage;
 
         switchBody = VerticalStageSwitch(
           containerKey: widget.switchKeys?[stage],
@@ -244,7 +254,12 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
               : '${widget.labels.stagePrefix}$stage',
           showNote: widget.showSwitchNotes,
           glow: hardGlow || softGlow || isSelected,
-          pulseAnimation: softGlow ? _pulse : null,
+          pulseAnimation: isActivePulse
+              ? widget.activePulseAnimation
+              : softGlow
+              ? _pulse
+              : null,
+          pulseColor: isActivePulse ? widget.activePulseColor : null,
           selectedHighlight: isSelected,
           showLearnedCount: widget.showLearnedCounterInStage5 && stage == 5,
           learnedCount: learnedCount,

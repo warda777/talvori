@@ -2,6 +2,7 @@ import '../../srs/models/learning_mode.dart';
 import '../../srs/models/srs_stage.dart';
 import '../../srs/models/training_area.dart';
 import '../controllers/local_learning_controller.dart';
+import '../models/local_review_visual_feedback.dart';
 
 class LocalLearningViewModelState {
   const LocalLearningViewModelState({
@@ -27,6 +28,7 @@ class LocalLearningViewModelState {
     this.exampleSentence,
     this.notes,
     this.currentStage,
+    this.lastReviewFeedback,
   });
 
   final bool isLoading;
@@ -43,6 +45,7 @@ class LocalLearningViewModelState {
   final String? exampleSentence;
   final String? notes;
   final SrsStage? currentStage;
+  final LocalReviewVisualFeedback? lastReviewFeedback;
   final int currentPosition;
   final int totalItems;
   final int answeredCount;

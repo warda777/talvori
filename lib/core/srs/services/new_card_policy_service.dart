@@ -22,6 +22,7 @@ class NewCardPolicyService {
 
     final maxNewCardsForMode = _maxNewCardsForMode(
       mode,
+      remainingSessionSlots: remainingSessionSlots,
       allowExpandedTimeNewCards: allowExpandedTimeNewCards,
     );
 
@@ -61,13 +62,14 @@ class NewCardPolicyService {
 
   int _maxNewCardsForMode(
     LearningMode mode, {
+    required int remainingSessionSlots,
     required bool allowExpandedTimeNewCards,
   }) {
     return switch (mode) {
       LearningMode.time =>
         allowExpandedTimeNewCards ? v1SessionSize : timeModeMaxNewCards,
       LearningMode.hybrid => hybridModeMaxNewCards,
-      LearningMode.adaptive => v1SessionSize,
+      LearningMode.adaptive => remainingSessionSlots,
     };
   }
 

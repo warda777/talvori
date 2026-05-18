@@ -147,6 +147,24 @@ class WordRepository {
     return rows.map((row) => row['id']! as String).toList(growable: false);
   }
 
+  Future<int> countWordsForCategory({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    final rows = await _database.rawQuery(
+      includeArchived
+          ? 'SELECT COUNT(*) AS count FROM words WHERE category_id = ?'
+          : '''
+SELECT COUNT(*) AS count
+FROM words
+WHERE category_id = ? AND is_archived = ?
+''',
+      includeArchived ? [categoryId] : [categoryId, 0],
+    );
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
   LocalWord _mapWord(Map<String, Object?> row) {
     return LocalWord(
       id: row['id']! as String,

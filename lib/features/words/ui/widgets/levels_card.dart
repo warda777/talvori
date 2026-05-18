@@ -111,6 +111,7 @@ class LevelsCardView extends StatelessWidget {
   final double stageSectionLabelBottomGap;
   final double stageTopGap;
   final double startTopGap;
+  final Widget? startTrailingControl;
 
   const LevelsCardView({
     super.key,
@@ -142,6 +143,7 @@ class LevelsCardView extends StatelessWidget {
     this.stageSectionLabelBottomGap = 0,
     this.stageTopGap = 24.0,
     this.startTopGap = 12.0,
+    this.startTrailingControl,
   });
 
   @override
@@ -269,6 +271,12 @@ class LevelsCardView extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          ),
+                        if (startTrailingControl != null)
+                          Positioned(
+                            left: buttonLeft + buttonW + gap,
+                            top: buttonTop + (buttonH - 44) / 2,
+                            child: startTrailingControl!,
                           ),
                       ],
                     ),

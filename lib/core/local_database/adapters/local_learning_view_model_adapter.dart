@@ -24,6 +24,7 @@ class LocalLearningViewModelAdapter {
       exampleSentence: readState?.currentExampleSentence,
       notes: readState?.currentNotes,
       currentStage: readState?.currentStage,
+      lastReviewFeedback: controllerState.lastReviewFeedback,
       currentPosition: readState?.currentPosition ?? 0,
       totalItems: readState?.totalItems ?? 0,
       answeredCount: readState?.answeredCount ?? 0,

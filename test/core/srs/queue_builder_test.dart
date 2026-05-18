@@ -167,6 +167,22 @@ void main() {
       expect(result.items.every((item) => item.isNewCard), isTrue);
     });
 
+    test('adaptive_without_reviews_can_use_larger_local_session_size', () {
+      final result = builder.buildSessionQueue(
+        input(
+          mode: LearningMode.adaptive,
+          reviewCount: 0,
+          newCount: 25,
+          sessionSize: 25,
+        ),
+      );
+
+      expect(result.items, hasLength(25));
+      expect(result.reviewsIncluded, 0);
+      expect(result.newCardsIncluded, 25);
+      expect(result.items.every((item) => item.isNewCard), isTrue);
+    });
+
     test('adaptive_mixes_two_reviews_then_one_new_card', () {
       final result = builder.buildSessionQueue(
         input(mode: LearningMode.adaptive, reviewCount: 12, newCount: 12),

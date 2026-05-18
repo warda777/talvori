@@ -346,6 +346,100 @@ void main() {
     );
 
     test(
+      'adaptive_correct_continuation_returns_after_short_delay_in_large_queue',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedNewWordsAndProgress(
+          db,
+          count: 25,
+          mode: LearningMode.adaptive,
+        );
+        final localService = service(db);
+        final started = await localService.startOrResumeSession(
+          categoryId: 'category-1',
+          mode: LearningMode.adaptive,
+          trainingArea: TrainingArea.all,
+          now: now,
+          sessionSize: 25,
+        );
+
+        await localService.submitAnswer(
+          sessionId: started.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(const Duration(minutes: 1)),
+        );
+
+        final itemRows = await db.query(
+          'session_items',
+          orderBy: 'position ASC',
+        );
+        final wordOneRows = itemRows
+            .where((row) => row['word_id'] == 'word-1')
+            .toList(growable: false);
+
+        expect(itemRows, hasLength(26));
+        expect(wordOneRows, hasLength(2));
+        expect(wordOneRows.first['status'], QueueItemStatus.answered.name);
+        expect(wordOneRows.last['status'], QueueItemStatus.queued.name);
+        expect(wordOneRows.last['position'], 9);
+        expect(
+          itemRows.take(25).map((row) => row['word_id']),
+          contains('word-1'),
+        );
+        expect(itemRows.last['word_id'], isNot('word-1'));
+      },
+    );
+
+    test('adaptive_correct_continuations_do_not_block_new_s0_cards', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedNewWordsAndProgress(db, count: 25, mode: LearningMode.adaptive);
+      final localService = service(db);
+      var state = await localService.startOrResumeSession(
+        categoryId: 'category-1',
+        mode: LearningMode.adaptive,
+        trainingArea: TrainingArea.all,
+        now: now,
+        sessionSize: 25,
+      );
+
+      for (var index = 0; index < 12; index++) {
+        state = await localService.submitAnswer(
+          sessionId: state.sessionId,
+          answer: ReviewAnswer.correct,
+          now: now.add(Duration(minutes: index + 1)),
+        );
+      }
+
+      final answeredRows = await db.query(
+        'session_items',
+        where: 'status = ?',
+        whereArgs: [QueueItemStatus.answered.name],
+      );
+      final distinctAnsweredWords = answeredRows
+          .map((row) => row['word_id']! as String)
+          .toSet();
+      final openWordRows = await db.query(
+        'session_items',
+        where: 'status IN (?, ?, ?, ?)',
+        whereArgs: [
+          QueueItemStatus.queued.name,
+          QueueItemStatus.shown.name,
+          QueueItemStatus.retryPending.name,
+          QueueItemStatus.difficult.name,
+        ],
+      );
+      final openWordIds = openWordRows
+          .map((row) => row['word_id']! as String)
+          .toList(growable: false);
+
+      expect(distinctAnsweredWords.length, greaterThan(7));
+      expect(distinctAnsweredWords, contains('word-10'));
+      expect(openWordIds.toSet(), hasLength(openWordIds.length));
+    });
+
+    test(
       'time_first_session_without_history_can_include_twenty_new_s0',
       () async {
         final db = await openSchemaDatabase();
