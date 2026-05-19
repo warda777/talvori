@@ -25,21 +25,22 @@ class SharedTextImportService {
     required DateTime now,
   }) async {
     try {
-      final normalized = _normalize(rawText);
-      if (normalized.isEmpty) {
+      final candidate = _extractSingleWordCandidate(rawText);
+      if (candidate == null) {
         return const SharedTextImportResult(
           status: SharedTextImportStatus.empty,
           message: 'Kein Wort zum Importieren gefunden.',
         );
       }
 
-      if (_containsMultipleWords(normalized)) {
+      if (candidate.isAmbiguous) {
         return const SharedTextImportResult(
           status: SharedTextImportStatus.invalid,
           message: 'Bitte markiere für Phase 1 nur ein einzelnes Wort.',
         );
       }
 
+      final normalized = candidate.word;
       if (!_containsLetter(normalized)) {
         return const SharedTextImportResult(
           status: SharedTextImportStatus.invalid,
@@ -104,8 +105,56 @@ class SharedTextImportService {
     return rawText.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
   }
 
-  bool _containsMultipleWords(String text) {
-    return text.contains(RegExp(r'\s'));
+  _ImportCandidate? _extractSingleWordCandidate(String rawText) {
+    final trimmed = rawText.trim();
+    if (trimmed.isEmpty) return null;
+
+    final lines = trimmed
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty);
+    final candidates = <String>{};
+    var hasAmbiguousContent = false;
+
+    for (final line in lines) {
+      final withoutUrls = _removeUrls(line).trim();
+      if (withoutUrls.isEmpty) continue;
+
+      final candidate = _singleWordFromText(withoutUrls);
+      if (candidate != null) {
+        candidates.add(candidate);
+        continue;
+      }
+
+      if (candidates.isEmpty) {
+        hasAmbiguousContent = true;
+      }
+    }
+
+    if (candidates.length == 1 && !hasAmbiguousContent) {
+      return _ImportCandidate(candidates.single);
+    }
+    if (candidates.isEmpty && !hasAmbiguousContent) return null;
+    return const _ImportCandidate.ambiguous();
+  }
+
+  String _removeUrls(String text) {
+    return text
+        .replaceAll(RegExp(r'https?://\S+', caseSensitive: false), ' ')
+        .replaceAll(RegExp(r'www\.\S+', caseSensitive: false), ' ');
+  }
+
+  String? _singleWordFromText(String text) {
+    final cleaned = _stripEdgePunctuation(_normalize(text));
+    if (cleaned.isEmpty) return null;
+    if (!_wordPattern.hasMatch(cleaned)) return null;
+    return cleaned;
+  }
+
+  String _stripEdgePunctuation(String text) {
+    return text
+        .replaceAll(RegExp(r'''^[\s"'“”‘’„‚«»()\[\]{}<>.,;:!?]+'''), '')
+        .replaceAll(RegExp(r'''[\s"'“”‘’„‚«»()\[\]{}<>.,;:!?]+$'''), '');
   }
 
   bool _containsLetter(String text) {
@@ -120,4 +169,17 @@ class SharedTextImportService {
         .replaceAll(RegExp(r'^-|-$'), '');
     return 'local-my-words-$slug';
   }
+
+  static final _wordPattern = RegExp(
+    r"^[a-z0-9à-öø-ÿ]+(?:[-'][a-z0-9à-öø-ÿ]+)*$",
+  );
+}
+
+class _ImportCandidate {
+  const _ImportCandidate(this.word) : isAmbiguous = false;
+
+  const _ImportCandidate.ambiguous() : word = '', isAmbiguous = true;
+
+  final String word;
+  final bool isAmbiguous;
 }

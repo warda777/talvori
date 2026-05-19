@@ -1,11 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
+import 'package:talvori/core/local_database/local_database_schema.dart';
+import 'package:talvori/core/local_database/repositories/category_repository.dart';
+import 'package:talvori/core/local_database/repositories/word_progress_repository.dart';
+import 'package:talvori/core/local_database/repositories/word_repository.dart';
 import 'package:talvori/core/local_database/services/incoming_shared_text_import_controller.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/core/platform/shared_text_platform_receiver.dart';
 
 void main() {
+  sqfliteFfiInit();
+
   final now = DateTime(2026, 5, 18, 12);
 
   test('imports_initial_shared_text', () async {
@@ -108,6 +116,30 @@ void main() {
     await sub.cancel();
 
     expect(results.single.status, SharedTextImportStatus.duplicate);
+  });
+
+  test('imports_android_style_shared_text_with_word_and_url', () async {
+    final db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+    addTearDown(db.close);
+    await LocalDatabaseSchema.createV1(db);
+    final service = SharedTextImportService(
+      categoryRepository: CategoryRepository(database: db),
+      wordRepository: WordRepository(database: db),
+      wordProgressRepository: WordProgressRepository(database: db),
+    );
+    final receiver = _FakeSharedTextPlatformReceiver(
+      initialText: 'hello\nhttps://example.com/article',
+    );
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: service.importRawText,
+    );
+
+    final result = await controller.importInitialSharedText();
+
+    expect(result?.status, SharedTextImportStatus.imported);
+    expect(result?.word?.term, 'hello');
   });
 }
 

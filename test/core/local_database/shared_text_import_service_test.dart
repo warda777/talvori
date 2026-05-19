@@ -72,6 +72,82 @@ void main() {
       expect(words.single.term, 'umbrella');
     });
 
+    test('imports_single_word_from_android_share_text_with_url', () async {
+      final result = await service.importRawText(
+        rawText: 'hello\nhttps://example.com/article',
+        now: now,
+      );
+
+      expect(result.status, SharedTextImportStatus.imported);
+      expect(result.word?.term, 'hello');
+    });
+
+    test(
+      'imports_single_word_from_android_share_text_with_title_and_url',
+      () async {
+        final result = await service.importRawText(
+          rawText: 'hello\nExample Page Title\nhttps://example.com/article',
+          now: now,
+        );
+
+        expect(result.status, SharedTextImportStatus.imported);
+        expect(result.word?.term, 'hello');
+      },
+    );
+
+    test('imports_single_word_before_url_on_same_line', () async {
+      final result = await service.importRawText(
+        rawText: 'hello https://example.com/article',
+        now: now,
+      );
+
+      expect(result.status, SharedTextImportStatus.imported);
+      expect(result.word?.term, 'hello');
+    });
+
+    test('imports_quoted_or_punctuated_single_word', () async {
+      final quoted = await service.importRawText(rawText: '"hello"', now: now);
+      final punctuated = await service.importRawText(
+        rawText: 'river.',
+        now: now,
+      );
+
+      expect(quoted.status, SharedTextImportStatus.imported);
+      expect(quoted.word?.term, 'hello');
+      expect(punctuated.status, SharedTextImportStatus.imported);
+      expect(punctuated.word?.term, 'river');
+    });
+
+    test('rejects_url_without_word_candidate', () async {
+      final result = await service.importRawText(
+        rawText: 'https://example.com/article',
+        now: now,
+      );
+
+      expect(result.status, SharedTextImportStatus.empty);
+      expect(
+        await wordRepository.countWordsForCategory(
+          categoryId: localMyWordsCategoryId,
+        ),
+        0,
+      );
+    });
+
+    test('rejects_ambiguous_same_line_share_text', () async {
+      final result = await service.importRawText(
+        rawText: 'hello ExampleTitle https://example.com',
+        now: now,
+      );
+
+      expect(result.status, SharedTextImportStatus.invalid);
+      expect(
+        await wordRepository.countWordsForCategory(
+          categoryId: localMyWordsCategoryId,
+        ),
+        0,
+      );
+    });
+
     test('initializes_progress_for_all_srs_modes', () async {
       final result = await service.importRawText(rawText: 'river', now: now);
       final word = result.word!;
@@ -105,6 +181,23 @@ void main() {
       );
       expect(words, hasLength(1));
       expect(words.single.term, 'house');
+    });
+
+    test('detects_duplicate_after_extracting_word_from_share_text', () async {
+      final first = await service.importRawText(rawText: 'Hello', now: now);
+      final second = await service.importRawText(
+        rawText: 'hello\nhttps://example.com',
+        now: now.add(const Duration(minutes: 1)),
+      );
+
+      expect(first.status, SharedTextImportStatus.imported);
+      expect(second.status, SharedTextImportStatus.duplicate);
+
+      final words = await wordRepository.loadWordsForCategory(
+        categoryId: localMyWordsCategoryId,
+      );
+      expect(words, hasLength(1));
+      expect(words.single.term, 'hello');
     });
 
     test('rejects_multi_word_text_for_phase_one', () async {
