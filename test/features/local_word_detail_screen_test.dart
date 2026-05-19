@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
@@ -35,6 +36,12 @@ class _FakeLocalWordEditController extends LocalWordEditController {
       categoryId: categoryId,
       term: term,
       translation: translation,
+      translationStatus: translation.trim().isEmpty
+          ? TranslationStatus.pending
+          : TranslationStatus.translated,
+      sourceLanguage: currentWord?.sourceLanguage,
+      targetLanguage: currentWord?.targetLanguage,
+      translationError: null,
       sortOrder: currentWord?.sortOrder ?? 0,
       isArchived: currentWord?.isArchived ?? false,
       createdAt: currentWord?.createdAt ?? DateTime(2026, 1, 1),
@@ -74,12 +81,21 @@ void main() {
     }
   }
 
-  LocalWord word({String term = 'hello', String translation = 'hallo'}) {
+  LocalWord word({
+    String term = 'hello',
+    String translation = 'hallo',
+    TranslationStatus translationStatus = TranslationStatus.translated,
+    String? translationError,
+  }) {
     return LocalWord(
       id: 'seed-basics-hello',
       categoryId: 'seed-category-basics',
       term: term,
       translation: translation,
+      translationStatus: translationStatus,
+      sourceLanguage: 'en',
+      targetLanguage: 'de',
+      translationError: translationError,
       sortOrder: 0,
       isArchived: false,
       createdAt: now,
@@ -148,6 +164,8 @@ void main() {
     expect(find.text('Health & Fitness'), findsWidgets);
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('hallo'), findsOneWidget);
+    expect(find.text('Übersetzungsstatus'), findsOneWidget);
+    expect(find.text('Übersetzt'), findsOneWidget);
     expect(find.text('Lernstatus'), findsOneWidget);
     expect(find.text('Merkstufe'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
@@ -170,6 +188,54 @@ void main() {
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('Noch kein Lernfortschritt'), findsOneWidget);
     expect(find.text('Noch kein Lernverlauf vorhanden'), findsOneWidget);
+  });
+
+  testWidgets('local_word_detail_screen_shows_pending_translation_status', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(
+        word: word(
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+        ),
+        progress: null,
+      ),
+    );
+
+    expect(find.text('umbrella'), findsOneWidget);
+    expect(find.text('Noch keine Übersetzung'), findsOneWidget);
+    expect(find.text('Übersetzungsstatus'), findsOneWidget);
+    expect(find.text('Übersetzung ausstehend'), findsOneWidget);
+    expect(
+      find.text('Die Übersetzung wird später automatisch ergänzt.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('local_word_detail_screen_shows_failed_translation_status', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(
+        word: word(
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.failed,
+          translationError: 'offline',
+        ),
+        progress: null,
+      ),
+    );
+
+    expect(find.text('umbrella'), findsOneWidget);
+    expect(find.text('Noch keine Übersetzung'), findsOneWidget);
+    expect(find.text('Übersetzung fehlgeschlagen'), findsOneWidget);
+    expect(find.text('Fehlerhinweis'), findsOneWidget);
+    expect(find.text('offline'), findsOneWidget);
   });
 
   testWidgets('local_word_detail_screen_shows_review_history_items', (
@@ -216,6 +282,12 @@ void main() {
           colorValue: 0xFF36F58A,
         ),
       ],
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Verlauf'),
+      180,
+      scrollable: find.byType(Scrollable),
     );
 
     expect(find.text('Verlauf'), findsOneWidget);

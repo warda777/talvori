@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
@@ -32,6 +33,12 @@ class _FakeLocalWordEditController extends LocalWordEditController {
           categoryId: word.categoryId,
           term: term,
           translation: translation,
+          translationStatus: translation.trim().isEmpty
+              ? TranslationStatus.pending
+              : TranslationStatus.translated,
+          sourceLanguage: word.sourceLanguage,
+          targetLanguage: word.targetLanguage,
+          translationError: null,
           sortOrder: word.sortOrder,
           isArchived: word.isArchived,
           createdAt: word.createdAt,
@@ -51,6 +58,8 @@ void main() {
     required String id,
     required String term,
     required String translation,
+    TranslationStatus translationStatus = TranslationStatus.translated,
+    String? translationError,
   }) {
     final now = DateTime(2026, 1, 1);
     return LocalWord(
@@ -58,6 +67,10 @@ void main() {
       categoryId: 'seed-category-basics',
       term: term,
       translation: translation,
+      translationStatus: translationStatus,
+      sourceLanguage: 'en',
+      targetLanguage: 'de',
+      translationError: translationError,
       sortOrder: 0,
       isArchived: false,
       createdAt: now,
@@ -147,6 +160,63 @@ void main() {
     expect(find.text('Wasser'), findsOneWidget);
   });
 
+  testWidgets('local_word_list_screen_shows_pending_translation_status', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-pending',
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+        ),
+      ],
+    );
+
+    expect(find.text('umbrella'), findsWidgets);
+    expect(find.text('Noch keine Übersetzung'), findsOneWidget);
+    expect(find.text('Übersetzung ausstehend'), findsOneWidget);
+  });
+
+  testWidgets('local_word_list_screen_shows_failed_translation_status', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-failed',
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.failed,
+          translationError: 'offline',
+        ),
+      ],
+    );
+
+    expect(find.text('umbrella'), findsWidgets);
+    expect(find.text('Noch keine Übersetzung'), findsOneWidget);
+    expect(find.text('Übersetzung fehlgeschlagen'), findsOneWidget);
+  });
+
+  testWidgets('local_word_list_screen_shows_translated_word_without_badge', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(id: 'word-translated', term: 'hello', translation: 'hallo'),
+      ],
+    );
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('hallo'), findsOneWidget);
+    expect(find.text('Übersetzung ausstehend'), findsNothing);
+    expect(find.text('Übersetzung fehlgeschlagen'), findsNothing);
+  });
+
   testWidgets('local_word_list_screen_shows_empty_state', (tester) async {
     await pumpLocalWordList(tester, words: const [], title: 'Empty Local');
 
@@ -163,6 +233,30 @@ void main() {
 
     expect(find.text('ticket'), findsWidgets);
     expect(find.text('Fahrkarte'), findsOneWidget);
+    expect(find.text('water'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_search_keeps_pending_status_visible', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-pending',
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+        ),
+        localWord(id: 'word-water', term: 'water', translation: 'Wasser'),
+      ],
+    );
+
+    await tester.enterText(find.byType(TextField), 'umbrella');
+    await tester.pump();
+
+    expect(find.text('umbrella'), findsWidgets);
+    expect(find.text('Übersetzung ausstehend'), findsOneWidget);
     expect(find.text('water'), findsNothing);
   });
 

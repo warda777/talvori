@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
@@ -285,6 +286,13 @@ class _LocalWordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translationText = word.translation.trim().isEmpty
+        ? 'Noch keine Übersetzung'
+        : word.translation;
+    final statusBadge = _TranslationStatusBadgeData.fromStatus(
+      word.translationStatus,
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
@@ -329,7 +337,7 @@ class _LocalWordCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        word.translation,
+                        translationText,
                         style: const TextStyle(
                           color: Color(0xFFB8C4D9),
                           fontSize: 14,
@@ -337,6 +345,10 @@ class _LocalWordCard extends StatelessWidget {
                           letterSpacing: 0,
                         ),
                       ),
+                      if (statusBadge != null) ...[
+                        const SizedBox(height: 10),
+                        _TranslationStatusBadge(data: statusBadge),
+                      ],
                     ],
                   ),
                 ),
@@ -365,6 +377,71 @@ class _LocalWordCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TranslationStatusBadgeData {
+  const _TranslationStatusBadgeData({
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
+
+  final String label;
+  final Color color;
+  final IconData icon;
+
+  static _TranslationStatusBadgeData? fromStatus(TranslationStatus status) {
+    return switch (status) {
+      TranslationStatus.pending => const _TranslationStatusBadgeData(
+        label: 'Übersetzung ausstehend',
+        color: Color(0xFF59D7FF),
+        icon: Icons.schedule,
+      ),
+      TranslationStatus.failed => const _TranslationStatusBadgeData(
+        label: 'Übersetzung fehlgeschlagen',
+        color: Color(0xFFFF5F7A),
+        icon: Icons.error_outline,
+      ),
+      TranslationStatus.translated => null,
+    };
+  }
+}
+
+class _TranslationStatusBadge extends StatelessWidget {
+  const _TranslationStatusBadge({required this.data});
+
+  final _TranslationStatusBadgeData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: data.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: data.color.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(color: data.color.withValues(alpha: 0.18), blurRadius: 12),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(data.icon, color: data.color, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            data.label,
+            style: TextStyle(
+              color: data.color,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
       ),
     );
   }

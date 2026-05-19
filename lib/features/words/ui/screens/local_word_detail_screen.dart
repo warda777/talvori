@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
+import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
@@ -123,7 +125,7 @@ class LocalWordDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      detail.word.translation,
+                      _translationDisplayText(detail.word),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: const Color(0xFFA8C7FF),
                         fontWeight: FontWeight.w600,
@@ -146,6 +148,8 @@ class LocalWordDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 18),
+              _NeonPanel(child: _TranslationStatusSection(word: detail.word)),
+              const SizedBox(height: 18),
               _NeonPanel(
                 child: _LearningStatusSection(progress: detail.progress),
               ),
@@ -161,6 +165,128 @@ class LocalWordDetailScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+}
+
+String _translationDisplayText(LocalWord word) {
+  return word.translation.trim().isEmpty
+      ? 'Noch keine Übersetzung'
+      : word.translation;
+}
+
+class _TranslationStatusSection extends StatelessWidget {
+  const _TranslationStatusSection({required this.word});
+
+  final LocalWord word;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _TranslationStatusPresentation.fromWord(word);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Übersetzungsstatus',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: data.color.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+                border: Border.all(color: data.color.withValues(alpha: 0.6)),
+                boxShadow: [
+                  BoxShadow(
+                    color: data.color.withValues(alpha: 0.2),
+                    blurRadius: 14,
+                  ),
+                ],
+              ),
+              child: Icon(data.icon, color: data.color, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data.title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    data.description,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFFB8C4D9),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (word.translationError?.trim().isNotEmpty == true) ...[
+                    const SizedBox(height: 10),
+                    _InfoRow(
+                      label: 'Fehlerhinweis',
+                      value: word.translationError!.trim(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _TranslationStatusPresentation {
+  const _TranslationStatusPresentation({
+    required this.title,
+    required this.description,
+    required this.color,
+    required this.icon,
+  });
+
+  final String title;
+  final String description;
+  final Color color;
+  final IconData icon;
+
+  static _TranslationStatusPresentation fromWord(LocalWord word) {
+    return switch (word.translationStatus) {
+      TranslationStatus.pending => const _TranslationStatusPresentation(
+        title: 'Übersetzung ausstehend',
+        description: 'Die Übersetzung wird später automatisch ergänzt.',
+        color: Color(0xFF59D7FF),
+        icon: Icons.schedule,
+      ),
+      TranslationStatus.failed => const _TranslationStatusPresentation(
+        title: 'Übersetzung fehlgeschlagen',
+        description:
+            'Die automatische Übersetzung konnte nicht abgeschlossen werden.',
+        color: Color(0xFFFF5F7A),
+        icon: Icons.error_outline,
+      ),
+      TranslationStatus.translated => _TranslationStatusPresentation(
+        title: 'Übersetzt',
+        description: word.translation.trim().isEmpty
+            ? 'Noch keine Übersetzung hinterlegt.'
+            : 'Die Übersetzung ist verfügbar.',
+        color: const Color(0xFF36F58A),
+        icon: Icons.check_circle_outline,
+      ),
+    };
   }
 }
 
