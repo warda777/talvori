@@ -13,7 +13,7 @@ void main() {
         functionCaller: (functionName, payload) async {
           capturedFunctionName = functionName;
           capturedPayload = payload;
-          return {'reply': 'Hallo.'};
+          return {'answer': 'Hallo.'};
         },
       );
 
@@ -39,7 +39,7 @@ void main() {
       final client = SupabaseAiChatClient(
         functionCaller: (functionName, payload) async {
           capturedPayload = payload;
-          return {'reply': 'Sure.'};
+          return {'answer': 'Sure.'};
         },
       );
 
@@ -89,10 +89,29 @@ void main() {
       );
     });
 
+    test('handles_ai_request_failed_response', () async {
+      final client = SupabaseAiChatClient(
+        functionCaller: (functionName, payload) async {
+          return {'error': 'ai_request_failed'};
+        },
+      );
+
+      expect(
+        () => client.sendMessage(const AiChatRequest(message: 'hello')),
+        throwsA(
+          isA<AiChatException>().having(
+            (error) => error.toString(),
+            'message',
+            contains('ai_request_failed'),
+          ),
+        ),
+      );
+    });
+
     test('handles_invalid_response_shape', () async {
       final client = SupabaseAiChatClient(
         functionCaller: (functionName, payload) async {
-          return {'reply': ''};
+          return {'answer': ''};
         },
       );
 

@@ -43,13 +43,13 @@ class SupabaseAiChatClient implements AiChatClient {
       throw AiChatException('Supabase AI chat failed: $error');
     }
 
-    final reply = response['reply'];
-    if (reply is! String || reply.trim().isEmpty) {
+    final answer = response['answer'] ?? response['reply'];
+    if (answer is! String || answer.trim().isEmpty) {
       throw const AiChatException(
         'Supabase AI chat response is missing reply.',
       );
     }
 
-    return AiChatResult(reply: reply);
+    return AiChatResult(reply: answer);
   }
 }
