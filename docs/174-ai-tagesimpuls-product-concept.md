@@ -1,28 +1,27 @@
 # Tagesimpuls Product Concept
 
-## Ziel des Features
+## Produktziel
 
-Der Tagesimpuls ist ein appweites Lernfeature, bei dem der Nutzer 3–5 Wörter sammelt.
+Der Tagesimpuls ist ein appweites Lernfeature, bei dem der Nutzer 3-5 Wörter sammelt. Aus diesen Wörtern erzeugt die KI kurze natürliche Nachrichten, die sich wie echte Messenger- oder Alltagsnachrichten anfühlen.
 
-Aus diesen Wörtern erzeugt die KI eine kurze natürliche Nachricht. Diese Nachricht soll sich nicht wie eine trockene Vokabelliste anfühlen, sondern wie ein kleiner Alltagsimpuls: verständlich, kontextnah und leicht wiederholbar.
+Ziel ist beiläufiges Wiedererkennen im Alltag: Der Nutzer soll schwierige oder wichtige Wörter später unerwartet im Kontext lesen, idealerweise wie eine kurze WhatsApp-ähnliche Nachricht auf dem Sperrbildschirm. Tagesimpuls ergänzt SRS, ersetzt es aber nicht.
 
-Die ausgewählten Wörter werden dadurch passiv im Kontext wiederholt.
+## HomeScreen-Rolle
 
-## Warum das Feature wichtig ist
+Der HomeScreen bleibt clean. Er zeigt primär den Auswahlstatus, zum Beispiel `0/5`, und bietet einen Einstieg in die Tagesimpuls-Verwaltung.
 
-Wörter werden nicht nur isoliert gelernt.
+Eine große dauerhafte Tagesimpuls-Karte auf dem HomeScreen ist nicht das Hauptziel. Später reicht ein kleines Bottom Sheet oder ein Dialog, um Folgendes zu verwalten:
 
-Kontext hilft beim Verstehen, Erinnern und Wiedererkennen. Besonders schwierige Wörter können dem Nutzer später erneut begegnen, ohne dass dafür eine komplette SRS-Session gestartet werden muss.
-
-Der Tagesimpuls ergänzt SRS, ersetzt es aber nicht. SRS bleibt für strukturierten Lernfortschritt zuständig. Der Tagesimpuls ist ein zusätzlicher Kontext- und Wiederholungsraum.
+- ausgewählte Wörter
+- Anzahl Tagesimpulse pro Tag
+- Tagesimpuls planen
+- Auswahl leeren
 
 ## Appweite Verfügbarkeit
 
-Der HomeScreen bleibt ein Einstieg.
+Die Tagesimpuls-Auswahl darf nicht nur an den HomeScreen gekoppelt sein. Sie soll appweit verfügbar sein:
 
-Die Tagesimpuls-Auswahl darf aber nicht nur an den HomeScreen gekoppelt sein. Sie soll appweit nutzbar werden:
-
-- HomeScreen: bestehende Auswahlleiste und Counter
+- HomeScreen: Auswahlstatus und Einstieg
 - Lernmodus: direkter Add-Button auf der Karte
 - Wortdetailseite: später optional ebenfalls ein Add-Button
 
@@ -30,7 +29,7 @@ So kann der Nutzer ein Wort genau dann hinzufügen, wenn es auffällt oder schwe
 
 ## Globale Tagesimpuls-Auswahl
 
-Die Tagesimpuls-Auswahl ist ein globaler lokaler Zustand.
+Die Auswahl ist ein globaler lokaler Zustand.
 
 Regeln:
 
@@ -41,46 +40,113 @@ Regeln:
 - Duplikate werden verhindert
 - Auswahl kann geleert werden
 
-Der Counter im HomeScreen soll denselben globalen Zustand anzeigen, den später auch Lernmodus und Wortdetail verwenden.
+Wenn der Nutzer Wörter manuell auswählt, werden genau diese Wörter bevorzugt für den nächsten Tagesimpuls verwendet.
 
-## Lernmodus-Integration
+## Automatische Wortauswahl
 
-Wenn ein Wort im Lernmodus schwerfällt oder später wiederholt werden soll, kann der Nutzer es direkt zur Tagesimpuls-Auswahl hinzufügen.
+Wenn keine manuelle Auswahl vorhanden ist, kann Talvori später automatisch geeignete Wörter vorschlagen. Mögliche Quellen:
 
-Mögliche UI:
+- schwierige Wörter
+- zuletzt falsch beantwortete Wörter
+- Wörter aus S1-S3
+- neue Wörter aus „Meine Wörter“
+- Favoriten
+- Wörter mit unsicherem Lernstatus
 
-- Button oder Icon auf der Lernkarte
-- optisch klar, aber nicht störend
-- keine Verwechslung mit richtig/falsch Swipe
+Diese automatische Auswahl ist nur Grundlage für den Impuls und verändert keinen SRS-Fortschritt. Ohne bewusste Nutzerkonfiguration darf daraus maximal 1 Nachricht pro Tag entstehen.
 
-Feedback:
+## Anzahl Tagesimpulse Pro Tag
 
-- Erfolg: `Wort wurde zum Tagesimpuls hinzugefügt.`
-- Auswahl voll: `Tagesimpuls ist voll.`
-- Duplikat: optional `Wort ist bereits im Tagesimpuls.`
+Die spätere Einstellung soll begrenzt bleiben:
 
-Das Hinzufügen verändert keinen SRS-Fortschritt.
+- 1 pro Tag als Standard
+- 2 pro Tag
+- 3 pro Tag
+- 4 pro Tag
+- 5 pro Tag
 
-## KI-Nachricht
+Mehr als 1 automatische Nachricht pro Tag darf nie ohne bewusste Nutzerentscheidung passieren. 2-5 Tagesimpulse pro Tag sind nur erlaubt, wenn der Nutzer dies aktiv einstellt. Später kann hier eine Free-/Premium-Unterscheidung greifen.
 
-Die KI nutzt die ausgewählten Wörter und erzeugt daraus eine kurze Nachricht.
+## KI-Nachrichten
 
-Ziel:
+Die KI erzeugt kurze natürliche Nachrichten mit den ausgewählten oder automatisch vorgeschlagenen Wörtern.
+
+Eigenschaften:
 
 - natürlich formuliert
-- kurz genug für einen Tagesimpuls
-- verständlich als Lernkontext
-- bevorzugt Deutsch als Erklärung oder Lernsprache, abhängig von späterer Einstellung
+- kurz genug für eine Benachrichtigung
+- verständlich für Sprachlernende
+- keine trockene Vokabelliste
+- keine allgemeine Chat-Antwort
 
-Es darf keine automatische KI-Anfrage ohne Nutzeraktion geben.
+Wenn Übersetzungen vorhanden sind, können sie als Kontext mitgegeben werden. Die KI-Anfrage erfolgt nicht automatisch beim Hinzufügen eines Wortes.
 
-Später kann daraus eine geplante Tagesnachricht oder Benachrichtigung entstehen. Das ist aber ein eigener späterer Schritt.
+## Kostenstrategie
+
+Aus Kostengründen sollten 1-5 Nachrichten möglichst in einem KI-Aufruf erzeugt werden. Ein einzelner Request mit mehreren Nachrichten spart Systemprompt- und Kontext-Overhead gegenüber mehreren einzelnen Requests.
+
+Die Kosten hängen hauptsächlich an der Tokenmenge, nicht nur an der Anzahl Requests. Trotzdem sind mehrere einzelne Requests meist ungünstiger, weil Systemprompt und Kontext mehrfach gesendet werden.
+
+Ziel für spätere Generierung:
+
+- ein Planungslauf
+- ein KI-Request
+- strukturierte JSON-Liste mit 1-5 Nachrichten
+
+Beispiel-Output:
+
+```json
+[
+  { "slot": "morning", "message": "..." },
+  { "slot": "afternoon", "message": "..." },
+  { "slot": "evening", "message": "..." }
+]
+```
+
+## Backend-Strategie
+
+Langfristig läuft die Generierung über Supabase Edge Function. Flutter enthält keine KI-Secrets. Supabase hält API-Keys serverseitig.
+
+Eine spätere spezialisierte Function könnte heißen:
+
+- `generate-daily-impulses`
+
+Usage Tracking und Limits gelten auch für Tagesimpuls. Die bestehende `ai-chat`-Function kann als technische Referenz dienen, ist aber nicht zwingend die finale Produkt-Function.
+
+## Notification-Strategie
+
+### Phase A: Lokale Notification
+
+Die App erzeugt oder lädt Tagesimpuls-Nachrichten und plant lokale Notifications auf dem Gerät. Das ist der einfachere MVP.
+
+Voraussetzungen:
+
+- Nutzer erteilt Notification-Berechtigung
+- App plant lokale Zeitpunkte
+- Lernen bleibt offline-first
+- keine Push-Server-Komplexität
+
+### Phase B: Server-Push
+
+Später kann ein Backend die Zustellung steuern und Push über APNs/FCM versenden. Das ist aufwendiger, aber besser für echte tägliche Zustellung, Premium-Funktionen, Retention und Coach-Logik.
+
+## Tagesplanung
+
+Wenn 1 Nachricht geplant ist, kann der Zeitpunkt zufällig innerhalb eines sinnvollen Tagesfensters liegen oder vom Nutzer gewählt werden.
+
+Wenn mehrere Nachrichten geplant sind, werden sie über Tagesfenster verteilt:
+
+- morgens
+- mittags
+- nachmittags
+- abends
+- nachts nur optional und nicht standardmäßig
+
+Ohne explizite Einstellung darf die App keine übermäßigen Benachrichtigungen erzeugen.
 
 ## Offline-First
 
-Die Auswahl der Wörter funktioniert lokal.
-
-Die KI-Erzeugung braucht Internet, weil sie über eine Supabase Edge Function läuft. Wenn der Nutzer offline ist, bleibt die Auswahl erhalten und kann später verwendet werden.
+Die Auswahl der Wörter funktioniert lokal. KI-Generierung und spätere Push-Zustellung benötigen Internet. Wenn der Nutzer offline ist, bleibt die Auswahl erhalten und Lernen funktioniert weiter.
 
 Lokales Lernen bleibt unabhängig:
 
@@ -88,24 +154,30 @@ Lokales Lernen bleibt unabhängig:
 - Tagesimpuls-Auswahl bleibt lokal
 - keine Online-Pflicht für Lernmodus oder Wortdetail
 
-## Datenschutz und Kosten
+## Datenschutz
 
-Nur ausgewählte Wörter werden an die KI gesendet.
+Nur notwendige Wörter und minimale Kontextdaten werden an die KI gesendet. Vollständige Lernhistorien werden nicht ungefiltert übertragen.
 
-Keine API-Keys liegen in Flutter. KI-Anfragen laufen über Supabase Edge Function, damit Secrets serverseitig bleiben.
+Grundsätze:
 
-Usage Limits und Kostenkontrolle müssen später auch für Tagesimpuls gelten. Das Feature darf keine unbegrenzten automatischen KI-Anfragen erzeugen.
+- keine Secrets in Flutter
+- keine Benachrichtigung ohne Zustimmung
+- Nutzer kann Tagesimpuls deaktivieren
+- keine sensiblen Texte unnötig loggen
+- serverseitige API-Keys bleiben geschützt
 
 ## Abgrenzung
 
-Der Tagesimpuls ist:
+Tagesimpuls ist:
 
 - kein allgemeiner Chat
-- kein automatisches Sammeln ohne Nutzerentscheidung
-- kein Ersatz für den Lernmodus
-- kein sofortiger Push-Benachrichtigungs-Zwang
+- kein automatisches Sammeln ohne nachvollziehbare Logik
+- kein Ersatz für SRS
+- kein Spam-Reminder
+- kein Push ohne Berechtigung
+- keine automatische Progression
 
-Der Nutzer entscheidet bewusst, welche Wörter in den Tagesimpuls aufgenommen werden.
+Mehr als 1 Nachricht pro Tag darf nur durch bewusste Nutzerentscheidung entstehen.
 
 ## Umsetzung in Phasen
 
@@ -113,36 +185,39 @@ Der Nutzer entscheidet bewusst, welche Wörter in den Tagesimpuls aufgenommen we
 
 - globale Tagesimpuls-Auswahl
 - Add-Button im Lernmodus
-- Counter appweit korrekt
-- Duplikat- und Maximalgrenze lokal absichern
+- Counter `0/5`
+- Favoriten/Quick-Actions
 
 ### Phase 2
 
-- KI-Nachricht manuell generieren
-- ausgewählte Wörter an `ai-chat` oder eine spezialisierte Edge Function senden
-- Ergebnis lokal anzeigen
-- Fehler und Limits verständlich kommunizieren
+- Backend-Strategie dokumentieren
+- `generate-daily-impulses` Edge Function planen
+- 1-5 Nachrichten in einem Request generieren
 
 ### Phase 3
 
-- geplante Tagesnachrichten
-- optionale Benachrichtigungen
-- klare Nutzerentscheidung für Benachrichtigungen
+- manuelle Vorschau/Planung in der App
+- lokale Notification planen
 
 ### Phase 4
 
-- adaptive Vorschläge durch Lernverhalten
-- schwierige Wörter vorschlagen
-- weiterhin keine automatische Aufnahme ohne Nutzerentscheidung
+- automatische Tagesplanung
+- Nutzer-Einstellung 1-5 Nachrichten
+- automatische Wortauswahl nur max. 1 Nachricht ohne manuelle Auswahl
 
-## Nächster technischer Schritt
+### Phase 5
 
-Die Tagesimpuls-Auswahl sollte aus dem HomeScreen gelöst werden.
+- Server-Push über APNs/FCM
+- Premium-/Free-Limits
+- Usage Tracking produktiv
 
-Empfehlung:
+## Nächster Technischer Schritt
 
-1. Eigenen lokalen Provider/Service für Tagesimpuls-Auswahl erstellen.
-2. Auswahl lokal persistieren.
-3. HomeScreen an denselben globalen Zustand anbinden.
-4. Lernmodus-Button auf denselben Zustand schreiben lassen.
-5. Counter `0/5` überall aus derselben Quelle lesen.
+Als nächstes sollte die Edge Function `generate-daily-impulses` geplant werden:
+
+- Request-/Response-Format definieren
+- 1-5 Nachrichten in einem strukturierten Output zurückgeben
+- Usage Tracking und Limits berücksichtigen
+- noch keine Notifications implementieren
+
+Danach kann die lokale Notification-Scheduling-Implementierung separat geplant werden.
