@@ -144,6 +144,184 @@ void main() {
       expect(word.translationError, 'network unavailable');
     });
 
+    test(
+      'load_pending_translations_returns_only_pending_active_words',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        final repository = WordRepository(database: db);
+
+        await repository.upsertWord(
+          id: 'word-pending-b',
+          categoryId: 'category-basics',
+          term: 'Beta',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+          sortOrder: 2,
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-pending-a',
+          categoryId: 'category-basics',
+          term: 'Alpha',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+          sortOrder: 1,
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-translated',
+          categoryId: 'category-basics',
+          term: 'House',
+          translation: 'Haus',
+          translationStatus: TranslationStatus.translated,
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-failed',
+          categoryId: 'category-basics',
+          term: 'Broken',
+          translation: '',
+          translationStatus: TranslationStatus.failed,
+          translationError: 'network unavailable',
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-archived',
+          categoryId: 'category-basics',
+          term: 'Archived',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+          isArchived: true,
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-travel',
+          categoryId: 'category-travel',
+          term: 'Airport',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+          now: now,
+        );
+
+        final words = await repository.loadPendingTranslations(
+          categoryId: 'category-basics',
+        );
+
+        expect(words.map((word) => word.id), [
+          'word-pending-a',
+          'word-pending-b',
+        ]);
+        expect(
+          words.every(
+            (word) =>
+                word.categoryId == 'category-basics' &&
+                word.translationStatus == TranslationStatus.pending,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test('load_pending_translations_can_include_archived_words', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      final repository = WordRepository(database: db);
+
+      await repository.upsertWord(
+        id: 'word-active',
+        categoryId: 'category-basics',
+        term: 'Active',
+        translation: '',
+        translationStatus: TranslationStatus.pending,
+        sortOrder: 1,
+        now: now,
+      );
+      await repository.upsertWord(
+        id: 'word-archived',
+        categoryId: 'category-basics',
+        term: 'Archived',
+        translation: '',
+        translationStatus: TranslationStatus.pending,
+        sortOrder: 0,
+        isArchived: true,
+        now: now,
+      );
+
+      final words = await repository.loadPendingTranslations(
+        categoryId: 'category-basics',
+        includeArchived: true,
+      );
+
+      expect(words.map((word) => word.id), ['word-archived', 'word-active']);
+    });
+
+    test('update_translation_sets_translated_and_clears_error', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      final repository = WordRepository(database: db);
+      final updatedAt = now.add(const Duration(minutes: 15));
+
+      await repository.upsertWord(
+        id: 'word-river',
+        categoryId: 'category-basics',
+        term: 'river',
+        translation: '',
+        translationStatus: TranslationStatus.failed,
+        sourceLanguage: 'en',
+        targetLanguage: 'de',
+        translationError: 'old error',
+        now: now,
+      );
+
+      final updated = await repository.updateTranslation(
+        id: 'word-river',
+        translation: 'Fluss',
+        updatedAt: updatedAt,
+      );
+
+      expect(updated, isNotNull);
+      expect(updated!.translation, 'Fluss');
+      expect(updated.translationStatus, TranslationStatus.translated);
+      expect(updated.translationError, isNull);
+      expect(updated.sourceLanguage, 'en');
+      expect(updated.targetLanguage, 'de');
+      expect(updated.updatedAt, updatedAt);
+    });
+
+    test('mark_translation_failed_sets_failed_status_and_error', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      final repository = WordRepository(database: db);
+      final failedAt = now.add(const Duration(minutes: 20));
+
+      await repository.upsertWord(
+        id: 'word-river',
+        categoryId: 'category-basics',
+        term: 'river',
+        translation: '',
+        translationStatus: TranslationStatus.pending,
+        now: now,
+      );
+
+      final failed = await repository.markTranslationFailed(
+        id: 'word-river',
+        error: 'offline',
+        updatedAt: failedAt,
+      );
+
+      expect(failed, isNotNull);
+      expect(failed!.translationStatus, TranslationStatus.failed);
+      expect(failed.translationError, 'offline');
+      expect(failed.translation, '');
+      expect(failed.updatedAt, failedAt);
+    });
+
     test('upsert_word_updates_existing_word', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);

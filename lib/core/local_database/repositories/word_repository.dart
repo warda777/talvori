@@ -141,6 +141,79 @@ class WordRepository {
     return rows.map(_mapWord).toList(growable: false);
   }
 
+  Future<List<LocalWord>> loadPendingTranslations({
+    String? categoryId,
+    bool includeArchived = false,
+  }) async {
+    final where = <String>['translation_status = ?'];
+    final whereArgs = <Object?>[TranslationStatus.pending.dbValue];
+    if (categoryId != null) {
+      where.add('category_id = ?');
+      whereArgs.add(categoryId);
+    }
+    if (!includeArchived) {
+      where.add('is_archived = ?');
+      whereArgs.add(0);
+    }
+
+    final rows = await _database.query(
+      'words',
+      where: where.join(' AND '),
+      whereArgs: whereArgs,
+      orderBy: 'sort_order ASC, term ASC',
+    );
+
+    return rows.map(_mapWord).toList(growable: false);
+  }
+
+  Future<LocalWord?> updateTranslation({
+    required String id,
+    required String translation,
+    String? sourceLanguage,
+    String? targetLanguage,
+    required DateTime updatedAt,
+  }) async {
+    final existing = await loadWordById(id);
+    if (existing == null) return null;
+
+    final updatedRows = await _database.update(
+      'words',
+      {
+        'translation': translation,
+        'translation_status': TranslationStatus.translated.dbValue,
+        'source_language': sourceLanguage ?? existing.sourceLanguage,
+        'target_language': targetLanguage ?? existing.targetLanguage,
+        'translation_error': null,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (updatedRows == 0) return null;
+    return loadWordById(id);
+  }
+
+  Future<LocalWord?> markTranslationFailed({
+    required String id,
+    required String error,
+    required DateTime updatedAt,
+  }) async {
+    final updatedRows = await _database.update(
+      'words',
+      {
+        'translation_status': TranslationStatus.failed.dbValue,
+        'translation_error': error,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (updatedRows == 0) return null;
+    return loadWordById(id);
+  }
+
   Future<void> archiveWord({
     required String id,
     required bool archived,
