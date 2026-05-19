@@ -2,24 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'counter_badge.dart';
 import 'dart:ui' as ui;
-import 'glow_sweep_ring.dart';
 import 'tap_flash.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:talvori/core/services/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talvori/features/words/data/last_shared_word_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
 import 'package:talvori/features/words/ui/cards/glow_orb.dart';
 import 'package:talvori/features/words/ui/cards/center_glow.dart';
-import 'package:talvori/features/words/ui/cards/rotating_chrome_icon.dart';
-import 'package:talvori/features/words/ui/cards/multi_color_chrome_icon.dart';
 import 'package:talvori/features/words/ui/cards/animated_phone_icon.dart';
 import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/home/ui/widgets/glow_switch.dart';
-import 'package:talvori/features/push/data/daily_picks_store.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/words/ui/cards/spinning_chrome_button.dart';
 
 // ignore_for_file: use_build_context_synchronously
@@ -29,8 +24,8 @@ class WordCard extends ConsumerStatefulWidget {
   // Aktionen
   final VoidCallback onSpeak;
   final VoidCallback onMarkWords;
-  final AddResult? Function(String word)?
-  onQuickSend; // Nimmt das aktuelle Wort aus dem Wheel, gibt AddResult zurück
+  final Future<TagesimpulsSelectionAddResult> Function(WordUserView word)?
+  onQuickSend; // Nimmt das aktuelle Wort aus dem Wheel.
   final VoidCallback onGo;
 
   // Bild
@@ -137,13 +132,6 @@ class _WordCardState extends ConsumerState<WordCard> {
     final onImageIcon = widget.isImageDark
         ? Colors.white
         : Colors.black87; // Icons minimal kräftiger
-    final asyncWord = ref.watch(lastSharedWordProvider);
-    final displayWord = asyncWord.maybeWhen(
-      data: (v) => (v != null && v.trim().isNotEmpty)
-          ? v.trim()
-          : (widget.initialWord ?? 'to assume'),
-      orElse: () => widget.initialWord ?? 'to assume',
-    );
     final glowEnabled = ref.watch(
       homeControllerProvider.select((s) => s.glowEnabled),
     );
@@ -452,12 +440,11 @@ class _WordCardState extends ConsumerState<WordCard> {
                             if (_currentWord != null &&
                                 widget.onQuickSend != null) {
                               // Führe QuickSend aus und prüfe das Ergebnis
-                              final result = widget.onQuickSend!(
-                                _currentWord!.text,
-                              );
+                              final result = widget.onQuickSend!(_currentWord!);
 
                               // Starte Flug-Animation nur wenn erfolgreich hinzugefügt
-                              if (result == AddResult.ok) {
+                              if (await result ==
+                                  TagesimpulsSelectionAddResult.ok) {
                                 _startArrowFlyAnimation(context);
                               }
                             }

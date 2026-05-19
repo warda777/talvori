@@ -42,6 +42,7 @@ void main() {
     await tester.pump();
 
     expect(bottomOverflows, isEmpty);
+    expect(find.text('0/5'), findsOneWidget);
     expect(find.text('Üben'), findsOneWidget);
     expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
   });

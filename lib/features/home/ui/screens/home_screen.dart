@@ -12,7 +12,9 @@ import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
 import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
-import 'package:talvori/features/push/data/daily_picks_store.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
+import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_debug_hub_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -76,6 +78,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeControllerProvider);
+    final tagesimpulsSelection = ref.watch(
+      tagesimpulsSelectionControllerProvider,
+    );
 
     return Scaffold(
       backgroundColor: HomeTheme.background,
@@ -121,56 +126,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AnimatedBuilder(
-                      animation: DailyPicksStore.I,
-                      builder: (context, _) {
-                        final count = DailyPicksStore.I.items.length;
-                        final max = DailyPicksStore.I.maxCount;
-
-                        // Wenn count >= max, aber Animation noch läuft, zeige Pill weiterhin
-                        final shouldShowProgress =
-                            count < max || _progressAnimationRunning;
-
-                        return HomeTopBar(
-                          buttonKey: _rightButtonKey,
-                          progressPillKey: _progressPillKey,
-                          counterKey: _counterKey, // <-- NEU: Counter Key
-                          crownButtonKey: _crownButtonKey,
-                          fireballKey: _fireballKey,
-                          onAllWords: () {
-                            // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                          },
-                          onRewards: () => _todo('Rewards/Leaderboard/Stats'),
-                          onProgressTap: () => _todo('Daily picks settings'),
-                          selected: count,
-                          max: max,
-                          showProgress: shouldShowProgress,
-                          onProgressAnimationStart: () {
-                            // Animation gestartet - verzögere setState
+                    HomeTopBar(
+                      buttonKey: _rightButtonKey,
+                      progressPillKey: _progressPillKey,
+                      counterKey: _counterKey, // <-- NEU: Counter Key
+                      crownButtonKey: _crownButtonKey,
+                      fireballKey: _fireballKey,
+                      onAllWords: () {
+                        // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                      },
+                      onRewards: () => _todo('Rewards/Leaderboard/Stats'),
+                      onProgressTap: () => _todo('Tagesimpuls'),
+                      selected: tagesimpulsSelection.count,
+                      max: tagesimpulsSelection.maxCount,
+                      showProgress:
+                          tagesimpulsSelection.count <
+                              tagesimpulsSelection.maxCount ||
+                          _progressAnimationRunning,
+                      onProgressAnimationStart: () {
+                        // Animation gestartet - verzögere setState
+                        if (mounted) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  setState(() {
-                                    _progressAnimationRunning = true;
-                                  });
-                                }
+                              setState(() {
+                                _progressAnimationRunning = true;
                               });
                             }
-                          },
-                          onProgressAnimationComplete: () {
-                            // Animation fertig - jetzt kann die Pill ausgeblendet werden
-                            // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                          });
+                        }
+                      },
+                      onProgressAnimationComplete: () {
+                        // Animation fertig - jetzt kann die Pill ausgeblendet werden
+                        // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                        if (mounted) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  setState(() {
-                                    _progressAnimationRunning = false;
-                                  });
-                                }
+                              setState(() {
+                                _progressAnimationRunning = false;
                               });
                             }
-                          },
-                        );
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -194,45 +190,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 counterKey: _counterKey, // <-- NEU: Counter Key
                                 initialWord:
                                     null, // lastSharedWordProvider regelt das
-                                onQuickSend: (String wordText) {
+                                onQuickSend: (word) async {
                                   // Füge nur das aktuell ausgewählte Wort hinzu
-                                  final res = DailyPicksStore.I.add(wordText);
+                                  final res = await ref
+                                      .read(
+                                        tagesimpulsSelectionControllerProvider
+                                            .notifier,
+                                      )
+                                      .add(
+                                        TagesimpulsSelectionItem(
+                                          wordId: word.id,
+                                          text: word.text,
+                                          translation: word.translation,
+                                          addedAt: DateTime.now(),
+                                        ),
+                                      );
 
                                   if (!context.mounted) return res;
 
                                   switch (res) {
-                                    case AddResult.ok:
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Wort hinzugefügt'),
-                                        ),
-                                      );
-                                      break;
-                                    case AddResult.duplicate:
+                                    case TagesimpulsSelectionAddResult.ok:
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                            'Bereits in deinen Tageswörtern',
+                                            'Wort wurde zum Tagesimpuls hinzugefügt.',
                                           ),
                                         ),
                                       );
                                       break;
-                                    case AddResult.full:
+                                    case TagesimpulsSelectionAddResult
+                                        .duplicate:
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        SnackBar(
+                                        const SnackBar(
                                           content: Text(
-                                            'Tageswörter ist voll (${DailyPicksStore.I.maxCount})',
+                                            'Wort ist bereits im Tagesimpuls.',
                                           ),
                                         ),
                                       );
                                       break;
-                                    case AddResult.invalid:
+                                    case TagesimpulsSelectionAddResult.full:
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Tagesimpuls ist voll.',
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case TagesimpulsSelectionAddResult.invalid:
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
