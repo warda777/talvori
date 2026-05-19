@@ -15,6 +15,9 @@ import 'package:talvori/core/local_database/providers/local_time_replay_cards_pr
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
+import 'package:talvori/features/tagesimpuls/data/tagesimpuls_selection_repository.dart';
+import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
@@ -106,6 +109,29 @@ class _TestLocalLearningController extends LocalLearningController {
         lastAction: LocalLearningControllerAction.submitWrong,
       );
     }
+  }
+}
+
+class _MemoryTagesimpulsRepository implements TagesimpulsSelectionRepository {
+  _MemoryTagesimpulsRepository([
+    List<TagesimpulsSelectionItem> initial = const [],
+  ]) : _items = List<TagesimpulsSelectionItem>.of(initial);
+
+  List<TagesimpulsSelectionItem> _items;
+
+  @override
+  Future<List<TagesimpulsSelectionItem>> loadItems() async {
+    return List<TagesimpulsSelectionItem>.of(_items);
+  }
+
+  @override
+  Future<void> saveItems(List<TagesimpulsSelectionItem> items) async {
+    _items = List<TagesimpulsSelectionItem>.of(items);
+  }
+
+  @override
+  Future<void> clear() async {
+    _items = const [];
   }
 }
 
@@ -239,6 +265,244 @@ void main() {
     await tester.pump(const Duration(milliseconds: 450));
 
     expect(find.text('hallo'), findsOneWidget);
+  });
+
+  testWidgets('learn_mode_screen_local_mode_shows_tagesimpuls_add_button', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: readState),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('learn_mode_screen_local_mode_adds_current_word_to_tagesimpuls', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: readState),
+    );
+    final repository = _MemoryTagesimpulsRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
+    );
+    await tester.pump();
+
+    final items = await repository.loadItems();
+    expect(items, hasLength(1));
+    expect(items.single.wordId, 'word-1');
+    expect(items.single.text, 'hello');
+    expect(items.single.translation, 'hallo');
+    expect(items.single.categoryId, 'basics');
+    expect(find.text('Zum Tagesimpuls hinzugefügt.'), findsOneWidget);
+    expect(controller.submitCorrectCalls, 0);
+    expect(controller.submitWrongCalls, 0);
+  });
+
+  testWidgets('learn_mode_screen_local_mode_does_not_add_duplicate', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final repository = _MemoryTagesimpulsRepository([
+      TagesimpulsSelectionItem(
+        wordId: 'word-1',
+        text: 'hello',
+        translation: 'hallo',
+        categoryId: 'basics',
+        addedAt: DateTime.utc(2026, 5, 19),
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(
+            () => _TestLocalLearningController(
+              const LocalLearningControllerState(readState: readState),
+            ),
+          ),
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
+    );
+    await tester.pump();
+
+    expect(await repository.loadItems(), hasLength(1));
+    expect(find.text('Bereits im Tagesimpuls.'), findsOneWidget);
+  });
+
+  testWidgets('learn_mode_screen_local_mode_respects_tagesimpuls_limit', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-new',
+      currentTerm: 'new',
+      currentTranslation: 'neu',
+      currentStage: SrsStage.s0,
+    );
+    final repository = _MemoryTagesimpulsRepository(
+      List<TagesimpulsSelectionItem>.generate(
+        5,
+        (index) => TagesimpulsSelectionItem(
+          wordId: 'word-$index',
+          text: 'word $index',
+          addedAt: DateTime.utc(2026, 5, 19),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(
+            () => _TestLocalLearningController(
+              const LocalLearningControllerState(readState: readState),
+            ),
+          ),
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
+    );
+    await tester.pump();
+
+    final items = await repository.loadItems();
+    expect(items, hasLength(5));
+    expect(items.any((item) => item.wordId == 'word-new'), isFalse);
+    expect(find.text('Tagesimpuls ist voll.'), findsOneWidget);
   });
 
   testWidgets('learn_mode_screen_local_mode_swipe_right_submits_correct', (

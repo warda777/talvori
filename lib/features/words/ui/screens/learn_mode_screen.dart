@@ -33,6 +33,9 @@ import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart'
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart'
     show WordUserView;
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
+import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
 import 'package:talvori/core/ui/effects/fireworks_service.dart';
 import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
 
@@ -1241,6 +1244,35 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
     }
 
+    Future<void> addCurrentWordToTagesimpuls() async {
+      final wordId = viewModelState.currentWordId;
+      final term = viewModelState.term;
+      if (wordId == null || wordId.trim().isEmpty || term == null) return;
+
+      final result = await ref
+          .read(tagesimpulsSelectionControllerProvider.notifier)
+          .add(
+            TagesimpulsSelectionItem(
+              wordId: wordId,
+              text: term,
+              translation: viewModelState.translation,
+              categoryId: localCategoryId,
+              addedAt: DateTime.now(),
+            ),
+          );
+
+      if (!context.mounted) return;
+      final message = switch (result) {
+        TagesimpulsSelectionAddResult.ok => 'Zum Tagesimpuls hinzugefügt.',
+        TagesimpulsSelectionAddResult.duplicate => 'Bereits im Tagesimpuls.',
+        TagesimpulsSelectionAddResult.full => 'Tagesimpuls ist voll.',
+        TagesimpulsSelectionAddResult.invalid => 'Ungültiges Wort.',
+      };
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+
     Future<void> openStageInspector(int stageIndex) async {
       if (localCategoryId == null || localCategoryId.isEmpty) return;
       await showLocalStageInspectorSheet(
@@ -1484,26 +1516,38 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         },
       );
     } else if (cardState.hasCard) {
-      cardContent = SwipeableWordCard(
-        key: cardKey,
-        frontText: cardState.frontText ?? '',
-        backText: cardState.backText ?? '',
-        level: null,
-        showTranslation: _localShowTranslation,
-        gesturesEnabled: true,
-        srsStage: uiState.currentStage?.index,
-        streak: null,
-        passCount: null,
-        onFlip: () {
-          setState(() => _localShowTranslation = !_localShowTranslation);
-        },
-        onSwipe: (correct) async {
-          if (correct) {
-            await submitCorrect();
-          } else {
-            await submitWrong();
-          }
-        },
+      cardContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          SwipeableWordCard(
+            key: cardKey,
+            frontText: cardState.frontText ?? '',
+            backText: cardState.backText ?? '',
+            level: null,
+            showTranslation: _localShowTranslation,
+            gesturesEnabled: true,
+            srsStage: uiState.currentStage?.index,
+            streak: null,
+            passCount: null,
+            onFlip: () {
+              setState(() => _localShowTranslation = !_localShowTranslation);
+            },
+            onSwipe: (correct) async {
+              if (correct) {
+                await submitCorrect();
+              } else {
+                await submitWrong();
+              }
+            },
+          ),
+          Positioned(
+            top: 14,
+            right: 18,
+            child: _TagesimpulsAddButton(
+              onPressed: addCurrentWordToTagesimpuls,
+            ),
+          ),
+        ],
       );
     } else if (uiState.isCompleted) {
       cardContent = Center(
@@ -1784,6 +1828,48 @@ class _LocalTimeReplayBadge extends StatelessWidget {
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _TagesimpulsAddButton extends StatelessWidget {
+  const _TagesimpulsAddButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Zum Tagesimpuls hinzufügen',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('local-learn-mode-tagesimpuls-add-button'),
+          borderRadius: BorderRadius.circular(999),
+          onTap: onPressed,
+          child: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: const Color(0xFF07101A).withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
+                  blurRadius: 18,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.add_task_rounded,
+              color: Color(0xFFB8FFF6),
+              size: 22,
+            ),
+          ),
         ),
       ),
     );

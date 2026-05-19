@@ -64,6 +64,7 @@ class TagesimpulsSelectionController
   Future<TagesimpulsSelectionAddResult> add(
     TagesimpulsSelectionItem item,
   ) async {
+    await _ensureLoaded();
     final normalizedText = item.normalizedText;
     if (normalizedText.isEmpty) return TagesimpulsSelectionAddResult.invalid;
     if (contains(item)) return TagesimpulsSelectionAddResult.duplicate;
@@ -85,6 +86,7 @@ class TagesimpulsSelectionController
   }
 
   Future<bool> remove(TagesimpulsSelectionItem item) async {
+    await _ensureLoaded();
     final next = state.items
         .where((candidate) => !_matches(candidate, item))
         .toList(growable: false);
@@ -96,12 +98,18 @@ class TagesimpulsSelectionController
   }
 
   Future<void> clear() async {
+    await _ensureLoaded();
     state = state.copyWith(items: const [], isLoading: false);
     await _repository.clear();
   }
 
   bool contains(TagesimpulsSelectionItem item) {
     return state.items.any((candidate) => _matches(candidate, item));
+  }
+
+  Future<void> _ensureLoaded() async {
+    if (!state.isLoading) return;
+    await load();
   }
 
   List<TagesimpulsSelectionItem> _dedupe(List<TagesimpulsSelectionItem> items) {
