@@ -150,6 +150,61 @@ void main() {
       );
     });
 
+    test('manual_retry_resets_failed_words_and_processes_them', () async {
+      await seedWord(
+        id: 'word-river',
+        term: 'river',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.failed,
+        error: 'offline',
+      );
+      await seedWord(
+        id: 'word-other',
+        term: 'mountain',
+        categoryId: 'category-other',
+        status: TranslationStatus.failed,
+        error: 'other offline',
+      );
+
+      final result = await processor.processPendingAndRetryFailedTranslations(
+        categoryId: 'local-category-my-words',
+      );
+
+      final retried = await wordRepository.loadWordById('word-river');
+      final other = await wordRepository.loadWordById('word-other');
+      expect(result.resetFailed, 1);
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(retried?.translation, 'fluss');
+      expect(retried?.translationStatus, TranslationStatus.translated);
+      expect(retried?.translationError, isNull);
+      expect(other?.translationStatus, TranslationStatus.failed);
+      expect(other?.translationError, 'other offline');
+    });
+
+    test('manual_retry_keeps_going_when_retried_word_fails_again', () async {
+      await seedWord(
+        id: 'word-broken',
+        term: 'broken',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.failed,
+        error: 'old error',
+      );
+
+      final result = await processor.processPendingAndRetryFailedTranslations(
+        categoryId: 'local-category-my-words',
+      );
+
+      final word = await wordRepository.loadWordById('word-broken');
+      expect(result.resetFailed, 1);
+      expect(result.processed, 1);
+      expect(result.translated, 0);
+      expect(result.failed, 1);
+      expect(word?.translationStatus, TranslationStatus.failed);
+      expect(word?.translationError, contains('Fake translation failed'));
+    });
+
     test(
       'processes_multiple_pending_words_and_keeps_going_after_failure',
       () async {

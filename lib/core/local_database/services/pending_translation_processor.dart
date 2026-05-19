@@ -61,6 +61,22 @@ class PendingTranslationProcessor {
       failed: failed,
     );
   }
+
+  Future<PendingTranslationProcessorResult>
+  processPendingAndRetryFailedTranslations({String? categoryId}) async {
+    final resetFailed = await _wordRepository.resetFailedTranslationsToPending(
+      categoryId: categoryId,
+      updatedAt: _now(),
+    );
+    final result = await processPendingTranslations(categoryId: categoryId);
+
+    return PendingTranslationProcessorResult(
+      processed: result.processed,
+      translated: result.translated,
+      failed: result.failed,
+      resetFailed: resetFailed,
+    );
+  }
 }
 
 class PendingTranslationProcessorResult {
@@ -68,9 +84,11 @@ class PendingTranslationProcessorResult {
     required this.processed,
     required this.translated,
     required this.failed,
+    this.resetFailed = 0,
   });
 
   final int processed;
   final int translated;
   final int failed;
+  final int resetFailed;
 }

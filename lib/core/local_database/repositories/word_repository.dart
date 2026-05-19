@@ -214,6 +214,34 @@ class WordRepository {
     return loadWordById(id);
   }
 
+  Future<int> resetFailedTranslationsToPending({
+    String? categoryId,
+    bool includeArchived = false,
+    required DateTime updatedAt,
+  }) async {
+    final where = <String>['translation_status = ?'];
+    final whereArgs = <Object?>[TranslationStatus.failed.dbValue];
+    if (categoryId != null) {
+      where.add('category_id = ?');
+      whereArgs.add(categoryId);
+    }
+    if (!includeArchived) {
+      where.add('is_archived = ?');
+      whereArgs.add(0);
+    }
+
+    return _database.update(
+      'words',
+      {
+        'translation_status': TranslationStatus.pending.dbValue,
+        'translation_error': null,
+        'updated_at': _encodeDateTime(updatedAt),
+      },
+      where: where.join(' AND '),
+      whereArgs: whereArgs,
+    );
+  }
+
   Future<void> archiveWord({
     required String id,
     required bool archived,

@@ -41,3 +41,11 @@ final pendingTranslationRunnerProvider =
       );
       return processor.processPendingTranslations;
     });
+
+final pendingAndFailedTranslationRunnerProvider =
+    FutureProvider<PendingTranslationRunner>((ref) async {
+      final processor = await ref.watch(
+        pendingTranslationProcessorProvider.future,
+      );
+      return processor.processPendingAndRetryFailedTranslations;
+    });

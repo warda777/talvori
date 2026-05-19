@@ -94,6 +94,11 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
                 (word) => word.translationStatus == TranslationStatus.pending,
               )
               .length;
+          final failedCount = words
+              .where(
+                (word) => word.translationStatus == TranslationStatus.failed,
+              )
+              .length;
 
           return Column(
             children: [
@@ -114,11 +119,12 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
                   },
                 ),
               ),
-              if (pendingCount > 0)
+              if (pendingCount + failedCount > 0)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                   child: _TranslationProcessButton(
                     pendingCount: pendingCount,
+                    failedCount: failedCount,
                     isLoading: _isProcessingTranslations,
                     onPressed: _processPendingTranslations,
                   ),
@@ -202,7 +208,9 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
 
     setState(() => _isProcessingTranslations = true);
     try {
-      final runner = await ref.read(pendingTranslationRunnerProvider.future);
+      final runner = await ref.read(
+        pendingAndFailedTranslationRunnerProvider.future,
+      );
       final result = await runner(categoryId: widget.categoryId);
       if (!mounted) return;
 
@@ -336,11 +344,13 @@ class _NeonFieldShell extends StatelessWidget {
 class _TranslationProcessButton extends StatelessWidget {
   const _TranslationProcessButton({
     required this.pendingCount,
+    required this.failedCount,
     required this.isLoading,
     required this.onPressed,
   });
 
   final int pendingCount;
+  final int failedCount;
   final bool isLoading;
   final VoidCallback onPressed;
 
@@ -370,9 +380,7 @@ class _TranslationProcessButton extends StatelessWidget {
                 )
               : const Icon(Icons.translate, color: Color(0xFF59D7FF)),
           label: Text(
-            isLoading
-                ? 'Übersetzungen laufen...'
-                : 'Ausstehende Übersetzungen verarbeiten ($pendingCount)',
+            _label,
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
@@ -387,6 +395,18 @@ class _TranslationProcessButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String get _label {
+    if (isLoading) {
+      return 'Übersetzungen laufen...';
+    }
+    if (failedCount == 0) {
+      return 'Ausstehende Übersetzungen verarbeiten ($pendingCount)';
+    }
+
+    final total = pendingCount + failedCount;
+    return 'Übersetzungen verarbeiten / erneut versuchen ($total)';
   }
 }
 

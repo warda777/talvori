@@ -112,7 +112,7 @@ void main() {
             _FakeLocalWordEditController.new,
           ),
           if (translationRunner != null)
-            pendingTranslationRunnerProvider.overrideWith(
+            pendingAndFailedTranslationRunnerProvider.overrideWith(
               (ref) async => translationRunner,
             ),
         ],
@@ -209,6 +209,30 @@ void main() {
   );
 
   testWidgets(
+    'local_word_list_screen_shows_manual_retry_button_for_failed_words',
+    (tester) async {
+      await pumpLocalWordList(
+        tester,
+        words: [
+          localWord(
+            id: 'word-failed',
+            term: 'umbrella',
+            translation: '',
+            translationStatus: TranslationStatus.failed,
+            translationError: 'offline',
+          ),
+        ],
+      );
+
+      expect(
+        find.text('Übersetzungen verarbeiten / erneut versuchen (1)'),
+        findsOneWidget,
+      );
+      expect(find.text('Übersetzung fehlgeschlagen'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'local_word_list_screen_hides_manual_translation_button_without_pending_words',
     (tester) async {
       await pumpLocalWordList(
@@ -270,6 +294,55 @@ void main() {
       );
     },
   );
+
+  testWidgets('local_word_list_screen_manual_retry_refreshes_failed_word', (
+    tester,
+  ) async {
+    final words = [
+      localWord(
+        id: 'word-failed',
+        term: 'umbrella',
+        translation: '',
+        translationStatus: TranslationStatus.failed,
+        translationError: 'offline',
+      ),
+    ];
+    var wasTriggered = false;
+
+    await pumpLocalWordList(
+      tester,
+      words: words,
+      translationRunner: ({String? categoryId}) async {
+        wasTriggered = true;
+        expect(categoryId, 'seed-category-basics');
+        words[0] = localWord(
+          id: 'word-failed',
+          term: 'umbrella',
+          translation: 'Regenschirm',
+          translationStatus: TranslationStatus.translated,
+        );
+        return const PendingTranslationProcessorResult(
+          processed: 1,
+          translated: 1,
+          failed: 0,
+          resetFailed: 1,
+        );
+      },
+    );
+
+    await tester.tap(
+      find.text('Übersetzungen verarbeiten / erneut versuchen (1)'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(wasTriggered, isTrue);
+    expect(find.text('Regenschirm'), findsOneWidget);
+    expect(find.text('Übersetzung fehlgeschlagen'), findsNothing);
+    expect(
+      find.text('Übersetzungen verarbeitet: 1 erfolgreich.'),
+      findsOneWidget,
+    );
+  });
 
   testWidgets(
     'local_word_list_screen_manual_translation_error_does_not_crash',

@@ -322,6 +322,59 @@ void main() {
       expect(failed.updatedAt, failedAt);
     });
 
+    test('reset_failed_translations_to_pending_clears_error', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-other', name: 'Other');
+      final repository = WordRepository(database: db);
+      final resetAt = now.add(const Duration(minutes: 25));
+
+      await repository.upsertWord(
+        id: 'word-failed',
+        categoryId: 'category-basics',
+        term: 'river',
+        translation: '',
+        translationStatus: TranslationStatus.failed,
+        translationError: 'offline',
+        now: now,
+      );
+      await repository.upsertWord(
+        id: 'word-pending',
+        categoryId: 'category-basics',
+        term: 'mountain',
+        translation: '',
+        translationStatus: TranslationStatus.pending,
+        now: now,
+      );
+      await repository.upsertWord(
+        id: 'word-other',
+        categoryId: 'category-other',
+        term: 'airport',
+        translation: '',
+        translationStatus: TranslationStatus.failed,
+        translationError: 'other error',
+        now: now,
+      );
+
+      final resetCount = await repository.resetFailedTranslationsToPending(
+        categoryId: 'category-basics',
+        updatedAt: resetAt,
+      );
+
+      final retried = await repository.loadWordById('word-failed');
+      final pending = await repository.loadWordById('word-pending');
+      final other = await repository.loadWordById('word-other');
+
+      expect(resetCount, 1);
+      expect(retried?.translationStatus, TranslationStatus.pending);
+      expect(retried?.translationError, isNull);
+      expect(retried?.updatedAt, resetAt);
+      expect(pending?.translationStatus, TranslationStatus.pending);
+      expect(other?.translationStatus, TranslationStatus.failed);
+      expect(other?.translationError, 'other error');
+    });
+
     test('upsert_word_updates_existing_word', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);
