@@ -45,5 +45,7 @@ void main() {
     expect(find.text('0/5'), findsOneWidget);
     expect(find.text('Üben'), findsOneWidget);
     expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
+    expect(find.text('Impuls vorbereiten'), findsNothing);
+    expect(find.text('Impuls-Vorschau'), findsNothing);
   });
 }
