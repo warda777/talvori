@@ -80,6 +80,31 @@ void main() {
       );
     });
 
+    test('handles_quota_exceeded_response', () async {
+      final client = SupabaseTranslationClient(
+        functionCaller: (functionName, payload) async {
+          return {'error': 'quota_exceeded'};
+        },
+      );
+
+      expect(
+        () => client.translate(
+          const TranslationRequest(
+            text: 'house',
+            sourceLanguage: 'en',
+            targetLanguage: 'de',
+          ),
+        ),
+        throwsA(
+          isA<TranslationException>().having(
+            (error) => error.toString(),
+            'message',
+            contains('quota_exceeded'),
+          ),
+        ),
+      );
+    });
+
     test('handles_invalid_response_shape', () async {
       final client = SupabaseTranslationClient(
         functionCaller: (functionName, payload) async {

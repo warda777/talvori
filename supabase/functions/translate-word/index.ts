@@ -35,9 +35,14 @@ type AccessCheckResult =
     status: number;
   };
 
-type UsageStatus = "success" | "failed";
+type UsageStatus = "success" | "failed" | "blocked";
+
+type UsageLimitResult =
+  | { ok: true }
+  | { ok: false; error: "quota_exceeded"; status: number };
 
 const maxTextLength = 500;
+const defaultDailyRequestLimit = 1000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,6 +75,37 @@ function readDeepLBaseUrl(): string {
 function readUsagePlan(): string | null {
   const configured = Deno.env.get("TRANSLATION_USAGE_PLAN")?.trim();
   return configured && configured.length > 0 ? configured : null;
+}
+
+function readDailyRequestLimit(): number {
+  const configured = Deno.env.get("TRANSLATION_DAILY_REQUEST_LIMIT")?.trim();
+  if (!configured) {
+    return defaultDailyRequestLimit;
+  }
+
+  const parsed = Number(configured);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return defaultDailyRequestLimit;
+  }
+
+  return Math.floor(parsed);
+}
+
+function currentDayBucket(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function createSupabaseAdminClient() {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
 }
 
 function envFlagEnabled(name: string): boolean {
@@ -122,17 +158,12 @@ async function recordUsageEvent(
   text: string,
   status: UsageStatus,
 ): Promise<void> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
-
-  if (!supabaseUrl || !serviceRoleKey) {
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) {
     return;
   }
 
   try {
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
     const { error } = await supabase.from("translation_usage_events").insert({
       user_id: auth.userId,
       feature: "translation",
@@ -149,6 +180,53 @@ async function recordUsageEvent(
     const message = error instanceof Error ? error.message : "unknown error";
     console.warn("translation usage event write failed", message);
   }
+}
+
+async function checkUsageLimit(auth: AuthContext): Promise<UsageLimitResult> {
+  const limit = readDailyRequestLimit();
+  if (limit === 0) {
+    return { ok: false, error: "quota_exceeded", status: 429 };
+  }
+
+  const supabase = createSupabaseAdminClient();
+  if (!supabase) {
+    return { ok: true };
+  }
+
+  try {
+    let query = supabase
+      .from("translation_usage_events")
+      .select("request_count")
+      .eq("feature", "translation")
+      .eq("day_bucket", currentDayBucket());
+
+    // TODO before production:
+    // - enforce per-user limits after JWT verification is implemented
+    // - keep global fallback only for development/anonymous requests
+    if (auth.userId) {
+      query = query.eq("user_id", auth.userId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.warn("translation usage limit check failed", error.message);
+      return { ok: true };
+    }
+
+    const used = (data ?? []).reduce((sum, row) => {
+      const count = Number(row.request_count ?? 0);
+      return sum + (Number.isFinite(count) ? count : 0);
+    }, 0);
+
+    if (used >= limit) {
+      return { ok: false, error: "quota_exceeded", status: 429 };
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown error";
+    console.warn("translation usage limit check failed", message);
+  }
+
+  return { ok: true };
 }
 
 async function readJsonBody(req: Request): Promise<JsonBodyResult> {
@@ -182,11 +260,6 @@ serve(async (req) => {
     return jsonResponse({ error: rateLimitCheck.error }, rateLimitCheck.status);
   }
 
-  const deeplApiKey = Deno.env.get("DEEPL_API_KEY")?.trim();
-  if (!deeplApiKey) {
-    return jsonResponse({ error: "translation_not_configured" }, 500);
-  }
-
   const parsed = await readJsonBody(req);
   if (!parsed.ok) {
     return jsonResponse({ error: parsed.error }, 400);
@@ -208,6 +281,20 @@ serve(async (req) => {
       { error: "translation_failed", reason: "text_too_long" },
       413,
     );
+  }
+
+  const usageLimitCheck = await checkUsageLimit(auth);
+  if (!usageLimitCheck.ok) {
+    await recordUsageEvent(auth, text, "blocked");
+    return jsonResponse(
+      { error: usageLimitCheck.error },
+      usageLimitCheck.status,
+    );
+  }
+
+  const deeplApiKey = Deno.env.get("DEEPL_API_KEY")?.trim();
+  if (!deeplApiKey) {
+    return jsonResponse({ error: "translation_not_configured" }, 500);
   }
 
   const payload: Record<string, unknown> = {
