@@ -254,8 +254,14 @@ void main() {
       () async {
         final (:container, :tempDir) = await createContainer(
           overrides: [
-            translationClientProvider.overrideWithValue(
-              FakeTranslationClient(translations: {'umbrella': 'regenschirm'}),
+            supabaseTranslationFunctionCallerProvider.overrideWithValue((
+              functionName,
+              payload,
+            ) async {
+              return {'translation': 'regenschirm'};
+            }),
+            localTranslationConfigProvider.overrideWithValue(
+              const LocalTranslationConfig.developmentSupabase(),
             ),
           ],
         );
@@ -284,6 +290,166 @@ void main() {
         expect(processResult.failed, 0);
         expect(word?.translation, 'regenschirm');
         expect(word?.translationStatus, TranslationStatus.translated);
+      },
+    );
+
+    test(
+      'build_local_translation_processor_for_config_defaults_to_fake',
+      () async {
+        final (:container, :tempDir) = await createContainer();
+        addTearDown(() => disposeContainer(container, tempDir));
+        final bootstrap = await container.read(localBootstrapProvider.future);
+        final processor = buildLocalTranslationProcessorForConfig(
+          wordRepository: bootstrap.repositoryFactory.wordRepository,
+          config: LocalTranslationConfig.defaultConfig,
+        );
+
+        final importService = await container.read(
+          sharedTextImportServiceProvider.future,
+        );
+        final importResult = await importService.importRawText(
+          rawText: 'hello',
+          now: DateTime(2026, 5, 19, 10),
+        );
+
+        final result = await processor.processPendingTranslations(
+          categoryId: localMyWordsCategoryId,
+        );
+        final word = await bootstrap.repositoryFactory.wordRepository
+            .loadWordById(importResult.word!.id);
+
+        expect(result.translated, 1);
+        expect(word?.translation, 'hallo');
+        expect(word?.translationStatus, TranslationStatus.translated);
+      },
+    );
+
+    test('development_supabase_integration_processes_pending_word', () async {
+      final (:container, :tempDir) = await createContainer(
+        overrides: [
+          localTranslationConfigProvider.overrideWithValue(
+            const LocalTranslationConfig.developmentSupabase(),
+          ),
+          supabaseTranslationFunctionCallerProvider.overrideWithValue((
+            functionName,
+            payload,
+          ) async {
+            expect(functionName, 'translate-word');
+            expect(payload['text'], 'river');
+            expect(payload['targetLang'], 'DE');
+            return {'translation': 'Fluss'};
+          }),
+        ],
+      );
+      addTearDown(() => disposeContainer(container, tempDir));
+
+      final importService = await container.read(
+        sharedTextImportServiceProvider.future,
+      );
+      final importResult = await importService.importRawText(
+        rawText: 'river',
+        now: DateTime(2026, 5, 19, 10),
+      );
+      final beforeProcessing = await (await container.read(
+        localBootstrapProvider.future,
+      )).repositoryFactory.wordRepository.loadWordById(importResult.word!.id);
+      final runner = await container.read(
+        pendingTranslationRunnerProvider.future,
+      );
+
+      expect(beforeProcessing?.translationStatus, TranslationStatus.pending);
+
+      final result = await runner(categoryId: localMyWordsCategoryId);
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      final word = await bootstrap.repositoryFactory.wordRepository
+          .loadWordById(importResult.word!.id);
+
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(word?.translation, 'Fluss');
+      expect(word?.translationStatus, TranslationStatus.translated);
+    });
+
+    test('development_supabase_integration_retries_failed_word', () async {
+      final (:container, :tempDir) = await createContainer(
+        overrides: [
+          localTranslationConfigProvider.overrideWithValue(
+            const LocalTranslationConfig.developmentSupabase(),
+          ),
+          supabaseTranslationFunctionCallerProvider.overrideWithValue(
+            (functionName, payload) async => {'translation': 'Fluss'},
+          ),
+        ],
+      );
+      addTearDown(() => disposeContainer(container, tempDir));
+
+      final importService = await container.read(
+        sharedTextImportServiceProvider.future,
+      );
+      final importResult = await importService.importRawText(
+        rawText: 'river',
+        now: DateTime(2026, 5, 19, 10),
+      );
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      await bootstrap.repositoryFactory.wordRepository.markTranslationFailed(
+        id: importResult.word!.id,
+        error: 'offline',
+        updatedAt: DateTime(2026, 5, 19, 11),
+      );
+      final runner = await container.read(
+        pendingAndFailedTranslationRunnerProvider.future,
+      );
+
+      final result = await runner(categoryId: localMyWordsCategoryId);
+      final word = await bootstrap.repositoryFactory.wordRepository
+          .loadWordById(importResult.word!.id);
+
+      expect(result.resetFailed, 1);
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(word?.translation, 'Fluss');
+      expect(word?.translationStatus, TranslationStatus.translated);
+      expect(word?.translationError, isNull);
+    });
+
+    test(
+      'development_supabase_integration_marks_function_error_as_failed',
+      () async {
+        final (:container, :tempDir) = await createContainer(
+          overrides: [
+            localTranslationConfigProvider.overrideWithValue(
+              const LocalTranslationConfig.developmentSupabase(),
+            ),
+            supabaseTranslationFunctionCallerProvider.overrideWithValue(
+              (functionName, payload) async => {'error': 'translation_failed'},
+            ),
+          ],
+        );
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final importService = await container.read(
+          sharedTextImportServiceProvider.future,
+        );
+        final importResult = await importService.importRawText(
+          rawText: 'river',
+          now: DateTime(2026, 5, 19, 10),
+        );
+        final runner = await container.read(
+          pendingTranslationRunnerProvider.future,
+        );
+
+        final result = await runner(categoryId: localMyWordsCategoryId);
+        final bootstrap = await container.read(localBootstrapProvider.future);
+        final word = await bootstrap.repositoryFactory.wordRepository
+            .loadWordById(importResult.word!.id);
+
+        expect(result.processed, 1);
+        expect(result.translated, 0);
+        expect(result.failed, 1);
+        expect(word?.translationStatus, TranslationStatus.failed);
+        expect(word?.translationError, contains('translation_failed'));
       },
     );
   });

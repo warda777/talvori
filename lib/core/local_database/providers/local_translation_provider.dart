@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../repositories/word_repository.dart';
 import '../services/pending_translation_processor.dart';
 import '../translation/local_translation_config.dart';
 import '../translation/supabase_function_caller.dart';
@@ -44,9 +45,12 @@ final pendingTranslationProcessorProvider =
       final bootstrap = await ref.watch(localBootstrapProvider.future);
       final repositories = bootstrap.repositoryFactory;
 
-      return PendingTranslationProcessor(
+      return buildLocalTranslationProcessorForConfig(
         wordRepository: repositories.wordRepository,
-        translationClient: ref.watch(translationClientProvider),
+        config: ref.watch(localTranslationConfigProvider),
+        supabaseFunctionCaller: ref.watch(
+          supabaseTranslationFunctionCallerProvider,
+        ),
       );
     });
 
@@ -65,3 +69,18 @@ final pendingAndFailedTranslationRunnerProvider =
       );
       return processor.processPendingAndRetryFailedTranslations;
     });
+
+PendingTranslationProcessor buildLocalTranslationProcessorForConfig({
+  required WordRepository wordRepository,
+  required LocalTranslationConfig config,
+  SupabaseFunctionCaller? supabaseFunctionCaller,
+}) {
+  final factory = LocalTranslationClientFactory(
+    supabaseFunctionCaller: supabaseFunctionCaller,
+  );
+
+  return PendingTranslationProcessor(
+    wordRepository: wordRepository,
+    translationClient: factory.create(config),
+  );
+}
