@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.dart';
@@ -1246,10 +1248,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
     }
 
-    Future<void> addCurrentWordToTagesimpuls() async {
+    Future<_LocalQuickActionFeedback> addCurrentWordToTagesimpuls() async {
       final wordId = viewModelState.currentWordId;
       final term = viewModelState.term;
-      if (wordId == null || wordId.trim().isEmpty || term == null) return;
+      if (wordId == null || wordId.trim().isEmpty || term == null) {
+        return _LocalQuickActionFeedback.warning;
+      }
 
       final result = await ref
           .read(tagesimpulsSelectionControllerProvider.notifier)
@@ -1263,31 +1267,50 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             ),
           );
 
-      if (!context.mounted) return;
       final message = switch (result) {
         TagesimpulsSelectionAddResult.ok => 'Zum Tagesimpuls hinzugefügt.',
         TagesimpulsSelectionAddResult.duplicate => 'Bereits im Tagesimpuls.',
         TagesimpulsSelectionAddResult.full => 'Tagesimpuls ist voll.',
         TagesimpulsSelectionAddResult.invalid => 'Ungültiges Wort.',
       };
-      _showLocalQuickActionMessage(context, message);
+      final feedback = switch (result) {
+        TagesimpulsSelectionAddResult.ok => _LocalQuickActionFeedback.success,
+        TagesimpulsSelectionAddResult.duplicate =>
+          _LocalQuickActionFeedback.warning,
+        TagesimpulsSelectionAddResult.full => _LocalQuickActionFeedback.warning,
+        TagesimpulsSelectionAddResult.invalid =>
+          _LocalQuickActionFeedback.warning,
+      };
+      if (context.mounted) {
+        _showLocalQuickActionMessage(context, message);
+      }
+      return feedback;
     }
 
-    Future<void> addCurrentWordToFavorites() async {
+    Future<_LocalQuickActionFeedback> addCurrentWordToFavorites() async {
       final wordId = viewModelState.currentWordId;
-      if (wordId == null || wordId.trim().isEmpty) return;
+      if (wordId == null || wordId.trim().isEmpty) {
+        return _LocalQuickActionFeedback.warning;
+      }
 
       final result = await ref
           .read(localFavoritesControllerProvider.notifier)
           .addWordId(wordId);
 
-      if (!context.mounted) return;
       final message = switch (result) {
         LocalFavoriteAddResult.ok => 'Zu Favoriten hinzugefügt.',
         LocalFavoriteAddResult.duplicate => 'Bereits in Favoriten.',
         LocalFavoriteAddResult.invalid => 'Ungültiges Wort.',
       };
-      _showLocalQuickActionMessage(context, message);
+      final feedback = switch (result) {
+        LocalFavoriteAddResult.ok => _LocalQuickActionFeedback.success,
+        LocalFavoriteAddResult.duplicate => _LocalQuickActionFeedback.warning,
+        LocalFavoriteAddResult.invalid => _LocalQuickActionFeedback.warning,
+      };
+      if (context.mounted) {
+        _showLocalQuickActionMessage(context, message);
+      }
+      return feedback;
     }
 
     Future<void> openStageInspector(int stageIndex) async {
@@ -1871,8 +1894,8 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
     required this.onAddToFavorites,
   });
 
-  final VoidCallback onAddToTagesimpuls;
-  final VoidCallback onAddToFavorites;
+  final Future<_LocalQuickActionFeedback> Function() onAddToTagesimpuls;
+  final Future<_LocalQuickActionFeedback> Function() onAddToFavorites;
 
   @override
   Widget build(BuildContext context) {
@@ -1881,19 +1904,23 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
       children: [
         _LocalQuickActionButton(
           key: const ValueKey('local-learn-mode-favorite-add-button'),
+          feedbackKey: const ValueKey('local-learn-mode-favorite-feedback'),
           tooltip: 'Zu Favoriten hinzufügen',
           icon: Icons.favorite_rounded,
           iconColor: const Color(0xFFFF8ACB),
           borderColor: const Color(0xFFFF8ACB),
+          warningColor: const Color(0xFFFFC857),
           onPressed: onAddToFavorites,
         ),
         const SizedBox(height: 10),
         _LocalQuickActionButton(
           key: const ValueKey('local-learn-mode-tagesimpuls-add-button'),
+          feedbackKey: const ValueKey('local-learn-mode-tagesimpuls-feedback'),
           tooltip: 'Zum Tagesimpuls hinzufügen',
           icon: Icons.add_task_rounded,
           iconColor: const Color(0xFFB8FFF6),
           borderColor: const Color(0xFF5DDCFF),
+          warningColor: const Color(0xFFFFC857),
           onPressed: onAddToTagesimpuls,
         ),
       ],
@@ -1901,47 +1928,152 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
   }
 }
 
-class _LocalQuickActionButton extends StatelessWidget {
+enum _LocalQuickActionFeedback { success, warning }
+
+class _LocalQuickActionButton extends StatefulWidget {
   const _LocalQuickActionButton({
     super.key,
+    required this.feedbackKey,
     required this.tooltip,
     required this.icon,
     required this.iconColor,
     required this.borderColor,
+    required this.warningColor,
     required this.onPressed,
   });
 
+  final Key feedbackKey;
   final String tooltip;
   final IconData icon;
   final Color iconColor;
   final Color borderColor;
-  final VoidCallback onPressed;
+  final Color warningColor;
+  final Future<_LocalQuickActionFeedback> Function() onPressed;
+
+  @override
+  State<_LocalQuickActionButton> createState() =>
+      _LocalQuickActionButtonState();
+}
+
+class _LocalQuickActionButtonState extends State<_LocalQuickActionButton> {
+  bool _isPressed = false;
+  bool _showFeedback = false;
+  _LocalQuickActionFeedback _feedback = _LocalQuickActionFeedback.success;
+  Timer? _hideFeedbackTimer;
+
+  Future<void> _handleTap() async {
+    if (_isPressed) return;
+    setState(() => _isPressed = true);
+
+    final feedback = await widget.onPressed();
+    if (!mounted) return;
+    setState(() {
+      _feedback = feedback;
+      _showFeedback = true;
+      _isPressed = false;
+    });
+
+    _hideFeedbackTimer?.cancel();
+    _hideFeedbackTimer = Timer(const Duration(milliseconds: 460), () {
+      if (!mounted) return;
+      setState(() => _showFeedback = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideFeedbackTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final feedbackColor = _feedback == _LocalQuickActionFeedback.success
+        ? widget.borderColor
+        : widget.warningColor;
+
     return Tooltip(
-      message: tooltip,
+      message: widget.tooltip,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
-          onTap: onPressed,
-          child: Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: const Color(0xFF07101A).withValues(alpha: 0.9),
-              shape: BoxShape.circle,
-              border: Border.all(color: borderColor, width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: borderColor.withValues(alpha: 0.24),
-                  blurRadius: 18,
-                  spreadRadius: 1,
-                ),
-              ],
+          onTap: _handleTap,
+          child: AnimatedScale(
+            scale: _isPressed ? 0.88 : 1,
+            duration: const Duration(milliseconds: 130),
+            curve: Curves.easeOutCubic,
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedOpacity(
+                    key: widget.feedbackKey,
+                    opacity: _showFeedback ? 1 : 0,
+                    duration: const Duration(milliseconds: 120),
+                    child: AnimatedScale(
+                      scale: _showFeedback ? 1.25 : 0.72,
+                      duration: const Duration(milliseconds: 420),
+                      curve: Curves.easeOutCubic,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: feedbackColor.withValues(alpha: 0.82),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: feedbackColor.withValues(alpha: 0.42),
+                              blurRadius: 22,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07101A).withValues(alpha: 0.94),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _showFeedback
+                            ? feedbackColor
+                            : widget.borderColor,
+                        width: _showFeedback ? 1.6 : 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              (_showFeedback
+                                      ? feedbackColor
+                                      : widget.borderColor)
+                                  .withValues(
+                                    alpha: _showFeedback ? 0.36 : 0.24,
+                                  ),
+                          blurRadius: _showFeedback ? 24 : 18,
+                          spreadRadius: _showFeedback ? 2 : 1,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      color: _showFeedback ? feedbackColor : widget.iconColor,
+                      size: _showFeedback ? 24 : 22,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
           ),
         ),
       ),

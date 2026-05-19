@@ -19,6 +19,16 @@ Die Quick-Actions sind Teil der `SwipeableWordCard`. Dadurch bewegen sich die Ic
 
 Der Tagesimpuls-Button nutzt denselben globalen Tagesimpuls-State wie der HomeScreen. Die Favoriten-Aktion speichert das lokale Wort in der lokalen Favoriten-Auswahl.
 
+Beide Quick-Actions haben sichtbares Tap-Feedback:
+
+- kurzer Scale-Effekt beim Antippen
+- kurzer Glow-/Ring-Pulse nach dem Ergebnis
+- Cyan/Violett-Pulse für Tagesimpuls
+- Pink-/Herz-Pulse für Favoriten
+- gedämpfter Warn-Pulse bei Duplikat oder vollem Tagesimpuls
+
+Die Effekte liegen innerhalb der Quick-Action-Gruppe und bleiben damit an die swipebare Karte gebunden.
+
 ## Verhalten
 
 Beim Tippen auf den Tagesimpuls-Button:
@@ -77,6 +87,7 @@ Abgedeckt sind:
 - Favoriten-Button wird im lokalen Lernmodus angezeigt
 - aktuelles Wort wird zum Tagesimpuls hinzugefügt
 - aktuelles Wort wird zu Favoriten hinzugefügt
+- Tap-Feedback erscheint bei Tagesimpuls- und Favoriten-Aktion
 - Duplikate werden nicht doppelt gezählt
 - Limit von 5 Wörtern wird eingehalten
 - SRS-Submit-Calls bleiben unberührt

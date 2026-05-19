@@ -401,6 +401,13 @@ void main() {
     );
 
     await tester.pump();
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-tagesimpuls-feedback'),
+      ),
+      0,
+    );
     await tester.tap(
       find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
     );
@@ -413,6 +420,13 @@ void main() {
     expect(items.single.translation, 'hallo');
     expect(items.single.categoryId, 'basics');
     expect(find.text('Zum Tagesimpuls hinzugefügt.'), findsOneWidget);
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-tagesimpuls-feedback'),
+      ),
+      1,
+    );
     expect(controller.submitCorrectCalls, 0);
     expect(controller.submitWrongCalls, 0);
   });
@@ -463,6 +477,13 @@ void main() {
     );
 
     await tester.pump();
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-favorite-feedback'),
+      ),
+      0,
+    );
     await tester.tap(
       find.byKey(const ValueKey('local-learn-mode-favorite-add-button')),
     );
@@ -470,6 +491,13 @@ void main() {
 
     expect(await favoritesRepository.loadWordIds(), ['word-1']);
     expect(find.text('Zu Favoriten hinzugefügt.'), findsOneWidget);
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-favorite-feedback'),
+      ),
+      1,
+    );
     expect(controller.submitCorrectCalls, 0);
     expect(controller.submitWrongCalls, 0);
   });
@@ -528,6 +556,13 @@ void main() {
 
     expect(await favoritesRepository.loadWordIds(), ['word-1']);
     expect(find.text('Bereits in Favoriten.'), findsOneWidget);
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-favorite-feedback'),
+      ),
+      1,
+    );
   });
 
   testWidgets('learn_mode_screen_local_mode_does_not_add_duplicate', (
@@ -591,6 +626,13 @@ void main() {
 
     expect(await repository.loadItems(), hasLength(1));
     expect(find.text('Bereits im Tagesimpuls.'), findsOneWidget);
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-tagesimpuls-feedback'),
+      ),
+      1,
+    );
   });
 
   testWidgets('learn_mode_screen_local_mode_respects_tagesimpuls_limit', (
@@ -657,6 +699,13 @@ void main() {
     expect(items, hasLength(5));
     expect(items.any((item) => item.wordId == 'word-new'), isFalse);
     expect(find.text('Tagesimpuls ist voll.'), findsOneWidget);
+    expect(
+      _feedbackOpacity(
+        tester,
+        const ValueKey('local-learn-mode-tagesimpuls-feedback'),
+      ),
+      1,
+    );
   });
 
   testWidgets('learn_mode_screen_local_mode_swipe_right_submits_correct', (
@@ -1667,4 +1716,8 @@ void main() {
       [0, 0, 0, 0, 0, 4],
     );
   });
+}
+
+double _feedbackOpacity(WidgetTester tester, Key key) {
+  return tester.widget<AnimatedOpacity>(find.byKey(key)).opacity;
 }
