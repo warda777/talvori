@@ -17,6 +17,7 @@ class LocalTranslationConfig {
   });
 
   static const defaultTargetLanguage = 'DE';
+  static const defaultConfig = LocalTranslationConfig.fake();
 
   const LocalTranslationConfig.fake()
     : mode = LocalTranslationClientMode.fake,
@@ -34,6 +35,13 @@ class LocalTranslationConfig {
        assert(apiKey != null);
 
   const LocalTranslationConfig.supabase({
+    this.targetLanguage = defaultTargetLanguage,
+    this.sourceLanguage,
+  }) : mode = LocalTranslationClientMode.supabase,
+       apiKey = null,
+       baseUri = null;
+
+  const LocalTranslationConfig.developmentSupabase({
     this.targetLanguage = defaultTargetLanguage,
     this.sourceLanguage,
   }) : mode = LocalTranslationClientMode.supabase,

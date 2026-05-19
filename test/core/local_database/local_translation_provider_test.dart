@@ -70,6 +70,39 @@ void main() {
       expect(result.translatedText, 'hallo');
     });
 
+    test('translation_default_config_is_fake', () {
+      const config = LocalTranslationConfig.defaultConfig;
+
+      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.resolvedTargetLanguage, 'DE');
+      expect(config.resolvedSourceLanguage, isNull);
+      expect(config.hasValidDeepLConfig, isFalse);
+      expect(config.wantsSupabase, isFalse);
+    });
+
+    test('translation_fake_factory_returns_fake_config', () {
+      const config = LocalTranslationConfig.fake();
+
+      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.apiKey, isNull);
+      expect(config.baseUri, isNull);
+      expect(config.wantsSupabase, isFalse);
+    });
+
+    test('translation_development_supabase_factory_is_explicit', () {
+      const config = LocalTranslationConfig.developmentSupabase(
+        targetLanguage: ' de ',
+        sourceLanguage: ' en ',
+      );
+
+      expect(config.mode, LocalTranslationClientMode.supabase);
+      expect(config.apiKey, isNull);
+      expect(config.baseUri, isNull);
+      expect(config.resolvedTargetLanguage, 'DE');
+      expect(config.resolvedSourceLanguage, 'EN');
+      expect(config.wantsSupabase, isTrue);
+    });
+
     test('translation_config_normalizes_runtime_languages', () {
       const config = LocalTranslationConfig.deepl(
         apiKey: 'test-key',
