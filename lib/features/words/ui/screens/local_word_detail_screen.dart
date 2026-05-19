@@ -3,14 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
+import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
 import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
 
-class LocalWordDetailScreen extends ConsumerWidget {
+class LocalWordDetailScreen extends ConsumerStatefulWidget {
   const LocalWordDetailScreen({
     super.key,
     required this.wordId,
@@ -25,22 +27,30 @@ class LocalWordDetailScreen extends ConsumerWidget {
   final LearningMode mode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LocalWordDetailScreen> createState() =>
+      _LocalWordDetailScreenState();
+}
+
+class _LocalWordDetailScreenState extends ConsumerState<LocalWordDetailScreen> {
+  bool _isProcessingTranslation = false;
+
+  @override
+  Widget build(BuildContext context) {
     final detailAsync = ref.watch(
       localWordDetailProvider(
         LocalWordDetailRequest(
-          wordId: wordId,
-          categoryId: categoryId,
-          mode: mode,
+          wordId: widget.wordId,
+          categoryId: widget.categoryId,
+          mode: widget.mode,
         ),
       ),
     );
     final historyAsync = ref.watch(
       localWordReviewHistoryProvider(
         LocalWordReviewHistoryRequest(
-          wordId: wordId,
-          categoryId: categoryId,
-          mode: mode,
+          wordId: widget.wordId,
+          categoryId: widget.categoryId,
+          mode: widget.mode,
         ),
       ),
     );
@@ -50,7 +60,7 @@ class LocalWordDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF050507),
         foregroundColor: Colors.white,
-        title: Text(title),
+        title: Text(widget.title),
         actions: [
           IconButton(
             tooltip: 'Bearbeiten',
@@ -59,9 +69,9 @@ class LocalWordDetailScreen extends ConsumerWidget {
               final updated = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
                   builder: (_) => LocalWordEditScreen(
-                    wordId: wordId,
-                    categoryId: categoryId,
-                    title: title,
+                    wordId: widget.wordId,
+                    categoryId: widget.categoryId,
+                    title: widget.title,
                   ),
                 ),
               );
@@ -70,18 +80,18 @@ class LocalWordDetailScreen extends ConsumerWidget {
                 ref.invalidate(
                   localWordDetailProvider(
                     LocalWordDetailRequest(
-                      wordId: wordId,
-                      categoryId: categoryId,
-                      mode: mode,
+                      wordId: widget.wordId,
+                      categoryId: widget.categoryId,
+                      mode: widget.mode,
                     ),
                   ),
                 );
                 ref.invalidate(
                   localWordReviewHistoryProvider(
                     LocalWordReviewHistoryRequest(
-                      wordId: wordId,
-                      categoryId: categoryId,
-                      mode: mode,
+                      wordId: widget.wordId,
+                      categoryId: widget.categoryId,
+                      mode: widget.mode,
                     ),
                   ),
                 );
@@ -132,7 +142,7 @@ class LocalWordDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    _InfoRow(label: 'Kategorie', value: title),
+                    _InfoRow(label: 'Kategorie', value: widget.title),
                     if (detail.word.exampleSentence != null) ...[
                       const SizedBox(height: 12),
                       _InfoRow(
@@ -148,7 +158,13 @@ class LocalWordDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              _NeonPanel(child: _TranslationStatusSection(word: detail.word)),
+              _NeonPanel(
+                child: _TranslationStatusSection(
+                  word: detail.word,
+                  isLoading: _isProcessingTranslation,
+                  onTranslate: _processWordTranslation,
+                ),
+              ),
               const SizedBox(height: 18),
               _NeonPanel(
                 child: _LearningStatusSection(progress: detail.progress),
@@ -166,6 +182,46 @@ class LocalWordDetailScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _processWordTranslation() async {
+    if (_isProcessingTranslation) return;
+
+    setState(() => _isProcessingTranslation = true);
+    try {
+      final runner = await ref.read(singleWordTranslationRunnerProvider.future);
+      final result = await runner(wordId: widget.wordId);
+      if (!mounted) return;
+
+      ref.invalidate(
+        localWordDetailProvider(
+          LocalWordDetailRequest(
+            wordId: widget.wordId,
+            categoryId: widget.categoryId,
+            mode: widget.mode,
+          ),
+        ),
+      );
+      ref.invalidate(localWordsForCategoryProvider(widget.categoryId));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result.translated > 0
+                ? 'Übersetzung aktualisiert.'
+                : 'Übersetzung konnte nicht abgeschlossen werden.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Übersetzung konnte nicht starten.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingTranslation = false);
+      }
+    }
+  }
 }
 
 String _translationDisplayText(LocalWord word) {
@@ -175,9 +231,15 @@ String _translationDisplayText(LocalWord word) {
 }
 
 class _TranslationStatusSection extends StatelessWidget {
-  const _TranslationStatusSection({required this.word});
+  const _TranslationStatusSection({
+    required this.word,
+    required this.isLoading,
+    required this.onTranslate,
+  });
 
   final LocalWord word;
+  final bool isLoading;
+  final VoidCallback onTranslate;
 
   @override
   Widget build(BuildContext context) {
@@ -240,12 +302,83 @@ class _TranslationStatusSection extends StatelessWidget {
                       value: word.translationError!.trim(),
                     ),
                   ],
+                  if (word.translationStatus !=
+                      TranslationStatus.translated) ...[
+                    const SizedBox(height: 14),
+                    _SingleWordTranslationButton(
+                      status: word.translationStatus,
+                      isLoading: isLoading,
+                      onPressed: onTranslate,
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _SingleWordTranslationButton extends StatelessWidget {
+  const _SingleWordTranslationButton({
+    required this.status,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final TranslationStatus status;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = isLoading
+        ? 'Übersetzung läuft...'
+        : switch (status) {
+            TranslationStatus.failed => 'Erneut übersetzen',
+            _ => 'Jetzt übersetzen',
+          };
+
+    return SizedBox(
+      width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B1218),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF59D7FF), width: 1),
+          boxShadow: const [
+            BoxShadow(color: Color(0x2259D7FF), blurRadius: 16),
+          ],
+        ),
+        child: TextButton.icon(
+          onPressed: isLoading ? null : onPressed,
+          icon: isLoading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF59D7FF),
+                  ),
+                )
+              : const Icon(Icons.translate, color: Color(0xFF59D7FF)),
+          label: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            foregroundColor: Colors.white,
+            disabledForegroundColor: const Color(0xFF7F8494),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -267,7 +400,7 @@ class _TranslationStatusPresentation {
     return switch (word.translationStatus) {
       TranslationStatus.pending => const _TranslationStatusPresentation(
         title: 'Übersetzung ausstehend',
-        description: 'Die Übersetzung wird später automatisch ergänzt.',
+        description: 'Starte die Übersetzung manuell, sobald du online bist.',
         color: Color(0xFF59D7FF),
         icon: Icons.schedule,
       ),
@@ -279,7 +412,7 @@ class _TranslationStatusPresentation {
         icon: Icons.error_outline,
       ),
       TranslationStatus.translated => _TranslationStatusPresentation(
-        title: 'Übersetzt',
+        title: 'Übersetzung verfügbar',
         description: word.translation.trim().isEmpty
             ? 'Noch keine Übersetzung hinterlegt.'
             : 'Die Übersetzung ist verfügbar.',

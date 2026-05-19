@@ -272,6 +272,77 @@ void main() {
       expect(word?.translationError, isNull);
     });
 
+    test('process_word_translation_translates_single_pending_word', () async {
+      await seedWord(
+        id: 'word-river',
+        term: 'river',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.pending,
+      );
+      await seedWord(
+        id: 'word-mountain',
+        term: 'mountain',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.pending,
+      );
+
+      final result = await processor.processWordTranslation(
+        wordId: 'word-river',
+      );
+
+      final river = await wordRepository.loadWordById('word-river');
+      final mountain = await wordRepository.loadWordById('word-mountain');
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(river?.translation, 'fluss');
+      expect(river?.translationStatus, TranslationStatus.translated);
+      expect(mountain?.translation, '');
+      expect(mountain?.translationStatus, TranslationStatus.pending);
+    });
+
+    test('process_word_translation_retries_single_failed_word', () async {
+      await seedWord(
+        id: 'word-river',
+        term: 'river',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.failed,
+        error: 'offline',
+      );
+
+      final result = await processor.processWordTranslation(
+        wordId: 'word-river',
+      );
+
+      final word = await wordRepository.loadWordById('word-river');
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(word?.translation, 'fluss');
+      expect(word?.translationStatus, TranslationStatus.translated);
+      expect(word?.translationError, isNull);
+    });
+
+    test('process_word_translation_marks_single_failure', () async {
+      await seedWord(
+        id: 'word-broken',
+        term: 'broken',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.pending,
+      );
+
+      final result = await processor.processWordTranslation(
+        wordId: 'word-broken',
+      );
+
+      final word = await wordRepository.loadWordById('word-broken');
+      expect(result.processed, 1);
+      expect(result.translated, 0);
+      expect(result.failed, 1);
+      expect(word?.translationStatus, TranslationStatus.failed);
+      expect(word?.translationError, contains('Fake translation failed'));
+    });
+
     test(
       'processes_multiple_pending_words_and_keeps_going_after_failure',
       () async {

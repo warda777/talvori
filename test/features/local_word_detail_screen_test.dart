@@ -5,9 +5,11 @@ import 'package:talvori/core/local_database/models/local_review_history_timeline
 import 'package:talvori/core/local_database/models/local_review_visual_feedback.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
+import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
+import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
@@ -107,6 +109,7 @@ void main() {
     WidgetTester tester, {
     required LocalWordDetailData? detail,
     List<LocalReviewHistoryTimelineItem> history = const [],
+    SingleWordTranslationRunner? translationRunner,
   }) async {
     _FakeLocalWordEditController.currentWord = detail?.word;
 
@@ -127,6 +130,10 @@ void main() {
           localWordEditControllerProvider.overrideWith(
             _FakeLocalWordEditController.new,
           ),
+          if (translationRunner != null)
+            singleWordTranslationRunnerProvider.overrideWith(
+              (ref) async => translationRunner,
+            ),
         ],
         child: const MaterialApp(
           home: LocalWordDetailScreen(
@@ -165,7 +172,7 @@ void main() {
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('Übersetzungsstatus'), findsOneWidget);
-    expect(find.text('Übersetzt'), findsOneWidget);
+    expect(find.text('Übersetzung verfügbar'), findsOneWidget);
     expect(find.text('Lernstatus'), findsOneWidget);
     expect(find.text('Merkstufe'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
@@ -210,9 +217,10 @@ void main() {
     expect(find.text('Übersetzungsstatus'), findsOneWidget);
     expect(find.text('Übersetzung ausstehend'), findsOneWidget);
     expect(
-      find.text('Die Übersetzung wird später automatisch ergänzt.'),
+      find.text('Starte die Übersetzung manuell, sobald du online bist.'),
       findsOneWidget,
     );
+    expect(find.text('Jetzt übersetzen'), findsOneWidget);
   });
 
   testWidgets('local_word_detail_screen_shows_failed_translation_status', (
@@ -236,6 +244,71 @@ void main() {
     expect(find.text('Übersetzung fehlgeschlagen'), findsOneWidget);
     expect(find.text('Fehlerhinweis'), findsOneWidget);
     expect(find.text('offline'), findsOneWidget);
+    expect(find.text('Erneut übersetzen'), findsOneWidget);
+  });
+
+  testWidgets(
+    'local_word_detail_screen_hides_translate_button_when_translated',
+    (tester) async {
+      await pumpDetail(
+        tester,
+        detail: LocalWordDetailData(word: word(), progress: null),
+      );
+
+      expect(find.text('Übersetzung verfügbar'), findsOneWidget);
+      expect(find.text('Jetzt übersetzen'), findsNothing);
+      expect(find.text('Erneut übersetzen'), findsNothing);
+    },
+  );
+
+  testWidgets('local_word_detail_screen_manual_translate_updates_word', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(
+        word: word(
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+        ),
+        progress: null,
+      ),
+      translationRunner: ({required String wordId}) async {
+        expect(wordId, 'seed-basics-hello');
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        final previous = _FakeLocalWordEditController.currentWord!;
+        _FakeLocalWordEditController.currentWord = LocalWord(
+          id: previous.id,
+          categoryId: previous.categoryId,
+          term: previous.term,
+          translation: 'Regenschirm',
+          translationStatus: TranslationStatus.translated,
+          sourceLanguage: previous.sourceLanguage,
+          targetLanguage: previous.targetLanguage,
+          translationError: null,
+          sortOrder: previous.sortOrder,
+          isArchived: previous.isArchived,
+          createdAt: previous.createdAt,
+          updatedAt: DateTime(2026, 1, 2),
+        );
+        return const PendingTranslationProcessorResult(
+          processed: 1,
+          translated: 1,
+          failed: 0,
+        );
+      },
+    );
+
+    await tester.tap(find.text('Jetzt übersetzen'));
+    await tester.pump();
+    expect(find.text('Übersetzung läuft...'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Regenschirm'), findsOneWidget);
+    expect(find.text('Übersetzung verfügbar'), findsOneWidget);
+    expect(find.text('Jetzt übersetzen'), findsNothing);
+    expect(find.text('Übersetzung aktualisiert.'), findsOneWidget);
   });
 
   testWidgets('local_word_detail_screen_shows_review_history_items', (

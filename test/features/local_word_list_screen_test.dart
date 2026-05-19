@@ -202,7 +202,7 @@ void main() {
       );
 
       expect(
-        find.text('Ausstehende Übersetzungen verarbeiten (1)'),
+        find.text('Ausstehende Übersetzungen starten (1)'),
         findsOneWidget,
       );
     },
@@ -225,7 +225,7 @@ void main() {
       );
 
       expect(
-        find.text('Übersetzungen verarbeiten / erneut versuchen (1)'),
+        find.text('Übersetzungen starten / erneut versuchen (1)'),
         findsOneWidget,
       );
       expect(find.text('Übersetzung fehlgeschlagen'), findsOneWidget);
@@ -243,7 +243,7 @@ void main() {
       );
 
       expect(
-        find.textContaining('Ausstehende Übersetzungen verarbeiten'),
+        find.textContaining('Ausstehende Übersetzungen starten'),
         findsNothing,
       );
     },
@@ -282,7 +282,7 @@ void main() {
         },
       );
 
-      await tester.tap(find.text('Ausstehende Übersetzungen verarbeiten (1)'));
+      await tester.tap(find.text('Ausstehende Übersetzungen starten (1)'));
       await tester.pumpAndSettle();
 
       expect(wasTriggered, isTrue);
@@ -330,9 +330,7 @@ void main() {
       },
     );
 
-    await tester.tap(
-      find.text('Übersetzungen verarbeiten / erneut versuchen (1)'),
-    );
+    await tester.tap(find.text('Übersetzungen starten / erneut versuchen (1)'));
     await tester.pumpAndSettle();
 
     expect(wasTriggered, isTrue);
@@ -362,7 +360,7 @@ void main() {
         },
       );
 
-      await tester.tap(find.text('Ausstehende Übersetzungen verarbeiten (1)'));
+      await tester.tap(find.text('Ausstehende Übersetzungen starten (1)'));
       await tester.pumpAndSettle();
 
       expect(

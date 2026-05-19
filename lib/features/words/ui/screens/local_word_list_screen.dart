@@ -402,11 +402,11 @@ class _TranslationProcessButton extends StatelessWidget {
       return 'Übersetzungen laufen...';
     }
     if (failedCount == 0) {
-      return 'Ausstehende Übersetzungen verarbeiten ($pendingCount)';
+      return 'Ausstehende Übersetzungen starten ($pendingCount)';
     }
 
     final total = pendingCount + failedCount;
-    return 'Übersetzungen verarbeiten / erneut versuchen ($total)';
+    return 'Übersetzungen starten / erneut versuchen ($total)';
   }
 }
 

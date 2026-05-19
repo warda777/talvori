@@ -1,3 +1,4 @@
+import '../models/translation_status.dart';
 import '../repositories/word_repository.dart';
 import '../translation/translation_client.dart';
 
@@ -60,6 +61,63 @@ class PendingTranslationProcessor {
       translated: translated,
       failed: failed,
     );
+  }
+
+  Future<PendingTranslationProcessorResult> processWordTranslation({
+    required String wordId,
+  }) async {
+    final word = await _wordRepository.loadWordById(wordId);
+    if (word == null) {
+      return const PendingTranslationProcessorResult(
+        processed: 0,
+        translated: 0,
+        failed: 0,
+      );
+    }
+
+    if (word.translationStatus == TranslationStatus.translated) {
+      return const PendingTranslationProcessorResult(
+        processed: 0,
+        translated: 0,
+        failed: 0,
+      );
+    }
+
+    final sourceLanguage = word.sourceLanguage ?? 'en';
+    final targetLanguage = word.targetLanguage ?? 'de';
+
+    try {
+      final result = await _translationClient.translate(
+        TranslationRequest(
+          text: word.term,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+        ),
+      );
+      await _wordRepository.updateTranslation(
+        id: word.id,
+        translation: result.translatedText,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: targetLanguage,
+        updatedAt: _now(),
+      );
+      return const PendingTranslationProcessorResult(
+        processed: 1,
+        translated: 1,
+        failed: 0,
+      );
+    } catch (error) {
+      await _wordRepository.markTranslationFailed(
+        id: word.id,
+        error: error.toString(),
+        updatedAt: _now(),
+      );
+      return const PendingTranslationProcessorResult(
+        processed: 1,
+        translated: 0,
+        failed: 1,
+      );
+    }
   }
 
   Future<PendingTranslationProcessorResult>

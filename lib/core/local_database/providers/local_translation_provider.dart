@@ -11,6 +11,10 @@ import 'local_bootstrap_provider.dart';
 
 typedef PendingTranslationRunner =
     Future<PendingTranslationProcessorResult> Function({String? categoryId});
+typedef SingleWordTranslationRunner =
+    Future<PendingTranslationProcessorResult> Function({
+      required String wordId,
+    });
 
 final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
   return localTranslationConfigFromEnvironment();
@@ -68,6 +72,14 @@ final pendingAndFailedTranslationRunnerProvider =
         pendingTranslationProcessorProvider.future,
       );
       return processor.processPendingAndRetryFailedTranslations;
+    });
+
+final singleWordTranslationRunnerProvider =
+    FutureProvider<SingleWordTranslationRunner>((ref) async {
+      final processor = await ref.watch(
+        pendingTranslationProcessorProvider.future,
+      );
+      return processor.processWordTranslation;
     });
 
 PendingTranslationProcessor buildLocalTranslationProcessorForConfig({
