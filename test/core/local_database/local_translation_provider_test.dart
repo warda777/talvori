@@ -52,6 +52,7 @@ void main() {
       final (:container, :tempDir) = await createContainer();
       addTearDown(() => disposeContainer(container, tempDir));
 
+      final config = container.read(localTranslationConfigProvider);
       final client = container.read(translationClientProvider);
       final result = await client.translate(
         const TranslationRequest(
@@ -61,8 +62,24 @@ void main() {
         ),
       );
 
+      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.resolvedTargetLanguage, 'DE');
+      expect(config.resolvedSourceLanguage, isNull);
       expect(client, isA<FakeTranslationClient>());
       expect(result.translatedText, 'hallo');
+    });
+
+    test('translation_config_normalizes_runtime_languages', () {
+      const config = LocalTranslationConfig.deepl(
+        apiKey: 'test-key',
+        targetLanguage: ' de ',
+        sourceLanguage: ' en ',
+      );
+
+      expect(config.mode, LocalTranslationClientMode.deepl);
+      expect(config.hasValidDeepLConfig, isTrue);
+      expect(config.resolvedTargetLanguage, 'DE');
+      expect(config.resolvedSourceLanguage, 'EN');
     });
 
     test(
@@ -74,6 +91,7 @@ void main() {
               LocalTranslationConfig.deepl(
                 apiKey: 'test-key',
                 baseUri: Uri.parse('https://api-free.deepl.com'),
+                targetLanguage: 'DE',
               ),
             ),
           ],

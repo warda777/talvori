@@ -7,25 +7,52 @@ import 'translation_client.dart';
 enum LocalTranslationClientMode { fake, deepl }
 
 class LocalTranslationConfig {
-  const LocalTranslationConfig({required this.mode, this.apiKey, this.baseUri});
+  const LocalTranslationConfig({
+    required this.mode,
+    this.apiKey,
+    this.baseUri,
+    this.targetLanguage = defaultTargetLanguage,
+    this.sourceLanguage,
+  });
+
+  static const defaultTargetLanguage = 'DE';
 
   const LocalTranslationConfig.fake()
     : mode = LocalTranslationClientMode.fake,
       apiKey = null,
-      baseUri = null;
+      baseUri = null,
+      targetLanguage = defaultTargetLanguage,
+      sourceLanguage = null;
 
-  const LocalTranslationConfig.deepl({required this.apiKey, this.baseUri})
-    : mode = LocalTranslationClientMode.deepl,
-      assert(apiKey != null);
+  const LocalTranslationConfig.deepl({
+    required this.apiKey,
+    this.baseUri,
+    this.targetLanguage = defaultTargetLanguage,
+    this.sourceLanguage,
+  }) : mode = LocalTranslationClientMode.deepl,
+       assert(apiKey != null);
 
   final LocalTranslationClientMode mode;
   final String? apiKey;
   final Uri? baseUri;
+  final String targetLanguage;
+  final String? sourceLanguage;
+
+  String get resolvedTargetLanguage {
+    final normalized = targetLanguage.trim().toUpperCase();
+    return normalized.isEmpty ? defaultTargetLanguage : normalized;
+  }
+
+  String? get resolvedSourceLanguage {
+    final normalized = sourceLanguage?.trim().toUpperCase();
+    return normalized == null || normalized.isEmpty ? null : normalized;
+  }
 
   bool get hasValidDeepLConfig {
     return mode == LocalTranslationClientMode.deepl &&
         apiKey != null &&
-        apiKey!.trim().isNotEmpty;
+        apiKey!.trim().isNotEmpty &&
+        resolvedTargetLanguage.isNotEmpty;
   }
 }
 
