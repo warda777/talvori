@@ -15,6 +15,8 @@ import 'package:talvori/core/local_database/providers/local_time_replay_cards_pr
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
+import 'package:talvori/features/favorites/application/local_favorites_provider.dart';
+import 'package:talvori/features/favorites/data/local_favorites_repository.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/data/tagesimpuls_selection_repository.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
@@ -132,6 +134,23 @@ class _MemoryTagesimpulsRepository implements TagesimpulsSelectionRepository {
   @override
   Future<void> clear() async {
     _items = const [];
+  }
+}
+
+class _MemoryLocalFavoritesRepository implements LocalFavoritesRepository {
+  _MemoryLocalFavoritesRepository([List<String> initial = const []])
+    : _wordIds = List<String>.of(initial);
+
+  List<String> _wordIds;
+
+  @override
+  Future<List<String>> loadWordIds() async {
+    return List<String>.of(_wordIds);
+  }
+
+  @override
+  Future<void> saveWordIds(List<String> wordIds) async {
+    _wordIds = List<String>.of(wordIds);
   }
 }
 
@@ -314,6 +333,28 @@ void main() {
       find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const ValueKey('local-learn-mode-favorite-add-button')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(SwipeableWordCard),
+        matching: find.byKey(
+          const ValueKey('local-learn-mode-tagesimpuls-add-button'),
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(SwipeableWordCard),
+        matching: find.byKey(
+          const ValueKey('local-learn-mode-favorite-add-button'),
+        ),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('learn_mode_screen_local_mode_adds_current_word_to_tagesimpuls', (
@@ -374,6 +415,119 @@ void main() {
     expect(find.text('Zum Tagesimpuls hinzugefügt.'), findsOneWidget);
     expect(controller.submitCorrectCalls, 0);
     expect(controller.submitWrongCalls, 0);
+  });
+
+  testWidgets('learn_mode_screen_local_mode_adds_current_word_to_favorites', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: readState),
+    );
+    final favoritesRepository = _MemoryLocalFavoritesRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+          localFavoritesRepositoryProvider.overrideWithValue(
+            favoritesRepository,
+          ),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('local-learn-mode-favorite-add-button')),
+    );
+    await tester.pump();
+
+    expect(await favoritesRepository.loadWordIds(), ['word-1']);
+    expect(find.text('Zu Favoriten hinzugefügt.'), findsOneWidget);
+    expect(controller.submitCorrectCalls, 0);
+    expect(controller.submitWrongCalls, 0);
+  });
+
+  testWidgets('learn_mode_screen_local_mode_does_not_add_favorite_duplicate', (
+    tester,
+  ) async {
+    const readState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s0,
+    );
+    final favoritesRepository = _MemoryLocalFavoritesRepository(['word-1']);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(
+            () => _TestLocalLearningController(
+              const LocalLearningControllerState(readState: readState),
+            ),
+          ),
+          localFavoritesRepositoryProvider.overrideWithValue(
+            favoritesRepository,
+          ),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey('local-learn-mode-favorite-add-button')),
+    );
+    await tester.pump();
+
+    expect(await favoritesRepository.loadWordIds(), ['word-1']);
+    expect(find.text('Bereits in Favoriten.'), findsOneWidget);
   });
 
   testWidgets('learn_mode_screen_local_mode_does_not_add_duplicate', (

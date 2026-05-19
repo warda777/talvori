@@ -33,6 +33,8 @@ import 'package:talvori/features/words/ui/widgets/card_glow_settings_popup.dart'
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart'
     show WordUserView;
+import 'package:talvori/features/favorites/application/local_favorites_controller.dart';
+import 'package:talvori/features/favorites/application/local_favorites_provider.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
@@ -1268,9 +1270,24 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         TagesimpulsSelectionAddResult.full => 'Tagesimpuls ist voll.',
         TagesimpulsSelectionAddResult.invalid => 'Ungültiges Wort.',
       };
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      _showLocalQuickActionMessage(context, message);
+    }
+
+    Future<void> addCurrentWordToFavorites() async {
+      final wordId = viewModelState.currentWordId;
+      if (wordId == null || wordId.trim().isEmpty) return;
+
+      final result = await ref
+          .read(localFavoritesControllerProvider.notifier)
+          .addWordId(wordId);
+
+      if (!context.mounted) return;
+      final message = switch (result) {
+        LocalFavoriteAddResult.ok => 'Zu Favoriten hinzugefügt.',
+        LocalFavoriteAddResult.duplicate => 'Bereits in Favoriten.',
+        LocalFavoriteAddResult.invalid => 'Ungültiges Wort.',
+      };
+      _showLocalQuickActionMessage(context, message);
     }
 
     Future<void> openStageInspector(int stageIndex) async {
@@ -1516,38 +1533,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         },
       );
     } else if (cardState.hasCard) {
-      cardContent = Stack(
-        alignment: Alignment.center,
-        children: [
-          SwipeableWordCard(
-            key: cardKey,
-            frontText: cardState.frontText ?? '',
-            backText: cardState.backText ?? '',
-            level: null,
-            showTranslation: _localShowTranslation,
-            gesturesEnabled: true,
-            srsStage: uiState.currentStage?.index,
-            streak: null,
-            passCount: null,
-            onFlip: () {
-              setState(() => _localShowTranslation = !_localShowTranslation);
-            },
-            onSwipe: (correct) async {
-              if (correct) {
-                await submitCorrect();
-              } else {
-                await submitWrong();
-              }
-            },
-          ),
-          Positioned(
-            top: 14,
-            right: 18,
-            child: _TagesimpulsAddButton(
-              onPressed: addCurrentWordToTagesimpuls,
-            ),
-          ),
-        ],
+      cardContent = SwipeableWordCard(
+        key: cardKey,
+        frontText: cardState.frontText ?? '',
+        backText: cardState.backText ?? '',
+        level: null,
+        showTranslation: _localShowTranslation,
+        gesturesEnabled: true,
+        srsStage: uiState.currentStage?.index,
+        streak: null,
+        passCount: null,
+        quickActions: _LocalLearnModeQuickActions(
+          onAddToTagesimpuls: addCurrentWordToTagesimpuls,
+          onAddToFavorites: addCurrentWordToFavorites,
+        ),
+        onFlip: () {
+          setState(() => _localShowTranslation = !_localShowTranslation);
+        },
+        onSwipe: (correct) async {
+          if (correct) {
+            await submitCorrect();
+          } else {
+            await submitWrong();
+          }
+        },
       );
     } else if (uiState.isCompleted) {
       cardContent = Center(
@@ -1762,6 +1771,28 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     );
   }
 
+  void _showLocalQuickActionMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF061018),
+        elevation: 0,
+        margin: const EdgeInsets.fromLTRB(18, 0, 18, 22),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.1),
+        ),
+      ),
+    );
+  }
+
   String _localTimePlanNextDueLabel(DateTime? nextAvailableAt) {
     if (nextAvailableAt == null) {
       return 'Heute ist dein Zeitplan erledigt. Reset gibt es nur im CategoryDetail.';
@@ -1834,19 +1865,65 @@ class _LocalTimeReplayBadge extends StatelessWidget {
   }
 }
 
-class _TagesimpulsAddButton extends StatelessWidget {
-  const _TagesimpulsAddButton({required this.onPressed});
+class _LocalLearnModeQuickActions extends StatelessWidget {
+  const _LocalLearnModeQuickActions({
+    required this.onAddToTagesimpuls,
+    required this.onAddToFavorites,
+  });
 
+  final VoidCallback onAddToTagesimpuls;
+  final VoidCallback onAddToFavorites;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _LocalQuickActionButton(
+          key: const ValueKey('local-learn-mode-favorite-add-button'),
+          tooltip: 'Zu Favoriten hinzufügen',
+          icon: Icons.favorite_rounded,
+          iconColor: const Color(0xFFFF8ACB),
+          borderColor: const Color(0xFFFF8ACB),
+          onPressed: onAddToFavorites,
+        ),
+        const SizedBox(height: 10),
+        _LocalQuickActionButton(
+          key: const ValueKey('local-learn-mode-tagesimpuls-add-button'),
+          tooltip: 'Zum Tagesimpuls hinzufügen',
+          icon: Icons.add_task_rounded,
+          iconColor: const Color(0xFFB8FFF6),
+          borderColor: const Color(0xFF5DDCFF),
+          onPressed: onAddToTagesimpuls,
+        ),
+      ],
+    );
+  }
+}
+
+class _LocalQuickActionButton extends StatelessWidget {
+  const _LocalQuickActionButton({
+    super.key,
+    required this.tooltip,
+    required this.icon,
+    required this.iconColor,
+    required this.borderColor,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final Color iconColor;
+  final Color borderColor;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Zum Tagesimpuls hinzufügen',
+      message: tooltip,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          key: const ValueKey('local-learn-mode-tagesimpuls-add-button'),
           borderRadius: BorderRadius.circular(999),
           onTap: onPressed,
           child: Container(
@@ -1855,20 +1932,16 @@ class _TagesimpulsAddButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF07101A).withValues(alpha: 0.9),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+              border: Border.all(color: borderColor, width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
+                  color: borderColor.withValues(alpha: 0.24),
                   blurRadius: 18,
                   spreadRadius: 1,
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.add_task_rounded,
-              color: Color(0xFFB8FFF6),
-              size: 22,
-            ),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
         ),
       ),
@@ -2158,7 +2231,9 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
               fontSize: 48,
               fontWeight: FontWeight.bold,
               color: _white,
-              shadows: [Shadow(color: _white.withOpacity(0.6), blurRadius: 12)],
+              shadows: [
+                Shadow(color: _white.withValues(alpha: 0.6), blurRadius: 12),
+              ],
             ),
           ),
         ),
@@ -2179,7 +2254,7 @@ class _MasteredCountBlinkState extends State<_MasteredCountBlink>
                 fontWeight: FontWeight.bold,
                 color: color,
                 shadows: [
-                  Shadow(color: color.withOpacity(0.6), blurRadius: 12),
+                  Shadow(color: color.withValues(alpha: 0.6), blurRadius: 12),
                 ],
               ),
             ),

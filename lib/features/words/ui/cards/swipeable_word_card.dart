@@ -15,6 +15,8 @@ class SwipeableWordCard extends StatefulWidget {
   final bool showTranslation;
   final bool gesturesEnabled; // blockt Flip/Swipe bei pausiertem Timer
   final Widget? footer; // TimerBar etc.
+  final Widget?
+  quickActions; // Aktionen, die fest zur swipebaren Karte gehören.
   final int? srsStage; // 0..5 (für Streak-Progress Anzeige)
   final int? streak; // korrekt-in-a-row in current stage
   final int? passCount; // A-SRS: wie oft in aktueller Stage richtig (0, 1, 2)
@@ -48,6 +50,7 @@ class SwipeableWordCard extends StatefulWidget {
     required this.onSwipe,
     required this.onFlip,
     this.footer,
+    this.quickActions,
     this.srsStage,
     this.streak,
     this.passCount,
@@ -195,7 +198,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                   : const Duration(milliseconds: 300)),
         curve: _slidingIn ? Curves.easeOutCubic : Curves.easeOut,
         transform: Matrix4.identity()
-          ..translate(_offset.dx, _offset.dy)
+          ..translateByDouble(_offset.dx, _offset.dy, 0, 1)
           ..rotateZ(_slidingIn ? 0 : _rotation),
         child: _buildFlip(),
       ),
@@ -282,6 +285,8 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           ),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
+          if (widget.quickActions != null)
+            Positioned(right: 14, bottom: 64, child: widget.quickActions!),
           if (widget.onSettingsTap != null)
             Positioned(
               top: 12,
@@ -295,7 +300,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2D2D2F).withOpacity(0.9),
+                      color: const Color(0xFF2D2D2F).withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white24, width: 1),
                     ),
@@ -348,6 +353,8 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             ),
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
+          if (widget.quickActions != null)
+            Positioned(right: 14, bottom: 64, child: widget.quickActions!),
         ],
       ),
     );
@@ -442,10 +449,13 @@ class _PassCountIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 1,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 1),
               ),
@@ -521,7 +531,7 @@ class _StreakProgressBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.28),
+          color: Colors.black.withValues(alpha: 0.28),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
@@ -629,7 +639,9 @@ class _CardShellState extends ConsumerState<_CardShell>
                           WordsUIConstants.cardBackground),
                 borderRadius: BorderRadius.circular(borderRadius),
                 border: Border.all(
-                  color: (widget.borderColor ?? accentColor).withOpacity(0.6),
+                  color: (widget.borderColor ?? accentColor).withValues(
+                    alpha: 0.6,
+                  ),
                   width: 1.5,
                 ),
                 boxShadow: [
@@ -637,8 +649,8 @@ class _CardShellState extends ConsumerState<_CardShell>
                   ...WordsUIConstants.cardShadow,
                   // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
                   BoxShadow(
-                    color: accentColor.withOpacity(
-                      0.25 * (0.6 + 0.4 * pulse) * settings.intensity,
+                    color: accentColor.withValues(
+                      alpha: 0.25 * (0.6 + 0.4 * pulse) * settings.intensity,
                     ),
                     blurRadius:
                         (60 + glowSpread * 2.0).clamp(0.0, 100.0) *
@@ -646,8 +658,8 @@ class _CardShellState extends ConsumerState<_CardShell>
                     spreadRadius: glowSpread * 1.5 * settings.intensity,
                   ),
                   BoxShadow(
-                    color: accentColor.withOpacity(
-                      0.30 * (0.5 + 0.5 * pulse) * settings.intensity,
+                    color: accentColor.withValues(
+                      alpha: 0.30 * (0.5 + 0.5 * pulse) * settings.intensity,
                     ),
                     blurRadius:
                         (45 + glowSpread * 1.5).clamp(0.0, 100.0) *
@@ -655,8 +667,8 @@ class _CardShellState extends ConsumerState<_CardShell>
                     spreadRadius: glowSpread * 1.2 * settings.intensity,
                   ),
                   BoxShadow(
-                    color: accentColor.withOpacity(
-                      0.35 * (0.5 + 0.5 * pulse) * settings.intensity,
+                    color: accentColor.withValues(
+                      alpha: 0.35 * (0.5 + 0.5 * pulse) * settings.intensity,
                     ),
                     blurRadius:
                         (35 + glowSpread * 1.2).clamp(0.0, 100.0) *
@@ -664,8 +676,8 @@ class _CardShellState extends ConsumerState<_CardShell>
                     spreadRadius: glowSpread * 0.9 * settings.intensity,
                   ),
                   BoxShadow(
-                    color: const Color(0xFFEFE9FF).withOpacity(
-                      0.45 * (0.3 + 0.7 * pulse) * settings.intensity,
+                    color: const Color(0xFFEFE9FF).withValues(
+                      alpha: 0.45 * (0.3 + 0.7 * pulse) * settings.intensity,
                     ),
                     blurRadius:
                         (18 + glowSpread * 0.5).clamp(0.0, 100.0) *
@@ -782,44 +794,50 @@ class _AdaptiveText extends StatelessWidget {
 }
 
 class _SwipeHint extends StatelessWidget {
-  final bool top;
-  const _SwipeHint({this.top = true});
+  const _SwipeHint();
 
   static Widget _buildRow() => Row(
     mainAxisSize: MainAxisSize.min,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Icon(Icons.swipe_left, color: Colors.red.withOpacity(0.6), size: 16),
+      Icon(
+        Icons.swipe_left,
+        color: Colors.red.withValues(alpha: 0.6),
+        size: 16,
+      ),
       const SizedBox(width: 4),
       Text(
         'Falsch',
         style: TextStyle(
-          color: Colors.red.withOpacity(0.7),
+          color: Colors.red.withValues(alpha: 0.7),
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
       ),
       const SizedBox(width: 16),
-      Text('•', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+      Text('•', style: TextStyle(color: Colors.white.withValues(alpha: 0.3))),
       const SizedBox(width: 16),
       Text(
         'Richtig',
         style: TextStyle(
-          color: Colors.green.withOpacity(0.7),
+          color: Colors.green.withValues(alpha: 0.7),
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
       ),
       const SizedBox(width: 4),
-      Icon(Icons.swipe_right, color: Colors.green.withOpacity(0.6), size: 16),
+      Icon(
+        Icons.swipe_right,
+        color: Colors.green.withValues(alpha: 0.6),
+        size: 16,
+      ),
     ],
   );
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: top ? 16 : null,
-      bottom: top ? null : 44,
+      top: 16,
       left: 0,
       right: 0,
       child: Center(child: _buildRow()),

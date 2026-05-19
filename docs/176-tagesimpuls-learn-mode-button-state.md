@@ -6,13 +6,22 @@ Die globale lokale Tagesimpuls-Auswahl existiert als eigenes Feature unter `lib/
 
 ## Neuer Stand
 
-Der lokale Lernmodus zeigt auf der aktiven Lernkarte einen kleinen Button zum Hinzufügen des aktuellen Wortes zum Tagesimpuls.
+Der lokale Lernmodus zeigt auf der aktiven Lernkarte Quick-Actions für das aktuell sichtbare Wort.
 
-Der Button nutzt denselben globalen Tagesimpuls-State wie der HomeScreen.
+Vorhanden sind:
+
+- Zum Tagesimpuls hinzufügen
+- Zu Favoriten hinzufügen
+
+Der Tagesimpuls-Button wurde ergonomischer tiefer platziert und sitzt jetzt zusammen mit der Favoriten-Aktion in einer kleinen Quick-Action-Gruppe. Die Aktionen überlappen nicht mit anderen Kartenbuttons.
+
+Die Quick-Actions sind Teil der `SwipeableWordCard`. Dadurch bewegen sich die Icons mit der Karte mit, wenn die Lernkarte per Swipe/Animation verschoben wird. Sie sind kein unabhängiges Screen-Overlay mehr.
+
+Der Tagesimpuls-Button nutzt denselben globalen Tagesimpuls-State wie der HomeScreen. Die Favoriten-Aktion speichert das lokale Wort in der lokalen Favoriten-Auswahl.
 
 ## Verhalten
 
-Beim Tippen auf den Button:
+Beim Tippen auf den Tagesimpuls-Button:
 
 - wird das aktuell sichtbare lokale Lernwort hinzugefügt
 - wird die globale Auswahl aktualisiert
@@ -25,6 +34,19 @@ Feedback:
 - Erfolg: „Zum Tagesimpuls hinzugefügt.“
 - Duplikat: „Bereits im Tagesimpuls.“
 - Voll: „Tagesimpuls ist voll.“
+
+Beim Tippen auf den Favoriten-Button:
+
+- wird nur das aktuell sichtbare lokale Lernwort als Favorit gespeichert
+- werden Duplikate verhindert
+- bleibt der SRS-Fortschritt unverändert
+
+Feedback:
+
+- Erfolg: „Zu Favoriten hinzugefügt.“
+- Duplikat: „Bereits in Favoriten.“
+
+Die Feedback-Anzeige nutzt eine dunkle, deckende Snackbar mit Neon-Kontur und ist nicht mehr transparent.
 
 ## Fachliche Abgrenzung
 
@@ -52,7 +74,9 @@ Nicht verändert werden:
 Abgedeckt sind:
 
 - Button wird im lokalen Lernmodus angezeigt
+- Favoriten-Button wird im lokalen Lernmodus angezeigt
 - aktuelles Wort wird zum Tagesimpuls hinzugefügt
+- aktuelles Wort wird zu Favoriten hinzugefügt
 - Duplikate werden nicht doppelt gezählt
 - Limit von 5 Wörtern wird eingehalten
 - SRS-Submit-Calls bleiben unberührt
