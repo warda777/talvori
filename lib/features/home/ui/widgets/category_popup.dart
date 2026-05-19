@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/features/favorites/ui/local_favorites_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
@@ -276,30 +277,28 @@ Future<void> showCategoryPopup({
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    OpenContainer(
-                      transitionDuration: const Duration(milliseconds: 350),
-                      transitionType: ContainerTransitionType.fadeThrough,
-                      closedElevation: 0,
-                      openElevation: 0,
-                      useRootNavigator: true,
-                      closedColor: cs.surfaceContainerHighest,
-                      openColor: Theme.of(context).scaffoldBackgroundColor,
-                      closedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      tappable: false,
-                      closedBuilder: (c, open) => buildTile(
-                        context: c,
-                        onTapAfter: () async {
-                          onBeginOpen();
-                          open();
-                        },
-                        title: 'Favoriten',
-                        icon: Icons.favorite_rounded,
-                        accentColor: pink,
-                      ),
-                      openBuilder: (_, __) =>
-                          const QuickSetsDetailScreen(initialIndex: 2),
+                    buildTile(
+                      key: const Key('category-popup-favorites-tile'),
+                      context: context,
+                      onTapBefore: () {
+                        final navigator = Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        );
+                        onBeginOpen();
+                        unawaited(
+                          navigator.push(
+                            MaterialPageRoute(
+                              builder: (_) => const LocalFavoritesListScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                      onTapAfter: () async {},
+                      holdDelay: Duration.zero,
+                      title: 'Favoriten',
+                      icon: Icons.favorite_rounded,
+                      accentColor: pink,
                     ),
                     OpenContainer(
                       transitionDuration: const Duration(milliseconds: 350),
