@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
+import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/data/tagesimpuls_selection_repository.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
@@ -15,26 +16,30 @@ void main() {
       _item('word-1', 'move'),
       _item('word-2', 'superstar'),
     ]);
-    final fakeClient = _FakeAiChatClient();
+    final fakeClient = _FakeTagesimpulsAiClient();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
         ],
-        child: MaterialApp(home: CourseScreen(aiChatClient: fakeClient)),
+        child: const MaterialApp(home: CourseScreen()),
       ),
     );
     await tester.pump();
 
-    await tester.tap(find.text('Impuls vorbereiten'));
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
     await tester.pump();
 
-    expect(find.text('Wähle mindestens 3 Wörter aus.'), findsOneWidget);
+    expect(
+      find.text('Wähle mindestens 3 Wörter für einen manuellen Tagesimpuls.'),
+      findsOneWidget,
+    );
     expect(fakeClient.requests, isEmpty);
   });
 
-  testWidgets('generates and shows Tagesimpuls message for three words', (
+  testWidgets('generates and shows Tagesimpuls impulses for three words', (
     tester,
   ) async {
     final repository = _MemoryTagesimpulsRepository([
@@ -42,36 +47,44 @@ void main() {
       _item('word-2', 'superstar'),
       _item('word-3', 'destroyed'),
     ]);
-    final fakeClient = _FakeAiChatClient(reply: 'I moved like a superstar.');
+    final fakeClient = _FakeTagesimpulsAiClient(
+      impulses: const [
+        TagesimpulsGeneratedImpulse(
+          slot: 'morning',
+          message: 'I moved like a superstar.',
+          usedWords: ['move', 'superstar'],
+        ),
+      ],
+    );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
         ],
-        child: MaterialApp(home: CourseScreen(aiChatClient: fakeClient)),
+        child: const MaterialApp(home: CourseScreen()),
       ),
     );
     await tester.pump();
 
-    await tester.tap(find.text('Impuls vorbereiten'));
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
     await tester.pump();
     await tester.pump();
 
     expect(fakeClient.requests, hasLength(1));
-    expect(fakeClient.requests.single.message, contains('move'));
-    expect(fakeClient.requests.single.message, contains('superstar'));
-    expect(fakeClient.requests.single.message, contains('destroyed'));
-    expect(fakeClient.requests.single.message, contains('eine einzelne kurze'));
-    final context = fakeClient.requests.single.context;
-    expect(context, isA<Map<String, Object?>>());
-    expect(
-      (context! as Map<String, Object?>)['feature'],
-      'tagesimpuls_preview',
-    );
+    expect(fakeClient.requests.single.count, 1);
     expect(fakeClient.requests.single.language, 'EN');
+    expect(fakeClient.requests.single.style, 'natural_message');
+    expect(fakeClient.requests.single.words.map((word) => word.word), [
+      'move',
+      'superstar',
+      'destroyed',
+    ]);
     expect(find.text('Impuls-Vorschau'), findsOneWidget);
+    expect(find.text('Morgens'), findsOneWidget);
     expect(find.text('I moved like a superstar.'), findsOneWidget);
+    expect(find.text('move'), findsWidgets);
   });
 
   testWidgets('shows mapped error when AI request fails', (tester) async {
@@ -80,21 +93,22 @@ void main() {
       _item('word-2', 'superstar'),
       _item('word-3', 'destroyed'),
     ]);
-    final fakeClient = _FakeAiChatClient(
-      error: const AiChatException('Supabase AI chat failed: quota_exceeded'),
+    final fakeClient = _FakeTagesimpulsAiClient(
+      error: const TagesimpulsAiException('quota_exceeded'),
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
         ],
-        child: MaterialApp(home: CourseScreen(aiChatClient: fakeClient)),
+        child: const MaterialApp(home: CourseScreen()),
       ),
     );
     await tester.pump();
 
-    await tester.tap(find.text('Impuls vorbereiten'));
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
     await tester.pump();
     await tester.pump();
 
@@ -102,6 +116,36 @@ void main() {
       find.text('Limit erreicht oder Anbieter begrenzt Anfrage.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('lets the user consciously select multiple daily impulses', (
+    tester,
+  ) async {
+    final repository = _MemoryTagesimpulsRepository([
+      _item('word-1', 'move'),
+      _item('word-2', 'superstar'),
+      _item('word-3', 'destroyed'),
+    ]);
+    final fakeClient = _FakeTagesimpulsAiClient();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+        ],
+        child: const MaterialApp(home: CourseScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(ChoiceChip, '3'));
+    await tester.pump();
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fakeClient.requests.single.count, 3);
   });
 }
 
@@ -136,18 +180,29 @@ class _MemoryTagesimpulsRepository implements TagesimpulsSelectionRepository {
   }
 }
 
-class _FakeAiChatClient implements AiChatClient {
-  _FakeAiChatClient({this.reply = 'Antwort', this.error});
+class _FakeTagesimpulsAiClient implements TagesimpulsAiClient {
+  _FakeTagesimpulsAiClient({
+    this.impulses = const [
+      TagesimpulsGeneratedImpulse(
+        slot: 'day',
+        message: 'Antwort',
+        usedWords: ['word'],
+      ),
+    ],
+    this.error,
+  });
 
-  final String reply;
-  final AiChatException? error;
-  final List<AiChatRequest> requests = [];
+  final List<TagesimpulsGeneratedImpulse> impulses;
+  final TagesimpulsAiException? error;
+  final List<TagesimpulsGenerateRequest> requests = [];
 
   @override
-  Future<AiChatResult> sendMessage(AiChatRequest request) async {
+  Future<TagesimpulsGenerateResult> generate(
+    TagesimpulsGenerateRequest request,
+  ) async {
     requests.add(request);
     final error = this.error;
     if (error != null) throw error;
-    return AiChatResult(reply: reply);
+    return TagesimpulsGenerateResult(impulses: impulses);
   }
 }

@@ -1,31 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:talvori/core/ai/ai_chat_client.dart';
-import 'package:talvori/core/ai/supabase_ai_chat_client.dart';
-import 'package:talvori/core/local_database/translation/supabase_function_caller.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
-import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
 
 class CourseScreen extends ConsumerStatefulWidget {
-  const CourseScreen({super.key, AiChatClient? aiChatClient})
-    : _aiChatClient = aiChatClient;
-
-  final AiChatClient? _aiChatClient;
+  const CourseScreen({super.key});
 
   @override
   ConsumerState<CourseScreen> createState() => _CourseScreenState();
 }
 
 class _CourseScreenState extends ConsumerState<CourseScreen> {
-  bool _isGenerating = false;
-  String? _message;
-  String? _error;
-
   @override
   Widget build(BuildContext context) {
     final selection = ref.watch(tagesimpulsSelectionControllerProvider);
+    final messageState = ref.watch(tagesimpulsMessageControllerProvider);
+    final messageController = ref.read(
+      tagesimpulsMessageControllerProvider.notifier,
+    );
     final controller = ref.read(
       tagesimpulsSelectionControllerProvider.notifier,
     );
@@ -151,13 +144,39 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  const Text(
+                    'Anzahl Tagesimpulse',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (
+                        var impulseCount = 1;
+                        impulseCount <= 5;
+                        impulseCount++
+                      )
+                        ChoiceChip(
+                          label: Text('$impulseCount'),
+                          selected: messageState.count == impulseCount,
+                          onSelected: (_) =>
+                              messageController.setCount(impulseCount),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      onPressed: _isGenerating
+                      onPressed: messageState.isGenerating
                           ? null
-                          : () => _generateMessage(selection.items),
-                      icon: _isGenerating
+                          : () => messageController.generate(selection.items),
+                      icon: messageState.isGenerating
                           ? const SizedBox(
                               width: 17,
                               height: 17,
@@ -168,9 +187,9 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                             )
                           : const Icon(Icons.auto_awesome_rounded),
                       label: Text(
-                        _isGenerating
+                        messageState.isGenerating
                             ? 'Impuls wird vorbereitet...'
-                            : 'Impuls vorbereiten',
+                            : 'Tagesimpulse vorbereiten',
                       ),
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF0D2530),
@@ -187,16 +206,33 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (_error != null)
+                  if (messageState.error != null)
                     _TagesimpulsResultCard(
                       title: 'Hinweis',
-                      message: _error!,
+                      message: _mapTagesimpulsError(messageState.error!),
                       isError: true,
                     ),
-                  if (_message != null)
-                    _TagesimpulsResultCard(
-                      title: 'Impuls-Vorschau',
-                      message: _message!,
+                  if (messageState.impulses.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Impuls-Vorschau',
+                          style: TextStyle(
+                            color: Color(0xFF7FFFE7),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        for (final impulse in messageState.impulses) ...[
+                          _TagesimpulsResultCard(
+                            title: _labelForSlot(impulse.slot),
+                            message: impulse.message,
+                            usedWords: impulse.usedWords,
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ],
                     ),
                 ],
               ),
@@ -207,89 +243,42 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     );
   }
 
-  Future<void> _generateMessage(List<TagesimpulsSelectionItem> items) async {
-    if (items.length < 3) {
-      setState(() {
-        _message = null;
-        _error = 'Wähle mindestens 3 Wörter aus.';
-      });
-      return;
+  String _mapTagesimpulsError(String code) {
+    if (code == 'words_required') {
+      return 'Wähle mindestens 3 Wörter für einen manuellen Tagesimpuls.';
     }
-
-    setState(() {
-      _isGenerating = true;
-      _message = null;
-      _error = null;
-    });
-
-    try {
-      final client = _resolveClient();
-      final result = await client.sendMessage(
-        AiChatRequest(
-          message: _buildPrompt(items),
-          language: 'EN',
-          context: {
-            'feature': 'tagesimpuls_preview',
-            'words': [
-              for (final item in items)
-                {
-                  'word': item.text,
-                  if ((item.translation ?? '').trim().isNotEmpty)
-                    'translation': item.translation!.trim(),
-                },
-            ],
-          },
-        ),
-      );
-      if (!mounted) return;
-      setState(() => _message = result.reply.trim());
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _error = _mapError(error));
-    } finally {
-      if (mounted) {
-        setState(() => _isGenerating = false);
-      }
-    }
-  }
-
-  AiChatClient _resolveClient() {
-    final injected = widget._aiChatClient;
-    if (injected != null) return injected;
-
-    return SupabaseAiChatClient(
-      functionCaller: supabaseFunctionCallerFromClient(
-        Supabase.instance.client,
-      ),
-    );
-  }
-
-  String _buildPrompt(List<TagesimpulsSelectionItem> items) {
-    final words = items
-        .map((item) {
-          final translation = (item.translation ?? '').trim();
-          if (translation.isEmpty) return item.text;
-          return '${item.text} ($translation)';
-        })
-        .join(', ');
-
-    return 'Erstelle eine einzelne kurze natürliche Nachricht auf Englisch mit diesen Wörtern: $words. '
-        'Die Nachricht soll sich wie eine echte Alltagsnachricht anfühlen und für einen Sprachlernenden verständlich sein. '
-        'Gib nur die Nachricht zurück. Keine Push-Benachrichtigung planen.';
-  }
-
-  String _mapError(Object error) {
-    final raw = error.toString();
-    if (raw.contains('ai_not_configured')) {
+    if (code == 'ai_not_configured') {
       return 'KI ist noch nicht konfiguriert.';
     }
-    if (raw.contains('quota_exceeded') || raw.contains('ai_rate_limited')) {
+    if (code == 'quota_exceeded' || code == 'ai_rate_limited') {
       return 'Limit erreicht oder Anbieter begrenzt Anfrage.';
     }
-    if (raw.contains('ai_request_failed') || raw.contains('ai_auth_failed')) {
+    if (code == 'ai_invalid_response') {
+      return 'Die KI-Antwort war ungültig.';
+    }
+    if (code == 'invalid_count') {
+      return 'Ungültige Anzahl für Tagesimpulse.';
+    }
+    if (code == 'ai_request_failed' || code == 'ai_auth_failed') {
       return 'Tagesimpuls konnte nicht erzeugt werden.';
     }
     return 'Tagesimpuls konnte nicht geladen werden.';
+  }
+
+  String _labelForSlot(String slot) {
+    switch (slot.trim().toLowerCase()) {
+      case 'morning':
+        return 'Morgens';
+      case 'noon':
+      case 'midday':
+        return 'Mittags';
+      case 'afternoon':
+        return 'Nachmittags';
+      case 'evening':
+        return 'Abends';
+      default:
+        return slot.trim().isEmpty ? 'Tagesimpuls' : slot.trim();
+    }
   }
 }
 
@@ -325,11 +314,13 @@ class _TagesimpulsResultCard extends StatelessWidget {
   const _TagesimpulsResultCard({
     required this.title,
     required this.message,
+    this.usedWords = const [],
     this.isError = false,
   });
 
   final String title;
   final String message;
+  final List<String> usedWords;
   final bool isError;
 
   @override
@@ -367,6 +358,17 @@ class _TagesimpulsResultCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (usedWords.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final word in usedWords)
+                  Chip(label: Text(word), visualDensity: VisualDensity.compact),
+              ],
+            ),
+          ],
         ],
       ),
     );
