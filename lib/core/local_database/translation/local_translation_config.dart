@@ -2,9 +2,10 @@ import 'package:http/http.dart' as http;
 
 import 'deepl_translation_client.dart';
 import 'fake_translation_client.dart';
+import 'supabase_translation_client.dart';
 import 'translation_client.dart';
 
-enum LocalTranslationClientMode { fake, deepl }
+enum LocalTranslationClientMode { fake, deepl, supabase }
 
 class LocalTranslationConfig {
   const LocalTranslationConfig({
@@ -32,6 +33,13 @@ class LocalTranslationConfig {
   }) : mode = LocalTranslationClientMode.deepl,
        assert(apiKey != null);
 
+  const LocalTranslationConfig.supabase({
+    this.targetLanguage = defaultTargetLanguage,
+    this.sourceLanguage,
+  }) : mode = LocalTranslationClientMode.supabase,
+       apiKey = null,
+       baseUri = null;
+
   final LocalTranslationClientMode mode;
   final String? apiKey;
   final Uri? baseUri;
@@ -54,13 +62,22 @@ class LocalTranslationConfig {
         apiKey!.trim().isNotEmpty &&
         resolvedTargetLanguage.isNotEmpty;
   }
+
+  bool get wantsSupabase {
+    return mode == LocalTranslationClientMode.supabase &&
+        resolvedTargetLanguage.isNotEmpty;
+  }
 }
 
 class LocalTranslationClientFactory {
-  const LocalTranslationClientFactory({http.Client? httpClient})
-    : _httpClient = httpClient;
+  const LocalTranslationClientFactory({
+    http.Client? httpClient,
+    SupabaseFunctionCaller? supabaseFunctionCaller,
+  }) : _httpClient = httpClient,
+       _supabaseFunctionCaller = supabaseFunctionCaller;
 
   final http.Client? _httpClient;
+  final SupabaseFunctionCaller? _supabaseFunctionCaller;
 
   TranslationClient create(LocalTranslationConfig config) {
     if (config.hasValidDeepLConfig) {
@@ -69,6 +86,9 @@ class LocalTranslationClientFactory {
         baseUri: config.baseUri,
         httpClient: _httpClient,
       );
+    }
+    if (config.wantsSupabase && _supabaseFunctionCaller != null) {
+      return SupabaseTranslationClient(functionCaller: _supabaseFunctionCaller);
     }
 
     return FakeTranslationClient();
