@@ -19,6 +19,21 @@ type JsonBodyResult =
   | { ok: true; body: TranslateWordRequest }
   | { ok: false; error: "invalid_json" };
 
+type AuthContext = {
+  authorization: string | null;
+  userId: string | null;
+  clientIp: string | null;
+  isAuthenticated: boolean;
+};
+
+type AccessCheckResult =
+  | { ok: true }
+  | {
+    ok: false;
+    error: "auth_required" | "rate_limit_exceeded" | "quota_exceeded";
+    status: number;
+  };
+
 const maxTextLength = 500;
 
 const corsHeaders = {
@@ -49,6 +64,51 @@ function readDeepLBaseUrl(): string {
     : "https://api-free.deepl.com";
 }
 
+function envFlagEnabled(name: string): boolean {
+  const value = Deno.env.get(name)?.trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
+function readAuthContext(req: Request): AuthContext {
+  const authorization = req.headers.get("authorization")?.trim() ?? null;
+  const forwardedFor = req.headers.get("x-forwarded-for")?.trim() ?? "";
+  const clientIp = forwardedFor.split(",")[0]?.trim() ||
+    req.headers.get("cf-connecting-ip")?.trim() ||
+    null;
+
+  // TODO before production:
+  // - verify Supabase JWT and derive the real user_id
+  // - reject invalid or expired tokens
+  // - attach premium/entitlement information for quota checks
+  return {
+    authorization,
+    userId: null,
+    clientIp,
+    isAuthenticated: authorization !== null && authorization.length > 0,
+  };
+}
+
+function checkAuth(auth: AuthContext): AccessCheckResult {
+  // Dev remains open by default. Production can require auth by setting this
+  // flag after JWT verification is implemented.
+  if (envFlagEnabled("TRANSLATE_WORD_REQUIRE_AUTH") && !auth.isAuthenticated) {
+    return { ok: false, error: "auth_required", status: 401 };
+  }
+
+  return { ok: true };
+}
+
+function checkRateLimit(auth: AuthContext): AccessCheckResult {
+  void auth;
+  // TODO before production:
+  // - rate limit by user_id when authenticated
+  // - fallback to client IP for anonymous/dev requests
+  // - enforce daily free quota and premium quota
+  // - return rate_limit_exceeded or quota_exceeded when limits are active
+  // - share the same strategy with future AI chat Edge Functions
+  return { ok: true };
+}
+
 async function readJsonBody(req: Request): Promise<JsonBodyResult> {
   try {
     const body = await req.json();
@@ -70,10 +130,16 @@ serve(async (req) => {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }
 
-  // TODO before production:
-  // - verify user auth / entitlement from the Authorization header
-  // - add rate limits and premium/user quotas
-  // - add abuse protection without logging full user text or secrets
+  const auth = readAuthContext(req);
+  const authCheck = checkAuth(auth);
+  if (!authCheck.ok) {
+    return jsonResponse({ error: authCheck.error }, authCheck.status);
+  }
+  const rateLimitCheck = checkRateLimit(auth);
+  if (!rateLimitCheck.ok) {
+    return jsonResponse({ error: rateLimitCheck.error }, rateLimitCheck.status);
+  }
+
   const deeplApiKey = Deno.env.get("DEEPL_API_KEY")?.trim();
   if (!deeplApiKey) {
     return jsonResponse({ error: "translation_not_configured" }, 500);
