@@ -1,5 +1,6 @@
 // supabase/functions/translate-word/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type TranslateWordRequest = {
   text?: string;
@@ -34,6 +35,8 @@ type AccessCheckResult =
     status: number;
   };
 
+type UsageStatus = "success" | "failed";
+
 const maxTextLength = 500;
 
 const corsHeaders = {
@@ -62,6 +65,11 @@ function readDeepLBaseUrl(): string {
   return configured && configured.length > 0
     ? configured.replace(/\/+$/, "")
     : "https://api-free.deepl.com";
+}
+
+function readUsagePlan(): string | null {
+  const configured = Deno.env.get("TRANSLATION_USAGE_PLAN")?.trim();
+  return configured && configured.length > 0 ? configured : null;
 }
 
 function envFlagEnabled(name: string): boolean {
@@ -107,6 +115,40 @@ function checkRateLimit(auth: AuthContext): AccessCheckResult {
   // - return rate_limit_exceeded or quota_exceeded when limits are active
   // - share the same strategy with future AI chat Edge Functions
   return { ok: true };
+}
+
+async function recordUsageEvent(
+  auth: AuthContext,
+  text: string,
+  status: UsageStatus,
+): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return;
+  }
+
+  try {
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+    const { error } = await supabase.from("translation_usage_events").insert({
+      user_id: auth.userId,
+      feature: "translation",
+      request_count: 1,
+      character_count: text.length,
+      status,
+      plan: readUsagePlan(),
+    });
+
+    if (error) {
+      console.warn("translation usage event write failed", error.message);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown error";
+    console.warn("translation usage event write failed", message);
+  }
 }
 
 async function readJsonBody(req: Request): Promise<JsonBodyResult> {
@@ -187,10 +229,12 @@ serve(async (req) => {
       body: JSON.stringify(payload),
     });
   } catch {
+    await recordUsageEvent(auth, text, "failed");
     return jsonResponse({ error: "translation_request_failed" }, 502);
   }
 
   if (!deeplResponse.ok) {
+    await recordUsageEvent(auth, text, "failed");
     return jsonResponse(
       {
         error: "translation_failed",
@@ -204,13 +248,16 @@ serve(async (req) => {
   try {
     decoded = await deeplResponse.json() as DeepLResponse;
   } catch {
+    await recordUsageEvent(auth, text, "failed");
     return jsonResponse({ error: "invalid_translation_response" }, 502);
   }
 
   const translatedText = decoded.translations?.[0]?.text;
   if (typeof translatedText !== "string" || translatedText.trim().length === 0) {
+    await recordUsageEvent(auth, text, "failed");
     return jsonResponse({ error: "invalid_translation_response" }, 502);
   }
 
+  await recordUsageEvent(auth, text, "success");
   return jsonResponse({ translation: translatedText });
 });
