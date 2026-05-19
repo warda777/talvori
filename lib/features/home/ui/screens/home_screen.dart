@@ -9,6 +9,7 @@ import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 
 import 'package:talvori/features/home/application/application.dart';
+import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
 import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
@@ -136,7 +137,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
                       },
                       onRewards: () => _todo('Rewards/Leaderboard/Stats'),
-                      onProgressTap: () => _todo('Tagesimpuls'),
+                      onProgressTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const CourseScreen(),
+                          ),
+                        );
+                      },
                       selected: tagesimpulsSelection.count,
                       max: tagesimpulsSelection.maxCount,
                       showProgress:
