@@ -13,7 +13,7 @@ typedef PendingTranslationRunner =
     Future<PendingTranslationProcessorResult> Function({String? categoryId});
 
 final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
-  return LocalTranslationConfig.defaultConfig;
+  return localTranslationConfigFromEnvironment();
 });
 
 final supabaseTranslationFunctionCallerProvider =

@@ -80,6 +80,29 @@ void main() {
       expect(config.wantsSupabase, isFalse);
     });
 
+    test('translation_environment_config_defaults_to_fake', () {
+      final config = localTranslationConfigFromEnvironment(mode: '');
+
+      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.wantsSupabase, isFalse);
+    });
+
+    test('translation_environment_config_enables_supabase_define', () {
+      final config = localTranslationConfigFromEnvironment(mode: 'supabase');
+
+      expect(config.mode, LocalTranslationClientMode.supabase);
+      expect(config.apiKey, isNull);
+      expect(config.wantsSupabase, isTrue);
+      expect(config.resolvedTargetLanguage, 'DE');
+    });
+
+    test('translation_environment_config_ignores_unknown_mode', () {
+      final config = localTranslationConfigFromEnvironment(mode: 'deepl');
+
+      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.wantsSupabase, isFalse);
+    });
+
     test('translation_fake_factory_returns_fake_config', () {
       const config = LocalTranslationConfig.fake();
 

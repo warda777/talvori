@@ -7,6 +7,22 @@ import 'translation_client.dart';
 
 enum LocalTranslationClientMode { fake, deepl, supabase }
 
+const talvoriTranslationModeDefineName = 'TALVORI_TRANSLATION_MODE';
+const talvoriTranslationModeDefine = String.fromEnvironment(
+  talvoriTranslationModeDefineName,
+);
+
+LocalTranslationConfig localTranslationConfigFromEnvironment({
+  String mode = talvoriTranslationModeDefine,
+}) {
+  final normalizedMode = mode.trim().toLowerCase();
+  if (normalizedMode == 'supabase') {
+    return const LocalTranslationConfig.developmentSupabase();
+  }
+
+  return LocalTranslationConfig.defaultConfig;
+}
+
 class LocalTranslationConfig {
   const LocalTranslationConfig({
     required this.mode,
