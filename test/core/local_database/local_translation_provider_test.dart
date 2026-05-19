@@ -9,7 +9,9 @@ import 'package:talvori/core/local_database/providers/local_bootstrap_provider.d
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/shared_text_import_service_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/core/local_database/translation/deepl_translation_client.dart';
 import 'package:talvori/core/local_database/translation/fake_translation_client.dart';
+import 'package:talvori/core/local_database/translation/local_translation_config.dart';
 import 'package:talvori/core/local_database/translation/translation_client.dart';
 
 void main() {
@@ -62,6 +64,53 @@ void main() {
       expect(client, isA<FakeTranslationClient>());
       expect(result.translatedText, 'hallo');
     });
+
+    test(
+      'translation_client_provider_can_create_deepl_when_configured',
+      () async {
+        final (:container, :tempDir) = await createContainer(
+          overrides: [
+            localTranslationConfigProvider.overrideWithValue(
+              LocalTranslationConfig.deepl(
+                apiKey: 'test-key',
+                baseUri: Uri.parse('https://api-free.deepl.com'),
+              ),
+            ),
+          ],
+        );
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final client = container.read(translationClientProvider);
+
+        expect(client, isA<DeepLTranslationClient>());
+      },
+    );
+
+    test(
+      'translation_client_provider_falls_back_to_fake_for_empty_deepl_key',
+      () async {
+        final (:container, :tempDir) = await createContainer(
+          overrides: [
+            localTranslationConfigProvider.overrideWithValue(
+              const LocalTranslationConfig.deepl(apiKey: '   '),
+            ),
+          ],
+        );
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final client = container.read(translationClientProvider);
+        final result = await client.translate(
+          const TranslationRequest(
+            text: 'world',
+            sourceLanguage: 'en',
+            targetLanguage: 'de',
+          ),
+        );
+
+        expect(client, isA<FakeTranslationClient>());
+        expect(result.translatedText, 'welt');
+      },
+    );
 
     test(
       'pending_translation_processor_provider_injects_translation_client',

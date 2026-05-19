@@ -1,12 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/pending_translation_processor.dart';
-import '../translation/fake_translation_client.dart';
+import '../translation/local_translation_config.dart';
 import '../translation/translation_client.dart';
 import 'local_bootstrap_provider.dart';
 
+final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
+  return const LocalTranslationConfig.fake();
+});
+
+final localTranslationClientFactoryProvider =
+    Provider<LocalTranslationClientFactory>((ref) {
+      return const LocalTranslationClientFactory();
+    });
+
 final translationClientProvider = Provider<TranslationClient>((ref) {
-  return FakeTranslationClient();
+  final config = ref.watch(localTranslationConfigProvider);
+  final factory = ref.watch(localTranslationClientFactoryProvider);
+  return factory.create(config);
 });
 
 final pendingTranslationProcessorProvider =
