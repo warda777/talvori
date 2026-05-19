@@ -1,3 +1,5 @@
+import 'translation_status.dart';
+
 class LocalWord {
   const LocalWord({
     required this.id,
@@ -8,14 +10,22 @@ class LocalWord {
     required this.isArchived,
     required this.createdAt,
     required this.updatedAt,
+    this.translationStatus = TranslationStatus.translated,
     this.exampleSentence,
     this.notes,
+    this.sourceLanguage,
+    this.targetLanguage,
+    this.translationError,
   });
 
   final String id;
   final String categoryId;
   final String term;
   final String translation;
+  final TranslationStatus translationStatus;
+  final String? sourceLanguage;
+  final String? targetLanguage;
+  final String? translationError;
   final String? exampleSentence;
   final String? notes;
   final int sortOrder;

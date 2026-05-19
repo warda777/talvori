@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/local_word.dart';
+import '../models/translation_status.dart';
 
 class WordRepository {
   WordRepository({required Database database, Uuid uuid = const Uuid()})
@@ -16,6 +17,10 @@ class WordRepository {
     required String categoryId,
     required String term,
     required String translation,
+    TranslationStatus? translationStatus,
+    String? sourceLanguage,
+    String? targetLanguage,
+    String? translationError,
     String? exampleSentence,
     String? notes,
     int sortOrder = 0,
@@ -24,6 +29,8 @@ class WordRepository {
   }) async {
     final wordId = id ?? _uuid.v4();
     final existing = await loadWordById(wordId);
+    final resolvedTranslationStatus =
+        translationStatus ?? _statusForTranslation(translation);
 
     if (existing == null) {
       await _database.insert('words', {
@@ -31,6 +38,10 @@ class WordRepository {
         'category_id': categoryId,
         'term': term,
         'translation': translation,
+        'translation_status': resolvedTranslationStatus.dbValue,
+        'source_language': sourceLanguage,
+        'target_language': targetLanguage,
+        'translation_error': translationError,
         'example_sentence': exampleSentence,
         'notes': notes,
         'sort_order': sortOrder,
@@ -45,6 +56,10 @@ class WordRepository {
           'category_id': categoryId,
           'term': term,
           'translation': translation,
+          'translation_status': resolvedTranslationStatus.dbValue,
+          'source_language': sourceLanguage,
+          'target_language': targetLanguage,
+          'translation_error': translationError,
           'example_sentence': exampleSentence,
           'notes': notes,
           'sort_order': sortOrder,
@@ -78,13 +93,25 @@ class WordRepository {
     required String id,
     required String term,
     required String translation,
+    TranslationStatus? translationStatus,
+    String? sourceLanguage,
+    String? targetLanguage,
+    String? translationError,
     required DateTime updatedAt,
   }) async {
+    final existing = await loadWordById(id);
+    if (existing == null) return null;
+    final resolvedTranslationStatus =
+        translationStatus ?? _statusForTranslation(translation);
     final updatedRows = await _database.update(
       'words',
       {
         'term': term,
         'translation': translation,
+        'translation_status': resolvedTranslationStatus.dbValue,
+        'source_language': sourceLanguage ?? existing.sourceLanguage,
+        'target_language': targetLanguage ?? existing.targetLanguage,
+        'translation_error': translationError,
         'updated_at': _encodeDateTime(updatedAt),
       },
       where: 'id = ?',
@@ -171,6 +198,12 @@ WHERE category_id = ? AND is_archived = ?
       categoryId: row['category_id']! as String,
       term: row['term']! as String,
       translation: row['translation']! as String,
+      translationStatus: TranslationStatus.fromDbValue(
+        row['translation_status'],
+      ),
+      sourceLanguage: row['source_language'] as String?,
+      targetLanguage: row['target_language'] as String?,
+      translationError: row['translation_error'] as String?,
       exampleSentence: row['example_sentence'] as String?,
       notes: row['notes'] as String?,
       sortOrder: row['sort_order']! as int,
@@ -186,5 +219,11 @@ WHERE category_id = ? AND is_archived = ?
 
   DateTime _decodeDateTime(String value) {
     return DateTime.parse(value);
+  }
+
+  TranslationStatus _statusForTranslation(String translation) {
+    return translation.trim().isEmpty
+        ? TranslationStatus.pending
+        : TranslationStatus.translated;
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/local_app_database_path.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/shared_text_import_service_provider.dart';
@@ -113,6 +114,7 @@ void main() {
 
       expect(words, hasLength(1));
       expect(words.single.term, 'umbrella');
+      expect(words.single.translationStatus, TranslationStatus.pending);
     });
   });
 }

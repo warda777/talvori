@@ -15,6 +15,11 @@ class LocalDatabaseFactory {
       onCreate: (db, version) async {
         await LocalDatabaseSchema.createV1(db);
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await LocalDatabaseSchema.migrateV1ToV2(db);
+        }
+      },
     );
   }
 }

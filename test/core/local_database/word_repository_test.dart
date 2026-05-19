@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:path/path.dart' as p;
+import 'package:talvori/core/local_database/local_database_factory.dart';
 import 'package:talvori/core/local_database/local_database_schema.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
 
 void main() {
   sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
   final now = DateTime(2026, 5, 13, 10);
 
@@ -79,6 +85,7 @@ void main() {
       expect(word.categoryId, 'category-basics');
       expect(word.term, 'Haus');
       expect(word.translation, 'house');
+      expect(word.translationStatus, TranslationStatus.translated);
       expect(word.exampleSentence, 'Das Haus ist klein.');
       expect(word.notes, 'Noun');
       expect(word.sortOrder, 1);
@@ -88,6 +95,53 @@ void main() {
 
       final rows = await db.query('words');
       expect(rows, hasLength(1));
+      expect(rows.single['translation_status'], 'translated');
+    });
+
+    test('upsert_word_without_translation_defaults_to_pending', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      final repository = WordRepository(database: db);
+
+      final word = await repository.upsertWord(
+        id: 'word-pending',
+        categoryId: 'category-basics',
+        term: 'umbrella',
+        translation: '',
+        sourceLanguage: 'en',
+        targetLanguage: 'de',
+        now: now,
+      );
+
+      expect(word.translationStatus, TranslationStatus.pending);
+      expect(word.sourceLanguage, 'en');
+      expect(word.targetLanguage, 'de');
+
+      final rows = await db.query('words');
+      expect(rows.single['translation_status'], 'pending');
+      expect(rows.single['source_language'], 'en');
+      expect(rows.single['target_language'], 'de');
+    });
+
+    test('upsert_word_can_store_failed_translation_status', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      final repository = WordRepository(database: db);
+
+      final word = await repository.upsertWord(
+        id: 'word-failed',
+        categoryId: 'category-basics',
+        term: 'umbrella',
+        translation: '',
+        translationStatus: TranslationStatus.failed,
+        translationError: 'network unavailable',
+        now: now,
+      );
+
+      expect(word.translationStatus, TranslationStatus.failed);
+      expect(word.translationError, 'network unavailable');
     });
 
     test('upsert_word_updates_existing_word', () async {
@@ -193,6 +247,7 @@ void main() {
       expect(updated, isNotNull);
       expect(updated!.term, 'Zuhause');
       expect(updated.translation, 'home');
+      expect(updated.translationStatus, TranslationStatus.translated);
       expect(updated.categoryId, 'category-basics');
       expect(updated.exampleSentence, 'Das Haus ist klein.');
       expect(updated.notes, 'Noun');
@@ -213,6 +268,72 @@ void main() {
       );
 
       expect(updated, isNull);
+    });
+
+    test('migration_defaults_existing_words_by_translation_presence', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'talvori_word_repo_migration_test_',
+      );
+      addTearDown(() async {
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+      final path = p.join(tempDir.path, 'local.db');
+      var legacyDb = await databaseFactoryFfi.openDatabase(path);
+      await legacyDb.execute('''
+CREATE TABLE categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_archived INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+)
+''');
+      await legacyDb.execute('''
+CREATE TABLE words (
+  id TEXT PRIMARY KEY,
+  category_id TEXT NOT NULL,
+  term TEXT NOT NULL,
+  translation TEXT NOT NULL,
+  example_sentence TEXT,
+  notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_archived INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES categories (id)
+)
+''');
+      await seedCategory(legacyDb, id: 'category-basics', name: 'Basics');
+      await seedWord(
+        legacyDb,
+        id: 'word-translated',
+        categoryId: 'category-basics',
+        term: 'House',
+        translation: 'Haus',
+      );
+      await seedWord(
+        legacyDb,
+        id: 'word-pending',
+        categoryId: 'category-basics',
+        term: 'Umbrella',
+        translation: '',
+      );
+      await legacyDb.setVersion(1);
+      await legacyDb.close();
+
+      final migratedDb = await const LocalDatabaseFactory().openAtPath(path);
+      addTearDown(migratedDb.close);
+      final repository = WordRepository(database: migratedDb);
+
+      final translated = await repository.loadWordById('word-translated');
+      final pending = await repository.loadWordById('word-pending');
+
+      expect(translated?.translationStatus, TranslationStatus.translated);
+      expect(pending?.translationStatus, TranslationStatus.pending);
     });
 
     test('load_words_for_category_returns_only_that_category_sorted', () async {

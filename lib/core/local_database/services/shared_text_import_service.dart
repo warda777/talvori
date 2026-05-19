@@ -1,5 +1,6 @@
 import '../../srs/models/learning_mode.dart';
 import '../import/shared_text_import_result.dart';
+import '../models/translation_status.dart';
 import '../repositories/category_repository.dart';
 import '../repositories/word_progress_repository.dart';
 import '../repositories/word_repository.dart';
@@ -74,6 +75,9 @@ class SharedTextImportService {
         categoryId: localMyWordsCategoryId,
         term: normalized,
         translation: '',
+        translationStatus: TranslationStatus.pending,
+        sourceLanguage: 'en',
+        targetLanguage: 'de',
         notes: 'Importiert. Übersetzung ausstehend.',
         sortOrder: existingWords.length + 1,
         now: now,

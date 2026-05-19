@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/local_app_database_path.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
@@ -57,6 +58,7 @@ void main() {
       expect(detail, isNotNull);
       expect(detail!.word.term, 'hello');
       expect(detail.word.translation, 'hallo');
+      expect(detail.word.translationStatus, TranslationStatus.translated);
       expect(detail.progress, isNotNull);
       expect(detail.progress!.passCount, 0);
     });

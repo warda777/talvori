@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
 import 'package:talvori/core/local_database/local_database_schema.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/category_repository.dart';
 import 'package:talvori/core/local_database/repositories/word_progress_repository.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
@@ -58,6 +59,9 @@ void main() {
       expect(result.status, SharedTextImportStatus.imported);
       expect(result.word?.term, 'umbrella');
       expect(result.word?.translation, '');
+      expect(result.word?.translationStatus, TranslationStatus.pending);
+      expect(result.word?.sourceLanguage, 'en');
+      expect(result.word?.targetLanguage, 'de');
       expect(result.word?.categoryId, localMyWordsCategoryId);
 
       final category = await categoryRepository.loadCategoryById(
@@ -175,6 +179,7 @@ void main() {
       expect(first.status, SharedTextImportStatus.imported);
       expect(second.status, SharedTextImportStatus.duplicate);
       expect(second.word?.id, first.word?.id);
+      expect(second.word?.translationStatus, TranslationStatus.pending);
 
       final words = await wordRepository.loadWordsForCategory(
         categoryId: localMyWordsCategoryId,

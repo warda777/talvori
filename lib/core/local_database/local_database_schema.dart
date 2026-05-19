@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalDatabaseSchema {
   const LocalDatabaseSchema._();
 
-  static const int version = 1;
+  static const int version = 2;
 
   static Future<void> createV1(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
@@ -26,6 +26,10 @@ CREATE TABLE words (
   category_id TEXT NOT NULL,
   term TEXT NOT NULL,
   translation TEXT NOT NULL,
+  translation_status TEXT NOT NULL DEFAULT 'translated',
+  source_language TEXT,
+  target_language TEXT,
+  translation_error TEXT,
   example_sentence TEXT,
   notes TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -183,6 +187,22 @@ CREATE TABLE settings (
   value_type TEXT NOT NULL,
   updated_at TEXT NOT NULL
 )
+''');
+  }
+
+  static Future<void> migrateV1ToV2(Database db) async {
+    await db.execute(
+      "ALTER TABLE words ADD COLUMN translation_status TEXT NOT NULL DEFAULT 'translated'",
+    );
+    await db.execute('ALTER TABLE words ADD COLUMN source_language TEXT');
+    await db.execute('ALTER TABLE words ADD COLUMN target_language TEXT');
+    await db.execute('ALTER TABLE words ADD COLUMN translation_error TEXT');
+    await db.execute('''
+UPDATE words
+SET translation_status = CASE
+  WHEN TRIM(translation) = '' THEN 'pending'
+  ELSE 'translated'
+END
 ''');
   }
 }
