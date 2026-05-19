@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../services/pending_translation_processor.dart';
 import '../translation/local_translation_config.dart';
+import '../translation/supabase_function_caller.dart';
+import '../translation/supabase_translation_client.dart';
 import '../translation/translation_client.dart';
 import 'local_bootstrap_provider.dart';
 
@@ -12,9 +15,22 @@ final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
   return const LocalTranslationConfig.fake();
 });
 
+final supabaseTranslationFunctionCallerProvider =
+    Provider<SupabaseFunctionCaller?>((ref) {
+      try {
+        return supabaseFunctionCallerFromClient(Supabase.instance.client);
+      } catch (_) {
+        return null;
+      }
+    });
+
 final localTranslationClientFactoryProvider =
     Provider<LocalTranslationClientFactory>((ref) {
-      return const LocalTranslationClientFactory();
+      return LocalTranslationClientFactory(
+        supabaseFunctionCaller: ref.watch(
+          supabaseTranslationFunctionCallerProvider,
+        ),
+      );
     });
 
 final translationClientProvider = Provider<TranslationClient>((ref) {

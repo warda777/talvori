@@ -183,6 +183,27 @@ void main() {
     );
 
     test(
+      'translation_client_provider_uses_injected_supabase_function_caller',
+      () async {
+        final (:container, :tempDir) = await createContainer(
+          overrides: [
+            localTranslationConfigProvider.overrideWithValue(
+              const LocalTranslationConfig.supabase(),
+            ),
+            supabaseTranslationFunctionCallerProvider.overrideWithValue(
+              (functionName, payload) async => {'translation': 'Haus'},
+            ),
+          ],
+        );
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final client = container.read(translationClientProvider);
+
+        expect(client, isA<SupabaseTranslationClient>());
+      },
+    );
+
+    test(
       'pending_translation_processor_provider_injects_translation_client',
       () async {
         final (:container, :tempDir) = await createContainer(
