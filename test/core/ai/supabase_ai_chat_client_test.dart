@@ -108,6 +108,47 @@ void main() {
       );
     });
 
+    test('handles_ai_auth_failed_response', () async {
+      final client = SupabaseAiChatClient(
+        functionCaller: (functionName, payload) async {
+          return {'error': 'ai_auth_failed', 'reason': 'provider_auth_failed'};
+        },
+      );
+
+      expect(
+        () => client.sendMessage(const AiChatRequest(message: 'hello')),
+        throwsA(
+          isA<AiChatException>().having(
+            (error) => error.toString(),
+            'message',
+            contains('ai_auth_failed'),
+          ),
+        ),
+      );
+    });
+
+    test('handles_ai_rate_limited_response', () async {
+      final client = SupabaseAiChatClient(
+        functionCaller: (functionName, payload) async {
+          return {
+            'error': 'ai_rate_limited',
+            'reason': 'provider_rate_limited',
+          };
+        },
+      );
+
+      expect(
+        () => client.sendMessage(const AiChatRequest(message: 'hello')),
+        throwsA(
+          isA<AiChatException>().having(
+            (error) => error.toString(),
+            'message',
+            contains('ai_rate_limited'),
+          ),
+        ),
+      );
+    });
+
     test('handles_invalid_response_shape', () async {
       final client = SupabaseAiChatClient(
         functionCaller: (functionName, payload) async {
