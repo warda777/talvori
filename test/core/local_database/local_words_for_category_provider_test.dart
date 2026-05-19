@@ -116,5 +116,34 @@ void main() {
       expect(words.single.term, 'umbrella');
       expect(words.single.translationStatus, TranslationStatus.pending);
     });
+
+    test('my_words_category_loads_empty_list_before_first_import', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'talvori_local_words_my_words_empty_provider_test_',
+      );
+      late final ProviderContainer container;
+
+      addTearDown(() async {
+        container.dispose();
+        await Future<void>.delayed(Duration.zero);
+        final databasePath = LocalAppDatabasePath.buildPath(tempDir.path);
+        await databaseFactoryFfi.deleteDatabase(databasePath);
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+
+      container = ProviderContainer(
+        overrides: [
+          localBootstrapDatabasesPathProvider.overrideWithValue(tempDir.path),
+        ],
+      );
+
+      final words = await container.read(
+        localWordsForCategoryProvider(localMyWordsCategoryId).future,
+      );
+
+      expect(words, isEmpty);
+    });
   });
 }

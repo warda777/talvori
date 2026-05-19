@@ -4,6 +4,7 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
@@ -76,9 +77,14 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
         ),
         data: (words) {
           if (words.isEmpty) {
-            return const _LocalWordListEmptyState(
-              title: 'Keine lokalen Wörter verfügbar',
-              subtitle: 'Für diese Kategorie sind lokal noch keine Wörter da.',
+            final isMyWords = widget.categoryId == localMyWordsCategoryId;
+            return _LocalWordListEmptyState(
+              title: isMyWords
+                  ? 'Noch keine eigenen Wörter'
+                  : 'Keine lokalen Wörter verfügbar',
+              subtitle: isMyWords
+                  ? 'Geteilte Wörter erscheinen hier.'
+                  : 'Für diese Kategorie sind lokal noch keine Wörter da.',
             );
           }
 

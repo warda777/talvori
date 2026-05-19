@@ -8,6 +8,7 @@ import 'package:talvori/core/local_database/providers/local_word_detail_provider
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
@@ -85,6 +86,7 @@ void main() {
     required List<LocalWord> words,
     String title = 'Health & Fitness',
     PendingTranslationRunner? translationRunner,
+    String categoryId = 'seed-category-basics',
   }) async {
     _FakeLocalWordEditController.words = words;
 
@@ -115,10 +117,7 @@ void main() {
             ),
         ],
         child: MaterialApp(
-          home: LocalWordListScreen(
-            categoryId: 'seed-category-basics',
-            title: title,
-          ),
+          home: LocalWordListScreen(categoryId: categoryId, title: title),
         ),
       ),
     );
@@ -344,6 +343,26 @@ void main() {
     expect(find.text('Empty Local'), findsOneWidget);
     expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
     expect(find.text('empty-local'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_shows_my_words_empty_state', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: const [],
+      title: localMyWordsCategoryLabel,
+      categoryId: localMyWordsCategoryId,
+    );
+
+    expect(find.text('Meine Wörter'), findsOneWidget);
+    expect(find.text('Noch keine eigenen Wörter'), findsOneWidget);
+    expect(find.text('Geteilte Wörter erscheinen hier.'), findsOneWidget);
+    expect(
+      find.text('Lokale Wörter konnten nicht geladen werden'),
+      findsNothing,
+    );
+    expect(find.text('local-category-my-words'), findsNothing);
   });
 
   testWidgets('local_word_list_screen_search_finds_term', (tester) async {

@@ -112,5 +112,34 @@ void main() {
 
       expect(count, 1);
     });
+
+    test('my_words_count_is_zero_before_first_import', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'talvori_local_word_count_my_words_empty_provider_test_',
+      );
+      late final ProviderContainer container;
+
+      addTearDown(() async {
+        container.dispose();
+        await Future<void>.delayed(Duration.zero);
+        final databasePath = LocalAppDatabasePath.buildPath(tempDir.path);
+        await databaseFactoryFfi.deleteDatabase(databasePath);
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+
+      container = ProviderContainer(
+        overrides: [
+          localBootstrapDatabasesPathProvider.overrideWithValue(tempDir.path),
+        ],
+      );
+
+      final count = await container.read(
+        localWordCountProvider(localMyWordsCategoryId).future,
+      );
+
+      expect(count, 0);
+    });
   });
 }
