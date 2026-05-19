@@ -249,7 +249,7 @@ void main() {
 
         expect(count, 1);
         expect(words.single.term, 'mountain');
-        expect(words.single.notes, 'Importiert. Übersetzung ausstehend.');
+        expect(words.single.notes, 'Importiert.');
       },
     );
   });

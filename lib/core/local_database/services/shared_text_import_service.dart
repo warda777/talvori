@@ -78,7 +78,7 @@ class SharedTextImportService {
         translationStatus: TranslationStatus.pending,
         sourceLanguage: 'en',
         targetLanguage: 'de',
-        notes: 'Importiert. Übersetzung ausstehend.',
+        notes: 'Importiert.',
         sortOrder: existingWords.length + 1,
         now: now,
       );
