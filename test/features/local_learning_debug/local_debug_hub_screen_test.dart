@@ -25,6 +25,7 @@ void main() {
       expect(find.text('Lokaler Lernscreen'), findsOneWidget);
       expect(find.text('Lokale Kategorien'), findsOneWidget);
       expect(find.text('Lokaler WordHub'), findsOneWidget);
+      expect(find.text('AI Chat Test'), findsOneWidget);
     });
 
     testWidgets('debug_hub_opens_local_learnmode_screen', (tester) async {
@@ -99,6 +100,17 @@ void main() {
       expect(find.text('Word Hub'), findsNothing);
       expect(find.text('Life & Daily Flow'), findsOneWidget);
       expect(find.text('Health & Fitness'), findsOneWidget);
+    });
+
+    testWidgets('debug_hub_opens_ai_chat_dev_screen', (tester) async {
+      await tester.pumpWidget(const MaterialApp(home: LocalDebugHubScreen()));
+
+      await tester.tap(find.text('AI Chat Test'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('AI Chat Test'), findsWidgets);
+      expect(find.text('KI testen'), findsOneWidget);
+      expect(find.text('Nachricht'), findsOneWidget);
     });
   });
 }

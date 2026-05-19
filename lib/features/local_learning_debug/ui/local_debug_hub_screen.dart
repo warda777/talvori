@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
+import 'package:talvori/features/local_learning_debug/ui/ai_chat_dev_screen.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_learn_mode_screen.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_wordhub_debug_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_shared_text_import_screen.dart';
@@ -55,6 +56,15 @@ class LocalDebugHubScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => const LocalSharedTextImportScreen(),
                 ),
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('AI Chat Test'),
+            subtitle: const Text('Interner Test der Edge Function ai-chat'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AiChatDevScreen()),
               );
             },
           ),
