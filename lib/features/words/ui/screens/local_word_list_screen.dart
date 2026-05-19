@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
+import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
@@ -35,6 +36,7 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
   final _searchController = TextEditingController();
   String _query = '';
   _LocalWordSortMode _sortMode = _LocalWordSortMode.termAz;
+  bool _isProcessingTranslations = false;
 
   @override
   void dispose() {
@@ -81,6 +83,11 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
           }
 
           final visibleWords = _sortWords(_filterWords(words));
+          final pendingCount = words
+              .where(
+                (word) => word.translationStatus == TranslationStatus.pending,
+              )
+              .length;
 
           return Column(
             children: [
@@ -101,6 +108,15 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
                   },
                 ),
               ),
+              if (pendingCount > 0)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  child: _TranslationProcessButton(
+                    pendingCount: pendingCount,
+                    isLoading: _isProcessingTranslations,
+                    onPressed: _processPendingTranslations,
+                  ),
+                ),
               Expanded(
                 child: visibleWords.isEmpty
                     ? const _LocalWordListEmptyState(
@@ -173,6 +189,39 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
     });
 
     return sorted;
+  }
+
+  Future<void> _processPendingTranslations() async {
+    if (_isProcessingTranslations) return;
+
+    setState(() => _isProcessingTranslations = true);
+    try {
+      final runner = await ref.read(pendingTranslationRunnerProvider.future);
+      final result = await runner(categoryId: widget.categoryId);
+      if (!mounted) return;
+
+      ref.invalidate(localWordsForCategoryProvider(widget.categoryId));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result.failed > 0
+                ? 'Übersetzungen verarbeitet: ${result.translated} erfolgreich, ${result.failed} fehlgeschlagen.'
+                : 'Übersetzungen verarbeitet: ${result.translated} erfolgreich.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Übersetzungen konnten nicht verarbeitet werden.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingTranslations = false);
+      }
+    }
   }
 }
 
@@ -274,6 +323,63 @@ class _NeonFieldShell extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+class _TranslationProcessButton extends StatelessWidget {
+  const _TranslationProcessButton({
+    required this.pendingCount,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final int pendingCount;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B1218),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF59D7FF), width: 1),
+          boxShadow: const [
+            BoxShadow(color: Color(0x2259D7FF), blurRadius: 18),
+          ],
+        ),
+        child: TextButton.icon(
+          onPressed: isLoading ? null : onPressed,
+          icon: isLoading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF59D7FF),
+                  ),
+                )
+              : const Icon(Icons.translate, color: Color(0xFF59D7FF)),
+          label: Text(
+            isLoading
+                ? 'Übersetzungen laufen...'
+                : 'Ausstehende Übersetzungen verarbeiten ($pendingCount)',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            foregroundColor: Colors.white,
+            disabledForegroundColor: const Color(0xFF7F8494),
+          ),
+        ),
+      ),
     );
   }
 }

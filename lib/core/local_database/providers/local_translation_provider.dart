@@ -5,6 +5,9 @@ import '../translation/local_translation_config.dart';
 import '../translation/translation_client.dart';
 import 'local_bootstrap_provider.dart';
 
+typedef PendingTranslationRunner =
+    Future<PendingTranslationProcessorResult> Function({String? categoryId});
+
 final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
   return const LocalTranslationConfig.fake();
 });
@@ -29,4 +32,12 @@ final pendingTranslationProcessorProvider =
         wordRepository: repositories.wordRepository,
         translationClient: ref.watch(translationClientProvider),
       );
+    });
+
+final pendingTranslationRunnerProvider =
+    FutureProvider<PendingTranslationRunner>((ref) async {
+      final processor = await ref.watch(
+        pendingTranslationProcessorProvider.future,
+      );
+      return processor.processPendingTranslations;
     });

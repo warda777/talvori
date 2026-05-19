@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
+import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
@@ -82,6 +84,7 @@ void main() {
     WidgetTester tester, {
     required List<LocalWord> words,
     String title = 'Health & Fitness',
+    PendingTranslationRunner? translationRunner,
   }) async {
     _FakeLocalWordEditController.words = words;
 
@@ -106,6 +109,10 @@ void main() {
           localWordEditControllerProvider.overrideWith(
             _FakeLocalWordEditController.new,
           ),
+          if (translationRunner != null)
+            pendingTranslationRunnerProvider.overrideWith(
+              (ref) async => translationRunner,
+            ),
         ],
         child: MaterialApp(
           home: LocalWordListScreen(
@@ -179,6 +186,120 @@ void main() {
     expect(find.text('Noch keine Übersetzung'), findsOneWidget);
     expect(find.text('Übersetzung ausstehend'), findsOneWidget);
   });
+
+  testWidgets(
+    'local_word_list_screen_shows_manual_translation_button_for_pending_words',
+    (tester) async {
+      await pumpLocalWordList(
+        tester,
+        words: [
+          localWord(
+            id: 'word-pending',
+            term: 'umbrella',
+            translation: '',
+            translationStatus: TranslationStatus.pending,
+          ),
+        ],
+      );
+
+      expect(
+        find.text('Ausstehende Übersetzungen verarbeiten (1)'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'local_word_list_screen_hides_manual_translation_button_without_pending_words',
+    (tester) async {
+      await pumpLocalWordList(
+        tester,
+        words: [
+          localWord(id: 'word-translated', term: 'hello', translation: 'hallo'),
+        ],
+      );
+
+      expect(
+        find.textContaining('Ausstehende Übersetzungen verarbeiten'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'local_word_list_screen_manual_translation_trigger_refreshes_words',
+    (tester) async {
+      final words = [
+        localWord(
+          id: 'word-pending',
+          term: 'umbrella',
+          translation: '',
+          translationStatus: TranslationStatus.pending,
+        ),
+      ];
+      var wasTriggered = false;
+
+      await pumpLocalWordList(
+        tester,
+        words: words,
+        translationRunner: ({String? categoryId}) async {
+          wasTriggered = true;
+          expect(categoryId, 'seed-category-basics');
+          words[0] = localWord(
+            id: 'word-pending',
+            term: 'umbrella',
+            translation: 'Regenschirm',
+            translationStatus: TranslationStatus.translated,
+          );
+          return const PendingTranslationProcessorResult(
+            processed: 1,
+            translated: 1,
+            failed: 0,
+          );
+        },
+      );
+
+      await tester.tap(find.text('Ausstehende Übersetzungen verarbeiten (1)'));
+      await tester.pumpAndSettle();
+
+      expect(wasTriggered, isTrue);
+      expect(find.text('Regenschirm'), findsOneWidget);
+      expect(find.text('Übersetzung ausstehend'), findsNothing);
+      expect(
+        find.text('Übersetzungen verarbeitet: 1 erfolgreich.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'local_word_list_screen_manual_translation_error_does_not_crash',
+    (tester) async {
+      await pumpLocalWordList(
+        tester,
+        words: [
+          localWord(
+            id: 'word-pending',
+            term: 'umbrella',
+            translation: '',
+            translationStatus: TranslationStatus.pending,
+          ),
+        ],
+        translationRunner: ({String? categoryId}) async {
+          throw StateError('translation unavailable');
+        },
+      );
+
+      await tester.tap(find.text('Ausstehende Übersetzungen verarbeiten (1)'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Übersetzungen konnten nicht verarbeitet werden.'),
+        findsOneWidget,
+      );
+      expect(find.text('Übersetzung ausstehend'), findsOneWidget);
+    },
+  );
 
   testWidgets('local_word_list_screen_shows_failed_translation_status', (
     tester,
