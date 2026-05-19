@@ -190,6 +190,19 @@ void main() {
     );
 
     test(
+      'development_supabase_builder_creates_supabase_translation_client',
+      () {
+        final client = buildDevelopmentSupabaseTranslationClient(
+          functionCaller: (functionName, payload) async {
+            return {'translation': 'Haus'};
+          },
+        );
+
+        expect(client, isA<SupabaseTranslationClient>());
+      },
+    );
+
+    test(
       'translation_client_provider_falls_back_to_fake_without_supabase_caller',
       () async {
         final (:container, :tempDir) = await createContainer(

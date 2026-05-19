@@ -102,3 +102,11 @@ class LocalTranslationClientFactory {
     return FakeTranslationClient();
   }
 }
+
+TranslationClient buildDevelopmentSupabaseTranslationClient({
+  required SupabaseFunctionCaller functionCaller,
+}) {
+  return LocalTranslationClientFactory(
+    supabaseFunctionCaller: functionCaller,
+  ).create(const LocalTranslationConfig.developmentSupabase());
+}

@@ -5,6 +5,7 @@ import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
 import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/core/local_database/translation/fake_translation_client.dart';
+import 'package:talvori/core/local_database/translation/supabase_translation_client.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -203,6 +204,72 @@ void main() {
       expect(result.failed, 1);
       expect(word?.translationStatus, TranslationStatus.failed);
       expect(word?.translationError, contains('Fake translation failed'));
+    });
+
+    test('processes_pending_word_with_supabase_translation_client', () async {
+      await seedWord(
+        id: 'word-river',
+        term: 'river',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.pending,
+      );
+      final supabaseProcessor = PendingTranslationProcessor(
+        wordRepository: wordRepository,
+        translationClient: SupabaseTranslationClient(
+          functionCaller: (functionName, payload) async {
+            expect(functionName, 'translate-word');
+            expect(payload['text'], 'river');
+            expect(payload['sourceLang'], 'EN');
+            expect(payload['targetLang'], 'DE');
+            return {'translation': 'fluss'};
+          },
+        ),
+        now: () => processedAt,
+      );
+
+      final result = await supabaseProcessor.processPendingTranslations(
+        categoryId: 'local-category-my-words',
+      );
+
+      final word = await wordRepository.loadWordById('word-river');
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(word?.translation, 'fluss');
+      expect(word?.translationStatus, TranslationStatus.translated);
+    });
+
+    test('manual_retry_works_with_supabase_translation_client', () async {
+      await seedWord(
+        id: 'word-river',
+        term: 'river',
+        categoryId: 'local-category-my-words',
+        status: TranslationStatus.failed,
+        error: 'offline',
+      );
+      final supabaseProcessor = PendingTranslationProcessor(
+        wordRepository: wordRepository,
+        translationClient: SupabaseTranslationClient(
+          functionCaller: (functionName, payload) async {
+            return {'translation': 'fluss'};
+          },
+        ),
+        now: () => processedAt,
+      );
+
+      final result = await supabaseProcessor
+          .processPendingAndRetryFailedTranslations(
+            categoryId: 'local-category-my-words',
+          );
+
+      final word = await wordRepository.loadWordById('word-river');
+      expect(result.resetFailed, 1);
+      expect(result.processed, 1);
+      expect(result.translated, 1);
+      expect(result.failed, 0);
+      expect(word?.translation, 'fluss');
+      expect(word?.translationStatus, TranslationStatus.translated);
+      expect(word?.translationError, isNull);
     });
 
     test(
