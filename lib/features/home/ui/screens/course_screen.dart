@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_models.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_service.dart';
 
 class CourseScreen extends ConsumerStatefulWidget {
   const CourseScreen({super.key});
@@ -12,12 +15,17 @@ class CourseScreen extends ConsumerStatefulWidget {
 }
 
 class _CourseScreenState extends ConsumerState<CourseScreen> {
+  bool _isPlanningNotifications = false;
+
   @override
   Widget build(BuildContext context) {
     final selection = ref.watch(tagesimpulsSelectionControllerProvider);
     final messageState = ref.watch(tagesimpulsMessageControllerProvider);
     final messageController = ref.read(
       tagesimpulsMessageControllerProvider.notifier,
+    );
+    final notificationService = ref.read(
+      tagesimpulsNotificationServiceProvider,
     );
     final controller = ref.read(
       tagesimpulsSelectionControllerProvider.notifier,
@@ -232,6 +240,33 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                           ),
                           const SizedBox(height: 10),
                         ],
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: _isPlanningNotifications
+                                ? null
+                                : () => _planNotifications(
+                                    notificationService,
+                                    messageState.impulses,
+                                  ),
+                            icon: _isPlanningNotifications
+                                ? const SizedBox(
+                                    width: 17,
+                                    height: 17,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.notifications_active_rounded,
+                                  ),
+                            label: Text(
+                              _isPlanningNotifications
+                                  ? 'Benachrichtigungen werden geplant...'
+                                  : 'Benachrichtigungen planen',
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                 ],
@@ -241,6 +276,34 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _planNotifications(
+    TagesimpulsNotificationService service,
+    List<TagesimpulsGeneratedImpulse> impulses,
+  ) async {
+    setState(() => _isPlanningNotifications = true);
+    try {
+      final result = await service.planNotifications(
+        TagesimpulsNotificationPlanOptions(impulses: impulses),
+      );
+      if (!mounted) return;
+      final message = switch (result.status) {
+        TagesimpulsNotificationPlanningStatus.planned =>
+          'Tagesimpulse geplant.',
+        TagesimpulsNotificationPlanningStatus.permissionDenied =>
+          'Benachrichtigungen müssen erlaubt werden.',
+        TagesimpulsNotificationPlanningStatus.empty =>
+          'Keine Tagesimpulse zum Planen vorhanden.',
+      };
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() => _isPlanningNotifications = false);
+      }
+    }
   }
 
   String _mapTagesimpulsError(String code) {

@@ -7,6 +7,8 @@ import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_pro
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/data/tagesimpuls_selection_repository.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_models.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_service.dart';
 
 void main() {
   testWidgets('shows hint when fewer than three words are selected', (
@@ -17,12 +19,16 @@ void main() {
       _item('word-2', 'superstar'),
     ]);
     final fakeClient = _FakeTagesimpulsAiClient();
+    final fakeScheduler = _FakeNotificationScheduler();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
           tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
         ],
         child: const MaterialApp(home: CourseScreen()),
       ),
@@ -56,12 +62,16 @@ void main() {
         ),
       ],
     );
+    final fakeScheduler = _FakeNotificationScheduler();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
           tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
         ],
         child: const MaterialApp(home: CourseScreen()),
       ),
@@ -85,6 +95,8 @@ void main() {
     expect(find.text('Morgens'), findsOneWidget);
     expect(find.text('I moved like a superstar.'), findsOneWidget);
     expect(find.text('move'), findsWidgets);
+    expect(find.text('Benachrichtigungen planen'), findsOneWidget);
+    expect(fakeScheduler.scheduled, isEmpty);
   });
 
   testWidgets('shows mapped error when AI request fails', (tester) async {
@@ -96,12 +108,16 @@ void main() {
     final fakeClient = _FakeTagesimpulsAiClient(
       error: const TagesimpulsAiException('quota_exceeded'),
     );
+    final fakeScheduler = _FakeNotificationScheduler();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
           tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
         ],
         child: const MaterialApp(home: CourseScreen()),
       ),
@@ -127,12 +143,16 @@ void main() {
       _item('word-3', 'destroyed'),
     ]);
     final fakeClient = _FakeTagesimpulsAiClient();
+    final fakeScheduler = _FakeNotificationScheduler();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
           tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
         ],
         child: const MaterialApp(home: CourseScreen()),
       ),
@@ -146,6 +166,96 @@ void main() {
     await tester.pump();
 
     expect(fakeClient.requests.single.count, 3);
+  });
+
+  testWidgets('plans notifications only after explicit user action', (
+    tester,
+  ) async {
+    final repository = _MemoryTagesimpulsRepository([
+      _item('word-1', 'move'),
+      _item('word-2', 'superstar'),
+      _item('word-3', 'destroyed'),
+    ]);
+    final fakeClient = _FakeTagesimpulsAiClient(
+      impulses: const [
+        TagesimpulsGeneratedImpulse(
+          slot: 'morning',
+          message: 'I moved like a superstar.',
+          usedWords: ['move'],
+        ),
+      ],
+    );
+    final fakeScheduler = _FakeNotificationScheduler();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
+        ],
+        child: const MaterialApp(home: CourseScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fakeScheduler.scheduled, isEmpty);
+
+    await tester.ensureVisible(find.text('Benachrichtigungen planen'));
+    await tester.pump();
+    await tester.tap(find.text('Benachrichtigungen planen'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fakeScheduler.scheduled, hasLength(1));
+    expect(find.text('Tagesimpulse geplant.'), findsOneWidget);
+  });
+
+  testWidgets('shows permission warning when notifications are denied', (
+    tester,
+  ) async {
+    final repository = _MemoryTagesimpulsRepository([
+      _item('word-1', 'move'),
+      _item('word-2', 'superstar'),
+      _item('word-3', 'destroyed'),
+    ]);
+    final fakeClient = _FakeTagesimpulsAiClient();
+    final fakeScheduler = _FakeNotificationScheduler(permissionGranted: false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          tagesimpulsSelectionRepositoryProvider.overrideWithValue(repository),
+          tagesimpulsAiClientProvider.overrideWithValue(fakeClient),
+          tagesimpulsNotificationSchedulerProvider.overrideWithValue(
+            fakeScheduler,
+          ),
+        ],
+        child: const MaterialApp(home: CourseScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Tagesimpulse vorbereiten'));
+    await tester.pump();
+    await tester.pump();
+    await tester.ensureVisible(find.text('Benachrichtigungen planen'));
+    await tester.pump();
+    await tester.tap(find.text('Benachrichtigungen planen'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fakeScheduler.scheduled, isEmpty);
+    expect(
+      find.text('Benachrichtigungen müssen erlaubt werden.'),
+      findsOneWidget,
+    );
   });
 }
 
@@ -204,5 +314,28 @@ class _FakeTagesimpulsAiClient implements TagesimpulsAiClient {
     final error = this.error;
     if (error != null) throw error;
     return TagesimpulsGenerateResult(impulses: impulses);
+  }
+}
+
+class _FakeNotificationScheduler implements TagesimpulsNotificationScheduler {
+  _FakeNotificationScheduler({this.permissionGranted = true});
+
+  final bool permissionGranted;
+  final scheduled = <TagesimpulsNotificationSchedule>[];
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<bool> requestPermission() async => permissionGranted;
+
+  @override
+  Future<void> schedule(TagesimpulsNotificationSchedule notification) async {
+    scheduled.add(notification);
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    scheduled.clear();
   }
 }
