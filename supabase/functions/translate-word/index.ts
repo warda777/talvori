@@ -15,6 +15,12 @@ type DeepLResponse = {
   translations?: DeepLTranslation[];
 };
 
+type JsonBodyResult =
+  | { ok: true; body: TranslateWordRequest }
+  | { ok: false; error: "invalid_json" };
+
+const maxTextLength = 500;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -43,12 +49,15 @@ function readDeepLBaseUrl(): string {
     : "https://api-free.deepl.com";
 }
 
-async function readJsonBody(req: Request): Promise<TranslateWordRequest> {
+async function readJsonBody(req: Request): Promise<JsonBodyResult> {
   try {
     const body = await req.json();
-    return body && typeof body === "object" ? body as TranslateWordRequest : {};
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return { ok: false, error: "invalid_json" };
+    }
+    return { ok: true, body: body as TranslateWordRequest };
   } catch {
-    return {};
+    return { ok: false, error: "invalid_json" };
   }
 }
 
@@ -61,13 +70,21 @@ serve(async (req) => {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }
 
-  // TODO before production: add auth, rate limits, and abuse protection.
+  // TODO before production:
+  // - verify user auth / entitlement from the Authorization header
+  // - add rate limits and premium/user quotas
+  // - add abuse protection without logging full user text or secrets
   const deeplApiKey = Deno.env.get("DEEPL_API_KEY")?.trim();
   if (!deeplApiKey) {
     return jsonResponse({ error: "translation_not_configured" }, 500);
   }
 
-  const body = await readJsonBody(req);
+  const parsed = await readJsonBody(req);
+  if (!parsed.ok) {
+    return jsonResponse({ error: parsed.error }, 400);
+  }
+
+  const body = parsed.body;
   const text = body.text?.trim() ?? "";
   const targetLang = normalizeLanguage(body.targetLang ?? "");
   const sourceLang = normalizeLanguage(body.sourceLang ?? "");
@@ -77,6 +94,12 @@ serve(async (req) => {
   }
   if (!targetLang) {
     return jsonResponse({ error: "target_lang_required" }, 400);
+  }
+  if (text.length > maxTextLength) {
+    return jsonResponse(
+      { error: "translation_failed", reason: "text_too_long" },
+      413,
+    );
   }
 
   const payload: Record<string, unknown> = {
