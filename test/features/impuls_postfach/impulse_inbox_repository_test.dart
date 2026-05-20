@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
@@ -47,6 +48,68 @@ void main() {
       expect(chats.single.unreadCount, 1);
       expect(chats.single.lastMessageText, 'You moved like a superstar.');
       expect(loadedMessages.single.usedWords, ['move', 'superstar']);
+    });
+
+    test(
+      'ensureCategoryChat creates and updates a category chat once',
+      () async {
+        final repository = SharedPreferencesImpulseInboxRepository(
+          clock: () => DateTime(2026, 5, 20, 12),
+        );
+
+        final first = await repository.ensureCategoryChat(
+          'seed-category-basics',
+          'Basics',
+        );
+        final second = await repository.ensureCategoryChat(
+          'seed-category-basics',
+          'Basics aktualisiert',
+        );
+        final chats = await repository.listChats();
+
+        expect(first.id, 'impulse-chat-category-seed-category-basics');
+        expect(second.id, first.id);
+        expect(second.sourceType, ImpulseChatSourceType.category);
+        expect(second.sourceId, 'seed-category-basics');
+        expect(second.title, 'Basics aktualisiert');
+        expect(second.avatarKey, 'category:seed-category-basics');
+        expect(chats, hasLength(1));
+      },
+    );
+
+    test('disabled category chat is hidden but keeps old messages', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.ensureCategoryChat(
+        'seed-category-travel',
+        'Travel',
+      );
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: chat.id,
+          text: 'Was bedeutet journey?',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+          readAt: DateTime(2026, 5, 20, 12),
+        ),
+        incrementUnread: false,
+      );
+
+      await repository.setCategoryChatEnabled('seed-category-travel', false);
+      expect(await repository.listChats(), isEmpty);
+
+      await repository.setCategoryChatEnabled('seed-category-travel', true);
+      final chats = await repository.listChats();
+      final messages = await repository.listMessages(chat.id);
+
+      expect(chats.single.id, chat.id);
+      expect(messages.single.text, 'Was bedeutet journey?');
+      expect(
+        await repository.getCategoryChat('seed-category-travel'),
+        isNotNull,
+      );
     });
 
     test('mark chat read clears unread count and sets readAt', () async {

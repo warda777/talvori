@@ -92,6 +92,49 @@ void main() {
     );
   });
 
+  testWidgets('chat list shows active category chat and hides disabled one', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_category_chat_list',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final activeChat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    await repository.ensureCategoryChat('seed-category-travel', 'Travel');
+    await repository.setCategoryChatEnabled('seed-category-travel', false);
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: activeChat.id,
+        text: 'Was bedeutet move?',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.user,
+        readAt: DateTime(2026, 5, 20, 12),
+      ),
+      incrementUnread: false,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Basics'), findsOneWidget);
+    expect(find.text('Was bedeutet move?'), findsOneWidget);
+    expect(find.text('Travel'), findsNothing);
+  });
+
   testWidgets('chat detail shows bubble and marks chat as read', (
     tester,
   ) async {
@@ -142,6 +185,133 @@ void main() {
 
     final chats = await repository.listChats();
     expect(chats.single.unreadCount, 0);
+  });
+
+  testWidgets('category chat detail shows category title and empty hint', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_category_detail',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Basics'), findsOneWidget);
+    expect(find.text('Kategorie-Chat'), findsOneWidget);
+    expect(find.text('Noch keine Nachrichten'), findsOneWidget);
+    expect(
+      find.text('Stelle Talvori eine Frage zu dieser Kategorie.'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('category_chat_options_button')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('daily impulse chat does not show category disable action', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_daily_no_disable_action',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('category_chat_options_button')), findsNothing);
+  });
+
+  testWidgets('category chat can be disabled without deleting messages', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_category_disable',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Alte lokale Nachricht',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Basics'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('category_chat_options_button')));
+    await tester.pumpAndSettle();
+    expect(find.text('Kategorie-Chat deaktivieren?'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const Key('category_chat_disable_confirm_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulsPostfachScreen), findsOneWidget);
+    expect(find.text('Basics'), findsNothing);
+    expect(await repository.listChats(), isEmpty);
+    expect(
+      (await repository.listMessages(chat.id)).single.text,
+      'Alte lokale Nachricht',
+    );
+
+    final reactivated = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    expect(reactivated.id, chat.id);
+    expect((await repository.listChats()).single.id, chat.id);
+    expect(
+      (await repository.listMessages(chat.id)).single.text,
+      'Alte lokale Nachricht',
+    );
   });
 
   testWidgets('chat detail renders assistant left and user right bubbles', (
@@ -716,6 +886,46 @@ void main() {
       ImpulseMessageSource.user,
     );
     expect((await repository.listChats()).single.unreadCount, 0);
+  });
+
+  testWidgets('category chat sends category context to AI client', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_category_send_message',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    final aiClient = _FakeAiChatClient('Move passt gut zu Basics.');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(aiClient),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('impulse_chat_message_input')),
+      'Gib mir einen Beispielsatz.',
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('impulse_chat_send_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gib mir einen Beispielsatz.'), findsOneWidget);
+    expect(find.text('Move passt gut zu Basics.'), findsOneWidget);
+    final context = aiClient.requests.single.context as Map<String, Object?>;
+    expect(context['chatType'], 'category');
+    expect(context['categoryId'], 'seed-category-basics');
+    expect(context['categoryTitle'], 'Basics');
   });
 
   testWidgets('microphone button writes recognized speech into the input', (

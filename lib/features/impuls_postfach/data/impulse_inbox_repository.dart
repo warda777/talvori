@@ -7,6 +7,9 @@ import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
 abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
+  Future<ImpulseChat> ensureCategoryChat(String categoryId, String title);
+  Future<ImpulseChat?> getCategoryChat(String categoryId);
+  Future<void> setCategoryChatEnabled(String categoryId, bool enabled);
   Future<List<ImpulseChat>> listChats();
   Future<List<ImpulseMessage>> listMessages(String chatId);
   Future<ImpulseMessage> addMessage(
@@ -66,6 +69,66 @@ class SharedPreferencesImpulseInboxRepository
     store.chats[chat.id] = chat;
     await _saveStore(store);
     return chat;
+  }
+
+  @override
+  Future<ImpulseChat> ensureCategoryChat(
+    String categoryId,
+    String title,
+  ) async {
+    final normalizedCategoryId = categoryId.trim();
+    if (normalizedCategoryId.isEmpty) {
+      throw ArgumentError.value(categoryId, 'categoryId', 'must not be empty');
+    }
+
+    final store = await _loadStore();
+    final chatId = _categoryChatId(normalizedCategoryId);
+    final normalizedTitle = title.trim().isEmpty ? 'Kategorie' : title.trim();
+    final existing = store.chats[chatId];
+    if (existing != null) {
+      final updated = existing.copyWith(
+        sourceType: ImpulseChatSourceType.category,
+        sourceId: normalizedCategoryId,
+        title: normalizedTitle,
+        avatarKey: 'category:$normalizedCategoryId',
+        enabled: true,
+      );
+      store.chats[chatId] = updated;
+      await _saveStore(store);
+      return updated;
+    }
+
+    final chat = ImpulseChat(
+      id: chatId,
+      sourceType: ImpulseChatSourceType.category,
+      sourceId: normalizedCategoryId,
+      title: normalizedTitle,
+      avatarKey: 'category:$normalizedCategoryId',
+      createdAt: _now,
+    );
+    store.chats[chat.id] = chat;
+    await _saveStore(store);
+    return chat;
+  }
+
+  @override
+  Future<ImpulseChat?> getCategoryChat(String categoryId) async {
+    final normalizedCategoryId = categoryId.trim();
+    if (normalizedCategoryId.isEmpty) return null;
+    final store = await _loadStore();
+    return store.chats[_categoryChatId(normalizedCategoryId)];
+  }
+
+  @override
+  Future<void> setCategoryChatEnabled(String categoryId, bool enabled) async {
+    final normalizedCategoryId = categoryId.trim();
+    if (normalizedCategoryId.isEmpty) return;
+    final store = await _loadStore();
+    final chatId = _categoryChatId(normalizedCategoryId);
+    final chat = store.chats[chatId];
+    if (chat == null) return;
+    store.chats[chatId] = chat.copyWith(enabled: enabled);
+    await _saveStore(store);
   }
 
   @override
@@ -319,6 +382,10 @@ class SharedPreferencesImpulseInboxRepository
   String _messageId(String chatId, int index) {
     final timestamp = _now.microsecondsSinceEpoch;
     return '$chatId-message-$timestamp-$index';
+  }
+
+  String _categoryChatId(String categoryId) {
+    return 'impulse-chat-category-$categoryId';
   }
 }
 

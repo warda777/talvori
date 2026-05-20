@@ -6,6 +6,30 @@ enum ImpulseChatSourceType {
   knownWords,
 }
 
+extension ImpulseChatSourceTypeWireName on ImpulseChatSourceType {
+  String get wireName {
+    return switch (this) {
+      ImpulseChatSourceType.dailyImpulse => 'daily_impulse',
+      ImpulseChatSourceType.category => 'category',
+      ImpulseChatSourceType.favorites => 'favorites',
+      ImpulseChatSourceType.myWords => 'my_words',
+      ImpulseChatSourceType.knownWords => 'known_words',
+    };
+  }
+
+  static ImpulseChatSourceType parse(Object? value) {
+    final raw = value?.toString().trim();
+    return switch (raw) {
+      'daily_impulse' || 'dailyImpulse' => ImpulseChatSourceType.dailyImpulse,
+      'category' => ImpulseChatSourceType.category,
+      'favorites' => ImpulseChatSourceType.favorites,
+      'my_words' || 'myWords' => ImpulseChatSourceType.myWords,
+      'known_words' || 'knownWords' => ImpulseChatSourceType.knownWords,
+      _ => ImpulseChatSourceType.dailyImpulse,
+    };
+  }
+}
+
 class ImpulseChat {
   const ImpulseChat({
     required this.id,
@@ -65,7 +89,7 @@ class ImpulseChat {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'sourceType': sourceType.name,
+      'sourceType': sourceType.wireName,
       'sourceId': sourceId,
       'title': title,
       'avatarKey': avatarKey,
@@ -80,10 +104,7 @@ class ImpulseChat {
   factory ImpulseChat.fromJson(Map<String, dynamic> json) {
     return ImpulseChat(
       id: json['id'] as String? ?? '',
-      sourceType: ImpulseChatSourceType.values.firstWhere(
-        (type) => type.name == json['sourceType'],
-        orElse: () => ImpulseChatSourceType.dailyImpulse,
-      ),
+      sourceType: ImpulseChatSourceTypeWireName.parse(json['sourceType']),
       sourceId: json['sourceId'] as String?,
       title: json['title'] as String? ?? 'Impuls',
       avatarKey: json['avatarKey'] as String?,

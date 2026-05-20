@@ -65,6 +65,23 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return chat;
   }
 
+  Future<ImpulseChat> ensureCategoryChat({
+    required String categoryId,
+    required String title,
+  }) async {
+    final chat = await _repository.ensureCategoryChat(categoryId, title);
+    await loadChats();
+    return chat;
+  }
+
+  Future<void> setCategoryChatEnabled({
+    required String categoryId,
+    required bool enabled,
+  }) async {
+    await _repository.setCategoryChatEnabled(categoryId, enabled);
+    await loadChats();
+  }
+
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
     List<TagesimpulsGeneratedImpulse> impulses,
   ) async {
@@ -116,25 +133,19 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
 
     try {
       final contextMessages = await _repository.listMessages(chatId);
+      final chat = state.chats.cast<ImpulseChat?>().firstWhere(
+        (chat) => chat?.id == chatId,
+        orElse: () => null,
+      );
       final response = await _aiChatClient.sendMessage(
         AiChatRequest(
           message: userMessage.text,
           language: 'DE',
-          context: {
-            'source': 'impulse_inbox',
-            'chatId': chatId,
-            'recentMessages': contextMessages
-                .takeLast(8)
-                .map(
-                  (message) => {
-                    'role': message.source == ImpulseMessageSource.user
-                        ? 'user'
-                        : 'assistant',
-                    'content': message.text,
-                  },
-                )
-                .toList(growable: false),
-          },
+          context: _chatContext(
+            chatId: chatId,
+            chat: chat,
+            messages: contextMessages,
+          ),
         ),
       );
       final reply = response.reply.trim();
@@ -237,6 +248,37 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     final normalized = text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (normalized.length <= 72) return normalized;
     return '${normalized.substring(0, 69)}...';
+  }
+
+  Map<String, Object?> _chatContext({
+    required String chatId,
+    required ImpulseChat? chat,
+    required List<ImpulseMessage> messages,
+  }) {
+    final sourceType = chat?.sourceType;
+    final context = <String, Object?>{
+      'source': 'impulse_inbox',
+      'chatId': chatId,
+      'chatType': sourceType?.wireName ?? 'unknown',
+      'recentMessages': messages
+          .takeLast(8)
+          .map(
+            (message) => {
+              'role': message.source == ImpulseMessageSource.user
+                  ? 'user'
+                  : 'assistant',
+              'content': message.text,
+            },
+          )
+          .toList(growable: false),
+    };
+    if (sourceType == ImpulseChatSourceType.category) {
+      context['categoryId'] = chat?.sourceId;
+      context['categoryTitle'] = chat?.title;
+      context['instruction'] =
+          'Antworte im Kontext dieser Wort-Kategorie. Verändere keine Lernstände.';
+    }
+    return context;
   }
 }
 

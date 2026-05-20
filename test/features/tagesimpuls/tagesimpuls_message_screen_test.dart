@@ -1017,6 +1017,17 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
+  Future<ImpulseChat> ensureCategoryChat(String categoryId, String title) {
+    throw StateError('inbox failed');
+  }
+
+  @override
+  Future<ImpulseChat?> getCategoryChat(String categoryId) async => null;
+
+  @override
+  Future<void> setCategoryChatEnabled(String categoryId, bool enabled) async {}
+
+  @override
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
     List<TagesimpulsGeneratedImpulse> impulses,
   ) {

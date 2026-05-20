@@ -75,6 +75,16 @@ class _ImpulseChatDetailScreenState
         elevation: 0,
         scrolledUnderElevation: 0,
         title: _ChatHeader(chat: chat),
+        actions: [
+          if (chat?.sourceType == ImpulseChatSourceType.category &&
+              chat?.sourceId?.trim().isNotEmpty == true)
+            IconButton(
+              key: const Key('category_chat_options_button'),
+              tooltip: 'Kategorie-Chat Optionen',
+              onPressed: () => _confirmDisableCategoryChat(chat!),
+              icon: const Icon(Icons.more_vert_rounded),
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -91,7 +101,7 @@ class _ImpulseChatDetailScreenState
                   behavior: HitTestBehavior.translucent,
                   onTap: () => FocusScope.of(context).unfocus(),
                   child: messages.isEmpty && !isResponding
-                      ? const _EmptyChat()
+                      ? _EmptyChat(chat: chat)
                       : ListView.builder(
                           key: const Key('impulse_chat_message_list'),
                           controller: _scrollController,
@@ -302,6 +312,51 @@ class _ImpulseChatDetailScreenState
         .deleteMessage(widget.chatId, message.id);
   }
 
+  Future<void> _confirmDisableCategoryChat(ImpulseChat chat) async {
+    final categoryId = chat.sourceId?.trim();
+    if (chat.sourceType != ImpulseChatSourceType.category ||
+        categoryId == null ||
+        categoryId.isEmpty) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111820),
+        title: const Text(
+          'Kategorie-Chat deaktivieren?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Der Chat wird aus dem Impuls-Postfach ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
+          style: TextStyle(color: Color(0xFFB8C4D9)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            key: const Key('category_chat_disable_confirm_button'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Deaktivieren',
+              style: TextStyle(color: Color(0xFFFFB05A)),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .setCategoryChatEnabled(categoryId: categoryId, enabled: false);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   void _showSnack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -323,6 +378,7 @@ class _ChatHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCategory = chat?.sourceType == ImpulseChatSourceType.category;
     return Row(
       children: [
         Container(
@@ -336,9 +392,11 @@ class _ChatHeader extends StatelessWidget {
               BoxShadow(color: Color(0x227FFFE7), blurRadius: 14),
             ],
           ),
-          child: const Icon(
-            Icons.auto_awesome_rounded,
-            color: Color(0xFF7FFFE7),
+          child: Icon(
+            isCategory
+                ? Icons.mark_unread_chat_alt_rounded
+                : Icons.auto_awesome_rounded,
+            color: const Color(0xFF7FFFE7),
             size: 18,
           ),
         ),
@@ -359,11 +417,11 @@ class _ChatHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 1),
-              const Text(
-                'Talvori Impulse',
+              Text(
+                isCategory ? 'Kategorie-Chat' : 'Talvori Impulse',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF7D8BA3),
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -378,20 +436,39 @@ class _ChatHeader extends StatelessWidget {
 }
 
 class _EmptyChat extends StatelessWidget {
-  const _EmptyChat();
+  const _EmptyChat({required this.chat});
+
+  final ImpulseChat? chat;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final isCategory = chat?.sourceType == ImpulseChatSourceType.category;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Text(
-          'Noch keine Nachrichten',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFFB8C4D9),
-            fontWeight: FontWeight.w700,
-          ),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Noch keine Nachrichten',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFFB8C4D9),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            if (isCategory) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Stelle Talvori eine Frage zu dieser Kategorie.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7D8BA3),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 
@@ -87,7 +91,8 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.tap(find.text('Health & Fitness'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
@@ -155,6 +160,62 @@ void main() {
   );
 
   testWidgets(
+    'word_hub_category_chat_icon_opens_category_chat_without_rect_background',
+    (tester) async {
+      usePhoneViewport(tester);
+      SharedPreferences.setMockInitialValues({});
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_word_hub_category_chat_icon',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localCategoryDetailGroupItemsProvider.overrideWith(
+              (ref, wordHubKey) async => localItemsFor(wordHubKey),
+            ),
+            impulseInboxRepositoryProvider.overrideWithValue(repository),
+            impulseInboxAiChatClientProvider.overrideWithValue(
+              const _FakeAiChatClient(),
+            ),
+          ],
+          child: const MaterialApp(
+            home: WordHubScreen(useLocalOfflineFlow: true),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      final buttonKey = const Key(
+        'word_hub_category_chat_button_seed-category-basics',
+      );
+      final circleKey = const Key(
+        'word_hub_category_chat_circle_seed-category-basics',
+      );
+
+      expect(find.byKey(buttonKey), findsOneWidget);
+      final circle = tester.widget<DecoratedBox>(find.byKey(circleKey));
+      final decoration = circle.decoration as BoxDecoration;
+      expect(decoration.shape, BoxShape.circle);
+
+      final button = tester.widget<IconButton>(
+        find.descendant(
+          of: find.byKey(buttonKey),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+
+      final chat = await repository.ensureCategoryChat(
+        'seed-category-basics',
+        'Health & Fitness',
+      );
+      expect(chat.sourceId, 'seed-category-basics');
+    },
+  );
+
+  testWidgets(
     'word_hub_screen_local_mode_unmapped_category_shows_snackbar_without_basics_fallback',
     (tester) async {
       usePhoneViewport(tester);
@@ -181,4 +242,13 @@ void main() {
       expect(find.text('Keine aktive lokale Session'), findsNothing);
     },
   );
+}
+
+class _FakeAiChatClient implements AiChatClient {
+  const _FakeAiChatClient();
+
+  @override
+  Future<AiChatResult> sendMessage(AiChatRequest request) async {
+    return const AiChatResult(reply: 'Okay.');
+  }
 }

@@ -1,10 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_screen.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
@@ -1190,6 +1194,32 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                         localCategoryId: mappedLocalCategoryId,
                         localWordCount: tappedLocalItem?.vocabsCount,
                         glowEnabled: glowEnabled,
+                        onChatTap: mappedLocalCategoryId == null
+                            ? null
+                            : () {
+                                final navigator = Navigator.of(context);
+                                ref
+                                    .read(
+                                      impulseInboxControllerProvider.notifier,
+                                    )
+                                    .ensureCategoryChat(
+                                      categoryId: mappedLocalCategoryId,
+                                      title: sub.label,
+                                    )
+                                    .then((chat) {
+                                      if (!context.mounted) return;
+                                      unawaited(
+                                        navigator.push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                ImpulseChatDetailScreen(
+                                                  chatId: chat.id,
+                                                ),
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              },
                         onTap: () {
                           if (mappedLocalCategoryId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -1258,6 +1288,7 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
     required this.localCategoryId,
     required this.localWordCount,
     required this.glowEnabled,
+    required this.onChatTap,
     required this.onTap,
   });
 
@@ -1265,100 +1296,173 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
   final String? localCategoryId;
   final int? localWordCount;
   final bool glowEnabled;
+  final VoidCallback? onChatTap;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final strokeColor = CategoryStrokeColors.getStrokeColor(sub.label);
     final fillColor = Color.lerp(const Color(0xFF050505), strokeColor, 0.10)!;
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(24),
+    return Stack(
       clipBehavior: Clip.none,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        overlayColor: WidgetStatePropertyAll(
-          Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
-        ),
-        splashFactory: InkRipple.splashFactory,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
+      children: [
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          clipBehavior: Clip.none,
+          child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            boxShadow: glowEnabled
-                ? [
-                    BoxShadow(
-                      color: strokeColor.withValues(alpha: 0.20),
-                      blurRadius: 18,
-                      spreadRadius: 1,
-                    ),
-                    BoxShadow(
-                      color: strokeColor.withValues(alpha: 0.10),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                  ]
-                : const [],
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [fillColor, const Color(0xFF050507)],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: strokeColor.withValues(alpha: 0.72),
-                width: 1.6,
-              ),
+            onTap: onTap,
+            overlayColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      width: 1,
-                    ),
-                    color: const Color(0xFF08080A).withValues(alpha: 0.74),
+            splashFactory: InkRipple.splashFactory,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: glowEnabled
+                    ? [
+                        BoxShadow(
+                          color: strokeColor.withValues(alpha: 0.20),
+                          blurRadius: 18,
+                          spreadRadius: 1,
+                        ),
+                        BoxShadow(
+                          color: strokeColor.withValues(alpha: 0.10),
+                          blurRadius: 30,
+                          spreadRadius: 5,
+                        ),
+                      ]
+                    : const [],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [fillColor, const Color(0xFF050507)],
                   ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: strokeColor.withValues(alpha: 0.72),
+                    width: 1.6,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          sub.label,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
+                    padding: const EdgeInsets.all(5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          width: 1,
+                        ),
+                        color: const Color(0xFF08080A).withValues(alpha: 0.74),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: onChatTap == null ? 0 : 38,
                               ),
-                        ),
-                        const Spacer(),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            localCategoryId == null
-                                ? 'local pending'
-                                : '${localWordCount ?? 0}',
-                            style: TextStyle(
-                              color: localCategoryId == null
-                                  ? Colors.white54
-                                  : strokeColor,
-                              fontWeight: FontWeight.w800,
+                              child: Text(
+                                sub.label,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
                             ),
-                          ),
+                            const Spacer(),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                localCategoryId == null
+                                    ? 'local pending'
+                                    : '${localWordCount ?? 0}',
+                                style: TextStyle(
+                                  color: localCategoryId == null
+                                      ? Colors.white54
+                                      : strokeColor,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+        if (onChatTap != null)
+          Positioned(
+            top: 14,
+            right: 14,
+            child: _CategoryChatButton(
+              categoryId: localCategoryId!,
+              color: strokeColor,
+              onTap: onChatTap!,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CategoryChatButton extends StatelessWidget {
+  const _CategoryChatButton({
+    required this.categoryId,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String categoryId;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      key: Key('word_hub_category_chat_button_$categoryId'),
+      width: 34,
+      height: 34,
+      child: DecoratedBox(
+        key: Key('word_hub_category_chat_circle_$categoryId'),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFF07111A).withValues(alpha: 0.92),
+          border: Border.all(color: color.withValues(alpha: 0.75)),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: 0.25), blurRadius: 14),
+          ],
+        ),
+        child: ClipOval(
+          child: IconButton(
+            tooltip: 'Kategorie-Chat öffnen',
+            padding: EdgeInsets.zero,
+            splashRadius: 18,
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: const Color(0xFF7FFFE7),
+              hoverColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              highlightColor: color.withValues(alpha: 0.12),
+            ),
+            onPressed: onTap,
+            icon: const Icon(
+              Icons.mark_unread_chat_alt_rounded,
+              color: Color(0xFF7FFFE7),
+              size: 17,
             ),
           ),
         ),

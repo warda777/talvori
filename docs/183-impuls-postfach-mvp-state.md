@@ -257,6 +257,51 @@ Nach dem Scheduling wird diagnostiziert, ob iOS die erwartete Pending Notificati
 
 Der primäre Einstieg ins Impuls-Postfach liegt auf der Home-Seite. Der Button sitzt als sichtbares Chat-/Sprechblasen-Icon neben den Home-Quick-Actions und kann optional einen Ungelesen-Badge anzeigen.
 
+## Kategorie-Chats
+
+Das Impuls-Postfach unterstützt jetzt lokale Kategorie-Chats. Ein Kategorie-Chat ist ein eigener Verlauf für eine Wort-Kategorie und nutzt dieselbe Messenger-Oberfläche wie der Tagesimpuls-Chat:
+
+- KI-/Assistant-Nachrichten links
+- Nutzer-Nachrichten rechts
+- Eingabeleiste mit Sprache-zu-Text
+- Long-Press-Menü
+- Reaktionen
+- Antworten
+- Kopieren
+- Stern
+- Löschen lokaler Nachrichten
+
+Kategorie-Chats werden lokal als `ImpulseChat` gespeichert:
+
+- `sourceType`: `category`
+- `sourceId`: lokale `categoryId`
+- `title`: Kategoriename
+- `avatarKey`: `category:<categoryId>`
+- `enabled`: steuert, ob der Chat in der normalen Postfachliste sichtbar ist
+
+Der Tagesimpuls-Chat bleibt `sourceType=daily_impulse`. Alte gespeicherte Chats mit dem bisherigen `dailyImpulse`-Wert werden weiterhin tolerant gelesen.
+
+Das Repository stellt dafür lokale Funktionen bereit:
+
+- `ensureCategoryChat(categoryId, categoryTitle)`
+- `getCategoryChat(categoryId)`
+- `setCategoryChatEnabled(categoryId, enabled)`
+
+`ensureCategoryChat` legt einen Kategorie-Chat nur einmal an, aktualisiert aber den Titel, falls sich der Kategoriename ändert. `enabled=false` blendet den Chat aus der normalen Postfachliste aus, löscht aber keine Nachrichten. Wird der Chat später wieder aktiviert, bleibt der lokale Verlauf erhalten.
+
+Im WordHub erhalten lokal verfügbare Kategorie-Kacheln ein kleines Sprechblasen-Icon. Das Icon zeichnet nur den runden Neon-Kreis; der Bereich außerhalb des Kreises bleibt transparent und erzeugt keinen eckigen Fremdhintergrund auf der Kachel. Ein Tap auf dieses Icon erstellt oder aktiviert den passenden Kategorie-Chat und öffnet direkt das generische `ImpulseChatDetailScreen`. Die Kategorie-Kachel verändert dabei keine SRS-Werte und startet keine Lernsession.
+
+Kategorie-Chats können im Chatdetail über eine Kategorie-spezifische Aktion deaktiviert werden. Diese Aktion erscheint nur bei `sourceType=category`, nicht beim Tagesimpuls-Chat. Nach Bestätigung wird `enabled=false` gesetzt und der Chat verschwindet aus der normalen Postfachliste. Lokale Nachrichten bleiben erhalten. Wenn der Nutzer später wieder das Chat-Icon derselben Kategorie-Kachel antippt, setzt `ensureCategoryChat` den Chat erneut auf `enabled=true` und öffnet den bestehenden Verlauf.
+
+Beim Senden aus einem Kategorie-Chat wird der bestehende `ai-chat` Client weiterverwendet. Der Request bekommt zusätzlichen Kontext:
+
+- `chatType: category`
+- `categoryId`
+- `categoryTitle`
+- kurzer Hinweis, dass keine Lernstände verändert werden sollen
+
+In diesem Schritt wird noch keine Wortliste aus der Kategorie als KI-Kontext mitgeschickt. Das kann später ergänzt werden, solange es reine Kontextdaten bleiben und keine SRS-Fortschritte verändert werden.
+
 ## Bewusst nicht umgesetzt
 
 - Kein Server-Push
@@ -279,7 +324,16 @@ Abgedeckt sind:
 - Chatdetail zeigt Sprechblasen und usedWords.
 - Tagesimpuls-Planung speichert generierte Nachrichten im Postfach.
 - Notification-Payload enthält `chatId` und `messageId`.
+- Kategorie-Chat wird lokal erstellt.
+- Kategorie-Chat wird nicht dupliziert.
+- Deaktivierte Kategorie-Chats verschwinden aus der normalen Chatliste.
+- Reaktivierte Kategorie-Chats behalten ihre lokalen Nachrichten.
+- Kategorie-Chatdetail zeigt Kategorie-Titel und Kategorie-Unterzeile.
+- Kategorie-Chats senden Kategorie-Kontext an den bestehenden `ai-chat` Client.
+- Kategorie-Chat-Icon rendert als runder Kreis ohne eckigen Fremdhintergrund.
+- Kategorie-Chat kann deaktiviert werden, ohne lokale Nachrichten zu löschen.
+- Tagesimpuls-Chat zeigt keine Kategorie-Deaktivieren-Aktion.
 
 ## Nächster Schritt
 
-Als nächstes können Kategorie-Chats aktiviert und deaktiviert werden. Dafür braucht es eine lokale Aktivierungslogik pro Kategorie und später ein Sprechblasen-Icon auf Kategorie-Kacheln.
+Als nächstes kann der KI-Kontext später um eine kleine, rein lesende Auswahl von Kategorie-Wörtern erweitert werden.
