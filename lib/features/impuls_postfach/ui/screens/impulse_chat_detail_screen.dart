@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
@@ -76,12 +79,28 @@ class _ImpulseChatDetailScreenState
         scrolledUnderElevation: 0,
         title: _ChatHeader(chat: chat),
         actions: [
+          if (chat != null &&
+              (chat.sourceType == ImpulseChatSourceType.category ||
+                  chat.sourceType == ImpulseChatSourceType.customAi))
+            IconButton(
+              key: const Key('chat_avatar_change_button'),
+              tooltip: 'Bild ändern',
+              onPressed: () => _pickAvatarImage(chat),
+              icon: const Icon(Icons.add_photo_alternate_rounded),
+            ),
           if (chat?.sourceType == ImpulseChatSourceType.category &&
               chat?.sourceId?.trim().isNotEmpty == true)
             IconButton(
               key: const Key('category_chat_options_button'),
               tooltip: 'Kategorie-Chat Optionen',
               onPressed: () => _confirmDisableCategoryChat(chat!),
+              icon: const Icon(Icons.more_vert_rounded),
+            ),
+          if (chat?.sourceType == ImpulseChatSourceType.customAi)
+            IconButton(
+              key: const Key('custom_chat_options_button'),
+              tooltip: 'Eigenen Chat ausblenden',
+              onPressed: () => _confirmDisableCustomChat(chat!),
               icon: const Icon(Icons.more_vert_rounded),
             ),
         ],
@@ -198,6 +217,18 @@ class _ImpulseChatDetailScreenState
 
   Future<ImpulseVoiceInputResult> _startVoiceInput() {
     return ref.read(impulseVoiceInputServiceProvider).listenForText();
+  }
+
+  Future<void> _pickAvatarImage(ImpulseChat chat) async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      imageQuality: 82,
+    );
+    if (picked == null) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .updateChatAvatarImagePath(chatId: chat.id, imagePath: picked.path);
   }
 
   Future<void> _openMessageActions(ImpulseMessage message) async {
@@ -357,6 +388,46 @@ class _ImpulseChatDetailScreenState
     Navigator.of(context).pop();
   }
 
+  Future<void> _confirmDisableCustomChat(ImpulseChat chat) async {
+    if (chat.sourceType != ImpulseChatSourceType.customAi) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111820),
+        title: const Text(
+          'Chat ausblenden?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Der eigene KI-Chat wird aus dem Impuls-Postfach ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
+          style: TextStyle(color: Color(0xFFB8C4D9)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            key: const Key('custom_chat_disable_confirm_button'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Ausblenden',
+              style: TextStyle(color: Color(0xFFFFB05A)),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .setChatEnabled(chatId: chat.id, enabled: false);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   void _showSnack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -379,26 +450,16 @@ class _ChatHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCategory = chat?.sourceType == ImpulseChatSourceType.category;
+    final isCustom = chat?.sourceType == ImpulseChatSourceType.customAi;
     return Row(
       children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF07111A),
-            border: Border.all(color: const Color(0xFF7FFFE7)),
-            boxShadow: const [
-              BoxShadow(color: Color(0x227FFFE7), blurRadius: 14),
-            ],
-          ),
-          child: Icon(
-            isCategory
-                ? Icons.mark_unread_chat_alt_rounded
-                : Icons.auto_awesome_rounded,
-            color: const Color(0xFF7FFFE7),
-            size: 18,
-          ),
+        _HeaderAvatar(
+          chat: chat,
+          icon: isCategory
+              ? Icons.mark_unread_chat_alt_rounded
+              : isCustom
+              ? Icons.psychology_alt_rounded
+              : Icons.auto_awesome_rounded,
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -418,7 +479,11 @@ class _ChatHeader extends StatelessWidget {
               ),
               const SizedBox(height: 1),
               Text(
-                isCategory ? 'Kategorie-Chat' : 'Talvori Impulse',
+                isCategory
+                    ? 'Kategorie-Chat'
+                    : isCustom
+                    ? 'Eigener KI-Chat'
+                    : 'Talvori Impulse',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -431,6 +496,37 @@ class _ChatHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HeaderAvatar extends StatelessWidget {
+  const _HeaderAvatar({required this.chat, required this.icon});
+
+  final ImpulseChat? chat;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = chat?.avatarImagePath?.trim();
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF07111A),
+        border: Border.all(color: const Color(0xFF7FFFE7)),
+        boxShadow: const [BoxShadow(color: Color(0x227FFFE7), blurRadius: 14)],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: path != null && path.isNotEmpty
+          ? Image.file(
+              File(path),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  Icon(icon, color: const Color(0xFF7FFFE7), size: 18),
+            )
+          : Icon(icon, color: const Color(0xFF7FFFE7), size: 18),
     );
   }
 }

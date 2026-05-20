@@ -298,9 +298,43 @@ Beim Senden aus einem Kategorie-Chat wird der bestehende `ai-chat` Client weiter
 - `chatType: category`
 - `categoryId`
 - `categoryTitle`
-- kurzer Hinweis, dass keine Lernstände verändert werden sollen
+- `categoryWordsSample` mit maximal zehn lokal gelesenen Wörtern, falls verfügbar
+- kurzer Hinweis, dass keine Lernstände, Queues oder SRS-Werte verändert werden sollen
 
-In diesem Schritt wird noch keine Wortliste aus der Kategorie als KI-Kontext mitgeschickt. Das kann später ergänzt werden, solange es reine Kontextdaten bleiben und keine SRS-Fortschritte verändert werden.
+Die Kategorie-Wörter werden rein lesend über die lokale Word-Repository-Schicht geladen. Es wird keine Lernsession gestartet, keine Queue verändert und kein `is_mastered`-, `pass_count`- oder `next_due_at`-ähnlicher Lernstand geschrieben.
+
+## Moderner Chat-Hub
+
+Das Impuls-Postfach ist jetzt stärker als eigener Chat-Hub gestaltet. Der Screen besitzt:
+
+- einen kompakten Header `Impuls-Postfach`
+- eine Suche mit Placeholder `Chats oder Kategorien suchen`
+- ein Plus-Menü zum Hinzufügen von Chats
+- interne Tabs `Chats`, `Kategorien`, `Gespeichert` und `Du`
+
+Die Chatliste ist weniger card-lastig und näher an einem Messenger-Startbildschirm: runde Avatare links, Titel und Vorschau in der Mitte, Zeit und Ungelesen-Badge rechts. Die Suche filtert aktive Chats nach Titel und letzter Nachricht.
+
+Das Plus-Menü bietet:
+
+- `Kategorie-Chat hinzufügen`
+- `Eigenen KI-Chat erstellen`
+- `Tagesimpuls öffnen`
+
+Der Kategorien-Tab zeigt lokal verfügbare Kategorien mit Wortanzahl und Status. Noch nicht vorhandene Kategorie-Chats können hinzugefügt werden, deaktivierte Kategorie-Chats werden über denselben Weg reaktiviert und behalten ihren lokalen Verlauf.
+
+Eigene KI-Chats werden lokal als `ImpulseChat` gespeichert:
+
+- `sourceType`: `custom_ai`
+- `sourceId`: lokale Chat-ID
+- `title`: vom Nutzer gewählter Chatname
+- `avatarKey`: `custom:<chatId>`
+- `enabled`: steuert die Sichtbarkeit im Hub
+
+Eigene KI-Chats nutzen dieselbe Messenger-Oberfläche wie Tagesimpuls- und Kategorie-Chats. Der `ai-chat` Request bekommt `chatType: custom_ai` und den Chat-Titel als Kontext. Eigene Chats können lokal ausgeblendet werden, ohne automatisch den Verlauf zu löschen.
+
+Chats können optional ein lokales Avatarbild bekommen. Das Modell speichert dafür `avatarImagePath`; die UI zeigt ein rundes Bild, wenn ein lokaler Pfad vorhanden ist, sonst das bisherige Neon-Icon. Bilder werden nur als Chat-/Kategorie-Avatar verwendet, nicht als Chat-Anhang und nicht in die Cloud hochgeladen. iOS enthält dafür eine Fotomediathek-Beschreibung.
+
+Der Tab `Gespeichert` ist für markierte Nachrichten vorbereitet und zeigt gespeicherte Stern-Nachrichten, sobald sie im geladenen lokalen Verlauf vorhanden sind. Der Tab `Du` bleibt bewusst schlank und erklärt, dass die Impuls-Chats lokal auf dem Gerät bleiben.
 
 ## Bewusst nicht umgesetzt
 
@@ -309,7 +343,8 @@ In diesem Schritt wird noch keine Wortliste aus der Kategorie als KI-Kontext mit
 - Kein Supabase-Verlauf
 - Kein Premium-Gating
 - Kein freier globaler Chat außerhalb des Impuls-Postfachs
-- Keine Foto-/Datei-/Audiofunktion
+- Keine Foto-/Datei-/Audio-Nachrichten
+- Keine Cloud-Speicherung von Avatarbildern
 - Keine SRS-Änderung
 
 ## Tests
@@ -333,7 +368,12 @@ Abgedeckt sind:
 - Kategorie-Chat-Icon rendert als runder Kreis ohne eckigen Fremdhintergrund.
 - Kategorie-Chat kann deaktiviert werden, ohne lokale Nachrichten zu löschen.
 - Tagesimpuls-Chat zeigt keine Kategorie-Deaktivieren-Aktion.
+- Eigene KI-Chats können lokal erstellt werden.
+- Avatar-Pfade werden lokal gespeichert und gelesen.
+- Suche filtert aktive Chats.
+- Plus-Menü öffnet Kategorie- und Custom-Chat-Flows.
+- Kategorie-Wörter werden rein lesend als KI-Kontext bereitgestellt.
 
 ## Nächster Schritt
 
-Als nächstes kann der KI-Kontext später um eine kleine, rein lesende Auswahl von Kategorie-Wörtern erweitert werden.
+Als nächstes können die Tabs `Gespeichert` und `Du` weiter ausgebaut werden, zum Beispiel mit einer verwaltbaren Liste ausgeblendeter eigener Chats oder einer Tonalitätsauswahl für KI-Antworten.

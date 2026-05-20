@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Talvori nutzt das Mikrofon, damit du Chatnachrichten diktieren kannst.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Talvori nutzt deine Fotomediathek nur, wenn du lokal ein Chat-Bild auswaehlst.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Talvori nutzt Spracherkennung, um gesprochene Worte in Text fuer den Impuls-Chat umzuwandeln.</string>
 	<key>UIApplicationSceneManifest</key>

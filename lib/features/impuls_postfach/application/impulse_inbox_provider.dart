@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/core/ai/supabase_ai_chat_client.dart';
+import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/translation/supabase_function_caller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
@@ -38,6 +39,25 @@ final impulseInboxControllerProvider =
       final controller = ImpulseInboxController(
         repository: repository,
         aiChatClient: aiChatClient,
+        categoryWordSampler: (categoryId) async {
+          try {
+            final bootstrap = await ref.read(localBootstrapProvider.future);
+            final words = await bootstrap.repositoryFactory.wordRepository
+                .loadWordsForCategory(categoryId: categoryId);
+            return words
+                .take(10)
+                .map(
+                  (word) => {
+                    'word': word.term,
+                    if (word.translation.trim().isNotEmpty)
+                      'translation': word.translation,
+                  },
+                )
+                .toList(growable: false);
+          } on Object {
+            return const [];
+          }
+        },
       );
       unawaited(controller.loadChats());
       return controller;

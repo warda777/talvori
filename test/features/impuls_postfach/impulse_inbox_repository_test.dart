@@ -112,6 +112,51 @@ void main() {
       );
     });
 
+    test('creates custom AI chat and persists avatar image path', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+
+      final chat = await repository.createCustomAiChat('Grammatikfragen');
+      await repository.updateChatAvatarImagePath(chat.id, '/tmp/avatar.png');
+
+      final allChats = await repository.listAllChats();
+      final loaded = allChats.single;
+
+      expect(loaded.sourceType, ImpulseChatSourceType.customAi);
+      expect(loaded.sourceId, chat.id);
+      expect(loaded.title, 'Grammatikfragen');
+      expect(loaded.avatarKey, 'custom:${chat.id}');
+      expect(loaded.avatarImagePath, '/tmp/avatar.png');
+    });
+
+    test('custom AI chat can be hidden without deleting messages', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.createCustomAiChat('Reisevokabeln');
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: chat.id,
+          text: 'Trainiere mit mir.',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+          readAt: DateTime(2026, 5, 20, 12),
+        ),
+        incrementUnread: false,
+      );
+
+      await repository.setChatEnabled(chat.id, false);
+
+      expect(await repository.listChats(), isEmpty);
+      expect(await repository.listAllChats(), hasLength(1));
+      expect(
+        (await repository.listMessages(chat.id)).single.text,
+        'Trainiere mit mir.',
+      );
+    });
+
     test('mark chat read clears unread count and sets readAt', () async {
       final repository = SharedPreferencesImpulseInboxRepository(
         clock: () => DateTime(2026, 5, 20, 12),

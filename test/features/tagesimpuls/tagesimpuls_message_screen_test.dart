@@ -1022,10 +1022,24 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
+  Future<ImpulseChat> createCustomAiChat(String title) {
+    throw StateError('inbox failed');
+  }
+
+  @override
   Future<ImpulseChat?> getCategoryChat(String categoryId) async => null;
 
   @override
   Future<void> setCategoryChatEnabled(String categoryId, bool enabled) async {}
+
+  @override
+  Future<void> setChatEnabled(String chatId, bool enabled) async {}
+
+  @override
+  Future<void> updateChatAvatarImagePath(
+    String chatId,
+    String? imagePath,
+  ) async {}
 
   @override
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
@@ -1071,6 +1085,9 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
 
   @override
   Future<List<ImpulseChat>> listChats() async => const [];
+
+  @override
+  Future<List<ImpulseChat>> listAllChats() async => const [];
 
   @override
   Future<List<ImpulseMessage>> listMessages(String chatId) async => const [];

@@ -5,10 +5,14 @@ import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
+typedef ImpulseCategoryWordSampler =
+    Future<List<Map<String, String>>> Function(String categoryId);
+
 class ImpulseInboxState {
   const ImpulseInboxState({
     this.isLoading = false,
     this.chats = const [],
+    this.allChats = const [],
     this.messagesByChat = const {},
     this.respondingChatIds = const {},
     this.chatErrors = const {},
@@ -16,6 +20,7 @@ class ImpulseInboxState {
 
   final bool isLoading;
   final List<ImpulseChat> chats;
+  final List<ImpulseChat> allChats;
   final Map<String, List<ImpulseMessage>> messagesByChat;
   final Set<String> respondingChatIds;
   final Map<String, String> chatErrors;
@@ -23,6 +28,7 @@ class ImpulseInboxState {
   ImpulseInboxState copyWith({
     bool? isLoading,
     List<ImpulseChat>? chats,
+    List<ImpulseChat>? allChats,
     Map<String, List<ImpulseMessage>>? messagesByChat,
     Set<String>? respondingChatIds,
     Map<String, String>? chatErrors,
@@ -30,6 +36,7 @@ class ImpulseInboxState {
     return ImpulseInboxState(
       isLoading: isLoading ?? this.isLoading,
       chats: chats ?? this.chats,
+      allChats: allChats ?? this.allChats,
       messagesByChat: messagesByChat ?? this.messagesByChat,
       respondingChatIds: respondingChatIds ?? this.respondingChatIds,
       chatErrors: chatErrors ?? this.chatErrors,
@@ -41,14 +48,17 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
   ImpulseInboxController({
     required ImpulseInboxRepository repository,
     required AiChatClient aiChatClient,
+    ImpulseCategoryWordSampler? categoryWordSampler,
     DateTime Function()? clock,
   }) : _aiChatClient = aiChatClient,
+       _categoryWordSampler = categoryWordSampler,
        _clock = clock,
        _repository = repository,
        super(const ImpulseInboxState(isLoading: true));
 
   final ImpulseInboxRepository _repository;
   final AiChatClient _aiChatClient;
+  final ImpulseCategoryWordSampler? _categoryWordSampler;
   final DateTime Function()? _clock;
 
   DateTime get _now => _clock?.call() ?? DateTime.now();
@@ -56,7 +66,8 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
   Future<void> loadChats() async {
     state = state.copyWith(isLoading: true);
     final chats = await _repository.listChats();
-    state = state.copyWith(isLoading: false, chats: chats);
+    final allChats = await _repository.listAllChats();
+    state = state.copyWith(isLoading: false, chats: chats, allChats: allChats);
   }
 
   Future<ImpulseChat> ensureDailyImpulseChat() async {
@@ -74,11 +85,33 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return chat;
   }
 
+  Future<ImpulseChat> createCustomAiChat({required String title}) async {
+    final chat = await _repository.createCustomAiChat(title);
+    await loadChats();
+    return chat;
+  }
+
   Future<void> setCategoryChatEnabled({
     required String categoryId,
     required bool enabled,
   }) async {
     await _repository.setCategoryChatEnabled(categoryId, enabled);
+    await loadChats();
+  }
+
+  Future<void> setChatEnabled({
+    required String chatId,
+    required bool enabled,
+  }) async {
+    await _repository.setChatEnabled(chatId, enabled);
+    await loadChats();
+  }
+
+  Future<void> updateChatAvatarImagePath({
+    required String chatId,
+    required String? imagePath,
+  }) async {
+    await _repository.updateChatAvatarImagePath(chatId, imagePath);
     await loadChats();
   }
 
@@ -141,7 +174,7 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
         AiChatRequest(
           message: userMessage.text,
           language: 'DE',
-          context: _chatContext(
+          context: await _chatContext(
             chatId: chatId,
             chat: chat,
             messages: contextMessages,
@@ -224,8 +257,10 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
   Future<void> _refreshChat(String chatId) async {
     final messages = await _repository.listMessages(chatId);
     final chats = await _repository.listChats();
+    final allChats = await _repository.listAllChats();
     state = state.copyWith(
       chats: chats,
+      allChats: allChats,
       messagesByChat: {...state.messagesByChat, chatId: messages},
     );
   }
@@ -250,11 +285,11 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return '${normalized.substring(0, 69)}...';
   }
 
-  Map<String, Object?> _chatContext({
+  Future<Map<String, Object?>> _chatContext({
     required String chatId,
     required ImpulseChat? chat,
     required List<ImpulseMessage> messages,
-  }) {
+  }) async {
     final sourceType = chat?.sourceType;
     final context = <String, Object?>{
       'source': 'impulse_inbox',
@@ -277,6 +312,22 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
       context['categoryTitle'] = chat?.title;
       context['instruction'] =
           'Antworte im Kontext dieser Wort-Kategorie. Verändere keine Lernstände.';
+      final categoryId = chat?.sourceId?.trim();
+      if (categoryId != null &&
+          categoryId.isNotEmpty &&
+          _categoryWordSampler != null) {
+        final sample = await _categoryWordSampler(categoryId);
+        if (sample.isNotEmpty) {
+          context['categoryWordsSample'] = sample;
+          context['categoryWordsInstruction'] =
+              'Nutze diese Wörter nur als Gesprächskontext. Verändere keine Lernstände, keine Queue und keine SRS-Werte.';
+        }
+      }
+    }
+    if (sourceType == ImpulseChatSourceType.customAi) {
+      context['chatTitle'] = chat?.title;
+      context['instruction'] =
+          'Antworte als lokaler Talvori KI-Chat. Der Verlauf bleibt lokal auf diesem Gerät.';
     }
     return context;
   }

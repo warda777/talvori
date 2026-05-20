@@ -8,9 +8,13 @@ import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
   Future<ImpulseChat> ensureCategoryChat(String categoryId, String title);
+  Future<ImpulseChat> createCustomAiChat(String title);
   Future<ImpulseChat?> getCategoryChat(String categoryId);
   Future<void> setCategoryChatEnabled(String categoryId, bool enabled);
+  Future<void> setChatEnabled(String chatId, bool enabled);
+  Future<void> updateChatAvatarImagePath(String chatId, String? imagePath);
   Future<List<ImpulseChat>> listChats();
+  Future<List<ImpulseChat>> listAllChats();
   Future<List<ImpulseMessage>> listMessages(String chatId);
   Future<ImpulseMessage> addMessage(
     ImpulseMessage message, {
@@ -120,6 +124,26 @@ class SharedPreferencesImpulseInboxRepository
   }
 
   @override
+  Future<ImpulseChat> createCustomAiChat(String title) async {
+    final normalizedTitle = title.trim().isEmpty
+        ? 'Eigener KI-Chat'
+        : title.trim();
+    final store = await _loadStore();
+    final id = _customChatId();
+    final chat = ImpulseChat(
+      id: id,
+      sourceType: ImpulseChatSourceType.customAi,
+      sourceId: id,
+      title: normalizedTitle,
+      avatarKey: 'custom:$id',
+      createdAt: _now,
+    );
+    store.chats[chat.id] = chat;
+    await _saveStore(store);
+    return chat;
+  }
+
+  @override
   Future<void> setCategoryChatEnabled(String categoryId, bool enabled) async {
     final normalizedCategoryId = categoryId.trim();
     if (normalizedCategoryId.isEmpty) return;
@@ -132,15 +156,58 @@ class SharedPreferencesImpulseInboxRepository
   }
 
   @override
+  Future<void> setChatEnabled(String chatId, bool enabled) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    store.chats[normalizedChatId] = chat.copyWith(enabled: enabled);
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> updateChatAvatarImagePath(
+    String chatId,
+    String? imagePath,
+  ) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    final normalizedPath = imagePath?.trim();
+    store.chats[normalizedChatId] = chat.copyWith(
+      avatarImagePath: normalizedPath == null || normalizedPath.isEmpty
+          ? null
+          : normalizedPath,
+      clearAvatarImagePath: normalizedPath == null || normalizedPath.isEmpty,
+    );
+    await _saveStore(store);
+  }
+
+  @override
   Future<List<ImpulseChat>> listChats() async {
     final store = await _loadStore();
     final chats = store.chats.values.where((chat) => chat.enabled).toList();
+    _sortChats(chats);
+    return chats;
+  }
+
+  @override
+  Future<List<ImpulseChat>> listAllChats() async {
+    final store = await _loadStore();
+    final chats = store.chats.values.toList();
+    _sortChats(chats);
+    return chats;
+  }
+
+  void _sortChats(List<ImpulseChat> chats) {
     chats.sort((a, b) {
       final aDate = a.lastMessageAt ?? a.createdAt;
       final bDate = b.lastMessageAt ?? b.createdAt;
       return bDate.compareTo(aDate);
     });
-    return chats;
   }
 
   @override
@@ -386,6 +453,10 @@ class SharedPreferencesImpulseInboxRepository
 
   String _categoryChatId(String categoryId) {
     return 'impulse-chat-category-$categoryId';
+  }
+
+  String _customChatId() {
+    return 'impulse-chat-custom-${_now.microsecondsSinceEpoch}';
   }
 }
 

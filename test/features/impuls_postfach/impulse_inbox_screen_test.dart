@@ -3,9 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/ai/ai_chat_client.dart';
+import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
+import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/application/impulse_inbox_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_payload.dart';
 import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_router.dart';
@@ -90,6 +94,143 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('chat hub shows search field and filters chats', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_search',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await repository.addDailyImpulseMessages(const [
+      TagesimpulsGeneratedImpulse(
+        slot: 'morning',
+        message: 'Daily hello',
+        usedWords: ['hello'],
+      ),
+    ]);
+    await repository.ensureCategoryChat('seed-category-travel', 'Travel');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('impulse_inbox_search_field')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('impulse_inbox_search_field')),
+      'Travel',
+    );
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Tagesimpuls'), findsNothing);
+  });
+
+  testWidgets('plus menu creates custom AI chat', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_custom_chat',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('impulse_inbox_add_chat_button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('add_custom_ai_chat_option')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('add_custom_ai_chat_option')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('custom_chat_name_field')),
+      'Grammatikfragen',
+    );
+    await tester.tap(
+      find.byKey(const Key('custom_chat_create_confirm_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text('Grammatikfragen'), findsOneWidget);
+    expect(find.text('Eigener KI-Chat'), findsOneWidget);
+
+    final chats = await repository.listChats();
+    expect(chats.single.sourceType, ImpulseChatSourceType.customAi);
+  });
+
+  testWidgets('category tab can add and reactivate category chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_category_tab',
+    );
+    final categoryItems = const LocalCategoryDetailGroupResolver()
+        .resolve('health_fitness')
+        .map(
+          (item) => item.localCategoryId == null
+              ? item
+              : item.copyWith(vocabsCount: 3),
+        )
+        .toList(growable: false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoryDetailGroupItemsProvider.overrideWith(
+            (ref, wordHubKey) async => categoryItems,
+          ),
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Kategorien'));
+    await tester.pumpAndSettle();
+    expect(find.text('Health & Fitness'), findsOneWidget);
+    expect(find.text('Hinzufügen'), findsWidgets);
+
+    await tester.tap(
+      find.byKey(const Key('impulse_inbox_category_tile_seed-category-basics')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text('Health & Fitness'), findsOneWidget);
+
+    await repository.setCategoryChatEnabled('seed-category-basics', false);
+    await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Health & Fitness',
+    );
+    final chat = await repository.getCategoryChat('seed-category-basics');
+    expect(chat?.enabled, isTrue);
   });
 
   testWidgets('chat list shows active category chat and hides disabled one', (
@@ -926,6 +1067,39 @@ void main() {
     expect(context['chatType'], 'category');
     expect(context['categoryId'], 'seed-category-basics');
     expect(context['categoryTitle'], 'Basics');
+  });
+
+  test('category chat sends read-only word sample to AI context', () async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_category_word_context',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    final aiClient = _FakeAiChatClient('Antwort');
+    final controller = ImpulseInboxController(
+      repository: repository,
+      aiChatClient: aiClient,
+      categoryWordSampler: (categoryId) async => [
+        {'word': 'move', 'translation': 'bewegen'},
+        {'word': 'serve', 'translation': 'servieren'},
+      ],
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await controller.loadChats();
+
+    await controller.sendChatMessage(chat.id, 'Nutze ein Wort.');
+
+    final context = aiClient.requests.single.context as Map<String, Object?>;
+    expect(context['chatType'], 'category');
+    expect(context['categoryWordsSample'], isA<List<Map<String, String>>>());
+    expect((context['categoryWordsSample'] as List).first['word'], 'move');
+    expect(
+      context['categoryWordsInstruction'],
+      contains('Verändere keine Lernstände'),
+    );
   });
 
   testWidgets('microphone button writes recognized speech into the input', (

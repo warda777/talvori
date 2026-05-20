@@ -1,6 +1,7 @@
 enum ImpulseChatSourceType {
   dailyImpulse,
   category,
+  customAi,
   favorites,
   myWords,
   knownWords,
@@ -11,6 +12,7 @@ extension ImpulseChatSourceTypeWireName on ImpulseChatSourceType {
     return switch (this) {
       ImpulseChatSourceType.dailyImpulse => 'daily_impulse',
       ImpulseChatSourceType.category => 'category',
+      ImpulseChatSourceType.customAi => 'custom_ai',
       ImpulseChatSourceType.favorites => 'favorites',
       ImpulseChatSourceType.myWords => 'my_words',
       ImpulseChatSourceType.knownWords => 'known_words',
@@ -22,6 +24,7 @@ extension ImpulseChatSourceTypeWireName on ImpulseChatSourceType {
     return switch (raw) {
       'daily_impulse' || 'dailyImpulse' => ImpulseChatSourceType.dailyImpulse,
       'category' => ImpulseChatSourceType.category,
+      'custom_ai' || 'customAi' || 'custom' => ImpulseChatSourceType.customAi,
       'favorites' => ImpulseChatSourceType.favorites,
       'my_words' || 'myWords' => ImpulseChatSourceType.myWords,
       'known_words' || 'knownWords' => ImpulseChatSourceType.knownWords,
@@ -37,6 +40,7 @@ class ImpulseChat {
     this.sourceId,
     required this.title,
     this.avatarKey,
+    this.avatarImagePath,
     this.enabled = true,
     required this.createdAt,
     this.lastMessageAt,
@@ -49,6 +53,7 @@ class ImpulseChat {
   final String? sourceId;
   final String title;
   final String? avatarKey;
+  final String? avatarImagePath;
   final bool enabled;
   final DateTime createdAt;
   final DateTime? lastMessageAt;
@@ -61,6 +66,8 @@ class ImpulseChat {
     String? sourceId,
     String? title,
     String? avatarKey,
+    String? avatarImagePath,
+    bool clearAvatarImagePath = false,
     bool? enabled,
     DateTime? createdAt,
     DateTime? lastMessageAt,
@@ -74,6 +81,9 @@ class ImpulseChat {
       sourceId: sourceId ?? this.sourceId,
       title: title ?? this.title,
       avatarKey: avatarKey ?? this.avatarKey,
+      avatarImagePath: clearAvatarImagePath
+          ? null
+          : avatarImagePath ?? this.avatarImagePath,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
       lastMessageAt: clearLastMessage
@@ -93,6 +103,7 @@ class ImpulseChat {
       'sourceId': sourceId,
       'title': title,
       'avatarKey': avatarKey,
+      'avatarImagePath': avatarImagePath,
       'enabled': enabled,
       'createdAt': createdAt.toIso8601String(),
       'lastMessageAt': lastMessageAt?.toIso8601String(),
@@ -108,6 +119,7 @@ class ImpulseChat {
       sourceId: json['sourceId'] as String?,
       title: json['title'] as String? ?? 'Impuls',
       avatarKey: json['avatarKey'] as String?,
+      avatarImagePath: json['avatarImagePath'] as String?,
       enabled: json['enabled'] as bool? ?? true,
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
