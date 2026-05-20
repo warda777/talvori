@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/tagesimpuls_ai_client.dart';
@@ -8,12 +9,14 @@ class TagesimpulsMessageState {
     this.count = 1,
     this.isGenerating = false,
     this.error,
+    this.generationStatus = TagesimpulsGenerationStatus.idle,
     this.impulses = const [],
   });
 
   final int count;
   final bool isGenerating;
   final String? error;
+  final TagesimpulsGenerationStatus generationStatus;
   final List<TagesimpulsGeneratedImpulse> impulses;
 
   TagesimpulsMessageState copyWith({
@@ -21,12 +24,14 @@ class TagesimpulsMessageState {
     bool? isGenerating,
     String? error,
     bool clearError = false,
+    TagesimpulsGenerationStatus? generationStatus,
     List<TagesimpulsGeneratedImpulse>? impulses,
   }) {
     return TagesimpulsMessageState(
       count: count ?? this.count,
       isGenerating: isGenerating ?? this.isGenerating,
       error: clearError ? null : error ?? this.error,
+      generationStatus: generationStatus ?? this.generationStatus,
       impulses: impulses ?? this.impulses,
     );
   }
@@ -48,7 +53,8 @@ class TagesimpulsMessageController
   Future<void> generate(List<TagesimpulsSelectionItem> items) async {
     if (items.length < 3) {
       state = state.copyWith(
-        error: 'words_required',
+        error: 'notEnoughWords',
+        generationStatus: TagesimpulsGenerationStatus.notEnoughWords,
         impulses: const [],
         isGenerating: false,
       );
@@ -58,10 +64,15 @@ class TagesimpulsMessageController
     state = state.copyWith(
       isGenerating: true,
       clearError: true,
+      generationStatus: TagesimpulsGenerationStatus.idle,
       impulses: const [],
     );
 
     try {
+      debugPrint(
+        'TagesimpulsMessageController generate start '
+        'selectedWords=${items.length} requestedCount=${state.count}',
+      );
       final result = await _client.generate(
         TagesimpulsGenerateRequest(
           words: [
@@ -76,23 +87,57 @@ class TagesimpulsMessageController
           style: 'natural_message',
         ),
       );
+      debugPrint(
+        'TagesimpulsMessageController generate success '
+        'impulses=${result.impulses.length}',
+      );
+      if (result.impulses.isEmpty) {
+        state = state.copyWith(
+          isGenerating: false,
+          error: 'noImpulsesReturned',
+          generationStatus: TagesimpulsGenerationStatus.noImpulsesReturned,
+          impulses: const [],
+        );
+        return;
+      }
       state = state.copyWith(
         isGenerating: false,
         clearError: true,
+        generationStatus: TagesimpulsGenerationStatus.generationSucceeded,
         impulses: result.impulses,
       );
     } on TagesimpulsAiException catch (error) {
+      final status = _statusForErrorCode(error.code);
+      debugPrint(
+        'TagesimpulsMessageController generate failed code=${error.code} '
+        'status=${status.name}',
+      );
       state = state.copyWith(
         isGenerating: false,
         error: error.code,
+        generationStatus: status,
         impulses: const [],
       );
     } on Object {
+      debugPrint('TagesimpulsMessageController generate failed unexpected');
       state = state.copyWith(
         isGenerating: false,
-        error: 'ai_request_failed',
+        error: 'functionCallFailed',
+        generationStatus: TagesimpulsGenerationStatus.functionCallFailed,
         impulses: const [],
       );
     }
+  }
+
+  TagesimpulsGenerationStatus _statusForErrorCode(String code) {
+    return switch (code) {
+      'aiClientNotConfigured' =>
+        TagesimpulsGenerationStatus.aiClientNotConfigured,
+      'quotaExceeded' => TagesimpulsGenerationStatus.quotaExceeded,
+      'invalidAiResponse' => TagesimpulsGenerationStatus.invalidAiResponse,
+      'noImpulsesReturned' => TagesimpulsGenerationStatus.noImpulsesReturned,
+      'notEnoughWords' => TagesimpulsGenerationStatus.notEnoughWords,
+      _ => TagesimpulsGenerationStatus.functionCallFailed,
+    };
   }
 }

@@ -40,6 +40,33 @@ void main() {
     },
   );
 
+  testWidgets('custom time option is visible and selected time is shown', (
+    tester,
+  ) async {
+    final fakeClient = _FakeTagesimpulsAiClient();
+    final settingsRepository = _MemorySettingsRepository(
+      const TagesimpulsNotificationSettings(
+        preferredWindow: TagesimpulsPreferredWindow.custom,
+        customHour: 12,
+        customMinute: 7,
+      ),
+    );
+
+    await _pumpCourseScreen(
+      tester,
+      fakeClient: fakeClient,
+      settingsRepository: settingsRepository,
+    );
+
+    expect(find.text('Eigene Zeit'), findsOneWidget);
+    final customChip = tester.widget<ChoiceChip>(
+      find.byKey(const Key('tagesimpuls-window-custom')),
+    );
+    expect(customChip.selected, isTrue);
+    expect(find.text('Eigene Zeit: 12:07 Uhr'), findsOneWidget);
+    expect(fakeClient.requests, isEmpty);
+  });
+
   testWidgets('under three words shows hint and does not generate on change', (
     tester,
   ) async {
@@ -378,6 +405,37 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
+  testWidgets('pending count zero after scheduling corrects status', (
+    tester,
+  ) async {
+    final fakeScheduler = _FakeNotificationScheduler(
+      pendingIdsOverride: const [],
+    );
+
+    await _pumpCourseScreen(
+      tester,
+      initialItems: _threeItems(),
+      fakeScheduler: fakeScheduler,
+    );
+
+    await tester.ensureVisible(
+      find.byKey(const Key('tagesimpuls-window-morning')),
+    );
+    await tester.tap(find.byKey(const Key('tagesimpuls-window-morning')));
+    await tester.pump();
+    await tester.pump();
+
+    expect(fakeScheduler.scheduled, hasLength(1));
+    expect(
+      find.text('Benachrichtigungen wurden nicht registriert.'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(RegExp(r'Nächster Impuls: .* um \d\d:\d\d Uhr\.')),
+      findsNothing,
+    );
+  });
+
   testWidgets('debug test notification plans without AI', (tester) async {
     final fakeClient = _FakeTagesimpulsAiClient();
     final fakeScheduler = _FakeNotificationScheduler();
@@ -392,6 +450,7 @@ void main() {
     await tester.ensureVisible(
       find.byKey(const Key('tagesimpuls-test-notification')),
     );
+    expect(find.text('Test in 10 Sekunden'), findsOneWidget);
     await tester.tap(find.byKey(const Key('tagesimpuls-test-notification')));
     await tester.pump();
     await tester.pump();
@@ -553,10 +612,12 @@ class _FakeNotificationScheduler implements TagesimpulsNotificationScheduler {
   _FakeNotificationScheduler({
     this.permissionStatus = TagesimpulsNotificationPermissionStatus.granted,
     this.throwOnSchedule = false,
+    this.pendingIdsOverride,
   });
 
   final TagesimpulsNotificationPermissionStatus permissionStatus;
   final bool throwOnSchedule;
+  final List<int>? pendingIdsOverride;
   final scheduled = <TagesimpulsNotificationSchedule>[];
   int cancelCalls = 0;
 
@@ -576,6 +637,12 @@ class _FakeNotificationScheduler implements TagesimpulsNotificationScheduler {
 
   @override
   Future<int> pendingNotificationCount() async => scheduled.length;
+
+  @override
+  Future<List<int>> pendingNotificationIds() async {
+    return pendingIdsOverride ??
+        scheduled.map((notification) => notification.id).toList();
+  }
 
   @override
   Future<void> cancelAll() async {

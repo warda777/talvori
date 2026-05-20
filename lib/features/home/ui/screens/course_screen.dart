@@ -19,8 +19,31 @@ class CourseScreen extends ConsumerStatefulWidget {
   ConsumerState<CourseScreen> createState() => _CourseScreenState();
 }
 
-class _CourseScreenState extends ConsumerState<CourseScreen> {
+class _CourseScreenState extends ConsumerState<CourseScreen>
+    with WidgetsBindingObserver {
   bool _isApplyingTagesimpulsSettings = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _validateCurrentTagesimpulsPlan();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _validateCurrentTagesimpulsPlan();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -277,16 +300,39 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                           label: Text(_labelForWindow(window)),
                           selected:
                               notificationSettings.preferredWindow == window,
-                          onSelected: (_) => _setPreferredWindow(
-                            service: notificationService,
-                            messageController: messageController,
-                            settingsController: settingsController,
-                            selectedItems: selection.items,
-                            window: window,
-                          ),
+                          onSelected: (_) async {
+                            if (window == TagesimpulsPreferredWindow.custom) {
+                              await _setCustomTime(
+                                service: notificationService,
+                                messageController: messageController,
+                                settingsController: settingsController,
+                                selectedItems: selection.items,
+                                currentSettings: notificationSettings.settings,
+                              );
+                              return;
+                            }
+                            await _setPreferredWindow(
+                              service: notificationService,
+                              messageController: messageController,
+                              settingsController: settingsController,
+                              selectedItems: selection.items,
+                              window: window,
+                            );
+                          },
                         ),
                     ],
                   ),
+                  if (notificationSettings.preferredWindow ==
+                      TagesimpulsPreferredWindow.custom) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Eigene Zeit: ${_customTimeLabel(notificationSettings.settings)} Uhr',
+                      style: const TextStyle(
+                        color: Color(0xFF7FFFE7),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   Text(
                     _statusText(notificationSettings),
@@ -357,7 +403,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                         settingsController: settingsController,
                       ),
                       icon: const Icon(Icons.notifications_active_outlined),
-                      label: const Text('Test-Benachrichtigung'),
+                      label: const Text('Test in 10 Sekunden'),
                     ),
                   ],
                 ],
@@ -428,6 +474,36 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     );
   }
 
+  Future<void> _setCustomTime({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+    required List<TagesimpulsSelectionItem> selectedItems,
+    required TagesimpulsNotificationSettings currentSettings,
+  }) async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: currentSettings.customHour,
+        minute: currentSettings.customMinute,
+      ),
+    );
+    if (selected == null) return;
+    if (!mounted) return;
+
+    final settings = await settingsController.setCustomTime(
+      hour: selected.hour,
+      minute: selected.minute,
+    );
+    await _applyTagesimpulsSettings(
+      service: service,
+      messageController: messageController,
+      settingsController: settingsController,
+      selectedItems: selectedItems,
+      settings: settings,
+    );
+  }
+
   Future<void> _applyTagesimpulsSettings({
     required TagesimpulsNotificationService service,
     required TagesimpulsMessageController messageController,
@@ -482,6 +558,8 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
               .take(settings.frequencyPerDay)
               .toList(growable: false),
           preferredWindow: settings.preferredWindow,
+          customHour: settings.customHour,
+          customMinute: settings.customMinute,
         ),
       );
       if (!mounted) return;
@@ -496,6 +574,19 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
           settingsController.setPlannedTimes(
             result.scheduled.map((schedule) => schedule.scheduledAt).toList(),
             info,
+          );
+        case TagesimpulsNotificationPlanningStatus
+            .scheduledButNoPendingNotification:
+          settingsController.setErrorStatus(
+            'Benachrichtigungen wurden nicht registriert.',
+          );
+        case TagesimpulsNotificationPlanningStatus.noPendingNotifications:
+          settingsController.setErrorStatus(
+            'Keine geplanten Benachrichtigungen gefunden.',
+          );
+        case TagesimpulsNotificationPlanningStatus.expiredScheduleRecomputed:
+          settingsController.setNextPlannedInfo(
+            'Tagesimpuls-Zeit wurde aktualisiert.',
           );
         case TagesimpulsNotificationPlanningStatus.permissionGranted:
           settingsController.setNextPlannedInfo('Tagesimpuls ist aktiv.');
@@ -591,6 +682,19 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     switch (result.status) {
       case TagesimpulsNotificationPlanningStatus.scheduledSuccessfully:
         settingsController.setNextPlannedInfo('Test-Benachrichtigung geplant.');
+      case TagesimpulsNotificationPlanningStatus
+          .scheduledButNoPendingNotification:
+        settingsController.setErrorStatus(
+          'Test-Benachrichtigung wurde nicht registriert.',
+        );
+      case TagesimpulsNotificationPlanningStatus.noPendingNotifications:
+        settingsController.setErrorStatus(
+          'Keine geplanten Benachrichtigungen gefunden.',
+        );
+      case TagesimpulsNotificationPlanningStatus.expiredScheduleRecomputed:
+        settingsController.setNextPlannedInfo(
+          'Tagesimpuls-Zeit wurde aktualisiert.',
+        );
       case TagesimpulsNotificationPlanningStatus.permissionDenied:
         settingsController.setPermissionDeniedStatus(
           'Benachrichtigungen sind nicht erlaubt. Bitte in den iPhone-Einstellungen aktivieren.',
@@ -641,6 +745,78 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     };
   }
 
+  Future<void> _validateCurrentTagesimpulsPlan() async {
+    if (!mounted) return;
+
+    final selection = ref.read(tagesimpulsSelectionControllerProvider);
+    final notificationSettings = ref.read(
+      tagesimpulsNotificationSettingsControllerProvider,
+    );
+    final settingsController = ref.read(
+      tagesimpulsNotificationSettingsControllerProvider.notifier,
+    );
+    final notificationService = ref.read(
+      tagesimpulsNotificationServiceProvider,
+    );
+
+    if (selection.isLoading || !notificationSettings.enabled) return;
+
+    final hadLocalPlan =
+        notificationSettings.plannedTimes.isNotEmpty ||
+        notificationSettings.nextPlannedAt != null;
+    final prunedExpiredTimes = settingsController.pruneExpiredPlannedTimes(
+      DateTime.now(),
+      _nextPlannedInfo,
+    );
+    final refreshedSettings = ref.read(
+      tagesimpulsNotificationSettingsControllerProvider,
+    );
+
+    if (selection.items.length < 3) {
+      settingsController.setNeedsWordsStatus(_notEnoughWordsStatus);
+      return;
+    }
+
+    if (!hadLocalPlan) return;
+
+    final inspection = await notificationService.inspectPendingNotifications();
+    if (!mounted) return;
+    debugPrint(
+      'Tagesimpuls pending validation status=${inspection.status.name} '
+      'pendingCount=${inspection.pendingNotificationCount ?? -1} '
+      'prunedExpiredTimes=$prunedExpiredTimes',
+    );
+
+    if (inspection.status ==
+        TagesimpulsNotificationPlanningStatus.noPendingNotifications) {
+      settingsController.setErrorStatus(
+        'Keine geplanten Benachrichtigungen gefunden.',
+      );
+      await _applyTagesimpulsSettings(
+        service: notificationService,
+        messageController: ref.read(
+          tagesimpulsMessageControllerProvider.notifier,
+        ),
+        settingsController: settingsController,
+        selectedItems: selection.items,
+        settings: refreshedSettings.settings,
+      );
+      return;
+    }
+
+    if (prunedExpiredTimes && refreshedSettings.plannedTimes.isEmpty) {
+      await _applyTagesimpulsSettings(
+        service: notificationService,
+        messageController: ref.read(
+          tagesimpulsMessageControllerProvider.notifier,
+        ),
+        settingsController: settingsController,
+        selectedItems: selection.items,
+        settings: refreshedSettings.settings,
+      );
+    }
+  }
+
   String _labelForWindow(TagesimpulsPreferredWindow window) {
     return switch (window) {
       TagesimpulsPreferredWindow.automatic => 'Automatisch',
@@ -648,7 +824,14 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
       TagesimpulsPreferredWindow.noon => 'Mittags',
       TagesimpulsPreferredWindow.afternoon => 'Nachmittags',
       TagesimpulsPreferredWindow.evening => 'Abends',
+      TagesimpulsPreferredWindow.custom => 'Eigene Zeit',
     };
+  }
+
+  String _customTimeLabel(TagesimpulsNotificationSettings settings) {
+    final hour = settings.customHour.toString().padLeft(2, '0');
+    final minute = settings.customMinute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 
   String _nextPlannedInfo(DateTime scheduledAt) {

@@ -3,7 +3,14 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum TagesimpulsPreferredWindow { automatic, morning, noon, afternoon, evening }
+enum TagesimpulsPreferredWindow {
+  automatic,
+  morning,
+  noon,
+  afternoon,
+  evening,
+  custom,
+}
 
 enum TagesimpulsNotificationDisplayStatus {
   active,
@@ -18,22 +25,42 @@ class TagesimpulsNotificationSettings {
     this.enabled = true,
     this.frequencyPerDay = 1,
     this.preferredWindow = TagesimpulsPreferredWindow.automatic,
+    this.customHour = 9,
+    this.customMinute = 0,
   });
 
   final bool enabled;
   final int frequencyPerDay;
   final TagesimpulsPreferredWindow preferredWindow;
+  final int customHour;
+  final int customMinute;
 
   TagesimpulsNotificationSettings copyWith({
     bool? enabled,
     int? frequencyPerDay,
     TagesimpulsPreferredWindow? preferredWindow,
+    int? customHour,
+    int? customMinute,
   }) {
     return TagesimpulsNotificationSettings(
       enabled: enabled ?? this.enabled,
       frequencyPerDay: (frequencyPerDay ?? this.frequencyPerDay).clamp(1, 5),
       preferredWindow: preferredWindow ?? this.preferredWindow,
+      customHour: _normalizeHour(customHour ?? this.customHour),
+      customMinute: _normalizeMinute(customMinute ?? this.customMinute),
     );
+  }
+
+  static int _normalizeHour(int value) {
+    if (value < 0) return 0;
+    if (value > 23) return 23;
+    return value;
+  }
+
+  static int _normalizeMinute(int value) {
+    if (value < 0) return 0;
+    if (value > 59) return 59;
+    return value;
   }
 }
 
@@ -49,11 +76,15 @@ class SharedPreferencesTagesimpulsNotificationSettingsRepository
     this.enabledKey = 'talvori_tagesimpuls_notifications_enabled_v1',
     this.frequencyKey = 'talvori_tagesimpuls_notification_frequency_v1',
     this.windowKey = 'talvori_tagesimpuls_notification_window_v1',
+    this.customHourKey = 'talvori_tagesimpuls_notification_custom_hour_v1',
+    this.customMinuteKey = 'talvori_tagesimpuls_notification_custom_minute_v1',
   });
 
   final String enabledKey;
   final String frequencyKey;
   final String windowKey;
+  final String customHourKey;
+  final String customMinuteKey;
 
   @override
   Future<TagesimpulsNotificationSettings> loadSettings() async {
@@ -61,10 +92,14 @@ class SharedPreferencesTagesimpulsNotificationSettingsRepository
     final enabled = prefs.getBool(enabledKey) ?? true;
     final frequency = prefs.getInt(frequencyKey);
     final windowName = prefs.getString(windowKey);
+    final customHour = prefs.getInt(customHourKey);
+    final customMinute = prefs.getInt(customMinuteKey);
     return TagesimpulsNotificationSettings(
       enabled: enabled,
       frequencyPerDay: _normalizeFrequency(frequency),
       preferredWindow: _parseWindow(windowName),
+      customHour: _normalizeHour(customHour),
+      customMinute: _normalizeMinute(customMinute),
     );
   }
 
@@ -74,6 +109,8 @@ class SharedPreferencesTagesimpulsNotificationSettingsRepository
     await prefs.setBool(enabledKey, settings.enabled);
     await prefs.setInt(frequencyKey, settings.frequencyPerDay.clamp(1, 5));
     await prefs.setString(windowKey, settings.preferredWindow.name);
+    await prefs.setInt(customHourKey, settings.customHour.clamp(0, 23));
+    await prefs.setInt(customMinuteKey, settings.customMinute.clamp(0, 59));
   }
 
   int _normalizeFrequency(int? value) {
@@ -86,6 +123,16 @@ class SharedPreferencesTagesimpulsNotificationSettingsRepository
       (window) => window.name == value,
       orElse: () => TagesimpulsPreferredWindow.automatic,
     );
+  }
+
+  int _normalizeHour(int? value) {
+    if (value == null || value < 0 || value > 23) return 9;
+    return value;
+  }
+
+  int _normalizeMinute(int? value) {
+    if (value == null || value < 0 || value > 59) return 0;
+    return value;
   }
 }
 
@@ -122,6 +169,10 @@ class TagesimpulsNotificationSettingsState {
   int get frequencyPerDay => settings.frequencyPerDay;
 
   TagesimpulsPreferredWindow get preferredWindow => settings.preferredWindow;
+
+  int get customHour => settings.customHour;
+
+  int get customMinute => settings.customMinute;
 
   bool get isOff => !settings.enabled;
 
@@ -202,6 +253,20 @@ class TagesimpulsNotificationSettingsController
     return settings;
   }
 
+  Future<TagesimpulsNotificationSettings> setCustomTime({
+    required int hour,
+    required int minute,
+  }) async {
+    final settings = state.settings.copyWith(
+      enabled: true,
+      preferredWindow: TagesimpulsPreferredWindow.custom,
+      customHour: hour,
+      customMinute: minute,
+    );
+    await _save(settings);
+    return settings;
+  }
+
   void setNextPlannedInfo(String? info) {
     state = state.copyWith(
       nextPlannedInfo: info,
@@ -255,6 +320,41 @@ class TagesimpulsNotificationSettingsController
       displayStatus: TagesimpulsNotificationDisplayStatus.active,
       clearPlannedTimes: sorted.isEmpty,
     );
+  }
+
+  bool pruneExpiredPlannedTimes(
+    DateTime now,
+    String Function(DateTime scheduledAt) infoBuilder,
+  ) {
+    final remaining =
+        state.plannedTimes
+            .where((time) => time.isAfter(now))
+            .toList(growable: false)
+          ..sort();
+    if (remaining.length == state.plannedTimes.length &&
+        (state.nextPlannedAt == null || state.nextPlannedAt!.isAfter(now))) {
+      return false;
+    }
+
+    if (remaining.isEmpty) {
+      state = state.copyWith(
+        clearNextPlannedInfo: true,
+        clearPlannedTimes: true,
+        displayStatus: state.enabled
+            ? TagesimpulsNotificationDisplayStatus.active
+            : TagesimpulsNotificationDisplayStatus.off,
+      );
+      return true;
+    }
+
+    state = state.copyWith(
+      nextPlannedInfo: infoBuilder(remaining.first),
+      nextPlannedAt: remaining.first,
+      plannedTimes: remaining,
+      plannedCount: remaining.length,
+      displayStatus: TagesimpulsNotificationDisplayStatus.active,
+    );
+    return true;
   }
 
   Future<void> _save(

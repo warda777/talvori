@@ -7,10 +7,15 @@ import '../ai/supabase_tagesimpuls_ai_client.dart';
 import '../ai/tagesimpuls_ai_client.dart';
 import 'tagesimpuls_message_controller.dart';
 
+final tagesimpulsFunctionCallerProvider = Provider<TagesimpulsFunctionCaller>((
+  ref,
+) {
+  return supabaseFunctionCallerFromClient(Supabase.instance.client);
+});
+
 final tagesimpulsAiClientProvider = Provider<TagesimpulsAiClient>((ref) {
-  return SupabaseTagesimpulsAiClient(
-    functionCaller: supabaseFunctionCallerFromClient(Supabase.instance.client),
-  );
+  final functionCaller = ref.watch(tagesimpulsFunctionCallerProvider);
+  return SupabaseTagesimpulsAiClient(functionCaller: functionCaller);
 });
 
 final tagesimpulsMessageControllerProvider =

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/local_database/translation/supabase_function_caller.dart';
 import 'package:talvori/core/local_database/translation/translation_client.dart';
 
@@ -82,6 +83,44 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('returns_function_exception_json_error_details', () async {
+      final caller = SupabaseEdgeFunctionCaller.withInvoker((
+        functionName,
+        payload,
+      ) async {
+        throw const FunctionException(
+          status: 429,
+          details: {'error': 'quota_exceeded'},
+          reasonPhrase: 'Too Many Requests',
+        );
+      });
+
+      final response = await caller.call('generate-daily-impulses', {
+        'words': const [],
+      });
+
+      expect(response, {'error': 'quota_exceeded'});
+    });
+
+    test('returns_function_exception_string_error_details', () async {
+      final caller = SupabaseEdgeFunctionCaller.withInvoker((
+        functionName,
+        payload,
+      ) async {
+        throw const FunctionException(
+          status: 500,
+          details: '{"error":"ai_request_failed"}',
+          reasonPhrase: 'Internal Server Error',
+        );
+      });
+
+      final response = await caller.call('generate-daily-impulses', {
+        'words': const [],
+      });
+
+      expect(response, {'error': 'ai_request_failed'});
     });
   });
 }

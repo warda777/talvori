@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'tagesimpuls_ai_client.dart';
 
 typedef TagesimpulsFunctionCaller =
@@ -20,7 +22,7 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
     TagesimpulsGenerateRequest request,
   ) async {
     if (request.words.isEmpty) {
-      throw const TagesimpulsAiException('words_required');
+      throw const TagesimpulsAiException('notEnoughWords');
     }
     if (request.count < 1 || request.count > 5) {
       throw const TagesimpulsAiException('invalid_count');
@@ -32,22 +34,42 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
       'language': request.language,
       'style': request.style,
     };
+    debugPrint(
+      'SupabaseTagesimpulsAiClient call function=$functionName '
+      'words=${request.words.length} count=${request.count} '
+      'language=${request.language} style=${request.style}',
+    );
 
     late final Map<String, Object?> response;
     try {
       response = await _functionCaller(functionName, payload);
     } on Object catch (error) {
-      throw TagesimpulsAiException('function_call_failed: $error');
+      debugPrint(
+        'SupabaseTagesimpulsAiClient function call failed: '
+        '${error.runtimeType} message=${_safeErrorMessage(error)}',
+      );
+      throw const TagesimpulsAiException('functionCallFailed');
     }
+    debugPrint(
+      'SupabaseTagesimpulsAiClient responseKeys=${response.keys.toList()}',
+    );
 
     final error = response['error'];
     if (error is String && error.trim().isNotEmpty) {
-      throw TagesimpulsAiException(error.trim());
+      final code = _mapFunctionError(error.trim());
+      debugPrint(
+        'SupabaseTagesimpulsAiClient function error=$code '
+        'raw=${error.trim()}',
+      );
+      throw TagesimpulsAiException(code);
     }
 
     final rawImpulses = response['impulses'];
     if (rawImpulses is! List) {
-      throw const TagesimpulsAiException('ai_invalid_response');
+      throw const TagesimpulsAiException('invalidAiResponse');
+    }
+    if (rawImpulses.isEmpty) {
+      throw const TagesimpulsAiException('noImpulsesReturned');
     }
 
     final impulses = rawImpulses
@@ -55,10 +77,22 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
         .whereType<TagesimpulsGeneratedImpulse>()
         .toList(growable: false);
     if (impulses.isEmpty) {
-      throw const TagesimpulsAiException('ai_invalid_response');
+      throw const TagesimpulsAiException('invalidAiResponse');
     }
+    debugPrint('SupabaseTagesimpulsAiClient impulses=${impulses.length}');
 
     return TagesimpulsGenerateResult(impulses: impulses);
+  }
+
+  String _mapFunctionError(String error) {
+    return switch (error) {
+      'ai_not_configured' ||
+      'ai_provider_not_supported' => 'aiClientNotConfigured',
+      'quota_exceeded' || 'ai_rate_limited' => 'quotaExceeded',
+      'ai_invalid_response' => 'invalidAiResponse',
+      'words_required' => 'notEnoughWords',
+      _ => 'functionCallFailed',
+    };
   }
 
   TagesimpulsGeneratedImpulse? _parseImpulse(Object? raw) {
@@ -80,5 +114,11 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
                 .toList(growable: false)
           : const [],
     );
+  }
+
+  String _safeErrorMessage(Object error) {
+    final message = error.toString();
+    if (message.length <= 240) return message;
+    return '${message.substring(0, 240)}...';
   }
 }

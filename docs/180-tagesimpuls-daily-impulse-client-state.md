@@ -19,33 +19,61 @@ Neu vorbereitet wurde ein spezialisierter Tagesimpuls-Client:
 
 Der Client ruft die Supabase Edge Function `generate-daily-impulses` über den bestehenden Supabase Function Caller auf. Er kennt keine API-Keys und enthält keine KI-Secrets.
 
+Der Tagesimpuls-Provider stellt den Function Caller separat bereit. Dadurch kann der echte App-Flow einen `SupabaseTagesimpulsAiClient` mit `SupabaseEdgeFunctionCaller` nutzen, während Tests denselben Provider mit einem Fake Function Caller überschreiben können.
+
 ## Fehlerbehandlung
 
-Der Client behandelt kontrollierte Fehlercodes:
+Der Client normalisiert Edge-Function- und Provider-Fehler auf appseitige Diagnosezustände:
 
-- `ai_not_configured`
-- `quota_exceeded`
-- `ai_rate_limited`
-- `ai_invalid_response`
-- `ai_request_failed`
-- `ai_auth_failed`
-- `invalid_count`
-- `words_required`
+- `aiClientNotConfigured`
+- `functionCallFailed`
+- `quotaExceeded`
+- `invalidAiResponse`
+- `noImpulsesReturned`
+- `notEnoughWords`
+- `generationSucceeded`
 
-Die UI mappt diese Codes auf verständliche deutsche Hinweise.
+Die UI mappt diese Zustände auf konkrete deutsche Hinweise. Dadurch ist unterscheidbar, ob die Edge Function nicht erreichbar ist, das Limit erreicht wurde, die KI-Antwort nicht parsebar war oder keine Impulse zurückkamen.
 
-## Planungs-/Vorschau-Flow
+`functionCallFailed` bedeutet appseitig: Der Flutter-Aufruf der Supabase Function lieferte keine verwertbare Function-Response. Edge-Function-Fehler mit JSON-Body, zum Beispiel `{ "error": "quota_exceeded" }`, werden vom gemeinsamen `SupabaseEdgeFunctionCaller` aus `FunctionException.details` zurück in eine Map normalisiert, damit der Tagesimpuls-Client sie konkret mappen kann.
 
-Der neue `TagesimpulsMessageController` verwaltet den App-seitigen Vorschauzustand:
+Der Client ruft exakt `generate-daily-impulses` auf und sendet:
+
+- `words`
+- `count`
+- `language`
+- `style`
+
+Sichere Debug-Logs enthalten nur Function-Name, Payload-Keys, Response-Keys, Exception-Typ und gekürzte Fehlermeldungen. API-Keys, Tokens und vollständige Prompts werden nicht geloggt.
+
+Die erwartete Response bleibt:
+
+```json
+{
+  "impulses": [
+    {
+      "slot": "morning",
+      "message": "...",
+      "usedWords": ["move"]
+    }
+  ]
+}
+```
+
+`usedWords` wird tolerant behandelt, falls die Function es ausnahmsweise nicht liefert. `message` bleibt Pflicht.
+
+## Planungsflow
+
+Der `TagesimpulsMessageController` verwaltet den App-seitigen Generierungszustand:
 
 - ausgewählte Wörter aus der globalen Tagesimpuls-Auswahl
 - Anzahl `1` bis `5`
 - Standard `1`
 - Ladezustand
 - Fehlerzustand
-- generierte Impulse im lokalen UI-State
+- generierte Impulse im lokalen State
 
-Die Generierung wird nur manuell durch den Button „Tagesimpulse vorbereiten“ ausgelöst.
+Die Generierung wird nicht beim App-Start und nicht beim Hinzufügen eines Wortes ausgelöst. Im aktuellen Selbstläufer-Flow passiert sie intern nur, wenn der Nutzer Tagesimpuls-Einstellungen aktiv nutzt und genug Wörter vorhanden sind.
 
 ## UI-Stand
 
@@ -58,10 +86,10 @@ Die Tagesimpuls-Verwaltung zeigt:
 - Hinweis bei zu wenigen Wörtern
 - bewusste Auswahl der Anzahl `1` bis `5`
 - Hinweis, dass mehrere Impulse eine bewusste Entscheidung sind
-- Button „Tagesimpulse vorbereiten“
-- generierte Impulse mit Slot, Nachricht und verwendeten Wörtern
+- Status zu Generierung/Planung
 
 Es gibt keine große dauerhafte Tagesimpuls-Karte auf Home.
+KI-Texte werden nicht als Vorschau angezeigt; sie sind für lokale Notifications gedacht.
 
 ## Regeln
 
@@ -88,13 +116,18 @@ Abgedeckt sind:
 
 - Client sendet `words`, `count`, `language` und `style`
 - Client parst `impulses`
-- Client behandelt `quota_exceeded`
+- Client behandelt `quotaExceeded`
 - Client behandelt ungültige KI-Antworten
+- Client behandelt leere Impulslisten
+- Client behandelt Function-Call-Fehler
+- Client behandelt fehlende KI-Konfiguration
+- Supabase Function Caller übernimmt JSON-Fehlerdetails aus `FunctionException`
+- Provider baut den Tagesimpuls-Client mit injiziertem Function Caller
 - Controller startet mit `count = 1`
 - Controller erlaubt `count` 1 bis 5
-- Controller generiert nur manuell
+- Controller generiert nicht automatisch beim Erstellen
 - UI zeigt Hinweis bei zu wenigen Wörtern
-- UI zeigt generierte Impulse
+- UI zeigt konkrete Fehlerstatus
 - keine echten Netzwerkaufrufe in Tests
 
 ## Nächster Schritt

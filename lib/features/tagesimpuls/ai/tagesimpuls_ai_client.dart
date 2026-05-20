@@ -45,6 +45,17 @@ class TagesimpulsGenerateResult {
   final List<TagesimpulsGeneratedImpulse> impulses;
 }
 
+enum TagesimpulsGenerationStatus {
+  idle,
+  aiClientNotConfigured,
+  functionCallFailed,
+  quotaExceeded,
+  invalidAiResponse,
+  noImpulsesReturned,
+  notEnoughWords,
+  generationSucceeded,
+}
+
 class TagesimpulsAiException implements Exception {
   const TagesimpulsAiException(this.code);
 

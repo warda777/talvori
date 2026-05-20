@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -15,6 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
@@ -80,8 +80,6 @@ class _InitGateState extends State<_InitGate> {
   }
 
   Future<void> _initialize() async {
-    WidgetsFlutterBinding.ensureInitialized();
-
     // 0) Orientierung auf Hochformat fixieren (keine Drehung)
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
@@ -89,13 +87,10 @@ class _InitGateState extends State<_InitGate> {
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {
-      print('⚠️ .env nicht gefunden, verwende .env.example');
+      debugPrint('⚠️ .env nicht gefunden, verwende .env.example');
       await dotenv.load(fileName: ".env.example");
     }
 
-    // Debug: Prüfe ob Keys geladen werden
-    print('URL=${dotenv.env['SUPABASE_URL']}');
-    print('ANON=${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 8)}...');
     assert(
       dotenv.env['SUPABASE_URL']?.isNotEmpty == true,
       'SUPABASE_URL missing',
@@ -106,60 +101,55 @@ class _InitGateState extends State<_InitGate> {
     );
 
     // 2) Supabase initialisieren (mit Fallback)
-    print('🔧 Supabase URL: ${dotenv.env['SUPABASE_URL']}');
-    print(
-      '🔧 Supabase Anon Key: ${dotenv.env['SUPABASE_ANON_KEY']?.substring(0, 20)}...',
-    );
-
     try {
       await Supabase.initialize(
         url: dotenv.env['SUPABASE_URL']!,
         anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
       );
-      print('✅ Supabase erfolgreich initialisiert');
+      debugPrint('✅ Supabase erfolgreich initialisiert');
     } catch (e) {
-      print('❌ Supabase-Initialisierung fehlgeschlagen: $e');
-      print('⚠️ App läuft im Offline-Modus');
+      debugPrint('❌ Supabase-Initialisierung fehlgeschlagen: $e');
+      debugPrint('⚠️ App läuft im Offline-Modus');
       // App läuft trotzdem weiter, aber ohne Supabase
     }
 
     // 3) Debug-Auto-Login (nur wenn Supabase verfügbar)
     try {
       final auth = Supabase.instance.client.auth;
-      print('🔧 Current user: ${auth.currentUser?.email ?? "Kein User"}');
+      debugPrint('🔧 Current user: ${auth.currentUser?.email ?? "Kein User"}');
 
       if (kDebugMode && auth.currentUser == null) {
         final email = dotenv.env['TEST_EMAIL'];
         final pw = dotenv.env['TEST_PASSWORD'];
-        print('🔧 Versuche Login mit: $email');
+        debugPrint('🔧 Versuche Debug-Login');
 
         if (email != null && pw != null && email.isNotEmpty && pw.isNotEmpty) {
           try {
             final result = await auth
                 .signInWithPassword(email: email, password: pw)
                 .timeout(const Duration(seconds: 8));
-            print('✅ Login erfolgreich: ${result.user?.email}');
+            debugPrint('✅ Login erfolgreich: ${result.user?.email}');
           } on TimeoutException {
-            print('⚠️ Login timeout – UI startet trotzdem');
+            debugPrint('⚠️ Login timeout – UI startet trotzdem');
           } catch (e) {
-            print('❌ Login fehlgeschlagen: $e');
+            debugPrint('❌ Login fehlgeschlagen: $e');
           }
         } else {
-          print('⚠️ Keine Login-Credentials in .env gefunden');
+          debugPrint('⚠️ Keine Login-Credentials in .env gefunden');
         }
       }
     } catch (e) {
-      print('⚠️ Supabase nicht verfügbar - Login übersprungen: $e');
+      debugPrint('⚠️ Supabase nicht verfügbar - Login übersprungen: $e');
     }
 
     // 4) Test-Datenbankverbindung (nur wenn Supabase verfügbar)
     try {
       final client = Supabase.instance.client;
       final response = await client.from('categories').select('count').limit(1);
-      print('🔧 Datenbank-Test: ${response.length} Kategorien gefunden');
+      debugPrint('🔧 Datenbank-Test: ${response.length} Kategorien gefunden');
     } catch (e) {
-      print('❌ Datenbank-Test fehlgeschlagen: $e');
-      print('⚠️ App läuft ohne Datenbankverbindung');
+      debugPrint('❌ Datenbank-Test fehlgeschlagen: $e');
+      debugPrint('⚠️ App läuft ohne Datenbankverbindung');
     }
 
     final prefs = await SharedPreferences.getInstance();

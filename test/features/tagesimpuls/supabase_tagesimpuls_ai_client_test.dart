@@ -58,13 +58,30 @@ void main() {
           isA<TagesimpulsAiException>().having(
             (error) => error.code,
             'code',
-            'quota_exceeded',
+            'quotaExceeded',
           ),
         ),
       );
     });
 
     test('handles invalid AI response', () async {
+      final client = SupabaseTagesimpulsAiClient(
+        functionCaller: (_, _) async => {'impulses': 'nope'},
+      );
+
+      await expectLater(
+        client.generate(_request()),
+        throwsA(
+          isA<TagesimpulsAiException>().having(
+            (error) => error.code,
+            'code',
+            'invalidAiResponse',
+          ),
+        ),
+      );
+    });
+
+    test('handles empty impulse list separately', () async {
       final client = SupabaseTagesimpulsAiClient(
         functionCaller: (_, _) async => {'impulses': []},
       );
@@ -75,10 +92,59 @@ void main() {
           isA<TagesimpulsAiException>().having(
             (error) => error.code,
             'code',
-            'ai_invalid_response',
+            'noImpulsesReturned',
           ),
         ),
       );
+    });
+
+    test('handles function call failure', () async {
+      final client = SupabaseTagesimpulsAiClient(
+        functionCaller: (_, _) async => throw StateError('network failed'),
+      );
+
+      await expectLater(
+        client.generate(_request()),
+        throwsA(
+          isA<TagesimpulsAiException>().having(
+            (error) => error.code,
+            'code',
+            'functionCallFailed',
+          ),
+        ),
+      );
+    });
+
+    test('maps ai_not_configured to client diagnosis', () async {
+      final client = SupabaseTagesimpulsAiClient(
+        functionCaller: (_, _) async => {'error': 'ai_not_configured'},
+      );
+
+      await expectLater(
+        client.generate(_request()),
+        throwsA(
+          isA<TagesimpulsAiException>().having(
+            (error) => error.code,
+            'code',
+            'aiClientNotConfigured',
+          ),
+        ),
+      );
+    });
+
+    test('parses impulse without usedWords', () async {
+      final client = SupabaseTagesimpulsAiClient(
+        functionCaller: (_, _) async => {
+          'impulses': [
+            {'slot': 'morning', 'message': 'Good morning.'},
+          ],
+        },
+      );
+
+      final result = await client.generate(_request());
+
+      expect(result.impulses.single.message, 'Good morning.');
+      expect(result.impulses.single.usedWords, isEmpty);
     });
 
     test('rejects invalid count without network call', () async {

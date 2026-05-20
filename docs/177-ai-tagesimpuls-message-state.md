@@ -4,89 +4,113 @@
 
 Talvori besitzt eine globale lokale Tagesimpuls-Auswahl mit maximal 5 Wörtern. Wörter können auf dem HomeScreen und im lokalen Lernmodus manuell hinzugefügt werden. Die Auswahl bleibt lokal gespeichert und ist appweit lesbar.
 
-Die Produktstrategie wurde auf eine spätere Messenger-/Notification-Logik ausgerichtet: Der Tagesimpuls soll langfristig nicht als große dauerhafte HomeScreen-Karte funktionieren, sondern als kurze natürliche Nachricht außerhalb der App erscheinen.
+Die Produktstrategie ist auf eine Messenger-/Notification-Logik ausgerichtet: Der Tagesimpuls soll langfristig nicht als große HomeScreen-Karte funktionieren, sondern als kurze natürliche Nachricht außerhalb der App erscheinen.
 
 ## Aktueller Stand
 
+Der Tagesimpuls-Flow ist jetzt als selbstlaufende Einstellung aufgebaut. Standard ist:
+
+- Modus `Automatisch`
+- `1` Tagesimpuls pro Tag
+- Zeitfenster `Automatisch`
+
+Es gibt keinen zentralen Speichern- oder Planen-Button mehr. Änderungen an Modus, Häufigkeit oder Zeitfenster werden sofort lokal gespeichert. Wenn Tagesimpuls aktiv ist und mindestens 3 Wörter ausgewählt sind, wird die lokale Planung ruhig im Hintergrund aktualisiert.
+
 Home bleibt bewusst clean. Der HomeScreen zeigt primär den Auswahlstatus, zum Beispiel `0/5`, und bietet einen kompakten Einstieg in die Tagesimpuls-Verwaltung.
 
-Die bestehende Tagesimpuls-Message-UI ist aktuell nur eine manuelle Vorschau- und Planungsfläche. Sie ist kein automatischer Tagesimpuls, keine Push-Funktion und keine verpflichtende Home-Komponente.
+Der Status der Tagesimpuls-Verwaltung reagiert live auf die globale Wortauswahl. Wenn Wörter hinzugefügt oder entfernt werden, wird der Hinweis „Füge mindestens 3 Wörter hinzu.“ sofort neu bewertet. Ein Wechsel des Zeitfensters oder der Häufigkeit ist nicht mehr als Refresh nötig.
 
-Die Aktion heißt:
+## Nutzerkontrolle
 
-- „Impuls vorbereiten“
+Der Nutzer kann wählen:
 
-Sie nutzt die ausgewählten Wörter und erstellt daraus manuell eine kurze natürliche Nachricht auf Englisch. Die Nachricht soll sich wie eine echte Alltagsnachricht anfühlen und für Sprachlernende verständlich bleiben.
+- Modus: `Aus` oder `Automatisch`
+- Häufigkeit: `1`, `2`, `3`, `4`, `5`
+- Zeitfenster: `Automatisch`, `Morgens`, `Mittags`, `Nachmittags`, `Abends`
+
+`2` bis `5` Tagesimpulse pro Tag entstehen nur durch bewusste Auswahl. Wenn `Aus` gewählt wird, werden geplante lokale Tagesimpuls-Benachrichtigungen gelöscht und es wird keine KI-Anfrage ausgelöst.
+
+## Keine sichtbare KI-Vorschau
+
+KI-Texte werden nicht als Vorschaukarte angezeigt. Es gibt keine sichtbare Karte mit Slot, Nachricht oder `usedWords`.
+
+Der Nutzer sieht:
+
+- ausgewählte Wörter
+- Modus
+- Häufigkeit
+- Zeitfenster
+- Status, zum Beispiel „Tagesimpuls ist ausgeschaltet.“, „Benachrichtigungen sind nicht erlaubt.“ oder „Nächster Impuls: heute Nachmittag.“
+
+Die generierten Nachrichten sollen erst als lokale Benachrichtigung sichtbar werden.
 
 ## Regeln
 
-- Mindestens 3 Wörter müssen ausgewählt sein.
+- Mindestens 3 manuell ausgewählte Wörter werden benötigt.
 - Maximal 5 Wörter können in der Auswahl liegen.
-- Bei weniger als 3 Wörtern erscheint der Hinweis „Wähle mindestens 3 Wörter aus.“
-- Die KI-Anfrage wird nur durch den Button ausgelöst.
+- Bei weniger als 3 Wörtern erscheint „Füge mindestens 3 Wörter hinzu.“
+- Automatische Wortauswahl ist noch nicht umgesetzt und wird als späterer Schritt markiert.
 - Es gibt keine automatische Anfrage beim App-Start.
 - Es gibt keine automatische Anfrage beim Hinzufügen eines Wortes.
-- Es gibt keine Notification-Planung in diesem Schritt.
+- Es gibt keine KI-Anfrage nur durch Hinzufügen oder Entfernen von Tagesimpuls-Wörtern.
+- Es gibt keine automatische Mehrfachbenachrichtigung ohne Nutzerentscheidung.
 
-## Notification-Strategie
+## Feedback und Status
 
-Die aktuelle Vorschau bereitet nur den späteren Produktfluss vor. Langfristig soll eine separate Backend-/Notification-Architektur übernehmen:
+Der Flow nutzt primär eine ruhige Statusanzeige unter den Einstellungen. Normale Änderungen wie `1` auf `2` oder `Morgens` auf `Nachmittags` zeigen keine Fehlersnackbar, solange die Einstellung gespeichert werden konnte.
 
-- Standard bleibt maximal 1 Tagesimpuls pro Tag.
-- 2 bis 5 Impulse pro Tag dürfen nur nach bewusster Nutzerentscheidung entstehen.
-- Ohne manuelle Wortauswahl darf automatische Auswahl später höchstens 1 Nachricht pro Tag erzeugen.
-- Die spätere Generierung soll möglichst mehrere geplante Nachrichten in einem Backend-Request erzeugen.
+Snackbars werden nur für wichtige bewusste Statuswechsel verwendet:
 
-## Anzeige
+- „Tagesimpuls ist aktiv.“
+- „Benachrichtigungen müssen erlaubt werden.“
 
-Der Tagesimpuls-Flow zeigt:
+Ruhige Statusmeldungen sind unter anderem:
 
-- die ausgewählten Wörter
-- den Button „Impuls vorbereiten“
-- einen Ladezustand
-- eine optionale „Impuls-Vorschau“
-- verständliche Fehlerhinweise
+- „Automatisch aktiv · 1 Impuls pro Tag.“
+- „Tagesimpuls ist ausgeschaltet.“
+- „Nächster Impuls: heute Nachmittag.“
+- „Benachrichtigungen sind nicht erlaubt.“
+- „Benachrichtigungen konnten noch nicht geplant werden.“
+- „Tagesimpuls konnte nicht geplant werden.“
+- „Füge mindestens 3 Wörter hinzu.“
 
-Der Stil bleibt dunkel/neon und passt zum lokalen Talvori-Design. Die Vorschau ist nicht als große dauerhafte HomeScreen-Fläche gedacht.
-
-## Fehlerfälle
-
-Gemappt werden unter anderem:
-
-- `ai_not_configured` → „KI ist noch nicht konfiguriert.“
-- `quota_exceeded` / `ai_rate_limited` → „Limit erreicht oder Anbieter begrenzt Anfrage.“
-- `ai_request_failed` / `ai_auth_failed` → „Tagesimpuls konnte nicht erzeugt werden.“
-- sonstige Fehler → „Tagesimpuls konnte nicht geladen werden.“
+Wenn ein Zustand bereits dauerhaft sichtbar ist, wird dieselbe Meldung nicht zusätzlich als Snackbar angezeigt.
 
 ## Offline-first
 
-Die Auswahl der Wörter bleibt lokal und funktioniert offline. Nur das manuelle Vorbereiten der KI-Vorschau benötigt Internet und die Supabase Edge Function.
+Die Auswahl der Wörter bleibt lokal und funktioniert offline. Die aktive Planung benötigt Internet, weil dabei die Supabase Edge Function `generate-daily-impulses` genutzt wird.
 
 Lokales Lernen, SRS-Fortschritt und Wortlisten bleiben unabhängig.
 
 ## Bewusst nicht umgesetzt
 
-- Keine automatische KI-Anfrage
+- Kein Server-Push
+- Kein APNs/FCM
 - Kein Secret in Flutter
-- Keine Push-Funktion
-- Keine lokale Notification-Planung
-- Keine neue Supabase Function
-- Keine Supabase-Datenbank-Änderung
+- Keine sichtbare KI-Vorschau
+- Keine automatische Mehrfachbenachrichtigung
+- Keine Supabase-Datenbank-Änderung im lokalen Flow
 - Keine SRS-Änderung
-- Keine persistente Historie der generierten Tagesimpulse
 
 ## Tests
 
 Abgedeckt sind:
 
-- Hinweis bei weniger als 3 Wörtern
-- manuelle KI-Anfrage bei 3 bis 5 Wörtern
-- Fake-AI-Client wird im Test verwendet
-- generierte Vorschau wird angezeigt
-- Fehler wird verständlich angezeigt
-- HomeScreen enthält keine große Pflicht-Tagesimpuls-Karte
-- keine echten Netzwerkaufrufe in Tests
+- Standard ist `Automatisch`, `1` pro Tag und Zeitfenster `Automatisch`.
+- `Aus` deaktiviert und löscht geplante Benachrichtigungen.
+- Häufigkeitsänderung auf `3` persistiert automatisch und plant drei Benachrichtigungen.
+- Zeitfensteränderungen werden automatisch übernommen.
+- Frequenz- und Zeitfensteränderungen spammen keine Fehlersnackbars.
+- `Aus` zeigt keine doppelte identische Snackbar.
+- Permission-/Scheduling-Probleme erscheinen als ruhiger Status.
+- KI-Texte werden nicht sichtbar als Vorschau angezeigt.
+- Wörter bleiben sichtbar und entfernbar.
+- Hinweis bei weniger als 3 Wörtern.
+- Live-Status wird ohne Zeitfensterwechsel aktualisiert, wenn die Wortauswahl von unter 3 auf mindestens 3 Wörter wechselt oder wieder darunter fällt.
+- Keine KI-Anfrage beim Öffnen.
+- Keine KI-Anfrage nur durch Wortänderungen.
+- Keine echten Netzwerkaufrufe in Tests.
 
 ## Nächster Schritt
 
-Der nächste technische Schritt ist die Planung einer Edge Function `generate-daily-impulses` mit Request-/Response-Format für 1 bis 5 geplante Nachrichten. Erst danach sollte lokale Notification-Planung separat vorbereitet werden.
+Als nächstes sollte der lokale Notification-Gerätetest auf iOS und Android fortgeführt werden. Danach kann die automatische Wortauswahl und später ein wiederkehrender Tagesplan separat geplant werden.

@@ -107,8 +107,17 @@ Der Nutzer kann wählen:
 - `Mittags`
 - `Nachmittags`
 - `Abends`
+- `Eigene Zeit`
 
 Bei `Automatisch` nutzt Talvori die Slots der generierten Impulse oder sichere Fallback-Zeiten. Bei manuellem Zeitfenster werden mehrere Impulse in sinnvollen Abständen innerhalb dieses Fensters geplant. Nachtzeiten werden standardmäßig vermieden. Wenn ein Zeitpunkt für heute schon vorbei ist, wird auf den nächsten Tag geplant.
+
+Bei `Eigene Zeit` wählt der Nutzer eine konkrete Uhrzeit über einen Time Picker. Die Uhrzeit wird lokal gespeichert und in der UI angezeigt, zum Beispiel:
+
+- „Eigene Zeit: 12:07 Uhr“
+- „Nächster Impuls: heute um 12:07 Uhr.“
+- „Nächster Impuls: morgen um 12:07 Uhr.“, wenn die Uhrzeit heute bereits vorbei ist
+
+Bei mehreren Tagesimpulsen wird die eigene Uhrzeit als Startzeit verwendet. Weitere Impulse werden in sinnvollem Abstand danach geplant, solange keine Nachtzeit entsteht.
 
 Die geplanten Notifications verwenden:
 
@@ -131,6 +140,10 @@ Dadurch kann die UI konkrete Zeiten anzeigen, zum Beispiel:
 - „Nächster Impuls: morgen um 09:00 Uhr.“
 
 Die aktuelle Umsetzung plant lokale Notifications auf dem Gerät. Nach erfolgreicher Planung kann iOS die Nachricht auch anzeigen, wenn die App geschlossen ist. Es gibt in diesem Schritt keinen Supabase Server-Push.
+
+Abgelaufene geplante Zeiten werden nicht mehr als nächster Impuls angezeigt. Beim Öffnen des Tagesimpuls-Screens und beim Zurückkehren in die App werden gespeicherte `plannedTimes` gegen die aktuelle Uhrzeit geprüft. Zeiten, die kleiner oder gleich `now` sind, werden aus dem lokalen State entfernt. Wenn dadurch kein gültiger Zeitpunkt übrig bleibt und der Tagesimpuls aktiv ist, wird der Planungsstatus neu berechnet.
+
+Zusätzlich kann die lokale Notification-Schicht die vom Betriebssystem registrierten Pending Notifications prüfen. Nach dem Scheduling werden Pending-Count und Pending-IDs diagnostiziert. Wenn lokal ein Zeitpunkt gespeichert ist, aber iOS keine passende Pending Notification mehr kennt, wird der lokale Status korrigiert und es wird keine abgelaufene Uhrzeit mehr als „Nächster Impuls“ angezeigt.
 
 ## Berechtigungen
 
@@ -156,6 +169,9 @@ Für iOS muss im Gerätetest geprüft werden, ob der Permission-Dialog erscheint
 Der Service unterscheidet strukturierte Planungsergebnisse:
 
 - `scheduledSuccessfully`
+- `scheduledButNoPendingNotification`
+- `noPendingNotifications`
+- `expiredScheduleRecomputed`
 - `permissionGranted`
 - `permissionDenied`
 - `permissionNotRequested`
@@ -192,6 +208,8 @@ Im Entwicklungsmodus loggt der Flow sicher:
 - geplante Notification-Zeitpunkte
 - Scheduling-Result
 - Anzahl pending Notifications nach dem Planen, soweit vom Plugin verfügbar
+- Pending Notification IDs, soweit vom Plugin verfügbar
+- Abgleich zwischen lokal gespeicherten Zeiten und tatsächlich pending Notifications
 
 Es werden keine API-Keys, Secrets oder vollständigen KI-Prompts geloggt.
 
@@ -200,6 +218,7 @@ Es werden keine API-Keys, Secrets oder vollständigen KI-Prompts geloggt.
 Für die Geräte-Diagnose gibt es eine technische Testfunktion:
 
 - `scheduleTestNotificationInTenSeconds()`
+- Debug-Button: „Test in 10 Sekunden“
 - Titel: „Talvori Test“
 - Body: „Benachrichtigungen funktionieren.“
 - Planung: `now + 10 Sekunden`
@@ -267,6 +286,10 @@ Abgedeckt sind:
 - Auswahl `3` plant drei Benachrichtigungen nach Nutzerwahl.
 - Manuelle Zeitfenster werden in Zeitpunkte übersetzt.
 - Slots werden in Zeitpunkte übersetzt.
+- `Eigene Zeit` wird gespeichert.
+- `Eigene Zeit` plant heute, wenn die Uhrzeit noch kommt.
+- `Eigene Zeit` plant morgen, wenn die Uhrzeit heute vorbei ist.
+- Mehrere Impulse mit `Eigene Zeit` werden ab der gewählten Uhrzeit verteilt.
 - Nachtzeiten werden vermieden.
 - Fehlende Permission wird kontrolliert als Status angezeigt.
 - Normale Einstellungsänderungen zeigen keine Fehlersnackbar.
@@ -275,6 +298,9 @@ Abgedeckt sind:
 - KI-Fehler und leere Impulse werden konkret angezeigt.
 - Doppelte Snackbar/Status-Meldungen werden vermieden.
 - Erfolgreiches Scheduling liefert den geplanten Zeitpunkt und optional Pending-Count.
+- Pending-Count `0` nach Scheduling wird als eigener Status behandelt.
+- Abgelaufene geplante Zeiten werden aus dem State entfernt.
+- `nextPlannedAt` darf nicht in der Vergangenheit liegen.
 - Geplante Tagesimpuls-Zeitpunkte werden im State gespeichert und in der UI angezeigt.
 - Statusanzeige und Snackbars werden nicht mit identischem Text gedoppelt.
 - KI-Texte werden nicht sichtbar als Vorschau angezeigt.

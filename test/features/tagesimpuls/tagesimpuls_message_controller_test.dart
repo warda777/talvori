@@ -45,7 +45,11 @@ void main() {
 
         await controller.generate([_item('word-1', 'move')]);
 
-        expect(controller.state.error, 'words_required');
+        expect(controller.state.error, 'notEnoughWords');
+        expect(
+          controller.state.generationStatus,
+          TagesimpulsGenerationStatus.notEnoughWords,
+        );
         expect(fakeClient.requests, isEmpty);
       },
     );
@@ -72,7 +76,66 @@ void main() {
       expect(fakeClient.requests, hasLength(1));
       expect(fakeClient.requests.single.count, 3);
       expect(controller.state.error, isNull);
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.generationSucceeded,
+      );
       expect(controller.state.impulses.single.message, contains('superstar'));
+    });
+
+    test('maps quota exceeded diagnosis', () async {
+      final controller = TagesimpulsMessageController(
+        client: _FakeTagesimpulsAiClient(errorCode: 'quotaExceeded'),
+      );
+
+      await controller.generate([
+        _item('word-1', 'move'),
+        _item('word-2', 'superstar'),
+        _item('word-3', 'destroyed'),
+      ]);
+
+      expect(controller.state.error, 'quotaExceeded');
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.quotaExceeded,
+      );
+      expect(controller.state.impulses, isEmpty);
+    });
+
+    test('maps empty generated impulses diagnosis', () async {
+      final controller = TagesimpulsMessageController(
+        client: _FakeTagesimpulsAiClient(impulses: const []),
+      );
+
+      await controller.generate([
+        _item('word-1', 'move'),
+        _item('word-2', 'superstar'),
+        _item('word-3', 'destroyed'),
+      ]);
+
+      expect(controller.state.error, 'noImpulsesReturned');
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.noImpulsesReturned,
+      );
+    });
+
+    test('maps unknown errors to function call failed', () async {
+      final controller = TagesimpulsMessageController(
+        client: _ThrowingTagesimpulsAiClient(),
+      );
+
+      await controller.generate([
+        _item('word-1', 'move'),
+        _item('word-2', 'superstar'),
+        _item('word-3', 'destroyed'),
+      ]);
+
+      expect(controller.state.error, 'functionCallFailed');
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.functionCallFailed,
+      );
     });
   });
 }
@@ -94,9 +157,11 @@ class _FakeTagesimpulsAiClient implements TagesimpulsAiClient {
         usedWords: ['word'],
       ),
     ],
+    this.errorCode,
   });
 
   final List<TagesimpulsGeneratedImpulse> impulses;
+  final String? errorCode;
   final List<TagesimpulsGenerateRequest> requests = [];
 
   @override
@@ -104,6 +169,16 @@ class _FakeTagesimpulsAiClient implements TagesimpulsAiClient {
     TagesimpulsGenerateRequest request,
   ) async {
     requests.add(request);
+    if (errorCode != null) throw TagesimpulsAiException(errorCode!);
     return TagesimpulsGenerateResult(impulses: impulses);
+  }
+}
+
+class _ThrowingTagesimpulsAiClient implements TagesimpulsAiClient {
+  @override
+  Future<TagesimpulsGenerateResult> generate(
+    TagesimpulsGenerateRequest request,
+  ) async {
+    throw StateError('boom');
   }
 }
