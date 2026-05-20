@@ -73,15 +73,29 @@ class TagesimpulsMessageController
         'TagesimpulsMessageController generate start '
         'selectedWords=${items.length} requestedCount=${state.count}',
       );
+      final words = [
+        for (final item in items)
+          TagesimpulsGenerateWord(
+            word: item.text,
+            translation: item.translation?.trim(),
+          ),
+      ].where((word) => word.hasPayloadWord).toList(growable: false);
+      debugPrint(
+        'TagesimpulsMessageController generate payloadWords=${words.length} '
+        'firstPayloadWord=${words.isEmpty ? '' : words.first.payloadWord}',
+      );
+      if (words.length < 3) {
+        state = state.copyWith(
+          isGenerating: false,
+          error: 'wordsRequired',
+          generationStatus: TagesimpulsGenerationStatus.wordsRequired,
+          impulses: const [],
+        );
+        return;
+      }
       final result = await _client.generate(
         TagesimpulsGenerateRequest(
-          words: [
-            for (final item in items)
-              TagesimpulsGenerateWord(
-                word: item.text.trim(),
-                translation: item.translation?.trim(),
-              ),
-          ],
+          words: words,
           count: state.count,
           language: 'EN',
           style: 'natural_message',
@@ -137,6 +151,7 @@ class TagesimpulsMessageController
       'invalidAiResponse' => TagesimpulsGenerationStatus.invalidAiResponse,
       'noImpulsesReturned' => TagesimpulsGenerationStatus.noImpulsesReturned,
       'notEnoughWords' => TagesimpulsGenerationStatus.notEnoughWords,
+      'wordsRequired' => TagesimpulsGenerationStatus.wordsRequired,
       _ => TagesimpulsGenerationStatus.functionCallFailed,
     };
   }

@@ -7,13 +7,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:talvori/core/theme/app_theme.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
+import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_router.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_service.dart';
 import 'package:talvori/features/words/ui/widgets/incoming_shared_text_import_listener.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterLocalTagesimpulsNotificationScheduler.configurePayloadHandler(
+    ImpulseInboxNotificationRouter.handlePayload,
+  );
 
   // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
   FlutterError.onError = (details) {
@@ -42,6 +47,7 @@ class TalvoriApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Talvori',
+      navigatorKey: ImpulseInboxNotificationRouter.navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       home: const _InitGate(
@@ -152,6 +158,12 @@ class _InitGateState extends State<_InitGate> {
       debugPrint('⚠️ App läuft ohne Datenbankverbindung');
     }
 
+    try {
+      await FlutterLocalTagesimpulsNotificationScheduler().initialize();
+    } catch (e) {
+      debugPrint('⚠️ Notification-Tap-Handler nicht bereit: $e');
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
 
@@ -206,6 +218,9 @@ class _InitGateState extends State<_InitGate> {
           );
         }
         // Fertig initialisiert → eigentliche App
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ImpulseInboxNotificationRouter.markReady();
+        });
         return widget.child;
       },
     );

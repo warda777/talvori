@@ -13,6 +13,8 @@ import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
 import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
+import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
@@ -81,6 +83,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final state = ref.watch(homeControllerProvider);
     final tagesimpulsSelection = ref.watch(
       tagesimpulsSelectionControllerProvider,
+    );
+    final impulseInboxState = ref.watch(impulseInboxControllerProvider);
+    final impulseUnreadCount = impulseInboxState.chats.fold<int>(
+      0,
+      (sum, chat) => sum + chat.unreadCount,
     );
 
     return Scaffold(
@@ -263,6 +270,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                                   return res; // Gib das Ergebnis zurück
                                 },
+                                onImpulseInboxTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ImpulsPostfachScreen(),
+                                    ),
+                                  );
+                                },
+                                impulseInboxUnreadCount: impulseUnreadCount,
                                 isImageExpanded: state.imageExpanded,
                                 onToggleImage: () => ref
                                     .read(homeControllerProvider.notifier)

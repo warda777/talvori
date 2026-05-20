@@ -20,7 +20,8 @@ class TapFlash extends StatefulWidget {
   State<TapFlash> createState() => _TapFlashState();
 }
 
-class _TapFlashState extends State<TapFlash> with SingleTickerProviderStateMixin {
+class _TapFlashState extends State<TapFlash>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -50,6 +51,7 @@ class _TapFlashState extends State<TapFlash> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: _handleTap,
       child: AnimatedBuilder(
         animation: _animation,
@@ -65,7 +67,9 @@ class _TapFlashState extends State<TapFlash> with SingleTickerProviderStateMixin
                 if (_animation.value > 0)
                   Container(
                     decoration: BoxDecoration(
-                      color: widget.color.withValues(alpha: _animation.value * 0.3),
+                      color: widget.color.withValues(
+                        alpha: _animation.value * 0.3,
+                      ),
                       borderRadius: widget.borderRadius,
                       shape: widget.shape,
                     ),

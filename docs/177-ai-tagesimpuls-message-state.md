@@ -18,7 +18,11 @@ Es gibt keinen zentralen Speichern- oder Planen-Button mehr. Änderungen an Modu
 
 Home bleibt bewusst clean. Der HomeScreen zeigt primär den Auswahlstatus, zum Beispiel `0/5`, und bietet einen kompakten Einstieg in die Tagesimpuls-Verwaltung.
 
-Der Status der Tagesimpuls-Verwaltung reagiert live auf die globale Wortauswahl. Wenn Wörter hinzugefügt oder entfernt werden, wird der Hinweis „Füge mindestens 3 Wörter hinzu.“ sofort neu bewertet. Ein Wechsel des Zeitfensters oder der Häufigkeit ist nicht mehr als Refresh nötig.
+Der Status der Tagesimpuls-Verwaltung reagiert live auf die globale Wortauswahl. Header-Counter und Planungsbereich lesen aus derselben globalen Tagesimpuls-Auswahl. Wenn Wörter hinzugefügt oder entfernt werden, wird der Hinweis „Füge mindestens 3 Wörter hinzu.“ sofort neu bewertet. Ein Wechsel des Zeitfensters oder der Häufigkeit ist nicht mehr als Refresh nötig.
+
+Alte `notEnoughWords`-Meldungen werden auch dann entfernt, wenn sie vorher als Fehlerstatus gespeichert wurden. Dadurch bleibt kein stale Snapshot im Planungsbereich stehen, sobald die globale Auswahl wieder mindestens 3 Wörter enthält.
+
+Der Tagesimpuls-Planungsbereich hat eine zentrale Statusquelle. Sie leitet aus globaler Auswahl, aktivem Modus, Häufigkeit, Zeitfenster und Planungs-/Fehlerzustand genau eine sichtbare Statusmeldung ab. Der optionale Untertext wiederholt die Statusmeldung nicht.
 
 ## Nutzerkontrolle
 
@@ -54,6 +58,10 @@ Die generierten Nachrichten sollen erst als lokale Benachrichtigung sichtbar wer
 - Es gibt keine automatische Anfrage beim Hinzufügen eines Wortes.
 - Es gibt keine KI-Anfrage nur durch Hinzufügen oder Entfernen von Tagesimpuls-Wörtern.
 - Es gibt keine automatische Mehrfachbenachrichtigung ohne Nutzerentscheidung.
+- Der Debug-Test „Tagesimpuls in 10 Sekunden testen“ nutzt immer die aktuelle globale Wortauswahl.
+- Der Button „Tagesimpuls in 10 Sekunden testen“ ist nur bei 3 oder mehr aktuell ausgewählten Wörtern aktiv.
+- Beim Tippen setzt der echte Debug-Test sofort den Status „Tagesimpuls-Test wird vorbereitet...“.
+- Der echte Debug-Test läuft über die zentrale Methode `runRealTagesimpulsTestInTenSeconds`.
 
 ## Feedback und Status
 
@@ -75,6 +83,16 @@ Ruhige Statusmeldungen sind unter anderem:
 - „Füge mindestens 3 Wörter hinzu.“
 
 Wenn ein Zustand bereits dauerhaft sichtbar ist, wird dieselbe Meldung nicht zusätzlich als Snackbar angezeigt.
+
+Es gibt keine zweite konkurrierende Statusanzeige wie „Füge mindestens 3 Wörter hinzu. Automatische Wortauswahl folgt später.“ mehr. Automatische Wortauswahl kann als kurzer Untertext erscheinen, aber nicht als zweiter Statusblock.
+
+Der echte 10-Sekunden-Test priorisiert seinen Aktionsstatus, damit „wird vorbereitet“ oder „Tagesimpuls-Test geplant.“ nicht sofort durch den Standardstatus überschrieben werden. Während der Test läuft, wird der Button deaktiviert, um Doppel-Auslösungen zu verhindern.
+
+Konkrete Fehlerzustände im echten Test sind:
+
+- „Tagesimpulse konnten nicht erzeugt werden.“
+- „Impuls konnte nicht im Postfach gespeichert werden.“
+- „Benachrichtigung konnte nicht geplant werden.“
 
 ## Offline-first
 

@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
+import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_payload.dart';
+import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_router.dart';
+import 'package:talvori/features/impuls_postfach/notifications/notification_tap_debug_state.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_controller.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
@@ -22,6 +28,7 @@ class CourseScreen extends ConsumerStatefulWidget {
 class _CourseScreenState extends ConsumerState<CourseScreen>
     with WidgetsBindingObserver {
   bool _isApplyingTagesimpulsSettings = false;
+  DateTime? _lastRealTestScheduledAt;
 
   @override
   void initState() {
@@ -67,6 +74,11 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     final count = selection.count;
     final max = selection.maxCount;
     final full = selection.isFull;
+    final statusViewModel = _TagesimpulsStatusViewModel.from(
+      selection: selection,
+      settings: notificationSettings,
+    );
+    final realTestEnabled = statusViewModel.canRunRealTenSecondTest;
 
     ref.listen<TagesimpulsSelectionState>(
       tagesimpulsSelectionControllerProvider,
@@ -334,27 +346,11 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
                     ),
                   ],
                   const SizedBox(height: 12),
-                  Text(
-                    _statusText(notificationSettings),
-                    style: const TextStyle(
-                      color: Color(0xFFB8C4D9),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (notificationSettings.nextPlannedInfo != null) ...[
+                  _TagesimpulsStatusBlock(viewModel: statusViewModel),
+                  if (statusViewModel.showPlannedTimes) ...[
                     const SizedBox(height: 6),
                     Text(
-                      notificationSettings.nextPlannedInfo!,
-                      style: const TextStyle(
-                        color: Color(0xFF7FFFE7),
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                  if (notificationSettings.plannedTimes.length > 1) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      _plannedTimesText(notificationSettings.plannedTimes),
+                      _plannedTimesText(statusViewModel.plannedTimes),
                       style: const TextStyle(
                         color: Color(0xFFB8C4D9),
                         fontWeight: FontWeight.w700,
@@ -382,18 +378,6 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
                       ],
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  if (selection.items.length < 3)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 12),
-                      child: Text(
-                        'Füge mindestens 3 Wörter hinzu. Automatische Wortauswahl folgt später.',
-                        style: TextStyle(
-                          color: Color(0xFFFFC857),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
                   if (kDebugMode) ...[
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
@@ -405,6 +389,26 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
                       icon: const Icon(Icons.notifications_active_outlined),
                       label: const Text('Test in 10 Sekunden'),
                     ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: const Key('real_tagesimpuls_10s_test_button'),
+                      onPressed:
+                          !realTestEnabled || _isApplyingTagesimpulsSettings
+                          ? null
+                          : () => runRealTagesimpulsTestInTenSeconds(
+                              service: notificationService,
+                              messageController: messageController,
+                              settingsController: settingsController,
+                            ),
+                      icon: const Icon(Icons.quickreply_outlined),
+                      label: Text(
+                        _isApplyingTagesimpulsSettings
+                            ? 'Test wird geplant...'
+                            : 'Tagesimpuls in 10 Sekunden testen',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const _NotificationTapDebugPanel(),
                   ],
                 ],
               ),
@@ -551,15 +555,30 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
       debugPrint(
         'Tagesimpuls planning generatedImpulses=${generated.impulses.length}',
       );
+      final impulsesForPlan = generated.impulses
+          .take(settings.frequencyPerDay)
+          .toList(growable: false);
+      final inboxMessages = await ref
+          .read(impulseInboxControllerProvider.notifier)
+          .addDailyImpulseMessages(impulsesForPlan);
+      final messageIds = inboxMessages
+          .map((message) => message.id)
+          .toList(growable: false);
+      debugPrint(
+        'Tagesimpuls planning inbox savedMessages=${inboxMessages.length} '
+        'chatId=${SharedPreferencesImpulseInboxRepository.dailyImpulseChatId} '
+        'hasMessageIds=${messageIds.isNotEmpty} '
+        'customTime=${settings.preferredWindow == TagesimpulsPreferredWindow.custom ? '${settings.customHour}:${settings.customMinute.toString().padLeft(2, '0')}' : '-'}',
+      );
 
       final result = await service.planNotifications(
         TagesimpulsNotificationPlanOptions(
-          impulses: generated.impulses
-              .take(settings.frequencyPerDay)
-              .toList(growable: false),
+          impulses: impulsesForPlan,
           preferredWindow: settings.preferredWindow,
           customHour: settings.customHour,
           customMinute: settings.customMinute,
+          chatId: SharedPreferencesImpulseInboxRepository.dailyImpulseChatId,
+          messageIds: messageIds,
         ),
       );
       if (!mounted) return;
@@ -575,10 +594,35 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
             result.scheduled.map((schedule) => schedule.scheduledAt).toList(),
             info,
           );
+        case TagesimpulsNotificationPlanningStatus.realImpulseTestScheduled:
+          settingsController.setPlannedTimes(
+            result.scheduled.map((schedule) => schedule.scheduledAt).toList(),
+            'Echter Tagesimpuls-Test geplant.',
+          );
+        case TagesimpulsNotificationPlanningStatus
+            .realImpulseTestDeliveredUnknown:
+          settingsController.setNextPlannedInfo(
+            'Echter Tagesimpuls-Test geplant. Zustellung wird vom System übernommen.',
+          );
+        case TagesimpulsNotificationPlanningStatus.realImpulseScheduleFailed:
+          settingsController.setErrorStatus(
+            'Echter Tagesimpuls-Test konnte nicht geplant werden.',
+          );
         case TagesimpulsNotificationPlanningStatus
             .scheduledButNoPendingNotification:
+        case TagesimpulsNotificationPlanningStatus.notificationPendingMissing:
           settingsController.setErrorStatus(
             'Benachrichtigungen wurden nicht registriert.',
+          );
+        case TagesimpulsNotificationPlanningStatus.notificationBodyEmpty:
+          settingsController.setErrorStatus('Tagesimpuls-Nachricht ist leer.');
+        case TagesimpulsNotificationPlanningStatus.notificationPayloadInvalid:
+          settingsController.setErrorStatus(
+            'Tagesimpuls-Payload ist ungültig.',
+          );
+        case TagesimpulsNotificationPlanningStatus.scheduledAtInPast:
+          settingsController.setErrorStatus(
+            'Tagesimpuls-Zeit liegt in der Vergangenheit.',
           );
         case TagesimpulsNotificationPlanningStatus.noPendingNotifications:
           settingsController.setErrorStatus(
@@ -643,6 +687,15 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     required TagesimpulsNotificationSettingsController settingsController,
   }) {
     if (selection.isLoading || !notificationSettings.enabled) return;
+    if (kDebugMode) {
+      debugPrint(
+        'Tagesimpuls state sync headerCount=${selection.count} '
+        'planningSelectionCount=${selection.items.length} '
+        'controllerSelectionCount=${selection.items.length} '
+        'buttonEnabled=${selection.items.length >= 3} '
+        'selectedWords=${selection.items.map((item) => item.text).take(5).toList()}',
+      );
+    }
 
     if (selection.items.length < 3) {
       if (notificationSettings.nextPlannedInfo != _notEnoughWordsStatus) {
@@ -654,13 +707,6 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     if (notificationSettings.nextPlannedInfo == _notEnoughWordsStatus) {
       settingsController.clearNeedsWordsStatus();
     }
-  }
-
-  String _statusText(TagesimpulsNotificationSettingsState settings) {
-    if (!settings.enabled) return 'Tagesimpuls ist ausgeschaltet.';
-    final count = settings.frequencyPerDay;
-    final plural = count == 1 ? '' : 'e';
-    return 'Tagesimpuls aktiv · $count Impuls$plural pro Tag.';
   }
 
   static const _genericPlanningErrorStatus =
@@ -682,10 +728,32 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     switch (result.status) {
       case TagesimpulsNotificationPlanningStatus.scheduledSuccessfully:
         settingsController.setNextPlannedInfo('Test-Benachrichtigung geplant.');
+      case TagesimpulsNotificationPlanningStatus.realImpulseTestScheduled:
+        settingsController.setNextPlannedInfo(
+          'Echter Tagesimpuls-Test geplant.',
+        );
+      case TagesimpulsNotificationPlanningStatus
+          .realImpulseTestDeliveredUnknown:
+        settingsController.setNextPlannedInfo(
+          'Echter Tagesimpuls-Test geplant. Zustellung wird vom System übernommen.',
+        );
+      case TagesimpulsNotificationPlanningStatus.realImpulseScheduleFailed:
+        settingsController.setErrorStatus(
+          'Echter Tagesimpuls-Test konnte nicht geplant werden.',
+        );
       case TagesimpulsNotificationPlanningStatus
           .scheduledButNoPendingNotification:
+      case TagesimpulsNotificationPlanningStatus.notificationPendingMissing:
         settingsController.setErrorStatus(
           'Test-Benachrichtigung wurde nicht registriert.',
+        );
+      case TagesimpulsNotificationPlanningStatus.notificationBodyEmpty:
+        settingsController.setErrorStatus('Tagesimpuls-Nachricht ist leer.');
+      case TagesimpulsNotificationPlanningStatus.notificationPayloadInvalid:
+        settingsController.setErrorStatus('Tagesimpuls-Payload ist ungültig.');
+      case TagesimpulsNotificationPlanningStatus.scheduledAtInPast:
+        settingsController.setErrorStatus(
+          'Tagesimpuls-Zeit liegt in der Vergangenheit.',
         );
       case TagesimpulsNotificationPlanningStatus.noPendingNotifications:
         settingsController.setErrorStatus(
@@ -726,6 +794,151 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     }
   }
 
+  Future<void> runRealTagesimpulsTestInTenSeconds({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+  }) async {
+    debugPrint('real 10s button tapped');
+    final selectedItems = ref
+        .read(tagesimpulsSelectionControllerProvider)
+        .items;
+    final canRun = selectedItems.length >= 3;
+    debugPrint(
+      'Tagesimpuls real 10s actionSelectionCount=${selectedItems.length} '
+      'canRun=$canRun '
+      'selectedWords=${selectedItems.map((item) => item.text).take(5).toList()}',
+    );
+    if (selectedItems.length < 3) {
+      settingsController.setNeedsWordsStatus(_notEnoughWordsStatus);
+      return;
+    }
+
+    setState(() => _isApplyingTagesimpulsSettings = true);
+    settingsController.setNextPlannedInfo(
+      'Tagesimpuls-Test wird vorbereitet...',
+    );
+    try {
+      debugPrint(
+        'Tagesimpuls real 10s start selectionCount=${selectedItems.length}',
+      );
+      messageController.setCount(1);
+      debugPrint('Tagesimpuls real 10s call generate-daily-impulses');
+      await messageController.generate(selectedItems);
+      final generated = ref.read(tagesimpulsMessageControllerProvider);
+      if (generated.error != null || generated.impulses.isEmpty) {
+        debugPrint(
+          'Tagesimpuls real 10s generation failed '
+          'status=${generated.generationStatus.name} code=${generated.error}',
+        );
+        settingsController.setErrorStatus(
+          _generationStatusText(generated.generationStatus),
+        );
+        return;
+      }
+      debugPrint(
+        'Tagesimpuls real 10s generatedImpulses=${generated.impulses.length}',
+      );
+
+      final impulse = generated.impulses.first;
+      debugPrint('Tagesimpuls real 10s ensure daily impulse chat and save');
+      final List<ImpulseMessage> inboxMessages;
+      try {
+        inboxMessages = await ref
+            .read(impulseInboxControllerProvider.notifier)
+            .addDailyImpulseMessages([impulse]);
+      } on Object catch (error) {
+        debugPrint(
+          'Tagesimpuls real 10s inbox save failed: '
+          '${error.runtimeType}: $error',
+        );
+        settingsController.setErrorStatus(
+          'Impuls konnte nicht im Postfach gespeichert werden.',
+        );
+        return;
+      }
+      if (inboxMessages.isEmpty) {
+        settingsController.setErrorStatus(
+          'Impuls konnte nicht im Postfach gespeichert werden.',
+        );
+        return;
+      }
+      final message = inboxMessages.first;
+      debugPrint(
+        'Tagesimpuls real 10s inbox savedMessages=${inboxMessages.length} '
+        'chatId=${SharedPreferencesImpulseInboxRepository.dailyImpulseChatId} '
+        'messageId=${message.id} '
+        'notificationBodyEmpty=${impulse.message.trim().isEmpty}',
+      );
+
+      final result = await service
+          .scheduleRealImpulseTestNotificationInTenSeconds(
+            impulse: impulse,
+            chatId: SharedPreferencesImpulseInboxRepository.dailyImpulseChatId,
+            messageId: message.id,
+          );
+      if (!mounted) return;
+      final scheduledAt = result.scheduled.isEmpty
+          ? '-'
+          : result.scheduled.first.scheduledAt.toIso8601String();
+      final notificationId = result.scheduled.isEmpty
+          ? '-'
+          : result.scheduled.first.id.toString();
+      final payload = result.scheduled.isEmpty
+          ? null
+          : result.scheduled.first.payload;
+      debugPrint(
+        'Tagesimpuls real 10s scheduleStatus=${result.status.name} '
+        'scheduledAt=$scheduledAt '
+        'notificationId=$notificationId '
+        'payloadHasInbox=${ImpulseInboxNotificationPayload.parse(payload)?.opensChat ?? false} '
+        'pendingCount=${result.pendingNotificationCount ?? -1} '
+        'debug=${result.debugMessage ?? "-"}',
+      );
+      switch (result.status) {
+        case TagesimpulsNotificationPlanningStatus.realImpulseTestScheduled:
+          _lastRealTestScheduledAt = DateTime.now();
+          settingsController.setNextPlannedInfo('Tagesimpuls-Test geplant.');
+        case TagesimpulsNotificationPlanningStatus.notificationPendingMissing:
+          settingsController.setErrorStatus(
+            'Benachrichtigung konnte nicht geplant werden.',
+          );
+        case TagesimpulsNotificationPlanningStatus.realImpulseScheduleFailed:
+          settingsController.setErrorStatus(
+            'Benachrichtigung konnte nicht geplant werden.',
+          );
+        case TagesimpulsNotificationPlanningStatus.permissionDenied:
+          settingsController.setPermissionDeniedStatus(
+            'Benachrichtigungen sind nicht erlaubt.',
+          );
+        case TagesimpulsNotificationPlanningStatus.notificationBodyEmpty:
+          settingsController.setErrorStatus('Tagesimpuls-Nachricht ist leer.');
+        case TagesimpulsNotificationPlanningStatus.notificationPayloadInvalid:
+          settingsController.setErrorStatus(
+            'Tagesimpuls-Payload ist ungültig.',
+          );
+        case TagesimpulsNotificationPlanningStatus.scheduledAtInPast:
+          settingsController.setErrorStatus(
+            'Tagesimpuls-Zeit liegt in der Vergangenheit.',
+          );
+        default:
+          settingsController.setErrorStatus(
+            'Benachrichtigung konnte nicht geplant werden.',
+          );
+      }
+    } catch (error) {
+      debugPrint('Tagesimpuls real 10s failed: ${error.runtimeType}: $error');
+      if (!mounted) return;
+      settingsController.setErrorStatus(
+        'Benachrichtigung konnte nicht geplant werden.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isApplyingTagesimpulsSettings = false);
+      }
+    }
+  }
+
   String _generationStatusText(TagesimpulsGenerationStatus status) {
     return switch (status) {
       TagesimpulsGenerationStatus.aiClientNotConfigured =>
@@ -740,6 +953,8 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
         'Es wurden keine Tagesimpulse erzeugt.',
       TagesimpulsGenerationStatus.notEnoughWords =>
         'Füge mindestens 3 Wörter hinzu.',
+      TagesimpulsGenerationStatus.wordsRequired =>
+        'Tagesimpuls-Wörter konnten nicht vorbereitet werden.',
       TagesimpulsGenerationStatus.generationSucceeded ||
       TagesimpulsGenerationStatus.idle => _genericPlanningErrorStatus,
     };
@@ -764,6 +979,14 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     final hadLocalPlan =
         notificationSettings.plannedTimes.isNotEmpty ||
         notificationSettings.nextPlannedAt != null;
+
+    if (_isRecentRealTest()) {
+      debugPrint(
+        'Tagesimpuls pending validation skipped because realTestInProgress=false '
+        'recentRealTest=true',
+      );
+      return;
+    }
     final prunedExpiredTimes = settingsController.pruneExpiredPlannedTimes(
       DateTime.now(),
       _nextPlannedInfo,
@@ -826,6 +1049,12 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
       TagesimpulsPreferredWindow.evening => 'Abends',
       TagesimpulsPreferredWindow.custom => 'Eigene Zeit',
     };
+  }
+
+  bool _isRecentRealTest() {
+    final scheduledAt = _lastRealTestScheduledAt;
+    if (scheduledAt == null) return false;
+    return DateTime.now().difference(scheduledAt) < const Duration(seconds: 20);
   }
 
   String _customTimeLabel(TagesimpulsNotificationSettings settings) {
@@ -891,6 +1120,201 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
           side: const BorderSide(color: Color(0xFF59D7FF), width: 1),
         ),
       ),
+    );
+  }
+}
+
+enum _TagesimpulsStatusSeverity { info, warning, error }
+
+class _NotificationTapDebugPanel extends StatelessWidget {
+  const _NotificationTapDebugPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<NotificationTapDebugState>(
+      valueListenable: NotificationTapDebugStore.value,
+      builder: (context, state, _) {
+        final title = state.hasTap
+            ? 'Letzter Notification-Tap: ${state.lastParsedType ?? 'unbekannt'}'
+            : 'Noch kein Notification-Tap empfangen';
+        final details = [
+          if (state.lastPayloadRawPreview != null)
+            'Payload: ${state.lastPayloadRawPreview}',
+          if (state.lastChatId != null) 'Chat: ${state.lastChatId}',
+          if (state.lastMessageId != null) 'Message: ${state.lastMessageId}',
+          if (state.lastRouteTarget != null)
+            'Route: ${state.lastRouteTarget} / ${state.lastRouteResult ?? '-'}',
+          if (state.didNotificationLaunchApp != null)
+            'Launch checked: ${state.didNotificationLaunchApp}',
+          if (state.lastError != null) 'Fehler: ${state.lastError}',
+        ];
+
+        return Container(
+          key: const Key('notification-tap-debug-panel'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07111A),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0x3359D7FF)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                key: const Key('notification-tap-debug-title'),
+                style: const TextStyle(
+                  color: Color(0xFF7FFFE7),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                for (final line in details)
+                  Text(
+                    line,
+                    style: const TextStyle(
+                      color: Color(0xFFB8C4D9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton(
+                    key: const Key('open-last-notification-payload'),
+                    onPressed: state.hasPayload
+                        ? () => ImpulseInboxNotificationRouter.handlePayload(
+                            state.lastPayloadRaw,
+                          )
+                        : null,
+                    child: const Text('Letzte Notification-Payload öffnen'),
+                  ),
+                  OutlinedButton(
+                    key: const Key('simulate-impulse-message-payload'),
+                    onPressed: () =>
+                        ImpulseInboxNotificationRouter.simulateImpulseMessage(
+                          messageId: state.lastMessageId,
+                        ),
+                    child: const Text('Chat-Payload simulieren'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TagesimpulsStatusViewModel {
+  const _TagesimpulsStatusViewModel({
+    required this.statusText,
+    required this.severity,
+    required this.canRunRealTenSecondTest,
+    this.secondaryText,
+    this.plannedTimes = const [],
+  });
+
+  factory _TagesimpulsStatusViewModel.from({
+    required TagesimpulsSelectionState selection,
+    required TagesimpulsNotificationSettingsState settings,
+  }) {
+    final selectionCount = selection.count;
+    if (selectionCount < 3) {
+      return const _TagesimpulsStatusViewModel(
+        statusText: 'Füge mindestens 3 Wörter hinzu.',
+        secondaryText: 'Automatische Wortauswahl folgt später.',
+        severity: _TagesimpulsStatusSeverity.warning,
+        canRunRealTenSecondTest: false,
+      );
+    }
+
+    if (!settings.enabled) {
+      return const _TagesimpulsStatusViewModel(
+        statusText: 'Tagesimpuls ist ausgeschaltet.',
+        severity: _TagesimpulsStatusSeverity.info,
+        canRunRealTenSecondTest: true,
+      );
+    }
+
+    final nextInfo = settings.nextPlannedInfo;
+    if (nextInfo != null &&
+        nextInfo.trim().isNotEmpty &&
+        nextInfo != 'Füge mindestens 3 Wörter hinzu.') {
+      final severity =
+          settings.displayStatus == TagesimpulsNotificationDisplayStatus.error
+          ? _TagesimpulsStatusSeverity.error
+          : settings.displayStatus ==
+                TagesimpulsNotificationDisplayStatus.permissionDenied
+          ? _TagesimpulsStatusSeverity.warning
+          : _TagesimpulsStatusSeverity.info;
+      return _TagesimpulsStatusViewModel(
+        statusText: nextInfo,
+        severity: severity,
+        canRunRealTenSecondTest: true,
+        plannedTimes: settings.plannedTimes,
+      );
+    }
+
+    final count = settings.frequencyPerDay;
+    final plural = count == 1 ? '' : 'e';
+    return _TagesimpulsStatusViewModel(
+      statusText: 'Tagesimpuls aktiv · $count Impuls$plural pro Tag.',
+      severity: _TagesimpulsStatusSeverity.info,
+      canRunRealTenSecondTest: true,
+      plannedTimes: settings.plannedTimes,
+    );
+  }
+
+  final String statusText;
+  final String? secondaryText;
+  final _TagesimpulsStatusSeverity severity;
+  final bool canRunRealTenSecondTest;
+  final List<DateTime> plannedTimes;
+
+  bool get showPlannedTimes => plannedTimes.length > 1;
+}
+
+class _TagesimpulsStatusBlock extends StatelessWidget {
+  const _TagesimpulsStatusBlock({required this.viewModel});
+
+  final _TagesimpulsStatusViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (viewModel.severity) {
+      _TagesimpulsStatusSeverity.info => const Color(0xFF7FFFE7),
+      _TagesimpulsStatusSeverity.warning => const Color(0xFFFFC857),
+      _TagesimpulsStatusSeverity.error => const Color(0xFFFF6B8A),
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          viewModel.statusText,
+          key: const Key('tagesimpuls-planning-status'),
+          style: TextStyle(color: color, fontWeight: FontWeight.w800),
+        ),
+        if (viewModel.secondaryText != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            viewModel.secondaryText!,
+            key: const Key('tagesimpuls-planning-status-secondary'),
+            style: const TextStyle(
+              color: Color(0xFF7D8BA3),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

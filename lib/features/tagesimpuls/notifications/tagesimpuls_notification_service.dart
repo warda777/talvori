@@ -2,9 +2,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_payload.dart';
+import 'package:talvori/features/impuls_postfach/notifications/notification_tap_debug_state.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../ai/tagesimpuls_ai_client.dart';
 import 'tagesimpuls_notification_models.dart';
 import 'tagesimpuls_notification_settings.dart';
 
@@ -19,22 +22,62 @@ abstract interface class TagesimpulsNotificationScheduler {
 
   Future<List<int>> pendingNotificationIds();
 
+  Future<void> cancel(int id);
+
   Future<void> cancelAll();
 }
 
 class FlutterLocalTagesimpulsNotificationScheduler
     implements TagesimpulsNotificationScheduler {
-  FlutterLocalTagesimpulsNotificationScheduler({
+  factory FlutterLocalTagesimpulsNotificationScheduler({
     FlutterLocalNotificationsPlugin? plugin,
-  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  }) {
+    if (plugin != null) {
+      return FlutterLocalTagesimpulsNotificationScheduler._(plugin);
+    }
+    return _shared;
+  }
+
+  FlutterLocalTagesimpulsNotificationScheduler._(this._plugin);
+
+  static final _shared = FlutterLocalTagesimpulsNotificationScheduler._(
+    FlutterLocalNotificationsPlugin(),
+  );
+
+  static ValueChanged<String?>? _payloadHandler;
+  static String? _handledLaunchPayload;
+  static String? _pendingPayloadForHandler;
+
+  static void configurePayloadHandler(ValueChanged<String?> handler) {
+    _payloadHandler = handler;
+    final pending = _pendingPayloadForHandler;
+    if (pending == null) return;
+    _pendingPayloadForHandler = null;
+    debugPrint(
+      'FlutterLocalTagesimpulsNotificationScheduler flush pending payload '
+      'payloadRawLength=${pending.length}',
+    );
+    handler(pending);
+  }
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _initialized = false;
   bool _timezoneInitialized = false;
+  Future<void>? _initializeFuture;
 
   @override
   Future<void> initialize() async {
     if (_initialized) return;
+    final existing = _initializeFuture;
+    if (existing != null) return existing;
+    _initializeFuture = _initialize().catchError((Object error) {
+      _initializeFuture = null;
+      throw error;
+    });
+    return _initializeFuture;
+  }
+
+  Future<void> _initialize() async {
     _initializeTimeZones();
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -44,7 +87,22 @@ class FlutterLocalTagesimpulsNotificationScheduler
       requestSoundPermission: false,
     );
     const settings = InitializationSettings(android: android, iOS: ios);
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (response) {
+        NotificationTapDebugStore.recordResponseReceived(
+          source: 'foreground/background',
+          payload: response.payload,
+        );
+        debugPrint(
+          'notification response received '
+          'foreground/background '
+          'payloadRawLength=${response.payload?.length ?? 0}',
+        );
+        _dispatchPayload(response.payload);
+      },
+    );
+    await _dispatchLaunchPayloadIfNeeded();
     _initialized = true;
   }
 
@@ -134,9 +192,53 @@ class FlutterLocalTagesimpulsNotificationScheduler
   }
 
   @override
+  Future<void> cancel(int id) async {
+    await initialize();
+    await _plugin.cancel(id);
+  }
+
+  @override
   Future<void> cancelAll() async {
     await initialize();
     await _plugin.cancelAll();
+  }
+
+  Future<void> _dispatchLaunchPayloadIfNeeded() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    final didLaunch = details?.didNotificationLaunchApp == true;
+    final payload = details?.notificationResponse?.payload;
+    NotificationTapDebugStore.recordLaunchDetailsChecked(
+      didNotificationLaunchApp: didLaunch,
+      payloadLength: payload?.length ?? 0,
+    );
+    if (!didLaunch) return;
+    if (payload == null || payload == _handledLaunchPayload) return;
+    _handledLaunchPayload = payload;
+    NotificationTapDebugStore.recordResponseReceived(
+      source: 'launch_details',
+      payload: payload,
+    );
+    debugPrint(
+      'notification launch response received payloadRawLength=${payload.length}',
+    );
+    _dispatchPayload(payload);
+  }
+
+  void _dispatchPayload(String? payload) {
+    debugPrint(
+      'FlutterLocalTagesimpulsNotificationScheduler dispatch payload '
+      'payloadRawLength=${payload?.length ?? 0}',
+    );
+    final handler = _payloadHandler;
+    if (handler == null) {
+      _pendingPayloadForHandler = payload;
+      debugPrint(
+        'FlutterLocalTagesimpulsNotificationScheduler queued payload '
+        'reason=handler_not_configured',
+      );
+      return;
+    }
+    handler(payload);
   }
 }
 
@@ -161,100 +263,59 @@ class TagesimpulsNotificationService {
     );
 
     final schedules = buildSchedules(options);
-    if (schedules.isEmpty) {
-      return const TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus.noGeneratedImpulses,
-      );
-    }
-
-    if (schedules.any(
-      (schedule) => !schedule.scheduledAt.isAfter(options.now),
-    )) {
-      return const TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus.invalidScheduleTime,
-      );
-    }
-    _debugSchedules(schedules);
-
-    try {
-      await _scheduler.initialize();
-    } on Object catch (error) {
-      _debugLog('initialize failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: _isTimezoneError(error)
-            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
-            : TagesimpulsNotificationPlanningStatus
-                  .notificationServiceNotInitialized,
-        debugMessage: _debugMessage(error),
-      );
-    }
-
-    final TagesimpulsNotificationPermissionStatus permission;
-    try {
-      permission = await _scheduler.requestPermission();
-    } on Object catch (error) {
-      _debugLog('permission request failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus.schedulePlatformError,
-        debugMessage: _debugMessage(error),
-      );
-    }
-    debugPrint('TagesimpulsNotificationService permission=$permission');
-    switch (permission) {
-      case TagesimpulsNotificationPermissionStatus.granted:
-        break;
-      case TagesimpulsNotificationPermissionStatus.denied:
-        return TagesimpulsNotificationPlanningResult(
-          status: TagesimpulsNotificationPlanningStatus.permissionDenied,
-          permissionStatus: permission,
-        );
-      case TagesimpulsNotificationPermissionStatus.notRequested:
-        return TagesimpulsNotificationPlanningResult(
-          status: TagesimpulsNotificationPlanningStatus.permissionNotRequested,
-          permissionStatus: permission,
-        );
-    }
-
-    try {
-      for (final notification in schedules) {
-        await _scheduler.schedule(notification);
-      }
-    } on Object catch (error) {
-      _debugLog('schedule failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: _isTimezoneError(error)
-            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
-            : TagesimpulsNotificationPlanningStatus.schedulePlatformError,
-        debugMessage: _debugMessage(error),
-        permissionStatus: permission,
-      );
-    }
-
-    final pendingIds = await _safePendingNotificationIds();
-    final scheduledIds = schedules.map((schedule) => schedule.id).toSet();
-    final matchingPendingIds = pendingIds
-        ?.where(scheduledIds.contains)
-        .toList(growable: false);
-    final pendingCount = matchingPendingIds?.length;
-    debugPrint(
-      'TagesimpulsNotificationService schedule result='
-      'scheduledSuccessfully pendingCount=${pendingCount ?? -1} '
-      'pendingIds=${pendingIds ?? const []} scheduledIds=$scheduledIds',
+    return _schedulePreparedNotifications(
+      schedules,
+      now: options.now,
+      emptyStatus: TagesimpulsNotificationPlanningStatus.noGeneratedImpulses,
+      successStatus:
+          TagesimpulsNotificationPlanningStatus.scheduledSuccessfully,
+      noPendingStatus: TagesimpulsNotificationPlanningStatus
+          .scheduledButNoPendingNotification,
+      platformErrorStatus:
+          TagesimpulsNotificationPlanningStatus.schedulePlatformError,
     );
-    if (pendingCount == 0) {
-      return TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus
-            .scheduledButNoPendingNotification,
-        scheduled: schedules,
-        pendingNotificationCount: pendingCount,
-        permissionStatus: permission,
-      );
-    }
-    return TagesimpulsNotificationPlanningResult(
-      status: TagesimpulsNotificationPlanningStatus.scheduledSuccessfully,
-      scheduled: schedules,
-      pendingNotificationCount: pendingCount,
-      permissionStatus: permission,
+  }
+
+  Future<TagesimpulsNotificationPlanningResult>
+  scheduleRealImpulseTestNotificationInTenSeconds({
+    required TagesimpulsGeneratedImpulse impulse,
+    required String chatId,
+    required String messageId,
+    DateTime? now,
+  }) async {
+    final start = now ?? DateTime.now();
+    final notification = TagesimpulsNotificationSchedule(
+      id: TagesimpulsNotificationIds.realTest,
+      title: 'Talvori Tagesimpuls',
+      body: impulse.message,
+      scheduledAt: start.add(const Duration(seconds: 10)),
+      slot: impulse.slot.trim().isEmpty ? 'test' : impulse.slot,
+      usedWords: impulse.usedWords,
+      payload: _payloadFor(
+        slot: impulse.slot.trim().isEmpty ? 'test' : impulse.slot,
+        chatId: chatId,
+        messageId: messageId,
+      ),
+    );
+
+    debugPrint(
+      'TagesimpulsNotificationService real impulse test start '
+      'scheduledAt=${notification.scheduledAt.toIso8601String()} '
+      'hasInboxPayload=${ImpulseInboxNotificationPayload.parse(notification.payload)?.opensChat ?? false}',
+    );
+
+    return _schedulePreparedNotifications(
+      [notification],
+      now: start,
+      cancelRegularBeforeScheduling: false,
+      cancelRealTestBeforeScheduling: true,
+      emptyStatus: TagesimpulsNotificationPlanningStatus.noGeneratedImpulses,
+      successStatus:
+          TagesimpulsNotificationPlanningStatus.realImpulseTestScheduled,
+      noPendingStatus:
+          TagesimpulsNotificationPlanningStatus.notificationPendingMissing,
+      platformErrorStatus:
+          TagesimpulsNotificationPlanningStatus.realImpulseScheduleFailed,
     );
   }
 
@@ -262,7 +323,7 @@ class TagesimpulsNotificationService {
   scheduleTestNotificationInTenSeconds({DateTime? now}) async {
     final start = now ?? DateTime.now();
     final notification = TagesimpulsNotificationSchedule(
-      id: 910010,
+      id: TagesimpulsNotificationIds.technicalTest,
       title: 'Talvori Test',
       body: 'Benachrichtigungen funktionieren.',
       scheduledAt: start.add(const Duration(seconds: 10)),
@@ -276,82 +337,17 @@ class TagesimpulsNotificationService {
       'scheduledAt=${notification.scheduledAt.toIso8601String()}',
     );
 
-    try {
-      await _scheduler.initialize();
-    } on Object catch (error) {
-      _debugLog('test initialize failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: _isTimezoneError(error)
-            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
-            : TagesimpulsNotificationPlanningStatus
-                  .notificationServiceNotInitialized,
-        debugMessage: _debugMessage(error),
-      );
-    }
-
-    final TagesimpulsNotificationPermissionStatus permission;
-    try {
-      permission = await _scheduler.requestPermission();
-    } on Object catch (error) {
-      _debugLog('test permission request failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus.schedulePlatformError,
-        debugMessage: _debugMessage(error),
-      );
-    }
-    debugPrint('TagesimpulsNotificationService test permission=$permission');
-    switch (permission) {
-      case TagesimpulsNotificationPermissionStatus.granted:
-        break;
-      case TagesimpulsNotificationPermissionStatus.denied:
-        return TagesimpulsNotificationPlanningResult(
-          status: TagesimpulsNotificationPlanningStatus.permissionDenied,
-          permissionStatus: permission,
-        );
-      case TagesimpulsNotificationPermissionStatus.notRequested:
-        return TagesimpulsNotificationPlanningResult(
-          status: TagesimpulsNotificationPlanningStatus.permissionNotRequested,
-          permissionStatus: permission,
-        );
-    }
-
-    try {
-      await _scheduler.schedule(notification);
-    } on Object catch (error) {
-      _debugLog('test schedule failed', error);
-      return TagesimpulsNotificationPlanningResult(
-        status: _isTimezoneError(error)
-            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
-            : TagesimpulsNotificationPlanningStatus.schedulePlatformError,
-        debugMessage: _debugMessage(error),
-        permissionStatus: permission,
-      );
-    }
-
-    final pendingIds = await _safePendingNotificationIds();
-    final pendingCount = pendingIds == null
-        ? null
-        : pendingIds.contains(notification.id)
-        ? 1
-        : 0;
-    debugPrint(
-      'TagesimpulsNotificationService test result=scheduledSuccessfully '
-      'pendingCount=${pendingCount ?? -1} pendingIds=${pendingIds ?? const []}',
-    );
-    if (pendingCount == 0) {
-      return TagesimpulsNotificationPlanningResult(
-        status: TagesimpulsNotificationPlanningStatus
-            .scheduledButNoPendingNotification,
-        scheduled: [notification],
-        pendingNotificationCount: pendingCount,
-        permissionStatus: permission,
-      );
-    }
-    return TagesimpulsNotificationPlanningResult(
-      status: TagesimpulsNotificationPlanningStatus.scheduledSuccessfully,
-      scheduled: [notification],
-      pendingNotificationCount: pendingCount,
-      permissionStatus: permission,
+    return _schedulePreparedNotifications(
+      [notification],
+      now: start,
+      cancelRegularBeforeScheduling: false,
+      emptyStatus: TagesimpulsNotificationPlanningStatus.noGeneratedImpulses,
+      successStatus:
+          TagesimpulsNotificationPlanningStatus.scheduledSuccessfully,
+      noPendingStatus: TagesimpulsNotificationPlanningStatus
+          .scheduledButNoPendingNotification,
+      platformErrorStatus:
+          TagesimpulsNotificationPlanningStatus.schedulePlatformError,
     );
   }
 
@@ -397,14 +393,23 @@ class TagesimpulsNotificationService {
             ),
             slot: impulse.slot,
             usedWords: impulse.usedWords,
-            payload: 'tagesimpuls:${impulse.slot}',
+            payload: _payloadFor(
+              slot: impulse.slot,
+              chatId: options.chatId,
+              messageId: index < options.messageIds.length
+                  ? options.messageIds[index]
+                  : null,
+            ),
           );
         })
         .toList(growable: false);
   }
 
   Future<void> clearScheduledNotifications() async {
-    await _scheduler.cancelAll();
+    await _cancelMatchingPendingNotifications(
+      reason: 'clear regular Tagesimpuls notifications',
+      matches: TagesimpulsNotificationIds.isRegular,
+    );
   }
 
   Future<int?> _safePendingNotificationCount() async {
@@ -414,6 +419,141 @@ class TagesimpulsNotificationService {
       _debugLog('pending count failed', error);
       return null;
     }
+  }
+
+  Future<TagesimpulsNotificationPlanningResult> _schedulePreparedNotifications(
+    List<TagesimpulsNotificationSchedule> schedules, {
+    required DateTime now,
+    required TagesimpulsNotificationPlanningStatus emptyStatus,
+    required TagesimpulsNotificationPlanningStatus successStatus,
+    required TagesimpulsNotificationPlanningStatus noPendingStatus,
+    required TagesimpulsNotificationPlanningStatus platformErrorStatus,
+    bool cancelRegularBeforeScheduling = true,
+    bool cancelRealTestBeforeScheduling = false,
+  }) async {
+    if (schedules.isEmpty) {
+      return TagesimpulsNotificationPlanningResult(status: emptyStatus);
+    }
+
+    final validationStatus = _validateSchedules(schedules, now);
+    if (validationStatus != null) {
+      return TagesimpulsNotificationPlanningResult(
+        status: validationStatus,
+        scheduled: schedules,
+      );
+    }
+    _debugSchedules(schedules);
+
+    try {
+      await _scheduler.initialize();
+    } on Object catch (error) {
+      _debugLog('initialize failed', error);
+      return TagesimpulsNotificationPlanningResult(
+        status: _isTimezoneError(error)
+            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
+            : TagesimpulsNotificationPlanningStatus
+                  .notificationServiceNotInitialized,
+        debugMessage: _debugMessage(error),
+      );
+    }
+
+    final TagesimpulsNotificationPermissionStatus permission;
+    try {
+      permission = await _scheduler.requestPermission();
+    } on Object catch (error) {
+      _debugLog('permission request failed', error);
+      return TagesimpulsNotificationPlanningResult(
+        status: platformErrorStatus,
+        debugMessage: _debugMessage(error),
+      );
+    }
+    debugPrint('TagesimpulsNotificationService permission=$permission');
+    switch (permission) {
+      case TagesimpulsNotificationPermissionStatus.granted:
+        break;
+      case TagesimpulsNotificationPermissionStatus.denied:
+        return TagesimpulsNotificationPlanningResult(
+          status: TagesimpulsNotificationPlanningStatus.permissionDenied,
+          permissionStatus: permission,
+        );
+      case TagesimpulsNotificationPermissionStatus.notRequested:
+        return TagesimpulsNotificationPlanningResult(
+          status: TagesimpulsNotificationPlanningStatus.permissionNotRequested,
+          permissionStatus: permission,
+        );
+    }
+
+    if (cancelRegularBeforeScheduling) {
+      await _cancelMatchingPendingNotifications(
+        reason: 'regular Tagesimpuls replanning',
+        matches: TagesimpulsNotificationIds.isRegular,
+      );
+    }
+    if (cancelRealTestBeforeScheduling) {
+      await _cancelMatchingPendingNotifications(
+        reason: 'real Tagesimpuls test replanning',
+        matches: TagesimpulsNotificationIds.isRealTest,
+      );
+    }
+
+    try {
+      for (final notification in schedules) {
+        await _scheduler.schedule(notification);
+      }
+    } on Object catch (error) {
+      _debugLog('schedule failed', error);
+      return TagesimpulsNotificationPlanningResult(
+        status: _isTimezoneError(error)
+            ? TagesimpulsNotificationPlanningStatus.timezoneNotInitialized
+            : platformErrorStatus,
+        debugMessage: _debugMessage(error),
+        permissionStatus: permission,
+      );
+    }
+
+    final pendingIds = await _safePendingNotificationIds();
+    final scheduledIds = schedules.map((schedule) => schedule.id).toSet();
+    final matchingPendingIds = pendingIds
+        ?.where(scheduledIds.contains)
+        .toList(growable: false);
+    final pendingCount = matchingPendingIds?.length;
+    debugPrint(
+      'TagesimpulsNotificationService schedule result=${successStatus.name} '
+      'pendingCount=${pendingCount ?? -1} '
+      'pendingIds=${pendingIds ?? const []} scheduledIds=$scheduledIds',
+    );
+    if (pendingCount == 0) {
+      return TagesimpulsNotificationPlanningResult(
+        status: noPendingStatus,
+        scheduled: schedules,
+        pendingNotificationCount: pendingCount,
+        permissionStatus: permission,
+      );
+    }
+    return TagesimpulsNotificationPlanningResult(
+      status: successStatus,
+      scheduled: schedules,
+      pendingNotificationCount: pendingCount,
+      permissionStatus: permission,
+    );
+  }
+
+  TagesimpulsNotificationPlanningStatus? _validateSchedules(
+    List<TagesimpulsNotificationSchedule> schedules,
+    DateTime now,
+  ) {
+    if (schedules.any((schedule) => schedule.body.trim().isEmpty)) {
+      return TagesimpulsNotificationPlanningStatus.notificationBodyEmpty;
+    }
+    if (schedules.any(
+      (schedule) => schedule.payload != null && schedule.payload!.length > 512,
+    )) {
+      return TagesimpulsNotificationPlanningStatus.notificationPayloadInvalid;
+    }
+    if (schedules.any((schedule) => !schedule.scheduledAt.isAfter(now))) {
+      return TagesimpulsNotificationPlanningStatus.scheduledAtInPast;
+    }
+    return null;
   }
 
   Future<List<int>?> _safePendingNotificationIds() async {
@@ -427,8 +567,51 @@ class TagesimpulsNotificationService {
   }
 
   int _notificationIdFor(int index, DateTime now) {
-    final day = DateTime(now.year, now.month, now.day);
-    return day.millisecondsSinceEpoch ~/ 1000 + index;
+    final maxOffset =
+        TagesimpulsNotificationIds.regularEnd -
+        TagesimpulsNotificationIds.regularStart;
+    return TagesimpulsNotificationIds.regularStart + index.clamp(0, maxOffset);
+  }
+
+  Future<void> _cancelMatchingPendingNotifications({
+    required String reason,
+    required bool Function(int id) matches,
+  }) async {
+    final before = await _safePendingNotificationIds();
+    if (before == null) return;
+
+    final cancelIds = before.where(matches).toList(growable: false);
+    debugPrint(
+      'TagesimpulsNotificationService cancel reason=$reason '
+      'idsBefore=$before cancelIds=$cancelIds',
+    );
+    for (final id in cancelIds) {
+      try {
+        await _scheduler.cancel(id);
+      } on Object catch (error) {
+        _debugLog('cancel id=$id failed', error);
+      }
+    }
+
+    final after = await _safePendingNotificationIds();
+    debugPrint(
+      'TagesimpulsNotificationService cancel reason=$reason '
+      'idsAfter=${after ?? const []}',
+    );
+  }
+
+  String _payloadFor({
+    required String slot,
+    String? chatId,
+    String? messageId,
+  }) {
+    if (chatId != null && chatId.trim().isNotEmpty) {
+      return ImpulseInboxNotificationPayload.encodeImpulseMessage(
+        chatId: chatId.trim(),
+        messageId: messageId?.trim() ?? '',
+      );
+    }
+    return 'tagesimpuls:$slot';
   }
 
   DateTime _nextSlotTime(
@@ -565,6 +748,10 @@ class TagesimpulsNotificationService {
     debugPrint(
       'TagesimpulsNotificationService planned times='
       '${schedules.map((schedule) => schedule.scheduledAt.toIso8601String()).toList()}',
+    );
+    debugPrint(
+      'TagesimpulsNotificationService planned notification details='
+      '${schedules.map((schedule) => {'id': schedule.id, 'slot': schedule.slot, 'hasInboxPayload': ImpulseInboxNotificationPayload.parse(schedule.payload)?.opensChat ?? false}).toList()}',
     );
   }
 }

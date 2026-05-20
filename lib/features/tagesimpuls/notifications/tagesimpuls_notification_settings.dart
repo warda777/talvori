@@ -284,7 +284,8 @@ class TagesimpulsNotificationSettingsController
 
   void clearNeedsWordsStatus() {
     if (state.displayStatus !=
-        TagesimpulsNotificationDisplayStatus.needsWords) {
+            TagesimpulsNotificationDisplayStatus.needsWords &&
+        state.nextPlannedInfo == null) {
       return;
     }
     state = state.copyWith(

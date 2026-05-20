@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type DailyImpulseWord = {
   word?: unknown;
+  text?: unknown;
   translation?: unknown;
 };
 
@@ -181,6 +182,24 @@ function safeString(value: unknown): string | null {
     : null;
 }
 
+function normalizeWordText(value: unknown): string | null {
+  const raw = safeString(value);
+  if (!raw) return null;
+
+  const candidates = raw
+    .split(/[\r\n]+/)
+    .map((line) =>
+      line
+        .replace(/https?:\/\/\S+/gi, " ")
+        .replace(/www\.\S+/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter((line) => line.length > 0);
+
+  return candidates[0] ?? null;
+}
+
 function normalizeOptionalString(value: unknown, fallback: string): string {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
@@ -212,7 +231,7 @@ function normalizeWords(value: unknown): DailyImpulseWord[] | null {
     }
 
     const entry = raw as DailyImpulseWord;
-    const word = safeString(entry.word);
+    const word = normalizeWordText(entry.word) ?? normalizeWordText(entry.text);
     if (!word || word.length > maxWordLength) {
       return null;
     }

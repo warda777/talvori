@@ -4,13 +4,38 @@ class TagesimpulsGenerateWord {
   final String word;
   final String? translation;
 
+  String get payloadWord => normalizeTagesimpulsPayloadWord(word);
+
+  bool get hasPayloadWord => payloadWord.isNotEmpty;
+
   Map<String, Object?> toJson() {
+    final normalizedWord = payloadWord;
     return {
-      'word': word,
+      'word': normalizedWord,
       if ((translation ?? '').trim().isNotEmpty)
         'translation': translation!.trim(),
     };
   }
+}
+
+String normalizeTagesimpulsPayloadWord(String value) {
+  final lines = value
+      .split(RegExp(r'[\r\n]+'))
+      .map(_stripUrlsAndNormalizeWhitespace)
+      .where((line) => line.isNotEmpty);
+
+  final firstLine = lines.isNotEmpty ? lines.first : '';
+  if (firstLine.isNotEmpty) return firstLine;
+
+  return _stripUrlsAndNormalizeWhitespace(value);
+}
+
+String _stripUrlsAndNormalizeWhitespace(String value) {
+  return value
+      .replaceAll(RegExp(r'https?:\/\/\S+', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'www\.\S+', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 class TagesimpulsGenerateRequest {
@@ -53,6 +78,7 @@ enum TagesimpulsGenerationStatus {
   invalidAiResponse,
   noImpulsesReturned,
   notEnoughWords,
+  wordsRequired,
   generationSucceeded,
 }
 

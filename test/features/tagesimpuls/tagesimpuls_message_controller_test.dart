@@ -83,6 +83,46 @@ void main() {
       expect(controller.state.impulses.single.message, contains('superstar'));
     });
 
+    test('normalizes imported URL leftovers before generation', () async {
+      final fakeClient = _FakeTagesimpulsAiClient();
+      final controller = TagesimpulsMessageController(client: fakeClient);
+
+      await controller.generate([
+        _item('word-1', 'move https://www.bbc.com/news/story'),
+        _item('word-2', 'reefs\nhttps://example.com/story'),
+        _item('word-3', 'serving'),
+      ]);
+
+      expect(fakeClient.requests, hasLength(1));
+      expect(fakeClient.requests.single.words.map((word) => word.payloadWord), [
+        'move',
+        'reefs',
+        'serving',
+      ]);
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.generationSucceeded,
+      );
+    });
+
+    test('maps payload preparation failure separately', () async {
+      final fakeClient = _FakeTagesimpulsAiClient();
+      final controller = TagesimpulsMessageController(client: fakeClient);
+
+      await controller.generate([
+        _item('word-1', 'https://example.com/one'),
+        _item('word-2', 'https://example.com/two'),
+        _item('word-3', 'https://example.com/three'),
+      ]);
+
+      expect(fakeClient.requests, isEmpty);
+      expect(controller.state.error, 'wordsRequired');
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.wordsRequired,
+      );
+    });
+
     test('maps quota exceeded diagnosis', () async {
       final controller = TagesimpulsMessageController(
         client: _FakeTagesimpulsAiClient(errorCode: 'quotaExceeded'),
@@ -135,6 +175,24 @@ void main() {
       expect(
         controller.state.generationStatus,
         TagesimpulsGenerationStatus.functionCallFailed,
+      );
+    });
+
+    test('maps words required diagnosis', () async {
+      final controller = TagesimpulsMessageController(
+        client: _FakeTagesimpulsAiClient(errorCode: 'wordsRequired'),
+      );
+
+      await controller.generate([
+        _item('word-1', 'move'),
+        _item('word-2', 'superstar'),
+        _item('word-3', 'destroyed'),
+      ]);
+
+      expect(controller.state.error, 'wordsRequired');
+      expect(
+        controller.state.generationStatus,
+        TagesimpulsGenerationStatus.wordsRequired,
       );
     });
   });

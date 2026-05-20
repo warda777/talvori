@@ -1,6 +1,21 @@
 import '../ai/tagesimpuls_ai_client.dart';
 import 'tagesimpuls_notification_settings.dart';
 
+class TagesimpulsNotificationIds {
+  const TagesimpulsNotificationIds._();
+
+  static const technicalTest = 900001;
+  static const realTestStart = 910000;
+  static const realTestEnd = 910099;
+  static const realTest = 910011;
+  static const regularStart = 920000;
+  static const regularEnd = 920999;
+
+  static bool isRegular(int id) => id >= regularStart && id <= regularEnd;
+
+  static bool isRealTest(int id) => id >= realTestStart && id <= realTestEnd;
+}
+
 class TagesimpulsNotificationSchedule {
   const TagesimpulsNotificationSchedule({
     required this.id,
@@ -23,7 +38,14 @@ class TagesimpulsNotificationSchedule {
 
 enum TagesimpulsNotificationPlanningStatus {
   scheduledSuccessfully,
+  realImpulseTestScheduled,
+  realImpulseTestDeliveredUnknown,
+  realImpulseScheduleFailed,
   scheduledButNoPendingNotification,
+  notificationPendingMissing,
+  notificationBodyEmpty,
+  notificationPayloadInvalid,
+  scheduledAtInPast,
   noPendingNotifications,
   expiredScheduleRecomputed,
   permissionGranted,
@@ -64,6 +86,8 @@ class TagesimpulsNotificationPlanOptions {
     this.preferredWindow = TagesimpulsPreferredWindow.automatic,
     this.customHour,
     this.customMinute,
+    this.chatId,
+    this.messageIds = const [],
     DateTime? now,
   }) : now = now ?? DateTime.now();
 
@@ -71,5 +95,7 @@ class TagesimpulsNotificationPlanOptions {
   final TagesimpulsPreferredWindow preferredWindow;
   final int? customHour;
   final int? customMinute;
+  final String? chatId;
+  final List<String> messageIds;
   final DateTime now;
 }

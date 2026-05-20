@@ -31,6 +31,7 @@ Der Client normalisiert Edge-Function- und Provider-Fehler auf appseitige Diagno
 - `invalidAiResponse`
 - `noImpulsesReturned`
 - `notEnoughWords`
+- `wordsRequired`
 - `generationSucceeded`
 
 Die UI mappt diese Zustände auf konkrete deutsche Hinweise. Dadurch ist unterscheidbar, ob die Edge Function nicht erreichbar ist, das Limit erreicht wurde, die KI-Antwort nicht parsebar war oder keine Impulse zurückkamen.
@@ -39,10 +40,29 @@ Die UI mappt diese Zustände auf konkrete deutsche Hinweise. Dadurch ist untersc
 
 Der Client ruft exakt `generate-daily-impulses` auf und sendet:
 
-- `words`
+- `words` als Liste mit `word` und optional `translation`
 - `count`
 - `language`
 - `style`
+
+Das erwartete Request-Format ist:
+
+```json
+{
+  "words": [
+    { "word": "move", "translation": "bewegen" },
+    { "word": "reefs" },
+    { "word": "serving" }
+  ],
+  "count": 1,
+  "language": "EN",
+  "style": "natural_message"
+}
+```
+
+Vor dem Senden normalisiert Flutter die ausgewählten Tagesimpuls-Wörter. Zeilenumbrüche werden geglättet, offensichtliche URL-Reste aus importierten Shared-Texten werden entfernt und leere Wörter werden nicht an die Edge Function gesendet. Ein importiertes Feld wie `move https://www.bbc.com/...` wird dadurch als `move` übertragen.
+
+`words_required` wird als `wordsRequired` gemappt. Wenn lokal mindestens 3 Wörter ausgewählt sind, aber nach der Payload-Normalisierung keine gültigen Wörter übrig bleiben oder die Edge Function `words_required` meldet, zeigt die App nicht den normalen Mindestwort-Hinweis, sondern den konkreten Datenhinweis `Tagesimpuls-Wörter konnten nicht vorbereitet werden.`
 
 Sichere Debug-Logs enthalten nur Function-Name, Payload-Keys, Response-Keys, Exception-Typ und gekürzte Fehlermeldungen. API-Keys, Tokens und vollständige Prompts werden nicht geloggt.
 

@@ -26,6 +26,8 @@ class WordCard extends ConsumerStatefulWidget {
   final VoidCallback onMarkWords;
   final Future<TagesimpulsSelectionAddResult> Function(WordUserView word)?
   onQuickSend; // Nimmt das aktuelle Wort aus dem Wheel.
+  final VoidCallback? onImpulseInboxTap;
+  final int impulseInboxUnreadCount;
   final VoidCallback onGo;
 
   // Bild
@@ -61,6 +63,8 @@ class WordCard extends ConsumerStatefulWidget {
     required this.onSpeak,
     required this.onMarkWords,
     required this.onQuickSend,
+    this.onImpulseInboxTap,
+    this.impulseInboxUnreadCount = 0,
     required this.onGo,
     this.wordImage,
     this.onImageTap,
@@ -427,10 +431,10 @@ class _WordCardState extends ConsumerState<WordCard> {
                       ),
                     ),
 
-                    // ─── LINKES ICON (unten links) mit TapFlash ───
+                    // ─── LINKE AKTIONEN (unten links) mit TapFlash ───
                     Positioned(
                       bottom: 16,
-                      left: 8,
+                      left: 0,
                       child: SizedBox.square(
                         dimension: 52,
                         child: TapFlash(
@@ -470,6 +474,90 @@ class _WordCardState extends ConsumerState<WordCard> {
                         ),
                       ),
                     ),
+
+                    if (widget.onImpulseInboxTap != null)
+                      Positioned(
+                        bottom: 76,
+                        left: 0,
+                        child: SizedBox.square(
+                          key: const Key('home-impuls-postfach-button'),
+                          dimension: 52,
+                          child: TapFlash(
+                            color: const Color(0xFF59D7FF),
+                            shape: BoxShape.circle,
+                            onTapAfter: widget.onImpulseInboxTap,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF07111A),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: const Color(0xFF59D7FF),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x3359D7FF),
+                                        blurRadius: 18,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.mark_unread_chat_alt_rounded,
+                                    color: widget.isImageExpanded
+                                        ? onImageIcon
+                                        : const Color(0xFF7FFFE7),
+                                    size: 28,
+                                  ),
+                                ),
+                                if (widget.impulseInboxUnreadCount > 0)
+                                  Positioned(
+                                    key: const Key(
+                                      'home-impuls-postfach-unread-badge',
+                                    ),
+                                    right: -2,
+                                    top: -2,
+                                    child: Container(
+                                      constraints: const BoxConstraints(
+                                        minWidth: 18,
+                                        minHeight: 18,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF59D7FF),
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
+                                          color: const Color(0xFF06101A),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        widget.impulseInboxUnreadCount > 9
+                                            ? '9+'
+                                            : '${widget.impulseInboxUnreadCount}',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Color(0xFF041019),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
 
                     // ─── RECHTES ICON Chrome Button(unten rechts) mit TapFlash ───
                     Positioned(

@@ -28,16 +28,29 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
       throw const TagesimpulsAiException('invalid_count');
     }
 
+    final payloadWords = [
+      for (final word in request.words)
+        if (word.hasPayloadWord) word.toJson(),
+    ];
+    if (payloadWords.isEmpty) {
+      throw const TagesimpulsAiException('wordsRequired');
+    }
+
     final payload = <String, Object?>{
-      'words': [for (final word in request.words) word.toJson()],
+      'words': payloadWords,
       'count': request.count,
       'language': request.language,
       'style': request.style,
     };
+    final firstPayloadWord = payloadWords.firstOrNull;
     debugPrint(
       'SupabaseTagesimpulsAiClient call function=$functionName '
       'words=${request.words.length} count=${request.count} '
-      'language=${request.language} style=${request.style}',
+      'language=${request.language} style=${request.style} '
+      'payloadWordsCount=${payloadWords.length} '
+      'payloadWordKeys=${payload.keys.toList()} '
+      'firstPayloadWordKeys=${firstPayloadWord?.keys.toList() ?? const []} '
+      'firstPayloadWordPreview=${_preview(firstPayloadWord?['word'])}',
     );
 
     late final Map<String, Object?> response;
@@ -90,7 +103,7 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
       'ai_provider_not_supported' => 'aiClientNotConfigured',
       'quota_exceeded' || 'ai_rate_limited' => 'quotaExceeded',
       'ai_invalid_response' => 'invalidAiResponse',
-      'words_required' => 'notEnoughWords',
+      'words_required' => 'wordsRequired',
       _ => 'functionCallFailed',
     };
   }
@@ -120,5 +133,11 @@ class SupabaseTagesimpulsAiClient implements TagesimpulsAiClient {
     final message = error.toString();
     if (message.length <= 240) return message;
     return '${message.substring(0, 240)}...';
+  }
+
+  String _preview(Object? value) {
+    if (value is! String) return '';
+    if (value.length <= 32) return value;
+    return '${value.substring(0, 32)}...';
   }
 }

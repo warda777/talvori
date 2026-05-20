@@ -286,7 +286,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
           if (widget.quickActions != null)
-            Positioned(right: 14, bottom: 64, child: widget.quickActions!),
+            Positioned(left: 14, bottom: 64, child: widget.quickActions!),
           if (widget.onSettingsTap != null)
             Positioned(
               top: 12,
@@ -354,7 +354,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           if (widget.footer != null)
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
           if (widget.quickActions != null)
-            Positioned(right: 14, bottom: 64, child: widget.quickActions!),
+            Positioned(left: 14, bottom: 64, child: widget.quickActions!),
         ],
       ),
     );

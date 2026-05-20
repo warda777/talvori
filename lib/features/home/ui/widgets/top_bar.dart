@@ -503,7 +503,9 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
 
   @override
   void dispose() {
-    _hideRewardsQuick();
+    _rewardsOverlay?.remove();
+    _rewardsOverlay = null;
+    _quickOpen = false;
     super.dispose();
   }
 }
