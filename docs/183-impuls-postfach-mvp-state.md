@@ -14,8 +14,9 @@ Das MVP ergänzt ein lokales Impuls-Postfach mit:
 - lokal gespeicherten Impulsnachrichten
 - ungelesenem Status
 - vorbereiteter Notification-Payload mit `chatId` und `messageId`
+- einfacher Antwortfunktion im Tagesimpuls-Chat über `ai-chat`
 
-Es wurde kein Server-Push, kein Supabase-Verlauf und keine Antwortfunktion eingebaut.
+Es wurde kein Server-Push und kein Supabase-Verlauf eingebaut.
 
 ## Lokale Speicherung
 
@@ -95,16 +96,109 @@ Der echte 10-Sekunden-Test nutzt einen eigenen Notification-ID-Bereich (`910000`
 
 Der Stil folgt Talvoris Dark-Neon-Look und kopiert keine externe Messenger-App 1:1.
 
+Die Chatliste wurde für das MVP produktnäher poliert:
+
+- dezenter Verlaufskopf mit Anzahl der aktiven Verläufe
+- dunkle Chat-Kacheln mit Neon-Cyan-/Mint-Kanten
+- Tagesimpuls-Avatar als leuchtender Kreis mit Impuls-Icon
+- letzte Nachricht einzeilig und gut scanbar
+- Uhrzeit/Datum rechts
+- Ungelesen-Badge mit starkem Kontrast
+- leerer Zustand mit großem Chat-Icon und ruhigem Erklärungstext
+
 ## Chatdetail
 
 `ImpulseChatDetailScreen` zeigt:
 
 - Chat-Titel
+- Zurück-Button im App-Header
 - Nachrichten als Sprechblasen
-- Datum/Uhrzeit
+- KI-/Systemimpulse links bzw. neutral
+- Datum/Uhrzeit klein in der Bubble
 - verwendete Wörter als Chips
+- leeren Zustand, falls lokal noch keine Nachricht vorhanden ist
 
-Beim Öffnen wird der Chat als gelesen markiert. Es gibt noch keine Texteingabe und keine Antwortfunktion.
+Das Chatdetail wurde von einer Card-/Feed-Optik zu einem klareren Messenger-Muster umgebaut. Die Nachrichten sind kompakte Bubbles statt großer Karten:
+
+- KI- und Tagesimpuls-Nachrichten stehen links.
+- Nutzer-Nachrichten stehen rechts.
+- Die Bubble-Geometrie nutzt einheitlich große, harmonische Rundungen.
+- Bubble und Tail werden als zusammenhängende Custom-Shape gezeichnet.
+- Die Bubble-Form hat links oder rechts unten ein kleines weich-spitzes Tail, das nicht wie ein separates Rechteck wirkt.
+- Der Tail von Assistant-/grauen Bubbles nutzt exakt dieselbe Füllfarbe wie die Bubble; es gibt keine dunkle Naht zwischen Bubble und Tail.
+- Kurze Nachrichten bleiben kurze Bubbles.
+- Lange Nachrichten umbrechen innerhalb einer maximalen Bubble-Breite.
+- Zeitstempel sitzen klein in der Bubble.
+- `usedWords` sind deutlich kleinere, dezente Chips.
+- Die Abstände im Verlauf sind luftiger, ohne Full-Width-Cards.
+- Reine Emoji-Nachrichten werden groß und frei stehend dargestellt, ohne Standard-Bubble.
+- Text mit Emoji bleibt eine normale Chatbubble.
+- Mehrere aufeinanderfolgende Nachrichten desselben Senders werden enger gruppiert; das Tail sitzt nur an der letzten Bubble der Gruppe.
+- Der Chatverlauf hat ein dezentes dunkles Hintergrundmuster im Talvori-Stil.
+- Datums-Trenner werden als kleine zentrierte Pills angezeigt.
+
+Der Stil bleibt Talvori Dark-Neon und kopiert keine externe Messenger-App 1:1. Der Header ist kompakter mit Zurück-Button, Tagesimpuls-Avatar, Titel und Unterzeile. Beim Öffnen wird nach unten gescrollt, damit der aktuelle Impuls sichtbar ist. Wenn eine Notification mit `messageId` öffnet, kann die Zielnachricht visuell hervorgehoben werden.
+
+Die Eingabeleiste folgt ebenfalls dem Messenger-Muster: Plus-Platzhalter, runde dunkle Textkapsel und rechts ein kontextabhängiger Button. Wenn Text vorhanden ist, erscheint der Senden-Button. Wenn das Textfeld leer ist, erscheint ein Mikrofon-Button fuer Sprache-zu-Text. Wenn der Nutzer in den Chatverlauf tippt oder im Verlauf scrollt, wird die Tastatur geschlossen. Beim Öffnen der Tastatur und nach neuen Nachrichten scrollt der Verlauf wieder nach unten.
+
+Beim Öffnen wird der Chat als gelesen markiert.
+
+## Nachrichten-Aktionsmenü
+
+Nachrichten im Chatdetail unterstützen ein lokales Long-Press-Menü im Talvori Dark-Neon-Stil. Das Muster orientiert sich an modernen Messenger-Kontextmenüs, kopiert aber keine externe App:
+
+- Long-Press schließt die Tastatur und öffnet ein dunkles Aktionsmenü.
+- Oben erscheint eine kompakte Emoji-Reaktionsleiste mit `👍`, `❤️`, `😂`, `😮`, `😢`, `🙏`, `🥰` und einem Plus-Platzhalter.
+- Eine gewählte Reaktion wird lokal an der Nachricht gespeichert und klein an der Bubble angezeigt.
+- „Antworten“ setzt eine lokale Reply-Vorschau über der Eingabeleiste. Die anschließend gesendete Nutzer-Nachricht speichert `replyToMessageId`, `replyPreviewText` und die Reply-Rolle.
+- „Kopieren“ kopiert den Nachrichtentext in die Zwischenablage.
+- „Mit Stern markieren“ bzw. „Stern entfernen“ toggelt einen lokalen Sternstatus und zeigt den Stern klein an der Nachricht.
+- „Löschen“ entfernt die Nachricht nach Bestätigung nur lokal aus diesem Chat. Chatvorschau und letzte Nachricht werden danach neu berechnet.
+- „Mehr ...“ öffnet ein zweites Menü mit vorbereiteten Aktionen `Fixieren`, `Sprechen` und `Übersetzen`.
+
+Für das MVP bleibt alles lokal. Es gibt keine Server-Synchronisation von Reaktionen, Sternen, Replies oder gelöschten Nachrichten.
+
+## Interaktiver Tagesimpuls-Chat
+
+Das Impuls-Postfach ist nicht mehr nur ein Archiv. Der Tagesimpuls-Chat kann im MVP als einfacher KI-Impuls-Chat genutzt werden:
+
+- Tagesimpuls- und KI-Nachrichten werden links als eingehende Bubbles dargestellt.
+- Nutzer-Nachrichten werden rechts als ausgehende Bubbles dargestellt.
+- Die Bubble-Form ist asymmetrisch und erinnert an Messenger-Muster, ohne eine bestehende Messenger-App zu kopieren.
+- Zeitstempel bleiben klein in der Bubble.
+- `usedWords` erscheinen nur bei KI-/Tagesimpuls-Nachrichten als kleine Chips.
+- Unten gibt es eine Eingabeleiste mit Plus-Platzhalter, Textfeld und Senden-Button.
+- Bei leerem Textfeld gibt es einen Mikrofon-Button fuer Sprache-zu-Text.
+- Der Plus-Button ist aktuell nur ein Platzhalter für spätere Anhänge.
+
+Beim Senden wird die Nutzer-Nachricht sofort lokal im Impuls-Postfach gespeichert. Danach ruft die App den bestehenden `ai-chat` Flutter-Client auf, der über die Supabase Edge Function `ai-chat` läuft. Flutter enthält weiterhin keine KI-Secrets und hat keine direkte OpenAI-Anbindung.
+
+Die KI-Antwort wird als lokale Assistant-Nachricht im selben Chat gespeichert. Während die Antwort läuft, zeigt der Chat eine kleine „Talvori denkt...“-Bubble. Bei Fehlern bleibt die Nutzer-Nachricht erhalten und der Chat zeigt eine lokale Fehlermeldung.
+
+Alte gespeicherte Nachrichten ohne explizite Rolle bleiben kompatibel und werden als Assistant-/KI-Nachrichten behandelt. Neue Nachrichten speichern zusätzlich Rolle und Status:
+
+- `source`/`role`: `ai`, `system` oder `user`
+- `status`: `sending`, `sent` oder `failed`
+- optional `errorMessage`
+- optional `reaction`
+- optional `isStarred`
+- optional `isPinned`
+- optional `replyToMessageId`
+- optional `replyPreviewText`
+- optional `replyPreviewSource`
+
+User-Nachrichten erhöhen den Ungelesen-Zähler nicht. KI-Antworten, die im geöffneten Chat entstehen, gelten direkt als gelesen. Die Chatliste zeigt nach User- oder KI-Nachrichten weiterhin die neueste Nachricht und den aktuellen Zeitstempel.
+
+Spracheingabe nutzt lokal das Flutter-Paket `speech_to_text`. Die App speichert keine Audiodateien und lädt keine Voice-Nachrichten hoch. Gesprochene Sprache wird in das Textfeld übertragen, damit der Nutzer den erkannten Text prüfen und anschließend normal senden kann. Flutter enthält dafür keine Secrets.
+
+Nicht umgesetzt in diesem Schritt:
+
+- keine Fotos
+- keine Dateien
+- keine Audio-Nachrichten
+- keine gespeicherten Voice-Messages
+- keine freie globale Chatfunktion außerhalb des Impuls-Postfachs
+- keine komplexe Retry-Logik
 
 ## Notification-Payload
 
@@ -169,8 +263,8 @@ Der primäre Einstieg ins Impuls-Postfach liegt auf der Home-Seite. Der Button s
 - Kein APNs-/FCM-Ausbau
 - Kein Supabase-Verlauf
 - Kein Premium-Gating
-- Kein freier Chat
-- Keine Antwortfunktion
+- Kein freier globaler Chat außerhalb des Impuls-Postfachs
+- Keine Foto-/Datei-/Audiofunktion
 - Keine SRS-Änderung
 
 ## Tests

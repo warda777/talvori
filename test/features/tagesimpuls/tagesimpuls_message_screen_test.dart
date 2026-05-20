@@ -665,7 +665,10 @@ void main() {
 
     expect(fakeClient.requests.single.count, 3);
     expect(fakeScheduler.scheduled, hasLength(3));
-    expect(find.textContaining(RegExp(r'Geplant: .* · .* ·')), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'(Geplant|geplant): .* · .* ·')),
+      findsOneWidget,
+    );
     expect(find.byType(SnackBar), findsNothing);
   });
 
@@ -1021,12 +1024,39 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
-  Future<ImpulseMessage> addMessage(ImpulseMessage message) {
+  Future<ImpulseMessage> addMessage(
+    ImpulseMessage message, {
+    bool incrementUnread = true,
+  }) {
     throw StateError('inbox failed');
   }
 
   @override
   Future<void> clearChat(String chatId) async {}
+
+  @override
+  Future<void> deleteMessage(String chatId, String messageId) async {}
+
+  @override
+  Future<void> updateMessagePinned(
+    String chatId,
+    String messageId, {
+    required bool isPinned,
+  }) async {}
+
+  @override
+  Future<void> updateMessageReaction(
+    String chatId,
+    String messageId,
+    String? reaction,
+  ) async {}
+
+  @override
+  Future<void> updateMessageStarred(
+    String chatId,
+    String messageId, {
+    required bool isStarred,
+  }) async {}
 
   @override
   Future<List<ImpulseChat>> listChats() async => const [];

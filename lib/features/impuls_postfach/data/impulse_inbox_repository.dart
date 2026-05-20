@@ -9,10 +9,29 @@ abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
   Future<List<ImpulseChat>> listChats();
   Future<List<ImpulseMessage>> listMessages(String chatId);
-  Future<ImpulseMessage> addMessage(ImpulseMessage message);
+  Future<ImpulseMessage> addMessage(
+    ImpulseMessage message, {
+    bool incrementUnread = true,
+  });
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
     List<TagesimpulsGeneratedImpulse> impulses,
   );
+  Future<void> updateMessageReaction(
+    String chatId,
+    String messageId,
+    String? reaction,
+  );
+  Future<void> updateMessageStarred(
+    String chatId,
+    String messageId, {
+    required bool isStarred,
+  });
+  Future<void> updateMessagePinned(
+    String chatId,
+    String messageId, {
+    required bool isPinned,
+  });
+  Future<void> deleteMessage(String chatId, String messageId);
   Future<void> markChatRead(String chatId);
   Future<void> clearChat(String chatId);
 }
@@ -69,7 +88,10 @@ class SharedPreferencesImpulseInboxRepository
   }
 
   @override
-  Future<ImpulseMessage> addMessage(ImpulseMessage message) async {
+  Future<ImpulseMessage> addMessage(
+    ImpulseMessage message, {
+    bool incrementUnread = true,
+  }) async {
     final store = await _loadStore();
     final existingChat = store.chats[message.chatId];
     if (existingChat == null) {
@@ -87,7 +109,9 @@ class SharedPreferencesImpulseInboxRepository
     store.chats[message.chatId] = existingChat.copyWith(
       lastMessageAt: normalized.createdAt,
       lastMessageText: normalized.text,
-      unreadCount: existingChat.unreadCount + 1,
+      unreadCount: incrementUnread
+          ? existingChat.unreadCount + 1
+          : existingChat.unreadCount,
     );
     await _saveStore(store);
     return normalized;
@@ -136,17 +160,111 @@ class SharedPreferencesImpulseInboxRepository
   }
 
   @override
+  Future<void> updateMessageReaction(
+    String chatId,
+    String messageId,
+    String? reaction,
+  ) {
+    return _updateMessage(
+      chatId,
+      messageId,
+      (message) => message.copyWith(
+        reaction: reaction,
+        clearReaction: reaction == null || reaction.trim().isEmpty,
+      ),
+    );
+  }
+
+  @override
+  Future<void> updateMessageStarred(
+    String chatId,
+    String messageId, {
+    required bool isStarred,
+  }) {
+    return _updateMessage(
+      chatId,
+      messageId,
+      (message) => message.copyWith(isStarred: isStarred),
+    );
+  }
+
+  @override
+  Future<void> updateMessagePinned(
+    String chatId,
+    String messageId, {
+    required bool isPinned,
+  }) {
+    return _updateMessage(
+      chatId,
+      messageId,
+      (message) => message.copyWith(isPinned: isPinned),
+    );
+  }
+
+  @override
+  Future<void> deleteMessage(String chatId, String messageId) async {
+    final store = await _loadStore();
+    final chat = store.chats[chatId];
+    if (chat == null) return;
+
+    final messages = [...(store.messages[chatId] ?? const <ImpulseMessage>[])];
+    final nextMessages = messages
+        .where((message) => message.id != messageId)
+        .toList(growable: false);
+    if (nextMessages.length == messages.length) return;
+
+    store.messages[chatId] = nextMessages;
+    _recomputeChatPreview(store, chatId);
+    await _saveStore(store);
+  }
+
+  @override
   Future<void> clearChat(String chatId) async {
     final store = await _loadStore();
     final chat = store.chats[chatId];
     if (chat == null) return;
     store.messages[chatId] = const [];
-    store.chats[chatId] = chat.copyWith(
-      lastMessageAt: null,
-      lastMessageText: null,
-      unreadCount: 0,
-    );
+    store.chats[chatId] = chat.copyWith(clearLastMessage: true, unreadCount: 0);
     await _saveStore(store);
+  }
+
+  Future<void> _updateMessage(
+    String chatId,
+    String messageId,
+    ImpulseMessage Function(ImpulseMessage message) update,
+  ) async {
+    final store = await _loadStore();
+    final messages = [...(store.messages[chatId] ?? const <ImpulseMessage>[])];
+    final index = messages.indexWhere((message) => message.id == messageId);
+    if (index < 0) return;
+    messages[index] = update(messages[index]);
+    store.messages[chatId] = messages;
+    await _saveStore(store);
+  }
+
+  void _recomputeChatPreview(_ImpulseInboxStore store, String chatId) {
+    final chat = store.chats[chatId];
+    if (chat == null) return;
+
+    final messages = [...(store.messages[chatId] ?? const <ImpulseMessage>[])];
+    messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    if (messages.isEmpty) {
+      store.chats[chatId] = chat.copyWith(
+        clearLastMessage: true,
+        unreadCount: 0,
+      );
+      return;
+    }
+
+    final last = messages.last;
+    final unreadCount = messages
+        .where((message) => message.readAt == null)
+        .length;
+    store.chats[chatId] = chat.copyWith(
+      lastMessageAt: last.createdAt,
+      lastMessageText: last.text,
+      unreadCount: unreadCount,
+    );
   }
 
   Future<_ImpulseInboxStore> _loadStore() async {

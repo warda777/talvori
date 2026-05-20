@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Talvori nutzt das Mikrofon, damit du Chatnachrichten diktieren kannst.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Talvori nutzt Spracherkennung, um gesprochene Worte in Text fuer den Impuls-Chat umzuwandeln.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

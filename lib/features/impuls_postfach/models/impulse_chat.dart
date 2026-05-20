@@ -41,6 +41,7 @@ class ImpulseChat {
     DateTime? createdAt,
     DateTime? lastMessageAt,
     String? lastMessageText,
+    bool clearLastMessage = false,
     int? unreadCount,
   }) {
     return ImpulseChat(
@@ -51,8 +52,12 @@ class ImpulseChat {
       avatarKey: avatarKey ?? this.avatarKey,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
-      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-      lastMessageText: lastMessageText ?? this.lastMessageText,
+      lastMessageAt: clearLastMessage
+          ? null
+          : lastMessageAt ?? this.lastMessageAt,
+      lastMessageText: clearLastMessage
+          ? null
+          : lastMessageText ?? this.lastMessageText,
       unreadCount: unreadCount ?? this.unreadCount,
     );
   }
