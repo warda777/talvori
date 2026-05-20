@@ -2,17 +2,33 @@
 
 ## Ausgangslage
 
-Tagesimpulse können über die Supabase Edge Function `generate-daily-impulses` erzeugt und im Flutter-Planungsflow als strukturierte Vorschau angezeigt werden. Ein Tagesimpuls besteht aus:
+Tagesimpulse können über die Supabase Edge Function `generate-daily-impulses` erzeugt werden. Ein Tagesimpuls besteht intern aus:
 
 - `slot`
 - `message`
 - `usedWords`
 
-Das langfristige Produktziel bleibt eine Messenger-/WhatsApp-ähnliche Nachricht auf dem Sperrbildschirm. In diesem Schritt wurde dafür nur die lokale Scheduling-Grundlage vorbereitet.
+Das langfristige Produktziel bleibt eine Messenger-/WhatsApp-ähnliche Nachricht auf dem Sperrbildschirm. In diesem Schritt wurde die lokale Scheduling-Grundlage nutzerfreundlicher an eine selbstlaufende Einstellung angepasst.
+
+## Selbstläufer-Logik
+
+Der Tagesimpuls funktioniert als dauerhafte Einstellung:
+
+- Standard ist `Automatisch`.
+- Standard-Häufigkeit ist `1` Tagesimpuls pro Tag.
+- Standard-Zeitfenster ist `Automatisch`.
+- Nutzer kann jederzeit `Aus` wählen.
+- Nutzer kann bewusst `1`, `2`, `3`, `4` oder `5` wählen.
+- Nutzer kann ein bevorzugtes Zeitfenster wählen.
+- Es gibt keinen zusätzlichen Speichern-/Planen-Button mehr.
+- Änderungen werden direkt gespeichert und die lokale Planung wird ruhig aktualisiert, wenn genug Wörter vorhanden sind.
+- Normale Änderungen an Häufigkeit oder Zeitfenster erzeugen keine Fehlersnackbar.
+
+KI-Texte werden nicht als Vorschau angezeigt. Nutzer müssen nur zurückkehren, wenn Wörter, Häufigkeit, Zeitfenster oder Deaktivierung geändert werden sollen.
 
 ## Lokale Notification-Grundlage
 
-Neu vorbereitet wurde eine lokale Notification-Schicht unter:
+Die lokale Notification-Schicht liegt unter:
 
 - `lib/features/tagesimpuls/notifications/`
 
@@ -23,45 +39,98 @@ Sie enthält:
 - `TagesimpulsNotificationScheduler`
 - `FlutterLocalTagesimpulsNotificationScheduler`
 - `TagesimpulsNotificationService`
+- `TagesimpulsNotificationSettings`
+- `TagesimpulsNotificationSettingsController`
+- `SharedPreferencesTagesimpulsNotificationSettingsRepository`
 
 Die echte Plugin-Anbindung liegt hinter einem Scheduler-Interface. Tests verwenden Fakes und lösen keine echten Platform Channels aus.
 
+## iOS-Anbindung
+
+Für iOS ist die lokale Notification-Anbindung technisch vorbereitet:
+
+- `DarwinInitializationSettings` initialisiert die iOS-Seite des Plugins.
+- iOS-Permissions werden nicht still beim Initialisieren angefragt, sondern explizit beim Planen über `requestPermissions(alert:badge:sound:)`.
+- Die Permission-Anfrage fordert `alert`, `badge` und `sound` an.
+- `DarwinNotificationDetails` setzt Foreground Presentation für Alert, Badge und Sound.
+- `GeneratedPluginRegistrant` wird nicht zusätzlich im normalen App-Start aufgerufen, damit `AppLinksIosPlugin` nicht doppelt registriert wird.
+- Der Notification-Service wird lazy genutzt und darf den App-Start nicht blockieren.
+
+Damit kann `flutter_local_notifications` lokale iOS-Notifications initialisieren, Permission aktiv abfragen und planen, ohne den AppLinks-Duplicate-Key-Crash wieder einzubauen.
+
 ## Paket
 
-Als lokales Notification-Paket wurde vorbereitet:
+Vorbereitet sind:
 
 - `flutter_local_notifications`
 - `timezone`
 
-Damit kann später lokal auf dem Gerät geplant werden, ohne Server-Push, APNs oder FCM zu benötigen.
+Damit kann lokal auf dem Gerät geplant werden, ohne Server-Push, APNs oder FCM zu nutzen.
 
-## Nutzeraktion erforderlich
+## Nutzeraktion und Automatik
 
-Notifications werden nicht automatisch geplant.
+Es gibt keine automatische Planung beim Öffnen der App und keine automatische KI-Anfrage beim Hinzufügen eines Wortes.
 
-Der aktuelle UI-Flow zeigt den Button:
+Sobald der Nutzer in der Verwaltung Modus, Häufigkeit oder Zeitfenster ändert:
 
-- „Benachrichtigungen planen“
+- die Einstellung wird gespeichert
+- bei `Aus` werden geplante Tagesimpulse gelöscht
+- bei `Automatisch` und mindestens 3 Wörtern werden KI-Impulse intern erzeugt
+- lokale Notifications werden geplant
+- es wird ein Status wie „Nächster Impuls: heute um 12:30 Uhr.“ angezeigt
 
-Dieser Button erscheint erst, wenn generierte Tagesimpulse vorhanden sind. Die Planung passiert nur nach bewusstem Antippen durch den Nutzer.
+Änderungen an der globalen Tagesimpuls-Wortauswahl werden separat live beobachtet. Wenn die Auswahl unter 3 Wörter fällt, erscheint der Status „Füge mindestens 3 Wörter hinzu.“ sofort. Wenn wieder mindestens 3 Wörter ausgewählt sind, wird dieser Hinweis sofort entfernt. Diese reine Status-Synchronisierung löst keine KI-Anfrage und keine neue Planung aus.
 
-Es gibt weiterhin:
+Fehler beim Hintergrund-Scheduling werden nicht als Snackbar-Spam angezeigt. Sie erscheinen als ruhiger Status unter den Einstellungen.
 
-- keine automatische Planung beim Generieren
-- keine automatische Planung beim App-Start
-- keine automatische KI-Anfrage
-- keine Hintergrundgenerierung
+Statusanzeige und Snackbar sind getrennt: Die Statusanzeige beschreibt den aktuellen Zustand. Wenn der Status eine Aktion bereits bestätigt, wird keine Snackbar mit demselben Inhalt gezeigt. Das gilt unter anderem für:
 
-## Slots und Zeitpunkte
+- „Test-Benachrichtigung geplant.“
+- „Tagesimpuls ist ausgeschaltet.“
+- „Tagesimpuls ist aktiv.“
+- gespeicherte Einstellungsänderungen
 
-Die erste Planungslogik übersetzt Slots in feste lokale Uhrzeiten:
+Snackbars bleiben nur für kritische, einmalige Fälle vorgesehen, zum Beispiel wenn Permission bewusst abgelehnt wurde.
 
-- `morning` → 09:00
-- `midday` / `noon` → 12:30
-- `afternoon` → 14:00
-- `evening` → 18:30
+Wenn weniger als 3 Wörter ausgewählt sind, erscheint:
 
-Unbekannte Slots fallen auf sichere Tageszeiten zurück. Nachtzeiten werden standardmäßig vermieden. Wenn ein Slot für heute schon vorbei ist, wird er auf den nächsten Tag geplant.
+- „Füge mindestens 3 Wörter hinzu.“
+
+Automatische Wortauswahl folgt später.
+
+## Zeitfenster
+
+Der Nutzer kann wählen:
+
+- `Automatisch`
+- `Morgens`
+- `Mittags`
+- `Nachmittags`
+- `Abends`
+
+Bei `Automatisch` nutzt Talvori die Slots der generierten Impulse oder sichere Fallback-Zeiten. Bei manuellem Zeitfenster werden mehrere Impulse in sinnvollen Abständen innerhalb dieses Fensters geplant. Nachtzeiten werden standardmäßig vermieden. Wenn ein Zeitpunkt für heute schon vorbei ist, wird auf den nächsten Tag geplant.
+
+Die geplanten Notifications verwenden:
+
+- Titel: „Talvori Tagesimpuls“
+- Body: generierte Tagesimpuls-Nachricht
+- eindeutige IDs pro Tag und Impuls
+- Payload mit Tagesimpuls-Kontext
+
+Die geplanten Zeitpunkte werden im lokalen Tagesimpuls-State gehalten:
+
+- `nextPlannedAt`
+- `plannedTimes`
+- `plannedCount`
+- Anzeige-Status wie `active`, `off`, `needsWords`, `permissionDenied` oder `error`
+
+Dadurch kann die UI konkrete Zeiten anzeigen, zum Beispiel:
+
+- „Nächster Impuls: heute um 12:30 Uhr.“
+- „Heute geplant: 12:30 · 16:00 · 19:15“
+- „Nächster Impuls: morgen um 09:00 Uhr.“
+
+Die aktuelle Umsetzung plant lokale Notifications auf dem Gerät. Nach erfolgreicher Planung kann iOS die Nachricht auch anzeigen, wenn die App geschlossen ist. Es gibt in diesem Schritt keinen Supabase Server-Push.
 
 ## Berechtigungen
 
@@ -70,43 +139,149 @@ Der Scheduler bereitet Permission-Anfragen vor:
 - iOS über Darwin Notification Permissions
 - Android über Notification Permission, soweit vom Plugin unterstützt
 
+Android deklariert `POST_NOTIFICATIONS` für Android 13+.
+
 Wenn die Berechtigung fehlt, zeigt der UI-Flow:
 
-- „Benachrichtigungen müssen erlaubt werden.“
+- als ruhigen Status „Benachrichtigungen sind nicht erlaubt.“
+- bei bewusster Aktivierung zusätzlich „Benachrichtigungen müssen erlaubt werden.“
+
+Wenn die Plattformkonfiguration noch nicht vollständig ist oder Scheduling fehlschlägt, wird kontrolliert angezeigt:
+
+- „Benachrichtigungen konnten vom System nicht geplant werden.“
+- „Tagesimpuls konnte nicht geplant werden.“, falls kein konkreterer Grund verfügbar ist
+
+Für iOS muss im Gerätetest geprüft werden, ob der Permission-Dialog erscheint und ob lokale Notifications im Simulator/Gerät zugestellt werden. Wenn iOS weiterhin nicht plant, sind als nächste Punkte native Notification-Capabilities, Simulator-Berechtigungen und Plugin-Konfiguration zu prüfen.
+
+Der Service unterscheidet strukturierte Planungsergebnisse:
+
+- `scheduledSuccessfully`
+- `permissionGranted`
+- `permissionDenied`
+- `permissionNotRequested`
+- `notificationServiceNotInitialized`
+- `impulseGenerationFailed`
+- `noGeneratedImpulses`
+- `invalidScheduleTime`
+- `timezoneNotInitialized`
+- `schedulePlatformError`
+
+Bei Plattformfehlern wird intern eine debugbare Fehlermeldung im Result gehalten und per Debug-Log ausgegeben, ohne die App abstürzen zu lassen. Wenn iOS-Permission bereits abgelehnt wurde, zeigt iOS keinen neuen Dialog; der Flow liefert dann `permissionDenied` und der Nutzer muss die Berechtigung in den iOS-Einstellungen wieder aktivieren.
+
+Scheduling-Zeiten werden immer in die Zukunft geschoben. Wenn das gewählte Zeitfenster für heute vorbei ist, wird für morgen geplant.
+
+## Technische Diagnose
+
+Der Planungsflow gibt jetzt gezieltere Hinweise aus, damit iOS-Probleme getrennt geprüft werden können:
+
+- `permissionDenied`: iOS hat Benachrichtigungen nicht erlaubt oder der Nutzer hat sie früher abgelehnt.
+- `impulseGenerationFailed`: Die KI konnte keine Tagesimpulse erzeugen.
+- `noGeneratedImpulses`: Es gibt keine erzeugten Impulse zum Planen.
+- `invalidScheduleTime`: Ein geplanter Zeitpunkt wäre ungültig.
+- `timezoneNotInitialized`: Die Zeitzonenbasis für `zonedSchedule` ist nicht bereit.
+- `schedulePlatformError`: Das iOS-/Android-System oder das Plugin hat den Scheduling-Aufruf abgelehnt.
+- `scheduledSuccessfully`: Mindestens eine lokale Notification wurde geplant.
+
+Im Entwicklungsmodus loggt der Flow sicher:
+
+- Anzahl ausgewählter Wörter
+- Häufigkeit
+- gewähltes Zeitfenster
+- Permission-Status
+- Anzahl erzeugter Impulse
+- geplante Notification-Zeitpunkte
+- Scheduling-Result
+- Anzahl pending Notifications nach dem Planen, soweit vom Plugin verfügbar
+
+Es werden keine API-Keys, Secrets oder vollständigen KI-Prompts geloggt.
+
+## Test-Benachrichtigung
+
+Für die Geräte-Diagnose gibt es eine technische Testfunktion:
+
+- `scheduleTestNotificationInTenSeconds()`
+- Titel: „Talvori Test“
+- Body: „Benachrichtigungen funktionieren.“
+- Planung: `now + 10 Sekunden`
+
+Diese Test-Benachrichtigung benötigt keine KI, keine ausgewählten Wörter und keinen Tagesimpuls-Plan. Damit lässt sich trennen, ob das lokale Notification-System grundsätzlich funktioniert oder ob der Fehler in KI-Generierung, Wortauswahl oder Tagesimpuls-Planung liegt.
+
+Wenn die Test-Benachrichtigung funktioniert, aber der normale Tagesimpuls nicht, liegt die Ursache typischerweise vor dem Scheduling:
+
+- `generate-daily-impulses` nicht erreichbar
+- Flutter ruft nicht exakt `generate-daily-impulses` auf
+- der Supabase Function Caller ist im App-Flow nicht korrekt verdrahtet
+- KI-Provider nicht konfiguriert
+- Tagesimpuls-Limit erreicht
+- KI-Antwort nicht parsebar
+- keine Impulse in der Response
+- weniger als 3 ausgewählte Wörter
+
+Die appseitigen Diagnosezustände für die KI-Generierung sind:
+
+- `aiClientNotConfigured`
+- `functionCallFailed`
+- `quotaExceeded`
+- `invalidAiResponse`
+- `noImpulsesReturned`
+- `notEnoughWords`
+- `generationSucceeded`
+
+Der Flutter-Client ruft für normale Tagesimpulse ausschließlich `generate-daily-impulses` auf. Der gemeinsame `SupabaseEdgeFunctionCaller` normalisiert JSON-Fehlerdetails aus Supabase `FunctionException`s, sodass Edge-Function-Fehler wie `quota_exceeded`, `ai_not_configured` oder `ai_invalid_response` nicht pauschal als `functionCallFailed` verschwinden.
+
+Sichere Debug-Logs für diesen Pfad enthalten:
+
+- Function-Name
+- Payload-Keys
+- Response-Keys
+- Exception-Typ
+- gekürzte Fehlermeldung
+
+Secrets, Supabase Tokens und vollständige Prompts werden nicht geloggt.
+
+## App-Start und Logs
+
+Der Notification-Service darf beim App-Start keine Permission-Abfrage und keine Planung auslösen. Permission wird erst beim aktiven Tagesimpuls-Planungsflow angefragt.
+
+Supabase-URL, Anon-Key oder gekürzte Tokens dürfen nicht in Logs ausgegeben werden.
 
 ## Bewusst nicht umgesetzt
 
 - Kein Server-Push
 - Kein APNs
 - Kein FCM
-- Keine produktive Notification-Strategie
-- Keine automatische Planung
+- Keine sichtbare KI-Vorschau
+- Keine automatische Mehrfachbenachrichtigung
 - Keine Supabase-Datenbank-Änderung
 - Kein Secret in Flutter
 - Keine SRS-Änderung
-
-## Offene Plattformpunkte
-
-Vor echter Geräteabnahme müssen iOS- und Android-Konfigurationen geprüft werden:
-
-- iOS Notification Permissions und App Capabilities
-- Android 13 Notification Permission
-- Android Scheduling-Verhalten im Energiesparmodus
-- App-Icon/Channel-Optik
-- Verhalten bei Zeitzonenwechsel
 
 ## Tests
 
 Abgedeckt sind:
 
-- Service plant 1 Impuls.
-- Service plant mehrere Impulse.
+- Standard ist `Automatisch`.
+- Standard-Häufigkeit ist `1`.
+- Standard-Zeitfenster ist `Automatisch`.
+- `Aus` löscht geplante Tagesimpuls-Benachrichtigungen.
+- Auswahl `3` plant drei Benachrichtigungen nach Nutzerwahl.
+- Manuelle Zeitfenster werden in Zeitpunkte übersetzt.
 - Slots werden in Zeitpunkte übersetzt.
 - Nachtzeiten werden vermieden.
-- UI plant erst nach Nutzeraktion.
-- Fehlende Permission wird kontrolliert angezeigt.
+- Fehlende Permission wird kontrolliert als Status angezeigt.
+- Normale Einstellungsänderungen zeigen keine Fehlersnackbar.
+- Plattformfehler werden als strukturierter Planungsstatus behandelt.
+- Test-Benachrichtigung plant ohne KI und ohne Wörter.
+- KI-Fehler und leere Impulse werden konkret angezeigt.
+- Doppelte Snackbar/Status-Meldungen werden vermieden.
+- Erfolgreiches Scheduling liefert den geplanten Zeitpunkt und optional Pending-Count.
+- Geplante Tagesimpuls-Zeitpunkte werden im State gespeichert und in der UI angezeigt.
+- Statusanzeige und Snackbars werden nicht mit identischem Text gedoppelt.
+- KI-Texte werden nicht sichtbar als Vorschau angezeigt.
+- Wortauswahl-Änderungen aktualisieren den Status ohne Zeitfensterwechsel.
+- Wortauswahl-Änderungen lösen keine KI-Anfrage aus.
 - Keine echten Platform Channel Calls in Tests.
 
 ## Nächster Schritt
 
-Als nächstes sollte ein echter Gerätetest auf Android und iOS erfolgen. Danach kann eine separate Planung für wiederkehrende lokale Tagesplanung oder späteren Server-Push über APNs/FCM entstehen.
+Als nächstes sollte ein echter Gerätetest auf Android und iOS erfolgen. Danach kann eine separate Planung für automatische Wortauswahl, wiederkehrende lokale Tagesplanung oder späteren Server-Push über APNs/FCM entstehen.

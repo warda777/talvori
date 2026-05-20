@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_controller.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
+import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
+import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
 import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_models.dart';
 import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_service.dart';
+import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_settings.dart';
 
 class CourseScreen extends ConsumerStatefulWidget {
   const CourseScreen({super.key});
@@ -15,14 +20,20 @@ class CourseScreen extends ConsumerStatefulWidget {
 }
 
 class _CourseScreenState extends ConsumerState<CourseScreen> {
-  bool _isPlanningNotifications = false;
+  bool _isApplyingTagesimpulsSettings = false;
 
   @override
   Widget build(BuildContext context) {
     final selection = ref.watch(tagesimpulsSelectionControllerProvider);
     final messageState = ref.watch(tagesimpulsMessageControllerProvider);
+    final notificationSettings = ref.watch(
+      tagesimpulsNotificationSettingsControllerProvider,
+    );
     final messageController = ref.read(
       tagesimpulsMessageControllerProvider.notifier,
+    );
+    final settingsController = ref.read(
+      tagesimpulsNotificationSettingsControllerProvider.notifier,
     );
     final notificationService = ref.read(
       tagesimpulsNotificationServiceProvider,
@@ -33,6 +44,37 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     final count = selection.count;
     final max = selection.maxCount;
     final full = selection.isFull;
+
+    ref.listen<TagesimpulsSelectionState>(
+      tagesimpulsSelectionControllerProvider,
+      (previous, next) {
+        if (previous?.items == next.items && previous?.isLoading == false) {
+          return;
+        }
+        _syncTagesimpulsStatusWithSelection(
+          selection: next,
+          notificationSettings: ref.read(
+            tagesimpulsNotificationSettingsControllerProvider,
+          ),
+          settingsController: ref.read(
+            tagesimpulsNotificationSettingsControllerProvider.notifier,
+          ),
+        );
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _syncTagesimpulsStatusWithSelection(
+        selection: ref.read(tagesimpulsSelectionControllerProvider),
+        notificationSettings: ref.read(
+          tagesimpulsNotificationSettingsControllerProvider,
+        ),
+        settingsController: ref.read(
+          tagesimpulsNotificationSettingsControllerProvider.notifier,
+        ),
+      );
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -69,11 +111,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                     if (ok == true) {
                       await controller.clear();
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Tagesimpuls-Auswahl geleert'),
-                        ),
-                      );
+                      _showTagesimpulsSnackBar('Tagesimpuls-Auswahl geleert.');
                     }
                   },
             icon: const Icon(Icons.outbound_rounded),
@@ -136,7 +174,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Bereite aus 3 bis 5 Wörtern eine manuelle Vorschau vor. Später kann daraus eine Messenger-ähnliche Tagesnachricht entstehen.',
+                    'Stelle einmal ein, wie oft Talvori dir Wörter als kurze Tagesimpulse zeigen soll.',
                     style: TextStyle(
                       color: Color(0xFFB8C4D9),
                       fontWeight: FontWeight.w600,
@@ -144,7 +182,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Standard bleibt später 1 Impuls pro Tag. Mehrere Impulse brauchen eine bewusste Einstellung.',
+                    '1 Tagesimpuls pro Tag ist voreingestellt. Du kannst ihn ausschalten oder die Häufigkeit ändern.',
                     style: TextStyle(
                       color: Color(0xFF7D8BA3),
                       fontSize: 12,
@@ -153,7 +191,42 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Anzahl Tagesimpulse',
+                    'Modus',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ChoiceChip(
+                        key: const Key('tagesimpuls-mode-off'),
+                        label: const Text('Aus'),
+                        selected: !notificationSettings.enabled,
+                        onSelected: (_) => _disableTagesimpuls(
+                          service: notificationService,
+                          settingsController: settingsController,
+                        ),
+                      ),
+                      ChoiceChip(
+                        key: const Key('tagesimpuls-mode-automatic'),
+                        label: const Text('Automatisch'),
+                        selected: notificationSettings.enabled,
+                        onSelected: (_) => _activateTagesimpuls(
+                          service: notificationService,
+                          messageController: messageController,
+                          settingsController: settingsController,
+                          selectedItems: selection.items,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Häufigkeit',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
@@ -170,105 +243,123 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
                         impulseCount++
                       )
                         ChoiceChip(
+                          key: Key('tagesimpuls-frequency-$impulseCount'),
                           label: Text('$impulseCount'),
-                          selected: messageState.count == impulseCount,
-                          onSelected: (_) =>
-                              messageController.setCount(impulseCount),
+                          selected:
+                              notificationSettings.frequencyPerDay ==
+                              impulseCount,
+                          onSelected: (_) => _setFrequency(
+                            service: notificationService,
+                            messageController: messageController,
+                            settingsController: settingsController,
+                            selectedItems: selection.items,
+                            frequency: impulseCount,
+                          ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: messageState.isGenerating
-                          ? null
-                          : () => messageController.generate(selection.items),
-                      icon: messageState.isGenerating
-                          ? const SizedBox(
-                              width: 17,
-                              height: 17,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.auto_awesome_rounded),
-                      label: Text(
-                        messageState.isGenerating
-                            ? 'Impuls wird vorbereitet...'
-                            : 'Tagesimpulse vorbereiten',
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D2530),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: const BorderSide(
-                            color: Color(0xFF59D7FF),
-                            width: 1.1,
-                          ),
-                        ),
-                      ),
+                  const Text(
+                    'Zeitfenster',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  if (messageState.error != null)
-                    _TagesimpulsResultCard(
-                      title: 'Hinweis',
-                      message: _mapTagesimpulsError(messageState.error!),
-                      isError: true,
-                    ),
-                  if (messageState.impulses.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Impuls-Vorschau',
-                          style: TextStyle(
-                            color: Color(0xFF7FFFE7),
-                            fontWeight: FontWeight.w900,
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final window in TagesimpulsPreferredWindow.values)
+                        ChoiceChip(
+                          key: Key('tagesimpuls-window-${window.name}'),
+                          label: Text(_labelForWindow(window)),
+                          selected:
+                              notificationSettings.preferredWindow == window,
+                          onSelected: (_) => _setPreferredWindow(
+                            service: notificationService,
+                            messageController: messageController,
+                            settingsController: settingsController,
+                            selectedItems: selection.items,
+                            window: window,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        for (final impulse in messageState.impulses) ...[
-                          _TagesimpulsResultCard(
-                            title: _labelForSlot(impulse.slot),
-                            message: impulse.message,
-                            usedWords: impulse.usedWords,
-                          ),
-                          const SizedBox(height: 10),
-                        ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _statusText(notificationSettings),
+                    style: const TextStyle(
+                      color: Color(0xFFB8C4D9),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (notificationSettings.nextPlannedInfo != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      notificationSettings.nextPlannedInfo!,
+                      style: const TextStyle(
+                        color: Color(0xFF7FFFE7),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                  if (notificationSettings.plannedTimes.length > 1) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _plannedTimesText(notificationSettings.plannedTimes),
+                      style: const TextStyle(
+                        color: Color(0xFFB8C4D9),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                  if (messageState.isGenerating ||
+                      _isApplyingTagesimpulsSettings) ...[
+                    const SizedBox(height: 12),
+                    const Row(
+                      children: [
                         SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _isPlanningNotifications
-                                ? null
-                                : () => _planNotifications(
-                                    notificationService,
-                                    messageState.impulses,
-                                  ),
-                            icon: _isPlanningNotifications
-                                ? const SizedBox(
-                                    width: 17,
-                                    height: 17,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.notifications_active_rounded,
-                                  ),
-                            label: Text(
-                              _isPlanningNotifications
-                                  ? 'Benachrichtigungen werden geplant...'
-                                  : 'Benachrichtigungen planen',
-                            ),
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Tagesimpuls wird aktualisiert...',
+                          style: TextStyle(
+                            color: Color(0xFFB8C4D9),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
+                  ],
+                  const SizedBox(height: 16),
+                  if (selection.items.length < 3)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: Text(
+                        'Füge mindestens 3 Wörter hinzu. Automatische Wortauswahl folgt später.',
+                        style: TextStyle(
+                          color: Color(0xFFFFC857),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      key: const Key('tagesimpuls-test-notification'),
+                      onPressed: () => _scheduleTestNotification(
+                        service: notificationService,
+                        settingsController: settingsController,
+                      ),
+                      icon: const Icon(Icons.notifications_active_outlined),
+                      label: const Text('Test-Benachrichtigung'),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -278,70 +369,346 @@ class _CourseScreenState extends ConsumerState<CourseScreen> {
     );
   }
 
-  Future<void> _planNotifications(
-    TagesimpulsNotificationService service,
-    List<TagesimpulsGeneratedImpulse> impulses,
-  ) async {
-    setState(() => _isPlanningNotifications = true);
+  Future<void> _disableTagesimpuls({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsNotificationSettingsController settingsController,
+  }) async {
+    await settingsController.setEnabled(false);
+    await service.clearScheduledNotifications();
+  }
+
+  Future<void> _activateTagesimpuls({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+    required List<TagesimpulsSelectionItem> selectedItems,
+  }) async {
+    final settings = await settingsController.setEnabled(true);
+    await _applyTagesimpulsSettings(
+      service: service,
+      messageController: messageController,
+      settingsController: settingsController,
+      selectedItems: selectedItems,
+      settings: settings,
+      showActivationFeedback: true,
+    );
+  }
+
+  Future<void> _setFrequency({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+    required List<TagesimpulsSelectionItem> selectedItems,
+    required int frequency,
+  }) async {
+    final settings = await settingsController.setFrequencyPerDay(frequency);
+    await _applyTagesimpulsSettings(
+      service: service,
+      messageController: messageController,
+      settingsController: settingsController,
+      selectedItems: selectedItems,
+      settings: settings,
+    );
+  }
+
+  Future<void> _setPreferredWindow({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+    required List<TagesimpulsSelectionItem> selectedItems,
+    required TagesimpulsPreferredWindow window,
+  }) async {
+    final settings = await settingsController.setPreferredWindow(window);
+    await _applyTagesimpulsSettings(
+      service: service,
+      messageController: messageController,
+      settingsController: settingsController,
+      selectedItems: selectedItems,
+      settings: settings,
+    );
+  }
+
+  Future<void> _applyTagesimpulsSettings({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsMessageController messageController,
+    required TagesimpulsNotificationSettingsController settingsController,
+    required List<TagesimpulsSelectionItem> selectedItems,
+    required TagesimpulsNotificationSettings settings,
+    bool showActivationFeedback = false,
+  }) async {
+    if (!settings.enabled) return;
+    if (selectedItems.length < 3) {
+      debugPrint(
+        'Tagesimpuls planning skipped selectedWords=${selectedItems.length}',
+      );
+      settingsController.setNeedsWordsStatus(_notEnoughWordsStatus);
+      return;
+    }
+
+    setState(() => _isApplyingTagesimpulsSettings = true);
     try {
+      debugPrint(
+        'Tagesimpuls planning start selectedWords=${selectedItems.length} '
+        'frequency=${settings.frequencyPerDay} '
+        'window=${settings.preferredWindow.name}',
+      );
+      messageController.setCount(settings.frequencyPerDay);
+      await messageController.generate(selectedItems);
+      final generated = ref.read(tagesimpulsMessageControllerProvider);
+      if (generated.error != null) {
+        debugPrint(
+          'Tagesimpuls planning generation failed '
+          'status=${generated.generationStatus.name} code=${generated.error}',
+        );
+        settingsController.setErrorStatus(
+          _generationStatusText(generated.generationStatus),
+        );
+        return;
+      }
+      if (generated.impulses.isEmpty) {
+        debugPrint('Tagesimpuls planning no generated impulses');
+        settingsController.setErrorStatus(
+          'Kein Tagesimpuls zum Planen vorhanden.',
+        );
+        return;
+      }
+      debugPrint(
+        'Tagesimpuls planning generatedImpulses=${generated.impulses.length}',
+      );
+
       final result = await service.planNotifications(
-        TagesimpulsNotificationPlanOptions(impulses: impulses),
+        TagesimpulsNotificationPlanOptions(
+          impulses: generated.impulses
+              .take(settings.frequencyPerDay)
+              .toList(growable: false),
+          preferredWindow: settings.preferredWindow,
+        ),
       );
       if (!mounted) return;
-      final message = switch (result.status) {
-        TagesimpulsNotificationPlanningStatus.planned =>
-          'Tagesimpulse geplant.',
-        TagesimpulsNotificationPlanningStatus.permissionDenied =>
-          'Benachrichtigungen müssen erlaubt werden.',
-        TagesimpulsNotificationPlanningStatus.empty =>
-          'Keine Tagesimpulse zum Planen vorhanden.',
-      };
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      debugPrint(
+        'Tagesimpuls planning scheduleStatus=${result.status.name} '
+        'pendingCount=${result.pendingNotificationCount ?? -1} '
+        'debug=${result.debugMessage ?? "-"}',
+      );
+      switch (result.status) {
+        case TagesimpulsNotificationPlanningStatus.scheduledSuccessfully:
+          final info = _nextPlannedInfo(result.scheduled.first.scheduledAt);
+          settingsController.setPlannedTimes(
+            result.scheduled.map((schedule) => schedule.scheduledAt).toList(),
+            info,
+          );
+        case TagesimpulsNotificationPlanningStatus.permissionGranted:
+          settingsController.setNextPlannedInfo('Tagesimpuls ist aktiv.');
+        case TagesimpulsNotificationPlanningStatus.permissionDenied:
+          settingsController.setPermissionDeniedStatus(
+            'Benachrichtigungen sind nicht erlaubt.',
+          );
+          if (showActivationFeedback) {
+            _showTagesimpulsSnackBar(
+              'Benachrichtigungen müssen erlaubt werden.',
+            );
+          }
+        case TagesimpulsNotificationPlanningStatus.permissionNotRequested:
+          settingsController.setErrorStatus(
+            'Benachrichtigungen wurden noch nicht angefragt.',
+          );
+        case TagesimpulsNotificationPlanningStatus.noGeneratedImpulses:
+          settingsController.setErrorStatus(
+            'Kein Tagesimpuls zum Planen vorhanden.',
+          );
+        case TagesimpulsNotificationPlanningStatus
+            .notificationServiceNotInitialized:
+          settingsController.setErrorStatus(
+            'Benachrichtigungen sind noch nicht bereit.',
+          );
+        case TagesimpulsNotificationPlanningStatus.invalidScheduleTime:
+          settingsController.setErrorStatus('Zeitpunkt liegt ungültig.');
+        case TagesimpulsNotificationPlanningStatus.timezoneNotInitialized:
+          settingsController.setErrorStatus(
+            'Zeitzone für Benachrichtigungen ist noch nicht bereit.',
+          );
+        case TagesimpulsNotificationPlanningStatus.schedulePlatformError:
+          settingsController.setErrorStatus(
+            'Benachrichtigungen konnten vom System nicht geplant werden.',
+          );
+        case TagesimpulsNotificationPlanningStatus.impulseGenerationFailed:
+          settingsController.setErrorStatus(
+            'Tagesimpulse konnten nicht erzeugt werden.',
+          );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      settingsController.setErrorStatus(_genericPlanningErrorStatus);
     } finally {
       if (mounted) {
-        setState(() => _isPlanningNotifications = false);
+        setState(() => _isApplyingTagesimpulsSettings = false);
       }
     }
   }
 
-  String _mapTagesimpulsError(String code) {
-    if (code == 'words_required') {
-      return 'Wähle mindestens 3 Wörter für einen manuellen Tagesimpuls.';
+  void _syncTagesimpulsStatusWithSelection({
+    required TagesimpulsSelectionState selection,
+    required TagesimpulsNotificationSettingsState notificationSettings,
+    required TagesimpulsNotificationSettingsController settingsController,
+  }) {
+    if (selection.isLoading || !notificationSettings.enabled) return;
+
+    if (selection.items.length < 3) {
+      if (notificationSettings.nextPlannedInfo != _notEnoughWordsStatus) {
+        settingsController.setNeedsWordsStatus(_notEnoughWordsStatus);
+      }
+      return;
     }
-    if (code == 'ai_not_configured') {
-      return 'KI ist noch nicht konfiguriert.';
+
+    if (notificationSettings.nextPlannedInfo == _notEnoughWordsStatus) {
+      settingsController.clearNeedsWordsStatus();
     }
-    if (code == 'quota_exceeded' || code == 'ai_rate_limited') {
-      return 'Limit erreicht oder Anbieter begrenzt Anfrage.';
-    }
-    if (code == 'ai_invalid_response') {
-      return 'Die KI-Antwort war ungültig.';
-    }
-    if (code == 'invalid_count') {
-      return 'Ungültige Anzahl für Tagesimpulse.';
-    }
-    if (code == 'ai_request_failed' || code == 'ai_auth_failed') {
-      return 'Tagesimpuls konnte nicht erzeugt werden.';
-    }
-    return 'Tagesimpuls konnte nicht geladen werden.';
   }
 
-  String _labelForSlot(String slot) {
-    switch (slot.trim().toLowerCase()) {
-      case 'morning':
-        return 'Morgens';
-      case 'noon':
-      case 'midday':
-        return 'Mittags';
-      case 'afternoon':
-        return 'Nachmittags';
-      case 'evening':
-        return 'Abends';
-      default:
-        return slot.trim().isEmpty ? 'Tagesimpuls' : slot.trim();
+  String _statusText(TagesimpulsNotificationSettingsState settings) {
+    if (!settings.enabled) return 'Tagesimpuls ist ausgeschaltet.';
+    final count = settings.frequencyPerDay;
+    final plural = count == 1 ? '' : 'e';
+    return 'Tagesimpuls aktiv · $count Impuls$plural pro Tag.';
+  }
+
+  static const _genericPlanningErrorStatus =
+      'Tagesimpuls konnte nicht geplant werden.';
+  static const _notEnoughWordsStatus = 'Füge mindestens 3 Wörter hinzu.';
+
+  Future<void> _scheduleTestNotification({
+    required TagesimpulsNotificationService service,
+    required TagesimpulsNotificationSettingsController settingsController,
+  }) async {
+    final result = await service.scheduleTestNotificationInTenSeconds();
+    if (!mounted) return;
+    debugPrint(
+      'Tagesimpuls test notification status=${result.status.name} '
+      'pendingCount=${result.pendingNotificationCount ?? -1} '
+      'debug=${result.debugMessage ?? "-"}',
+    );
+
+    switch (result.status) {
+      case TagesimpulsNotificationPlanningStatus.scheduledSuccessfully:
+        settingsController.setNextPlannedInfo('Test-Benachrichtigung geplant.');
+      case TagesimpulsNotificationPlanningStatus.permissionDenied:
+        settingsController.setPermissionDeniedStatus(
+          'Benachrichtigungen sind nicht erlaubt. Bitte in den iPhone-Einstellungen aktivieren.',
+        );
+        _showTagesimpulsSnackBar('Benachrichtigungen müssen erlaubt werden.');
+      case TagesimpulsNotificationPlanningStatus.permissionNotRequested:
+        settingsController.setErrorStatus(
+          'Benachrichtigungen wurden noch nicht angefragt.',
+        );
+      case TagesimpulsNotificationPlanningStatus
+          .notificationServiceNotInitialized:
+        settingsController.setErrorStatus(
+          'Benachrichtigungen sind noch nicht bereit.',
+        );
+      case TagesimpulsNotificationPlanningStatus.invalidScheduleTime:
+        settingsController.setErrorStatus('Zeitpunkt liegt ungültig.');
+      case TagesimpulsNotificationPlanningStatus.timezoneNotInitialized:
+        settingsController.setErrorStatus(
+          'Zeitzone für Benachrichtigungen ist noch nicht bereit.',
+        );
+      case TagesimpulsNotificationPlanningStatus.schedulePlatformError:
+        settingsController.setErrorStatus(
+          'Benachrichtigungen konnten vom System nicht geplant werden.',
+        );
+      case TagesimpulsNotificationPlanningStatus.noGeneratedImpulses:
+      case TagesimpulsNotificationPlanningStatus.impulseGenerationFailed:
+      case TagesimpulsNotificationPlanningStatus.permissionGranted:
+        settingsController.setErrorStatus(_genericPlanningErrorStatus);
     }
+  }
+
+  String _generationStatusText(TagesimpulsGenerationStatus status) {
+    return switch (status) {
+      TagesimpulsGenerationStatus.aiClientNotConfigured =>
+        'KI ist noch nicht konfiguriert.',
+      TagesimpulsGenerationStatus.functionCallFailed =>
+        'Tagesimpulse konnten nicht erzeugt werden.',
+      TagesimpulsGenerationStatus.quotaExceeded =>
+        'Tagesimpuls-Limit erreicht.',
+      TagesimpulsGenerationStatus.invalidAiResponse =>
+        'KI-Antwort konnte nicht verarbeitet werden.',
+      TagesimpulsGenerationStatus.noImpulsesReturned =>
+        'Es wurden keine Tagesimpulse erzeugt.',
+      TagesimpulsGenerationStatus.notEnoughWords =>
+        'Füge mindestens 3 Wörter hinzu.',
+      TagesimpulsGenerationStatus.generationSucceeded ||
+      TagesimpulsGenerationStatus.idle => _genericPlanningErrorStatus,
+    };
+  }
+
+  String _labelForWindow(TagesimpulsPreferredWindow window) {
+    return switch (window) {
+      TagesimpulsPreferredWindow.automatic => 'Automatisch',
+      TagesimpulsPreferredWindow.morning => 'Morgens',
+      TagesimpulsPreferredWindow.noon => 'Mittags',
+      TagesimpulsPreferredWindow.afternoon => 'Nachmittags',
+      TagesimpulsPreferredWindow.evening => 'Abends',
+    };
+  }
+
+  String _nextPlannedInfo(DateTime scheduledAt) {
+    return 'Nächster Impuls: ${_dayLabel(scheduledAt)} um ${_timeLabel(scheduledAt)} Uhr.';
+  }
+
+  String _plannedTimesText(List<DateTime> plannedTimes) {
+    if (plannedTimes.isEmpty) return '';
+    final sorted = [...plannedTimes]..sort();
+    final first = sorted.first;
+    final sameDay = sorted.every(
+      (time) =>
+          time.year == first.year &&
+          time.month == first.month &&
+          time.day == first.day,
+    );
+    final times = sorted.map(_timeLabel).join(' · ');
+    if (!sameDay) {
+      return 'Geplant: ${sorted.map((time) => '${_dayLabel(time)} ${_timeLabel(time)}').join(' · ')}';
+    }
+    final prefix = _dayLabel(first);
+    final capitalized = prefix.isEmpty
+        ? 'Geplant'
+        : '${prefix[0].toUpperCase()}${prefix.substring(1)} geplant';
+    return '$capitalized: $times';
+  }
+
+  String _dayLabel(DateTime scheduledAt) {
+    final now = DateTime.now();
+    final day = DateTime(scheduledAt.year, scheduledAt.month, scheduledAt.day);
+    final today = DateTime(now.year, now.month, now.day);
+    if (day == today) return 'heute';
+    if (day == today.add(const Duration(days: 1))) return 'morgen';
+    return 'am ${scheduledAt.day}.${scheduledAt.month}.';
+  }
+
+  String _timeLabel(DateTime scheduledAt) {
+    final hour = scheduledAt.hour.toString().padLeft(2, '0');
+    final minute = scheduledAt.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  void _showTagesimpulsSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF07111A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF59D7FF), width: 1),
+        ),
+      ),
+    );
   }
 }
 
@@ -369,71 +736,6 @@ class _TagesimpulsPanel extends StatelessWidget {
         ],
       ),
       child: child,
-    );
-  }
-}
-
-class _TagesimpulsResultCard extends StatelessWidget {
-  const _TagesimpulsResultCard({
-    required this.title,
-    required this.message,
-    this.usedWords = const [],
-    this.isError = false,
-  });
-
-  final String title;
-  final String message;
-  final List<String> usedWords;
-  final bool isError;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isError ? const Color(0xFFFFC857) : const Color(0xFF7FFFE7);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.58)),
-        boxShadow: [
-          BoxShadow(color: color.withValues(alpha: 0.14), blurRadius: 18),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              height: 1.35,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (usedWords.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final word in usedWords)
-                  Chip(label: Text(word), visualDensity: VisualDensity.compact),
-              ],
-            ),
-          ],
-        ],
-      ),
     );
   }
 }
