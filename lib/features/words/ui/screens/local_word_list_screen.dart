@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
-import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
@@ -77,14 +77,10 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
         ),
         data: (words) {
           if (words.isEmpty) {
-            final isMyWords = widget.categoryId == localMyWordsCategoryId;
+            final source = LocalLearningSource.fromId(widget.categoryId);
             return _LocalWordListEmptyState(
-              title: isMyWords
-                  ? 'Noch keine eigenen Wörter'
-                  : 'Keine lokalen Wörter verfügbar',
-              subtitle: isMyWords
-                  ? 'Geteilte Wörter erscheinen hier.'
-                  : 'Für diese Kategorie sind lokal noch keine Wörter da.',
+              title: _emptyTitleForSource(source),
+              subtitle: _emptySubtitleForSource(source),
             );
           }
 
@@ -576,6 +572,37 @@ class _TranslationStatusBadge extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+String _emptyTitleForSource(LocalLearningSource? source) {
+  switch (source) {
+    case LocalLearningSource.favorites:
+      return 'Noch keine Favoriten';
+    case LocalLearningSource.knownWords:
+      return 'Noch keine bekannten Wörter';
+    case LocalLearningSource.myMix:
+      return 'Noch kein Mix verfügbar';
+    case LocalLearningSource.allWords:
+    case LocalLearningSource.myWords:
+    case null:
+      return 'Noch keine Wörter';
+  }
+}
+
+String _emptySubtitleForSource(LocalLearningSource? source) {
+  switch (source) {
+    case LocalLearningSource.favorites:
+      return 'Markiere lokale Wörter als Favorit, damit sie hier erscheinen.';
+    case LocalLearningSource.knownWords:
+      return 'Bekannte Wörter erscheinen hier, sobald sie lokal gelernt sind.';
+    case LocalLearningSource.myMix:
+      return 'Füge Favoriten hinzu oder importiere weitere Wörter.';
+    case LocalLearningSource.allWords:
+      return 'Importierte und lokale Wörter erscheinen hier.';
+    case LocalLearningSource.myWords:
+    case null:
+      return 'Geteilte Wörter erscheinen hier.';
   }
 }
 

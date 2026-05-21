@@ -4,17 +4,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/local_app_database_path.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
+import 'package:talvori/core/local_database/providers/shared_text_import_service_provider.dart';
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
+import 'package:talvori/features/favorites/application/local_favorites_provider.dart';
+import 'package:talvori/features/favorites/data/local_favorites_repository.dart';
 
 void main() {
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 
-  Future<ProviderContainer> createContainer(String prefix) async {
+  Future<ProviderContainer> createContainer(
+    String prefix, {
+    List<String> favoriteWordIds = const <String>[],
+  }) async {
     final tempDir = await Directory.systemTemp.createTemp(prefix);
     late final ProviderContainer container;
 
@@ -31,6 +39,9 @@ void main() {
     container = ProviderContainer(
       overrides: [
         localBootstrapDatabasesPathProvider.overrideWithValue(tempDir.path),
+        localFavoritesRepositoryProvider.overrideWithValue(
+          _MemoryLocalFavoritesRepository(favoriteWordIds),
+        ),
       ],
     );
     return container;
@@ -177,4 +188,63 @@ void main() {
     expect(timeCards.map((card) => card.wordId), contains('seed-basics-water'));
     expect(hybridCards, isEmpty);
   });
+
+  test('local_source_practice_cards_use_filtered_source_words', () async {
+    final container = await createContainer(
+      'talvori_local_practice_source_filter_',
+      favoriteWordIds: const ['local-my-words-aurora'],
+    );
+    final bootstrap = await container.read(localBootstrapProvider.future);
+    final importService = await container.read(
+      sharedTextImportServiceProvider.future,
+    );
+    final favoriteResult = await importService.importRawText(
+      rawText: 'aurora',
+      now: DateTime(2026, 5, 21, 10),
+    );
+    final otherResult = await importService.importRawText(
+      rawText: 'canyon',
+      now: DateTime(2026, 5, 21, 11),
+    );
+
+    for (final result in [favoriteResult, otherResult]) {
+      final word = result.word!;
+      final progress = await bootstrap.repositoryFactory.wordProgressRepository
+          .loadProgress(
+            wordId: word.id,
+            categoryId: localMyWordsCategoryId,
+            mode: LearningMode.time,
+          );
+      await bootstrap.repositoryFactory.wordProgressRepository.saveProgress(
+        updatedProgress: progress!.copyWith(stage: SrsStage.s2),
+        updatedAt: DateTime(2026, 5, 21, 12),
+      );
+    }
+
+    final cards = await container.read(
+      localPracticeCardsProvider(
+        LocalPracticeCardsRequest(
+          categoryId: LocalLearningSource.favorites.id,
+          mode: LearningMode.time,
+          selection: LocalPracticeSelection.singleStage(SrsStage.s2),
+        ),
+      ).future,
+    );
+
+    expect(cards.map((card) => card.term), ['aurora']);
+  });
+}
+
+class _MemoryLocalFavoritesRepository implements LocalFavoritesRepository {
+  _MemoryLocalFavoritesRepository(this._wordIds);
+
+  List<String> _wordIds;
+
+  @override
+  Future<List<String>> loadWordIds() async => [..._wordIds];
+
+  @override
+  Future<void> saveWordIds(List<String> wordIds) async {
+    _wordIds = [...wordIds];
+  }
 }

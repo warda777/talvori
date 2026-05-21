@@ -1108,7 +1108,7 @@ void main() {
       expect(screen.categoryId, 'seed-category-basics');
       expect(screen.title, 'Health & Fitness');
       expect(find.text('Health & Fitness'), findsWidgets);
-      expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
+      expect(find.text('Noch keine Wörter'), findsOneWidget);
       expect(find.text('seed-category-basics'), findsNothing);
     },
   );

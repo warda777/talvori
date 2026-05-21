@@ -43,6 +43,7 @@ type UsageLimitResult =
 
 const maxTextLength = 500;
 const defaultDailyRequestLimit = 1000;
+const defaultDailyCharacterLimit = 20000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -91,6 +92,20 @@ function readDailyRequestLimit(): number {
   return Math.floor(parsed);
 }
 
+function readDailyCharacterLimit(): number {
+  const configured = Deno.env.get("TRANSLATION_DAILY_CHARACTER_LIMIT")?.trim();
+  if (!configured) {
+    return defaultDailyCharacterLimit;
+  }
+
+  const parsed = Number(configured);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return defaultDailyCharacterLimit;
+  }
+
+  return Math.floor(parsed);
+}
+
 function currentDayBucket(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -113,22 +128,42 @@ function envFlagEnabled(name: string): boolean {
   return value === "1" || value === "true" || value === "yes";
 }
 
-function readAuthContext(req: Request): AuthContext {
+async function readAuthContext(req: Request): Promise<AuthContext> {
   const authorization = req.headers.get("authorization")?.trim() ?? null;
   const forwardedFor = req.headers.get("x-forwarded-for")?.trim() ?? "";
   const clientIp = forwardedFor.split(",")[0]?.trim() ||
     req.headers.get("cf-connecting-ip")?.trim() ||
     null;
+  const bearerToken = authorization?.toLowerCase().startsWith("bearer ")
+    ? authorization.slice("bearer ".length).trim()
+    : null;
+  let userId: string | null = null;
 
-  // TODO before production:
-  // - verify Supabase JWT and derive the real user_id
-  // - reject invalid or expired tokens
-  // - attach premium/entitlement information for quota checks
+  if (bearerToken) {
+    const supabase = createSupabaseAdminClient();
+    if (supabase) {
+      try {
+        const { data, error } = await supabase.auth.getUser(bearerToken);
+        if (!error && data.user?.id) {
+          userId = data.user.id;
+        } else if (error) {
+          console.warn("translation auth verification failed", error.message);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "unknown error";
+        console.warn("translation auth verification failed", message);
+      }
+    }
+  }
+
+  // Dev remains open by default. Production can require auth with
+  // TRANSLATE_WORD_REQUIRE_AUTH once deployment provisioning is complete.
   return {
     authorization,
-    userId: null,
+    userId,
     clientIp,
-    isAuthenticated: authorization !== null && authorization.length > 0,
+    isAuthenticated:
+      userId !== null || (authorization !== null && authorization.length > 0),
   };
 }
 
@@ -182,9 +217,13 @@ async function recordUsageEvent(
   }
 }
 
-async function checkUsageLimit(auth: AuthContext): Promise<UsageLimitResult> {
-  const limit = readDailyRequestLimit();
-  if (limit === 0) {
+async function checkUsageLimit(
+  auth: AuthContext,
+  text: string,
+): Promise<UsageLimitResult> {
+  const requestLimit = readDailyRequestLimit();
+  const characterLimit = readDailyCharacterLimit();
+  if (requestLimit === 0 || characterLimit === 0) {
     return { ok: false, error: "quota_exceeded", status: 429 };
   }
 
@@ -196,13 +235,12 @@ async function checkUsageLimit(auth: AuthContext): Promise<UsageLimitResult> {
   try {
     let query = supabase
       .from("translation_usage_events")
-      .select("request_count")
+      .select("request_count, character_count")
       .eq("feature", "translation")
       .eq("day_bucket", currentDayBucket());
 
-    // TODO before production:
-    // - enforce per-user limits after JWT verification is implemented
-    // - keep global fallback only for development/anonymous requests
+    // Authenticated requests are limited per Supabase user. Development or
+    // anonymous requests use a global fallback bucket.
     if (auth.userId) {
       query = query.eq("user_id", auth.userId);
     }
@@ -213,12 +251,19 @@ async function checkUsageLimit(auth: AuthContext): Promise<UsageLimitResult> {
       return { ok: true };
     }
 
-    const used = (data ?? []).reduce((sum, row) => {
+    const usedRequests = (data ?? []).reduce((sum, row) => {
       const count = Number(row.request_count ?? 0);
       return sum + (Number.isFinite(count) ? count : 0);
     }, 0);
+    const usedCharacters = (data ?? []).reduce((sum, row) => {
+      const count = Number(row.character_count ?? 0);
+      return sum + (Number.isFinite(count) ? count : 0);
+    }, 0);
 
-    if (used >= limit) {
+    if (
+      usedRequests >= requestLimit ||
+      usedCharacters + text.length > characterLimit
+    ) {
       return { ok: false, error: "quota_exceeded", status: 429 };
     }
   } catch (error) {
@@ -250,7 +295,7 @@ serve(async (req) => {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }
 
-  const auth = readAuthContext(req);
+  const auth = await readAuthContext(req);
   const authCheck = checkAuth(auth);
   if (!authCheck.ok) {
     return jsonResponse({ error: authCheck.error }, authCheck.status);
@@ -271,19 +316,25 @@ serve(async (req) => {
   const sourceLang = normalizeLanguage(body.sourceLang ?? "");
 
   if (!text) {
-    return jsonResponse({ error: "text_required" }, 400);
+    return jsonResponse(
+      { error: "invalid_input", reason: "text_required" },
+      400,
+    );
   }
   if (!targetLang) {
-    return jsonResponse({ error: "target_lang_required" }, 400);
+    return jsonResponse(
+      { error: "invalid_input", reason: "target_lang_required" },
+      400,
+    );
   }
   if (text.length > maxTextLength) {
     return jsonResponse(
-      { error: "translation_failed", reason: "text_too_long" },
+      { error: "invalid_input", reason: "text_too_long" },
       413,
     );
   }
 
-  const usageLimitCheck = await checkUsageLimit(auth);
+  const usageLimitCheck = await checkUsageLimit(auth, text);
   if (!usageLimitCheck.ok) {
     await recordUsageEvent(auth, text, "blocked");
     return jsonResponse(

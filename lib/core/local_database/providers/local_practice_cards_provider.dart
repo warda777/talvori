@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/local_learning_source.dart';
 import '../../srs/models/srs_stage.dart';
 import '../models/local_practice_card.dart';
 import 'local_bootstrap_provider.dart';
+import 'local_words_for_source_provider.dart';
 
 final localPracticeCardsProvider =
     FutureProvider.family<List<LocalPracticeCard>, LocalPracticeCardsRequest>((
@@ -14,9 +16,12 @@ final localPracticeCardsProvider =
 
       final bootstrap = await ref.watch(localBootstrapProvider.future);
       final repositories = bootstrap.repositoryFactory;
-      final words = await repositories.wordRepository.loadWordsForCategory(
-        categoryId: categoryId,
-      );
+      final source = LocalLearningSource.fromId(categoryId);
+      final words = source == null
+          ? await repositories.wordRepository.loadWordsForCategory(
+              categoryId: categoryId,
+            )
+          : await ref.watch(localWordsForSourceProvider(source).future);
 
       final buckets = <SrsStage, List<LocalPracticeCard>>{
         for (final stage in SrsStage.values) stage: <LocalPracticeCard>[],
@@ -25,7 +30,7 @@ final localPracticeCardsProvider =
       for (final word in words) {
         final progress = await repositories.wordProgressRepository.loadProgress(
           wordId: word.id,
-          categoryId: categoryId,
+          categoryId: source == null ? categoryId : word.categoryId,
           mode: request.mode,
         );
         if (progress == null) continue;

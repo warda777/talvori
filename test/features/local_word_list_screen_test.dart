@@ -412,7 +412,7 @@ void main() {
     await pumpLocalWordList(tester, words: const [], title: 'Empty Local');
 
     expect(find.text('Empty Local'), findsOneWidget);
-    expect(find.text('Keine lokalen Wörter verfügbar'), findsOneWidget);
+    expect(find.text('Noch keine Wörter'), findsOneWidget);
     expect(find.text('empty-local'), findsNothing);
   });
 
@@ -427,7 +427,7 @@ void main() {
     );
 
     expect(find.text('Meine Wörter'), findsOneWidget);
-    expect(find.text('Noch keine eigenen Wörter'), findsOneWidget);
+    expect(find.text('Noch keine Wörter'), findsOneWidget);
     expect(find.text('Geteilte Wörter erscheinen hier.'), findsOneWidget);
     expect(
       find.text('Lokale Wörter konnten nicht geladen werden'),

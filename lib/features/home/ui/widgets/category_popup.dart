@@ -1,25 +1,42 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
-import 'package:talvori/features/favorites/ui/local_favorites_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
-import 'package:talvori/features/words/ui/screens/quick_sets_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
-import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/application/mix/mix_navigation_origin.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
 typedef VoidSnack = void Function(String);
+
+void _openLocalSource(
+  BuildContext context,
+  VoidCallback onBeginOpen,
+  String sourceKey, {
+  Future<void> Function()? onReturn,
+}) {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  onBeginOpen();
+  unawaited(
+    navigator
+        .push(
+          MaterialPageRoute(
+            settings: RouteSettings(name: 'local-source-detail-$sourceKey'),
+            builder: (_) =>
+                LocalLearningSourceDetailScreen(initialSourceKey: sourceKey),
+          ),
+        )
+        .then((_) => onReturn?.call()),
+  );
+}
 
 Future<void> showCategoryPopup({
   required BuildContext context,
   required Future<void> Function() onRefreshMyWords,
   required VoidSnack onTodo,
 }) {
-  final cs = Theme.of(context).colorScheme;
   const surface = Color(0xFF070B12);
   const surfaceAlt = Color(0xFF0C1220);
   const cyan = Color(0xFF5DDCFF);
@@ -154,252 +171,212 @@ Future<void> showCategoryPopup({
     );
   }
 
-  Widget content(BuildContext context, {required VoidCallback onBeginOpen}) =>
-      Material(
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: surface,
-            border: Border.all(color: cyan.withValues(alpha: 0.42), width: 1.4),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF0E1522), Color(0xFF060B12), Color(0xFF030508)],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: cyan.withValues(alpha: 0.16),
-                blurRadius: 34,
-                spreadRadius: 1,
-              ),
-              BoxShadow(color: violet.withValues(alpha: 0.10), blurRadius: 42),
-              const BoxShadow(
-                color: Colors.black87,
-                blurRadius: 24,
-                offset: Offset(0, 14),
-              ),
-            ],
+  Widget content(
+    BuildContext context, {
+    required VoidCallback onBeginOpen,
+  }) => Material(
+    color: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: surface,
+        border: Border.all(color: cyan.withValues(alpha: 0.42), width: 1.4),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0E1522), Color(0xFF060B12), Color(0xFF030508)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cyan.withValues(alpha: 0.16),
+            blurRadius: 34,
+            spreadRadius: 1,
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+          BoxShadow(color: violet.withValues(alpha: 0.10), blurRadius: 42),
+          const BoxShadow(
+            color: Colors.black87,
+            blurRadius: 24,
+            offset: Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      'Kategorie',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: textPrimary,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    OpenContainer(
-                      transitionDuration: const Duration(milliseconds: 350),
-                      transitionType: ContainerTransitionType.fadeThrough,
-                      closedElevation: 0,
-                      openElevation: 0,
-                      useRootNavigator: true,
-                      closedColor: cs.surfaceContainerHighest,
-                      openColor: Theme.of(context).scaffoldBackgroundColor,
-                      closedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      tappable: false,
-                      closedBuilder: (c, open) => buildTile(
-                        context: c,
-                        onTapAfter: () async {
-                          onBeginOpen();
-                          open();
-                        },
-                        title: 'Alle Wörter',
-                        icon: Icons.auto_stories_rounded,
-                        accentColor: cyan,
-                      ),
-                      openBuilder: (_, __) =>
-                          const QuickSetsDetailScreen(initialIndex: 0),
-                    ),
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final count = ref.watch(
-                          localWordCountProvider(localMyWordsCategoryId),
-                        );
-                        final subtitle = count.maybeWhen(
-                          data: (value) =>
-                              value == 1 ? '1 Wort' : '$value Wörter',
-                          orElse: () => null,
-                        );
-                        return buildTile(
-                          key: const Key('category-popup-my-words-tile'),
-                          context: context,
-                          onTapBefore: () {
-                            final navigator = Navigator.of(
-                              context,
-                              rootNavigator: true,
-                            );
-                            onBeginOpen();
-                            unawaited(
-                              navigator
-                                  .push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const LocalWordListScreen(
-                                        categoryId: localMyWordsCategoryId,
-                                        title: localMyWordsCategoryLabel,
-                                      ),
-                                    ),
-                                  )
-                                  .then((_) => onRefreshMyWords()),
-                            );
-                          },
-                          onTapAfter: () async {},
-                          holdDelay: Duration.zero,
-                          title: 'Meine Wörter',
-                          subtitle: subtitle,
-                          icon: Icons.edit_note_rounded,
-                          accentColor: violet,
-                          height: 106,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    buildTile(
-                      key: const Key('category-popup-favorites-tile'),
-                      context: context,
-                      onTapBefore: () {
-                        final navigator = Navigator.of(
-                          context,
-                          rootNavigator: true,
-                        );
-                        onBeginOpen();
-                        unawaited(
-                          navigator.push(
-                            MaterialPageRoute(
-                              builder: (_) => const LocalFavoritesListScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      onTapAfter: () async {},
-                      holdDelay: Duration.zero,
-                      title: 'Favoriten',
-                      icon: Icons.favorite_rounded,
-                      accentColor: pink,
-                    ),
-                    OpenContainer(
-                      transitionDuration: const Duration(milliseconds: 350),
-                      transitionType: ContainerTransitionType.fadeThrough,
-                      closedElevation: 0,
-                      openElevation: 0,
-                      useRootNavigator: true,
-                      closedColor: cs.surfaceContainerHighest,
-                      openColor: Theme.of(context).scaffoldBackgroundColor,
-                      closedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      tappable: false,
-                      closedBuilder: (c, open) => buildTile(
-                        context: c,
-                        onTapAfter: () async {
-                          onBeginOpen();
-                          open();
-                        },
-                        title: 'Wörter, die ich kenne',
-                        icon: Icons.verified_rounded,
-                        accentColor: green,
-                      ),
-                      openBuilder: (_, __) =>
-                          const QuickSetsDetailScreen(initialIndex: 3),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.center,
-                  child: OpenContainer(
-                    transitionDuration: const Duration(milliseconds: 350),
-                    transitionType: ContainerTransitionType.fadeThrough,
-                    closedElevation: 0,
-                    openElevation: 0,
-                    useRootNavigator: true,
-                    closedColor: cs.surfaceContainerHighest,
-                    openColor: Theme.of(context).scaffoldBackgroundColor,
-                    closedShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    tappable: false,
-                    closedBuilder: (c, open) => buildTile(
-                      context: c,
-                      onTapAfter: () async {
-                        onBeginOpen();
-                        open();
-                      },
-                      title: 'Wortwelten',
-                      subtitle: 'Themen und Lernbereiche',
-                      icon: Icons.public_rounded,
-                      accentColor: cyan,
-                      width: 280,
-                      height: 100,
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    openBuilder: (_, __) =>
-                        const WordHubScreen(useLocalOfflineFlow: true),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: 180,
-                    height: 40,
-                    child: FilledButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const MixBuilderScreen(
-                              navigationOrigin:
-                                  MixNavigationOrigin.categoryPopup(),
-                            ),
-                          ),
-                        );
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF0E1A24),
-                        foregroundColor: textPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(
-                            color: violet.withValues(alpha: 0.74),
-                            width: 1.2,
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        elevation: 0,
-                      ),
-                      child: const Text('Mix erstellen'),
-                    ),
+                Text(
+                  'Kategorie',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: textPrimary,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildTile(
+                  key: const Key('category-popup-all-words-tile'),
+                  context: context,
+                  onTapBefore: () =>
+                      _openLocalSource(context, onBeginOpen, 'all_words'),
+                  onTapAfter: () async {},
+                  holdDelay: Duration.zero,
+                  title: 'Alle Wörter',
+                  icon: Icons.auto_stories_rounded,
+                  accentColor: cyan,
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final count = ref.watch(
+                      localWordCountProvider(localMyWordsCategoryId),
+                    );
+                    final subtitle = count.maybeWhen(
+                      data: (value) => value == 1 ? '1 Wort' : '$value Wörter',
+                      orElse: () => null,
+                    );
+                    return buildTile(
+                      key: const Key('category-popup-my-words-tile'),
+                      context: context,
+                      onTapBefore: () => _openLocalSource(
+                        context,
+                        onBeginOpen,
+                        'my_words',
+                        onReturn: onRefreshMyWords,
+                      ),
+                      onTapAfter: () async {},
+                      holdDelay: Duration.zero,
+                      title: 'Meine Wörter',
+                      subtitle: subtitle,
+                      icon: Icons.edit_note_rounded,
+                      accentColor: violet,
+                      height: 106,
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildTile(
+                  key: const Key('category-popup-favorites-tile'),
+                  context: context,
+                  onTapBefore: () =>
+                      _openLocalSource(context, onBeginOpen, 'favorites'),
+                  onTapAfter: () async {},
+                  holdDelay: Duration.zero,
+                  title: 'Favoriten',
+                  icon: Icons.favorite_rounded,
+                  accentColor: pink,
+                ),
+                buildTile(
+                  key: const Key('category-popup-known-words-tile'),
+                  context: context,
+                  onTapBefore: () =>
+                      _openLocalSource(context, onBeginOpen, 'known_words'),
+                  onTapAfter: () async {},
+                  holdDelay: Duration.zero,
+                  title: 'Wörter, die ich kenne',
+                  icon: Icons.verified_rounded,
+                  accentColor: green,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.center,
+              child: buildTile(
+                key: const Key('category-popup-my-mix-tile'),
+                context: context,
+                onTapBefore: () =>
+                    _openLocalSource(context, onBeginOpen, 'my_mix'),
+                onTapAfter: () async {},
+                holdDelay: Duration.zero,
+                title: 'Mein Mix',
+                subtitle: 'Lokale Mischung',
+                icon: Icons.auto_awesome_rounded,
+                accentColor: const Color(0xFFFFC66A),
+                width: 280,
+                height: 90,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Align(
+              alignment: Alignment.center,
+              child: buildTile(
+                context: context,
+                onTapBefore: () {
+                  final navigator = Navigator.of(context, rootNavigator: true);
+                  onBeginOpen();
+                  unawaited(
+                    navigator.push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const WordHubScreen(useLocalOfflineFlow: true),
+                      ),
+                    ),
+                  );
+                },
+                onTapAfter: () async {},
+                holdDelay: Duration.zero,
+                title: 'Wortwelten',
+                subtitle: 'Themen und Lernbereiche',
+                icon: Icons.public_rounded,
+                accentColor: cyan,
+                width: 280,
+                height: 92,
+                borderRadius: BorderRadius.circular(22),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 180,
+                height: 40,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const MixBuilderScreen(
+                          navigationOrigin: MixNavigationOrigin.categoryPopup(),
+                        ),
+                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0E1A24),
+                    foregroundColor: textPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      side: BorderSide(
+                        color: violet.withValues(alpha: 0.74),
+                        width: 1.2,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    elevation: 0,
+                  ),
+                  child: const Text('Mix erstellen'),
+                ),
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   return showDialog(
     context: context,
@@ -419,10 +396,9 @@ Future<void> showCategoryPopup({
       final double posLeft = leftPad + offsetX;
       final double posBottom = baseBottom + offsetY;
 
-      const double popupWidth = 330;
-      const double popupHeight = 500;
-
       final screen = MediaQuery.of(ctx).size;
+      const double popupWidth = 330;
+      final double popupHeight = (screen.height - 16).clamp(500.0, 620.0);
       final safeLeft = posLeft.clamp(0.0, screen.width - popupWidth);
       final safeBottom = posBottom.clamp(8.0, screen.height - popupHeight - 8);
 
@@ -452,24 +428,29 @@ Future<void> showCategoryPopup({
                     child: SizedBox(
                       width: popupWidth,
                       height: popupHeight,
-                      child: content(
-                        ctx,
-                        onBeginOpen: () {
-                          // wird beim Tap auf die Kachel gesetzt (vor open())
-                          setLocalState(() => hidden = true);
-                          Future.delayed(const Duration(milliseconds: 380), () {
-                            if (!nav.mounted) return;
-                            if (dialogRoute != null) {
-                              if (dialogRoute.isCurrent) {
-                                nav.pop();
-                              } else {
-                                nav.removeRoute(dialogRoute);
-                              }
-                            } else if (nav.canPop()) {
-                              nav.pop();
-                            }
-                          });
-                        },
+                      child: SingleChildScrollView(
+                        child: content(
+                          ctx,
+                          onBeginOpen: () {
+                            // wird beim Tap auf die Kachel gesetzt (vor open())
+                            setLocalState(() => hidden = true);
+                            Future.delayed(
+                              const Duration(milliseconds: 380),
+                              () {
+                                if (!nav.mounted) return;
+                                if (dialogRoute != null) {
+                                  if (dialogRoute.isCurrent) {
+                                    nav.pop();
+                                  } else {
+                                    nav.removeRoute(dialogRoute);
+                                  }
+                                } else if (nav.canPop()) {
+                                  nav.pop();
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),

@@ -4,10 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
-import 'package:talvori/features/words/ui/screens/my_words_screen.dart';
-import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
-import 'package:talvori/features/words/application/learn_navigation_origin.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
+import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
@@ -65,6 +64,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('$what${HomeStrings.todo}')));
+  }
+
+  Future<void> _showLearningSourcesPopup() async {
+    ref.read(homeControllerProvider.notifier).setCategoriesActive(true);
+    await showCategoryPopup(
+      context: context,
+      onRefreshMyWords: () async {
+        await ref.read(homeControllerProvider.notifier).refreshMyWordsCount();
+      },
+      onTodo: (s) => _todo(s),
+    );
+    if (!mounted) return;
+    ref.read(homeControllerProvider.notifier).setCategoriesActive(false);
+  }
+
+  void _openImpulseInbox() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ImpulsPostfachScreen()));
   }
 
   // GlobalKey für Progress Pill (für Flug-Animation)
@@ -270,14 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                                   return res; // Gib das Ergebnis zurück
                                 },
-                                onImpulseInboxTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ImpulsPostfachScreen(),
-                                    ),
-                                  );
-                                },
+                                onImpulseInboxTap: null,
                                 impulseInboxUnreadCount: impulseUnreadCount,
                                 isImageExpanded: state.imageExpanded,
                                 onToggleImage: () => ref
@@ -293,34 +304,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   final nav = Navigator.of(context);
                                   await nav.push(
                                     MaterialPageRoute(
-                                      builder: (_) => const MyWordsScreen(),
+                                      settings: const RouteSettings(
+                                        name: 'local-vocabs-my_words',
+                                      ),
+                                      builder: (_) => const LocalWordListScreen(
+                                        categoryId: localMyWordsCategoryId,
+                                        title: localMyWordsCategoryLabel,
+                                      ),
                                     ),
                                   );
                                   if (!context.mounted) return;
                                 },
                                 onSpeak: () => _todo('Wort sprechen'),
                                 onMarkWords: () => _todo('Wörter markieren'),
-                                onGo: () async {
-                                  const quickSetsLabels = [
-                                    'All words',
-                                    'My words',
-                                    'Favorites',
-                                    'Words I know',
-                                    'My mix',
-                                  ];
-                                  await Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => LearnModeScreen(
-                                        categoryId: 'quicksets',
-                                        title: 'My words',
-                                        customWheelLabels: quickSetsLabels,
-                                        customWheelInitialIndex: 1,
-                                        navigationOrigin:
-                                            const LearnNavigationOrigin.home(),
-                                      ),
-                                    ),
-                                  );
-                                },
+                                onGo: _showLearningSourcesPopup,
                               ),
                             );
                           },
@@ -338,30 +335,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Padding(
           padding: HomeTheme.bottomPadding,
           child: HomeBottomNav(
-            onCategories: () async {
-              ref
-                  .read(homeControllerProvider.notifier)
-                  .setCategoriesActive(true);
-              await showCategoryPopup(
-                context: context,
-                onRefreshMyWords: () async {
-                  // Refresh My Words count after returning from My Words screen
-                  await ref
-                      .read(homeControllerProvider.notifier)
-                      .refreshMyWordsCount();
-                },
-                onTodo: (s) => _todo(s),
-              );
-              if (!mounted) return;
-              ref
-                  .read(homeControllerProvider.notifier)
-                  .setCategoriesActive(false);
-            },
-            onPractice: () => showPracticePicker(context),
+            onImpulseInbox: _openImpulseInbox,
+            onPractice: _showLearningSourcesPopup,
             onProfile: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
-            categoriesActive: state.categoriesActive,
+            impulseUnreadCount: impulseUnreadCount,
             practiceButtonKey:
                 _practiceButtonKey, // <-- NEU: Practice-Button Key
           ),

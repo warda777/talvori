@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/local_learning_source.dart';
 import '../services/shared_text_import_service.dart';
 import 'local_bootstrap_provider.dart';
+import 'local_words_for_source_provider.dart';
 
 final localWordCountProvider = FutureProvider.family<int, String>((
   ref,
@@ -9,6 +11,12 @@ final localWordCountProvider = FutureProvider.family<int, String>((
 ) async {
   if (categoryId.trim().isEmpty) {
     return 0;
+  }
+
+  final source = LocalLearningSource.fromId(categoryId);
+  if (source != null) {
+    final words = await ref.watch(localWordsForSourceProvider(source).future);
+    return words.length;
   }
 
   final bootstrapResult = await ref.watch(localBootstrapProvider.future);

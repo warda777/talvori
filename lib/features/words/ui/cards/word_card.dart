@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'counter_badge.dart';
 import 'dart:ui' as ui;
 import 'tap_flash.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -243,39 +242,25 @@ class _WordCardState extends ConsumerState<WordCard> {
                       top: 24,
                       left: 0,
                       right: 0,
-                      child: Center(
-                        child: TapFlash(
-                          color: _wheelBlue, // Blau aus Word Wheel
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          onTapAfter: widget.onCountTap,
-                          child: _total > 0
-                              ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.7),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Text(
-                                    '$_currentIndex/$_total',
-                                    style: TextStyle(
-                                      color: onImageFg, // Weiß
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                )
-                              : CounterBadge(
-                                  count: widget.userWordCount,
-                                  onTap: null, // TapFlash übernimmt das Tippen
-                                  color: Colors.black.withValues(
-                                    alpha: 0.7,
-                                  ), // Hintergrund
-                                  textColor: onImageFg, // Weiß
-                                ),
+                      height: 32,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          width: 74,
+                          height: 32,
+                          child: TapFlash(
+                            key: const Key('home-my-words-counter-button'),
+                            color: _wheelBlue, // Blau aus Word Wheel
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(14),
+                            onTapAfter: widget.onCountTap,
+                            child: _CounterPill(
+                              label: _total > 0
+                                  ? '$_currentIndex/$_total'
+                                  : '${widget.userWordCount}',
+                              textColor: onImageFg,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -283,14 +268,14 @@ class _WordCardState extends ConsumerState<WordCard> {
                     // ─── GLOW SWITCH (rechts oben) ───
                     Positioned(top: 18, right: 16, child: GlowSwitch()),
 
-                    // ─── "My Words" (immer identisch) ───
+                    // ─── "Meine Wörter" (immer identisch) ───
                     Positioned(
                       top: 70,
                       left: 0,
                       right: 0,
                       child: Center(
                         child: Text(
-                          'My Words',
+                          'Meine Wörter',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -303,7 +288,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                       ),
                     ),
 
-                    // ─── SPEAKER unter "My Words" ───
+                    // ─── SPEAKER unter "Meine Wörter" ───
                     Positioned(
                       top: 110,
                       left: 0,
@@ -358,16 +343,6 @@ class _WordCardState extends ConsumerState<WordCard> {
                           setState(() {
                             _total = total;
                           });
-                          // Aktualisiere auch den My Words Count im HomeController
-                          if (total > 0) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                ref
-                                    .read(homeControllerProvider.notifier)
-                                    .refreshMyWordsCount();
-                              }
-                            });
-                          }
                         },
                       ),
                     ),
@@ -379,6 +354,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                       right: 0,
                       child: Center(
                         child: GestureDetector(
+                          key: const Key('home-my-words-play-button'),
                           onTap: widget
                               .onGo, // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
                           behavior: HitTestBehavior
@@ -709,12 +685,42 @@ class _MyWordsTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Text(
-      'My Words',
+      'Meine Wörter',
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: Colors.white,
         shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
+      ),
+    );
+  }
+}
+
+class _CounterPill extends StatelessWidget {
+  const _CounterPill({required this.label, required this.textColor});
+
+  final String label;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        maxLines: 1,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
       ),
     );
   }

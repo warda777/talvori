@@ -141,6 +141,17 @@ class WordRepository {
     return rows.map(_mapWord).toList(growable: false);
   }
 
+  Future<List<LocalWord>> loadAllWords({bool includeArchived = false}) async {
+    final rows = await _database.query(
+      'words',
+      where: includeArchived ? null : 'is_archived = ?',
+      whereArgs: includeArchived ? null : [0],
+      orderBy: 'sort_order ASC, created_at DESC, term ASC',
+    );
+
+    return rows.map(_mapWord).toList(growable: false);
+  }
+
   Future<List<LocalWord>> loadPendingTranslations({
     String? categoryId,
     bool includeArchived = false,

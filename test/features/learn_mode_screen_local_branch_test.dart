@@ -362,8 +362,8 @@ void main() {
     final tagesimpulsRect = tester.getRect(
       find.byKey(const ValueKey('local-learn-mode-tagesimpuls-add-button')),
     );
-    expect(favoriteRect.center.dx, lessThan(cardRect.center.dx));
-    expect(tagesimpulsRect.center.dx, lessThan(cardRect.center.dx));
+    expect(favoriteRect.center.dx, greaterThan(cardRect.center.dx));
+    expect(tagesimpulsRect.center.dx, greaterThan(cardRect.center.dx));
   });
 
   testWidgets('learn_mode_screen_local_mode_adds_current_word_to_tagesimpuls', (
