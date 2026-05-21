@@ -12,6 +12,8 @@ import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_
 
 enum _InboxTab { chats, categories, saved, you }
 
+enum _ChatFilter { all, unread, dailyImpulse, categories, customAi, saved }
+
 class ImpulsPostfachScreen extends ConsumerStatefulWidget {
   const ImpulsPostfachScreen({super.key});
 
@@ -23,6 +25,7 @@ class ImpulsPostfachScreen extends ConsumerStatefulWidget {
 class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
   final _searchController = TextEditingController();
   _InboxTab _tab = _InboxTab.chats;
+  _ChatFilter _chatFilter = _ChatFilter.all;
   String _query = '';
 
   @override
@@ -37,7 +40,15 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     final categories = _tab == _InboxTab.categories
         ? ref.watch(localCategoryDetailGroupItemsProvider('health_fitness'))
         : null;
-    final filteredChats = _filterChats(state.chats, _query);
+    final starredChatIds = state.savedMessages
+        .map((item) => item.chat.id)
+        .toSet();
+    final filteredChats = _filterChats(
+      state.chats,
+      _query,
+      _chatFilter,
+      starredChatIds,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF050A12),
@@ -92,11 +103,14 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
                 _InboxTab.chats =>
                   state.isLoading
                       ? const Center(child: CircularProgressIndicator())
-                      : filteredChats.isEmpty && _query.trim().isNotEmpty
-                      ? const _SearchEmpty()
-                      : filteredChats.isEmpty
-                      ? const _EmptyInbox()
-                      : _ChatList(chats: filteredChats, onOpen: _openChat),
+                      : _ChatsTab(
+                          chats: filteredChats,
+                          selectedFilter: _chatFilter,
+                          query: _query,
+                          onFilterChanged: (filter) =>
+                              setState(() => _chatFilter = filter),
+                          onOpen: _openChat,
+                        ),
                 _InboxTab.categories => categories!.when(
                   data: (items) => _CategoryHubList(
                     items: items,
@@ -117,9 +131,12 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
                 ),
                 _InboxTab.you => _YouTab(
                   profile: state.aiProfile,
+                  activeChatCount: state.chats.length,
+                  hiddenChats: state.hiddenChats,
                   onChanged: (profile) => ref
                       .read(impulseInboxControllerProvider.notifier)
                       .updateAiProfile(profile),
+                  onManageHidden: _openHiddenChatsSheet,
                 ),
               },
             ),
@@ -133,12 +150,30 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     );
   }
 
-  List<ImpulseChat> _filterChats(List<ImpulseChat> chats, String query) {
+  List<ImpulseChat> _filterChats(
+    List<ImpulseChat> chats,
+    String query,
+    _ChatFilter filter,
+    Set<String> starredChatIds,
+  ) {
     final normalized = query.trim().toLowerCase();
-    if (normalized.isEmpty) return chats;
     return chats
         .where(
+          (chat) => switch (filter) {
+            _ChatFilter.all => true,
+            _ChatFilter.unread => chat.unreadCount > 0,
+            _ChatFilter.dailyImpulse =>
+              chat.sourceType == ImpulseChatSourceType.dailyImpulse,
+            _ChatFilter.categories =>
+              chat.sourceType == ImpulseChatSourceType.category,
+            _ChatFilter.customAi =>
+              chat.sourceType == ImpulseChatSourceType.customAi,
+            _ChatFilter.saved => starredChatIds.contains(chat.id),
+          },
+        )
+        .where(
           (chat) =>
+              normalized.isEmpty ||
               chat.title.toLowerCase().contains(normalized) ||
               (chat.lastMessageText ?? '').toLowerCase().contains(normalized),
         )
@@ -186,6 +221,66 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
         .createCustomAiChat(title: title);
     if (!mounted) return;
     _openChat(chat);
+  }
+
+  Future<void> _reactivateChat(ImpulseChat chat) async {
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .reactivateChat(chat.id);
+    if (!mounted) return;
+    _openChat(chat.copyWith(enabled: true));
+  }
+
+  Future<void> _confirmDeleteCustomChat(ImpulseChat chat) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF101923),
+        title: const Text(
+          'Eigenen Chat löschen?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Dieser Chat und seine lokalen Nachrichten werden nur auf diesem Gerät gelöscht.',
+          style: TextStyle(color: Color(0xFFB8C4D9)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            key: const Key('custom_chat_delete_confirm_button'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .deleteCustomAiChat(chat.id);
+  }
+
+  Future<void> _openHiddenChatsSheet() {
+    final hiddenChats = ref.read(impulseInboxControllerProvider).hiddenChats;
+    return showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _HiddenChatsSheet(
+        hiddenChats: hiddenChats,
+        onReactivate: (chat) async {
+          Navigator.of(sheetContext).pop();
+          await _reactivateChat(chat);
+        },
+        onDeleteCustom: (chat) async {
+          Navigator.of(sheetContext).pop();
+          await _confirmDeleteCustomChat(chat);
+        },
+      ),
+    );
   }
 
   Future<void> _openAddChatSheet() {
@@ -292,6 +387,127 @@ class _SearchField extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ChatsTab extends StatelessWidget {
+  const _ChatsTab({
+    required this.chats,
+    required this.selectedFilter,
+    required this.query,
+    required this.onFilterChanged,
+    required this.onOpen,
+  });
+
+  final List<ImpulseChat> chats;
+  final _ChatFilter selectedFilter;
+  final String query;
+  final ValueChanged<_ChatFilter> onFilterChanged;
+  final ValueChanged<ImpulseChat> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _ChatFilterChips(selected: selectedFilter, onSelected: onFilterChanged),
+        Expanded(
+          child: chats.isEmpty
+              ? _ChatFilterEmpty(
+                  filter: selectedFilter,
+                  hasQuery: query.trim().isNotEmpty,
+                )
+              : _ChatList(chats: chats, onOpen: onOpen),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChatFilterChips extends StatelessWidget {
+  const _ChatFilterChips({required this.selected, required this.onSelected});
+
+  final _ChatFilter selected;
+  final ValueChanged<_ChatFilter> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        key: const Key('impulse_inbox_chat_filter_chips'),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        itemBuilder: (context, index) {
+          final filter = _ChatFilter.values[index];
+          final isSelected = filter == selected;
+          return ChoiceChip(
+            key: Key('chat_filter_${filter.name}'),
+            label: Text(filter.label),
+            selected: isSelected,
+            onSelected: (_) => onSelected(filter),
+            selectedColor: const Color(0xFF0F5D4A),
+            backgroundColor: const Color(0xFF08111B),
+            side: BorderSide(
+              color: isSelected
+                  ? const Color(0xFF7FFFE7)
+                  : const Color(0x2259D7FF),
+            ),
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.white : const Color(0xFFC8D6E6),
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+            ),
+          );
+        },
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemCount: _ChatFilter.values.length,
+      ),
+    );
+  }
+}
+
+class _ChatFilterEmpty extends StatelessWidget {
+  const _ChatFilterEmpty({required this.filter, required this.hasQuery});
+
+  final _ChatFilter filter;
+  final bool hasQuery;
+
+  @override
+  Widget build(BuildContext context) {
+    if (hasQuery) return const _SearchEmpty();
+    return _PanelEmpty(title: filter.emptyTitle, text: filter.emptyText);
+  }
+}
+
+extension _ChatFilterLabels on _ChatFilter {
+  String get label => switch (this) {
+    _ChatFilter.all => 'Alle',
+    _ChatFilter.unread => 'Ungelesen',
+    _ChatFilter.dailyImpulse => 'Tagesimpuls',
+    _ChatFilter.categories => 'Kategorien',
+    _ChatFilter.customAi => 'Eigene Chats',
+    _ChatFilter.saved => 'Gespeichert',
+  };
+
+  String get emptyTitle => switch (this) {
+    _ChatFilter.all => 'Noch keine Chats',
+    _ChatFilter.unread => 'Keine ungelesenen Chats',
+    _ChatFilter.dailyImpulse => 'Kein Tagesimpuls-Chat',
+    _ChatFilter.categories => 'Keine Kategorie-Chats',
+    _ChatFilter.customAi => 'Keine eigenen Chats',
+    _ChatFilter.saved => 'Keine gespeicherten Nachrichten in Chats',
+  };
+
+  String get emptyText => switch (this) {
+    _ChatFilter.all =>
+      'Erstelle einen Kategorie-Chat oder starte mit deinem Tagesimpuls.',
+    _ChatFilter.unread => 'Neue Impulse und Antworten erscheinen hier.',
+    _ChatFilter.dailyImpulse => 'Der Tagesimpuls-Chat entsteht automatisch.',
+    _ChatFilter.categories =>
+      'Füge im Kategorien-Tab einen Kategorie-Chat hinzu.',
+    _ChatFilter.customAi => 'Erstelle über Plus einen eigenen lokalen KI-Chat.',
+    _ChatFilter.saved =>
+      'Markiere Nachrichten mit Stern, damit ihr Chat hier auftaucht.',
+  };
 }
 
 class _ChatList extends StatelessWidget {
@@ -585,6 +801,16 @@ class _CategoryChatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = chat?.enabled == true;
     final exists = chat != null;
+    final statusLabel = active
+        ? 'Aktiv'
+        : exists
+        ? 'Ausgeblendet'
+        : 'Noch kein Chat';
+    final actionLabel = active
+        ? 'Öffnen'
+        : exists
+        ? 'Wieder einblenden'
+        : 'Hinzufügen';
     return InkWell(
       key: Key('impulse_inbox_category_tile_${item.localCategoryId}'),
       borderRadius: BorderRadius.circular(18),
@@ -633,12 +859,20 @@ class _CategoryChatTile extends StatelessWidget {
                 ],
               ),
             ),
-            _StatusPill(
-              label: active
-                  ? 'Aktiv'
-                  : exists
-                  ? 'Reaktivieren'
-                  : 'Hinzufügen',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _StatusPill(label: statusLabel),
+                const SizedBox(height: 6),
+                Text(
+                  actionLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF7FFFE7),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -783,14 +1017,24 @@ class _SavedMessageTile extends StatelessWidget {
 }
 
 class _YouTab extends StatelessWidget {
-  const _YouTab({required this.profile, required this.onChanged});
+  const _YouTab({
+    required this.profile,
+    required this.activeChatCount,
+    required this.hiddenChats,
+    required this.onChanged,
+    required this.onManageHidden,
+  });
 
   final ImpulseAiProfile profile;
+  final int activeChatCount;
+  final List<ImpulseChat> hiddenChats;
   final ValueChanged<ImpulseAiProfile> onChanged;
+  final VoidCallback onManageHidden;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
+      key: const Key('impulse_inbox_you_tab_list'),
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
       children: [
         const _ProfileIntro(),
@@ -827,7 +1071,120 @@ class _YouTab extends StatelessWidget {
               onChanged(profile.copyWith(explanationLanguage: value)),
         ),
         _ProfilePreview(profile: profile),
+        const SizedBox(height: 16),
+        _ChatManagementPanel(
+          activeChatCount: activeChatCount,
+          hiddenChatCount: hiddenChats.length,
+          onManageHidden: onManageHidden,
+        ),
       ],
+    );
+  }
+}
+
+class _ChatManagementPanel extends StatelessWidget {
+  const _ChatManagementPanel({
+    required this.activeChatCount,
+    required this.hiddenChatCount,
+    required this.onManageHidden,
+  });
+
+  final int activeChatCount;
+  final int hiddenChatCount;
+  final VoidCallback onManageHidden;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('chat_management_panel'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF08111B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Chat-Verwaltung',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _ChatCountPill(label: 'Aktiv', count: activeChatCount),
+              const SizedBox(width: 8),
+              _ChatCountPill(label: 'Ausgeblendet', count: hiddenChatCount),
+            ],
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            key: const Key('manage_hidden_chats_button'),
+            borderRadius: BorderRadius.circular(16),
+            onTap: onManageHidden,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A141E),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0x2259D7FF)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.visibility_off_rounded,
+                    color: Color(0xFF7FFFE7),
+                    size: 18,
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Ausgeblendete Chats verwalten',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: Color(0xFF7D8BA3)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatCountPill extends StatelessWidget {
+  const _ChatCountPill({required this.label, required this.count});
+
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A141E),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+      child: Text(
+        '$label · $count',
+        style: const TextStyle(
+          color: Color(0xFFC8D6E6),
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }
@@ -1135,6 +1492,157 @@ class _AddChatSheet extends StatelessWidget {
   }
 }
 
+class _HiddenChatsSheet extends StatelessWidget {
+  const _HiddenChatsSheet({
+    required this.hiddenChats,
+    required this.onReactivate,
+    required this.onDeleteCustom,
+  });
+
+  final List<ImpulseChat> hiddenChats;
+  final ValueChanged<ImpulseChat> onReactivate;
+  final ValueChanged<ImpulseChat> onDeleteCustom;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(14),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF101923),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: const Color(0x2259D7FF)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ausgeblendete Chats',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Verläufe bleiben lokal erhalten.',
+                  style: TextStyle(color: Color(0xFF9FB0C7)),
+                ),
+                const SizedBox(height: 14),
+                if (hiddenChats.isEmpty)
+                  const _PanelEmpty(
+                    title: 'Keine ausgeblendeten Chats',
+                    text:
+                        'Ausgeblendete Kategorie- und eigene Chats erscheinen hier.',
+                  )
+                else
+                  Flexible(
+                    child: ListView.separated(
+                      key: const Key('hidden_chats_list'),
+                      shrinkWrap: true,
+                      itemCount: hiddenChats.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final chat = hiddenChats[index];
+                        return _HiddenChatTile(
+                          chat: chat,
+                          onReactivate: () => onReactivate(chat),
+                          onDeleteCustom:
+                              chat.sourceType == ImpulseChatSourceType.customAi
+                              ? () => onDeleteCustom(chat)
+                              : null,
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HiddenChatTile extends StatelessWidget {
+  const _HiddenChatTile({
+    required this.chat,
+    required this.onReactivate,
+    this.onDeleteCustom,
+  });
+
+  final ImpulseChat chat;
+  final VoidCallback onReactivate;
+  final VoidCallback? onDeleteCustom;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: Key('hidden_chat_tile_${chat.id}'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF08111B),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+      child: Row(
+        children: [
+          _ChatAvatar(chat: chat, size: 42),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  chat.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  chat.sourceType == ImpulseChatSourceType.category
+                      ? 'Kategorie-Chat'
+                      : 'Eigener KI-Chat',
+                  style: const TextStyle(
+                    color: Color(0xFF9FB0C7),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            key: Key('hidden_chat_reactivate_${chat.id}'),
+            onPressed: onReactivate,
+            child: const Text('Wieder einblenden'),
+          ),
+          if (onDeleteCustom != null)
+            IconButton(
+              key: Key('hidden_chat_delete_${chat.id}'),
+              tooltip: 'Lokal löschen',
+              onPressed: onDeleteCustom,
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: Color(0xFFFF7A8A),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AddChatOption extends StatelessWidget {
   const _AddChatOption({
     super.key,
@@ -1189,19 +1697,6 @@ class _StatusPill extends StatelessWidget {
           fontWeight: FontWeight.w900,
         ),
       ),
-    );
-  }
-}
-
-class _EmptyInbox extends StatelessWidget {
-  const _EmptyInbox();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _PanelEmpty(
-      title: 'Noch keine Impulse',
-      text:
-          'Deine Tagesimpulse erscheinen hier, sobald Talvori sie gesendet hat.',
     );
   }
 }

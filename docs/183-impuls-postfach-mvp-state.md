@@ -314,13 +314,24 @@ Das Impuls-Postfach ist jetzt stärker als eigener Chat-Hub gestaltet. Der Scree
 
 Die Chatliste ist weniger card-lastig und näher an einem Messenger-Startbildschirm: runde Avatare links, Titel und Vorschau in der Mitte, Zeit und Ungelesen-Badge rechts. Die Suche filtert aktive Chats nach Titel und letzter Nachricht.
 
+Im Tab `Chats` gibt es zusätzlich lokale Filter-Chips:
+
+- `Alle`
+- `Ungelesen`
+- `Tagesimpuls`
+- `Kategorien`
+- `Eigene Chats`
+- `Gespeichert`
+
+Filter und Suche werden kombiniert. Ein Suchbegriff wie `Englisch` innerhalb des Filters `Kategorien` zeigt nur aktive Kategorie-Chats, deren Titel oder letzte Nachricht passt. Der Filter `Gespeichert` zeigt Chats, die mindestens eine lokal mit Stern markierte Nachricht enthalten. Jeder Filter hat einen passenden Empty State, zum Beispiel `Keine ungelesenen Chats` oder `Keine eigenen Chats`.
+
 Das Plus-Menü bietet:
 
 - `Kategorie-Chat hinzufügen`
 - `Eigenen KI-Chat erstellen`
 - `Tagesimpuls öffnen`
 
-Der Kategorien-Tab zeigt lokal verfügbare Kategorien mit Wortanzahl und Status. Noch nicht vorhandene Kategorie-Chats können hinzugefügt werden, deaktivierte Kategorie-Chats werden über denselben Weg reaktiviert und behalten ihren lokalen Verlauf.
+Der Kategorien-Tab zeigt lokal verfügbare Kategorien mit Wortanzahl und Status. Der Status unterscheidet `Noch kein Chat`, `Aktiv` und `Ausgeblendet`. Noch nicht vorhandene Kategorie-Chats können hinzugefügt werden, aktive Chats werden geöffnet und ausgeblendete Kategorie-Chats werden über `Wieder einblenden` reaktiviert. Der lokale Verlauf bleibt dabei erhalten.
 
 Eigene KI-Chats werden lokal als `ImpulseChat` gespeichert:
 
@@ -330,7 +341,7 @@ Eigene KI-Chats werden lokal als `ImpulseChat` gespeichert:
 - `avatarKey`: `custom:<chatId>`
 - `enabled`: steuert die Sichtbarkeit im Hub
 
-Eigene KI-Chats nutzen dieselbe Messenger-Oberfläche wie Tagesimpuls- und Kategorie-Chats. Der `ai-chat` Request bekommt `chatType: custom_ai` und den Chat-Titel als Kontext. Eigene Chats können lokal ausgeblendet werden, ohne automatisch den Verlauf zu löschen.
+Eigene KI-Chats nutzen dieselbe Messenger-Oberfläche wie Tagesimpuls- und Kategorie-Chats. Der `ai-chat` Request bekommt `chatType: custom_ai` und den Chat-Titel als Kontext. Eigene Chats können lokal ausgeblendet werden, ohne automatisch den Verlauf zu löschen. Ausgeblendete eigene Chats können wieder eingeblendet oder nach Sicherheitsdialog endgültig lokal gelöscht werden. Beim lokalen Löschen werden nur der eigene Chat und seine lokalen Impuls-Nachrichten entfernt; SRS-Daten bleiben unberührt.
 
 Chats können optional ein lokales Avatarbild bekommen. Das Modell speichert dafür `avatarImagePath`; die UI zeigt ein rundes Bild, wenn ein lokaler Pfad vorhanden ist, sonst das bisherige Neon-Icon. Bilder werden nur als Chat-/Kategorie-Avatar verwendet, nicht als Chat-Anhang und nicht in die Cloud hochgeladen. iOS enthält dafür eine Fotomediathek-Beschreibung.
 
@@ -344,6 +355,14 @@ Der Tab `Du` enthält ein kleines lokales KI-Profil statt einer Einstellungswüs
 - Erklärungssprache: `Deutsch`, `Englisch`, `Gemischt`
 
 Das Profil wird lokal im Impuls-Postfach-Store gespeichert und hat Default-Werte für bestehende Installationen. Beim Senden aus Tagesimpuls-, Kategorie- oder eigenem KI-Chat ergänzt der Controller den bestehenden `ai-chat` Kontext um `aiStyle`, `answerLength`, `learningGoal` und `explanationLanguage`. Kategorie-Kontext wie `categoryId`, `categoryTitle` und `categoryWordsSample` bleibt erhalten. Es wird weiterhin keine Lernsession gestartet, keine Queue verändert und kein SRS-Fortschritt geschrieben.
+
+Unter dem KI-Profil zeigt der Tab `Du` außerdem eine kompakte `Chat-Verwaltung`:
+
+- Anzahl aktiver Chats
+- Anzahl ausgeblendeter Chats
+- Einstieg `Ausgeblendete Chats verwalten`
+
+Die Verwaltung listet lokal ausgeblendete Kategorie- und eigene KI-Chats. Kategorie-Chats können wieder eingeblendet werden und behalten ihre lokalen Nachrichten. Eigene KI-Chats können ebenfalls wieder eingeblendet oder nach Bestätigung endgültig lokal gelöscht werden. Der Tagesimpuls-Chat wird nicht als ausgeblendeter Chat verwaltet.
 
 ## Bewusst nicht umgesetzt
 
@@ -380,6 +399,13 @@ Abgedeckt sind:
 - Eigene KI-Chats können lokal erstellt werden.
 - Avatar-Pfade werden lokal gespeichert und gelesen.
 - Suche filtert aktive Chats.
+- Chat-Filter zeigen `Alle`, `Ungelesen`, `Tagesimpuls`, `Kategorien`, `Eigene Chats` und `Gespeichert`.
+- Suche und Chat-Filter funktionieren kombiniert.
+- Ausgeblendete Kategorie- und eigene KI-Chats werden separat gelistet.
+- Ausgeblendete Kategorie-Chats können reaktiviert werden und behalten lokale Nachrichten.
+- Eigene KI-Chats können ausgeblendet und lokal gelöscht werden.
+- Der Tagesimpuls-Chat wird nicht als ausgeblendeter Chat verwaltet.
+- Der Kategorien-Tab zeigt `Aktiv`, `Ausgeblendet` und `Noch kein Chat`.
 - Plus-Menü öffnet Kategorie- und Custom-Chat-Flows.
 - Kategorie-Wörter werden rein lesend als KI-Kontext bereitgestellt.
 - Gespeicherte Nachrichten werden aus allen lokalen Chats gesammelt.
@@ -392,4 +418,4 @@ Abgedeckt sind:
 
 ## Nächster Schritt
 
-Als nächstes können gespeicherte Nachrichten zusätzlich per Zielmarkierung in der Chatliste oder über einen kleinen Bookmark-Filter pro Chat erreichbar werden. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.
+Als nächstes können pro Chat weitere lokale Verwaltungsaktionen ergänzt werden, zum Beispiel Umbenennen eigener KI-Chats, feinere Avatar-Stile oder ein kompakter Export nur für lokale Diagnosezwecke. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.

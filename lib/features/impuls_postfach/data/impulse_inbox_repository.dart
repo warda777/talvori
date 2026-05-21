@@ -17,6 +17,7 @@ abstract class ImpulseInboxRepository {
   Future<void> updateChatAvatarImagePath(String chatId, String? imagePath);
   Future<List<ImpulseChat>> listChats();
   Future<List<ImpulseChat>> listAllChats();
+  Future<List<ImpulseChat>> listHiddenChats();
   Future<List<ImpulseSavedMessage>> listStarredMessages();
   Future<ImpulseAiProfile> loadAiProfile();
   Future<void> saveAiProfile(ImpulseAiProfile profile);
@@ -44,6 +45,7 @@ abstract class ImpulseInboxRepository {
     required bool isPinned,
   });
   Future<void> deleteMessage(String chatId, String messageId);
+  Future<void> deleteCustomAiChat(String chatId);
   Future<void> markChatRead(String chatId);
   Future<void> clearChat(String chatId);
 }
@@ -203,6 +205,21 @@ class SharedPreferencesImpulseInboxRepository
   Future<List<ImpulseChat>> listAllChats() async {
     final store = await _loadStore();
     final chats = store.chats.values.toList();
+    _sortChats(chats);
+    return chats;
+  }
+
+  @override
+  Future<List<ImpulseChat>> listHiddenChats() async {
+    final store = await _loadStore();
+    final chats = store.chats.values
+        .where(
+          (chat) =>
+              !chat.enabled &&
+              (chat.sourceType == ImpulseChatSourceType.category ||
+                  chat.sourceType == ImpulseChatSourceType.customAi),
+        )
+        .toList();
     _sortChats(chats);
     return chats;
   }
@@ -380,6 +397,21 @@ class SharedPreferencesImpulseInboxRepository
 
     store.messages[chatId] = nextMessages;
     _recomputeChatPreview(store, chatId);
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> deleteCustomAiChat(String chatId) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null || chat.sourceType != ImpulseChatSourceType.customAi) {
+      return;
+    }
+
+    store.chats.remove(normalizedChatId);
+    store.messages.remove(normalizedChatId);
     await _saveStore(store);
   }
 

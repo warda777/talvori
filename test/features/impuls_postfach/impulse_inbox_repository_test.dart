@@ -158,6 +158,74 @@ void main() {
       );
     });
 
+    test(
+      'listHiddenChats returns disabled category and custom chats only',
+      () async {
+        final repository = SharedPreferencesImpulseInboxRepository(
+          clock: () => DateTime(2026, 5, 20, 12),
+        );
+        final daily = await repository.ensureDailyImpulseChat();
+        final category = await repository.ensureCategoryChat(
+          'seed-category-travel',
+          'Travel',
+        );
+        final custom = await repository.createCustomAiChat('Reisevokabeln');
+
+        await repository.setChatEnabled(daily.id, false);
+        await repository.setCategoryChatEnabled('seed-category-travel', false);
+        await repository.setChatEnabled(custom.id, false);
+
+        final hidden = await repository.listHiddenChats();
+
+        expect(
+          hidden.map((chat) => chat.id),
+          containsAll([category.id, custom.id]),
+        );
+        expect(hidden.map((chat) => chat.id), isNot(contains(daily.id)));
+
+        await repository.setChatEnabled(custom.id, true);
+        expect((await repository.listHiddenChats()).map((chat) => chat.id), [
+          category.id,
+        ]);
+      },
+    );
+
+    test(
+      'deleteCustomAiChat removes only custom chat and local messages',
+      () async {
+        final repository = SharedPreferencesImpulseInboxRepository(
+          clock: () => DateTime(2026, 5, 20, 12),
+        );
+        final custom = await repository.createCustomAiChat('Grammatikfragen');
+        final category = await repository.ensureCategoryChat(
+          'seed-category-basics',
+          'Basics',
+        );
+        await repository.addMessage(
+          ImpulseMessage(
+            id: '',
+            chatId: custom.id,
+            text: 'Custom text',
+            createdAt: DateTime(2026, 5, 20, 12),
+            source: ImpulseMessageSource.user,
+          ),
+          incrementUnread: false,
+        );
+
+        await repository.deleteCustomAiChat(custom.id);
+        await repository.deleteCustomAiChat(category.id);
+
+        expect((await repository.listAllChats()).map((chat) => chat.id), [
+          category.id,
+        ]);
+        expect(await repository.listMessages(custom.id), isEmpty);
+        expect(
+          await repository.getCategoryChat('seed-category-basics'),
+          isNotNull,
+        );
+      },
+    );
+
     test('mark chat read clears unread count and sets readAt', () async {
       final repository = SharedPreferencesImpulseInboxRepository(
         clock: () => DateTime(2026, 5, 20, 12),

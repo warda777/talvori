@@ -15,6 +15,7 @@ class ImpulseInboxState {
     this.isLoading = false,
     this.chats = const [],
     this.allChats = const [],
+    this.hiddenChats = const [],
     this.savedMessages = const [],
     this.aiProfile = ImpulseAiProfile.defaults,
     this.messagesByChat = const {},
@@ -25,6 +26,7 @@ class ImpulseInboxState {
   final bool isLoading;
   final List<ImpulseChat> chats;
   final List<ImpulseChat> allChats;
+  final List<ImpulseChat> hiddenChats;
   final List<ImpulseSavedMessage> savedMessages;
   final ImpulseAiProfile aiProfile;
   final Map<String, List<ImpulseMessage>> messagesByChat;
@@ -35,6 +37,7 @@ class ImpulseInboxState {
     bool? isLoading,
     List<ImpulseChat>? chats,
     List<ImpulseChat>? allChats,
+    List<ImpulseChat>? hiddenChats,
     List<ImpulseSavedMessage>? savedMessages,
     ImpulseAiProfile? aiProfile,
     Map<String, List<ImpulseMessage>>? messagesByChat,
@@ -45,6 +48,7 @@ class ImpulseInboxState {
       isLoading: isLoading ?? this.isLoading,
       chats: chats ?? this.chats,
       allChats: allChats ?? this.allChats,
+      hiddenChats: hiddenChats ?? this.hiddenChats,
       savedMessages: savedMessages ?? this.savedMessages,
       aiProfile: aiProfile ?? this.aiProfile,
       messagesByChat: messagesByChat ?? this.messagesByChat,
@@ -77,12 +81,14 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     state = state.copyWith(isLoading: true);
     final chats = await _repository.listChats();
     final allChats = await _repository.listAllChats();
+    final hiddenChats = await _repository.listHiddenChats();
     final savedMessages = await _repository.listStarredMessages();
     final aiProfile = await _repository.loadAiProfile();
     state = state.copyWith(
       isLoading: false,
       chats: chats,
       allChats: allChats,
+      hiddenChats: hiddenChats,
       savedMessages: savedMessages,
       aiProfile: aiProfile,
     );
@@ -122,6 +128,15 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     required bool enabled,
   }) async {
     await _repository.setChatEnabled(chatId, enabled);
+    await loadChats();
+  }
+
+  Future<void> reactivateChat(String chatId) {
+    return setChatEnabled(chatId: chatId, enabled: true);
+  }
+
+  Future<void> deleteCustomAiChat(String chatId) async {
+    await _repository.deleteCustomAiChat(chatId);
     await loadChats();
   }
 
@@ -281,10 +296,12 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     final messages = await _repository.listMessages(chatId);
     final chats = await _repository.listChats();
     final allChats = await _repository.listAllChats();
+    final hiddenChats = await _repository.listHiddenChats();
     final savedMessages = await _repository.listStarredMessages();
     state = state.copyWith(
       chats: chats,
       allChats: allChats,
+      hiddenChats: hiddenChats,
       savedMessages: savedMessages,
       messagesByChat: {...state.messagesByChat, chatId: messages},
     );

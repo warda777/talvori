@@ -1065,6 +1065,9 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   Future<void> deleteMessage(String chatId, String messageId) async {}
 
   @override
+  Future<void> deleteCustomAiChat(String chatId) async {}
+
+  @override
   Future<void> updateMessagePinned(
     String chatId,
     String messageId, {
@@ -1090,6 +1093,9 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
 
   @override
   Future<List<ImpulseChat>> listAllChats() async => const [];
+
+  @override
+  Future<List<ImpulseChat>> listHiddenChats() async => const [];
 
   @override
   Future<List<ImpulseSavedMessage>> listStarredMessages() async => const [];

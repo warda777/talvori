@@ -140,6 +140,6 @@ void main() {
     await tester.pump();
 
     expect(find.byType(ImpulsPostfachScreen), findsOneWidget);
-    expect(find.text('Noch keine Impulse'), findsOneWidget);
+    expect(find.text('Noch keine Chats'), findsOneWidget);
   });
 }

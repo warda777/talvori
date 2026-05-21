@@ -59,11 +59,17 @@ void main() {
         child: const MaterialApp(home: ImpulsPostfachScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Impuls-Postfach'), findsOneWidget);
     expect(find.text('1 Verlauf'), findsOneWidget);
-    expect(find.text('Tagesimpuls'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Tagesimpuls'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('You moved like a superstar.'), findsOneWidget);
     expect(find.byKey(const Key('impulse_inbox_unread_badge')), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
@@ -85,13 +91,13 @@ void main() {
         child: const MaterialApp(home: ImpulsPostfachScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Impuls-Postfach'), findsOneWidget);
-    expect(find.text('Noch keine Impulse'), findsOneWidget);
+    expect(find.text('Noch keine Chats'), findsOneWidget);
     expect(
       find.text(
-        'Deine Tagesimpulse erscheinen hier, sobald Talvori sie gesendet hat.',
+        'Erstelle einen Kategorie-Chat oder starte mit deinem Tagesimpuls.',
       ),
       findsOneWidget,
     );
@@ -138,7 +144,161 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Tagesimpuls'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Tagesimpuls'),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('chat filter chips filter chats and combine with search', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_filters',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await repository.addDailyImpulseMessages(const [
+      TagesimpulsGeneratedImpulse(
+        slot: 'morning',
+        message: 'Daily saved hello',
+        usedWords: ['hello'],
+      ),
+    ]);
+    final category = await repository.ensureCategoryChat(
+      'seed-category-travel',
+      'Travel',
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: category.id,
+        text: 'Category saved text',
+        createdAt: DateTime(2026, 5, 20, 12, 1),
+        source: ImpulseMessageSource.ai,
+        isStarred: true,
+      ),
+      incrementUnread: false,
+    );
+    await repository.createCustomAiChat('Grammatikfragen');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('impulse_inbox_chat_filter_chips')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('chat_filter_categories')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Grammatikfragen'),
+      ),
+      findsNothing,
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('impulse_inbox_search_field')),
+      'Travel',
+    );
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('impulse_inbox_search_field')),
+      'Grammatik',
+    );
+    await tester.pump();
+    expect(find.text('Nichts gefunden'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('impulse_inbox_search_field')),
+      '',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('chat_filter_customAi')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Grammatikfragen'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsNothing,
+    );
+
+    await tester.tap(find.byKey(const Key('chat_filter_unread')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Tagesimpuls'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsNothing,
+    );
+
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_chat_filter_chips')),
+      const Offset(-420, 0),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('chat_filter_saved')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Grammatikfragen'),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('plus menu creates custom AI chat', (tester) async {
@@ -157,7 +317,7 @@ void main() {
         child: const MaterialApp(home: ImpulsPostfachScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('impulse_inbox_add_chat_button')));
     await tester.pumpAndSettle();
@@ -216,7 +376,7 @@ void main() {
         child: const MaterialApp(home: ImpulsPostfachScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Gespeichert'));
     await tester.pumpAndSettle();
@@ -403,7 +563,7 @@ void main() {
         child: const MaterialApp(home: ImpulsPostfachScreen()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Du'));
     await tester.pumpAndSettle();
@@ -447,20 +607,150 @@ void main() {
     expect(find.textContaining('Trainer-Modus'), findsOneWidget);
   });
 
+  testWidgets('you tab manages hidden chats and reactivates category chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_you_hidden_management',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final hidden = await repository.ensureCategoryChat(
+      'seed-category-travel',
+      'Travel',
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: hidden.id,
+        text: 'Alter Verlauf bleibt',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+      incrementUnread: false,
+    );
+    await repository.setCategoryChatEnabled('seed-category-travel', false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Du'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('chat_management_panel'), skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(find.text('Ausgeblendet · 1', skipOffstage: false), findsOneWidget);
+
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_you_tab_list')),
+      const Offset(0, -420),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('manage_hidden_chats_button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('hidden_chats_list')), findsOneWidget);
+    expect(find.byKey(Key('hidden_chat_tile_${hidden.id}')), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('hidden_chat_reactivate_${hidden.id}')));
+    await tester.pumpAndSettle();
+
+    final reactivated = await repository.getCategoryChat(
+      'seed-category-travel',
+    );
+    expect(reactivated?.enabled, isTrue);
+    expect(
+      (await repository.listMessages(hidden.id)).single.text,
+      'Alter Verlauf bleibt',
+    );
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+  });
+
+  testWidgets('hidden custom chat can be locally deleted from management', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_you_hidden_custom_delete',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final custom = await repository.createCustomAiChat('Grammatikfragen');
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: custom.id,
+        text: 'Lokaler Verlauf',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.user,
+      ),
+      incrementUnread: false,
+    );
+    await repository.setChatEnabled(custom.id, false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Du'));
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_you_tab_list')),
+      const Offset(0, -420),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('manage_hidden_chats_button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('hidden_chat_delete_${custom.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Eigenen Chat löschen?'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const Key('custom_chat_delete_confirm_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(await repository.listAllChats(), isEmpty);
+    expect(await repository.listMessages(custom.id), isEmpty);
+  });
+
   testWidgets('category tab can add and reactivate category chat', (
     tester,
   ) async {
     final repository = SharedPreferencesImpulseInboxRepository(
       storageKey: 'test_inbox_category_tab',
     );
-    final categoryItems = const LocalCategoryDetailGroupResolver()
-        .resolve('health_fitness')
-        .map(
-          (item) => item.localCategoryId == null
-              ? item
-              : item.copyWith(vocabsCount: 3),
-        )
-        .toList(growable: false);
+    final categoryItems = [
+      ...const LocalCategoryDetailGroupResolver()
+          .resolve('health_fitness')
+          .map(
+            (item) => item.localCategoryId == null
+                ? item
+                : item.copyWith(vocabsCount: 3),
+          ),
+      const LocalCategoryDetailGroupItem(
+        wordHubKey: 'missing-chat-category',
+        displayLabel: 'Missing Chat Category',
+        localCategoryId: 'seed-category-missing',
+        vocabsCount: 3,
+      ),
+    ];
 
     await tester.pumpWidget(
       ProviderScope(
@@ -478,7 +768,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Kategorien'));
+    await tester.tap(find.text('Kategorien').last);
     await tester.pumpAndSettle();
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('Hinzufügen'), findsWidgets);
@@ -497,6 +787,59 @@ void main() {
     );
     final chat = await repository.getCategoryChat('seed-category-basics');
     expect(chat?.enabled, isTrue);
+  });
+
+  testWidgets('category tab shows active hidden and missing chat statuses', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_category_statuses',
+    );
+    await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Health & Fitness',
+    );
+    await repository.ensureCategoryChat('seed-category-travel', 'Travel');
+    await repository.setCategoryChatEnabled('seed-category-travel', false);
+    final categoryItems = [
+      ...const LocalCategoryDetailGroupResolver()
+          .resolve('health_fitness')
+          .map(
+            (item) => item.localCategoryId == null
+                ? item
+                : item.copyWith(vocabsCount: 3),
+          ),
+      const LocalCategoryDetailGroupItem(
+        wordHubKey: 'missing-chat-category',
+        displayLabel: 'Missing Chat Category',
+        localCategoryId: 'seed-category-missing',
+        vocabsCount: 3,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoryDetailGroupItemsProvider.overrideWith(
+            (ref, wordHubKey) async => categoryItems,
+          ),
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Kategorien').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aktiv'), findsOneWidget);
+    expect(find.text('Ausgeblendet'), findsOneWidget);
+    expect(find.text('Noch kein Chat'), findsWidgets);
+    expect(find.text('Wieder einblenden'), findsOneWidget);
   });
 
   testWidgets('chat list shows active category chat and hides disabled one', (
@@ -569,7 +912,13 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.text('Tagesimpuls'));
+    await tester.tap(
+      find.byKey(
+        const Key(
+          'impulse_chat_tile_${SharedPreferencesImpulseInboxRepository.dailyImpulseChatId}',
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('You moved like a superstar.'), findsOneWidget);
@@ -1554,7 +1903,13 @@ void main() {
 
     expect(find.byKey(const Key('impulse_inbox_unread_badge')), findsOneWidget);
 
-    await tester.tap(find.text('Tagesimpuls'));
+    await tester.tap(
+      find.byKey(
+        const Key(
+          'impulse_chat_tile_${SharedPreferencesImpulseInboxRepository.dailyImpulseChatId}',
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
