@@ -334,7 +334,7 @@ Eigene KI-Chats nutzen dieselbe Messenger-Oberfläche wie Tagesimpuls- und Kateg
 
 Chats können optional ein lokales Avatarbild bekommen. Das Modell speichert dafür `avatarImagePath`; die UI zeigt ein rundes Bild, wenn ein lokaler Pfad vorhanden ist, sonst das bisherige Neon-Icon. Bilder werden nur als Chat-/Kategorie-Avatar verwendet, nicht als Chat-Anhang und nicht in die Cloud hochgeladen. iOS enthält dafür eine Fotomediathek-Beschreibung.
 
-Der Tab `Gespeichert` ist jetzt ein echter Sammelbereich für lokal markierte Nachrichten. Das Repository durchsucht alle lokalen Impuls-Chats nach `isStarred=true`, auch wenn ein Kategorie- oder eigener KI-Chat gerade ausgeblendet ist. Angezeigt werden Chatname, gekürzter Nachrichtentext, Datum/Uhrzeit, Quelle und optional die lokale Reaktion. Ein Tap öffnet den Ursprungschat; bei ausgeblendeten Chats wird der Chat lokal wieder sichtbar gemacht, ohne Nachrichten zu löschen. Die `messageId` wird an das Chatdetail übergeben, damit eine spätere gezielte Hervorhebung oder Scroll-Position vorbereitet ist.
+Der Tab `Gespeichert` ist jetzt ein echter Sammelbereich für lokal markierte Nachrichten. Das Repository durchsucht alle lokalen Impuls-Chats nach `isStarred=true`, auch wenn ein Kategorie- oder eigener KI-Chat gerade ausgeblendet ist. Angezeigt werden Chatname, gekürzter Nachrichtentext, Datum/Uhrzeit, Quelle und optional die lokale Reaktion. Ein Tap öffnet den Ursprungschat; bei ausgeblendeten Chats wird der Chat lokal wieder sichtbar gemacht, ohne Nachrichten zu löschen. Die `messageId` wird an das Chatdetail übergeben, das nach dem ersten Rendern zur Zielnachricht scrollt und sie kurz mit einem dezenten Talvori-Glow hervorhebt. Wenn die Nachricht inzwischen gelöscht wurde oder die `messageId` nicht mehr gefunden wird, öffnet der Chat ohne Crash und zeigt einen kontrollierten Hinweis. Notification-Routing mit `messageId` nutzt dieselbe Fokus- und Highlight-Logik.
 
 Der Tab `Du` enthält ein kleines lokales KI-Profil statt einer Einstellungswüste. Nutzer können festlegen:
 
@@ -384,10 +384,12 @@ Abgedeckt sind:
 - Kategorie-Wörter werden rein lesend als KI-Kontext bereitgestellt.
 - Gespeicherte Nachrichten werden aus allen lokalen Chats gesammelt.
 - Entfernen des Sterns oder Löschen einer Nachricht entfernt sie aus `Gespeichert`.
-- Ein Tap auf eine gespeicherte Nachricht öffnet den Ursprungschat.
+- Ein Tap auf eine gespeicherte Nachricht öffnet den Ursprungschat mit `messageId`.
+- Das Chatdetail scrollt zur Zielnachricht und hebt sie kurz hervor.
+- Fehlende oder gelöschte Zielnachrichten crashen nicht.
 - Das KI-Profil hat lokale Default-Werte und kann gespeichert werden.
 - `ai-chat` Requests erhalten den KI-Profil-Kontext zusätzlich zum Kategorie-Kontext.
 
 ## Nächster Schritt
 
-Als nächstes kann `Gespeichert` gezieltes Scrollen oder Highlighting der markierten Nachricht im Chatdetail bekommen. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.
+Als nächstes können gespeicherte Nachrichten zusätzlich per Zielmarkierung in der Chatliste oder über einen kleinen Bookmark-Filter pro Chat erreichbar werden. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.

@@ -233,6 +233,130 @@ void main() {
     expect((await repository.listChats()).single.id, chat.id);
   });
 
+  testWidgets(
+    'saved message opens chat and highlights target message briefly',
+    (tester) async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_inbox_saved_highlight',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.ensureDailyImpulseChat();
+      ImpulseMessage? target;
+      for (var index = 0; index < 12; index++) {
+        final message = await repository.addMessage(
+          ImpulseMessage(
+            id: '',
+            chatId: chat.id,
+            text: 'Nachricht $index',
+            createdAt: DateTime(2026, 5, 20, 12, index),
+            source: index.isEven
+                ? ImpulseMessageSource.ai
+                : ImpulseMessageSource.user,
+            readAt: DateTime(2026, 5, 20, 12, index),
+          ),
+          incrementUnread: false,
+        );
+        if (index == 3) target = message;
+      }
+      await repository.updateMessageStarred(
+        chat.id,
+        target!.id,
+        isStarred: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            impulseInboxRepositoryProvider.overrideWithValue(repository),
+            impulseInboxAiChatClientProvider.overrideWithValue(
+              _FakeAiChatClient('Okay.'),
+            ),
+          ],
+          child: const MaterialApp(home: ImpulsPostfachScreen()),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Gespeichert'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('saved_message_tile_${target.id}')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+      expect(
+        tester
+            .widget<ImpulseChatDetailScreen>(
+              find.byType(ImpulseChatDetailScreen),
+            )
+            .initialMessageId,
+        target.id,
+      );
+      expect(find.text('Nachricht 3'), findsOneWidget);
+      expect(
+        find.byKey(
+          Key('impulse_message_highlight_${target.id}'),
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: 3));
+      expect(
+        find.byKey(
+          Key('impulse_message_highlight_${target.id}'),
+          skipOffstage: false,
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('missing target message opens chat without crashing', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_missing_highlight_target',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Bleibt sichtbar',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: MaterialApp(
+          home: ImpulseChatDetailScreen(
+            chatId: chat.id,
+            initialMessageId: 'missing-message',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text('Bleibt sichtbar'), findsOneWidget);
+    expect(
+      find.text('Gespeicherte Nachricht wurde nicht gefunden.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('saved tab shows empty state', (tester) async {
     final repository = SharedPreferencesImpulseInboxRepository(
       storageKey: 'test_inbox_saved_empty',

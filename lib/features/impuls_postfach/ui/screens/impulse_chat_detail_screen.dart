@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -29,23 +30,39 @@ class _ImpulseChatDetailScreenState
     with WidgetsBindingObserver {
   final _scrollController = ScrollController();
   final _inputController = TextEditingController();
+  final Map<String, GlobalKey> _messageKeys = {};
+  Timer? _highlightTimer;
   ImpulseMessage? _replyToMessage;
+  String? _highlightedMessageId;
+  bool _initialTargetHandled = false;
+  bool _highlightClearScheduled = false;
 
   @override
   void initState() {
     super.initState();
+    final initialTarget = widget.initialMessageId?.trim();
+    _highlightedMessageId = initialTarget == null || initialTarget.isEmpty
+        ? null
+        : initialTarget;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final controller = ref.read(impulseInboxControllerProvider.notifier);
-      await controller.loadMessages(widget.chatId);
+      final loadedMessages = await controller.loadMessages(widget.chatId);
       await controller.markChatRead(widget.chatId);
-      _scrollToBottom();
+      if (widget.initialMessageId == null) {
+        _scrollToBottom();
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _focusInitialMessage(loadedMessages);
+        });
+      }
     });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _highlightTimer?.cancel();
     _scrollController.dispose();
     _inputController.dispose();
     super.dispose();
@@ -53,7 +70,11 @@ class _ImpulseChatDetailScreenState
 
   @override
   void didChangeMetrics() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.initialMessageId == null || _initialTargetHandled) {
+        _scrollToBottom();
+      }
+    });
   }
 
   @override
@@ -67,7 +88,19 @@ class _ImpulseChatDetailScreenState
     final isResponding = state.respondingChatIds.contains(widget.chatId);
     final error = state.chatErrors[widget.chatId];
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.initialMessageId != null && !_initialTargetHandled) {
+        _focusInitialMessage(messages);
+      } else if (widget.initialMessageId == null) {
+        _scrollToBottom();
+      }
+      final highlightedId = _highlightedMessageId;
+      if (highlightedId != null &&
+          !_highlightClearScheduled &&
+          messages.any((message) => message.id == highlightedId)) {
+        _scheduleHighlightClear(highlightedId);
+      }
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFF050A12),
@@ -121,64 +154,13 @@ class _ImpulseChatDetailScreenState
                   onTap: () => FocusScope.of(context).unfocus(),
                   child: messages.isEmpty && !isResponding
                       ? _EmptyChat(chat: chat)
-                      : ListView.builder(
-                          key: const Key('impulse_chat_message_list'),
-                          controller: _scrollController,
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
-                          itemCount: messages.length + (isResponding ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index < messages.length) {
-                              final previous = index == 0
-                                  ? null
-                                  : messages[index - 1];
-                              final next = index == messages.length - 1
-                                  ? null
-                                  : messages[index + 1];
-                              final current = messages[index];
-                              final sameGroup =
-                                  previous != null &&
-                                  _isSameMessageDay(
-                                    previous.createdAt,
-                                    current.createdAt,
-                                  ) &&
-                                  previous.source == current.source;
-                              final sameGroupAsNext =
-                                  next != null &&
-                                  _isSameMessageDay(
-                                    next.createdAt,
-                                    current.createdAt,
-                                  ) &&
-                                  next.source == current.source;
-                              final showDateSeparator =
-                                  previous == null ||
-                                  !_isSameMessageDay(
-                                    previous.createdAt,
-                                    current.createdAt,
-                                  );
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (showDateSeparator)
-                                    _DateSeparator(date: current.createdAt),
-                                  _MessageBubble(
-                                    message: current,
-                                    highlighted:
-                                        current.id == widget.initialMessageId,
-                                    sameGroupAsPrevious: sameGroup,
-                                    sameGroupAsNext: sameGroupAsNext,
-                                    onLongPress: () =>
-                                        _openMessageActions(current),
-                                  ),
-                                ],
-                              );
-                            }
-                            if (isResponding && index == messages.length) {
-                              return const _ThinkingBubble();
-                            }
-                            return const SizedBox.shrink();
-                          },
+                      : _MessageTimeline(
+                          scrollController: _scrollController,
+                          buildAllMessagesForTarget:
+                              widget.initialMessageId != null,
+                          messages: messages,
+                          isResponding: isResponding,
+                          messageBuilder: _buildMessageEntry,
                         ),
                 ),
               ],
@@ -213,6 +195,115 @@ class _ImpulseChatDetailScreenState
   void _scrollToBottom() {
     if (!_scrollController.hasClients) return;
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  }
+
+  Widget _buildMessageEntry(List<ImpulseMessage> messages, int index) {
+    final previous = index == 0 ? null : messages[index - 1];
+    final next = index == messages.length - 1 ? null : messages[index + 1];
+    final current = messages[index];
+    final sameGroup =
+        previous != null &&
+        _isSameMessageDay(previous.createdAt, current.createdAt) &&
+        previous.source == current.source;
+    final sameGroupAsNext =
+        next != null &&
+        _isSameMessageDay(next.createdAt, current.createdAt) &&
+        next.source == current.source;
+    final showDateSeparator =
+        previous == null ||
+        !_isSameMessageDay(previous.createdAt, current.createdAt);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showDateSeparator) _DateSeparator(date: current.createdAt),
+        KeyedSubtree(
+          key: _messageKeyFor(current.id),
+          child: _MessageBubble(
+            message: current,
+            highlighted: current.id == _highlightedMessageId,
+            sameGroupAsPrevious: sameGroup,
+            sameGroupAsNext: sameGroupAsNext,
+            onLongPress: () => _openMessageActions(current),
+          ),
+        ),
+      ],
+    );
+  }
+
+  GlobalKey _messageKeyFor(String messageId) {
+    return _messageKeys.putIfAbsent(messageId, GlobalKey.new);
+  }
+
+  Future<void> _focusInitialMessage(List<ImpulseMessage> messages) async {
+    final targetId = widget.initialMessageId?.trim();
+    if (targetId == null || targetId.isEmpty || _initialTargetHandled) return;
+    if (messages.isEmpty) return;
+
+    _initialTargetHandled = true;
+    final targetIndex = messages.indexWhere(
+      (message) => message.id == targetId,
+    );
+    if (targetIndex < 0) {
+      if (!mounted) return;
+      setState(() => _highlightedMessageId = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gespeicherte Nachricht wurde nicht gefunden.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _highlightedMessageId = targetId);
+    await _waitForScrollableLayout();
+    if (!mounted) return;
+    var targetContext = _messageKeys[targetId]?.currentContext;
+    if (targetContext == null) {
+      await _scrollNearTargetIndex(targetIndex, messages.length);
+      if (!mounted) return;
+      targetContext = _messageKeys[targetId]?.currentContext;
+    }
+    if (targetContext != null && targetContext.mounted) {
+      await Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+        alignment: 0.36,
+      );
+    }
+    _scheduleHighlightClear(targetId);
+  }
+
+  void _scheduleHighlightClear(String targetId) {
+    if (_highlightClearScheduled && _highlightedMessageId == targetId) return;
+    _highlightClearScheduled = true;
+    _highlightTimer?.cancel();
+    _highlightTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted && _highlightedMessageId == targetId) {
+        setState(() => _highlightedMessageId = null);
+      }
+    });
+  }
+
+  Future<void> _waitForScrollableLayout() async {
+    for (var attempt = 0; attempt < 6; attempt++) {
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent > 0) {
+        return;
+      }
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+  }
+
+  Future<void> _scrollNearTargetIndex(int targetIndex, int messageCount) async {
+    if (!_scrollController.hasClients) return;
+    final max = _scrollController.position.maxScrollExtent;
+    final denominator = messageCount <= 1 ? 1 : messageCount - 1;
+    final targetOffset = max * (targetIndex / denominator);
+    _scrollController.jumpTo(targetOffset.clamp(0.0, max).toDouble());
+    await WidgetsBinding.instance.endOfFrame;
   }
 
   Future<ImpulseVoiceInputResult> _startVoiceInput() {
@@ -697,6 +788,59 @@ class _ChatPatternPainter extends CustomPainter {
   bool shouldRepaint(covariant _ChatPatternPainter oldDelegate) => false;
 }
 
+typedef _TimelineMessageBuilder =
+    Widget Function(List<ImpulseMessage> messages, int index);
+
+class _MessageTimeline extends StatelessWidget {
+  const _MessageTimeline({
+    required this.scrollController,
+    required this.buildAllMessagesForTarget,
+    required this.messages,
+    required this.isResponding,
+    required this.messageBuilder,
+  });
+
+  final ScrollController scrollController;
+  final bool buildAllMessagesForTarget;
+  final List<ImpulseMessage> messages;
+  final bool isResponding;
+  final _TimelineMessageBuilder messageBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    if (buildAllMessagesForTarget) {
+      return ListView(
+        key: const Key('impulse_chat_message_list'),
+        controller: scrollController,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+        children: [
+          for (var index = 0; index < messages.length; index++)
+            messageBuilder(messages, index),
+          if (isResponding) const _ThinkingBubble(),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      key: const Key('impulse_chat_message_list'),
+      controller: scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+      itemCount: messages.length + (isResponding ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index < messages.length) {
+          return messageBuilder(messages, index);
+        }
+        if (isResponding && index == messages.length) {
+          return const _ThinkingBubble();
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.message,
@@ -720,6 +864,7 @@ class _MessageBubble extends StatelessWidget {
       return _EmojiMessage(
         message: message,
         isUser: isUser,
+        highlighted: highlighted,
         sameGroupAsPrevious: sameGroupAsPrevious,
         sameGroupAsNext: sameGroupAsNext,
         onLongPress: onLongPress,
@@ -734,6 +879,9 @@ class _MessageBubble extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return GestureDetector(
+          key: highlighted
+              ? Key('impulse_message_highlight_${message.id}')
+              : null,
           behavior: HitTestBehavior.opaque,
           onLongPress: onLongPress,
           child: Align(
@@ -1015,6 +1163,7 @@ class _EmojiMessage extends StatelessWidget {
   const _EmojiMessage({
     required this.message,
     required this.isUser,
+    required this.highlighted,
     required this.sameGroupAsPrevious,
     required this.sameGroupAsNext,
     required this.onLongPress,
@@ -1022,6 +1171,7 @@ class _EmojiMessage extends StatelessWidget {
 
   final ImpulseMessage message;
   final bool isUser;
+  final bool highlighted;
   final bool sameGroupAsPrevious;
   final bool sameGroupAsNext;
   final VoidCallback onLongPress;
@@ -1029,6 +1179,7 @@ class _EmojiMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      key: highlighted ? Key('impulse_message_highlight_${message.id}') : null,
       behavior: HitTestBehavior.opaque,
       onLongPress: onLongPress,
       child: Align(
@@ -1039,62 +1190,75 @@ class _EmojiMessage extends StatelessWidget {
             top: sameGroupAsPrevious ? 1 : 9,
             bottom: sameGroupAsNext ? 1 : 8,
           ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Column(
-                crossAxisAlignment: isUser
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    message.text.trim(),
-                    style: const TextStyle(fontSize: 48, height: 1.0),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (message.isStarred) ...[
-                        const Icon(
-                          Icons.star_rounded,
-                          color: Color(0xFFFFD166),
-                          size: 13,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: highlighted
+                  ? Border.all(color: const Color(0x887FFFE7))
+                  : null,
+              boxShadow: highlighted
+                  ? const [BoxShadow(color: Color(0x557FFFE7), blurRadius: 18)]
+                  : null,
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Column(
+                  crossAxisAlignment: isUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      message.text.trim(),
+                      style: const TextStyle(fontSize: 48, height: 1.0),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (message.isStarred) ...[
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Color(0xFFFFD166),
+                            size: 13,
+                          ),
+                          const SizedBox(width: 3),
+                        ],
+                        Text(
+                          _timeLabel(message.createdAt),
+                          style: const TextStyle(
+                            color: Color(0xB87D8BA3),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        const SizedBox(width: 3),
+                        if (isUser) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.done_all_rounded,
+                            color: Color(0xB859D7FF),
+                            size: 14,
+                          ),
+                        ],
                       ],
-                      Text(
-                        _timeLabel(message.createdAt),
-                        style: const TextStyle(
-                          color: Color(0xB87D8BA3),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (isUser) ...[
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.done_all_rounded,
-                          color: Color(0xB859D7FF),
-                          size: 14,
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-              if (message.reaction != null)
-                Positioned(
-                  right: isUser ? -6 : null,
-                  left: isUser ? null : -6,
-                  bottom: 13,
-                  child: _ReactionBadge(
-                    reaction: message.reaction!,
-                    messageId: message.id,
-                  ),
+                    ),
+                  ],
                 ),
-            ],
+                if (message.reaction != null)
+                  Positioned(
+                    right: isUser ? -6 : null,
+                    left: isUser ? null : -6,
+                    bottom: 13,
+                    child: _ReactionBadge(
+                      reaction: message.reaction!,
+                      messageId: message.id,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
