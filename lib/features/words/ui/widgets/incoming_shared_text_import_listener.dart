@@ -47,7 +47,12 @@ class _IncomingSharedTextImportListenerState
     if (initialResult != null) {
       _showResult(initialResult);
     }
-    _subscription = controller.watchIncomingSharedText().listen(_showResult);
+    _subscription = controller.watchIncomingSharedText().listen(
+      _showResult,
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('Shared text listener disabled: $error');
+      },
+    );
   }
 
   void _showResult(SharedTextImportResult result) {

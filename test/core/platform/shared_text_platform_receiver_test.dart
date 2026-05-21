@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/platform/shared_text_platform_receiver.dart';
 
@@ -31,5 +32,16 @@ void main() {
     final receiver = SharedTextPlatformReceiver();
 
     expect(await receiver.getInitialSharedText(), isNull);
+  });
+
+  test('watchSharedText_is_empty_on_platforms_without_native_stream', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    final receiver = SharedTextPlatformReceiver();
+
+    await expectLater(receiver.watchSharedText(), emitsDone);
   });
 }

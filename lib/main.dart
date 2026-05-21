@@ -15,22 +15,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  FlutterLocalTagesimpulsNotificationScheduler.configurePayloadHandler(
-    ImpulseInboxNotificationRouter.handlePayload,
-  );
-
-  // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
-  FlutterError.onError = (details) {
-    FlutterError.dumpErrorToConsole(details);
-    Zone.current.handleUncaughtError(
-      details.exception,
-      details.stack ?? StackTrace.empty,
-    );
-  };
-
   runZonedGuarded(
     () {
+      WidgetsFlutterBinding.ensureInitialized();
+      FlutterLocalTagesimpulsNotificationScheduler.configurePayloadHandler(
+        ImpulseInboxNotificationRouter.handlePayload,
+      );
+
+      // Globale Fehler abfangen (zeigt dir Crashes im Log statt weißem Screen)
+      FlutterError.onError = (details) {
+        FlutterError.dumpErrorToConsole(details);
+        Zone.current.handleUncaughtError(
+          details.exception,
+          details.stack ?? StackTrace.empty,
+        );
+      };
+
       runApp(const ProviderScope(child: TalvoriApp()));
     },
     (error, stack) {

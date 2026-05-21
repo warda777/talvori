@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class SharedTextPlatformReceiver {
@@ -24,12 +25,24 @@ class SharedTextPlatformReceiver {
   }
 
   Stream<String> watchSharedText() {
-    return _eventChannel
-        .receiveBroadcastStream()
-        .handleError((_) {})
-        .where((event) {
-          return event is String && event.trim().isNotEmpty;
-        })
-        .map((event) => (event as String).trim());
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return const Stream.empty();
+    }
+    return _watchSharedText();
+  }
+
+  Stream<String> _watchSharedText() async* {
+    try {
+      await for (final event in _eventChannel.receiveBroadcastStream()) {
+        if (event is! String) continue;
+        final normalized = event.trim();
+        if (normalized.isEmpty) continue;
+        yield normalized;
+      }
+    } on MissingPluginException {
+      return;
+    } on PlatformException {
+      return;
+    }
   }
 }
