@@ -86,6 +86,33 @@ void main() {
     ]);
   });
 
+  test('ignores_same_ios_share_id_but_accepts_same_text_with_new_id', () async {
+    final receiver = _FakeSharedTextPlatformReceiver();
+    final imported = <String>[];
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        imported.add(rawText);
+        return const SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+        );
+      },
+    );
+
+    final results = <SharedTextImportResult>[];
+    final sub = controller.watchIncomingSharedText().listen(results.add);
+    receiver.addPayload(const SharedTextPayload(id: 'share-1', text: 'river'));
+    receiver.addPayload(const SharedTextPayload(id: 'share-1', text: 'river'));
+    receiver.addPayload(const SharedTextPayload(id: 'share-2', text: 'river'));
+    await Future<void>.delayed(Duration.zero);
+    await sub.cancel();
+
+    expect(imported, ['river', 'river']);
+    expect(results, hasLength(2));
+  });
+
   test('surfaces_duplicate_and_invalid_import_results', () async {
     final receiver = _FakeSharedTextPlatformReceiver(
       initialText: 'hello world',
@@ -147,13 +174,29 @@ class _FakeSharedTextPlatformReceiver implements SharedTextPlatformReceiver {
   _FakeSharedTextPlatformReceiver({this.initialText});
 
   final String? initialText;
-  final _events = StreamController<String>.broadcast();
+  final _events = StreamController<SharedTextPayload>.broadcast();
 
-  void add(String text) => _events.add(text);
+  void add(String text) {
+    _events.add(SharedTextPayload(id: 'legacy:${text.hashCode}', text: text));
+  }
+
+  void addPayload(SharedTextPayload payload) => _events.add(payload);
+
+  @override
+  Future<SharedTextPayload?> getInitialSharedPayload() async {
+    final text = initialText;
+    if (text == null) return null;
+    return SharedTextPayload(id: 'initial-1', text: text);
+  }
 
   @override
   Future<String?> getInitialSharedText() async => initialText;
 
   @override
-  Stream<String> watchSharedText() => _events.stream;
+  Stream<SharedTextPayload> watchSharedPayload() => _events.stream;
+
+  @override
+  Stream<String> watchSharedText() {
+    return _events.stream.map((payload) => payload.text);
+  }
 }
