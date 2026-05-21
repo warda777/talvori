@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
@@ -406,14 +408,14 @@ class _TranslationProcessButton extends StatelessWidget {
   }
 }
 
-class _LocalWordCard extends StatelessWidget {
+class _LocalWordCard extends ConsumerWidget {
   const _LocalWordCard({required this.word, required this.onTap});
 
   final LocalWord word;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final translationText = word.translation.trim().isEmpty
         ? 'Noch keine Übersetzung'
         : word.translation;
@@ -480,7 +482,23 @@ class _LocalWordCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
+                IconButton(
+                  key: ValueKey('local-word-list-pronunciation-${word.id}'),
+                  tooltip: 'Wort aussprechen',
+                  onPressed: () => _speakWord(context, ref, word),
+                  icon: const Icon(
+                    Icons.volume_up_rounded,
+                    color: Color(0xFFB8FFF6),
+                    size: 22,
+                  ),
+                  style: IconButton.styleFrom(
+                    fixedSize: const Size(38, 38),
+                    backgroundColor: const Color(0xFF0B1820),
+                    side: const BorderSide(color: Color(0xFF59D7FF), width: 1),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 Container(
                   width: 30,
                   height: 30,
@@ -506,6 +524,21 @@ class _LocalWordCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _speakWord(
+    BuildContext context,
+    WidgetRef ref,
+    LocalWord word,
+  ) async {
+    HapticFeedback.selectionClick();
+    final result = await ref
+        .read(wordPronunciationServiceProvider)
+        .speakWord(word.term, languageCode: word.sourceLanguage);
+    if (!context.mounted || result.isSuccess) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
     );
   }
 }

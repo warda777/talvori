@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/learnmode_card_presenter.dart';
 import 'package:talvori/core/local_database/adapters/local_learn_mode_ui_adapter.dart';
@@ -11,6 +12,7 @@ import 'package:talvori/core/local_database/providers/local_learning_view_model_
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
@@ -1409,6 +1411,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                                   !_localPracticeShowTranslation,
                             );
                           },
+                          onSpeak: () => _speakVisibleWord(
+                            card.term,
+                            languageCode: card.sourceLanguage,
+                          ),
                           onSwipe: (_) async {
                             setState(() {
                               _localPracticeShowTranslation = false;
@@ -1516,6 +1522,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                                 !_localReplayShowTranslation,
                           );
                         },
+                        onSpeak: () => _speakVisibleWord(card.term),
                         onSwipe: (_) async {
                           setState(() {
                             _localReplayShowTranslation = false;
@@ -1573,6 +1580,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         onFlip: () {
           setState(() => _localShowTranslation = !_localShowTranslation);
         },
+        onSpeak: () => _speakVisibleWord(cardState.frontText ?? ''),
         onSwipe: (correct) async {
           if (correct) {
             await submitCorrect();
@@ -1813,6 +1821,18 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.1),
         ),
       ),
+    );
+  }
+
+  Future<void> _speakVisibleWord(String word, {String? languageCode}) async {
+    HapticFeedback.selectionClick();
+    final result = await ref
+        .read(wordPronunciationServiceProvider)
+        .speakWord(word, languageCode: languageCode);
+    if (!mounted || result.isSuccess) return;
+    _showLocalQuickActionMessage(
+      context,
+      result.message ?? 'Aussprache nicht verfügbar.',
     );
   }
 

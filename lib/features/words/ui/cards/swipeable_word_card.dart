@@ -32,6 +32,7 @@ class SwipeableWordCard extends StatefulWidget {
   final GlobalKey? passCountButtonKey; // Für Sparkle-Effekt bei Stage-Up
   final void Function(BuildContext context, bool correct)?
   onSwipeWillStart; // Vor Karten-Animation (für Sparkle)
+  final VoidCallback? onSpeak;
   final double cardWidthFactor;
   final double cardHeightFactor;
   final Color? cardBackgroundColor;
@@ -60,6 +61,7 @@ class SwipeableWordCard extends StatefulWidget {
     this.onSettingsTap,
     this.passCountButtonKey,
     this.onSwipeWillStart,
+    this.onSpeak,
     this.cardWidthFactor = 0.78,
     this.cardHeightFactor = 0.52,
     this.cardBackgroundColor,
@@ -253,6 +255,12 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
               right: 12,
               child: LevelBadge(level: widget.level),
             ),
+          if (!isDiagnostic && !isCongratulation && widget.onSpeak != null)
+            Positioned(
+              top: widget.onSettingsTap == null ? 12 : 58,
+              left: 12,
+              child: _PronunciationButton(onPressed: widget.onSpeak!),
+            ),
           if (!isDiagnostic && !isCongratulation && widget.passCount != null)
             Positioned(
               bottom: 28,
@@ -355,7 +363,49 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             Positioned(bottom: 8, left: 30, right: 30, child: widget.footer!),
           if (widget.quickActions != null)
             Positioned(right: 14, bottom: 64, child: widget.quickActions!),
+          if (widget.onSpeak != null)
+            Positioned(
+              top: 12,
+              left: 12,
+              child: _PronunciationButton(onPressed: widget.onSpeak!),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _PronunciationButton extends StatelessWidget {
+  const _PronunciationButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('learn-card-pronunciation-button'),
+        borderRadius: BorderRadius.circular(20),
+        onTap: onPressed,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1820).withValues(alpha: 0.92),
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF5DDCFF), width: 1.1),
+            boxShadow: const [
+              BoxShadow(color: Color(0x225DDCFF), blurRadius: 14),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.volume_up_rounded,
+            color: Color(0xFFB8FFF6),
+            size: 22,
+          ),
+        ),
       ),
     );
   }

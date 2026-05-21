@@ -10,6 +10,8 @@ import 'package:talvori/core/local_database/providers/local_word_detail_provider
 import 'package:talvori/core/local_database/providers/local_word_edit_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_service.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
@@ -52,6 +54,24 @@ class _FakeLocalWordEditController extends LocalWordEditController {
     currentWord = updatedWord;
     return updatedWord;
   }
+}
+
+class _FakePronunciationService implements WordPronunciationService {
+  String? spokenWord;
+  String? languageCode;
+
+  @override
+  Future<WordPronunciationResult> speakWord(
+    String word, {
+    String? languageCode,
+  }) async {
+    spokenWord = word;
+    this.languageCode = languageCode;
+    return const WordPronunciationResult(WordPronunciationStatus.spoken);
+  }
+
+  @override
+  Future<void> stop() async {}
 }
 
 void main() {
@@ -110,6 +130,7 @@ void main() {
     required LocalWordDetailData? detail,
     List<LocalReviewHistoryTimelineItem> history = const [],
     SingleWordTranslationRunner? translationRunner,
+    WordPronunciationService? pronunciationService,
   }) async {
     _FakeLocalWordEditController.currentWord = detail?.word;
 
@@ -133,6 +154,10 @@ void main() {
           if (translationRunner != null)
             singleWordTranslationRunnerProvider.overrideWith(
               (ref) async => translationRunner,
+            ),
+          if (pronunciationService != null)
+            wordPronunciationServiceProvider.overrideWithValue(
+              pronunciationService,
             ),
         ],
         child: const MaterialApp(
@@ -181,6 +206,28 @@ void main() {
     expect(find.text('Fehler'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('seed-category-basics'), findsNothing);
+  });
+
+  testWidgets('sound icon speaks the local word in its source language', (
+    tester,
+  ) async {
+    final pronunciation = _FakePronunciationService();
+    await pumpDetail(
+      tester,
+      detail: LocalWordDetailData(
+        word: word(term: 'emergency', translation: 'Notfall'),
+        progress: null,
+      ),
+      pronunciationService: pronunciation,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('local-word-detail-pronunciation-button')),
+    );
+    await tester.pump();
+
+    expect(pronunciation.spokenWord, 'emergency');
+    expect(pronunciation.languageCode, 'en');
   });
 
   testWidgets('local_word_detail_screen_shows_fallback_without_progress', (

@@ -16,7 +16,8 @@ Stand: 2026-05-21
 - Der Home-Word-Wheel und der Home-Counter verwenden die lokale Kategorie `Meine Wörter`.
 - Der große Play-Button auf Home startet nicht mehr den alten QuickSets-/Legacy-Einstieg mit `All Words`, `My words`, `Favorites`, `Words I know`, `My mix`.
 - Der Counter öffnet direkt die Vocabs-Seite für `Meine Wörter`; Zurück führt von dort direkt nach Home.
-- Der große `Üben`-/Play-Button öffnet jetzt das bestehende Kategorie-/Quellen-Popup.
+- Nur der große Play-Button auf der Home-Karte öffnet das bestehende Kategorie-/Quellen-Popup.
+- Der normale untere `Üben`-Button bleibt beim klassischen Auswahlmenü mit `Vocabs` und `Course`.
 - Der frühere untere linke 4-Kästchen-Einstieg wurde durch den Impuls-Postfach-Button ersetzt.
 - Das Impuls-Postfach ist damit direkt unten links von Home erreichbar; vorhandene ungelesene Impulse werden dort als Badge angezeigt.
 - Die lokale Quellen-Auswahl im Popup ist vom Detail `Meine Wörter` getrennt und bietet fünf lokale Quellen: `Alle Wörter`, `Favoriten`, `Meine Wörter`, `Wörter, die ich kenne`, `Mein Mix`.

@@ -54,10 +54,12 @@ class LocalPracticeCard {
     required this.term,
     required this.translation,
     required this.stage,
+    this.sourceLanguage,
   });
 
   final String wordId;
   final String term;
   final String translation;
   final SrsStage stage;
+  final String? sourceLanguage;
 }

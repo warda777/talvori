@@ -220,7 +220,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onPractice();
+    await tester.tap(find.byKey(const Key('home-my-words-play-button')));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -250,6 +250,33 @@ void main() {
     expect(find.text('Favorites'), findsNothing);
     expect(find.text('Words I know'), findsNothing);
     expect(find.text('My mix'), findsNothing);
+  });
+
+  testWidgets('bottom practice button opens classic Vocabs Course menu', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onPractice();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Vocabs'), findsOneWidget);
+    expect(find.text('Course'), findsOneWidget);
+    expect(find.text('Üben wird vorbereitet.'), findsNothing);
+    expect(find.text('Kategorie'), findsNothing);
+    expect(find.byKey(const Key('category-popup-my-words-tile')), findsNothing);
+    expect(find.byType(LocalLearningSourcesScreen), findsNothing);
+    expect(find.byType(LocalLearningSourceDetailScreen), findsNothing);
   });
 
   testWidgets('local sources open source details and keep back stack', (

@@ -9,6 +9,8 @@ import 'package:talvori/core/local_database/providers/local_word_edit_controller
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_service.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
@@ -56,6 +58,24 @@ class _FakeLocalWordEditController extends LocalWordEditController {
   }
 }
 
+class _FakePronunciationService implements WordPronunciationService {
+  String? spokenWord;
+  String? languageCode;
+
+  @override
+  Future<WordPronunciationResult> speakWord(
+    String word, {
+    String? languageCode,
+  }) async {
+    spokenWord = word;
+    this.languageCode = languageCode;
+    return const WordPronunciationResult(WordPronunciationStatus.spoken);
+  }
+
+  @override
+  Future<void> stop() async {}
+}
+
 void main() {
   LocalWord localWord({
     required String id,
@@ -86,6 +106,7 @@ void main() {
     required List<LocalWord> words,
     String title = 'Health & Fitness',
     PendingTranslationRunner? translationRunner,
+    WordPronunciationService? pronunciationService,
     String categoryId = 'seed-category-basics',
   }) async {
     _FakeLocalWordEditController.words = words;
@@ -114,6 +135,10 @@ void main() {
           if (translationRunner != null)
             pendingAndFailedTranslationRunnerProvider.overrideWith(
               (ref) async => translationRunner,
+            ),
+          if (pronunciationService != null)
+            wordPronunciationServiceProvider.overrideWithValue(
+              pronunciationService,
             ),
         ],
         child: MaterialApp(
@@ -164,6 +189,33 @@ void main() {
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('water'), findsOneWidget);
     expect(find.text('Wasser'), findsOneWidget);
+  });
+
+  testWidgets('local_word_list_sound_button_speaks_selected_word', (
+    tester,
+  ) async {
+    final pronunciation = _FakePronunciationService();
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'seed-basics-emergency',
+          term: 'emergency',
+          translation: 'Notfall',
+        ),
+      ],
+      pronunciationService: pronunciation,
+    );
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey('local-word-list-pronunciation-seed-basics-emergency'),
+      ),
+    );
+    await tester.pump();
+
+    expect(pronunciation.spokenWord, 'emergency');
+    expect(pronunciation.languageCode, 'en');
   });
 
   testWidgets('local_word_list_screen_shows_pending_translation_status', (

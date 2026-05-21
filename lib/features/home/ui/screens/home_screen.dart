@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
@@ -83,6 +86,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const ImpulsPostfachScreen()));
+  }
+
+  Future<void> _speakHomeWord(WordUserView? word) async {
+    final text = word?.text.trim() ?? '';
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Noch kein Wort ausgewählt.')),
+      );
+      return;
+    }
+
+    HapticFeedback.selectionClick();
+    final result = await ref
+        .read(wordPronunciationServiceProvider)
+        .speakWord(text, languageCode: 'en');
+    if (!mounted || result.isSuccess) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
+    );
   }
 
   // GlobalKey für Progress Pill (für Flug-Animation)
@@ -315,7 +337,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   );
                                   if (!context.mounted) return;
                                 },
-                                onSpeak: () => _todo('Wort sprechen'),
+                                onSpeak: _speakHomeWord,
                                 onMarkWords: () => _todo('Wörter markieren'),
                                 onGo: _showLearningSourcesPopup,
                               ),
@@ -336,7 +358,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: HomeTheme.bottomPadding,
           child: HomeBottomNav(
             onImpulseInbox: _openImpulseInbox,
-            onPractice: _showLearningSourcesPopup,
+            onPractice: () => showPracticePicker(context),
             onProfile: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),

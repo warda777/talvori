@@ -21,7 +21,7 @@ import 'package:talvori/features/words/ui/cards/spinning_chrome_button.dart';
 
 class WordCard extends ConsumerStatefulWidget {
   // Aktionen
-  final VoidCallback onSpeak;
+  final ValueChanged<WordUserView?> onSpeak;
   final VoidCallback onMarkWords;
   final Future<TagesimpulsSelectionAddResult> Function(WordUserView word)?
   onQuickSend; // Nimmt das aktuelle Wort aus dem Wheel.
@@ -299,7 +299,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                         child: TapFlash(
                           color: _wheelBlue, // Blau aus Word Wheel
                           shape: BoxShape.circle,
-                          onTapAfter: widget.onSpeak,
+                          onTapAfter: () => widget.onSpeak(_currentWord),
                           child: Container(
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,

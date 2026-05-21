@@ -41,6 +41,7 @@ final localPracticeCardsProvider =
             term: word.term,
             translation: word.translation,
             stage: progress.stage,
+            sourceLanguage: word.sourceLanguage,
           ),
         );
       }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_review_history_timeline_item.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
@@ -7,6 +8,7 @@ import 'package:talvori/core/local_database/providers/local_translation_provider
 import 'package:talvori/core/local_database/providers/local_word_detail_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
@@ -125,13 +127,25 @@ class _LocalWordDetailScreenState extends ConsumerState<LocalWordDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      detail.word.term,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            detail.word.term,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        _PronunciationIconButton(
+                          tooltip: 'Wort aussprechen',
+                          onPressed: () => _speakWord(detail.word),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -221,6 +235,60 @@ class _LocalWordDetailScreenState extends ConsumerState<LocalWordDetailScreen> {
         setState(() => _isProcessingTranslation = false);
       }
     }
+  }
+
+  Future<void> _speakWord(LocalWord word) async {
+    HapticFeedback.selectionClick();
+    final result = await ref
+        .read(wordPronunciationServiceProvider)
+        .speakWord(word.term, languageCode: word.sourceLanguage);
+    if (!mounted || result.isSuccess) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
+    );
+  }
+}
+
+class _PronunciationIconButton extends StatelessWidget {
+  const _PronunciationIconButton({
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const ValueKey('local-word-detail-pronunciation-button'),
+          borderRadius: BorderRadius.circular(22),
+          onTap: onPressed,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B1820),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF59D7FF), width: 1.2),
+              boxShadow: const [
+                BoxShadow(color: Color(0x2259D7FF), blurRadius: 14),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.volume_up_rounded,
+              color: Color(0xFFB8FFF6),
+              size: 24,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

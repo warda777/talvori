@@ -12,6 +12,8 @@ import 'package:talvori/core/local_database/providers/local_learning_view_model_
 import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_time_replay_cards_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/pronunciation/word_pronunciation_service.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
@@ -26,6 +28,24 @@ import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 import 'package:talvori/features/words/ui/widgets/switch_pulse_painter.dart';
 import 'package:talvori/features/words/ui/widgets/vertical_stage_switch.dart';
+
+class _FakePronunciationService implements WordPronunciationService {
+  String? spokenWord;
+  String? languageCode;
+
+  @override
+  Future<WordPronunciationResult> speakWord(
+    String word, {
+    String? languageCode,
+  }) async {
+    spokenWord = word;
+    this.languageCode = languageCode;
+    return const WordPronunciationResult(WordPronunciationStatus.spoken);
+  }
+
+  @override
+  Future<void> stop() async {}
+}
 
 class _TestLocalLearningController extends LocalLearningController {
   _TestLocalLearningController(
@@ -223,6 +243,7 @@ void main() {
   testWidgets('learn_mode_screen_local_mode_shows_active_local_word_card', (
     tester,
   ) async {
+    final pronunciation = _FakePronunciationService();
     const viewModelState = LocalLearningViewModelState(
       isLoading: false,
       hasSession: true,
@@ -246,6 +267,7 @@ void main() {
       ProviderScope(
         overrides: [
           localLearningViewModelProvider.overrideWithValue(viewModelState),
+          wordPronunciationServiceProvider.overrideWithValue(pronunciation),
         ],
         child: const MaterialApp(
           home: LearnModeScreen(
@@ -284,6 +306,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 450));
 
     expect(find.text('hallo'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey('learn-card-pronunciation-button')),
+    );
+    await tester.pump();
+
+    expect(pronunciation.spokenWord, 'hello');
   });
 
   testWidgets('learn_mode_screen_local_mode_shows_tagesimpuls_add_button', (
