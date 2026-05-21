@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
@@ -275,6 +276,99 @@ void main() {
       expect(chats.single.lastMessageAt, isNull);
       expect(chats.single.unreadCount, 0);
       expect(await repository.listMessages(chat.id), isEmpty);
+    });
+
+    test(
+      'starred messages are collected from all chats including hidden chats',
+      () async {
+        final repository = SharedPreferencesImpulseInboxRepository(
+          clock: () => DateTime(2026, 5, 20, 12),
+        );
+        final daily = await repository.ensureDailyImpulseChat();
+        final category = await repository.ensureCategoryChat(
+          'seed-category-basics',
+          'Basics',
+        );
+        final dailyMessage = await repository.addMessage(
+          ImpulseMessage(
+            id: '',
+            chatId: daily.id,
+            text: 'Daily saved',
+            createdAt: DateTime(2026, 5, 20, 12),
+            source: ImpulseMessageSource.ai,
+          ),
+        );
+        final categoryMessage = await repository.addMessage(
+          ImpulseMessage(
+            id: '',
+            chatId: category.id,
+            text: 'Category saved',
+            createdAt: DateTime(2026, 5, 20, 13),
+            source: ImpulseMessageSource.ai,
+          ),
+        );
+
+        await repository.updateMessageStarred(
+          daily.id,
+          dailyMessage.id,
+          isStarred: true,
+        );
+        await repository.updateMessageStarred(
+          category.id,
+          categoryMessage.id,
+          isStarred: true,
+        );
+        await repository.setCategoryChatEnabled('seed-category-basics', false);
+
+        final saved = await repository.listStarredMessages();
+
+        expect(saved.map((item) => item.message.text), [
+          'Category saved',
+          'Daily saved',
+        ]);
+        expect(saved.first.chat.enabled, isFalse);
+
+        await repository.updateMessageStarred(
+          category.id,
+          categoryMessage.id,
+          isStarred: false,
+        );
+        expect(
+          (await repository.listStarredMessages()).map(
+            (item) => item.message.text,
+          ),
+          ['Daily saved'],
+        );
+
+        await repository.deleteMessage(daily.id, dailyMessage.id);
+        expect(await repository.listStarredMessages(), isEmpty);
+      },
+    );
+
+    test('AI profile has defaults and can be saved locally', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_profile_defaults',
+      );
+
+      expect(
+        (await repository.loadAiProfile()).style,
+        ImpulseAiStyle.motivating,
+      );
+
+      await repository.saveAiProfile(
+        const ImpulseAiProfile(
+          style: ImpulseAiStyle.trainer,
+          answerLength: ImpulseAnswerLength.detailed,
+          learningGoal: ImpulseLearningGoal.exam,
+          explanationLanguage: ImpulseExplanationLanguage.mixed,
+        ),
+      );
+
+      final loaded = await repository.loadAiProfile();
+      expect(loaded.style, ImpulseAiStyle.trainer);
+      expect(loaded.answerLength, ImpulseAnswerLength.detailed);
+      expect(loaded.learningGoal, ImpulseLearningGoal.exam);
+      expect(loaded.explanationLanguage, ImpulseExplanationLanguage.mixed);
     });
   });
 }

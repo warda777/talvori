@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_saved_message.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
 typedef ImpulseCategoryWordSampler =
@@ -13,6 +15,8 @@ class ImpulseInboxState {
     this.isLoading = false,
     this.chats = const [],
     this.allChats = const [],
+    this.savedMessages = const [],
+    this.aiProfile = ImpulseAiProfile.defaults,
     this.messagesByChat = const {},
     this.respondingChatIds = const {},
     this.chatErrors = const {},
@@ -21,6 +25,8 @@ class ImpulseInboxState {
   final bool isLoading;
   final List<ImpulseChat> chats;
   final List<ImpulseChat> allChats;
+  final List<ImpulseSavedMessage> savedMessages;
+  final ImpulseAiProfile aiProfile;
   final Map<String, List<ImpulseMessage>> messagesByChat;
   final Set<String> respondingChatIds;
   final Map<String, String> chatErrors;
@@ -29,6 +35,8 @@ class ImpulseInboxState {
     bool? isLoading,
     List<ImpulseChat>? chats,
     List<ImpulseChat>? allChats,
+    List<ImpulseSavedMessage>? savedMessages,
+    ImpulseAiProfile? aiProfile,
     Map<String, List<ImpulseMessage>>? messagesByChat,
     Set<String>? respondingChatIds,
     Map<String, String>? chatErrors,
@@ -37,6 +45,8 @@ class ImpulseInboxState {
       isLoading: isLoading ?? this.isLoading,
       chats: chats ?? this.chats,
       allChats: allChats ?? this.allChats,
+      savedMessages: savedMessages ?? this.savedMessages,
+      aiProfile: aiProfile ?? this.aiProfile,
       messagesByChat: messagesByChat ?? this.messagesByChat,
       respondingChatIds: respondingChatIds ?? this.respondingChatIds,
       chatErrors: chatErrors ?? this.chatErrors,
@@ -67,7 +77,15 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     state = state.copyWith(isLoading: true);
     final chats = await _repository.listChats();
     final allChats = await _repository.listAllChats();
-    state = state.copyWith(isLoading: false, chats: chats, allChats: allChats);
+    final savedMessages = await _repository.listStarredMessages();
+    final aiProfile = await _repository.loadAiProfile();
+    state = state.copyWith(
+      isLoading: false,
+      chats: chats,
+      allChats: allChats,
+      savedMessages: savedMessages,
+      aiProfile: aiProfile,
+    );
   }
 
   Future<ImpulseChat> ensureDailyImpulseChat() async {
@@ -113,6 +131,11 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
   }) async {
     await _repository.updateChatAvatarImagePath(chatId, imagePath);
     await loadChats();
+  }
+
+  Future<void> updateAiProfile(ImpulseAiProfile profile) async {
+    await _repository.saveAiProfile(profile);
+    state = state.copyWith(aiProfile: profile);
   }
 
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
@@ -258,9 +281,11 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     final messages = await _repository.listMessages(chatId);
     final chats = await _repository.listChats();
     final allChats = await _repository.listAllChats();
+    final savedMessages = await _repository.listStarredMessages();
     state = state.copyWith(
       chats: chats,
       allChats: allChats,
+      savedMessages: savedMessages,
       messagesByChat: {...state.messagesByChat, chatId: messages},
     );
   }
@@ -306,6 +331,7 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
             },
           )
           .toList(growable: false),
+      ...state.aiProfile.toAiContext(),
     };
     if (sourceType == ImpulseChatSourceType.category) {
       context['categoryId'] = chat?.sourceId;

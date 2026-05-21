@@ -334,7 +334,16 @@ Eigene KI-Chats nutzen dieselbe Messenger-Oberfläche wie Tagesimpuls- und Kateg
 
 Chats können optional ein lokales Avatarbild bekommen. Das Modell speichert dafür `avatarImagePath`; die UI zeigt ein rundes Bild, wenn ein lokaler Pfad vorhanden ist, sonst das bisherige Neon-Icon. Bilder werden nur als Chat-/Kategorie-Avatar verwendet, nicht als Chat-Anhang und nicht in die Cloud hochgeladen. iOS enthält dafür eine Fotomediathek-Beschreibung.
 
-Der Tab `Gespeichert` ist für markierte Nachrichten vorbereitet und zeigt gespeicherte Stern-Nachrichten, sobald sie im geladenen lokalen Verlauf vorhanden sind. Der Tab `Du` bleibt bewusst schlank und erklärt, dass die Impuls-Chats lokal auf dem Gerät bleiben.
+Der Tab `Gespeichert` ist jetzt ein echter Sammelbereich für lokal markierte Nachrichten. Das Repository durchsucht alle lokalen Impuls-Chats nach `isStarred=true`, auch wenn ein Kategorie- oder eigener KI-Chat gerade ausgeblendet ist. Angezeigt werden Chatname, gekürzter Nachrichtentext, Datum/Uhrzeit, Quelle und optional die lokale Reaktion. Ein Tap öffnet den Ursprungschat; bei ausgeblendeten Chats wird der Chat lokal wieder sichtbar gemacht, ohne Nachrichten zu löschen. Die `messageId` wird an das Chatdetail übergeben, damit eine spätere gezielte Hervorhebung oder Scroll-Position vorbereitet ist.
+
+Der Tab `Du` enthält ein kleines lokales KI-Profil statt einer Einstellungswüste. Nutzer können festlegen:
+
+- KI-Stil: `Kurz & direkt`, `Motivierend`, `Locker`, `Trainer`
+- Antwortlänge: `Kurz`, `Normal`, `Ausführlich`
+- Lernziel: `Alltag`, `Schule`, `Reisen`, `Prüfung`, `Beruf`
+- Erklärungssprache: `Deutsch`, `Englisch`, `Gemischt`
+
+Das Profil wird lokal im Impuls-Postfach-Store gespeichert und hat Default-Werte für bestehende Installationen. Beim Senden aus Tagesimpuls-, Kategorie- oder eigenem KI-Chat ergänzt der Controller den bestehenden `ai-chat` Kontext um `aiStyle`, `answerLength`, `learningGoal` und `explanationLanguage`. Kategorie-Kontext wie `categoryId`, `categoryTitle` und `categoryWordsSample` bleibt erhalten. Es wird weiterhin keine Lernsession gestartet, keine Queue verändert und kein SRS-Fortschritt geschrieben.
 
 ## Bewusst nicht umgesetzt
 
@@ -373,7 +382,12 @@ Abgedeckt sind:
 - Suche filtert aktive Chats.
 - Plus-Menü öffnet Kategorie- und Custom-Chat-Flows.
 - Kategorie-Wörter werden rein lesend als KI-Kontext bereitgestellt.
+- Gespeicherte Nachrichten werden aus allen lokalen Chats gesammelt.
+- Entfernen des Sterns oder Löschen einer Nachricht entfernt sie aus `Gespeichert`.
+- Ein Tap auf eine gespeicherte Nachricht öffnet den Ursprungschat.
+- Das KI-Profil hat lokale Default-Werte und kann gespeichert werden.
+- `ai-chat` Requests erhalten den KI-Profil-Kontext zusätzlich zum Kategorie-Kontext.
 
 ## Nächster Schritt
 
-Als nächstes können die Tabs `Gespeichert` und `Du` weiter ausgebaut werden, zum Beispiel mit einer verwaltbaren Liste ausgeblendeter eigener Chats oder einer Tonalitätsauswahl für KI-Antworten.
+Als nächstes kann `Gespeichert` gezieltes Scrollen oder Highlighting der markierten Nachricht im Chatdetail bekommen. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.

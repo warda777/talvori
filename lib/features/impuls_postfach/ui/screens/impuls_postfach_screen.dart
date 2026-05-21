@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
-import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_saved_message.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_screen.dart';
 
 enum _InboxTab { chats, categories, saved, you }
@@ -111,10 +112,15 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
                   ),
                 ),
                 _InboxTab.saved => _SavedMessagesTab(
-                  messagesByChat: state.messagesByChat,
-                  chats: state.allChats,
+                  savedMessages: state.savedMessages,
+                  onOpen: _openSavedMessage,
                 ),
-                _InboxTab.you => const _YouTab(),
+                _InboxTab.you => _YouTab(
+                  profile: state.aiProfile,
+                  onChanged: (profile) => ref
+                      .read(impulseInboxControllerProvider.notifier)
+                      .updateAiProfile(profile),
+                ),
               },
             ),
             _InboxBottomTabs(
@@ -143,6 +149,23 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ImpulseChatDetailScreen(chatId: chat.id),
+      ),
+    );
+  }
+
+  Future<void> _openSavedMessage(ImpulseSavedMessage item) async {
+    if (!item.chat.enabled) {
+      await ref
+          .read(impulseInboxControllerProvider.notifier)
+          .setChatEnabled(chatId: item.chat.id, enabled: true);
+    }
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ImpulseChatDetailScreen(
+          chatId: item.chat.id,
+          initialMessageId: item.message.id,
+        ),
       ),
     );
   }
@@ -443,9 +466,10 @@ class _ChatDivider extends StatelessWidget {
 }
 
 class _ChatAvatar extends StatelessWidget {
-  const _ChatAvatar({required this.chat});
+  const _ChatAvatar({required this.chat, this.size = 54});
 
   final ImpulseChat chat;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -464,8 +488,8 @@ class _ChatAvatar extends StatelessWidget {
       _ => const Color(0xFF59D7FF),
     };
     return Container(
-      width: 54,
-      height: 54,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF07111A),
@@ -479,9 +503,10 @@ class _ChatAvatar extends StatelessWidget {
           ? Image.file(
               File(path),
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Icon(icon, color: color, size: 25),
+              errorBuilder: (_, __, ___) =>
+                  Icon(icon, color: color, size: size * 0.46),
             )
-          : Icon(icon, color: color, size: 25),
+          : Icon(icon, color: color, size: size * 0.46),
     );
   }
 }
@@ -623,85 +648,336 @@ class _CategoryChatTile extends StatelessWidget {
 }
 
 class _SavedMessagesTab extends StatelessWidget {
-  const _SavedMessagesTab({required this.messagesByChat, required this.chats});
+  const _SavedMessagesTab({required this.savedMessages, required this.onOpen});
 
-  final Map<String, List<ImpulseMessage>> messagesByChat;
-  final List<ImpulseChat> chats;
+  final List<ImpulseSavedMessage> savedMessages;
+  final ValueChanged<ImpulseSavedMessage> onOpen;
 
   @override
   Widget build(BuildContext context) {
-    final starred = messagesByChat.entries
-        .expand(
-          (entry) => entry.value
-              .where((message) => message.isStarred)
-              .map((message) => (chatId: entry.key, message: message)),
-        )
-        .toList(growable: false);
-    if (starred.isEmpty) {
+    if (savedMessages.isEmpty) {
       return const _PanelEmpty(
         title: 'Noch nichts gespeichert',
-        text: 'Markierte Nachrichten erscheinen hier.',
+        text:
+            'Markiere wichtige Impulse, Erklärungen oder Beispielsätze mit einem Stern.',
       );
     }
     return ListView.separated(
       padding: const EdgeInsets.all(18),
-      itemCount: starred.length,
+      itemCount: savedMessages.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
-        final item = starred[index];
-        final chat = chats.cast<ImpulseChat?>().firstWhere(
-          (chat) => chat?.id == item.chatId,
-          orElse: () => null,
-        );
-        return _SavedMessageTile(chat: chat, message: item.message);
+        final item = savedMessages[index];
+        return _SavedMessageTile(item: item, onTap: () => onOpen(item));
       },
     );
   }
 }
 
 class _SavedMessageTile extends StatelessWidget {
-  const _SavedMessageTile({required this.chat, required this.message});
+  const _SavedMessageTile({required this.item, required this.onTap});
 
-  final ImpulseChat? chat;
-  final ImpulseMessage message;
+  final ImpulseSavedMessage item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = item.message;
+    final chat = item.chat;
+    return InkWell(
+      key: Key('saved_message_tile_${message.id}'),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF08111B),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0x2259D7FF)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ChatAvatar(chat: chat, size: 38),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          chat.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF7FFFE7),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        _formatSavedTime(message.createdAt),
+                        style: const TextStyle(
+                          color: Color(0xFF7D8BA3),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _sourceLabel(chat.sourceType),
+                    style: const TextStyle(
+                      color: Color(0xFF7D8BA3),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    message.text,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, height: 1.35),
+                  ),
+                  if (message.reaction != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      message.reaction!,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _sourceLabel(ImpulseChatSourceType sourceType) {
+    return switch (sourceType) {
+      ImpulseChatSourceType.dailyImpulse => 'Tagesimpuls',
+      ImpulseChatSourceType.category => 'Kategorie-Chat',
+      ImpulseChatSourceType.favorites => 'Favoriten',
+      ImpulseChatSourceType.myWords => 'Meine Wörter',
+      ImpulseChatSourceType.knownWords => 'Bekannte Wörter',
+      ImpulseChatSourceType.customAi => 'Eigener KI-Chat',
+    };
+  }
+
+  String _formatSavedTime(DateTime value) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(value.year, value.month, value.day);
+    final time =
+        '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+    if (day == today) return time;
+    if (day == today.subtract(const Duration(days: 1))) return 'Gestern';
+    return '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.';
+  }
+}
+
+class _YouTab extends StatelessWidget {
+  const _YouTab({required this.profile, required this.onChanged});
+
+  final ImpulseAiProfile profile;
+  final ValueChanged<ImpulseAiProfile> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
+      children: [
+        const _ProfileIntro(),
+        const SizedBox(height: 14),
+        _ProfileSection<ImpulseAiStyle>(
+          title: 'KI-Stil',
+          values: ImpulseAiStyle.values,
+          selected: profile.style,
+          labelOf: (value) => value.label,
+          onSelected: (value) => onChanged(profile.copyWith(style: value)),
+        ),
+        _ProfileSection<ImpulseAnswerLength>(
+          title: 'Antwortlänge',
+          values: ImpulseAnswerLength.values,
+          selected: profile.answerLength,
+          labelOf: (value) => value.label,
+          onSelected: (value) =>
+              onChanged(profile.copyWith(answerLength: value)),
+        ),
+        _ProfileSection<ImpulseLearningGoal>(
+          title: 'Lernziel',
+          values: ImpulseLearningGoal.values,
+          selected: profile.learningGoal,
+          labelOf: (value) => value.label,
+          onSelected: (value) =>
+              onChanged(profile.copyWith(learningGoal: value)),
+        ),
+        _ProfileSection<ImpulseExplanationLanguage>(
+          title: 'Erklärungssprache',
+          values: ImpulseExplanationLanguage.values,
+          selected: profile.explanationLanguage,
+          labelOf: (value) => value.label,
+          onSelected: (value) =>
+              onChanged(profile.copyWith(explanationLanguage: value)),
+        ),
+        _ProfilePreview(profile: profile),
+      ],
+    );
+  }
+}
+
+class _ProfileIntro extends StatelessWidget {
+  const _ProfileIntro();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF08111B),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: const Color(0x2259D7FF)),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            chat?.title ?? 'Impuls',
-            style: const TextStyle(
-              color: Color(0xFF7FFFE7),
+            'Du und Talvori',
+            style: TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.w900,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(message.text, style: const TextStyle(color: Colors.white)),
+          SizedBox(height: 6),
+          Text(
+            'Passe an, wie Talvori dir im Chat antwortet.',
+            style: TextStyle(color: Color(0xFF9FB0C7), height: 1.35),
+          ),
         ],
       ),
     );
   }
 }
 
-class _YouTab extends StatelessWidget {
-  const _YouTab();
+class _ProfileSection<T> extends StatelessWidget {
+  const _ProfileSection({
+    required this.title,
+    required this.values,
+    required this.selected,
+    required this.labelOf,
+    required this.onSelected,
+  });
+
+  final String title;
+  final List<T> values;
+  final T selected;
+  final String Function(T value) labelOf;
+  final ValueChanged<T> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return const _PanelEmpty(
-      title: 'Du und Talvori',
-      text:
-          'Deine Impuls-Chats bleiben lokal auf diesem Gerät. Spracheingabe, Kategorie-Kontext und eigene KI-Chats sind vorbereitet, ohne Lernstände zu verändern.',
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF7D8BA3),
+              fontWeight: FontWeight.w900,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final value in values)
+                ChoiceChip(
+                  key: Key('ai_profile_${title}_$value'),
+                  label: Text(labelOf(value)),
+                  selected: value == selected,
+                  onSelected: (_) => onSelected(value),
+                  selectedColor: const Color(0xFF0F5D4A),
+                  backgroundColor: const Color(0xFF0A141E),
+                  side: BorderSide(
+                    color: value == selected
+                        ? const Color(0xFF7FFFE7)
+                        : const Color(0x2259D7FF),
+                  ),
+                  labelStyle: TextStyle(
+                    color: value == selected
+                        ? Colors.white
+                        : const Color(0xFFC8D6E6),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+}
+
+class _ProfilePreview extends StatelessWidget {
+  const _ProfilePreview({required this.profile});
+
+  final ImpulseAiProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF08111B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'So antwortet Talvori ungefähr:',
+            style: TextStyle(
+              color: Color(0xFF7FFFE7),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _previewText(profile),
+            style: const TextStyle(color: Colors.white, height: 1.35),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _previewText(ImpulseAiProfile profile) {
+    final tone = switch (profile.style) {
+      ImpulseAiStyle.direct => 'Kurz gesagt:',
+      ImpulseAiStyle.motivating => 'Stark, das packen wir:',
+      ImpulseAiStyle.casual => 'Easy, schauen wir kurz drauf:',
+      ImpulseAiStyle.trainer => 'Trainer-Modus:',
+    };
+    final goal = profile.learningGoal.label.toLowerCase();
+    final length = profile.answerLength == ImpulseAnswerLength.short
+        ? 'in einem knackigen Satz'
+        : profile.answerLength == ImpulseAnswerLength.detailed
+        ? 'mit Erklärung und Beispiel'
+        : 'mit einem klaren Beispiel';
+    return '$tone Ich helfe dir $length für dein Ziel $goal.';
   }
 }
 

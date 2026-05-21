@@ -7,8 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_saved_message.dart';
 import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_payload.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_message_provider.dart';
@@ -1088,6 +1090,15 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
 
   @override
   Future<List<ImpulseChat>> listAllChats() async => const [];
+
+  @override
+  Future<List<ImpulseSavedMessage>> listStarredMessages() async => const [];
+
+  @override
+  Future<ImpulseAiProfile> loadAiProfile() async => ImpulseAiProfile.defaults;
+
+  @override
+  Future<void> saveAiProfile(ImpulseAiProfile profile) async {}
 
   @override
   Future<List<ImpulseMessage>> listMessages(String chatId) async => const [];

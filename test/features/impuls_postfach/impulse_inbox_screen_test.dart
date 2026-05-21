@@ -9,6 +9,7 @@ import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provi
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_payload.dart';
@@ -179,6 +180,147 @@ void main() {
 
     final chats = await repository.listChats();
     expect(chats.single.sourceType, ImpulseChatSourceType.customAi);
+  });
+
+  testWidgets('saved tab shows starred messages and opens source chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_saved_tab',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    final message = await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Wichtiger Beispielsatz',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+    );
+    await repository.updateMessageStarred(chat.id, message.id, isStarred: true);
+    await repository.setCategoryChatEnabled('seed-category-basics', false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Gespeichert'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Basics'), findsOneWidget);
+    expect(find.text('Wichtiger Beispielsatz'), findsOneWidget);
+    expect(find.text('Kategorie-Chat'), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('saved_message_tile_${message.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text('Wichtiger Beispielsatz'), findsOneWidget);
+    expect((await repository.listChats()).single.id, chat.id);
+  });
+
+  testWidgets('saved tab shows empty state', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_saved_empty',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Gespeichert'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Noch nichts gespeichert'), findsOneWidget);
+    expect(
+      find.text(
+        'Markiere wichtige Impulse, Erklärungen oder Beispielsätze mit einem Stern.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('you tab edits and persists local AI profile', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_you_profile',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Du'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Passe an, wie Talvori dir im Chat antwortet.'),
+      findsOneWidget,
+    );
+    expect(find.text('Kurz & direkt'), findsOneWidget);
+    expect(find.text('Prüfung'), findsOneWidget);
+
+    await tester.tap(find.text('Trainer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ausführlich'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Prüfung'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(
+        const Key(
+          'ai_profile_Erklärungssprache_ImpulseExplanationLanguage.mixed',
+        ),
+      ),
+    );
+    await tester.drag(find.byType(ListView), const Offset(0, -160));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const Key(
+          'ai_profile_Erklärungssprache_ImpulseExplanationLanguage.mixed',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final profile = await repository.loadAiProfile();
+    expect(profile.style, ImpulseAiStyle.trainer);
+    expect(profile.answerLength, ImpulseAnswerLength.detailed);
+    expect(profile.learningGoal, ImpulseLearningGoal.exam);
+    expect(profile.explanationLanguage, ImpulseExplanationLanguage.mixed);
+    expect(find.textContaining('Trainer-Modus'), findsOneWidget);
   });
 
   testWidgets('category tab can add and reactivate category chat', (
@@ -1101,6 +1243,48 @@ void main() {
       contains('Verändere keine Lernstände'),
     );
   });
+
+  test(
+    'AI profile is included in chat context beside category context',
+    () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_inbox_ai_profile_context',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      await repository.saveAiProfile(
+        const ImpulseAiProfile(
+          style: ImpulseAiStyle.trainer,
+          answerLength: ImpulseAnswerLength.short,
+          learningGoal: ImpulseLearningGoal.school,
+          explanationLanguage: ImpulseExplanationLanguage.mixed,
+        ),
+      );
+      final chat = await repository.ensureCategoryChat(
+        'seed-category-basics',
+        'Basics',
+      );
+      final aiClient = _FakeAiChatClient('Antwort');
+      final controller = ImpulseInboxController(
+        repository: repository,
+        aiChatClient: aiClient,
+        categoryWordSampler: (categoryId) async => [
+          {'word': 'move', 'translation': 'bewegen'},
+        ],
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      await controller.loadChats();
+
+      await controller.sendChatMessage(chat.id, 'Erklär das bitte.');
+
+      final context = aiClient.requests.single.context as Map<String, Object?>;
+      expect(context['aiStyle'], 'trainer');
+      expect(context['answerLength'], 'short');
+      expect(context['learningGoal'], 'school');
+      expect(context['explanationLanguage'], 'mixed');
+      expect(context['chatType'], 'category');
+      expect(context['categoryWordsSample'], isA<List<Map<String, String>>>());
+    },
+  );
 
   testWidgets('microphone button writes recognized speech into the input', (
     tester,

@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_saved_message.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
 abstract class ImpulseInboxRepository {
@@ -15,6 +17,9 @@ abstract class ImpulseInboxRepository {
   Future<void> updateChatAvatarImagePath(String chatId, String? imagePath);
   Future<List<ImpulseChat>> listChats();
   Future<List<ImpulseChat>> listAllChats();
+  Future<List<ImpulseSavedMessage>> listStarredMessages();
+  Future<ImpulseAiProfile> loadAiProfile();
+  Future<void> saveAiProfile(ImpulseAiProfile profile);
   Future<List<ImpulseMessage>> listMessages(String chatId);
   Future<ImpulseMessage> addMessage(
     ImpulseMessage message, {
@@ -200,6 +205,36 @@ class SharedPreferencesImpulseInboxRepository
     final chats = store.chats.values.toList();
     _sortChats(chats);
     return chats;
+  }
+
+  @override
+  Future<List<ImpulseSavedMessage>> listStarredMessages() async {
+    final store = await _loadStore();
+    final saved = <ImpulseSavedMessage>[];
+    for (final entry in store.messages.entries) {
+      final chat = store.chats[entry.key];
+      if (chat == null) continue;
+      for (final message in entry.value) {
+        if (message.isStarred) {
+          saved.add(ImpulseSavedMessage(chat: chat, message: message));
+        }
+      }
+    }
+    saved.sort((a, b) => b.message.createdAt.compareTo(a.message.createdAt));
+    return saved;
+  }
+
+  @override
+  Future<ImpulseAiProfile> loadAiProfile() async {
+    final store = await _loadStore();
+    return store.aiProfile;
+  }
+
+  @override
+  Future<void> saveAiProfile(ImpulseAiProfile profile) async {
+    final store = await _loadStore();
+    store.aiProfile = profile;
+    await _saveStore(store);
   }
 
   void _sortChats(List<ImpulseChat> chats) {
@@ -429,7 +464,11 @@ class SharedPreferencesImpulseInboxRepository
       }
     }
 
-    return _ImpulseInboxStore(chats: chats, messages: messages);
+    return _ImpulseInboxStore(
+      chats: chats,
+      messages: messages,
+      aiProfile: ImpulseAiProfile.fromJson(decoded['aiProfile']),
+    );
   }
 
   Future<void> _saveStore(_ImpulseInboxStore store) async {
@@ -442,6 +481,7 @@ class SharedPreferencesImpulseInboxRepository
           messages.map((message) => message.toJson()).toList(),
         ),
       ),
+      'aiProfile': store.aiProfile.toJson(),
     });
     await prefs.setString(storageKey, encoded);
   }
@@ -461,12 +501,21 @@ class SharedPreferencesImpulseInboxRepository
 }
 
 class _ImpulseInboxStore {
-  _ImpulseInboxStore({required this.chats, required this.messages});
+  _ImpulseInboxStore({
+    required this.chats,
+    required this.messages,
+    required this.aiProfile,
+  });
 
   factory _ImpulseInboxStore.empty() {
-    return _ImpulseInboxStore(chats: {}, messages: {});
+    return _ImpulseInboxStore(
+      chats: {},
+      messages: {},
+      aiProfile: ImpulseAiProfile.defaults,
+    );
   }
 
   final Map<String, ImpulseChat> chats;
   final Map<String, List<ImpulseMessage>> messages;
+  ImpulseAiProfile aiProfile;
 }
