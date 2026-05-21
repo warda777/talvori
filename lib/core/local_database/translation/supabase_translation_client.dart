@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'translation_client.dart';
 
 typedef SupabaseFunctionCaller =
@@ -38,13 +40,16 @@ class SupabaseTranslationClient implements TranslationClient {
 
     late final Map<String, Object?> response;
     try {
+      debugPrint('Calling Supabase translate-word');
       response = await _functionCaller(functionName, payload);
     } on Object catch (error) {
+      debugPrint('Supabase translate failure reason=${error.runtimeType}');
       throw TranslationException('Supabase translation request failed: $error');
     }
 
     final error = response['error'];
     if (error is String && error.trim().isNotEmpty) {
+      debugPrint('Supabase translate failure code=$error');
       throw TranslationException('Supabase translation failed: $error');
     }
 
@@ -55,6 +60,7 @@ class SupabaseTranslationClient implements TranslationClient {
       );
     }
 
+    debugPrint('Supabase translate success');
     return TranslationResult(translatedText: translation);
   }
 }

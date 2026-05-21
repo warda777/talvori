@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../repositories/word_repository.dart';
@@ -23,8 +24,21 @@ final localTranslationConfigProvider = Provider<LocalTranslationConfig>((ref) {
 final supabaseTranslationFunctionCallerProvider =
     Provider<SupabaseFunctionCaller?>((ref) {
       try {
-        return supabaseFunctionCallerFromClient(Supabase.instance.client);
-      } catch (_) {
+        final caller = supabaseFunctionCallerFromClient(
+          Supabase.instance.client,
+        );
+        return (functionName, payload) {
+          debugPrint(
+            'Talvori translation provider type=supabase '
+            'function=$functionName',
+          );
+          return caller(functionName, payload);
+        };
+      } catch (error) {
+        debugPrint(
+          'Talvori translation provider type=unavailable '
+          'reason=${error.runtimeType}',
+        );
         return null;
       }
     });

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/translation_status.dart';
 import '../repositories/word_repository.dart';
 import '../translation/translation_client.dart';
@@ -76,6 +78,10 @@ class PendingTranslationProcessor {
     }
 
     if (word.translationStatus == TranslationStatus.translated) {
+      debugPrint(
+        'Talvori auto translation skipped word=${word.term} '
+        'reason=already_translated',
+      );
       return const PendingTranslationProcessorResult(
         processed: 0,
         translated: 0,
@@ -87,6 +93,10 @@ class PendingTranslationProcessor {
     final targetLanguage = word.targetLanguage ?? 'de';
 
     try {
+      debugPrint(
+        'Talvori auto translation started word=${word.term} '
+        'provider=${_translationClient.runtimeType}',
+      );
       final result = await _translationClient.translate(
         TranslationRequest(
           text: word.term,
@@ -101,12 +111,20 @@ class PendingTranslationProcessor {
         targetLanguage: targetLanguage,
         updatedAt: _now(),
       );
+      debugPrint(
+        'Talvori translation stored source=${_translationSourceLabel()} '
+        'word=${word.term}',
+      );
       return const PendingTranslationProcessorResult(
         processed: 1,
         translated: 1,
         failed: 0,
       );
     } catch (error) {
+      debugPrint(
+        'Talvori translation failed word=${word.term} '
+        'reason=${error.runtimeType}',
+      );
       await _wordRepository.markTranslationFailed(
         id: word.id,
         error: error.toString(),
@@ -134,6 +152,13 @@ class PendingTranslationProcessor {
       failed: result.failed,
       resetFailed: resetFailed,
     );
+  }
+
+  String _translationSourceLabel() {
+    final type = _translationClient.runtimeType.toString();
+    if (type.contains('Supabase')) return 'supabase';
+    if (type.contains('Fake')) return 'test_fake';
+    return type;
   }
 }
 

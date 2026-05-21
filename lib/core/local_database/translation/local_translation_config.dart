@@ -1,6 +1,3 @@
-import 'package:http/http.dart' as http;
-
-import 'deepl_translation_client.dart';
 import 'fake_translation_client.dart';
 import 'supabase_translation_client.dart';
 import 'translation_client.dart';
@@ -16,8 +13,11 @@ LocalTranslationConfig localTranslationConfigFromEnvironment({
   String mode = talvoriTranslationModeDefine,
 }) {
   final normalizedMode = mode.trim().toLowerCase();
-  if (normalizedMode == 'supabase') {
+  if (normalizedMode.isEmpty || normalizedMode == 'supabase') {
     return const LocalTranslationConfig.developmentSupabase();
+  }
+  if (normalizedMode == 'fake') {
+    return const LocalTranslationConfig.fake();
   }
 
   return LocalTranslationConfig.defaultConfig;
@@ -33,7 +33,7 @@ class LocalTranslationConfig {
   });
 
   static const defaultTargetLanguage = 'DE';
-  static const defaultConfig = LocalTranslationConfig.fake();
+  static const defaultConfig = LocalTranslationConfig.supabase();
 
   const LocalTranslationConfig.fake()
     : mode = LocalTranslationClientMode.fake,
@@ -81,10 +81,7 @@ class LocalTranslationConfig {
   }
 
   bool get hasValidDeepLConfig {
-    return mode == LocalTranslationClientMode.deepl &&
-        apiKey != null &&
-        apiKey!.trim().isNotEmpty &&
-        resolvedTargetLanguage.isNotEmpty;
+    return false;
   }
 
   bool get wantsSupabase {
@@ -95,27 +92,38 @@ class LocalTranslationConfig {
 
 class LocalTranslationClientFactory {
   const LocalTranslationClientFactory({
-    http.Client? httpClient,
     SupabaseFunctionCaller? supabaseFunctionCaller,
-  }) : _httpClient = httpClient,
-       _supabaseFunctionCaller = supabaseFunctionCaller;
+  }) : _supabaseFunctionCaller = supabaseFunctionCaller;
 
-  final http.Client? _httpClient;
   final SupabaseFunctionCaller? _supabaseFunctionCaller;
 
   TranslationClient create(LocalTranslationConfig config) {
-    if (config.hasValidDeepLConfig) {
-      return DeepLTranslationClient(
-        apiKey: config.apiKey!,
-        baseUri: config.baseUri,
-        httpClient: _httpClient,
-      );
-    }
     if (config.wantsSupabase && _supabaseFunctionCaller != null) {
       return SupabaseTranslationClient(functionCaller: _supabaseFunctionCaller);
     }
+    if (config.wantsSupabase) {
+      return const UnavailableTranslationClient(
+        'Supabase translate-word client is not available.',
+      );
+    }
+    if (config.mode == LocalTranslationClientMode.fake) {
+      return FakeTranslationClient();
+    }
 
-    return FakeTranslationClient();
+    return const UnavailableTranslationClient(
+      'No production translation client is configured.',
+    );
+  }
+}
+
+class UnavailableTranslationClient implements TranslationClient {
+  const UnavailableTranslationClient(this.message);
+
+  final String message;
+
+  @override
+  Future<TranslationResult> translate(TranslationRequest request) async {
+    throw TranslationException(message);
   }
 }
 

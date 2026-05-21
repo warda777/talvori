@@ -7,8 +7,12 @@ Stand: 2026-05-21
 - Geteilte Wörter aus Android und iOS werden lokal in der Kategorie `Meine Wörter` gespeichert.
 - Neue lokale Importwörter erhalten ohne vorhandene Übersetzung den Status `pending`.
 - Duplikate werden anhand des normalisierten Wortes erkannt und nicht erneut angelegt.
+- Nach einem erfolgreichen Share-Import startet Talvori automatisch eine einzelne Übersetzung für das importierte bzw. wiedergefundene Wort, sofern noch keine fertige Übersetzung vorliegt.
+- Bereits übersetzte Wörter lösen keine neue Übersetzungsanfrage aus; laufende Auto-Übersetzungen desselben Wortes werden lokal entdoppelt.
 - Die Übersetzung läuft appseitig ausschließlich über den Supabase-Client zur Edge Function `translate-word`.
 - Flutter enthält keinen DeepL-Key und ruft DeepL nicht direkt auf.
+- Alte Flutter-seitige Direct-DeepL-Konfigurationen werden nicht mehr als produktiver Translation-Client erzeugt.
+- Der lokale Fake-Translator ist nur noch für explizite Tests erlaubt. Im echten App-Lauf ist Supabase `translate-word` der Default; wenn kein Supabase-Caller verfügbar ist, schlägt die Übersetzung kontrolliert fehl und speichert keine `fake-*`-Übersetzung.
 - Der Home-Word-Wheel und der Home-Counter verwenden die lokale Kategorie `Meine Wörter`.
 - Der große Play-Button auf Home startet nicht mehr den alten QuickSets-/Legacy-Einstieg mit `All Words`, `My words`, `Favorites`, `Words I know`, `My mix`.
 - Der Counter öffnet direkt die Vocabs-Seite für `Meine Wörter`; Zurück führt von dort direkt nach Home.
@@ -40,9 +44,16 @@ Leere Quellen zeigen eigene Empty States, z. B. `Noch keine Favoriten`, `Noch ke
 ## Pending-Übersetzungen
 
 `Meine Wörter` zeigt Wörter mit fehlender Übersetzung als `Übersetzung ausstehend` bzw. `Noch keine Übersetzung`.
-Der Button `Ausstehende Übersetzungen starten` verarbeitet nur Wörter ohne fertige Übersetzung und nutzt den bestehenden `PendingTranslationProcessor`.
+Der Share-Import triggert nach dem lokalen Speichern asynchron den bestehenden Single-Word-Pfad des `PendingTranslationProcessor`.
+Das Wort ist dadurch sofort lokal sichtbar; die Übersetzung wird danach über `translate-word` nachgeladen und lokal gespeichert.
+
+Wenn das Gerät offline ist, kein Supabase-Client verfügbar ist, das serverseitige Limit erreicht wurde oder die Edge Function einen Fehler meldet, bleibt das Wort lokal erhalten und der Übersetzungsstatus bleibt `pending` oder `failed`.
+Fehlerfälle speichern keine erfundenen Fake-Übersetzungen.
+Der Button `Ausstehende Übersetzungen starten` bleibt als Fallback erhalten. Er verarbeitet nur Wörter ohne fertige Übersetzung, setzt fehlgeschlagene Übersetzungen kontrolliert zurück und nutzt ebenfalls den bestehenden `PendingTranslationProcessor`.
 
 Bei Fehlern bleiben Wörter lokal erhalten. Fehlgeschlagene Übersetzungen können erneut versucht werden.
+
+Gleiche Share-Payload-IDs werden nicht erneut verarbeitet. Derselbe Worttext mit neuer Share-ID läuft erneut durch den Importpfad, erzeugt aber wegen der normalisierten Duplikaterkennung keinen zweiten lokalen Worteintrag.
 
 ## Serverseitige Kostenkontrolle
 
@@ -66,6 +77,6 @@ Typische Fehlercodes:
 
 ## SRS-Schutz
 
-Import, Übersetzung, Home-Counter und Word-Wheel lesen bzw. speichern nur lokale Wortdaten und Übersetzungsstatus.
+Import, Auto-Übersetzung, manuelle Pending-Übersetzung, Home-Counter und Word-Wheel lesen bzw. speichern nur lokale Wortdaten und Übersetzungsstatus.
 Sie starten keine Lernsession automatisch und verändern keine bestehenden Lernfortschritte.
 SRS-Fortschritt entsteht erst im explizit geöffneten Lernmodus durch Nutzeraktionen.

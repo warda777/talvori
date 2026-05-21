@@ -9,8 +9,6 @@ import 'package:talvori/core/local_database/providers/local_bootstrap_provider.d
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/shared_text_import_service_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
-import 'package:talvori/core/local_database/translation/deepl_translation_client.dart';
-import 'package:talvori/core/local_database/translation/fake_translation_client.dart';
 import 'package:talvori/core/local_database/translation/local_translation_config.dart';
 import 'package:talvori/core/local_database/translation/supabase_translation_client.dart';
 import 'package:talvori/core/local_database/translation/translation_client.dart';
@@ -49,42 +47,44 @@ void main() {
       }
     }
 
-    test('translation_client_provider_uses_fake_client_by_default', () async {
+    test('translation_client_provider_requires_supabase_by_default', () async {
       final (:container, :tempDir) = await createContainer();
       addTearDown(() => disposeContainer(container, tempDir));
 
       final config = container.read(localTranslationConfigProvider);
       final client = container.read(translationClientProvider);
-      final result = await client.translate(
-        const TranslationRequest(
-          text: 'hello',
-          sourceLanguage: 'en',
-          targetLanguage: 'de',
-        ),
-      );
 
-      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.mode, LocalTranslationClientMode.supabase);
       expect(config.resolvedTargetLanguage, 'DE');
       expect(config.resolvedSourceLanguage, isNull);
-      expect(client, isA<FakeTranslationClient>());
-      expect(result.translatedText, 'hallo');
+      expect(client, isA<UnavailableTranslationClient>());
+      await expectLater(
+        client.translate(
+          const TranslationRequest(
+            text: 'hello',
+            sourceLanguage: 'en',
+            targetLanguage: 'de',
+          ),
+        ),
+        throwsA(isA<TranslationException>()),
+      );
     });
 
-    test('translation_default_config_is_fake', () {
+    test('translation_default_config_is_supabase', () {
       const config = LocalTranslationConfig.defaultConfig;
 
-      expect(config.mode, LocalTranslationClientMode.fake);
+      expect(config.mode, LocalTranslationClientMode.supabase);
       expect(config.resolvedTargetLanguage, 'DE');
       expect(config.resolvedSourceLanguage, isNull);
       expect(config.hasValidDeepLConfig, isFalse);
-      expect(config.wantsSupabase, isFalse);
+      expect(config.wantsSupabase, isTrue);
     });
 
-    test('translation_environment_config_defaults_to_fake', () {
+    test('translation_environment_config_defaults_to_supabase', () {
       final config = localTranslationConfigFromEnvironment(mode: '');
 
-      expect(config.mode, LocalTranslationClientMode.fake);
-      expect(config.wantsSupabase, isFalse);
+      expect(config.mode, LocalTranslationClientMode.supabase);
+      expect(config.wantsSupabase, isTrue);
     });
 
     test('translation_environment_config_enables_supabase_define', () {
@@ -96,8 +96,15 @@ void main() {
       expect(config.resolvedTargetLanguage, 'DE');
     });
 
-    test('translation_environment_config_ignores_unknown_mode', () {
+    test('translation_environment_config_ignores_unknown_mode_to_supabase', () {
       final config = localTranslationConfigFromEnvironment(mode: 'deepl');
+
+      expect(config.mode, LocalTranslationClientMode.supabase);
+      expect(config.wantsSupabase, isTrue);
+    });
+
+    test('translation_environment_config_allows_explicit_fake_for_tests', () {
+      final config = localTranslationConfigFromEnvironment(mode: 'fake');
 
       expect(config.mode, LocalTranslationClientMode.fake);
       expect(config.wantsSupabase, isFalse);
@@ -134,13 +141,13 @@ void main() {
       );
 
       expect(config.mode, LocalTranslationClientMode.deepl);
-      expect(config.hasValidDeepLConfig, isTrue);
+      expect(config.hasValidDeepLConfig, isFalse);
       expect(config.resolvedTargetLanguage, 'DE');
       expect(config.resolvedSourceLanguage, 'EN');
     });
 
     test(
-      'translation_client_provider_can_create_deepl_when_configured',
+      'translation_client_provider_does_not_create_direct_deepl_client',
       () async {
         final (:container, :tempDir) = await createContainer(
           overrides: [
@@ -157,12 +164,12 @@ void main() {
 
         final client = container.read(translationClientProvider);
 
-        expect(client, isA<DeepLTranslationClient>());
+        expect(client, isA<UnavailableTranslationClient>());
       },
     );
 
     test(
-      'translation_client_provider_falls_back_to_fake_for_empty_deepl_key',
+      'translation_client_provider_does_not_fallback_to_fake_for_empty_deepl_key',
       () async {
         final (:container, :tempDir) = await createContainer(
           overrides: [
@@ -174,16 +181,18 @@ void main() {
         addTearDown(() => disposeContainer(container, tempDir));
 
         final client = container.read(translationClientProvider);
-        final result = await client.translate(
-          const TranslationRequest(
-            text: 'world',
-            sourceLanguage: 'en',
-            targetLanguage: 'de',
-          ),
-        );
 
-        expect(client, isA<FakeTranslationClient>());
-        expect(result.translatedText, 'welt');
+        expect(client, isA<UnavailableTranslationClient>());
+        await expectLater(
+          client.translate(
+            const TranslationRequest(
+              text: 'world',
+              sourceLanguage: 'en',
+              targetLanguage: 'de',
+            ),
+          ),
+          throwsA(isA<TranslationException>()),
+        );
       },
     );
 
@@ -213,6 +222,37 @@ void main() {
     );
 
     test(
+      'translation_client_provider_uses_supabase_caller_by_default',
+      () async {
+        final (:container, :tempDir) = await createContainer(
+          overrides: [
+            supabaseTranslationFunctionCallerProvider.overrideWithValue((
+              functionName,
+              payload,
+            ) async {
+              expect(functionName, 'translate-word');
+              expect(payload['text'], 'emergency');
+              return {'translation': 'Notfall'};
+            }),
+          ],
+        );
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final client = container.read(translationClientProvider);
+        final result = await client.translate(
+          const TranslationRequest(
+            text: 'emergency',
+            sourceLanguage: 'en',
+            targetLanguage: 'de',
+          ),
+        );
+
+        expect(client, isA<SupabaseTranslationClient>());
+        expect(result.translatedText, 'Notfall');
+      },
+    );
+
+    test(
       'development_supabase_builder_creates_supabase_translation_client',
       () {
         final client = buildDevelopmentSupabaseTranslationClient(
@@ -225,31 +265,30 @@ void main() {
       },
     );
 
-    test(
-      'translation_client_provider_falls_back_to_fake_without_supabase_caller',
-      () async {
-        final (:container, :tempDir) = await createContainer(
-          overrides: [
-            localTranslationConfigProvider.overrideWithValue(
-              const LocalTranslationConfig.supabase(),
-            ),
-          ],
-        );
-        addTearDown(() => disposeContainer(container, tempDir));
+    test('translation_client_provider_fails_without_supabase_caller', () async {
+      final (:container, :tempDir) = await createContainer(
+        overrides: [
+          localTranslationConfigProvider.overrideWithValue(
+            const LocalTranslationConfig.supabase(),
+          ),
+        ],
+      );
+      addTearDown(() => disposeContainer(container, tempDir));
 
-        final client = container.read(translationClientProvider);
-        final result = await client.translate(
+      final client = container.read(translationClientProvider);
+
+      expect(client, isA<UnavailableTranslationClient>());
+      await expectLater(
+        client.translate(
           const TranslationRequest(
             text: 'hello',
             sourceLanguage: 'en',
             targetLanguage: 'de',
           ),
-        );
-
-        expect(client, isA<FakeTranslationClient>());
-        expect(result.translatedText, 'hallo');
-      },
-    );
+        ),
+        throwsA(isA<TranslationException>()),
+      );
+    });
 
     test(
       'translation_client_provider_uses_injected_supabase_function_caller',
@@ -317,7 +356,7 @@ void main() {
     );
 
     test(
-      'build_local_translation_processor_for_config_defaults_to_fake',
+      'build_local_translation_processor_without_supabase_marks_failed',
       () async {
         final (:container, :tempDir) = await createContainer();
         addTearDown(() => disposeContainer(container, tempDir));
@@ -341,9 +380,42 @@ void main() {
         final word = await bootstrap.repositoryFactory.wordRepository
             .loadWordById(importResult.word!.id);
 
-        expect(result.translated, 1);
-        expect(word?.translation, 'hallo');
-        expect(word?.translationStatus, TranslationStatus.translated);
+        expect(result.translated, 0);
+        expect(result.failed, 1);
+        expect(word?.translation, '');
+        expect(word?.translationStatus, TranslationStatus.failed);
+        expect(word?.translationError, contains('not available'));
+      },
+    );
+
+    test(
+      'default_processor_never_stores_fake_translation_when_supabase_missing',
+      () async {
+        final (:container, :tempDir) = await createContainer();
+        addTearDown(() => disposeContainer(container, tempDir));
+
+        final importService = await container.read(
+          sharedTextImportServiceProvider.future,
+        );
+        final importResult = await importService.importRawText(
+          rawText: 'emergency',
+          now: DateTime(2026, 5, 19, 10),
+        );
+        final runner = await container.read(
+          singleWordTranslationRunnerProvider.future,
+        );
+
+        final result = await runner(wordId: importResult.word!.id);
+        final bootstrap = await container.read(localBootstrapProvider.future);
+        final word = await bootstrap.repositoryFactory.wordRepository
+            .loadWordById(importResult.word!.id);
+
+        expect(result.processed, 1);
+        expect(result.translated, 0);
+        expect(result.failed, 1);
+        expect(word?.translation, isNot('fake-emergency'));
+        expect(word?.translation, '');
+        expect(word?.translationStatus, TranslationStatus.failed);
       },
     );
 
