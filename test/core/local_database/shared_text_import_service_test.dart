@@ -4,11 +4,8 @@ import 'package:talvori/core/local_database/import/shared_text_import_result.dar
 import 'package:talvori/core/local_database/local_database_schema.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/category_repository.dart';
-import 'package:talvori/core/local_database/repositories/word_progress_repository.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
-import 'package:talvori/core/srs/models/learning_mode.dart';
-import 'package:talvori/core/srs/models/srs_stage.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -17,7 +14,6 @@ void main() {
     late Database db;
     late CategoryRepository categoryRepository;
     late WordRepository wordRepository;
-    late WordProgressRepository wordProgressRepository;
     late SharedTextImportService service;
     final now = DateTime(2026, 5, 18, 10);
 
@@ -26,11 +22,9 @@ void main() {
       await LocalDatabaseSchema.createV1(db);
       categoryRepository = CategoryRepository(database: db);
       wordRepository = WordRepository(database: db);
-      wordProgressRepository = WordProgressRepository(database: db);
       service = SharedTextImportService(
         categoryRepository: categoryRepository,
         wordRepository: wordRepository,
-        wordProgressRepository: wordProgressRepository,
       );
     });
 
@@ -152,21 +146,16 @@ void main() {
       );
     });
 
-    test('initializes_progress_for_all_srs_modes', () async {
+    test('does_not_initialize_srs_progress_on_import', () async {
       final result = await service.importRawText(rawText: 'river', now: now);
       final word = result.word!;
 
-      for (final mode in LearningMode.values) {
-        final progress = await wordProgressRepository.loadProgress(
-          wordId: word.id,
-          categoryId: localMyWordsCategoryId,
-          mode: mode,
-        );
-        expect(progress, isNotNull);
-        expect(progress?.stage, SrsStage.s0);
-        expect(progress?.passCount, 0);
-        expect(progress?.wrongCount, 0);
-      }
+      final progressRows = await db.query(
+        'word_progress',
+        where: 'word_id = ?',
+        whereArgs: [word.id],
+      );
+      expect(progressRows, isEmpty);
     });
 
     test('detects_case_insensitive_duplicate_without_second_word', () async {

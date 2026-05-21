@@ -210,13 +210,14 @@ void main() {
     for (final result in [favoriteResult, otherResult]) {
       final word = result.word!;
       final progress = await bootstrap.repositoryFactory.wordProgressRepository
-          .loadProgress(
+          .ensureProgressForWord(
             wordId: word.id,
             categoryId: localMyWordsCategoryId,
             mode: LearningMode.time,
+            now: DateTime(2026, 5, 21, 11, 30),
           );
       await bootstrap.repositoryFactory.wordProgressRepository.saveProgress(
-        updatedProgress: progress!.copyWith(stage: SrsStage.s2),
+        updatedProgress: progress.copyWith(stage: SrsStage.s2),
         updatedAt: DateTime(2026, 5, 21, 12),
       );
     }

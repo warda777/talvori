@@ -1,8 +1,6 @@
-import '../../srs/models/learning_mode.dart';
 import '../import/shared_text_import_result.dart';
 import '../models/translation_status.dart';
 import '../repositories/category_repository.dart';
-import '../repositories/word_progress_repository.dart';
 import '../repositories/word_repository.dart';
 
 const localMyWordsCategoryId = 'local-category-my-words';
@@ -12,14 +10,11 @@ class SharedTextImportService {
   const SharedTextImportService({
     required CategoryRepository categoryRepository,
     required WordRepository wordRepository,
-    required WordProgressRepository wordProgressRepository,
   }) : _categoryRepository = categoryRepository,
-       _wordRepository = wordRepository,
-       _wordProgressRepository = wordProgressRepository;
+       _wordRepository = wordRepository;
 
   final CategoryRepository _categoryRepository;
   final WordRepository _wordRepository;
-  final WordProgressRepository _wordProgressRepository;
 
   Future<SharedTextImportResult> importRawText({
     required String rawText,
@@ -82,15 +77,6 @@ class SharedTextImportService {
         sortOrder: existingWords.length + 1,
         now: now,
       );
-
-      for (final mode in LearningMode.values) {
-        await _wordProgressRepository.ensureProgressForWord(
-          wordId: importedWord.id,
-          categoryId: localMyWordsCategoryId,
-          mode: mode,
-          now: now,
-        );
-      }
 
       return SharedTextImportResult(
         status: SharedTextImportStatus.imported,

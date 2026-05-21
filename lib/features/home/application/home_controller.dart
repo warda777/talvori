@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/providers/incoming_shared_text_import_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/home/application/home_state.dart';
 import 'package:talvori/features/home/data/share_ingest_service.dart';
@@ -120,6 +122,9 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
       ..invalidate(lastSharedWordProvider)
       ..invalidate(localWordsForCategoryProvider(localMyWordsCategoryId))
       ..invalidate(localWordCountProvider(localMyWordsCategoryId));
+    for (final source in LocalLearningSource.values) {
+      ref.invalidate(localWordsForSourceProvider(source));
+    }
     await refreshMyWordsCount();
     return result;
   }

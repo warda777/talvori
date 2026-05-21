@@ -10,7 +10,6 @@ final sharedTextImportServiceProvider = FutureProvider<SharedTextImportService>(
     return SharedTextImportService(
       categoryRepository: repositories.categoryRepository,
       wordRepository: repositories.wordRepository,
-      wordProgressRepository: repositories.wordProgressRepository,
     );
   },
 );

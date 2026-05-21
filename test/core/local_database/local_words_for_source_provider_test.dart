@@ -100,13 +100,15 @@ void main() {
 
     final bootstrap = await container.read(localBootstrapProvider.future);
     final repositories = bootstrap.repositoryFactory;
-    final progress = await repositories.wordProgressRepository.loadProgress(
-      wordId: knownWordId,
-      categoryId: localMyWordsCategoryId,
-      mode: LearningMode.time,
-    );
+    final progress = await repositories.wordProgressRepository
+        .ensureProgressForWord(
+          wordId: knownWordId,
+          categoryId: localMyWordsCategoryId,
+          mode: LearningMode.time,
+          now: DateTime(2026, 5, 21, 10, 30),
+        );
     await repositories.wordProgressRepository.saveProgress(
-      updatedProgress: progress!.copyWith(stage: SrsStage.s5),
+      updatedProgress: progress.copyWith(stage: SrsStage.s5),
       updatedAt: DateTime(2026, 5, 21, 11),
     );
 

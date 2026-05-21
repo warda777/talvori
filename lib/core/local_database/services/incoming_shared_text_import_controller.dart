@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../platform/shared_text_platform_receiver.dart';
 import '../import/shared_text_import_result.dart';
+import '../models/local_word.dart';
+import '../models/translation_status.dart';
+import 'pending_translation_processor.dart';
 
 typedef SharedTextImporter =
     Future<SharedTextImportResult> Function({
@@ -12,20 +15,33 @@ typedef SharedTextImporter =
     });
 
 typedef NowFactory = DateTime Function();
+typedef SharedWordTranslator =
+    Future<PendingTranslationProcessorResult> Function({
+      required String wordId,
+    });
+typedef SharedWordTranslationSettled =
+    void Function(String wordId, PendingTranslationProcessorResult result);
 
 class IncomingSharedTextImportController {
   IncomingSharedTextImportController({
     required SharedTextPlatformReceiver receiver,
     required SharedTextImporter importText,
+    SharedWordTranslator? translateWord,
+    SharedWordTranslationSettled? onTranslationSettled,
     NowFactory now = DateTime.now,
   }) : _receiver = receiver,
        _importText = importText,
+       _translateWord = translateWord,
+       _onTranslationSettled = onTranslationSettled,
        _now = now;
 
   final SharedTextPlatformReceiver _receiver;
   final SharedTextImporter _importText;
+  final SharedWordTranslator? _translateWord;
+  final SharedWordTranslationSettled? _onTranslationSettled;
   final NowFactory _now;
   final Set<String> _processedPayloadIds = <String>{};
+  final Set<String> _activeTranslations = <String>{};
 
   Future<SharedTextImportResult?> importInitialSharedText() async {
     final payload = await _receiver.getInitialSharedPayload();
@@ -41,8 +57,10 @@ class IncomingSharedTextImportController {
         .cast<SharedTextImportResult>();
   }
 
-  Future<SharedTextImportResult> importSharedText(String rawText) {
-    return _importText(rawText: rawText, now: _now());
+  Future<SharedTextImportResult> importSharedText(String rawText) async {
+    final result = await _importText(rawText: rawText, now: _now());
+    _scheduleAutoTranslation(result.word);
+    return result;
   }
 
   Future<SharedTextImportResult?> importSharedPayload(
@@ -54,5 +72,23 @@ class IncomingSharedTextImportController {
       return null;
     }
     return importSharedText(payload.text);
+  }
+
+  void _scheduleAutoTranslation(LocalWord? word) {
+    final translateWord = _translateWord;
+    if (word == null || translateWord == null) return;
+    if (word.translationStatus == TranslationStatus.translated) return;
+    if (!_activeTranslations.add(word.id)) return;
+
+    unawaited(() async {
+      try {
+        final result = await translateWord(wordId: word.id);
+        _onTranslationSettled?.call(word.id, result);
+      } catch (error) {
+        debugPrint('Talvori auto translation failed for ${word.id}: $error');
+      } finally {
+        _activeTranslations.remove(word.id);
+      }
+    }());
   }
 }

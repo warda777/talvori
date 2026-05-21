@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/providers/incoming_shared_text_import_controller_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
@@ -103,6 +105,9 @@ class _IncomingSharedTextImportListenerState
     ref
       ..invalidate(localWordsForCategoryProvider(localMyWordsCategoryId))
       ..invalidate(localWordCountProvider(localMyWordsCategoryId));
+    for (final source in LocalLearningSource.values) {
+      ref.invalidate(localWordsForSourceProvider(source));
+    }
   }
 
   String _titleFor(SharedTextImportResult result) {

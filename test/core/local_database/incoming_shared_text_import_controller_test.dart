@@ -4,10 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/import/shared_text_import_result.dart';
 import 'package:talvori/core/local_database/local_database_schema.dart';
+import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/category_repository.dart';
-import 'package:talvori/core/local_database/repositories/word_progress_repository.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
 import 'package:talvori/core/local_database/services/incoming_shared_text_import_controller.dart';
+import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/core/platform/shared_text_platform_receiver.dart';
 
@@ -152,7 +154,6 @@ void main() {
     final service = SharedTextImportService(
       categoryRepository: CategoryRepository(database: db),
       wordRepository: WordRepository(database: db),
-      wordProgressRepository: WordProgressRepository(database: db),
     );
     final receiver = _FakeSharedTextPlatformReceiver(
       initialText: 'hello\nhttps://example.com/article',
@@ -167,6 +168,115 @@ void main() {
 
     expect(result?.status, SharedTextImportStatus.imported);
     expect(result?.word?.term, 'hello');
+  });
+
+  test('starts_auto_translation_after_imported_word', () async {
+    final receiver = _FakeSharedTextPlatformReceiver(initialText: 'river');
+    final translatedWordIds = <String>[];
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+          word: _word(
+            id: 'word-river',
+            term: rawText,
+            status: TranslationStatus.pending,
+          ),
+        );
+      },
+      translateWord: ({required wordId}) async {
+        translatedWordIds.add(wordId);
+        return const PendingTranslationProcessorResult(
+          processed: 1,
+          translated: 1,
+          failed: 0,
+        );
+      },
+    );
+
+    final result = await controller.importInitialSharedText();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result?.status, SharedTextImportStatus.imported);
+    expect(translatedWordIds, ['word-river']);
+  });
+
+  test('skips_auto_translation_for_already_translated_duplicate', () async {
+    final receiver = _FakeSharedTextPlatformReceiver(initialText: 'house');
+    var translationCalls = 0;
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.duplicate,
+          message: 'duplicate',
+          word: _word(
+            id: 'word-house',
+            term: rawText,
+            status: TranslationStatus.translated,
+            translation: 'Haus',
+          ),
+        );
+      },
+      translateWord: ({required wordId}) async {
+        translationCalls++;
+        return const PendingTranslationProcessorResult(
+          processed: 0,
+          translated: 0,
+          failed: 0,
+        );
+      },
+    );
+
+    final result = await controller.importInitialSharedText();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result?.status, SharedTextImportStatus.duplicate);
+    expect(translationCalls, 0);
+  });
+
+  test('does_not_start_parallel_auto_translation_for_same_word', () async {
+    final receiver = _FakeSharedTextPlatformReceiver();
+    final completer = Completer<PendingTranslationProcessorResult>();
+    var translationCalls = 0;
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.duplicate,
+          message: 'duplicate',
+          word: _word(
+            id: 'word-river',
+            term: rawText,
+            status: TranslationStatus.pending,
+          ),
+        );
+      },
+      translateWord: ({required wordId}) {
+        translationCalls++;
+        return completer.future;
+      },
+    );
+
+    final first = controller.importSharedText('river');
+    final second = controller.importSharedText('river');
+    await Future.wait([first, second]);
+    await Future<void>.delayed(Duration.zero);
+    completer.complete(
+      const PendingTranslationProcessorResult(
+        processed: 1,
+        translated: 1,
+        failed: 0,
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    expect(translationCalls, 1);
   });
 }
 
@@ -199,4 +309,27 @@ class _FakeSharedTextPlatformReceiver implements SharedTextPlatformReceiver {
   Stream<String> watchSharedText() {
     return _events.stream.map((payload) => payload.text);
   }
+}
+
+LocalWord _word({
+  required String id,
+  required String term,
+  required TranslationStatus status,
+  String translation = '',
+}) {
+  final now = DateTime(2026, 5, 18, 12);
+  return LocalWord(
+    id: id,
+    categoryId: localMyWordsCategoryId,
+    term: term,
+    translation: translation,
+    translationStatus: status,
+    sourceLanguage: 'en',
+    targetLanguage: 'de',
+    translationError: null,
+    sortOrder: 0,
+    isArchived: false,
+    createdAt: now,
+    updatedAt: now,
+  );
 }
