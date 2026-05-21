@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 
@@ -172,7 +174,10 @@ class _ImpulseChatDetailScreenState
             replyToMessage: _replyToMessage,
             onCancelReply: () => setState(() => _replyToMessage = null),
             onSend: _sendMessage,
-            onVoiceInput: _startVoiceInput,
+            voiceService: ref.read(impulseVoiceMessageServiceProvider),
+            voiceLocaleId: _voiceLocaleForChat(chat),
+            onVoiceSend: _sendVoiceMessage,
+            onVoiceMessage: _showVoiceMessage,
           ),
         ],
       ),
@@ -190,6 +195,50 @@ class _ImpulseChatDetailScreenState
         .read(impulseInboxControllerProvider.notifier)
         .sendChatMessage(widget.chatId, text, replyTo: replyTo);
     _scrollToBottom();
+  }
+
+  Future<void> _sendVoiceMessage(ImpulseVoiceMessageResult result) async {
+    final audioPath = result.audioPath?.trim();
+    final durationMs = result.durationMs;
+    if (audioPath == null || audioPath.isEmpty || durationMs == null) return;
+    final replyTo = _replyToMessage;
+    setState(() => _replyToMessage = null);
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .sendChatAudioMessage(
+          widget.chatId,
+          audioPath: audioPath,
+          durationMs: durationMs,
+          waveformSeed: result.waveformSeed,
+          audioTranscript: result.transcript,
+          audioLanguage: result.language,
+          replyTo: replyTo,
+        );
+    if (result.transcript?.trim().isEmpty ?? true) {
+      _showVoiceMessage('Ich konnte die Sprachnachricht nicht erkennen.');
+    }
+    _scrollToBottom();
+  }
+
+  String? _voiceLocaleForChat(ImpulseChat? chat) {
+    final profile = ref
+        .read(impulseInboxControllerProvider.notifier)
+        .effectiveAiProfileForChat(chat);
+    return switch (profile.explanationLanguage) {
+      ImpulseExplanationLanguage.english => 'en_US',
+      ImpulseExplanationLanguage.german => 'de_DE',
+      ImpulseExplanationLanguage.mixed => null,
+    };
+  }
+
+  void _showVoiceMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF07111A),
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -306,10 +355,6 @@ class _ImpulseChatDetailScreenState
     await WidgetsBinding.instance.endOfFrame;
   }
 
-  Future<ImpulseVoiceInputResult> _startVoiceInput() {
-    return ref.read(impulseVoiceInputServiceProvider).listenForText();
-  }
-
   Future<void> _pickAvatarImage(ImpulseChat chat) async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -324,6 +369,7 @@ class _ImpulseChatDetailScreenState
 
   Future<void> _openMessageActions(ImpulseMessage message) async {
     FocusScope.of(context).unfocus();
+    unawaited(HapticFeedback.lightImpact());
     await showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -859,6 +905,16 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.source == ImpulseMessageSource.user;
+    if (message.contentType == ImpulseMessageContentType.audio) {
+      return _AudioMessage(
+        message: message,
+        isUser: isUser,
+        highlighted: highlighted,
+        sameGroupAsPrevious: sameGroupAsPrevious,
+        sameGroupAsNext: sameGroupAsNext,
+        onLongPress: onLongPress,
+      );
+    }
     final emojiOnly = _isEmojiOnly(message.text);
     if (emojiOnly) {
       return _EmojiMessage(
@@ -991,14 +1047,6 @@ class _MessageBubble extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                if (isUser) ...[
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.done_all_rounded,
-                                    color: Color(0xB859D7FF),
-                                    size: 14,
-                                  ),
-                                ],
                               ],
                             ),
                           ],
@@ -1235,14 +1283,6 @@ class _EmojiMessage extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (isUser) ...[
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.done_all_rounded,
-                            color: Color(0xB859D7FF),
-                            size: 14,
-                          ),
-                        ],
                       ],
                     ),
                   ],
@@ -1269,6 +1309,237 @@ class _EmojiMessage extends StatelessWidget {
     final hour = value.hour.toString().padLeft(2, '0');
     final minute = value.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+}
+
+class _AudioMessage extends ConsumerStatefulWidget {
+  const _AudioMessage({
+    required this.message,
+    required this.isUser,
+    required this.highlighted,
+    required this.sameGroupAsPrevious,
+    required this.sameGroupAsNext,
+    required this.onLongPress,
+  });
+
+  final ImpulseMessage message;
+  final bool isUser;
+  final bool highlighted;
+  final bool sameGroupAsPrevious;
+  final bool sameGroupAsNext;
+  final VoidCallback onLongPress;
+
+  @override
+  ConsumerState<_AudioMessage> createState() => _AudioMessageState();
+}
+
+class _AudioMessageState extends ConsumerState<_AudioMessage> {
+  bool _isPlaying = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bubbleColor = widget.isUser
+        ? const Color(0xFF0B342D)
+        : const Color(0xFF1A2026);
+    final showTail = !widget.sameGroupAsNext;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GestureDetector(
+          key: widget.highlighted
+              ? Key('impulse_message_highlight_${widget.message.id}')
+              : null,
+          behavior: HitTestBehavior.opaque,
+          onLongPress: widget.onLongPress,
+          child: Align(
+            alignment: widget.isUser
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth * 0.72,
+              ),
+              child: Padding(
+                key: Key('impulse_message_audio_${widget.message.id}'),
+                padding: EdgeInsets.only(
+                  top: widget.sameGroupAsPrevious ? 2 : 9,
+                  bottom: widget.sameGroupAsNext ? 1 : 7,
+                ),
+                child: CustomPaint(
+                  painter: _ChatBubblePainter(
+                    color: bubbleColor,
+                    isUser: widget.isUser,
+                    showTail: showTail,
+                    highlighted: widget.highlighted,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      widget.isUser ? 10 : 16,
+                      7,
+                      widget.isUser ? 16 : 10,
+                      6,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: widget.isUser
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.message.replyPreviewText != null) ...[
+                          _ReplyPreview(
+                            message: widget.message,
+                            isUser: widget.isUser,
+                          ),
+                          const SizedBox(height: 6),
+                        ],
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton.filled(
+                              key: Key(
+                                'impulse_audio_play_${widget.message.id}',
+                              ),
+                              constraints: const BoxConstraints.tightFor(
+                                width: 34,
+                                height: 34,
+                              ),
+                              padding: EdgeInsets.zero,
+                              style: IconButton.styleFrom(
+                                backgroundColor: const Color(0xFF59D7FF),
+                                foregroundColor: const Color(0xFF041016),
+                              ),
+                              onPressed: _togglePlayback,
+                              icon: Icon(
+                                _isPlaying
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _Waveform(seed: widget.message.waveformSeed ?? 0),
+                            const SizedBox(width: 8),
+                            Text(
+                              _durationLabel(
+                                Duration(
+                                  milliseconds:
+                                      widget.message.audioDurationMs ?? 0,
+                                ),
+                              ),
+                              key: Key(
+                                'impulse_audio_duration_${widget.message.id}',
+                              ),
+                              style: const TextStyle(
+                                color: Color(0xDDE9F2FF),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.message.isStarred) ...[
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Color(0xFFFFD166),
+                                size: 13,
+                              ),
+                              const SizedBox(width: 3),
+                            ],
+                            Text(
+                              _timeLabel(widget.message.createdAt),
+                              style: TextStyle(
+                                color: widget.isUser
+                                    ? const Color(0xB8A8D7CE)
+                                    : const Color(0xB87D8BA3),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _togglePlayback() async {
+    final service = ref.read(impulseVoiceMessageServiceProvider);
+    if (_isPlaying) {
+      await service.stopPlayback();
+      if (mounted) setState(() => _isPlaying = false);
+      return;
+    }
+    final path = widget.message.localAudioPath;
+    if (path == null || path.trim().isEmpty) {
+      _showMissingFile();
+      return;
+    }
+    final result = await service.play(path);
+    if (!mounted) return;
+    if (!result.success) {
+      _showMissingFile();
+      return;
+    }
+    setState(() => _isPlaying = true);
+  }
+
+  void _showMissingFile() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Audiodatei nicht gefunden.'),
+        backgroundColor: Color(0xFF07111A),
+      ),
+    );
+  }
+
+  String _durationLabel(Duration duration) {
+    final total = duration.inSeconds;
+    final minutes = (total ~/ 60).toString();
+    final seconds = (total % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  String _timeLabel(DateTime value) {
+    final hour = value.hour.toString().padLeft(2, '0');
+    final minute = value.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+}
+
+class _Waveform extends StatelessWidget {
+  const _Waveform({required this.seed});
+
+  final int seed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: const Key('impulse_audio_waveform'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        for (var index = 0; index < 18; index++)
+          Container(
+            width: 3,
+            height: (8 + ((seed + index * 7) % 18)).toDouble(),
+            margin: const EdgeInsets.symmetric(horizontal: 1.4),
+            decoration: BoxDecoration(
+              color: const Color(0xCC7FFFE7),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+      ],
+    );
   }
 }
 
@@ -1427,7 +1698,9 @@ class _InputReplyPreview extends StatelessWidget {
     final source = message.source == ImpulseMessageSource.user
         ? 'Du'
         : 'Talvori';
-    final preview = message.text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final preview = message.contentType == ImpulseMessageContentType.audio
+        ? 'Sprachnachricht'
+        : message.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     return Container(
       key: const Key('impulse_chat_reply_preview'),
       margin: const EdgeInsets.fromLTRB(44, 0, 48, 7),
@@ -1722,7 +1995,10 @@ class _ChatInputBar extends StatefulWidget {
     required this.replyToMessage,
     required this.onCancelReply,
     required this.onSend,
-    required this.onVoiceInput,
+    required this.voiceService,
+    required this.voiceLocaleId,
+    required this.onVoiceSend,
+    required this.onVoiceMessage,
   });
 
   final TextEditingController controller;
@@ -1730,7 +2006,10 @@ class _ChatInputBar extends StatefulWidget {
   final ImpulseMessage? replyToMessage;
   final VoidCallback onCancelReply;
   final Future<void> Function() onSend;
-  final Future<ImpulseVoiceInputResult> Function() onVoiceInput;
+  final ImpulseVoiceMessageService voiceService;
+  final String? voiceLocaleId;
+  final Future<void> Function(ImpulseVoiceMessageResult result) onVoiceSend;
+  final ValueChanged<String> onVoiceMessage;
 
   @override
   State<_ChatInputBar> createState() => _ChatInputBarState();
@@ -1738,7 +2017,25 @@ class _ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<_ChatInputBar> {
   bool _hasText = false;
-  bool _isListening = false;
+  bool _isRecording = false;
+  bool _isLocked = false;
+  bool _isPaused = false;
+  Timer? _recordingTimer;
+  DateTime? _recordingStartedAt;
+  Duration _pausedElapsed = Duration.zero;
+  DateTime? _pauseStartedAt;
+  Duration _recordingDuration = Duration.zero;
+  Offset? _voiceDragStart;
+  int? _voicePointer;
+  bool _voiceCancelRequested = false;
+  bool _voiceLockRequested = false;
+  bool _voicePointerReleased = false;
+  bool _voiceHoldThresholdPassed = false;
+  Timer? _voiceHoldTimer;
+  Timer? _voiceDiscardTimer;
+  StreamSubscription<double>? _voiceAmplitudeSub;
+  double _voiceAmplitude = 0;
+  bool _showVoiceDiscardAnimation = false;
 
   @override
   void initState() {
@@ -1759,6 +2056,14 @@ class _ChatInputBarState extends State<_ChatInputBar> {
 
   @override
   void dispose() {
+    _recordingTimer?.cancel();
+    _voiceHoldTimer?.cancel();
+    _voiceDiscardTimer?.cancel();
+    _voiceAmplitudeSub?.cancel();
+    _removeVoicePointerRoute();
+    if (_isRecording || _isPaused) {
+      unawaited(widget.voiceService.cancelRecording());
+    }
     widget.controller.removeListener(_syncTextState);
     super.dispose();
   }
@@ -1766,7 +2071,7 @@ class _ChatInputBarState extends State<_ChatInputBar> {
   @override
   Widget build(BuildContext context) {
     final canSend = widget.enabled && _hasText;
-    final canUseVoice = widget.enabled && !_hasText && !_isListening;
+    final canUseVoice = widget.enabled && !_hasText && !_isRecording;
     return SafeArea(
       top: false,
       child: Container(
@@ -1783,108 +2088,134 @@ class _ChatInputBarState extends State<_ChatInputBar> {
                 message: widget.replyToMessage!,
                 onCancel: widget.onCancelReply,
               ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
-                  key: const Key('impulse_chat_attachment_button'),
-                  tooltip: 'Anhänge folgen später',
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Anhänge folgen später.'),
-                        backgroundColor: Color(0xFF07111A),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add_rounded, color: Color(0xFF59D7FF)),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Container(
-                    constraints: const BoxConstraints(minHeight: 40),
-                    padding: const EdgeInsets.symmetric(horizontal: 13),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF151C23),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: const Color(0x1F59D7FF)),
-                    ),
-                    child: TextField(
-                      key: const Key('impulse_chat_message_input'),
-                      controller: widget.controller,
-                      enabled: widget.enabled,
-                      minLines: 1,
-                      maxLines: 4,
-                      textInputAction: TextInputAction.newline,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        height: 1.2,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
-                        hintText: 'Nachricht schreiben...',
-                        hintStyle: TextStyle(color: Color(0xFF7D8BA3)),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 7),
-                if (_hasText)
-                  IconButton.filled(
-                    key: const Key('impulse_chat_send_button'),
-                    tooltip: 'Senden',
-                    constraints: const BoxConstraints.tightFor(
-                      width: 40,
-                      height: 40,
-                    ),
-                    padding: EdgeInsets.zero,
-                    onPressed: canSend ? widget.onSend : null,
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFF59D7FF),
-                      disabledBackgroundColor: const Color(0x22151C23),
-                      foregroundColor: const Color(0xFF041016),
-                      disabledForegroundColor: const Color(0x887D8BA3),
-                    ),
-                    icon: const Icon(Icons.arrow_upward_rounded, size: 20),
-                  )
-                else
-                  IconButton.filled(
-                    key: const Key('impulse_chat_microphone_button'),
-                    tooltip: 'Spracheingabe',
-                    constraints: const BoxConstraints.tightFor(
-                      width: 40,
-                      height: 40,
-                    ),
-                    padding: EdgeInsets.zero,
-                    onPressed: canUseVoice ? _startVoiceInput : null,
-                    style: IconButton.styleFrom(
-                      backgroundColor: _isListening
-                          ? const Color(0xFF7FFFE7)
-                          : const Color(0xFF101B24),
-                      disabledBackgroundColor: const Color(0x22151C23),
-                      foregroundColor: _isListening
-                          ? const Color(0xFF041016)
-                          : const Color(0xFF59D7FF),
-                      disabledForegroundColor: const Color(0x887D8BA3),
-                    ),
-                    icon: Icon(
-                      _isListening
-                          ? Icons.graphic_eq_rounded
-                          : Icons.mic_rounded,
-                      size: 20,
-                    ),
-                  ),
-              ],
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: _showVoiceDiscardAnimation
+                  ? const _VoiceDiscardAnimation(
+                      key: Key('impulse_voice_discard_animation'),
+                    )
+                  : const SizedBox.shrink(),
             ),
+            _isRecording || _isLocked
+                ? _VoiceRecordingControls(
+                    locked: _isLocked,
+                    paused: _isPaused,
+                    duration: _recordingDuration,
+                    amplitude: _voiceAmplitude,
+                    onCancel: _cancelRecording,
+                    onLock: _lockRecording,
+                    onPauseResume: _togglePauseRecording,
+                    onSend: _finishRecording,
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        key: const Key('impulse_chat_attachment_button'),
+                        tooltip: 'Anhänge folgen später',
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Anhänge folgen später.'),
+                              backgroundColor: Color(0xFF07111A),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.add_rounded,
+                          color: Color(0xFF59D7FF),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 13),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF151C23),
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: const Color(0x1F59D7FF)),
+                          ),
+                          child: TextField(
+                            key: const Key('impulse_chat_message_input'),
+                            controller: widget.controller,
+                            enabled: widget.enabled,
+                            minLines: 1,
+                            maxLines: 4,
+                            textInputAction: TextInputAction.newline,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              height: 1.2,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 10,
+                              ),
+                              hintText: 'Nachricht schreiben...',
+                              hintStyle: TextStyle(color: Color(0xFF7D8BA3)),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      if (_hasText)
+                        IconButton.filled(
+                          key: const Key('impulse_chat_send_button'),
+                          tooltip: 'Senden',
+                          constraints: const BoxConstraints.tightFor(
+                            width: 40,
+                            height: 40,
+                          ),
+                          padding: EdgeInsets.zero,
+                          onPressed: canSend ? widget.onSend : null,
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFF59D7FF),
+                            disabledBackgroundColor: const Color(0x22151C23),
+                            foregroundColor: const Color(0xFF041016),
+                            disabledForegroundColor: const Color(0x887D8BA3),
+                          ),
+                          icon: const Icon(
+                            Icons.arrow_upward_rounded,
+                            size: 20,
+                          ),
+                        )
+                      else
+                        Listener(
+                          key: const Key('impulse_chat_microphone_button'),
+                          onPointerDown: canUseVoice
+                              ? _beginVoicePointer
+                              : null,
+                          child: Tooltip(
+                            message: 'Sprachnachricht aufnehmen',
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF101B24),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0x2259D7FF),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.mic_rounded,
+                                color: Color(0xFF59D7FF),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
           ],
         ),
       ),
@@ -1897,37 +2228,671 @@ class _ChatInputBarState extends State<_ChatInputBar> {
     setState(() => _hasText = next);
   }
 
-  Future<void> _startVoiceInput() async {
-    if (_isListening) return;
-    setState(() => _isListening = true);
-    final result = await widget.onVoiceInput();
-    if (!mounted) return;
-    setState(() => _isListening = false);
+  void _beginVoicePointer(PointerDownEvent event) {
+    _removeVoicePointerRoute();
+    unawaited(HapticFeedback.selectionClick());
+    _voiceDragStart = event.position;
+    _voicePointer = event.pointer;
+    _voiceCancelRequested = false;
+    _voiceLockRequested = false;
+    _voicePointerReleased = false;
+    _voiceHoldThresholdPassed = false;
+    _voiceHoldTimer?.cancel();
+    _voiceHoldTimer = Timer(const Duration(milliseconds: 450), () {
+      _voiceHoldThresholdPassed = true;
+    });
+    GestureBinding.instance.pointerRouter.addRoute(
+      event.pointer,
+      _handleTrackedVoicePointer,
+    );
+    _startRecording();
+  }
 
-    switch (result.status) {
-      case ImpulseVoiceInputStatus.success:
-        final text = result.text?.trim();
-        if (text == null || text.isEmpty) return;
-        widget.controller.text = text;
-        widget.controller.selection = TextSelection.collapsed(
-          offset: widget.controller.text.length,
-        );
-      case ImpulseVoiceInputStatus.permissionDenied:
-        _showVoiceInputMessage('Mikrofon und Spracherkennung erlauben.');
-      case ImpulseVoiceInputStatus.unavailable:
-        _showVoiceInputMessage('Spracheingabe ist nicht verfügbar.');
-      case ImpulseVoiceInputStatus.noSpeech:
-        _showVoiceInputMessage('Keine Sprache erkannt.');
-      case ImpulseVoiceInputStatus.failed:
-        _showVoiceInputMessage('Spracheingabe konnte nicht gestartet werden.');
+  void _handleTrackedVoicePointer(PointerEvent event) {
+    if (event.pointer != _voicePointer) return;
+    if (event is PointerMoveEvent) {
+      _handleVoicePointerMove(event);
+      return;
+    }
+    if (event is PointerUpEvent) {
+      _removeVoicePointerRoute(event.pointer);
+      _handleVoicePointerUp(event);
+      return;
+    }
+    if (event is PointerCancelEvent) {
+      _removeVoicePointerRoute(event.pointer);
+      _handleVoicePointerCancel(event);
     }
   }
 
-  void _showVoiceInputMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF07111A),
+  void _removeVoicePointerRoute([int? pointer]) {
+    final activePointer = pointer ?? _voicePointer;
+    if (activePointer == null) return;
+    GestureBinding.instance.pointerRouter.removeRoute(
+      activePointer,
+      _handleTrackedVoicePointer,
+    );
+    if (_voicePointer == activePointer) _voicePointer = null;
+  }
+
+  void _handleVoicePointerMove(PointerMoveEvent event) {
+    final start = _voiceDragStart;
+    if (start == null || !_isRecording) return;
+    final offset = event.position - start;
+    if (offset.dx < -70 && !_voiceCancelRequested) {
+      unawaited(HapticFeedback.lightImpact());
+      _voiceCancelRequested = true;
+      _cancelRecording();
+    } else if (offset.dy < -70 && !_isLocked) {
+      _lockRecording();
+    }
+  }
+
+  void _handleVoicePointerUp(PointerUpEvent event) {
+    _voiceDragStart = null;
+    _voicePointerReleased = true;
+    final quickTap = !_voiceHoldThresholdPassed;
+    if (_voiceCancelRequested) return;
+    if (quickTap && !_isLocked) {
+      _lockRecording();
+      return;
+    }
+    if (!_isLocked && _isRecording) {
+      _finishRecording();
+    }
+  }
+
+  void _handleVoicePointerCancel(PointerCancelEvent event) {
+    _voiceDragStart = null;
+    _voicePointerReleased = true;
+    if (!_isLocked) _cancelRecording();
+  }
+
+  void _lockRecording() {
+    _voiceLockRequested = true;
+    if (!mounted || !_isRecording || _isLocked) return;
+    unawaited(HapticFeedback.mediumImpact());
+    setState(() => _isLocked = true);
+  }
+
+  Future<void> _startRecording() async {
+    if (_isRecording) return;
+    FocusScope.of(context).unfocus();
+    final result = await widget.voiceService.startRecording(
+      localeId: widget.voiceLocaleId,
+    );
+    if (!mounted) return;
+    switch (result.status) {
+      case ImpulseVoiceMessageStatus.started:
+        if (_voiceLockRequested && !_isLocked) {
+          unawaited(HapticFeedback.mediumImpact());
+        }
+        setState(() {
+          _isRecording = true;
+          _isLocked = _voiceLockRequested;
+          _isPaused = false;
+          _recordingStartedAt = DateTime.now();
+          _pausedElapsed = Duration.zero;
+          _pauseStartedAt = null;
+          _recordingDuration = Duration.zero;
+        });
+        _startRecordingTimer();
+        _startAmplitudeListening();
+        if (_voiceCancelRequested) {
+          unawaited(_cancelRecording());
+        } else if (_voicePointerReleased && !_voiceLockRequested) {
+          unawaited(_finishRecording());
+        }
+      case ImpulseVoiceMessageStatus.denied:
+        widget.onVoiceMessage('Mikrofon nicht erlaubt.');
+      case ImpulseVoiceMessageStatus.unavailable:
+        widget.onVoiceMessage('Mikrofon nicht verfügbar.');
+      case ImpulseVoiceMessageStatus.alreadyRecording:
+        widget.onVoiceMessage('Aufnahme läuft bereits.');
+      case ImpulseVoiceMessageStatus.failed:
+        widget.onVoiceMessage('Aufnahme konnte nicht gestartet werden.');
+      default:
+        break;
+    }
+  }
+
+  Future<void> _finishRecording() async {
+    if (!_isRecording && !_isPaused) return;
+    final result = await widget.voiceService.stopRecording();
+    if (!mounted) return;
+    _stopRecordingUi();
+    switch (result.status) {
+      case ImpulseVoiceMessageStatus.completed:
+        await widget.onVoiceSend(result);
+      case ImpulseVoiceMessageStatus.tooShort:
+        widget.onVoiceMessage('Aufnahme zu kurz.');
+      case ImpulseVoiceMessageStatus.failed:
+        widget.onVoiceMessage('Aufnahme konnte nicht gesendet werden.');
+      default:
+        break;
+    }
+  }
+
+  Future<void> _cancelRecording({String? message}) async {
+    if (!_isRecording && !_isPaused) return;
+    _voiceCancelRequested = true;
+    _voiceHoldTimer?.cancel();
+    _removeVoicePointerRoute();
+    _voiceDragStart = null;
+    await widget.voiceService.cancelRecording();
+    if (!mounted) return;
+    _stopRecordingUi();
+    if (message == null) {
+      _playDiscardAnimation();
+    } else {
+      widget.onVoiceMessage(message);
+    }
+  }
+
+  Future<void> _togglePauseRecording() async {
+    if (!_isRecording && !_isPaused) return;
+    final result = _isPaused
+        ? await widget.voiceService.resumeRecording()
+        : await widget.voiceService.pauseRecording();
+    if (!mounted) return;
+    if (result.status == ImpulseVoiceMessageStatus.paused) {
+      setState(() {
+        _isPaused = true;
+        _pauseStartedAt = DateTime.now();
+      });
+    } else if (result.status == ImpulseVoiceMessageStatus.resumed) {
+      final pauseStarted = _pauseStartedAt;
+      setState(() {
+        _isPaused = false;
+        if (pauseStarted != null) {
+          _pausedElapsed += DateTime.now().difference(pauseStarted);
+        }
+        _pauseStartedAt = null;
+      });
+    } else {
+      widget.onVoiceMessage('Aufnahme konnte nicht pausiert werden.');
+    }
+  }
+
+  void _startRecordingTimer() {
+    _recordingTimer?.cancel();
+    _recordingTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      if (!mounted || _isPaused) return;
+      final started = _recordingStartedAt;
+      if (started == null) return;
+      setState(() {
+        _recordingDuration =
+            DateTime.now().difference(started) - _pausedElapsed;
+      });
+    });
+  }
+
+  void _startAmplitudeListening() {
+    _voiceAmplitudeSub?.cancel();
+    _voiceAmplitudeSub = widget.voiceService.amplitudeLevels().listen(
+      (level) {
+        if (!mounted || !_isRecording || _isPaused) return;
+        final normalized = level.clamp(0.0, 1.0);
+        setState(() {
+          _voiceAmplitude = (_voiceAmplitude * 0.68) + (normalized * 0.32);
+        });
+      },
+      onError: (_) {
+        if (!mounted) return;
+        setState(() => _voiceAmplitude = 0);
+      },
+    );
+  }
+
+  void _playDiscardAnimation() {
+    _voiceDiscardTimer?.cancel();
+    setState(() => _showVoiceDiscardAnimation = true);
+    _voiceDiscardTimer = Timer(const Duration(milliseconds: 520), () {
+      if (!mounted) return;
+      setState(() => _showVoiceDiscardAnimation = false);
+    });
+  }
+
+  void _stopRecordingUi() {
+    _recordingTimer?.cancel();
+    _voiceHoldTimer?.cancel();
+    _voiceAmplitudeSub?.cancel();
+    _removeVoicePointerRoute();
+    setState(() {
+      _isRecording = false;
+      _isLocked = false;
+      _isPaused = false;
+      _recordingStartedAt = null;
+      _pausedElapsed = Duration.zero;
+      _pauseStartedAt = null;
+      _recordingDuration = Duration.zero;
+      _voiceCancelRequested = false;
+      _voiceLockRequested = false;
+      _voicePointerReleased = false;
+      _voiceHoldThresholdPassed = false;
+      _voiceAmplitude = 0;
+    });
+  }
+}
+
+class _VoiceRecordingControls extends StatelessWidget {
+  const _VoiceRecordingControls({
+    required this.locked,
+    required this.paused,
+    required this.duration,
+    required this.amplitude,
+    required this.onCancel,
+    required this.onLock,
+    required this.onPauseResume,
+    required this.onSend,
+  });
+
+  final bool locked;
+  final bool paused;
+  final Duration duration;
+  final double amplitude;
+  final VoidCallback onCancel;
+  final VoidCallback onLock;
+  final VoidCallback onPauseResume;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    if (locked) {
+      return Container(
+        key: const Key('impulse_voice_locked_controls'),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 15),
+        decoration: BoxDecoration(
+          color: const Color(0xF205080D),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: const Color(0x2059D7FF)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x66000000),
+              blurRadius: 24,
+              offset: Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Text(
+                  _durationLabel(duration),
+                  key: const Key('impulse_voice_recording_timer'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    height: 1,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: _RecordingWaveform(
+                    duration: duration,
+                    paused: paused,
+                    prominent: true,
+                    amplitude: amplitude,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0x80FFFFFF)),
+                  ),
+                  child: const Icon(
+                    Icons.lock_open_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+            if (paused) ...[
+              const SizedBox(height: 8),
+              const Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Pausiert',
+                  style: TextStyle(
+                    color: Color(0xFFB8C4D9),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _VoiceCircleAction(
+                  key: const Key('impulse_voice_delete_button'),
+                  onPressed: onCancel,
+                  icon: Icons.delete_outline_rounded,
+                  foreground: Colors.white,
+                  borderColor: const Color(0x33FFFFFF),
+                  background: Colors.transparent,
+                  size: 54,
+                  iconSize: 30,
+                ),
+                _VoiceCircleAction(
+                  key: const Key('impulse_voice_pause_button'),
+                  onPressed: onPauseResume,
+                  icon: paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                  foreground: const Color(0xFFFF5B6B),
+                  borderColor: const Color(0xFFFF5B6B),
+                  background: const Color(0x1AFF5B6B),
+                  size: 58,
+                  iconSize: 29,
+                ),
+                _VoiceCircleAction(
+                  key: const Key('impulse_voice_send_button'),
+                  onPressed: onSend,
+                  icon: Icons.send_rounded,
+                  foreground: const Color(0xFF041016),
+                  borderColor: const Color(0xFF25D86F),
+                  background: const Color(0xFF25D86F),
+                  size: 64,
+                  iconSize: 31,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 104,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              key: const Key('impulse_voice_recording_bar'),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              decoration: BoxDecoration(
+                color: const Color(0xF205080D),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(color: const Color(0x1859D7FF)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: Color(0x26FF5B6B),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.mic_rounded,
+                      color: Color(0xFFFF5B6B),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    _durationLabel(duration),
+                    key: const Key('impulse_voice_recording_timer'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 23,
+                      height: 1,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  const Expanded(child: _VoiceCancelHint()),
+                  const SizedBox(width: 76),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: 20,
+            bottom: 22,
+            child: _VoiceLockHint(onLock: onLock),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _durationLabel(Duration duration) {
+    final total = duration.inSeconds;
+    final minutes = (total ~/ 60).toString();
+    final seconds = (total % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+}
+
+class _VoiceLockHint extends StatelessWidget {
+  const _VoiceLockHint({required this.onLock});
+
+  final VoidCallback onLock;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      key: const Key('impulse_voice_lock_button'),
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onLock,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          width: 58,
+          height: 94,
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: const Color(0xE6141A21),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0x3359D7FF)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x66000000),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(Icons.lock_open_rounded, color: Color(0xFFDCE4EF), size: 24),
+              Icon(
+                Icons.keyboard_arrow_up_rounded,
+                color: Color(0xFFDCE4EF),
+                size: 30,
+              ),
+              Text(
+                'hoch',
+                maxLines: 1,
+                style: TextStyle(
+                  color: Color(0xFFDCE4EF),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VoiceCancelHint extends StatelessWidget {
+  const _VoiceCancelHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      key: const Key('impulse_voice_cancel_hint_right'),
+      constraints: const BoxConstraints(maxWidth: 230),
+      child: const FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerRight,
+        child: Text(
+          '← Wischen zum Abbrechen',
+          key: Key('impulse_voice_slide_to_cancel'),
+          maxLines: 1,
+          style: TextStyle(
+            color: Color(0xFFDCE4EF),
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VoiceDiscardAnimation extends StatelessWidget {
+  const _VoiceDiscardAnimation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10, bottom: 6),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Transform.translate(
+              offset: Offset(42 * (1 - value), 0),
+              child: Transform.scale(
+                scale: 0.86 + (0.14 * value),
+                child: Opacity(opacity: value.clamp(0, 1), child: child),
+              ),
+            );
+          },
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0x2AFF5B6B),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0x99FF5B6B)),
+            ),
+            child: const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFFF8791),
+              size: 25,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VoiceCircleAction extends StatelessWidget {
+  const _VoiceCircleAction({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    required this.foreground,
+    required this.borderColor,
+    required this.background,
+    required this.size,
+    required this.iconSize,
+  });
+
+  final VoidCallback onPressed;
+  final IconData icon;
+  final Color foreground;
+  final Color borderColor;
+  final Color background;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Material(
+        color: background,
+        shape: CircleBorder(side: BorderSide(color: borderColor, width: 2)),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: Icon(icon, color: foreground, size: iconSize),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecordingWaveform extends StatelessWidget {
+  const _RecordingWaveform({
+    required this.duration,
+    required this.paused,
+    required this.prominent,
+    required this.amplitude,
+  });
+
+  final Duration duration;
+  final bool paused;
+  final bool prominent;
+  final double amplitude;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = prominent ? 42 : 20;
+    final maxHeight = prominent ? 32.0 : 18.0;
+    final minHeight = prominent ? 3.0 : 2.0;
+    final tick = duration.inMilliseconds ~/ 250;
+    final normalizedAmplitude = paused ? 0.0 : amplitude.clamp(0.0, 1.0);
+    final quietPhase = normalizedAmplitude < 0.12;
+    return SizedBox(
+      key: Key(
+        prominent
+            ? 'impulse_voice_locked_waveform'
+            : 'impulse_voice_compact_waveform',
+      ),
+      height: maxHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (var index = 0; index < count; index++)
+            Container(
+              key: Key(
+                '${prominent ? 'impulse_voice_locked' : 'impulse_voice_compact'}_waveform_bar_$index',
+              ),
+              width: prominent ? 3.5 : 3,
+              height: quietPhase
+                  ? minHeight + (index.isEven ? 1.5 : 0)
+                  : minHeight +
+                        ((((index * 11 + tick * 3) % maxHeight.toInt())
+                                    .toDouble() /
+                                maxHeight) *
+                            (maxHeight - minHeight) *
+                            (0.35 + normalizedAmplitude * 0.65)),
+              margin: EdgeInsets.symmetric(horizontal: prominent ? 2.1 : 1.4),
+              decoration: BoxDecoration(
+                color: index % 7 == 0
+                    ? const Color(0xFF7FFFE7)
+                    : const Color(0xB8B8C4D9),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+        ],
       ),
     );
   }

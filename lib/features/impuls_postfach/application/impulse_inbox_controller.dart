@@ -242,15 +242,135 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
         status: ImpulseMessageStatus.sent,
         readAt: _now,
         replyToMessageId: replyTo?.id,
-        replyPreviewText: replyTo == null
-            ? null
-            : _replyPreviewText(replyTo.text),
+        replyPreviewText: replyTo == null ? null : _replyPreviewText(replyTo),
         replyPreviewSource: replyTo?.source,
       ),
       incrementUnread: false,
     );
     await _refreshChat(chatId);
     return message;
+  }
+
+  Future<ImpulseMessage> addUserAudioMessage(
+    String chatId, {
+    required String audioPath,
+    required int durationMs,
+    int? waveformSeed,
+    String? audioTranscript,
+    String? audioLanguage,
+    ImpulseMessage? replyTo,
+  }) async {
+    final normalizedPath = audioPath.trim();
+    if (normalizedPath.isEmpty) {
+      throw const AiChatException(
+        'Impulse inbox audio path must not be empty.',
+      );
+    }
+    final message = await _repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chatId,
+        text: 'Sprachnachricht',
+        contentType: ImpulseMessageContentType.audio,
+        localAudioPath: normalizedPath,
+        audioDurationMs: durationMs,
+        waveformSeed: waveformSeed,
+        audioTranscript: audioTranscript?.trim(),
+        audioLanguage: audioLanguage,
+        createdAt: _now,
+        source: ImpulseMessageSource.user,
+        status: ImpulseMessageStatus.sent,
+        readAt: _now,
+        replyToMessageId: replyTo?.id,
+        replyPreviewText: replyTo == null ? null : _replyPreviewText(replyTo),
+        replyPreviewSource: replyTo?.source,
+      ),
+      incrementUnread: false,
+    );
+    await _refreshChat(chatId);
+    return message;
+  }
+
+  Future<void> sendChatAudioMessage(
+    String chatId, {
+    required String audioPath,
+    required int durationMs,
+    int? waveformSeed,
+    String? audioTranscript,
+    String? audioLanguage,
+    ImpulseMessage? replyTo,
+  }) async {
+    final userMessage = await addUserAudioMessage(
+      chatId,
+      audioPath: audioPath,
+      durationMs: durationMs,
+      waveformSeed: waveformSeed,
+      audioTranscript: audioTranscript,
+      audioLanguage: audioLanguage,
+      replyTo: replyTo,
+    );
+    final transcript = audioTranscript?.trim() ?? '';
+    if (transcript.isEmpty) {
+      state = state.copyWith(
+        chatErrors: {
+          ...state.chatErrors,
+          chatId: 'Ich konnte die Sprachnachricht nicht erkennen.',
+        },
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      respondingChatIds: {...state.respondingChatIds, chatId},
+      chatErrors: {...state.chatErrors}..remove(chatId),
+    );
+
+    try {
+      final contextMessages = await _repository.listMessages(chatId);
+      final chatPool = state.allChats.isEmpty ? state.chats : state.allChats;
+      final chat = chatPool.cast<ImpulseChat?>().firstWhere(
+        (chat) => chat?.id == chatId,
+        orElse: () => null,
+      );
+      final response = await _aiChatClient.sendMessage(
+        AiChatRequest(
+          message: transcript,
+          language: 'DE',
+          context: await _chatContext(
+            chatId: chatId,
+            chat: chat,
+            messages: contextMessages,
+            voiceTranscript: transcript,
+          ),
+        ),
+      );
+      final reply = response.reply.trim();
+      if (reply.isEmpty) {
+        throw const AiChatException('AI chat response is empty.');
+      }
+      await _repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: chatId,
+          text: reply,
+          createdAt: _now,
+          source: ImpulseMessageSource.ai,
+          status: ImpulseMessageStatus.sent,
+          readAt: _now,
+        ),
+        incrementUnread: false,
+      );
+      await _refreshChat(chatId);
+    } catch (error) {
+      state = state.copyWith(
+        chatErrors: {...state.chatErrors, chatId: _friendlyAiError(error)},
+      );
+    } finally {
+      state = state.copyWith(
+        respondingChatIds: {...state.respondingChatIds}..remove(chatId),
+      );
+      await _refreshChat(userMessage.chatId);
+    }
   }
 
   Future<void> sendChatMessage(
@@ -388,8 +508,11 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return 'KI-Antwort konnte nicht erzeugt werden.';
   }
 
-  String _replyPreviewText(String text) {
-    final normalized = text.trim().replaceAll(RegExp(r'\s+'), ' ');
+  String _replyPreviewText(ImpulseMessage message) {
+    if (message.contentType == ImpulseMessageContentType.audio) {
+      return 'Sprachnachricht';
+    }
+    final normalized = message.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (normalized.length <= 72) return normalized;
     return '${normalized.substring(0, 69)}...';
   }
@@ -398,6 +521,7 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     required String chatId,
     required ImpulseChat? chat,
     required List<ImpulseMessage> messages,
+    String? voiceTranscript,
   }) async {
     final sourceType = chat?.sourceType;
     final effectiveProfile = effectiveAiProfileForChat(chat);
@@ -416,12 +540,23 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
               'role': message.source == ImpulseMessageSource.user
                   ? 'user'
                   : 'assistant',
-              'content': message.text,
+              'content': message.contentType == ImpulseMessageContentType.audio
+                  ? (message.audioTranscript?.trim().isNotEmpty == true
+                        ? '[Gesprochene Nachricht] ${message.audioTranscript!.trim()}'
+                        : '[Sprachnachricht]')
+                  : message.text,
             },
           )
           .toList(growable: false),
       ...effectiveProfile.toAiContext(),
     };
+    final normalizedVoiceTranscript = voiceTranscript?.trim();
+    if (normalizedVoiceTranscript != null &&
+        normalizedVoiceTranscript.isNotEmpty) {
+      context['voiceMessageTranscript'] = normalizedVoiceTranscript;
+      context['voiceMessageInstruction'] =
+          'Der Nutzer hat diese Nachricht gesprochen. Antworte auf den transkribierten Inhalt. Die Audiodatei bleibt lokal und wird nicht hochgeladen.';
+    }
     if (sourceType == ImpulseChatSourceType.category) {
       context['categoryId'] = chat?.sourceId;
       context['categoryTitle'] = chat?.title;

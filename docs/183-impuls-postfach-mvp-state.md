@@ -139,7 +139,7 @@ Das Chatdetail wurde von einer Card-/Feed-Optik zu einem klareren Messenger-Must
 
 Der Stil bleibt Talvori Dark-Neon und kopiert keine externe Messenger-App 1:1. Der Header ist kompakter mit Zurück-Button, Tagesimpuls-Avatar, Titel und Unterzeile. Beim Öffnen wird nach unten gescrollt, damit der aktuelle Impuls sichtbar ist. Wenn eine Notification mit `messageId` öffnet, kann die Zielnachricht visuell hervorgehoben werden.
 
-Die Eingabeleiste folgt ebenfalls dem Messenger-Muster: Plus-Platzhalter, runde dunkle Textkapsel und rechts ein kontextabhängiger Button. Wenn Text vorhanden ist, erscheint der Senden-Button. Wenn das Textfeld leer ist, erscheint ein Mikrofon-Button fuer Sprache-zu-Text. Wenn der Nutzer in den Chatverlauf tippt oder im Verlauf scrollt, wird die Tastatur geschlossen. Beim Öffnen der Tastatur und nach neuen Nachrichten scrollt der Verlauf wieder nach unten.
+Die Eingabeleiste folgt ebenfalls dem Messenger-Muster: Plus-Platzhalter, runde dunkle Textkapsel und rechts ein kontextabhängiger Button. Wenn Text vorhanden ist, erscheint der Senden-Button. Wenn das Textfeld leer ist, erscheint ein Mikrofon-Button fuer lokale Sprachnachrichten. Halten startet die Aufnahme und ersetzt die Eingabeleiste durch eine kompakte Hold-to-record-Leiste mit Mikrofon, Timer und großem rechts ausgerichtetem „Wischen zum Abbrechen“-Hinweis. Der Lock-Hinweis ist nicht Teil dieser horizontalen Bar, sondern eine separate vertikale Floating-Zone rechts darüber; sie bleibt im Display, ragt nach oben über den Fingerbereich und zeigt Schloss, Hoch-Pfeil und den kurzen Hinweis „hoch“. Seitliches Wischen verwirft die Aufnahme sicher ohne Snackbar und zeigt nur eine kurze nach links laufende Papierkorb-Animation, Hochwischen sperrt sie, und ein kurzer Tap startet direkt den großen gesperrten Aufnahmemodus. Der Lock-Modus öffnet eine größere, ruhigere Aufnahmeansicht mit amplitudenbasierter Waveform, Löschen, Pause/Fortsetzen und Senden. User-Bubbles zeigen bewusst keine Messenger-Häkchen, weil es noch kein echtes Zustell-/Gelesen-System gibt; Zeitstempel bleiben sichtbar. Wenn der Nutzer in den Chatverlauf tippt oder im Verlauf scrollt, wird die Tastatur geschlossen. Beim Öffnen der Tastatur und nach neuen Nachrichten scrollt der Verlauf wieder nach unten.
 
 Beim Öffnen wird der Chat als gelesen markiert.
 
@@ -156,7 +156,7 @@ Nachrichten im Chatdetail unterstützen ein lokales Long-Press-Menü im Talvori 
 - „Löschen“ entfernt die Nachricht nach Bestätigung nur lokal aus diesem Chat. Chatvorschau und letzte Nachricht werden danach neu berechnet.
 - „Mehr ...“ öffnet ein zweites Menü mit vorbereiteten Aktionen `Fixieren`, `Sprechen` und `Übersetzen`.
 
-Für das MVP bleibt alles lokal. Es gibt keine Server-Synchronisation von Reaktionen, Sternen, Replies oder gelöschten Nachrichten.
+Long-Press auf Nachrichten löst eine dezente Haptik aus, bevor das Menü erscheint. Für das MVP bleibt alles lokal. Es gibt keine Server-Synchronisation von Reaktionen, Sternen, Replies oder gelöschten Nachrichten.
 
 ## Interaktiver Tagesimpuls-Chat
 
@@ -168,7 +168,7 @@ Das Impuls-Postfach ist nicht mehr nur ein Archiv. Der Tagesimpuls-Chat kann im 
 - Zeitstempel bleiben klein in der Bubble.
 - `usedWords` erscheinen nur bei KI-/Tagesimpuls-Nachrichten als kleine Chips.
 - Unten gibt es eine Eingabeleiste mit Plus-Platzhalter, Textfeld und Senden-Button.
-- Bei leerem Textfeld gibt es einen Mikrofon-Button fuer Sprache-zu-Text.
+- Bei leerem Textfeld gibt es einen Mikrofon-Button fuer lokale Sprachnachrichten.
 - Der Plus-Button ist aktuell nur ein Platzhalter für spätere Anhänge.
 
 Beim Senden wird die Nutzer-Nachricht sofort lokal im Impuls-Postfach gespeichert. Danach ruft die App den bestehenden `ai-chat` Flutter-Client auf, der über die Supabase Edge Function `ai-chat` läuft. Flutter enthält weiterhin keine KI-Secrets und hat keine direkte OpenAI-Anbindung.
@@ -186,17 +186,26 @@ Alte gespeicherte Nachrichten ohne explizite Rolle bleiben kompatibel und werden
 - optional `replyToMessageId`
 - optional `replyPreviewText`
 - optional `replyPreviewSource`
+- `contentType`: `text` oder `audio`
+- optional `localAudioPath`
+- optional `audioDurationMs`
+- optional `waveformSeed`
+- optional `audioTranscript`
+- optional `audioLanguage`
 
 User-Nachrichten erhöhen den Ungelesen-Zähler nicht. KI-Antworten, die im geöffneten Chat entstehen, gelten direkt als gelesen. Die Chatliste zeigt nach User- oder KI-Nachrichten weiterhin die neueste Nachricht und den aktuellen Zeitstempel.
 
-Spracheingabe nutzt lokal das Flutter-Paket `speech_to_text`. Die App speichert keine Audiodateien und lädt keine Voice-Nachrichten hoch. Gesprochene Sprache wird in das Textfeld übertragen, damit der Nutzer den erkannten Text prüfen und anschließend normal senden kann. Flutter enthält dafür keine Secrets.
+Das Mikrofon ist jetzt die lokale Sprachnachricht-Funktion. Die App nutzt `record` fuer die Aufnahme, `path_provider` fuer den lokalen Speicherort, `audioplayers` fuer das lokale Abspielen und `speech_to_text` fuer die lokale Transkription. Es gibt keine Aufnahme und keine Permission-Anfrage beim App-Start; Mikrofon- und Speech-Berechtigungen werden erst beim Mikrofonkontakt im Chat relevant. Ein kurzes Antippen startet direkt den großen gesperrten Aufnahmemodus. Gedrückt halten startet die temporäre Aufnahme, Loslassen sendet nur ohne Cancel-/Lock-Intent und nur bei Mindestdauer, Wischen nach links verwirft die temporäre Datei sicher, und Wischen nach oben sperrt die Aufnahme. Mikrofonstart, erfolgreicher Lock und Abbruch geben dezente Haptik. Im gesperrten Modus sieht der Nutzer eine größere Messenger-artige Aufnahmefläche mit Timer, Waveform, Lock-Status sowie den drei klaren Aktionen Löschen, Pause/Fortsetzen und Senden. Die Recording-Waveform nutzt die echten dBFS-Amplituden des `record`-Plugins: bei Stille erscheinen Punkte beziehungsweise niedrige Linien, beim Sprechen wachsen die Balken geglättet an und nach einer Sprechpause fallen sie wieder zurück. Locked-Löschen schließt die Aufnahmefläche ohne Snackbar und verwirft die temporäre Datei lokal. Gesendete Audiodateien bleiben lokal auf dem Gerät; es gibt keine Cloud-Uploads, keine Supabase-Storage-Nutzung und keine Voice-Message-Uploads.
+
+Audio-Nachrichten erscheinen im Verlauf als kompakte Messenger-Bubble mit Play/Pause-Button, Waveform-Platzhalter, Dauer und Zeitstempel. Das erkannte Transkript wird lokal an der Audio-Nachricht gespeichert und als Text an den bestehenden `ai-chat` Client gegeben, damit Talvori auf den gesprochenen Inhalt antworten kann. Die Sprache fuer die Erkennung wird aus dem effektiven KI-Profil abgeleitet: Deutsch nutzt `de_DE`, Englisch nutzt `en_US`, Gemischt überlässt die Locale-Auswahl dem System. Wenn keine Transkription möglich ist, bleibt die Audio-Nachricht gespeichert, Talvori zeigt eine kontrollierte Meldung und erzeugt keine KI-Antwort. Fehlende Audiodateien oder verweigerte Berechtigungen crashen die App nicht. Reply-Previews zeigen fuer Audio-Nachrichten „Sprachnachricht“. Textnachrichten und KI-Antworten laufen weiter über den bestehenden `ai-chat` Client.
 
 Nicht umgesetzt in diesem Schritt:
 
 - keine Fotos
 - keine Dateien
-- keine Audio-Nachrichten
-- keine gespeicherten Voice-Messages
+- keine Audio-Cloud-Uploads
+- keine Voice-Message-Uploads
+- keine automatische Transkription als Hauptfunktion
 - keine freie globale Chatfunktion außerhalb des Impuls-Postfachs
 - keine komplexe Retry-Logik
 
@@ -263,7 +272,7 @@ Das Impuls-Postfach unterstützt jetzt lokale Kategorie-Chats. Ein Kategorie-Cha
 
 - KI-/Assistant-Nachrichten links
 - Nutzer-Nachrichten rechts
-- Eingabeleiste mit Sprache-zu-Text
+- Eingabeleiste mit lokalen Sprachnachrichten
 - Long-Press-Menü
 - Reaktionen
 - Antworten

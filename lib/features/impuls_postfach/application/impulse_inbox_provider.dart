@@ -26,10 +26,19 @@ final impulseInboxAiChatClientProvider = Provider<AiChatClient>((ref) {
   }
 });
 
-final impulseVoiceInputServiceProvider = Provider<ImpulseVoiceInputService>((
+final impulseVoiceMessageServiceProvider = Provider<ImpulseVoiceMessageService>(
+  (ref) {
+    final service = LocalImpulseVoiceMessageService();
+    ref.onDispose(service.dispose);
+    return service;
+  },
+);
+
+@Deprecated('Use impulseVoiceMessageServiceProvider for local voice messages.')
+final impulseVoiceInputServiceProvider = Provider<ImpulseVoiceMessageService>((
   ref,
 ) {
-  return SpeechToTextImpulseVoiceInputService();
+  return ref.watch(impulseVoiceMessageServiceProvider);
 });
 
 final impulseInboxControllerProvider =

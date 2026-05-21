@@ -349,6 +349,42 @@ void main() {
 
       expect(message.source, ImpulseMessageSource.ai);
       expect(message.status, ImpulseMessageStatus.sent);
+      expect(message.contentType, ImpulseMessageContentType.text);
+    });
+
+    test('audio messages serialize and load locally', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_audio_messages',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.createCustomAiChat('Audio');
+
+      final saved = await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: chat.id,
+          text: 'Sprachnachricht',
+          contentType: ImpulseMessageContentType.audio,
+          localAudioPath: '/local/audio/message.m4a',
+          audioDurationMs: 2400,
+          audioTranscript: 'Wie nutze ich move?',
+          audioLanguage: 'de_DE',
+          waveformSeed: 42,
+          createdAt: DateTime(2026, 5, 20, 12, 1),
+          source: ImpulseMessageSource.user,
+        ),
+        incrementUnread: false,
+      );
+
+      final reloaded = (await repository.listMessages(chat.id)).single;
+
+      expect(saved.contentType, ImpulseMessageContentType.audio);
+      expect(reloaded.contentType, ImpulseMessageContentType.audio);
+      expect(reloaded.localAudioPath, '/local/audio/message.m4a');
+      expect(reloaded.audioDurationMs, 2400);
+      expect(reloaded.audioTranscript, 'Wie nutze ich move?');
+      expect(reloaded.audioLanguage, 'de_DE');
+      expect(reloaded.waveformSeed, 42);
     });
 
     test('user messages can update preview without unread count', () async {

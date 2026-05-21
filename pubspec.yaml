@@ -33,6 +33,8 @@ dependencies:
   sqflite: ^2.3.3+2
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
+  record: ^6.2.0
+  path_provider: ^2.1.5
   speech_to_text: ^7.4.0
 
 dev_dependencies:

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1877,6 +1879,7 @@ void main() {
 
     expect(assistantAlign.alignment, Alignment.centerLeft);
     expect(userAlign.alignment, Alignment.centerRight);
+    expect(find.byIcon(Icons.done_all_rounded), findsNothing);
   });
 
   testWidgets('short user messages stay compact like chat bubbles', (
@@ -2556,25 +2559,117 @@ void main() {
     },
   );
 
-  testWidgets('microphone button writes recognized speech into the input', (
+  test('audio message transcript is sent to AI beside chat context', () async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_audio_transcript_context',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    final aiClient = _FakeAiChatClient('Das passt zu deiner Kategorie.');
+    final controller = ImpulseInboxController(
+      repository: repository,
+      aiChatClient: aiClient,
+      categoryWordSampler: (categoryId) async => [
+        {'word': 'move', 'translation': 'bewegen'},
+      ],
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await controller.loadChats();
+
+    await controller.sendChatAudioMessage(
+      chat.id,
+      audioPath: '/tmp/talvori-audio-context.m4a',
+      durationMs: 2400,
+      waveformSeed: 9,
+      audioTranscript: 'Kannst du mir move erklären?',
+      audioLanguage: 'de_DE',
+    );
+
+    expect(aiClient.requests.single.message, 'Kannst du mir move erklären?');
+    final context = aiClient.requests.single.context as Map<String, Object?>;
+    expect(context['chatType'], 'category');
+    expect(context['categoryWordsSample'], isA<List<Map<String, String>>>());
+    expect(context['voiceMessageTranscript'], 'Kannst du mir move erklären?');
+    expect(context['voiceMessageInstruction'], contains('gesprochen'));
+    final messages = await repository.listMessages(chat.id);
+    expect(
+      messages.any(
+        (message) =>
+            message.contentType == ImpulseMessageContentType.audio &&
+            message.audioTranscript == 'Kannst du mir move erklären?' &&
+            message.audioLanguage == 'de_DE',
+      ),
+      isTrue,
+    );
+    expect(
+      messages.any(
+        (message) => message.text == 'Das passt zu deiner Kategorie.',
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+    'audio message without transcript is stored without AI request',
+    () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_inbox_audio_without_transcript',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.ensureDailyImpulseChat();
+      final aiClient = _FakeAiChatClient('Sollte nicht gerufen werden.');
+      final controller = ImpulseInboxController(
+        repository: repository,
+        aiChatClient: aiClient,
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      await controller.loadChats();
+
+      await controller.sendChatAudioMessage(
+        chat.id,
+        audioPath: '/tmp/talvori-audio-no-transcript.m4a',
+        durationMs: 2400,
+      );
+
+      expect(aiClient.requests, isEmpty);
+      expect(
+        controller.state.chatErrors[chat.id],
+        'Ich konnte die Sprachnachricht nicht erkennen.',
+      );
+      final messages = await repository.listMessages(chat.id);
+      expect(messages.single.contentType, ImpulseMessageContentType.audio);
+      expect(messages.single.audioTranscript, isNull);
+    },
+  );
+
+  testWidgets('holding microphone starts recording UI and sends audio bubble', (
     tester,
   ) async {
     final repository = SharedPreferencesImpulseInboxRepository(
-      storageKey: 'test_inbox_screen_voice_input',
+      storageKey: 'test_inbox_screen_voice_message_hold',
       clock: () => DateTime(2026, 5, 20, 12),
     );
     final chat = await repository.ensureDailyImpulseChat();
+    final voiceService = _FakeVoiceMessageService(
+      stopResult: const ImpulseVoiceMessageResult.completed(
+        audioPath: '/tmp/talvori-voice-hold.m4a',
+        durationMs: 2400,
+        waveformSeed: 7,
+        transcript: 'Erkläre mir move.',
+        language: 'de_DE',
+      ),
+    );
+    final aiClient = _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.');
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           impulseInboxRepositoryProvider.overrideWithValue(repository),
-          impulseInboxAiChatClientProvider.overrideWithValue(
-            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
-          ),
-          impulseVoiceInputServiceProvider.overrideWithValue(
-            const _FakeVoiceInputService('Kannst du das erklaeren?'),
-          ),
+          impulseInboxAiChatClientProvider.overrideWithValue(aiClient),
+          impulseVoiceMessageServiceProvider.overrideWithValue(voiceService),
         ],
         child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
       ),
@@ -2586,16 +2681,316 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('impulse_chat_microphone_button')));
-    await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 200));
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
 
-    expect(find.text('Kannst du das erklaeren?'), findsOneWidget);
-    expect(find.byKey(const Key('impulse_chat_send_button')), findsOneWidget);
     expect(
-      find.byKey(const Key('impulse_chat_microphone_button')),
+      find.byKey(const Key('impulse_voice_recording_bar')),
+      findsOneWidget,
+    );
+    expect(find.text('← Wischen zum Abbrechen'), findsOneWidget);
+    expect(find.text('hoch sperren'), findsNothing);
+    expect(find.text('hoch'), findsOneWidget);
+    expect(
+      find.byKey(const Key('impulse_voice_cancel_hint_right')),
+      findsOneWidget,
+    );
+    final barRect = tester.getRect(
+      find.byKey(const Key('impulse_voice_recording_bar')),
+    );
+    final lockRect = tester.getRect(
+      find.byKey(const Key('impulse_voice_lock_button')),
+    );
+    final scaffoldRect = tester.getRect(find.byType(Scaffold));
+    expect(lockRect.right, lessThanOrEqualTo(scaffoldRect.right));
+    expect(lockRect.left, greaterThanOrEqualTo(scaffoldRect.left));
+    expect(lockRect.top, lessThan(barRect.top));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final messages = await repository.listMessages(chat.id);
+    final audioMessage = messages.singleWhere(
+      (message) => message.contentType == ImpulseMessageContentType.audio,
+    );
+    expect(audioMessage.localAudioPath, '/tmp/talvori-voice-hold.m4a');
+    expect(audioMessage.audioDurationMs, 2400);
+    expect(audioMessage.audioTranscript, 'Erkläre mir move.');
+    expect(audioMessage.audioLanguage, 'de_DE');
+    expect(audioMessage.source, ImpulseMessageSource.user);
+    expect(
+      find.byKey(Key('impulse_message_audio_${audioMessage.id}')),
+      findsOneWidget,
+    );
+    expect(voiceService.startCalls, 1);
+    expect(voiceService.lastLocaleId, 'de_DE');
+    expect(voiceService.stopCalls, 1);
+    expect(aiClient.requests.single.message, 'Erkläre mir move.');
+  });
+
+  testWidgets('locked recording shows pause delete and send controls', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_voice_locked',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+    final voiceService = _FakeVoiceMessageService(
+      stopResult: const ImpulseVoiceMessageResult.completed(
+        audioPath: '/tmp/talvori-voice-locked.m4a',
+        durationMs: 5100,
+        waveformSeed: 13,
+        transcript: 'Wie nutze ich dieses Wort?',
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Das erklaere ich dir kurz.'),
+          ),
+          impulseVoiceMessageServiceProvider.overrideWithValue(voiceService),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, -90));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('impulse_voice_locked_controls')),
+      findsOneWidget,
+    );
+    expect(voiceService.stopCalls, 0);
+    final silentHeight = tester
+        .getSize(find.byKey(const Key('impulse_voice_locked_waveform_bar_1')))
+        .height;
+    voiceService.emitAmplitude(0.9);
+    await tester.pump(const Duration(milliseconds: 220));
+    final speakingHeight = tester
+        .getSize(find.byKey(const Key('impulse_voice_locked_waveform_bar_1')))
+        .height;
+    expect(speakingHeight, greaterThan(silentHeight));
+    expect(
+      find.byKey(const Key('impulse_voice_delete_button')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('impulse_voice_pause_button')), findsOneWidget);
+    expect(find.byKey(const Key('impulse_voice_send_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('impulse_voice_pause_button')));
+    await tester.pump();
+    expect(voiceService.pauseCalls, 1);
+    await tester.tap(find.byKey(const Key('impulse_voice_pause_button')));
+    await tester.pump();
+    expect(voiceService.resumeCalls, 1);
+
+    await tester.tap(find.byKey(const Key('impulse_voice_send_button')));
+    await tester.pumpAndSettle();
+
+    final messages = await repository.listMessages(chat.id);
+    expect(
+      messages.any(
+        (message) =>
+            message.contentType == ImpulseMessageContentType.audio &&
+            message.localAudioPath == '/tmp/talvori-voice-locked.m4a',
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('locked delete closes recording without sending or snackbar', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_voice_locked_delete',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+    final voiceService = _FakeVoiceMessageService();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Das erklaere ich dir kurz.'),
+          ),
+          impulseVoiceMessageServiceProvider.overrideWithValue(voiceService),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 80));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('impulse_voice_locked_controls')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('impulse_voice_delete_button')));
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('impulse_voice_locked_controls')),
       findsNothing,
     );
+    expect(
+      find.byKey(const Key('impulse_voice_discard_animation')),
+      findsOneWidget,
+    );
+    expect(find.text('Aufnahme verworfen.'), findsNothing);
+    expect(voiceService.cancelCalls, 1);
+    expect(voiceService.stopCalls, 0);
+    expect(await repository.listMessages(chat.id), isEmpty);
+    await tester.pump(const Duration(milliseconds: 600));
+  });
+
+  testWidgets('quick microphone tap starts locked recording mode', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_voice_quick_tap',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+    final voiceService = _FakeVoiceMessageService();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+          impulseVoiceMessageServiceProvider.overrideWithValue(voiceService),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(milliseconds: 80));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('impulse_voice_locked_controls')),
+      findsOneWidget,
+    );
+    expect(voiceService.startCalls, 1);
+    expect(voiceService.cancelCalls, 0);
+    expect(voiceService.stopCalls, 0);
+    expect(await repository.listMessages(chat.id), isEmpty);
+  });
+
+  testWidgets('swiping left cancels voice recording', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_voice_cancel',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+    final voiceService = _FakeVoiceMessageService();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+          impulseVoiceMessageServiceProvider.overrideWithValue(voiceService),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-90, 0));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aufnahme verworfen.'), findsNothing);
+    expect(
+      find.byKey(const Key('impulse_voice_discard_animation')),
+      findsOneWidget,
+    );
+    expect(voiceService.cancelCalls, 1);
+    expect(voiceService.stopCalls, 0);
+    expect(await repository.listMessages(chat.id), isEmpty);
+    await tester.pump(const Duration(milliseconds: 600));
+  });
+
+  testWidgets('voice permission denied shows a controlled message', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_screen_voice_denied',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureDailyImpulseChat();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern, hier ist ein kurzer Kontext.'),
+          ),
+          impulseVoiceMessageServiceProvider.overrideWithValue(
+            _FakeVoiceMessageService(
+              startResult: ImpulseVoiceMessageResult.denied(),
+            ),
+          ),
+        ],
+        child: MaterialApp(home: ImpulseChatDetailScreen(chatId: chat.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('impulse_chat_microphone_button'))),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mikrofon nicht erlaubt.'), findsOneWidget);
+    expect(
+      find.byKey(const Key('impulse_chat_microphone_button')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('impulse_chat_send_button')), findsNothing);
   });
 
   testWidgets('tapping chat history dismisses the keyboard', (tester) async {
@@ -3062,13 +3457,84 @@ class _FailingAiChatClient implements AiChatClient {
   }
 }
 
-class _FakeVoiceInputService implements ImpulseVoiceInputService {
-  const _FakeVoiceInputService(this.text);
+class _FakeVoiceMessageService implements ImpulseVoiceMessageService {
+  _FakeVoiceMessageService({
+    this.startResult = const ImpulseVoiceMessageResult.started(),
+    this.stopResult = const ImpulseVoiceMessageResult.completed(
+      audioPath: '/tmp/talvori-voice.m4a',
+      durationMs: 2200,
+      waveformSeed: 5,
+    ),
+  });
 
-  final String text;
+  final ImpulseVoiceMessageResult startResult;
+  final ImpulseVoiceMessageResult stopResult;
+  final _amplitudeController = StreamController<double>.broadcast();
+
+  int startCalls = 0;
+  int stopCalls = 0;
+  int cancelCalls = 0;
+  int pauseCalls = 0;
+  int resumeCalls = 0;
+  int playCalls = 0;
+  int stopPlaybackCalls = 0;
+  String? lastLocaleId;
+
+  void emitAmplitude(double level) {
+    _amplitudeController.add(level);
+  }
 
   @override
-  Future<ImpulseVoiceInputResult> listenForText() async {
-    return ImpulseVoiceInputResult.success(text);
+  Stream<double> amplitudeLevels({
+    Duration interval = const Duration(milliseconds: 180),
+  }) {
+    return _amplitudeController.stream;
+  }
+
+  @override
+  Future<ImpulseVoiceMessageResult> startRecording({String? localeId}) async {
+    startCalls += 1;
+    lastLocaleId = localeId;
+    return startResult;
+  }
+
+  @override
+  Future<ImpulseVoiceMessageResult> stopRecording() async {
+    stopCalls += 1;
+    return stopResult;
+  }
+
+  @override
+  Future<ImpulseVoiceMessageResult> cancelRecording() async {
+    cancelCalls += 1;
+    return const ImpulseVoiceMessageResult.cancelled();
+  }
+
+  @override
+  Future<ImpulseVoiceMessageResult> pauseRecording() async {
+    pauseCalls += 1;
+    return const ImpulseVoiceMessageResult.paused();
+  }
+
+  @override
+  Future<ImpulseVoiceMessageResult> resumeRecording() async {
+    resumeCalls += 1;
+    return const ImpulseVoiceMessageResult.resumed();
+  }
+
+  @override
+  Future<ImpulseVoicePlaybackResult> play(String path) async {
+    playCalls += 1;
+    return const ImpulseVoicePlaybackResult.success();
+  }
+
+  @override
+  Future<void> stopPlayback() async {
+    stopPlaybackCalls += 1;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _amplitudeController.close();
   }
 }
