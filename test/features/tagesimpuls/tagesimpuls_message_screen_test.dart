@@ -1029,6 +1029,15 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
+  Future<void> renameCustomAiChat(String chatId, String title) async {}
+
+  @override
+  Future<void> setChatFavorite(String chatId, bool favorite) async {}
+
+  @override
+  Future<void> setChatMuted(String chatId, bool muted) async {}
+
+  @override
   Future<ImpulseChat?> getCategoryChat(String categoryId) async => null;
 
   @override
@@ -1099,6 +1108,11 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
 
   @override
   Future<List<ImpulseSavedMessage>> listStarredMessages() async => const [];
+
+  @override
+  Future<List<ImpulseSavedMessage>> listStarredMessagesForChat(
+    String chatId,
+  ) async => const [];
 
   @override
   Future<ImpulseAiProfile> loadAiProfile() async => ImpulseAiProfile.defaults;

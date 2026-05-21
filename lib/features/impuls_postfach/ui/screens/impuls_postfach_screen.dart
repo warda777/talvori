@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
@@ -12,7 +13,15 @@ import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_
 
 enum _InboxTab { chats, categories, saved, you }
 
-enum _ChatFilter { all, unread, dailyImpulse, categories, customAi, saved }
+enum _ChatFilter {
+  all,
+  favorites,
+  unread,
+  dailyImpulse,
+  categories,
+  customAi,
+  saved,
+}
 
 class ImpulsPostfachScreen extends ConsumerStatefulWidget {
   const ImpulsPostfachScreen({super.key});
@@ -110,6 +119,10 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
                           onFilterChanged: (filter) =>
                               setState(() => _chatFilter = filter),
                           onOpen: _openChat,
+                          onLongPress: _openChatActionsSheet,
+                          onMore: _openChatMoreSheet,
+                          onHide: _hideChatFromList,
+                          onMarkRead: _markChatReadFromList,
                         ),
                 _InboxTab.categories => categories!.when(
                   data: (items) => _CategoryHubList(
@@ -133,6 +146,10 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
                   profile: state.aiProfile,
                   activeChatCount: state.chats.length,
                   hiddenChats: state.hiddenChats,
+                  favoriteChats: state.chats
+                      .where((chat) => chat.isFavorite)
+                      .toList(growable: false),
+                  onOpenFavorite: _openChat,
                   onChanged: (profile) => ref
                       .read(impulseInboxControllerProvider.notifier)
                       .updateAiProfile(profile),
@@ -157,10 +174,11 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     Set<String> starredChatIds,
   ) {
     final normalized = query.trim().toLowerCase();
-    return chats
+    final filtered = chats
         .where(
           (chat) => switch (filter) {
             _ChatFilter.all => true,
+            _ChatFilter.favorites => chat.isFavorite,
             _ChatFilter.unread => chat.unreadCount > 0,
             _ChatFilter.dailyImpulse =>
               chat.sourceType == ImpulseChatSourceType.dailyImpulse,
@@ -178,12 +196,20 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
               (chat.lastMessageText ?? '').toLowerCase().contains(normalized),
         )
         .toList(growable: false);
+    if (filter != _ChatFilter.all) return filtered;
+    return [...filtered]..sort((a, b) {
+      if (a.isFavorite != b.isFavorite) return a.isFavorite ? -1 : 1;
+      return _chatSortDate(b).compareTo(_chatSortDate(a));
+    });
   }
 
-  void _openChat(ImpulseChat chat) {
+  void _openChat(ImpulseChat chat, {String? initialMessageId}) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ImpulseChatDetailScreen(chatId: chat.id),
+        builder: (_) => ImpulseChatDetailScreen(
+          chatId: chat.id,
+          initialMessageId: initialMessageId,
+        ),
       ),
     );
   }
@@ -232,6 +258,7 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
   }
 
   Future<void> _confirmDeleteCustomChat(ImpulseChat chat) async {
+    if (chat.sourceType != ImpulseChatSourceType.customAi) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -261,6 +288,361 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     await ref
         .read(impulseInboxControllerProvider.notifier)
         .deleteCustomAiChat(chat.id);
+    if (!mounted) return;
+    _showImpulseToast('Chat gelöscht', icon: Icons.delete_outline_rounded);
+  }
+
+  Future<void> _openChatActionsSheet(ImpulseChat chat) {
+    return showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _ChatActionsSheet(
+        chat: chat,
+        onOpen: () {
+          Navigator.of(sheetContext).pop();
+          _openChat(chat);
+        },
+        onMarkRead: chat.unreadCount > 0
+            ? () async {
+                Navigator.of(sheetContext).pop();
+                await _markChatReadFromList(chat);
+              }
+            : null,
+        onHide: _canHideChat(chat)
+            ? () async {
+                Navigator.of(sheetContext).pop();
+                await _hideChatFromList(chat);
+              }
+            : null,
+        onRename: chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _renameCustomChat(chat);
+              }
+            : null,
+        onMore: () {
+          Navigator.of(sheetContext).pop();
+          _openChatMoreSheet(chat);
+        },
+        onFavorite: () {
+          Navigator.of(sheetContext).pop();
+          _toggleChatFavorite(chat);
+        },
+        onMute: () {
+          Navigator.of(sheetContext).pop();
+          _toggleChatMuted(chat);
+        },
+      ),
+    );
+  }
+
+  Future<void> _openChatMoreSheet(ImpulseChat chat) {
+    return showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _ChatMoreActionsSheet(
+        chat: chat,
+        onOpen: () {
+          Navigator.of(sheetContext).pop();
+          _openChat(chat);
+        },
+        onMarkRead: chat.unreadCount > 0
+            ? () async {
+                Navigator.of(sheetContext).pop();
+                await _markChatReadFromList(chat);
+              }
+            : null,
+        onHide: _canHideChat(chat)
+            ? () async {
+                Navigator.of(sheetContext).pop();
+                await _hideChatFromList(chat);
+              }
+            : null,
+        onRename: chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _renameCustomChat(chat);
+              }
+            : null,
+        onChangeImage:
+            chat.sourceType == ImpulseChatSourceType.category ||
+                chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _pickAvatarImage(chat);
+              }
+            : null,
+        onClear: chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _confirmClearCustomChat(chat);
+              }
+            : null,
+        onDelete: chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _confirmDeleteCustomChat(chat);
+              }
+            : null,
+        onSaved: () {
+          Navigator.of(sheetContext).pop();
+          _openChatSavedMessagesSheet(chat);
+        },
+        onMute: () {
+          Navigator.of(sheetContext).pop();
+          _toggleChatMuted(chat);
+        },
+        onInfo: () {
+          Navigator.of(sheetContext).pop();
+          _openChatInfoSheet(chat);
+        },
+      ),
+    );
+  }
+
+  Future<void> _toggleChatMuted(ImpulseChat chat) async {
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .toggleChatMuted(chat);
+    if (!mounted) return;
+    _showImpulseToast(
+      chat.isMuted ? 'Stumm aus' : 'Chat stumm geschaltet',
+      icon: chat.isMuted
+          ? Icons.notifications_active_rounded
+          : Icons.notifications_off_rounded,
+    );
+  }
+
+  Future<void> _toggleChatFavorite(ImpulseChat chat) async {
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .toggleChatFavorite(chat);
+    if (!mounted) return;
+    _showImpulseToast(
+      chat.isFavorite ? 'Favorit entfernt' : 'Favorit gesetzt',
+      icon: chat.isFavorite ? Icons.star_border_rounded : Icons.star_rounded,
+    );
+  }
+
+  Future<void> _openChatSavedMessagesSheet(ImpulseChat chat) async {
+    final saved = await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .loadStarredMessagesForChat(chat.id);
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _ChatSavedMessagesSheet(
+        chat: chat,
+        savedMessages: saved,
+        onOpen: (item) {
+          Navigator.of(sheetContext).pop();
+          _openChat(item.chat, initialMessageId: item.message.id);
+        },
+      ),
+    );
+  }
+
+  Future<void> _openChatInfoSheet(ImpulseChat chat) async {
+    final messages = await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .loadMessages(chat.id);
+    final saved = await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .loadStarredMessagesForChat(chat.id);
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => _ChatInfoSheet(
+        chat: chat,
+        messageCount: messages.length,
+        savedCount: saved.length,
+        onRename: chat.sourceType == ImpulseChatSourceType.customAi
+            ? () {
+                Navigator.of(sheetContext).pop();
+                _renameCustomChat(chat);
+              }
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _markChatReadFromList(ImpulseChat chat) async {
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .markChatRead(chat.id);
+    if (!mounted) return;
+    _showImpulseToast(
+      'Chat als gelesen markiert',
+      icon: Icons.mark_chat_read_rounded,
+    );
+  }
+
+  Future<void> _hideChatFromList(ImpulseChat chat) async {
+    if (!_canHideChat(chat)) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .setChatEnabled(chatId: chat.id, enabled: false);
+    if (!mounted) return;
+    _showImpulseToast('Chat ausgeblendet', icon: Icons.visibility_off_rounded);
+  }
+
+  Future<void> _renameCustomChat(ImpulseChat chat) async {
+    if (chat.sourceType != ImpulseChatSourceType.customAi) return;
+    final controller = TextEditingController(text: chat.title);
+    final title = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF101923),
+        title: const Text(
+          'Eigenen Chat umbenennen',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        content: TextField(
+          key: const Key('custom_chat_rename_field'),
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Chat-Name',
+            hintStyle: TextStyle(color: Color(0xFF7D8BA3)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            key: const Key('custom_chat_rename_confirm_button'),
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Speichern'),
+          ),
+        ],
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
+    final normalized = title?.trim();
+    if (normalized == null || normalized.isEmpty) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .renameCustomAiChat(chatId: chat.id, title: normalized);
+    if (!mounted) return;
+    _showImpulseToast('Chat umbenannt', icon: Icons.edit_rounded);
+  }
+
+  Future<void> _confirmClearCustomChat(ImpulseChat chat) async {
+    if (chat.sourceType != ImpulseChatSourceType.customAi) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF101923),
+        title: const Text(
+          'Chat leeren?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Alle lokalen Nachrichten in diesem Chat werden gelöscht. Der Chat bleibt erhalten.',
+          style: TextStyle(color: Color(0xFFB8C4D9)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            key: const Key('custom_chat_clear_confirm_button'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Leeren'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .clearCustomAiChatMessages(chat.id);
+    if (!mounted) return;
+    _showImpulseToast('Chat geleert', icon: Icons.cleaning_services_rounded);
+  }
+
+  Future<void> _pickAvatarImage(ImpulseChat chat) async {
+    if (chat.sourceType == ImpulseChatSourceType.dailyImpulse) return;
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      imageQuality: 82,
+    );
+    if (picked == null) return;
+    await ref
+        .read(impulseInboxControllerProvider.notifier)
+        .updateChatAvatarImagePath(chatId: chat.id, imagePath: picked.path);
+    if (!mounted) return;
+    _showImpulseToast('Bild geändert', icon: Icons.image_rounded);
+  }
+
+  bool _canHideChat(ImpulseChat chat) {
+    return chat.sourceType == ImpulseChatSourceType.category ||
+        chat.sourceType == ImpulseChatSourceType.customAi;
+  }
+
+  void _showImpulseToast(
+    String message, {
+    IconData icon = Icons.check_rounded,
+  }) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        key: const Key('impulse_toast'),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        backgroundColor: const Color(0xFF08111B),
+        margin: const EdgeInsets.fromLTRB(18, 0, 18, 104),
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Color(0x8859D7FF)),
+        ),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x662DE2D1),
+                blurRadius: 22,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFF7FFFE7), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _openHiddenChatsSheet() {
@@ -396,6 +778,10 @@ class _ChatsTab extends StatelessWidget {
     required this.query,
     required this.onFilterChanged,
     required this.onOpen,
+    required this.onLongPress,
+    required this.onMore,
+    required this.onHide,
+    required this.onMarkRead,
   });
 
   final List<ImpulseChat> chats;
@@ -403,6 +789,10 @@ class _ChatsTab extends StatelessWidget {
   final String query;
   final ValueChanged<_ChatFilter> onFilterChanged;
   final ValueChanged<ImpulseChat> onOpen;
+  final ValueChanged<ImpulseChat> onLongPress;
+  final ValueChanged<ImpulseChat> onMore;
+  final ValueChanged<ImpulseChat> onHide;
+  final ValueChanged<ImpulseChat> onMarkRead;
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +805,14 @@ class _ChatsTab extends StatelessWidget {
                   filter: selectedFilter,
                   hasQuery: query.trim().isNotEmpty,
                 )
-              : _ChatList(chats: chats, onOpen: onOpen),
+              : _ChatList(
+                  chats: chats,
+                  onOpen: onOpen,
+                  onLongPress: onLongPress,
+                  onMore: onMore,
+                  onHide: onHide,
+                  onMarkRead: onMarkRead,
+                ),
         ),
       ],
     );
@@ -481,6 +878,7 @@ class _ChatFilterEmpty extends StatelessWidget {
 extension _ChatFilterLabels on _ChatFilter {
   String get label => switch (this) {
     _ChatFilter.all => 'Alle',
+    _ChatFilter.favorites => 'Favoriten',
     _ChatFilter.unread => 'Ungelesen',
     _ChatFilter.dailyImpulse => 'Tagesimpuls',
     _ChatFilter.categories => 'Kategorien',
@@ -490,6 +888,7 @@ extension _ChatFilterLabels on _ChatFilter {
 
   String get emptyTitle => switch (this) {
     _ChatFilter.all => 'Noch keine Chats',
+    _ChatFilter.favorites => 'Keine Favoriten',
     _ChatFilter.unread => 'Keine ungelesenen Chats',
     _ChatFilter.dailyImpulse => 'Kein Tagesimpuls-Chat',
     _ChatFilter.categories => 'Keine Kategorie-Chats',
@@ -500,6 +899,8 @@ extension _ChatFilterLabels on _ChatFilter {
   String get emptyText => switch (this) {
     _ChatFilter.all =>
       'Erstelle einen Kategorie-Chat oder starte mit deinem Tagesimpuls.',
+    _ChatFilter.favorites =>
+      'Markiere wichtige Chats als Favorit, damit du sie schneller wiederfindest.',
     _ChatFilter.unread => 'Neue Impulse und Antworten erscheinen hier.',
     _ChatFilter.dailyImpulse => 'Der Tagesimpuls-Chat entsteht automatisch.',
     _ChatFilter.categories =>
@@ -511,10 +912,21 @@ extension _ChatFilterLabels on _ChatFilter {
 }
 
 class _ChatList extends StatelessWidget {
-  const _ChatList({required this.chats, required this.onOpen});
+  const _ChatList({
+    required this.chats,
+    required this.onOpen,
+    required this.onLongPress,
+    required this.onMore,
+    required this.onHide,
+    required this.onMarkRead,
+  });
 
   final List<ImpulseChat> chats;
   final ValueChanged<ImpulseChat> onOpen;
+  final ValueChanged<ImpulseChat> onLongPress;
+  final ValueChanged<ImpulseChat> onMore;
+  final ValueChanged<ImpulseChat> onHide;
+  final ValueChanged<ImpulseChat> onMarkRead;
 
   @override
   Widget build(BuildContext context) {
@@ -526,7 +938,14 @@ class _ChatList extends StatelessWidget {
           index == 0 ? const SizedBox(height: 10) : const _ChatDivider(),
       itemBuilder: (context, index) {
         if (index == 0) return _InboxHeader(chatCount: chats.length);
-        return _ChatTile(chat: chats[index - 1], onOpen: onOpen);
+        return _ChatTile(
+          chat: chats[index - 1],
+          onOpen: onOpen,
+          onLongPress: onLongPress,
+          onMore: onMore,
+          onHide: onHide,
+          onMarkRead: onMarkRead,
+        );
       },
     );
   }
@@ -559,90 +978,238 @@ class _InboxHeader extends StatelessWidget {
   }
 }
 
-class _ChatTile extends StatelessWidget {
-  const _ChatTile({required this.chat, required this.onOpen});
+class _ChatTile extends StatefulWidget {
+  const _ChatTile({
+    required this.chat,
+    required this.onOpen,
+    required this.onLongPress,
+    required this.onMore,
+    required this.onHide,
+    required this.onMarkRead,
+  });
 
   final ImpulseChat chat;
   final ValueChanged<ImpulseChat> onOpen;
+  final ValueChanged<ImpulseChat> onLongPress;
+  final ValueChanged<ImpulseChat> onMore;
+  final ValueChanged<ImpulseChat> onHide;
+  final ValueChanged<ImpulseChat> onMarkRead;
+
+  @override
+  State<_ChatTile> createState() => _ChatTileState();
+}
+
+class _ChatTileState extends State<_ChatTile> {
+  bool _actionsOpen = false;
+
+  bool get _canHide =>
+      widget.chat.sourceType == ImpulseChatSourceType.category ||
+      widget.chat.sourceType == ImpulseChatSourceType.customAi;
+
+  int get _actionCount =>
+      1 + (_canHide ? 1 : 0) + (widget.chat.unreadCount > 0 ? 1 : 0);
+
+  double get _actionWidth => _actionCount * 82 + 14;
+
+  @override
+  Widget build(BuildContext context) {
+    final chat = widget.chat;
+    final actionWidth = _actionWidth;
+    return GestureDetector(
+      key: Key('impulse_chat_swipe_area_${chat.id}'),
+      onHorizontalDragUpdate: (details) {
+        if (details.delta.dx < -2 && !_actionsOpen) {
+          setState(() => _actionsOpen = true);
+        } else if (details.delta.dx > 2 && _actionsOpen) {
+          setState(() => _actionsOpen = false);
+        }
+      },
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity < -80) {
+          setState(() => _actionsOpen = true);
+        } else if (velocity > 80) {
+          setState(() => _actionsOpen = false);
+        }
+      },
+      child: Stack(
+        alignment: Alignment.centerRight,
+        clipBehavior: Clip.hardEdge,
+        children: [
+          if (_actionsOpen)
+            Positioned.fill(
+              right: 0,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: actionWidth,
+                  child: _SwipeActions(chat: chat, actionWidth: actionWidth),
+                ),
+              ),
+            ),
+          AnimatedPadding(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.only(
+              right: _actionsOpen ? actionWidth + 12 : 0,
+            ),
+            child: Material(
+              color: const Color(0xFF050A12),
+              child: InkWell(
+                key: Key('impulse_chat_tile_${chat.id}'),
+                borderRadius: BorderRadius.circular(18),
+                onTap: () {
+                  if (_actionsOpen) {
+                    setState(() => _actionsOpen = false);
+                    return;
+                  }
+                  widget.onOpen(chat);
+                },
+                onLongPress: () => widget.onLongPress(chat),
+                child: _ChatTileContent(chat: chat),
+              ),
+            ),
+          ),
+          if (_actionsOpen)
+            Positioned(
+              right: 7,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (chat.unreadCount > 0)
+                    _SwipeActionButton(
+                      key: Key('chat_swipe_read_${chat.id}'),
+                      icon: Icons.mark_chat_read_rounded,
+                      label: 'Gelesen',
+                      color: const Color(0xFF59D7FF),
+                      onTap: () {
+                        setState(() => _actionsOpen = false);
+                        widget.onMarkRead(chat);
+                      },
+                    ),
+                  if (_canHide)
+                    _SwipeActionButton(
+                      key: Key('chat_swipe_hide_${chat.id}'),
+                      icon: Icons.archive_rounded,
+                      label: 'Ausbl.',
+                      color: const Color(0xFFFFD166),
+                      onTap: () {
+                        setState(() => _actionsOpen = false);
+                        widget.onHide(chat);
+                      },
+                    ),
+                  _SwipeActionButton(
+                    key: Key('chat_swipe_more_${chat.id}'),
+                    icon: Icons.more_horiz_rounded,
+                    label: 'Mehr',
+                    color: const Color(0xFF7FFFE7),
+                    onTap: () {
+                      setState(() => _actionsOpen = false);
+                      widget.onMore(chat);
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatTileContent extends StatelessWidget {
+  const _ChatTileContent({required this.chat});
+
+  final ImpulseChat chat;
 
   @override
   Widget build(BuildContext context) {
     final lastMessage = chat.lastMessageText?.trim();
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: Key('impulse_chat_tile_${chat.id}'),
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => onOpen(chat),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          child: Row(
-            children: [
-              _ChatAvatar(chat: chat),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Row(
+        children: [
+          _ChatAvatar(chat: chat),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            chat.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
+                    Expanded(
+                      child: Text(
+                        chat.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
                         ),
-                        if (chat.lastMessageAt != null)
-                          Text(
-                            _timeLabel(chat.lastMessageAt!),
-                            style: TextStyle(
-                              color: chat.unreadCount > 0
-                                  ? const Color(0xFF7FFFE7)
-                                  : const Color(0xFF7D8BA3),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            lastMessage == null || lastMessage.isEmpty
-                                ? _emptyPreview(chat)
-                                : lastMessage,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: chat.unreadCount > 0
-                                  ? Colors.white
-                                  : const Color(0xFFB8C4D9),
-                              fontWeight: chat.unreadCount > 0
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                            ),
-                          ),
+                    if (chat.lastMessageAt != null)
+                      Text(
+                        _timeLabel(chat.lastMessageAt!),
+                        style: TextStyle(
+                          color: chat.unreadCount > 0
+                              ? const Color(0xFF7FFFE7)
+                              : const Color(0xFF7D8BA3),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
                         ),
-                        if (chat.unreadCount > 0) ...[
-                          const SizedBox(width: 10),
-                          _UnreadBadge(count: chat.unreadCount),
-                        ],
-                      ],
-                    ),
+                      ),
+                    if (chat.isFavorite) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.star_rounded,
+                        key: Key('chat_favorite_indicator_${chat.id}'),
+                        color: const Color(0xFFFFD166),
+                        size: 15,
+                      ),
+                    ],
+                    if (chat.isMuted) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.notifications_off_rounded,
+                        key: Key('chat_muted_indicator_${chat.id}'),
+                        color: const Color(0xFF7D8BA3),
+                        size: 15,
+                      ),
+                    ],
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        lastMessage == null || lastMessage.isEmpty
+                            ? _emptyPreview(chat)
+                            : lastMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: chat.unreadCount > 0
+                              ? Colors.white
+                              : const Color(0xFFB8C4D9),
+                          fontWeight: chat.unreadCount > 0
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (chat.unreadCount > 0) ...[
+                      const SizedBox(width: 10),
+                      _UnreadBadge(count: chat.unreadCount),
+                    ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -667,6 +1234,686 @@ class _ChatTile extends StatelessWidget {
     final minute = value.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
   }
+}
+
+class _SwipeActions extends StatelessWidget {
+  const _SwipeActions({required this.chat, required this.actionWidth});
+
+  final ImpulseChat chat;
+  final double actionWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: Key('chat_swipe_actions_${chat.id}'),
+      width: actionWidth,
+      height: 72,
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFF08111B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+    );
+  }
+}
+
+class _SwipeActionButton extends StatelessWidget {
+  const _SwipeActionButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          width: 76,
+          height: 58,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.42)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+                softWrap: false,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatActionsSheet extends StatelessWidget {
+  const _ChatActionsSheet({
+    required this.chat,
+    required this.onOpen,
+    required this.onMore,
+    required this.onFavorite,
+    required this.onMute,
+    this.onMarkRead,
+    this.onHide,
+    this.onRename,
+  });
+
+  final ImpulseChat chat;
+  final VoidCallback onOpen;
+  final VoidCallback? onMarkRead;
+  final VoidCallback? onHide;
+  final VoidCallback? onRename;
+  final VoidCallback onMore;
+  final VoidCallback onFavorite;
+  final VoidCallback onMute;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ChatActionSheetFrame(
+      key: Key('chat_actions_sheet_${chat.id}'),
+      chat: chat,
+      title: 'Chat-Aktionen',
+      children: [
+        _ChatActionRow(
+          key: Key('chat_action_open_${chat.id}'),
+          icon: Icons.open_in_new_rounded,
+          label: 'Öffnen',
+          onTap: onOpen,
+        ),
+        if (onMarkRead != null)
+          _ChatActionRow(
+            key: Key('chat_action_read_${chat.id}'),
+            icon: Icons.mark_chat_read_rounded,
+            label: 'Als gelesen markieren',
+            onTap: onMarkRead!,
+          ),
+        _ChatActionRow(
+          key: Key('chat_action_favorite_${chat.id}'),
+          icon: chat.isFavorite
+              ? Icons.star_rounded
+              : Icons.star_border_rounded,
+          label: chat.isFavorite
+              ? 'Aus Favoriten entfernen'
+              : 'Zu Favoriten hinzufügen',
+          onTap: onFavorite,
+        ),
+        _ChatActionRow(
+          key: Key('chat_action_mute_${chat.id}'),
+          icon: chat.isMuted
+              ? Icons.notifications_active_rounded
+              : Icons.notifications_off_outlined,
+          label: chat.isMuted ? 'Stumm aus' : 'Chat stumm schalten',
+          onTap: onMute,
+        ),
+        if (onRename != null)
+          _ChatActionRow(
+            key: Key('chat_action_rename_${chat.id}'),
+            icon: Icons.edit_rounded,
+            label: 'Umbenennen',
+            onTap: onRename!,
+          ),
+        if (onHide != null)
+          _ChatActionRow(
+            key: Key('chat_action_hide_${chat.id}'),
+            icon: Icons.visibility_off_rounded,
+            label: chat.sourceType == ImpulseChatSourceType.category
+                ? 'Kategorie-Chat ausblenden'
+                : 'Chat ausblenden',
+            onTap: onHide!,
+          ),
+        _ChatActionRow(
+          key: Key('chat_action_more_${chat.id}'),
+          icon: Icons.more_horiz_rounded,
+          label: 'Mehr ...',
+          onTap: onMore,
+        ),
+      ],
+    );
+  }
+}
+
+class _ChatMoreActionsSheet extends StatelessWidget {
+  const _ChatMoreActionsSheet({
+    required this.chat,
+    required this.onOpen,
+    required this.onSaved,
+    required this.onMute,
+    required this.onInfo,
+    this.onMarkRead,
+    this.onHide,
+    this.onRename,
+    this.onChangeImage,
+    this.onClear,
+    this.onDelete,
+  });
+
+  final ImpulseChat chat;
+  final VoidCallback onOpen;
+  final VoidCallback? onMarkRead;
+  final VoidCallback? onHide;
+  final VoidCallback? onRename;
+  final VoidCallback? onChangeImage;
+  final VoidCallback? onClear;
+  final VoidCallback? onDelete;
+  final VoidCallback onSaved;
+  final VoidCallback onMute;
+  final VoidCallback onInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ChatActionSheetFrame(
+      key: Key('chat_more_actions_sheet_${chat.id}'),
+      chat: chat,
+      title: 'Mehr',
+      children: [
+        _ChatActionRow(
+          key: Key('chat_more_open_${chat.id}'),
+          icon: Icons.open_in_new_rounded,
+          label: 'Öffnen',
+          onTap: onOpen,
+        ),
+        if (onRename != null)
+          _ChatActionRow(
+            key: Key('chat_more_rename_${chat.id}'),
+            icon: Icons.edit_rounded,
+            label: 'Umbenennen',
+            onTap: onRename!,
+          ),
+        if (onChangeImage != null)
+          _ChatActionRow(
+            key: Key('chat_more_image_${chat.id}'),
+            icon: Icons.image_rounded,
+            label: 'Bild ändern',
+            onTap: onChangeImage!,
+          ),
+        if (onMarkRead != null)
+          _ChatActionRow(
+            key: Key('chat_more_read_${chat.id}'),
+            icon: Icons.mark_chat_read_rounded,
+            label: 'Als gelesen markieren',
+            onTap: onMarkRead!,
+          ),
+        if (onHide != null)
+          _ChatActionRow(
+            key: Key('chat_more_hide_${chat.id}'),
+            icon: Icons.visibility_off_rounded,
+            label: chat.sourceType == ImpulseChatSourceType.category
+                ? 'Kategorie-Chat ausblenden'
+                : 'Chat ausblenden',
+            onTap: onHide!,
+          ),
+        if (onClear != null)
+          _ChatActionRow(
+            key: Key('chat_more_clear_${chat.id}'),
+            icon: Icons.cleaning_services_rounded,
+            label: 'Chat leeren',
+            onTap: onClear!,
+          ),
+        _ChatActionRow(
+          key: Key('chat_more_saved_${chat.id}'),
+          icon: Icons.star_rounded,
+          label: 'Gespeicherte Nachrichten anzeigen',
+          onTap: onSaved,
+        ),
+        _ChatActionRow(
+          key: Key('chat_more_mute_${chat.id}'),
+          icon: chat.isMuted
+              ? Icons.notifications_active_rounded
+              : Icons.notifications_off_outlined,
+          label: chat.isMuted ? 'Stumm aus' : 'Stumm schalten',
+          onTap: onMute,
+        ),
+        _ChatActionRow(
+          key: Key('chat_more_info_${chat.id}'),
+          icon: Icons.info_outline_rounded,
+          label: 'Chatinfo',
+          onTap: onInfo,
+        ),
+        if (onDelete != null)
+          _ChatActionRow(
+            key: Key('chat_more_delete_${chat.id}'),
+            icon: Icons.delete_outline_rounded,
+            label: 'Chat lokal löschen',
+            destructive: true,
+            onTap: onDelete!,
+          ),
+      ],
+    );
+  }
+}
+
+class _ChatActionSheetFrame extends StatelessWidget {
+  const _ChatActionSheetFrame({
+    super.key,
+    required this.chat,
+    required this.title,
+    required this.children,
+  });
+
+  final ImpulseChat chat;
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.86;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xF20A111A),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0x2259D7FF)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x99000000),
+                blurRadius: 36,
+                offset: Offset(0, 18),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0x3359D7FF),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        _ChatAvatar(chat: chat, size: 42),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                chat.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                  color: Color(0xFF7D8BA3),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF101923),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: const Color(0x1F59D7FF)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < children.length; i++) ...[
+                            if (i > 0)
+                              const Divider(
+                                height: 1,
+                                color: Color(0x1839D8D8),
+                              ),
+                            children[i],
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatActionRow extends StatelessWidget {
+  const _ChatActionRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.destructive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = destructive ? const Color(0xFFFF7A88) : Colors.white;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            Icon(icon, color: color, size: 21),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatSavedMessagesSheet extends StatelessWidget {
+  const _ChatSavedMessagesSheet({
+    required this.chat,
+    required this.savedMessages,
+    required this.onOpen,
+  });
+
+  final ImpulseChat chat;
+  final List<ImpulseSavedMessage> savedMessages;
+  final ValueChanged<ImpulseSavedMessage> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = savedMessages.isEmpty
+        ? const [
+            Padding(
+              padding: EdgeInsets.all(18),
+              child: _PanelEmpty(
+                title: 'Keine gespeicherten Nachrichten in diesem Chat.',
+                text: 'Markiere wichtige Nachrichten mit einem Stern.',
+              ),
+            ),
+          ]
+        : savedMessages
+              .map<Widget>(
+                (item) => _SavedMessageMiniTile(
+                  key: Key('chat_saved_message_${item.message.id}'),
+                  item: item,
+                  onTap: () => onOpen(item),
+                ),
+              )
+              .toList(growable: false);
+    return _ChatActionSheetFrame(
+      key: Key('chat_saved_messages_sheet_${chat.id}'),
+      chat: chat,
+      title: 'Gespeicherte Nachrichten',
+      children: content,
+    );
+  }
+}
+
+class _SavedMessageMiniTile extends StatelessWidget {
+  const _SavedMessageMiniTile({
+    super.key,
+    required this.item,
+    required this.onTap,
+  });
+
+  final ImpulseSavedMessage item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = item.message;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            const Icon(Icons.star_rounded, color: Color(0xFFFFD166), size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.text,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      height: 1.25,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatCompactDateTime(message.createdAt),
+                    style: const TextStyle(
+                      color: Color(0xFF7D8BA3),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (message.reaction != null) ...[
+              const SizedBox(width: 8),
+              Text(message.reaction!, style: const TextStyle(fontSize: 18)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatInfoSheet extends StatelessWidget {
+  const _ChatInfoSheet({
+    required this.chat,
+    required this.messageCount,
+    required this.savedCount,
+    this.onRename,
+  });
+
+  final ImpulseChat chat;
+  final int messageCount;
+  final int savedCount;
+  final VoidCallback? onRename;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ChatActionSheetFrame(
+      key: Key('chat_info_sheet_${chat.id}'),
+      chat: chat,
+      title: 'Chatinfo',
+      children: [
+        _ChatInfoRow(label: 'Typ', value: _chatTypeLabel(chat.sourceType)),
+        _ChatInfoRow(
+          label: 'Erstellt',
+          value: _formatCompactDateTime(chat.createdAt),
+        ),
+        _ChatInfoRow(
+          label: 'Letzte Nachricht',
+          value: chat.lastMessageAt == null
+              ? 'Noch keine'
+              : _formatCompactDateTime(chat.lastMessageAt!),
+        ),
+        _ChatInfoRow(label: 'Nachrichten', value: '$messageCount lokal'),
+        _ChatInfoRow(label: 'Gespeichert', value: '$savedCount'),
+        _ChatInfoRow(
+          label: 'Status',
+          value: chat.enabled ? 'Aktiv' : 'Ausgeblendet',
+        ),
+        _ChatInfoRow(label: 'Stumm', value: chat.isMuted ? 'Ja' : 'Nein'),
+        _ChatInfoRow(label: 'Favorit', value: chat.isFavorite ? 'Ja' : 'Nein'),
+        if (chat.sourceType == ImpulseChatSourceType.category) ...[
+          _ChatInfoRow(label: 'Kategorie', value: chat.title),
+          _ChatInfoRow(
+            label: 'Kategorie-ID',
+            value: chat.sourceId == null || chat.sourceId!.isEmpty
+                ? '-'
+                : chat.sourceId!,
+          ),
+          const _ChatInfoNote(
+            text: 'Kategorie-Wörter werden nur lesend als KI-Kontext genutzt.',
+          ),
+        ],
+        if (chat.sourceType == ImpulseChatSourceType.dailyImpulse)
+          const _ChatInfoNote(
+            text:
+                'Tagesimpulse werden lokal gespeichert und über lokale Notifications geöffnet.',
+          ),
+        const _ChatInfoNote(
+          text: 'Dieser Verlauf ist lokal auf diesem Gerät gespeichert.',
+        ),
+        if (onRename != null)
+          _ChatActionRow(
+            key: Key('chat_info_rename_${chat.id}'),
+            icon: Icons.edit_rounded,
+            label: 'Umbenennen',
+            onTap: onRename!,
+          ),
+      ],
+    );
+  }
+}
+
+class _ChatInfoRow extends StatelessWidget {
+  const _ChatInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Color(0xFF8EA0B8),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatInfoNote extends StatelessWidget {
+  const _ChatInfoNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(14),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFFB8C4D9),
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+      ),
+    );
+  }
+}
+
+String _chatTypeLabel(ImpulseChatSourceType sourceType) {
+  return switch (sourceType) {
+    ImpulseChatSourceType.dailyImpulse => 'Tagesimpuls',
+    ImpulseChatSourceType.category => 'Kategorie-Chat',
+    ImpulseChatSourceType.customAi => 'Eigener KI-Chat',
+    ImpulseChatSourceType.favorites => 'Favoriten',
+    ImpulseChatSourceType.myWords => 'Meine Wörter',
+    ImpulseChatSourceType.knownWords => 'Bekannte Wörter',
+  };
+}
+
+String _formatCompactDateTime(DateTime value) {
+  final date =
+      '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year}';
+  final time =
+      '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+  return '$date · $time';
+}
+
+DateTime _chatSortDate(ImpulseChat chat) {
+  return chat.lastMessageAt ?? chat.createdAt;
 }
 
 class _ChatDivider extends StatelessWidget {
@@ -1021,6 +2268,8 @@ class _YouTab extends StatelessWidget {
     required this.profile,
     required this.activeChatCount,
     required this.hiddenChats,
+    required this.favoriteChats,
+    required this.onOpenFavorite,
     required this.onChanged,
     required this.onManageHidden,
   });
@@ -1028,6 +2277,8 @@ class _YouTab extends StatelessWidget {
   final ImpulseAiProfile profile;
   final int activeChatCount;
   final List<ImpulseChat> hiddenChats;
+  final List<ImpulseChat> favoriteChats;
+  final ValueChanged<ImpulseChat> onOpenFavorite;
   final ValueChanged<ImpulseAiProfile> onChanged;
   final VoidCallback onManageHidden;
 
@@ -1077,7 +2328,111 @@ class _YouTab extends StatelessWidget {
           hiddenChatCount: hiddenChats.length,
           onManageHidden: onManageHidden,
         ),
+        const SizedBox(height: 16),
+        _FavoriteChatsPanel(
+          favoriteChats: favoriteChats,
+          onOpen: onOpenFavorite,
+        ),
       ],
+    );
+  }
+}
+
+class _FavoriteChatsPanel extends StatelessWidget {
+  const _FavoriteChatsPanel({
+    required this.favoriteChats,
+    required this.onOpen,
+  });
+
+  final List<ImpulseChat> favoriteChats;
+  final ValueChanged<ImpulseChat> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = favoriteChats.take(3).toList(growable: false);
+    return Container(
+      key: const Key('favorite_chats_panel'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF08111B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x2259D7FF)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.star_rounded,
+                color: Color(0xFFFFD166),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Favoriten',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              _ChatCountPill(label: 'Chats', count: favoriteChats.length),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (favoriteChats.isEmpty)
+            const Text(
+              'Noch keine Favoriten.',
+              style: TextStyle(
+                color: Color(0xFF8EA0B8),
+                fontWeight: FontWeight.w700,
+              ),
+            )
+          else
+            for (final chat in visible)
+              _FavoriteChatMiniTile(chat: chat, onTap: () => onOpen(chat)),
+        ],
+      ),
+    );
+  }
+}
+
+class _FavoriteChatMiniTile extends StatelessWidget {
+  const _FavoriteChatMiniTile({required this.chat, required this.onTap});
+
+  final ImpulseChat chat;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: Key('favorite_chat_tile_${chat.id}'),
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        child: Row(
+          children: [
+            _ChatAvatar(chat: chat, size: 34),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                chat.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF7D8BA3)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1107,11 +2462,20 @@ class _ChatManagementPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Chat-Verwaltung',
+            'Chat-Übersicht',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w900,
               fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Alltagsaktionen findest du direkt per Long-Press oder Swipe in der Chatliste.',
+            style: TextStyle(
+              color: Color(0xFF8EA0B8),
+              fontWeight: FontWeight.w600,
+              height: 1.35,
             ),
           ),
           const SizedBox(height: 10),

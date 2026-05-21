@@ -171,6 +171,7 @@ void main() {
       'seed-category-travel',
       'Travel',
     );
+    await repository.setChatFavorite(category.id, true);
     await repository.addMessage(
       ImpulseMessage(
         id: '',
@@ -201,8 +202,26 @@ void main() {
       find.byKey(const Key('impulse_inbox_chat_filter_chips')),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('chat_filter_favorites')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('chat_filter_categories')));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Travel'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('impulse_inbox_chat_list')),
+        matching: find.text('Grammatikfragen'),
+      ),
+      findsNothing,
+    );
+
+    await tester.tap(find.byKey(const Key('chat_filter_favorites')));
     await tester.pumpAndSettle();
     expect(
       find.descendant(
@@ -244,6 +263,11 @@ void main() {
       '',
     );
     await tester.pump();
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_chat_filter_chips')),
+      const Offset(-520, 0),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('chat_filter_customAi')));
     await tester.pumpAndSettle();
     expect(
@@ -261,6 +285,11 @@ void main() {
       findsNothing,
     );
 
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_chat_filter_chips')),
+      const Offset(520, 0),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('chat_filter_unread')));
     await tester.pumpAndSettle();
     expect(
@@ -300,6 +329,546 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets('favorites filter empty state and search combination work', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_favorites_filter_search',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final favorite = await repository.ensureCategoryChat(
+      'seed-category-english',
+      'Englisch üben',
+    );
+    await repository.createCustomAiChat('Grammatikfragen');
+    await repository.setChatFavorite(favorite.id, true);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('chat_filter_favorites')));
+    await tester.pumpAndSettle();
+    expect(find.text('Englisch üben'), findsOneWidget);
+    expect(find.text('Grammatikfragen'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('impulse_inbox_search_field')),
+      'Grammatik',
+    );
+    await tester.pump();
+    expect(find.text('Nichts gefunden'), findsOneWidget);
+
+    final emptyRepository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_favorites_filter_empty',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await emptyRepository.createCustomAiChat('Kein Favorit');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(emptyRepository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(
+          home: ImpulsPostfachScreen(key: Key('empty_favorites_inbox')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('chat_filter_favorites')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Keine Favoriten'), findsOneWidget);
+    expect(
+      find.text(
+        'Markiere wichtige Chats als Favorit, damit du sie schneller wiederfindest.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('favorite chats are shown first in all filter', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_favorites_sorted_first',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final favorite = await repository.ensureCategoryChat(
+      'seed-category-travel',
+      'Travel',
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: favorite.id,
+        text: 'Older favorite',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+      incrementUnread: false,
+    );
+    await repository.setChatFavorite(favorite.id, true);
+    await repository.addDailyImpulseMessages(const [
+      TagesimpulsGeneratedImpulse(
+        slot: 'morning',
+        message: 'Newer daily',
+        usedWords: ['newer'],
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final favoriteTop = tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byKey(const Key('impulse_inbox_chat_list')),
+            matching: find.text('Travel'),
+          ),
+        )
+        .dy;
+    final dailyTop = tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byKey(const Key('impulse_inbox_chat_list')),
+            matching: find.text('Tagesimpuls'),
+          ),
+        )
+        .dy;
+
+    expect(favoriteTop, lessThan(dailyTop));
+  });
+
+  testWidgets('long press opens chat actions and protects daily impulse chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_actions_daily',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    await repository.addDailyImpulseMessages(const [
+      TagesimpulsGeneratedImpulse(
+        slot: 'morning',
+        message: 'Daily hello',
+        usedWords: ['hello'],
+      ),
+    ]);
+    final daily = (await repository.listChats()).single;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${daily.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(Key('chat_actions_sheet_${daily.id}')), findsOneWidget);
+    expect(find.byKey(Key('chat_action_read_${daily.id}')), findsOneWidget);
+    expect(find.byKey(Key('chat_action_hide_${daily.id}')), findsNothing);
+    expect(find.byKey(Key('chat_action_rename_${daily.id}')), findsNothing);
+
+    await tester.tap(find.byKey(Key('chat_action_more_${daily.id}')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(Key('chat_more_actions_sheet_${daily.id}')),
+      findsOneWidget,
+    );
+    expect(find.byKey(Key('chat_more_delete_${daily.id}')), findsNothing);
+    expect(find.byKey(Key('chat_more_hide_${daily.id}')), findsNothing);
+    expect(find.byKey(Key('chat_more_rename_${daily.id}')), findsNothing);
+  });
+
+  testWidgets('chat actions mark read and hide category chats from the list', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_actions_category',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final category = await repository.ensureCategoryChat(
+      'seed-category-travel',
+      'Travel',
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: category.id,
+        text: 'Kategorie Antwort',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${category.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_read_${category.id}')));
+    await tester.pumpAndSettle();
+
+    expect((await repository.listChats()).single.unreadCount, 0);
+    expect(find.byKey(const Key('impulse_inbox_unread_badge')), findsNothing);
+    expect(find.byKey(const Key('impulse_toast')), findsOneWidget);
+    expect(find.text('Chat als gelesen markiert'), findsOneWidget);
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${category.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_hide_${category.id}')));
+    await tester.pumpAndSettle();
+
+    expect(await repository.listChats(), isEmpty);
+    expect(find.text('Travel'), findsNothing);
+    expect(
+      (await repository.getCategoryChat('seed-category-travel'))?.enabled,
+      isFalse,
+    );
+  });
+
+  testWidgets('chat actions toggle favorite and mute locally', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_actions_favorite_mute',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final custom = await repository.createCustomAiChat('Training');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${custom.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_favorite_${custom.id}')));
+    await tester.pumpAndSettle();
+
+    var loaded = (await repository.listChats()).single;
+    expect(loaded.isFavorite, isTrue);
+    expect(
+      find.byKey(Key('chat_favorite_indicator_${custom.id}')),
+      findsOneWidget,
+    );
+    expect(find.text('Favorit gesetzt'), findsOneWidget);
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${custom.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_mute_${custom.id}')));
+    await tester.pumpAndSettle();
+
+    loaded = (await repository.listChats()).single;
+    expect(loaded.isMuted, isTrue);
+    expect(
+      find.byKey(Key('chat_muted_indicator_${custom.id}')),
+      findsOneWidget,
+    );
+    expect(find.text('Chat stumm geschaltet'), findsOneWidget);
+  });
+
+  testWidgets('swipe exposes quick actions for category chat', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_swipe_category',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final category = await repository.ensureCategoryChat(
+      'seed-category-travel',
+      'Travel',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(
+      find.byKey(Key('impulse_chat_swipe_area_${category.id}')),
+      const Offset(-420, 0),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(Key('chat_swipe_actions_${category.id}')),
+      findsOneWidget,
+    );
+    expect(find.byKey(Key('chat_swipe_more_${category.id}')), findsOneWidget);
+    expect(find.byKey(Key('chat_swipe_hide_${category.id}')), findsOneWidget);
+
+    final titleRect = tester.getRect(
+      find.descendant(
+        of: find.byKey(Key('impulse_chat_tile_${category.id}')),
+        matching: find.text('Travel'),
+      ),
+    );
+    final hideRect = tester.getRect(
+      find.byKey(Key('chat_swipe_hide_${category.id}')),
+    );
+    final moreRect = tester.getRect(
+      find.byKey(Key('chat_swipe_more_${category.id}')),
+    );
+    final frameRect = tester.getRect(
+      find.byKey(Key('chat_swipe_actions_${category.id}')),
+    );
+    expect(titleRect.right, lessThan(hideRect.left));
+    expect(hideRect.left, greaterThanOrEqualTo(frameRect.left));
+    expect(hideRect.right, lessThanOrEqualTo(frameRect.right));
+    expect(moreRect.left, greaterThanOrEqualTo(frameRect.left));
+    expect(moreRect.right, lessThanOrEqualTo(frameRect.right));
+  });
+
+  testWidgets('more menu opens chatinfo and saved messages for one chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_more_productive',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCategoryChat(
+      'seed-category-basics',
+      'Basics',
+    );
+    final message = await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Gespeicherter Satz',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.ai,
+      ),
+      incrementUnread: false,
+    );
+    await repository.updateMessageStarred(chat.id, message.id, isStarred: true);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_more_${chat.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(Key('chat_more_saved_${chat.id}')), findsOneWidget);
+    expect(find.byKey(Key('chat_more_info_${chat.id}')), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('chat_more_saved_${chat.id}')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(Key('chat_saved_messages_sheet_${chat.id}')),
+      findsOneWidget,
+    );
+    expect(find.byKey(Key('chat_saved_message_${message.id}')), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('chat_saved_message_${message.id}')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(
+      tester
+          .widget<ImpulseChatDetailScreen>(find.byType(ImpulseChatDetailScreen))
+          .initialMessageId,
+      message.id,
+    );
+  });
+
+  testWidgets('more menu opens local chatinfo sheet', (tester) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_info_sheet',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.createCustomAiChat('Training');
+    await repository.setChatFavorite(chat.id, true);
+    await repository.setChatMuted(chat.id, true);
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Lokaler Verlauf',
+        createdAt: DateTime(2026, 5, 20, 12),
+        source: ImpulseMessageSource.user,
+      ),
+      incrementUnread: false,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_more_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_more_info_${chat.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(Key('chat_info_sheet_${chat.id}')), findsOneWidget);
+    expect(find.text('Eigener KI-Chat'), findsOneWidget);
+    expect(find.text('1 lokal'), findsOneWidget);
+    expect(find.text('Favorit'), findsOneWidget);
+    expect(find.text('Stumm'), findsOneWidget);
+    expect(find.text('Aktiv'), findsOneWidget);
+    expect(
+      find.text('Dieser Verlauf ist lokal auf diesem Gerät gespeichert.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'custom AI chat can be renamed cleared and deleted from list menu',
+    (tester) async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_inbox_chat_actions_custom',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final custom = await repository.createCustomAiChat('Alter Chat');
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: custom.id,
+          text: 'Lokaler Verlauf',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+        ),
+        incrementUnread: false,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            impulseInboxRepositoryProvider.overrideWithValue(repository),
+            impulseInboxAiChatClientProvider.overrideWithValue(
+              _FakeAiChatClient('Okay.'),
+            ),
+          ],
+          child: const MaterialApp(home: ImpulsPostfachScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(find.byKey(Key('impulse_chat_tile_${custom.id}')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(Key('chat_action_rename_${custom.id}')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(Key('chat_action_rename_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('custom_chat_rename_field')),
+        'Neuer Chat',
+      );
+      await tester.tap(
+        find.byKey(const Key('custom_chat_rename_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Neuer Chat'), findsOneWidget);
+
+      await tester.longPress(find.byKey(Key('impulse_chat_tile_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('chat_action_more_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('chat_more_clear_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('custom_chat_clear_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(await repository.listMessages(custom.id), isEmpty);
+      expect((await repository.listAllChats()).single.title, 'Neuer Chat');
+
+      await tester.longPress(find.byKey(Key('impulse_chat_tile_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('chat_action_more_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('chat_more_delete_${custom.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('custom_chat_delete_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(await repository.listAllChats(), isEmpty);
+      expect(find.text('Neuer Chat'), findsNothing);
+    },
+  );
 
   testWidgets('plus menu creates custom AI chat', (tester) async {
     final repository = SharedPreferencesImpulseInboxRepository(
@@ -581,14 +1150,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Prüfung'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byKey(
-        const Key(
-          'ai_profile_Erklärungssprache_ImpulseExplanationLanguage.mixed',
-        ),
-      ),
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_you_tab_list')),
+      const Offset(0, -420),
     );
-    await tester.drag(find.byType(ListView), const Offset(0, -160));
+    await tester.pumpAndSettle();
     await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(
@@ -673,6 +1239,47 @@ void main() {
       'Alter Verlauf bleibt',
     );
     expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+  });
+
+  testWidgets('you tab shows favorite chats overview and opens them', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_you_favorites',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final favorite = await repository.createCustomAiChat('Lieblingschat');
+    await repository.setChatFavorite(favorite.id, true);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Du'));
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('impulse_inbox_you_tab_list')),
+      const Offset(0, -900),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('favorite_chats_panel')), findsOneWidget);
+    expect(find.text('Lieblingschat'), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('favorite_chat_tile_${favorite.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text('Lieblingschat'), findsOneWidget);
   });
 
   testWidgets('hidden custom chat can be locally deleted from management', (

@@ -11,6 +11,9 @@ abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
   Future<ImpulseChat> ensureCategoryChat(String categoryId, String title);
   Future<ImpulseChat> createCustomAiChat(String title);
+  Future<void> renameCustomAiChat(String chatId, String title);
+  Future<void> setChatMuted(String chatId, bool muted);
+  Future<void> setChatFavorite(String chatId, bool favorite);
   Future<ImpulseChat?> getCategoryChat(String categoryId);
   Future<void> setCategoryChatEnabled(String categoryId, bool enabled);
   Future<void> setChatEnabled(String chatId, bool enabled);
@@ -19,6 +22,7 @@ abstract class ImpulseInboxRepository {
   Future<List<ImpulseChat>> listAllChats();
   Future<List<ImpulseChat>> listHiddenChats();
   Future<List<ImpulseSavedMessage>> listStarredMessages();
+  Future<List<ImpulseSavedMessage>> listStarredMessagesForChat(String chatId);
   Future<ImpulseAiProfile> loadAiProfile();
   Future<void> saveAiProfile(ImpulseAiProfile profile);
   Future<List<ImpulseMessage>> listMessages(String chatId);
@@ -169,7 +173,54 @@ class SharedPreferencesImpulseInboxRepository
     final store = await _loadStore();
     final chat = store.chats[normalizedChatId];
     if (chat == null) return;
+    if (chat.sourceType == ImpulseChatSourceType.dailyImpulse && !enabled) {
+      return;
+    }
     store.chats[normalizedChatId] = chat.copyWith(enabled: enabled);
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> renameCustomAiChat(String chatId, String title) async {
+    final normalizedChatId = chatId.trim();
+    final normalizedTitle = title.trim();
+    if (normalizedChatId.isEmpty || normalizedTitle.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null || chat.sourceType != ImpulseChatSourceType.customAi) {
+      return;
+    }
+    store.chats[normalizedChatId] = chat.copyWith(title: normalizedTitle);
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> setChatMuted(String chatId, bool muted) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    store.chats[normalizedChatId] = chat.copyWith(
+      isMuted: muted,
+      mutedAt: muted ? _now : null,
+      clearMutedAt: !muted,
+    );
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> setChatFavorite(String chatId, bool favorite) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    store.chats[normalizedChatId] = chat.copyWith(
+      isFavorite: favorite,
+      favoritedAt: favorite ? _now : null,
+      clearFavoritedAt: !favorite,
+    );
     await _saveStore(store);
   }
 
@@ -237,6 +288,23 @@ class SharedPreferencesImpulseInboxRepository
         }
       }
     }
+    saved.sort((a, b) => b.message.createdAt.compareTo(a.message.createdAt));
+    return saved;
+  }
+
+  @override
+  Future<List<ImpulseSavedMessage>> listStarredMessagesForChat(
+    String chatId,
+  ) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return const [];
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return const [];
+    final saved = (store.messages[normalizedChatId] ?? const <ImpulseMessage>[])
+        .where((message) => message.isStarred)
+        .map((message) => ImpulseSavedMessage(chat: chat, message: message))
+        .toList(growable: false);
     saved.sort((a, b) => b.message.createdAt.compareTo(a.message.createdAt));
     return saved;
   }

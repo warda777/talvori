@@ -46,6 +46,10 @@ class ImpulseChat {
     this.lastMessageAt,
     this.lastMessageText,
     this.unreadCount = 0,
+    this.isMuted = false,
+    this.mutedAt,
+    this.isFavorite = false,
+    this.favoritedAt,
   });
 
   final String id;
@@ -59,6 +63,10 @@ class ImpulseChat {
   final DateTime? lastMessageAt;
   final String? lastMessageText;
   final int unreadCount;
+  final bool isMuted;
+  final DateTime? mutedAt;
+  final bool isFavorite;
+  final DateTime? favoritedAt;
 
   ImpulseChat copyWith({
     String? id,
@@ -74,6 +82,12 @@ class ImpulseChat {
     String? lastMessageText,
     bool clearLastMessage = false,
     int? unreadCount,
+    bool? isMuted,
+    DateTime? mutedAt,
+    bool clearMutedAt = false,
+    bool? isFavorite,
+    DateTime? favoritedAt,
+    bool clearFavoritedAt = false,
   }) {
     return ImpulseChat(
       id: id ?? this.id,
@@ -93,6 +107,10 @@ class ImpulseChat {
           ? null
           : lastMessageText ?? this.lastMessageText,
       unreadCount: unreadCount ?? this.unreadCount,
+      isMuted: isMuted ?? this.isMuted,
+      mutedAt: clearMutedAt ? null : mutedAt ?? this.mutedAt,
+      isFavorite: isFavorite ?? this.isFavorite,
+      favoritedAt: clearFavoritedAt ? null : favoritedAt ?? this.favoritedAt,
     );
   }
 
@@ -109,6 +127,10 @@ class ImpulseChat {
       'lastMessageAt': lastMessageAt?.toIso8601String(),
       'lastMessageText': lastMessageText,
       'unreadCount': unreadCount,
+      'isMuted': isMuted,
+      'mutedAt': mutedAt?.toIso8601String(),
+      'isFavorite': isFavorite,
+      'favoritedAt': favoritedAt?.toIso8601String(),
     };
   }
 
@@ -127,6 +149,10 @@ class ImpulseChat {
       lastMessageAt: DateTime.tryParse(json['lastMessageAt'] as String? ?? ''),
       lastMessageText: json['lastMessageText'] as String?,
       unreadCount: json['unreadCount'] as int? ?? 0,
+      isMuted: json['isMuted'] as bool? ?? false,
+      mutedAt: DateTime.tryParse(json['mutedAt'] as String? ?? ''),
+      isFavorite: json['isFavorite'] as bool? ?? false,
+      favoritedAt: DateTime.tryParse(json['favoritedAt'] as String? ?? ''),
     );
   }
 }

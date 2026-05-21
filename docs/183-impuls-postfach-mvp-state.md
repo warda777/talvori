@@ -325,6 +325,41 @@ Im Tab `Chats` gibt es zusätzlich lokale Filter-Chips:
 
 Filter und Suche werden kombiniert. Ein Suchbegriff wie `Englisch` innerhalb des Filters `Kategorien` zeigt nur aktive Kategorie-Chats, deren Titel oder letzte Nachricht passt. Der Filter `Gespeichert` zeigt Chats, die mindestens eine lokal mit Stern markierte Nachricht enthalten. Jeder Filter hat einen passenden Empty State, zum Beispiel `Keine ungelesenen Chats` oder `Keine eigenen Chats`.
 
+Chat-Verwaltung liegt jetzt direkt dort, wo Nutzer sie erwarten: an der Chatliste. Jede Chat-Kachel im `Chats`-Tab unterstützt lokale Messenger-Muster:
+
+- Long-Press öffnet ein dunkles Chat-Aktionsmenü mit Avatar, Titel und passenden Aktionen.
+- Horizontaler Swipe zeigt Schnellaktionen wie `Mehr`, `Ausblenden` bei Kategorie-/Custom-Chats und `Als gelesen` bei ungelesenen Chats.
+- `Mehr ...` öffnet ein erweitertes Menü mit typabhängigen Aktionen.
+
+Die Aktionen sind nach Chattyp geschützt:
+
+- `daily_impulse`: öffnen, als gelesen markieren und vorbereitete Aktionen wie Stumm/Chatinfo; kein Ausblenden, kein Löschen, kein Umbenennen.
+- `category`: öffnen, als gelesen markieren, Kategorie-Chat ausblenden, Bild ändern, gespeicherte Nachrichten anzeigen und Chatinfo. Ausblenden setzt nur `enabled=false`; lokale Nachrichten bleiben erhalten und können über Kategorien oder die Hidden-Verwaltung reaktiviert werden.
+- `custom_ai`: öffnen, umbenennen, Bild ändern, als gelesen markieren, ausblenden, Chat leeren und lokal löschen. `Chat leeren` entfernt nur lokale Nachrichten und lässt den Chat bestehen. `Chat lokal löschen` entfernt nach Sicherheitsdialog den eigenen Chat und seine lokalen Nachrichten.
+
+Die zuvor vorbereiteten Aktionen sind jetzt lokal produktiv:
+
+- `Stumm schalten` speichert `isMuted` und `mutedAt` lokal am Chat. In der Chatliste erscheint ein dezentes Stumm-Icon. Die Funktion verändert in diesem Schritt keine Notification-Planung und enthält keine Remote-Mute-Logik.
+- `Zu Favoriten hinzufügen` speichert `isFavorite` und `favoritedAt` lokal am Chat. In der Chatliste erscheint ein kleines Favoriten-Icon. Favoriten werden im Filter `Alle` oberhalb normaler Chats angezeigt und bleiben innerhalb der Favoriten nach letzter Aktivität sortiert.
+- `Chatinfo` öffnet ein lokales Info-Sheet mit Typ, Erstellzeit, letzter Nachricht, lokaler Nachrichtenanzahl, gespeicherter Nachrichtenanzahl, Status, Stumm/Favorit und einem Hinweis, dass der Verlauf lokal auf diesem Gerät gespeichert ist.
+- `Gespeicherte Nachrichten anzeigen` öffnet pro Chat ein Bottom Sheet mit den lokal markierten Nachrichten dieses Chats. Ein Tap öffnet den Ursprungschat mit `messageId`, sodass die bestehende Fokus- und Highlight-Logik genutzt wird.
+
+Alle Aktionsrückmeldungen im Chat-Hub verwenden eine deckende Talvori-Toast/Snackbar mit dunklem Hintergrund, Neon-Kante und Abstand zur unteren Navigation. Dadurch liegen Meldungen wie `Chat geleert`, `Chat ausgeblendet`, `Favorit gesetzt` oder `Stumm geschaltet` nicht mehr transparent oder abgeschnitten über der Tab-Bar.
+
+Die Swipe-Schnellaktionen wurden optisch getrennt: Beim Wischen wird der Chatinhalt aus dem Aktionsbereich herausgeclippt beziehungsweise mit ausreichend rechtem Platz layoutet. Vorschau, Uhrzeit und Titel überlagern die Buttons `Mehr`, `Ausbl.` oder `Gelesen` nicht mehr. Der äußere Aktionsrahmen berechnet seine Breite aus der Anzahl der sichtbaren Buttons und umschließt Icon und Label vollständig, sodass kurze Labels wie `Ausbl.` nicht aus dem Rahmen ragen.
+
+Der Chats-Tab enthält zusätzlich den Filter `Favoriten`. Die Reihenfolge der Filter ist:
+
+- `Alle`
+- `Favoriten`
+- `Ungelesen`
+- `Tagesimpuls`
+- `Kategorien`
+- `Eigene Chats`
+- `Gespeichert`
+
+Der Favoriten-Filter zeigt nur aktive Chats mit `isFavorite=true` und kombiniert sich mit der Suche. Wenn kein Favorit vorhanden ist, erscheint der Empty State `Keine Favoriten` mit dem Hinweis, wichtige Chats als Favorit zu markieren.
+
 Das Plus-Menü bietet:
 
 - `Kategorie-Chat hinzufügen`
@@ -356,13 +391,22 @@ Der Tab `Du` enthält ein kleines lokales KI-Profil statt einer Einstellungswüs
 
 Das Profil wird lokal im Impuls-Postfach-Store gespeichert und hat Default-Werte für bestehende Installationen. Beim Senden aus Tagesimpuls-, Kategorie- oder eigenem KI-Chat ergänzt der Controller den bestehenden `ai-chat` Kontext um `aiStyle`, `answerLength`, `learningGoal` und `explanationLanguage`. Kategorie-Kontext wie `categoryId`, `categoryTitle` und `categoryWordsSample` bleibt erhalten. Es wird weiterhin keine Lernsession gestartet, keine Queue verändert und kein SRS-Fortschritt geschrieben.
 
-Unter dem KI-Profil zeigt der Tab `Du` außerdem eine kompakte `Chat-Verwaltung`:
+Unter dem KI-Profil zeigt der Tab `Du` außerdem eine kompakte `Chat-Übersicht`. Sie ist nicht mehr der Hauptort für alltägliche Aktionen, sondern eine Verwaltungsübersicht:
 
 - Anzahl aktiver Chats
 - Anzahl ausgeblendeter Chats
 - Einstieg `Ausgeblendete Chats verwalten`
 
-Die Verwaltung listet lokal ausgeblendete Kategorie- und eigene KI-Chats. Kategorie-Chats können wieder eingeblendet werden und behalten ihre lokalen Nachrichten. Eigene KI-Chats können ebenfalls wieder eingeblendet oder nach Bestätigung endgültig lokal gelöscht werden. Der Tagesimpuls-Chat wird nicht als ausgeblendeter Chat verwaltet.
+Die Übersicht listet lokal ausgeblendete Kategorie- und eigene KI-Chats. Kategorie-Chats können wieder eingeblendet werden und behalten ihre lokalen Nachrichten. Eigene KI-Chats können ebenfalls wieder eingeblendet oder nach Bestätigung endgültig lokal gelöscht werden. Der Tagesimpuls-Chat wird nicht als ausgeblendeter Chat verwaltet. Alltagsaktionen passieren primär über Long-Press oder Swipe in der Chatliste.
+
+Direkt darunter zeigt der Tab `Du` eine kleine Favoriten-Übersicht:
+
+- Anzahl favorisierte Chats
+- bis zu drei favorisierte Chats als kompakte Mini-Liste
+- Tap öffnet den jeweiligen Chat
+- Empty State `Noch keine Favoriten.`
+
+Auch diese Übersicht ist rein lokal und verändert keine Lernstände.
 
 ## Bewusst nicht umgesetzt
 
@@ -401,6 +445,21 @@ Abgedeckt sind:
 - Suche filtert aktive Chats.
 - Chat-Filter zeigen `Alle`, `Ungelesen`, `Tagesimpuls`, `Kategorien`, `Eigene Chats` und `Gespeichert`.
 - Suche und Chat-Filter funktionieren kombiniert.
+- Chatlisten-Kacheln haben Long-Press-Menü, Swipe-Schnellaktionen und ein `Mehr`-Menü.
+- Chat-Hub-Aktionen zeigen eine moderne deckende Talvori-Toast/Snackbar oberhalb der unteren Navigation.
+- Swipe-Schnellaktionen überlagern Chattext und Uhrzeit nicht mehr.
+- Der Swipe-Aktionsrahmen umschließt alle Button-Inhalte vollständig, inklusive `Ausbl.`.
+- Chats können lokal stummgeschaltet und wieder aktiviert werden.
+- Chats können lokal als Favorit markiert und wieder entfernt werden.
+- Der Filter `Favoriten` zeigt nur aktive favorisierte Chats.
+- Suche und Favoriten-Filter funktionieren kombiniert.
+- Favorisierte Chats stehen im Filter `Alle` oberhalb normaler Chats.
+- Der Tab `Du` zeigt eine kompakte Favoriten-Übersicht.
+- Chatinfo zeigt lokale Metadaten, Nachrichtenanzahl und Status.
+- Gespeicherte Nachrichten können pro Chat angezeigt und per Tap im Ursprungschat fokussiert werden.
+- Tagesimpuls ist vor Ausblenden, Löschen, Leeren und Umbenennen geschützt.
+- Kategorie-Chats können direkt aus der Chatliste ausgeblendet und später reaktiviert werden.
+- Eigene KI-Chats können direkt aus der Chatliste umbenannt, geleert, ausgeblendet oder lokal gelöscht werden.
 - Ausgeblendete Kategorie- und eigene KI-Chats werden separat gelistet.
 - Ausgeblendete Kategorie-Chats können reaktiviert werden und behalten lokale Nachrichten.
 - Eigene KI-Chats können ausgeblendet und lokal gelöscht werden.
@@ -418,4 +477,4 @@ Abgedeckt sind:
 
 ## Nächster Schritt
 
-Als nächstes können pro Chat weitere lokale Verwaltungsaktionen ergänzt werden, zum Beispiel Umbenennen eigener KI-Chats, feinere Avatar-Stile oder ein kompakter Export nur für lokale Diagnosezwecke. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.
+Als nächstes können die lokalen Chatstatus-Felder optional stärker genutzt werden, zum Beispiel durch einen Favoriten-Filter, sortierte Favoriten oben oder spätere echte Benachrichtigungsregeln für stummgeschaltete Chats. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.

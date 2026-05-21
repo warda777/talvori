@@ -159,6 +159,73 @@ void main() {
     });
 
     test(
+      'daily impulse chat cannot be hidden through generic chat toggle',
+      () async {
+        final repository = SharedPreferencesImpulseInboxRepository(
+          clock: () => DateTime(2026, 5, 20, 12),
+        );
+        final daily = await repository.ensureDailyImpulseChat();
+
+        await repository.setChatEnabled(daily.id, false);
+
+        final chats = await repository.listChats();
+        expect(chats.single.id, daily.id);
+        expect(chats.single.enabled, isTrue);
+        expect(await repository.listHiddenChats(), isEmpty);
+      },
+    );
+
+    test('custom AI chat can be renamed locally', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final custom = await repository.createCustomAiChat('Alter Name');
+      final category = await repository.ensureCategoryChat(
+        'seed-category-basics',
+        'Basics',
+      );
+
+      await repository.renameCustomAiChat(custom.id, 'Neuer Name');
+      await repository.renameCustomAiChat(category.id, 'Kategorie Rename');
+
+      final allChats = await repository.listAllChats();
+      expect(
+        allChats.firstWhere((chat) => chat.id == custom.id).title,
+        'Neuer Name',
+      );
+      expect(
+        allChats.firstWhere((chat) => chat.id == category.id).title,
+        'Basics',
+      );
+    });
+
+    test('clearChat removes messages but keeps custom chat shell', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final custom = await repository.createCustomAiChat('Training');
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: custom.id,
+          text: 'Lokaler Verlauf',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+        ),
+        incrementUnread: false,
+      );
+
+      await repository.clearChat(custom.id);
+
+      final chat = (await repository.listAllChats()).single;
+      expect(chat.id, custom.id);
+      expect(chat.lastMessageText, isNull);
+      expect(chat.lastMessageAt, isNull);
+      expect(chat.unreadCount, 0);
+      expect(await repository.listMessages(custom.id), isEmpty);
+    });
+
+    test(
       'listHiddenChats returns disabled category and custom chats only',
       () async {
         final repository = SharedPreferencesImpulseInboxRepository(
@@ -245,6 +312,31 @@ void main() {
 
       expect(chats.single.unreadCount, 0);
       expect(messages.single.readAt, isNotNull);
+    });
+
+    test('mute and favorite status are stored locally', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.ensureDailyImpulseChat();
+
+      await repository.setChatMuted(chat.id, true);
+      await repository.setChatFavorite(chat.id, true);
+
+      var loaded = (await repository.listChats()).single;
+      expect(loaded.isMuted, isTrue);
+      expect(loaded.mutedAt, DateTime(2026, 5, 20, 12));
+      expect(loaded.isFavorite, isTrue);
+      expect(loaded.favoritedAt, DateTime(2026, 5, 20, 12));
+
+      await repository.setChatMuted(chat.id, false);
+      await repository.setChatFavorite(chat.id, false);
+
+      loaded = (await repository.listChats()).single;
+      expect(loaded.isMuted, isFalse);
+      expect(loaded.mutedAt, isNull);
+      expect(loaded.isFavorite, isFalse);
+      expect(loaded.favoritedAt, isNull);
     });
 
     test('legacy messages without role are treated as assistant messages', () {
@@ -412,6 +504,50 @@ void main() {
         expect(await repository.listStarredMessages(), isEmpty);
       },
     );
+
+    test('starred messages can be filtered for one chat', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final daily = await repository.ensureDailyImpulseChat();
+      final custom = await repository.createCustomAiChat('Training');
+      final dailyMessage = await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: daily.id,
+          text: 'Daily saved',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.ai,
+        ),
+      );
+      final customMessage = await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: custom.id,
+          text: 'Custom saved',
+          createdAt: DateTime(2026, 5, 20, 13),
+          source: ImpulseMessageSource.user,
+        ),
+        incrementUnread: false,
+      );
+
+      await repository.updateMessageStarred(
+        daily.id,
+        dailyMessage.id,
+        isStarred: true,
+      );
+      await repository.updateMessageStarred(
+        custom.id,
+        customMessage.id,
+        isStarred: true,
+      );
+
+      final saved = await repository.listStarredMessagesForChat(custom.id);
+
+      expect(saved, hasLength(1));
+      expect(saved.single.chat.id, custom.id);
+      expect(saved.single.message.text, 'Custom saved');
+    });
 
     test('AI profile has defaults and can be saved locally', () async {
       final repository = SharedPreferencesImpulseInboxRepository(

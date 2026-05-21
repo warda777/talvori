@@ -115,6 +115,38 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return chat;
   }
 
+  Future<void> renameCustomAiChat({
+    required String chatId,
+    required String title,
+  }) async {
+    await _repository.renameCustomAiChat(chatId, title);
+    await loadChats();
+  }
+
+  Future<void> setChatMuted({
+    required String chatId,
+    required bool muted,
+  }) async {
+    await _repository.setChatMuted(chatId, muted);
+    await loadChats();
+  }
+
+  Future<void> toggleChatMuted(ImpulseChat chat) {
+    return setChatMuted(chatId: chat.id, muted: !chat.isMuted);
+  }
+
+  Future<void> setChatFavorite({
+    required String chatId,
+    required bool favorite,
+  }) async {
+    await _repository.setChatFavorite(chatId, favorite);
+    await loadChats();
+  }
+
+  Future<void> toggleChatFavorite(ImpulseChat chat) {
+    return setChatFavorite(chatId: chat.id, favorite: !chat.isFavorite);
+  }
+
   Future<void> setCategoryChatEnabled({
     required String categoryId,
     required bool enabled,
@@ -137,6 +169,19 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
 
   Future<void> deleteCustomAiChat(String chatId) async {
     await _repository.deleteCustomAiChat(chatId);
+    await loadChats();
+  }
+
+  Future<void> clearCustomAiChatMessages(String chatId) async {
+    final allChats = state.allChats.isEmpty
+        ? await _repository.listAllChats()
+        : state.allChats;
+    final chat = allChats.cast<ImpulseChat?>().firstWhere(
+      (chat) => chat?.id == chatId,
+      orElse: () => null,
+    );
+    if (chat?.sourceType != ImpulseChatSourceType.customAi) return;
+    await _repository.clearChat(chatId);
     await loadChats();
   }
 
@@ -253,6 +298,10 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
       messagesByChat: {...state.messagesByChat, chatId: messages},
     );
     return messages;
+  }
+
+  Future<List<ImpulseSavedMessage>> loadStarredMessagesForChat(String chatId) {
+    return _repository.listStarredMessagesForChat(chatId);
   }
 
   Future<void> markChatRead(String chatId) async {
