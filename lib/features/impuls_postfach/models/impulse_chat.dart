@@ -1,3 +1,5 @@
+import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
+
 enum ImpulseChatSourceType {
   dailyImpulse,
   category,
@@ -50,6 +52,7 @@ class ImpulseChat {
     this.mutedAt,
     this.isFavorite = false,
     this.favoritedAt,
+    this.aiProfileOverride = ImpulseChatAiProfileOverride.empty,
   });
 
   final String id;
@@ -67,6 +70,9 @@ class ImpulseChat {
   final DateTime? mutedAt;
   final bool isFavorite;
   final DateTime? favoritedAt;
+  final ImpulseChatAiProfileOverride aiProfileOverride;
+
+  bool get hasAiProfileOverride => aiProfileOverride.hasOverrides;
 
   ImpulseChat copyWith({
     String? id,
@@ -88,6 +94,8 @@ class ImpulseChat {
     bool? isFavorite,
     DateTime? favoritedAt,
     bool clearFavoritedAt = false,
+    ImpulseChatAiProfileOverride? aiProfileOverride,
+    bool clearAiProfileOverride = false,
   }) {
     return ImpulseChat(
       id: id ?? this.id,
@@ -111,6 +119,9 @@ class ImpulseChat {
       mutedAt: clearMutedAt ? null : mutedAt ?? this.mutedAt,
       isFavorite: isFavorite ?? this.isFavorite,
       favoritedAt: clearFavoritedAt ? null : favoritedAt ?? this.favoritedAt,
+      aiProfileOverride: clearAiProfileOverride
+          ? ImpulseChatAiProfileOverride.empty
+          : aiProfileOverride ?? this.aiProfileOverride,
     );
   }
 
@@ -131,6 +142,9 @@ class ImpulseChat {
       'mutedAt': mutedAt?.toIso8601String(),
       'isFavorite': isFavorite,
       'favoritedAt': favoritedAt?.toIso8601String(),
+      'aiProfileOverride': aiProfileOverride.hasOverrides
+          ? aiProfileOverride.toJson()
+          : null,
     };
   }
 
@@ -153,6 +167,9 @@ class ImpulseChat {
       mutedAt: DateTime.tryParse(json['mutedAt'] as String? ?? ''),
       isFavorite: json['isFavorite'] as bool? ?? false,
       favoritedAt: DateTime.tryParse(json['favoritedAt'] as String? ?? ''),
+      aiProfileOverride: ImpulseChatAiProfileOverride.fromJson(
+        json['aiProfileOverride'],
+      ),
     );
   }
 }

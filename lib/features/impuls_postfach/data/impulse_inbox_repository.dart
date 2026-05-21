@@ -14,6 +14,11 @@ abstract class ImpulseInboxRepository {
   Future<void> renameCustomAiChat(String chatId, String title);
   Future<void> setChatMuted(String chatId, bool muted);
   Future<void> setChatFavorite(String chatId, bool favorite);
+  Future<void> updateChatAiProfileOverride(
+    String chatId,
+    ImpulseChatAiProfileOverride override,
+  );
+  Future<void> resetChatAiProfileOverride(String chatId);
   Future<ImpulseChat?> getCategoryChat(String categoryId);
   Future<void> setCategoryChatEnabled(String categoryId, bool enabled);
   Future<void> setChatEnabled(String chatId, bool enabled);
@@ -221,6 +226,36 @@ class SharedPreferencesImpulseInboxRepository
       favoritedAt: favorite ? _now : null,
       clearFavoritedAt: !favorite,
     );
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> updateChatAiProfileOverride(
+    String chatId,
+    ImpulseChatAiProfileOverride override,
+  ) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    store.chats[normalizedChatId] = chat.copyWith(
+      aiProfileOverride: override.hasOverrides
+          ? override
+          : ImpulseChatAiProfileOverride.empty,
+      clearAiProfileOverride: !override.hasOverrides,
+    );
+    await _saveStore(store);
+  }
+
+  @override
+  Future<void> resetChatAiProfileOverride(String chatId) async {
+    final normalizedChatId = chatId.trim();
+    if (normalizedChatId.isEmpty) return;
+    final store = await _loadStore();
+    final chat = store.chats[normalizedChatId];
+    if (chat == null) return;
+    store.chats[normalizedChatId] = chat.copyWith(clearAiProfileOverride: true);
     await _saveStore(store);
   }
 

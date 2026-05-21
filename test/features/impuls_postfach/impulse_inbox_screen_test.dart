@@ -858,6 +858,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(Key('chat_action_more_${custom.id}')));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(Key('chat_more_delete_${custom.id}')),
+      );
       await tester.tap(find.byKey(Key('chat_more_delete_${custom.id}')));
       await tester.pumpAndSettle();
       await tester.tap(
@@ -870,7 +873,9 @@ void main() {
     },
   );
 
-  testWidgets('plus menu creates custom AI chat', (tester) async {
+  testWidgets('plus button creates custom AI chat without redundant options', (
+    tester,
+  ) async {
     final repository = SharedPreferencesImpulseInboxRepository(
       storageKey: 'test_inbox_custom_chat',
     );
@@ -890,10 +895,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('impulse_inbox_add_chat_button')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('add_custom_ai_chat_option')), findsOneWidget);
+    expect(find.text('Eigenen KI-Chat erstellen'), findsOneWidget);
+    expect(find.text('Tagesimpuls öffnen'), findsNothing);
+    expect(find.text('Kategorie-Chat hinzufügen'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('add_custom_ai_chat_option')));
-    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('custom_chat_name_field')),
       'Grammatikfragen',
@@ -909,6 +914,40 @@ void main() {
 
     final chats = await repository.listChats();
     expect(chats.single.sourceType, ImpulseChatSourceType.customAi);
+  });
+
+  testWidgets('back from internal tabs returns to chats tab first', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_internal_tab_back',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final tab in ['Du', 'Gespeichert', 'Kategorien']) {
+      await tester.tap(find.text(tab).last);
+      await tester.pumpAndSettle();
+      expect(find.text('Impuls-Postfach'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Impuls-Postfach'), findsOneWidget);
+      expect(find.byKey(const Key('impulse_inbox_chat_list')), findsNothing);
+      expect(find.text('Noch keine Chats'), findsOneWidget);
+    }
   });
 
   testWidgets('saved tab shows starred messages and opens source chat', (
@@ -1171,6 +1210,107 @@ void main() {
     expect(profile.learningGoal, ImpulseLearningGoal.exam);
     expect(profile.explanationLanguage, ImpulseExplanationLanguage.mixed);
     expect(find.textContaining('Trainer-Modus'), findsOneWidget);
+  });
+
+  testWidgets('chat action sheet edits local AI preferences for one chat', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_ai_preferences',
+    );
+    final chat = await repository.createCustomAiChat('Grammatik');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_ai_preferences_${chat.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('KI-Stil für diesen Chat'), findsOneWidget);
+    expect(
+      find.text('Diese Einstellungen gelten nur für diesen Chat.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('chat_ai_style_ImpulseAiStyle.trainer')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('chat_ai_answer_length_ImpulseAnswerLength.short')),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('chat_ai_save_button')));
+    await tester.tap(find.byKey(const Key('chat_ai_save_button')));
+    await tester.pumpAndSettle();
+
+    var loaded = (await repository.listAllChats()).single;
+    expect(loaded.aiProfileOverride.style, ImpulseAiStyle.trainer);
+    expect(loaded.aiProfileOverride.answerLength, ImpulseAnswerLength.short);
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_ai_preferences_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('chat_ai_reset_button')));
+    await tester.tap(find.byKey(const Key('chat_ai_reset_button')));
+    await tester.pumpAndSettle();
+
+    loaded = (await repository.listAllChats()).single;
+    expect(loaded.hasAiProfileOverride, isFalse);
+  });
+
+  testWidgets('chat info shows AI preference status and action', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_chat_info_ai_preferences',
+    );
+    final chat = await repository.createCustomAiChat('Grammatik');
+    await repository.updateChatAiProfileOverride(
+      chat.id,
+      const ImpulseChatAiProfileOverride(style: ImpulseAiStyle.casual),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Okay.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byKey(Key('impulse_chat_tile_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_action_more_${chat.id}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('chat_more_info_${chat.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('KI-Stil'), findsOneWidget);
+    expect(find.text('Eigene Einstellungen'), findsOneWidget);
+    expect(find.textContaining('Locker'), findsOneWidget);
+    expect(
+      find.byKey(Key('chat_info_ai_preferences_${chat.id}')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('you tab manages hidden chats and reactivates category chat', (
@@ -2361,6 +2501,56 @@ void main() {
       expect(context['answerLength'], 'short');
       expect(context['learningGoal'], 'school');
       expect(context['explanationLanguage'], 'mixed');
+      expect(context['chatType'], 'category');
+      expect(context['categoryWordsSample'], isA<List<Map<String, String>>>());
+    },
+  );
+
+  test(
+    'chat AI overrides replace global profile values in chat context',
+    () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_inbox_ai_profile_override_context',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      await repository.saveAiProfile(
+        const ImpulseAiProfile(
+          style: ImpulseAiStyle.motivating,
+          answerLength: ImpulseAnswerLength.normal,
+          learningGoal: ImpulseLearningGoal.everyday,
+          explanationLanguage: ImpulseExplanationLanguage.german,
+        ),
+      );
+      final chat = await repository.ensureCategoryChat(
+        'seed-category-basics',
+        'Basics',
+      );
+      await repository.updateChatAiProfileOverride(
+        chat.id,
+        const ImpulseChatAiProfileOverride(
+          style: ImpulseAiStyle.trainer,
+          answerLength: ImpulseAnswerLength.detailed,
+        ),
+      );
+      final aiClient = _FakeAiChatClient('Antwort');
+      final controller = ImpulseInboxController(
+        repository: repository,
+        aiChatClient: aiClient,
+        categoryWordSampler: (categoryId) async => [
+          {'word': 'move', 'translation': 'bewegen'},
+        ],
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      await controller.loadChats();
+
+      await controller.sendChatMessage(chat.id, 'Erklär das bitte.');
+
+      final context = aiClient.requests.single.context as Map<String, Object?>;
+      expect(context['aiStyle'], 'trainer');
+      expect(context['answerLength'], 'detailed');
+      expect(context['learningGoal'], 'everyday');
+      expect(context['explanationLanguage'], 'german');
+      expect(context['aiProfileSource'], 'chat_override');
       expect(context['chatType'], 'category');
       expect(context['categoryWordsSample'], isA<List<Map<String, String>>>());
     },

@@ -1038,6 +1038,19 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   Future<void> setChatMuted(String chatId, bool muted) async {}
 
   @override
+  Future<void> updateChatAiProfileOverride(
+    String chatId,
+    ImpulseChatAiProfileOverride override,
+  ) {
+    throw StateError('inbox failed');
+  }
+
+  @override
+  Future<void> resetChatAiProfileOverride(String chatId) {
+    throw StateError('inbox failed');
+  }
+
+  @override
   Future<ImpulseChat?> getCategoryChat(String categoryId) async => null;
 
   @override

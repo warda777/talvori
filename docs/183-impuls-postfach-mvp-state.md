@@ -309,7 +309,7 @@ Das Impuls-Postfach ist jetzt stärker als eigener Chat-Hub gestaltet. Der Scree
 
 - einen kompakten Header `Impuls-Postfach`
 - eine Suche mit Placeholder `Chats oder Kategorien suchen`
-- ein Plus-Menü zum Hinzufügen von Chats
+- einen reduzierten Plus-Button zum Erstellen eigener lokaler KI-Chats
 - interne Tabs `Chats`, `Kategorien`, `Gespeichert` und `Du`
 
 Die Chatliste ist weniger card-lastig und näher an einem Messenger-Startbildschirm: runde Avatare links, Titel und Vorschau in der Mitte, Zeit und Ungelesen-Badge rechts. Die Suche filtert aktive Chats nach Titel und letzter Nachricht.
@@ -317,13 +317,16 @@ Die Chatliste ist weniger card-lastig und näher an einem Messenger-Startbildsch
 Im Tab `Chats` gibt es zusätzlich lokale Filter-Chips:
 
 - `Alle`
+- `Favoriten`
 - `Ungelesen`
 - `Tagesimpuls`
 - `Kategorien`
 - `Eigene Chats`
 - `Gespeichert`
 
-Filter und Suche werden kombiniert. Ein Suchbegriff wie `Englisch` innerhalb des Filters `Kategorien` zeigt nur aktive Kategorie-Chats, deren Titel oder letzte Nachricht passt. Der Filter `Gespeichert` zeigt Chats, die mindestens eine lokal mit Stern markierte Nachricht enthalten. Jeder Filter hat einen passenden Empty State, zum Beispiel `Keine ungelesenen Chats` oder `Keine eigenen Chats`.
+Filter und Suche werden kombiniert. Ein Suchbegriff wie `Englisch` innerhalb des Filters `Kategorien` zeigt nur aktive Kategorie-Chats, deren Titel oder letzte Nachricht passt. Der Filter `Gespeichert` zeigt Chats, die mindestens eine lokal mit Stern markierte Nachricht enthalten. Jeder Filter hat einen passenden Empty State, zum Beispiel `Keine ungelesenen Chats`, `Keine Favoriten` oder `Keine eigenen Chats`.
+
+Die interne Back-Navigation bleibt im Postfach-Kontext: Wenn `Kategorien`, `Gespeichert` oder `Du` aktiv ist, wechselt System-Back zuerst zurück zum Tab `Chats`. Erst ein weiterer Back aus `Chats` verlässt das Impuls-Postfach wie bisher. Das Notification-Routing bleibt dadurch unverändert: Notification -> Chatdetail -> Impuls-Postfach -> Home.
 
 Chat-Verwaltung liegt jetzt direkt dort, wo Nutzer sie erwarten: an der Chatliste. Jede Chat-Kachel im `Chats`-Tab unterstützt lokale Messenger-Muster:
 
@@ -360,11 +363,7 @@ Der Chats-Tab enthält zusätzlich den Filter `Favoriten`. Die Reihenfolge der F
 
 Der Favoriten-Filter zeigt nur aktive Chats mit `isFavorite=true` und kombiniert sich mit der Suche. Wenn kein Favorit vorhanden ist, erscheint der Empty State `Keine Favoriten` mit dem Hinweis, wichtige Chats als Favorit zu markieren.
 
-Das Plus-Menü bietet:
-
-- `Kategorie-Chat hinzufügen`
-- `Eigenen KI-Chat erstellen`
-- `Tagesimpuls öffnen`
+Der Plus-Button öffnet direkt den Dialog `Eigenen KI-Chat erstellen`. Die vorherigen Optionen `Tagesimpuls öffnen` und `Kategorie-Chat hinzufügen` wurden entfernt, weil der Tagesimpuls als Chat in der Chatliste erreichbar ist und Kategorie-Chats im Tab `Kategorien` verwaltet werden.
 
 Der Kategorien-Tab zeigt lokal verfügbare Kategorien mit Wortanzahl und Status. Der Status unterscheidet `Noch kein Chat`, `Aktiv` und `Ausgeblendet`. Noch nicht vorhandene Kategorie-Chats können hinzugefügt werden, aktive Chats werden geöffnet und ausgeblendete Kategorie-Chats werden über `Wieder einblenden` reaktiviert. Der lokale Verlauf bleibt dabei erhalten.
 
@@ -390,6 +389,8 @@ Der Tab `Du` enthält ein kleines lokales KI-Profil statt einer Einstellungswüs
 - Erklärungssprache: `Deutsch`, `Englisch`, `Gemischt`
 
 Das Profil wird lokal im Impuls-Postfach-Store gespeichert und hat Default-Werte für bestehende Installationen. Beim Senden aus Tagesimpuls-, Kategorie- oder eigenem KI-Chat ergänzt der Controller den bestehenden `ai-chat` Kontext um `aiStyle`, `answerLength`, `learningGoal` und `explanationLanguage`. Kategorie-Kontext wie `categoryId`, `categoryTitle` und `categoryWordsSample` bleibt erhalten. Es wird weiterhin keine Lernsession gestartet, keine Queue verändert und kein SRS-Fortschritt geschrieben.
+
+Zusätzlich kann jeder Chat lokale KI-Präferenzen als Override speichern. Über Long-Press/`Mehr ...` oder die Chatinfo ist `KI-Stil anpassen` erreichbar. Dort kann pro Feld entweder `Global verwenden` aktiv bleiben oder ein chat-spezifischer Wert gesetzt werden. Der effektive `ai-chat` Kontext entsteht aus dem globalen Du-Profil plus diesen Chat-Overrides; nicht gesetzte Felder fallen automatisch auf den globalen Standard zurück. Die Overrides werden lokal am `ImpulseChat` gespeichert und können über `Global verwenden` vollständig zurückgesetzt werden.
 
 Unter dem KI-Profil zeigt der Tab `Du` außerdem eine kompakte `Chat-Übersicht`. Sie ist nicht mehr der Hauptort für alltägliche Aktionen, sondern eine Verwaltungsübersicht:
 
@@ -465,7 +466,8 @@ Abgedeckt sind:
 - Eigene KI-Chats können ausgeblendet und lokal gelöscht werden.
 - Der Tagesimpuls-Chat wird nicht als ausgeblendeter Chat verwaltet.
 - Der Kategorien-Tab zeigt `Aktiv`, `Ausgeblendet` und `Noch kein Chat`.
-- Plus-Menü öffnet Kategorie- und Custom-Chat-Flows.
+- Back aus `Du`, `Gespeichert` und `Kategorien` wechselt zuerst zurück zu `Chats`.
+- Der Plus-Button öffnet nur noch den eigenen lokalen KI-Chat-Flow.
 - Kategorie-Wörter werden rein lesend als KI-Kontext bereitgestellt.
 - Gespeicherte Nachrichten werden aus allen lokalen Chats gesammelt.
 - Entfernen des Sterns oder Löschen einer Nachricht entfernt sie aus `Gespeichert`.
@@ -473,8 +475,9 @@ Abgedeckt sind:
 - Das Chatdetail scrollt zur Zielnachricht und hebt sie kurz hervor.
 - Fehlende oder gelöschte Zielnachrichten crashen nicht.
 - Das KI-Profil hat lokale Default-Werte und kann gespeichert werden.
-- `ai-chat` Requests erhalten den KI-Profil-Kontext zusätzlich zum Kategorie-Kontext.
+- Chat-spezifische KI-Präferenzen werden lokal gespeichert und können zurückgesetzt werden.
+- `ai-chat` Requests erhalten das effektive KI-Profil aus globalem Du-Profil plus Chat-Overrides zusätzlich zum Kategorie-Kontext.
 
 ## Nächster Schritt
 
-Als nächstes können die lokalen Chatstatus-Felder optional stärker genutzt werden, zum Beispiel durch einen Favoriten-Filter, sortierte Favoriten oben oder spätere echte Benachrichtigungsregeln für stummgeschaltete Chats. Im `Du`-Tab können später weitere lokale Präferenzen wie Tonalität pro Chat, Lernfokus oder Benachrichtigungsstil ergänzt werden.
+Als nächstes können die chat-spezifischen KI-Präferenzen weiter verfeinert werden, zum Beispiel durch Vorlagen pro Chattyp oder spätere echte Benachrichtigungsregeln für stummgeschaltete Chats.

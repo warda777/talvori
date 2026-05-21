@@ -574,5 +574,36 @@ void main() {
       expect(loaded.learningGoal, ImpulseLearningGoal.exam);
       expect(loaded.explanationLanguage, ImpulseExplanationLanguage.mixed);
     });
+
+    test('chat AI profile overrides are stored and reset locally', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        storageKey: 'test_chat_profile_overrides',
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+      final chat = await repository.createCustomAiChat('Grammatik');
+
+      await repository.updateChatAiProfileOverride(
+        chat.id,
+        ImpulseChatAiProfileOverride(
+          style: ImpulseAiStyle.trainer,
+          answerLength: ImpulseAnswerLength.detailed,
+          updatedAt: DateTime(2026, 5, 20, 12),
+        ),
+      );
+
+      var loaded = (await repository.listAllChats()).single;
+      expect(loaded.hasAiProfileOverride, isTrue);
+      expect(loaded.aiProfileOverride.style, ImpulseAiStyle.trainer);
+      expect(
+        loaded.aiProfileOverride.answerLength,
+        ImpulseAnswerLength.detailed,
+      );
+      expect(loaded.aiProfileOverride.learningGoal, isNull);
+
+      await repository.resetChatAiProfileOverride(chat.id);
+
+      loaded = (await repository.listAllChats()).single;
+      expect(loaded.hasAiProfileOverride, isFalse);
+    });
   });
 }

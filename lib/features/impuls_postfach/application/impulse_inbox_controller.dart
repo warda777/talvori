@@ -198,6 +198,23 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     state = state.copyWith(aiProfile: profile);
   }
 
+  Future<void> updateChatAiProfileOverride({
+    required String chatId,
+    required ImpulseChatAiProfileOverride override,
+  }) async {
+    await _repository.updateChatAiProfileOverride(chatId, override);
+    await loadChats();
+  }
+
+  Future<void> resetChatAiProfileOverride(String chatId) async {
+    await _repository.resetChatAiProfileOverride(chatId);
+    await loadChats();
+  }
+
+  ImpulseAiProfile effectiveAiProfileForChat(ImpulseChat? chat) {
+    return chat?.aiProfileOverride.applyTo(state.aiProfile) ?? state.aiProfile;
+  }
+
   Future<List<ImpulseMessage>> addDailyImpulseMessages(
     List<TagesimpulsGeneratedImpulse> impulses,
   ) async {
@@ -249,7 +266,8 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
 
     try {
       final contextMessages = await _repository.listMessages(chatId);
-      final chat = state.chats.cast<ImpulseChat?>().firstWhere(
+      final chatPool = state.allChats.isEmpty ? state.chats : state.allChats;
+      final chat = chatPool.cast<ImpulseChat?>().firstWhere(
         (chat) => chat?.id == chatId,
         orElse: () => null,
       );
@@ -382,10 +400,15 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     required List<ImpulseMessage> messages,
   }) async {
     final sourceType = chat?.sourceType;
+    final effectiveProfile = effectiveAiProfileForChat(chat);
     final context = <String, Object?>{
       'source': 'impulse_inbox',
       'chatId': chatId,
       'chatType': sourceType?.wireName ?? 'unknown',
+      'chatTitle': chat?.title,
+      'aiProfileSource': chat?.aiProfileOverride.hasOverrides == true
+          ? 'chat_override'
+          : 'global',
       'recentMessages': messages
           .takeLast(8)
           .map(
@@ -397,7 +420,7 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
             },
           )
           .toList(growable: false),
-      ...state.aiProfile.toAiContext(),
+      ...effectiveProfile.toAiContext(),
     };
     if (sourceType == ImpulseChatSourceType.category) {
       context['categoryId'] = chat?.sourceId;
@@ -417,7 +440,6 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
       }
     }
     if (sourceType == ImpulseChatSourceType.customAi) {
-      context['chatTitle'] = chat?.title;
       context['instruction'] =
           'Antworte als lokaler Talvori KI-Chat. Der Verlauf bleibt lokal auf diesem Gerät.';
     }

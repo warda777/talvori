@@ -136,3 +136,79 @@ class ImpulseAiProfile {
     };
   }
 }
+
+class ImpulseChatAiProfileOverride {
+  const ImpulseChatAiProfileOverride({
+    this.style,
+    this.answerLength,
+    this.learningGoal,
+    this.explanationLanguage,
+    this.updatedAt,
+  });
+
+  final ImpulseAiStyle? style;
+  final ImpulseAnswerLength? answerLength;
+  final ImpulseLearningGoal? learningGoal;
+  final ImpulseExplanationLanguage? explanationLanguage;
+  final DateTime? updatedAt;
+
+  static const empty = ImpulseChatAiProfileOverride();
+
+  bool get hasOverrides {
+    return style != null ||
+        answerLength != null ||
+        learningGoal != null ||
+        explanationLanguage != null;
+  }
+
+  ImpulseAiProfile applyTo(ImpulseAiProfile global) {
+    return global.copyWith(
+      style: style,
+      answerLength: answerLength,
+      learningGoal: learningGoal,
+      explanationLanguage: explanationLanguage,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'style': style?.wireName,
+      'answerLength': answerLength?.wireName,
+      'learningGoal': learningGoal?.wireName,
+      'explanationLanguage': explanationLanguage?.wireName,
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
+
+  factory ImpulseChatAiProfileOverride.fromJson(Object? json) {
+    if (json is! Map) return empty;
+    return ImpulseChatAiProfileOverride(
+      style: json['style'] == null
+          ? null
+          : ImpulseAiStyle.fromWireName(json['style']),
+      answerLength: json['answerLength'] == null
+          ? null
+          : ImpulseAnswerLength.fromWireName(json['answerLength']),
+      learningGoal: json['learningGoal'] == null
+          ? null
+          : ImpulseLearningGoal.fromWireName(json['learningGoal']),
+      explanationLanguage: json['explanationLanguage'] == null
+          ? null
+          : ImpulseExplanationLanguage.fromWireName(
+              json['explanationLanguage'],
+            ),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? ''),
+    );
+  }
+
+  String compactSummary(ImpulseAiProfile global) {
+    final effective = applyTo(global);
+    if (!hasOverrides) return 'Global';
+    return [
+      style == null ? null : effective.style.label,
+      answerLength == null ? null : effective.answerLength.label,
+      learningGoal == null ? null : effective.learningGoal.label,
+      explanationLanguage == null ? null : effective.explanationLanguage.label,
+    ].whereType<String>().join(' · ');
+  }
+}
