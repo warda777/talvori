@@ -11,6 +11,7 @@ import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provi
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
@@ -763,7 +764,9 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.byKey(const ValueKey('word-game-hangman'));
+    final tileFinder = find.byKey(
+      const ValueKey('word-game-context_challenge'),
+    );
     await tester.tap(tileFinder);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -998,6 +1001,33 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('hangman card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [localWord(id: 'level', term: 'level')];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-hangman')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HangmanGameScreen), findsOneWidget);
+    expect(find.text('Hangman'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('each word game tap shows prepared hint', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -1011,7 +1041,6 @@ void main() {
     await tester.pump();
 
     const games = [
-      MapEntry('hangman', 'Hangman'),
       MapEntry('context_challenge', 'Kontext-Challenge'),
       MapEntry('boss_fight', 'Boss-Fight'),
       MapEntry('daily_word_quest', 'Daily Word Quest'),

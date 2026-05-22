@@ -40,7 +40,7 @@ angeboten.
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
 `Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell` und
-`Wort-Jagd`. Die anderen vier Karten sind bewusst vorbereitet und starten noch keine echte
+`Wort-Jagd` und `Hangman`. Die anderen drei Karten sind bewusst vorbereitet und starten noch keine echte
 Spielsession:
 
 ### Schnellspiele
@@ -81,6 +81,23 @@ SRS-Fortschritt geschrieben.
 - vergleicht Antworten ueber stabile Wort-IDs
 - erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
 - zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
+
+## Hangman
+
+`Hangman` ist der achte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur Begriffe mit mindestens drei Zeichen
+- filtert Begriffe mit Leerzeichen, Bindestrichen oder nicht unterstuetzten Sonderzeichen
+- verwendet eine freundliche Anzeige `Versuche uebrig` statt Galgen-/Strafsymbolik
+- spielt maximal 10 Woerter pro Runde
+- zeigt optional die lokale Uebersetzung als Hinweis
+- deckt richtige Buchstaben an allen passenden Stellen auf
+- markiert bereits gewaehlt Buchstaben und verhindert Mehrfachabzug
+- erlaubt `Aufloesen` und `Naechstes Wort`
+- zeigt am Ende `Runde beendet`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
