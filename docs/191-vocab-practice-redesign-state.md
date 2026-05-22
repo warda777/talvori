@@ -39,8 +39,8 @@ angeboten.
 ## Aktuelle Spielkarten
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
-`Blitzrunde` und `Lueckenwort`. Die anderen sieben Karten sind bewusst
-vorbereitet und starten noch keine echte Spielsession:
+`Blitzrunde`, `Lueckenwort` und `Wort-Puzzle`. Die anderen sechs Karten sind
+bewusst vorbereitet und starten noch keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -80,6 +80,25 @@ SRS-Fortschritt geschrieben.
 - vergleicht Antworten ueber stabile Wort-IDs
 - erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
 - zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
+
+## Wort-Puzzle
+
+`Wort-Puzzle` ist der fuenfte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur stabile Begriffe mit mindestens drei Zeichen
+- filtert Begriffe mit Leerzeichen oder Bindestrichen fuer eindeutige Chips
+- spielt maximal 10 Woerter pro Runde
+- mischt Buchstaben lokal und deterministisch
+- unterstuetzt doppelte Buchstaben ueber indexierte Buchstaben-Chips
+- zeigt optional die lokale Uebersetzung als Hinweis
+- erlaubt `Pruefen`, `Zuruecknehmen`, `Zuruecksetzen`, `Aufloesen` und
+  `Naechstes Wort`
+- vergleicht Eingaben robust mit trim, Kleinschreibung und normalisierten
+  Leerzeichen
+- zeigt am Ende `Puzzle geschafft`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 

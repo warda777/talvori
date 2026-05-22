@@ -16,6 +16,7 @@ import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.da
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
@@ -896,6 +897,33 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('word puzzle card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [localWord(id: 'emergency', term: 'emergency')];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-word_puzzle')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WordPuzzleGameScreen), findsOneWidget);
+    expect(find.text('Wort-Puzzle'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('each word game tap shows prepared hint', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -911,7 +939,6 @@ void main() {
     const games = [
       MapEntry('word_hunt', 'Wort-Jagd'),
       MapEntry('meaning_duel', 'Bedeutungs-Duell'),
-      MapEntry('word_puzzle', 'Wort-Puzzle'),
       MapEntry('hangman', 'Hangman'),
       MapEntry('context_challenge', 'Kontext-Challenge'),
       MapEntry('boss_fight', 'Boss-Fight'),

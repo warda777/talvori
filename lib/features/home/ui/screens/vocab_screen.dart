@@ -6,6 +6,7 @@ import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_promo_card.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_tile.dart';
 
@@ -76,6 +77,15 @@ class VocabScreen extends ConsumerWidget {
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: GapWordGameScreen.routeName),
           builder: (_) => const GapWordGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'word_puzzle') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: WordPuzzleGameScreen.routeName),
+          builder: (_) => const WordPuzzleGameScreen(),
         ),
       );
       return;
