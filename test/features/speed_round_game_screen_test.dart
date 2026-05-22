@@ -201,28 +201,19 @@ void main() {
   testWidgets('start card shows word source selection with all words default', (
     tester,
   ) async {
-    await pumpGame(
-      tester,
-      words: sampleWords(),
-      categories: [category(id: 'travel', name: 'Reisen')],
-    );
+    await pumpGame(tester, words: sampleWords());
 
     expect(
       find.byKey(const ValueKey('speed-round-source-picker')),
       findsOneWidget,
     );
-    expect(find.text('Wortquelle'), findsOneWidget);
-    expect(find.text('Wortwelten'), findsOneWidget);
-    expect(find.text('Alle'), findsOneWidget);
-    expect(find.text('Meine'), findsOneWidget);
-    expect(find.text('Favoriten'), findsOneWidget);
-    expect(find.text('Bekannte'), findsOneWidget);
-    expect(find.text('Mix'), findsOneWidget);
-    expect(find.text('Reisen'), findsOneWidget);
-    expect(find.text('Du spielst mit: Alle Wörter'), findsOneWidget);
+    expect(find.text('Du spielst mit'), findsOneWidget);
+    expect(find.text('Alle Wörter'), findsOneWidget);
+    expect(find.text('Wortquelle ändern'), findsOneWidget);
+    expect(find.text('Wortwelt auswählen'), findsWidgets);
   });
 
-  testWidgets('standard source chip switches the active local word source', (
+  testWidgets('source sheet shows standard sources and switches favorites', (
     tester,
   ) async {
     final favoriteWords = [
@@ -242,14 +233,27 @@ void main() {
     );
 
     await tester.tap(
+      find.byKey(const ValueKey('speed-round-change-source-button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wortquelle ändern'), findsWidgets);
+    expect(find.text('Alle Wörter'), findsWidgets);
+    expect(find.text('Meine Wörter'), findsOneWidget);
+    expect(find.text('Favoriten'), findsOneWidget);
+    expect(find.text('Mein Mix'), findsOneWidget);
+    expect(find.text('Wörter, die ich kenne'), findsNothing);
+
+    await tester.tap(
       find.byKey(
         ValueKey('speed-round-source-${LocalLearningSource.favorites.id}'),
       ),
     );
+    await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    expect(find.text('Du spielst mit: Favoriten'), findsOneWidget);
+    expect(find.text('Favoriten'), findsWidgets);
 
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
@@ -260,8 +264,10 @@ void main() {
     expect(favoriteWords.map((word) => word.term), contains(prompt));
   });
 
-  testWidgets('category chip switches the active word world', (tester) async {
-    final travelCategory = category(id: 'travel', name: 'Reisen');
+  testWidgets('word world sheet shows full names and switches travel', (
+    tester,
+  ) async {
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
     final travelWords = [
       word(
         id: 'train',
@@ -297,12 +303,31 @@ void main() {
     );
 
     await tester.tap(
-      find.byKey(ValueKey('speed-round-category-${travelCategory.id}')),
+      find.byKey(const ValueKey('speed-round-select-world-button')),
     );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wortwelt auswählen'), findsWidgets);
+    expect(find.text('Alltag & Leben'), findsOneWidget);
+    expect(find.text('Health & Fitness'), findsOneWidget);
+    expect(find.text('Tech & Innovation'), findsOneWidget);
+    expect(find.text('Music & Entertainment'), findsOneWidget);
+    expect(find.text('Top 500 Words'), findsOneWidget);
+    expect(find.text('C2'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+      520,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+    );
+    await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    expect(find.text('Du spielst mit: Wortwelt Reisen'), findsOneWidget);
+    expect(find.text('Wortwelt: Travel'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
@@ -316,20 +341,30 @@ void main() {
   testWidgets('category with too few pairs shows category empty state', (
     tester,
   ) async {
-    final schoolCategory = category(id: 'school', name: 'Schule');
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
 
     await pumpGame(
       tester,
       words: sampleWords(),
-      categories: [schoolCategory],
+      categories: [travelCategory],
       wordsByCategory: {
-        schoolCategory.id: sampleWords().take(3).toList(growable: false),
+        travelCategory.id: sampleWords().take(3).toList(growable: false),
       },
     );
 
     await tester.tap(
-      find.byKey(ValueKey('speed-round-category-${schoolCategory.id}')),
+      find.byKey(const ValueKey('speed-round-select-world-button')),
     );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+      520,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+    );
+    await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
@@ -340,7 +375,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Du spielst mit: Wortwelt Schule'), findsOneWidget);
+    expect(find.text('Wortwelt: Travel'), findsOneWidget);
   });
 
   testWidgets('start shows timer score prompt and answers', (tester) async {
@@ -440,7 +475,7 @@ void main() {
   });
 
   testWidgets('restart keeps selected category active', (tester) async {
-    final travelCategory = category(id: 'travel', name: 'Reisen');
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
     final travelWords = [
       word(
         id: 'train',
@@ -478,8 +513,18 @@ void main() {
     );
 
     await tester.tap(
-      find.byKey(ValueKey('speed-round-category-${travelCategory.id}')),
+      find.byKey(const ValueKey('speed-round-select-world-button')),
     );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+      520,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('speed-round-word-world-travel')),
+    );
+    await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
@@ -489,6 +534,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Bereit für die Blitzrunde?'), findsOneWidget);
-    expect(find.text('Du spielst mit: Wortwelt Reisen'), findsOneWidget);
+    expect(find.text('Wortwelt: Travel'), findsOneWidget);
   });
 }
