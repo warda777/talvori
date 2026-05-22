@@ -10,6 +10,7 @@ import 'package:talvori/core/local_database/providers/local_words_for_source_pro
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
+import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
@@ -759,7 +760,7 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.byKey(const ValueKey('word-game-gap_word'));
+    final tileFinder = find.byKey(const ValueKey('word-game-word_hunt'));
     await tester.tap(tileFinder);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -833,6 +834,33 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('gap word card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [localWord(id: 'emergency', term: 'emergency')];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-gap_word')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GapWordGameScreen), findsOneWidget);
+    expect(find.text('Lückenwort'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('word match card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 1800);
     tester.view.devicePixelRatio = 1;
@@ -881,7 +909,6 @@ void main() {
     await tester.pump();
 
     const games = [
-      MapEntry('gap_word', 'Lückenwort'),
       MapEntry('word_hunt', 'Wort-Jagd'),
       MapEntry('meaning_duel', 'Bedeutungs-Duell'),
       MapEntry('word_puzzle', 'Wort-Puzzle'),

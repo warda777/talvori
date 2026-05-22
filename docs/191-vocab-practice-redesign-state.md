@@ -38,9 +38,9 @@ angeboten.
 
 ## Aktuelle Spielkarten
 
-Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match` und
-`Blitzrunde`. Die anderen acht Karten sind bewusst vorbereitet und starten noch
-keine echte Spielsession:
+Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
+`Blitzrunde` und `Lueckenwort`. Die anderen sieben Karten sind bewusst
+vorbereitet und starten noch keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -80,6 +80,24 @@ SRS-Fortschritt geschrieben.
 - vergleicht Antworten ueber stabile Wort-IDs
 - erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
 - zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
+
+## Lueckenwort
+
+`Lueckenwort` ist der vierte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur Woerter mit mindestens vier Buchstaben
+- spielt maximal 10 Woerter pro Runde
+- erzeugt die Luecken lokal und deterministisch
+- laesst den ersten Buchstaben sichtbar
+- entfernt keine Leerzeichen oder Bindestriche als Luecken
+- zeigt optional die lokale Uebersetzung als Hinweis
+- erlaubt `Pruefen`, `Aufloesen` und `Naechstes Wort`
+- vergleicht Eingaben robust mit trim, Kleinschreibung und normalisierten
+  Leerzeichen
+- zeigt am Ende `Runde beendet`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
