@@ -77,6 +77,7 @@ void main() {
           'learning_sessions',
           'session_items',
           'settings',
+          'word_sources',
         }),
       );
     });

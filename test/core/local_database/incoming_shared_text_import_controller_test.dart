@@ -8,6 +8,7 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/repositories/category_repository.dart';
 import 'package:talvori/core/local_database/repositories/word_repository.dart';
+import 'package:talvori/core/local_database/repositories/word_source_repository.dart';
 import 'package:talvori/core/local_database/services/incoming_shared_text_import_controller.dart';
 import 'package:talvori/core/local_database/services/pending_translation_processor.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
@@ -226,6 +227,178 @@ void main() {
 
     expect(result?.status, SharedTextImportStatus.imported);
     expect(translatedWordIds, ['word-river']);
+  });
+
+  test('saves_hidden_source_url_metadata_after_imported_word', () async {
+    final receiver = _FakeSharedTextPlatformReceiver();
+    final savedPayloads = <SharedTextPayload>[];
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+          word: _word(
+            id: 'word-emergency',
+            term: rawText,
+            status: TranslationStatus.pending,
+          ),
+        );
+      },
+      saveWordSource: ({required word, required payload, required now}) async {
+        savedPayloads.add(payload);
+      },
+    );
+
+    await controller.importSharedPayload(
+      const SharedTextPayload(
+        id: 'share-source-1',
+        text: 'emergency',
+        sourceUrl: 'https://example.com/article',
+        sourceTitle: 'Example',
+        sourceApp: 'Safari',
+        sharedTextPreview: 'emergency',
+      ),
+    );
+
+    expect(savedPayloads, hasLength(1));
+    expect(savedPayloads.single.sourceUrl, 'https://example.com/article');
+  });
+
+  test('does_not_call_source_saver_without_source_url', () async {
+    final receiver = _FakeSharedTextPlatformReceiver();
+    var sourceSaves = 0;
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+          word: _word(
+            id: 'word-river',
+            term: rawText,
+            status: TranslationStatus.pending,
+          ),
+        );
+      },
+      saveWordSource: ({required word, required payload, required now}) async {
+        sourceSaves++;
+      },
+    );
+
+    await controller.importSharedPayload(
+      const SharedTextPayload(id: 'share-no-source', text: 'river'),
+    );
+
+    expect(sourceSaves, 0);
+  });
+
+  test(
+    'source_save_failure_does_not_block_word_import_or_translation',
+    () async {
+      final receiver = _FakeSharedTextPlatformReceiver();
+      final translatedWordIds = <String>[];
+      final controller = IncomingSharedTextImportController(
+        receiver: receiver,
+        now: () => now,
+        importText: ({required rawText, required now}) async {
+          return SharedTextImportResult(
+            status: SharedTextImportStatus.imported,
+            message: 'ok',
+            word: _word(
+              id: 'word-river',
+              term: rawText,
+              status: TranslationStatus.pending,
+            ),
+          );
+        },
+        saveWordSource:
+            ({required word, required payload, required now}) async {
+              throw StateError('source storage unavailable');
+            },
+        translateWord: ({required wordId}) async {
+          translatedWordIds.add(wordId);
+          return const PendingTranslationProcessorResult(
+            processed: 1,
+            translated: 1,
+            failed: 0,
+          );
+        },
+      );
+
+      final result = await controller.importSharedPayload(
+        const SharedTextPayload(
+          id: 'share-source-error',
+          text: 'river',
+          sourceUrl: 'https://example.com/river',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(result?.status, SharedTextImportStatus.imported);
+      expect(translatedWordIds, ['word-river']);
+    },
+  );
+
+  test('duplicate_word_with_new_source_url_saves_second_source', () async {
+    final db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+    addTearDown(db.close);
+    await LocalDatabaseSchema.createV1(db);
+    final importService = SharedTextImportService(
+      categoryRepository: CategoryRepository(database: db),
+      wordRepository: WordRepository(database: db),
+    );
+    final sourceRepository = WordSourceRepository(database: db);
+    final controller = IncomingSharedTextImportController(
+      receiver: _FakeSharedTextPlatformReceiver(),
+      now: () => now,
+      importText: importService.importRawText,
+      saveWordSource: ({required word, required payload, required now}) async {
+        await sourceRepository.saveSource(
+          wordId: word.id,
+          sourceUrl: payload.sourceUrl!,
+          sourceTitle: payload.sourceTitle,
+          sourceApp: payload.sourceApp,
+          sharedTextPreview: payload.sharedTextPreview,
+          createdAt: payload.createdAt ?? now,
+        );
+      },
+    );
+
+    await controller.importSharedPayload(
+      SharedTextPayload(
+        id: 'share-a',
+        text: 'emergency',
+        sourceUrl: 'https://example.com/a',
+        createdAt: DateTime(2026, 5, 18, 12),
+      ),
+    );
+    await controller.importSharedPayload(
+      SharedTextPayload(
+        id: 'share-b',
+        text: 'emergency',
+        sourceUrl: 'https://example.com/b',
+        createdAt: DateTime(2026, 5, 18, 12, 1),
+      ),
+    );
+    await controller.importSharedPayload(
+      SharedTextPayload(
+        id: 'share-c',
+        text: 'emergency',
+        sourceUrl: 'https://example.com/a',
+        createdAt: DateTime(2026, 5, 18, 12, 2),
+      ),
+    );
+
+    final sources = await sourceRepository.loadSourcesForWord(
+      'local-my-words-emergency',
+    );
+    expect(sources.map((source) => source.sourceUrl), [
+      'https://example.com/b',
+      'https://example.com/a',
+    ]);
   });
 
   test('skips_auto_translation_for_already_translated_duplicate', () async {

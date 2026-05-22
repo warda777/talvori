@@ -8,6 +8,7 @@ final class ShareViewController: UIViewController {
   private let pendingCreatedAtKey = "pendingSharedTextCreatedAt"
   private let pendingSourceKey = "pendingSharedTextSource"
   private let pendingTypeKey = "pendingSharedTextType"
+  private let pendingSourceUrlKey = "pendingSharedTextSourceUrl"
   private var didStartProcessing = false
 
   override func viewDidLoad() {
@@ -23,9 +24,9 @@ final class ShareViewController: UIViewController {
   }
 
   private func processSharedInput() {
-    loadSharedText { [weak self] text in
+    loadSharedInput { [weak self] input in
       guard let self else { return }
-      let trimmed = text?.trimmingCharacters(in: .whitespacesAndNewlines)
+      let trimmed = input.text?.trimmingCharacters(in: .whitespacesAndNewlines)
       guard let trimmed, !trimmed.isEmpty else {
         self.extensionContext?.cancelRequest(
           withError: NSError(
@@ -37,57 +38,72 @@ final class ShareViewController: UIViewController {
         return
       }
 
-      self.storePendingSharedText(trimmed)
+      self.storePendingSharedText(trimmed, sourceUrl: input.sourceUrl)
       self.openContainingApp()
       self.extensionContext?.completeRequest(returningItems: nil)
     }
   }
 
-  private func loadSharedText(completion: @escaping (String?) -> Void) {
+  private func loadSharedInput(completion: @escaping (SharedInput) -> Void) {
     let items = extensionContext?.inputItems.compactMap { $0 as? NSExtensionItem } ?? []
     let providers = items.flatMap { $0.attachments ?? [] }
     let plainTextType = kUTTypePlainText as String
     let urlType = kUTTypeURL as String
+    let group = DispatchGroup()
+    var foundText: String?
+    var foundUrl: String?
 
     for provider in providers {
       if provider.hasItemConformingToTypeIdentifier(plainTextType) {
+        group.enter()
         provider.loadItem(forTypeIdentifier: plainTextType, options: nil) { item, _ in
           DispatchQueue.main.async {
             if let text = item as? String {
-              completion(text)
+              foundText = foundText ?? text
             } else if let data = item as? Data,
                       let text = String(data: data, encoding: .utf8) {
-              completion(text)
+              foundText = foundText ?? text
             } else {
-              completion(nil)
+              foundText = foundText
             }
+            group.leave()
           }
         }
-        return
       }
     }
 
     for provider in providers {
       if provider.hasItemConformingToTypeIdentifier(urlType) {
+        group.enter()
         provider.loadItem(forTypeIdentifier: urlType, options: nil) { item, _ in
           DispatchQueue.main.async {
             if let url = item as? URL {
-              completion(url.absoluteString)
+              foundUrl = foundUrl ?? self.webUrl(from: url.absoluteString)
+              foundText = foundText ?? url.absoluteString
             } else if let text = item as? String {
-              completion(text)
+              foundUrl = foundUrl ?? self.webUrl(from: text)
+              foundText = foundText ?? text
             } else {
-              completion(nil)
+              foundUrl = foundUrl
             }
+            group.leave()
           }
         }
-        return
       }
     }
 
-    completion(nil)
+    group.notify(queue: .main) {
+      let textUrl = foundText.flatMap { self.webUrl(from: $0) }
+      completion(
+        SharedInput(
+          text: foundText,
+          sourceUrl: foundUrl ?? textUrl
+        )
+      )
+    }
   }
 
-  private func storePendingSharedText(_ text: String) {
+  private func storePendingSharedText(_ text: String, sourceUrl: String?) {
     guard let defaults = UserDefaults(suiteName: appGroupId) else {
       NSLog("TalvoriShareExtension pending text write skipped reason=no_app_group_defaults")
       return
@@ -99,8 +115,17 @@ final class ShareViewController: UIViewController {
     defaults.set(Date().timeIntervalSince1970, forKey: pendingCreatedAtKey)
     defaults.set("ios_share_extension", forKey: pendingSourceKey)
     defaults.set(webUrl(from: text) == nil ? "text" : "url", forKey: pendingTypeKey)
+    if let sourceUrl, !sourceUrl.isEmpty {
+      defaults.set(sourceUrl, forKey: pendingSourceUrlKey)
+    } else {
+      defaults.removeObject(forKey: pendingSourceUrlKey)
+    }
     defaults.synchronize()
-    NSLog("TalvoriShareExtension wrote text payload id=%@", shareId)
+    NSLog(
+      "TalvoriShareExtension wrote text payload id=%@ hasSourceUrl=%@",
+      shareId,
+      sourceUrl == nil ? "false" : "true"
+    )
   }
 
   private func openContainingApp() {
@@ -117,4 +142,9 @@ final class ShareViewController: UIViewController {
     }
     return trimmed
   }
+}
+
+private struct SharedInput {
+  let text: String?
+  let sourceUrl: String?
 }

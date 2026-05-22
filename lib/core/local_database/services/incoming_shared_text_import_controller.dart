@@ -21,6 +21,12 @@ typedef SharedWordTranslator =
     });
 typedef SharedWordTranslationSettled =
     void Function(String wordId, PendingTranslationProcessorResult result);
+typedef SharedWordSourceSaver =
+    Future<void> Function({
+      required LocalWord word,
+      required SharedTextPayload payload,
+      required DateTime now,
+    });
 
 class IncomingSharedTextImportController {
   IncomingSharedTextImportController({
@@ -28,17 +34,20 @@ class IncomingSharedTextImportController {
     required SharedTextImporter importText,
     SharedWordTranslator? translateWord,
     SharedWordTranslationSettled? onTranslationSettled,
+    SharedWordSourceSaver? saveWordSource,
     NowFactory now = DateTime.now,
   }) : _receiver = receiver,
        _importText = importText,
        _translateWord = translateWord,
        _onTranslationSettled = onTranslationSettled,
+       _saveWordSource = saveWordSource,
        _now = now;
 
   final SharedTextPlatformReceiver _receiver;
   final SharedTextImporter _importText;
   final SharedWordTranslator? _translateWord;
   final SharedWordTranslationSettled? _onTranslationSettled;
+  final SharedWordSourceSaver? _saveWordSource;
   final NowFactory _now;
   final Set<String> _processedPayloadIds = <String>{};
   final Set<String> _activeTranslations = <String>{};
@@ -71,7 +80,30 @@ class IncomingSharedTextImportController {
       debugPrint('Talvori Flutter ignored duplicate share id=${payload.id}');
       return null;
     }
-    return importSharedText(payload.text);
+    final now = _now();
+    final result = await _importText(rawText: payload.text, now: now);
+    await _saveSourceIfPresent(result.word, payload, now);
+    _scheduleAutoTranslation(result.word);
+    return result;
+  }
+
+  Future<void> _saveSourceIfPresent(
+    LocalWord? word,
+    SharedTextPayload payload,
+    DateTime now,
+  ) async {
+    final saveWordSource = _saveWordSource;
+    if (word == null || saveWordSource == null) return;
+    if (payload.sourceUrl == null || payload.sourceUrl!.trim().isEmpty) {
+      return;
+    }
+    try {
+      await saveWordSource(word: word, payload: payload, now: now);
+    } catch (error) {
+      debugPrint(
+        'Talvori shared word source save failed wordId=${word.id}: $error',
+      );
+    }
   }
 
   void _scheduleAutoTranslation(LocalWord? word) {

@@ -40,6 +40,10 @@ void main() {
             'source': 'ios_share_extension',
             'type': 'text',
             'platform': 'ios',
+            'sourceUrl': ' https://example.com/article ',
+            'sourceTitle': 'Example',
+            'sourceApp': 'Safari',
+            'sharedTextPreview': 'Umbrella',
           };
         });
 
@@ -51,6 +55,10 @@ void main() {
     expect(payload?.source, 'ios_share_extension');
     expect(payload?.type, 'text');
     expect(payload?.platform, 'ios');
+    expect(payload?.sourceUrl, 'https://example.com/article');
+    expect(payload?.sourceTitle, 'Example');
+    expect(payload?.sourceApp, 'Safari');
+    expect(payload?.sharedTextPreview, 'Umbrella');
   });
 
   test('getInitialSharedText_returns_null_for_blank_text', () async {

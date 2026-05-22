@@ -11,6 +11,7 @@ import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
+import 'package:talvori/features/words/ui/cards/word_card.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_sources_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
@@ -253,7 +254,104 @@ void main() {
     expect(find.text('My mix'), findsNothing);
   });
 
-  testWidgets('home browser button explains missing shared source', (
+  testWidgets(
+    'home browser button shows Standardbrowser Chrome Brave choices',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({});
+      final opened = <Uri>[];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            homeExternalBrowserLauncherProvider.overrideWithValue((uri) async {
+              opened.add(uri);
+              return true;
+            }),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.tap(find.byKey(const Key('home-browser-return-button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(opened, isEmpty);
+      expect(find.byKey(const Key('home-browser-open-sheet')), findsOneWidget);
+      expect(find.text('Browser öffnen'), findsOneWidget);
+      expect(find.text('Standardbrowser'), findsOneWidget);
+      expect(find.text('Safari'), findsNothing);
+      expect(find.text('Chrome'), findsOneWidget);
+      expect(find.text('Brave'), findsOneWidget);
+      expect(find.text('Eigene Webseite hinterlegen'), findsOneWidget);
+      expect(find.text('Anderer Browser'), findsNothing);
+      expect(find.byKey(const Key('home-browser-option-safari')), findsNothing);
+      expect(find.byKey(const Key('home-browser-option-other')), findsNothing);
+      expect(
+        find.textContaining('Safari öffnet sich über Standardbrowser'),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('home-browser-missing-url-sheet')),
+        findsNothing,
+      );
+      expect(find.text('Talvori-Leser'), findsNothing);
+      expect(find.text('Keine Seite gespeichert'), findsNothing);
+    },
+  );
+
+  testWidgets('home browser custom start page can be saved', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('home-browser-set-start-url')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(
+      find.byKey(const Key('home-browser-start-url-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('Eigene Webseite'), findsOneWidget);
+    final input = tester.widget<TextField>(
+      find.byKey(const Key('home-browser-start-url-input')),
+    );
+    expect(input.controller?.text, isEmpty);
+
+    await tester.enterText(
+      find.byKey(const Key('home-browser-start-url-input')),
+      'bbc.com',
+    );
+    await tester.tap(find.byKey(const Key('home-browser-start-url-save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      prefs.getString(homeBrowserCustomStartUrlStorageKey),
+      'https://bbc.com',
+    );
+  });
+
+  testWidgets('home browser custom start page rejects invalid url', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -270,16 +368,218 @@ void main() {
 
     await tester.tap(find.byKey(const Key('home-browser-return-button')));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('home-browser-set-start-url')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Browser-Rückkehr wird vorbereitet.'), findsOneWidget);
-    expect(find.byKey(const Key('home-browser-return-toast')), findsOneWidget);
-    final snackBar = tester.widget<SnackBar>(
-      find.byKey(const Key('home-browser-return-toast')),
+    await tester.enterText(
+      find.byKey(const Key('home-browser-start-url-input')),
+      'keine webseite',
     );
-    expect(snackBar.backgroundColor, const Color(0xFF061018));
+    await tester.tap(find.byKey(const Key('home-browser-start-url-save')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(homeBrowserCustomStartUrlStorageKey), isNull);
+    expect(find.byKey(const Key('home-browser-open-toast')), findsOneWidget);
+    expect(find.text('Bitte gib eine gültige Webseite ein.'), findsOneWidget);
+  });
+
+  test('home browser start url normalization accepts only web urls', () {
+    expect(normalizeHomeBrowserStartUrl(null), isNull);
+    expect(normalizeHomeBrowserStartUrl(''), isNull);
+    expect(
+      normalizeHomeBrowserStartUrl('bbc.com'),
+      Uri.parse('https://bbc.com'),
+    );
+    expect(
+      normalizeHomeBrowserStartUrl('https://www.wikipedia.org'),
+      Uri.parse('https://www.wikipedia.org'),
+    );
+    expect(normalizeHomeBrowserStartUrl('ftp://example.com'), isNull);
+    expect(normalizeHomeBrowserStartUrl('keine webseite'), isNull);
+  });
+
+  testWidgets('home browser standard choice opens system browser url', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final opened = <Uri>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          homeBrowserUrlResolverProvider.overrideWithValue(
+            () async => Uri.parse('https://www.bbc.com'),
+          ),
+          homeExternalBrowserLauncherProvider.overrideWithValue((uri) async {
+            opened.add(uri);
+            return true;
+          }),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('home-browser-option-system')));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(opened, [Uri.parse('https://www.bbc.com')]);
+    expect(find.text('Talvori-Leser'), findsNothing);
     expect(find.text('Kategorie'), findsNothing);
     expect(find.text('Vocabs'), findsNothing);
     expect(find.byType(ImpulsPostfachScreen), findsNothing);
+  });
+
+  testWidgets('home browser brave choice tries brave then default fallback', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final opened = <Uri>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          homeBrowserUrlResolverProvider.overrideWithValue(
+            () async => Uri.parse('https://www.bbc.com'),
+          ),
+          homeExternalBrowserLauncherProvider.overrideWithValue((uri) async {
+            opened.add(uri);
+            return uri.scheme == 'https';
+          }),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('home-browser-option-brave')));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(opened, [
+      Uri.parse('brave://open-url?url=https%3A%2F%2Fwww.bbc.com'),
+      Uri.parse('https://www.bbc.com'),
+    ]);
+    expect(
+      find.text('Brave ist nicht verfügbar. Standardbrowser wird geöffnet.'),
+      findsOneWidget,
+    );
+    expect(find.text('Talvori-Leser'), findsNothing);
+  });
+
+  testWidgets('home browser chrome choice tries chrome then default fallback', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final opened = <Uri>[];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          homeBrowserUrlResolverProvider.overrideWithValue(
+            () async => Uri.parse('https://www.bbc.com'),
+          ),
+          homeExternalBrowserLauncherProvider.overrideWithValue((uri) async {
+            opened.add(uri);
+            if (uri.scheme == 'googlechromes') {
+              throw StateError('Chrome unavailable');
+            }
+            return uri.scheme == 'https';
+          }),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('home-browser-option-chrome')));
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(opened, [
+      Uri.parse('googlechromes://www.bbc.com'),
+      Uri.parse('https://www.bbc.com'),
+    ]);
+    expect(
+      find.text('Chrome ist nicht verfügbar. Standardbrowser wird geöffnet.'),
+      findsOneWidget,
+    );
+    expect(find.text('Talvori-Leser'), findsNothing);
+  });
+
+  testWidgets('home browser choice sheet has no overflow on compact height', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final previousOnError = FlutterError.onError;
+    final overflows = <FlutterErrorDetails>[];
+    FlutterError.onError = (details) {
+      final message = details.exceptionAsString();
+      if (message.contains('RenderFlex overflowed')) {
+        overflows.add(details);
+      } else {
+        previousOnError?.call(details);
+      }
+    };
+    addTearDown(() => FlutterError.onError = previousOnError);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          homeExternalBrowserLauncherProvider.overrideWithValue((_) async {
+            return true;
+          }),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byKey(const Key('home-browser-open-sheet')), findsOneWidget);
+    expect(find.text('Standardbrowser'), findsOneWidget);
+    expect(find.text('Safari'), findsNothing);
+    expect(find.text('Chrome'), findsOneWidget);
+    expect(find.text('Brave'), findsOneWidget);
+    expect(find.text('Eigene Webseite hinterlegen'), findsOneWidget);
+    expect(find.text('Anderer Browser'), findsNothing);
+    expect(find.byKey(const Key('home-browser-option-safari')), findsNothing);
+    expect(find.byKey(const Key('home-browser-option-other')), findsNothing);
+    expect(overflows, isEmpty);
   });
 
   testWidgets('home top right button opens progress hub', (tester) async {

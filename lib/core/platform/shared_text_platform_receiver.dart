@@ -12,6 +12,10 @@ class SharedTextPayload {
     this.source,
     this.type,
     this.platform,
+    this.sourceUrl,
+    this.sourceTitle,
+    this.sourceApp,
+    this.sharedTextPreview,
   });
 
   final String id;
@@ -20,6 +24,10 @@ class SharedTextPayload {
   final String? source;
   final String? type;
   final String? platform;
+  final String? sourceUrl;
+  final String? sourceTitle;
+  final String? sourceApp;
+  final String? sharedTextPreview;
 }
 
 class SharedTextPlatformReceiver {
@@ -156,16 +164,37 @@ class SharedTextPlatformReceiver {
     final rawSource = value['source'];
     final rawType = value['type'];
     final rawPlatform = value['platform'];
+    final rawSourceUrl = value['sourceUrl'];
+    final rawSourceTitle = value['sourceTitle'];
+    final rawSourceApp = value['sourceApp'];
+    final rawBrowserHint = value['browserHint'];
+    final rawSharedTextPreview = value['sharedTextPreview'];
 
-    debugPrint('Talvori Flutter received shared text id=$id');
+    final sourceUrl = _trimmedStringOrNull(rawSourceUrl);
+    debugPrint(
+      'Talvori Flutter received shared text id=$id '
+      'hasSourceUrl=${sourceUrl != null}',
+    );
     return SharedTextPayload(
       id: id,
       text: text,
       createdAt: createdAt,
-      source: rawSource is String ? rawSource : null,
-      type: rawType is String ? rawType : null,
-      platform: rawPlatform is String ? rawPlatform.trim() : null,
+      source: _trimmedStringOrNull(rawSource),
+      type: _trimmedStringOrNull(rawType),
+      platform: _trimmedStringOrNull(rawPlatform),
+      sourceUrl: sourceUrl,
+      sourceTitle: _trimmedStringOrNull(rawSourceTitle),
+      sourceApp:
+          _trimmedStringOrNull(rawSourceApp) ??
+          _trimmedStringOrNull(rawBrowserHint),
+      sharedTextPreview: _trimmedStringOrNull(rawSharedTextPreview),
     );
+  }
+
+  String? _trimmedStringOrNull(Object? value) {
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 }
 

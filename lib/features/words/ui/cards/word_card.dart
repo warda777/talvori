@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui' as ui;
 import 'tap_flash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
 import 'package:talvori/features/words/ui/cards/glow_orb.dart';
 import 'package:talvori/features/words/ui/cards/center_glow.dart';
@@ -13,9 +14,33 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/home/ui/widgets/glow_switch.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/words/ui/cards/spinning_chrome_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // ignore_for_file: use_build_context_synchronously
 // ignore_for_file: unnecessary_null_comparison
+
+typedef HomeExternalBrowserLauncher = Future<bool> Function(Uri uri);
+typedef HomeBrowserUrlResolver = Future<Uri> Function();
+
+enum HomeBrowserChoice { system, chrome, brave }
+
+@visibleForTesting
+final homeExternalBrowserLauncherProvider =
+    Provider<HomeExternalBrowserLauncher>((ref) {
+      return (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
+    });
+
+const _homeBrowserStartUrl = 'https://www.bbc.com';
+
+@visibleForTesting
+const homeBrowserCustomStartUrlStorageKey =
+    'talvori_browser_custom_start_url_v1';
+
+@visibleForTesting
+final homeBrowserUrlResolverProvider = Provider<HomeBrowserUrlResolver>((ref) {
+  return () => _resolveHomeBrowserUrl(ref);
+});
 
 class WordCard extends ConsumerStatefulWidget {
   // Aktionen
@@ -539,13 +564,13 @@ class _WordCardState extends ConsumerState<WordCard> {
                       right: 8,
                       child: Semantics(
                         key: const Key('home-browser-return-button'),
-                        label: 'Browser-Rückkehr wird vorbereitet',
+                        label: 'Browser öffnen',
                         child: SizedBox.square(
                           dimension: 52,
                           child: TapFlash(
                             color: _wheelBlue, // Blau aus Word Wheel
                             shape: BoxShape.circle,
-                            onTapAfter: () => onChromeButtonTap(context),
+                            onTapAfter: () => onChromeButtonTap(context, ref),
                             child: Container(
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
@@ -564,7 +589,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                                       : cs.onSurface,
                                   BlendMode.srcIn,
                                 ),
-                                onTap: () => onChromeButtonTap(context),
+                                onTap: () => onChromeButtonTap(context, ref),
                               ),
                             ),
                           ),
@@ -582,63 +607,329 @@ class _WordCardState extends ConsumerState<WordCard> {
   }
 }
 
-void onChromeButtonTap(BuildContext context) {
-  final messenger = ScaffoldMessenger.of(context);
-
-  _showBrowserReturnToast(
-    messenger,
-    icon: Icons.travel_explore_rounded,
-    message: 'Browser-Rückkehr wird vorbereitet.',
+Future<void> onChromeButtonTap(BuildContext context, WidgetRef ref) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (sheetContext) {
+      return _HomeBrowserOpenSheet(
+        onSelect: (choice) async {
+          Navigator.of(sheetContext).pop();
+          await _openHomeBrowserChoice(context, ref, choice);
+        },
+        onSetStartPage: () async {
+          Navigator.of(sheetContext).pop();
+          await _showHomeBrowserStartPageSheet(context);
+        },
+      );
+    },
   );
 }
 
-void _showBrowserReturnToast(
-  ScaffoldMessengerState messenger, {
-  required IconData icon,
-  required String message,
-  Duration duration = const Duration(seconds: 4),
-}) {
+Future<void> _openHomeBrowserChoice(
+  BuildContext context,
+  WidgetRef ref,
+  HomeBrowserChoice choice,
+) async {
+  final launcher = ref.read(homeExternalBrowserLauncherProvider);
+  final targetUrl = await ref.read(homeBrowserUrlResolverProvider)();
+  final opened = switch (choice) {
+    HomeBrowserChoice.system => await _tryLaunch(launcher, targetUrl),
+    HomeBrowserChoice.chrome => await _openChromeOrFallback(
+      context,
+      launcher,
+      targetUrl,
+    ),
+    HomeBrowserChoice.brave => await _openBraveOrFallback(
+      context,
+      launcher,
+      targetUrl,
+    ),
+  };
+  if (!context.mounted || opened) return;
+  _showBrowserOpenToast(context);
+}
+
+Future<Uri> _resolveHomeBrowserUrl(Ref ref) async {
+  try {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    final source = await bootstrap.repositoryFactory.wordSourceRepository
+        .loadLatestSource();
+    final uri = Uri.tryParse(source?.sourceUrl ?? '');
+    if (uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty) {
+      return uri;
+    }
+  } catch (_) {
+    // Browser opening must stay available even when local metadata is absent.
+  }
+  return _loadHomeBrowserStartUrl();
+}
+
+Future<bool> _openChromeOrFallback(
+  BuildContext context,
+  HomeExternalBrowserLauncher launcher,
+  Uri targetUrl,
+) async {
+  final chromeUri = _chromeUri(targetUrl);
+  if (await _tryLaunch(launcher, chromeUri)) return true;
+  if (context.mounted) {
+    _showBrowserOpenToast(
+      context,
+      'Chrome ist nicht verfügbar. Standardbrowser wird geöffnet.',
+    );
+  }
+  return _tryLaunch(launcher, targetUrl);
+}
+
+Future<bool> _openBraveOrFallback(
+  BuildContext context,
+  HomeExternalBrowserLauncher launcher,
+  Uri targetUrl,
+) async {
+  final braveUri = _braveUri(targetUrl);
+  if (await _tryLaunch(launcher, braveUri)) return true;
+  if (context.mounted) {
+    _showBrowserOpenToast(
+      context,
+      'Brave ist nicht verfügbar. Standardbrowser wird geöffnet.',
+    );
+  }
+  return _tryLaunch(launcher, targetUrl);
+}
+
+Future<bool> _tryLaunch(HomeExternalBrowserLauncher launcher, Uri uri) async {
+  try {
+    return await launcher(uri);
+  } catch (_) {
+    return false;
+  }
+}
+
+Uri _chromeUri(Uri targetUrl) {
+  final pathAndQuery = _browserSchemePathAndQuery(targetUrl);
+  if (targetUrl.scheme == 'https') {
+    return Uri.parse('googlechromes://${targetUrl.host}$pathAndQuery');
+  }
+  return Uri.parse('googlechrome://${targetUrl.host}$pathAndQuery');
+}
+
+Uri _braveUri(Uri targetUrl) {
+  final encoded = Uri.encodeComponent(targetUrl.toString());
+  return Uri.parse('brave://open-url?url=$encoded');
+}
+
+String _browserSchemePathAndQuery(Uri targetUrl) {
+  final path = targetUrl.path == '/' ? '' : targetUrl.path;
+  final query = targetUrl.query.isNotEmpty ? '?${targetUrl.query}' : '';
+  return '$path$query';
+}
+
+Future<Uri> _loadHomeBrowserStartUrl() async {
+  return await _loadHomeBrowserCustomStartUrl() ??
+      Uri.parse(_homeBrowserStartUrl);
+}
+
+Future<Uri?> _loadHomeBrowserCustomStartUrl() async {
+  final prefs = await SharedPreferences.getInstance();
+  final stored = prefs.getString(homeBrowserCustomStartUrlStorageKey);
+  return normalizeHomeBrowserStartUrl(stored);
+}
+
+@visibleForTesting
+Uri? normalizeHomeBrowserStartUrl(String? input) {
+  final trimmed = input?.trim() ?? '';
+  if (trimmed.isEmpty) return null;
+  if (RegExp(r'\s').hasMatch(trimmed)) return null;
+  final candidate = trimmed.contains('://') ? trimmed : 'https://$trimmed';
+  final uri = Uri.tryParse(candidate);
+  if (uri == null) return null;
+  if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+  if (uri.host.isEmpty) return null;
+  return uri;
+}
+
+void _showBrowserOpenToast(
+  BuildContext context, [
+  String message = 'Externer Browser konnte nicht geöffnet werden.',
+]) {
+  final messenger = ScaffoldMessenger.of(context);
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        key: const Key('home-browser-return-toast'),
+        key: const Key('home-browser-open-toast'),
         backgroundColor: const Color(0xFF061018),
         behavior: SnackBarBehavior.floating,
         elevation: 0,
-        duration: duration,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 118),
-        padding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.2),
         ),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          decoration: BoxDecoration(
-            color: const Color(0xFF061018),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
-                blurRadius: 24,
-                spreadRadius: -8,
-              ),
-            ],
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Color(0xFFF4F8FF),
+            fontWeight: FontWeight.w800,
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF7DFFE3), size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(
+        ),
+      ),
+    );
+}
+
+class _HomeBrowserOpenSheet extends StatelessWidget {
+  const _HomeBrowserOpenSheet({
+    required this.onSelect,
+    required this.onSetStartPage,
+  });
+
+  final ValueChanged<HomeBrowserChoice> onSelect;
+  final VoidCallback onSetStartPage;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxSheetHeight = MediaQuery.sizeOf(context).height * 0.82;
+    return SafeArea(
+      top: false,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxSheetHeight),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            key: const Key('home-browser-open-sheet'),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF061018),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5DDCFF).withValues(alpha: 0.22),
+                  blurRadius: 28,
+                  spreadRadius: -8,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Browser öffnen',
+                  style: TextStyle(
                     color: Color(0xFFF4F8FF),
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
                   ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Wähle, womit Talvori deine hinterlegte Webseite öffnet. Es wird keine letzte Seite gesucht.',
+                  style: TextStyle(
+                    color: Color(0xFF93A2B8),
+                    fontSize: 12.5,
+                    height: 1.3,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _HomeBrowserOptionTile(
+                  key: const Key('home-browser-option-system'),
+                  icon: Icons.travel_explore_rounded,
+                  title: 'Standardbrowser',
+                  subtitle: 'Öffnet deinen Standardbrowser',
+                  onTap: () => onSelect(HomeBrowserChoice.system),
+                ),
+                const SizedBox(height: 8),
+                _HomeBrowserOptionTile(
+                  key: const Key('home-browser-option-chrome'),
+                  icon: Icons.public_rounded,
+                  title: 'Chrome',
+                  subtitle: 'Direkt in Chrome öffnen',
+                  onTap: () => onSelect(HomeBrowserChoice.chrome),
+                ),
+                const SizedBox(height: 8),
+                _HomeBrowserOptionTile(
+                  key: const Key('home-browser-option-brave'),
+                  icon: Icons.shield_rounded,
+                  title: 'Brave',
+                  subtitle: 'Direkt in Brave öffnen',
+                  onTap: () => onSelect(HomeBrowserChoice.brave),
+                ),
+                const SizedBox(height: 10),
+                _HomeBrowserStartPageAction(onTap: onSetStartPage),
+                const SizedBox(height: 10),
+                const Text(
+                  'Safari öffnet sich über Standardbrowser, wenn Safari auf deinem Gerät als Standardbrowser eingestellt ist.',
+                  style: TextStyle(
+                    color: Color(0xFF93A2B8),
+                    fontSize: 11.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeBrowserStartPageAction extends StatelessWidget {
+  const _HomeBrowserStartPageAction({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF061018),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        key: const Key('home-browser-set-start-url'),
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
+            ),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.tune_rounded, color: Color(0xFF7DFFE3), size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Eigene Webseite hinterlegen',
+                      style: TextStyle(
+                        color: Color(0xFFF4F8FF),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Lege selbst fest, welche Seite geöffnet wird',
+                      style: TextStyle(
+                        color: Color(0xFF93A2B8),
+                        fontSize: 12.2,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -646,6 +937,283 @@ void _showBrowserReturnToast(
         ),
       ),
     );
+  }
+}
+
+Future<void> _showHomeBrowserStartPageSheet(BuildContext context) async {
+  final currentUrl = await _loadHomeBrowserCustomStartUrl();
+  if (!context.mounted) return;
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (sheetContext) {
+      return _HomeBrowserStartPageSheet(
+        initialUrl: currentUrl?.toString() ?? '',
+        parentContext: context,
+      );
+    },
+  );
+}
+
+class _HomeBrowserStartPageSheet extends StatefulWidget {
+  const _HomeBrowserStartPageSheet({
+    required this.initialUrl,
+    required this.parentContext,
+  });
+
+  final String initialUrl;
+  final BuildContext parentContext;
+
+  @override
+  State<_HomeBrowserStartPageSheet> createState() =>
+      _HomeBrowserStartPageSheetState();
+}
+
+class _HomeBrowserStartPageSheetState
+    extends State<_HomeBrowserStartPageSheet> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialUrl);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save(BuildContext sheetContext) {
+    return _saveHomeBrowserStartUrl(
+      sheetContext,
+      widget.parentContext,
+      _controller.text,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + 18,
+        ),
+        child: Container(
+          key: const Key('home-browser-start-url-sheet'),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF061018),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF5DDCFF).withValues(alpha: 0.22),
+                blurRadius: 28,
+                spreadRadius: -8,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Eigene Webseite',
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Diese Webseite nutzt Talvori, wenn keine gespeicherte Quelle vorhanden ist.',
+                style: TextStyle(
+                  color: Color(0xFF93A2B8),
+                  fontSize: 12.5,
+                  height: 1.3,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                key: const Key('home-browser-start-url-input'),
+                controller: _controller,
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                textInputAction: TextInputAction.done,
+                style: const TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontWeight: FontWeight.w800,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'z. B. $_homeBrowserStartUrl',
+                  hintStyle: const TextStyle(color: Color(0xFF5F6E83)),
+                  filled: true,
+                  fillColor: const Color(0xFF0B1823),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: const Color(0xFF7DFFE3).withValues(alpha: 0.28),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF7DFFE3),
+                      width: 1.2,
+                    ),
+                  ),
+                ),
+                onSubmitted: (_) => _save(context),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('home-browser-start-url-cancel'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFF4F8FF),
+                        side: BorderSide(
+                          color: const Color(
+                            0xFF93A2B8,
+                          ).withValues(alpha: 0.45),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Abbrechen'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      key: const Key('home-browser-start-url-save'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF7DFFE3),
+                        foregroundColor: const Color(0xFF061018),
+                      ),
+                      onPressed: () => _save(context),
+                      child: const Text('Speichern'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _saveHomeBrowserStartUrl(
+  BuildContext sheetContext,
+  BuildContext parentContext,
+  String input,
+) async {
+  final uri = normalizeHomeBrowserStartUrl(input);
+  if (uri == null) {
+    if (parentContext.mounted) {
+      _showBrowserOpenToast(
+        parentContext,
+        'Bitte gib eine gültige Webseite ein.',
+      );
+    }
+    return;
+  }
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(homeBrowserCustomStartUrlStorageKey, uri.toString());
+  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+  if (parentContext.mounted) {
+    _showBrowserOpenToast(parentContext, 'Webseite gespeichert.');
+  }
+}
+
+class _HomeBrowserOptionTile extends StatelessWidget {
+  const _HomeBrowserOptionTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF0B1823),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: const Color(0xFF7DFFE3).withValues(alpha: 0.28),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF78E6FF).withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFF78E6FF).withValues(alpha: 0.42),
+                  ),
+                ),
+                child: Icon(icon, color: const Color(0xFF7DFFE3), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Color(0xFFF4F8FF),
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF93A2B8),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF78E6FF)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Optionaler Helfer (falls du den Titel separat brauchst)

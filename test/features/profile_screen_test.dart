@@ -107,8 +107,10 @@ void main() {
     await tester.pump();
     expect(find.text('Impuls & KI'), findsOneWidget);
     expect(find.text('App-Einstellungen'), findsOneWidget);
-    expect(find.text('Browser öffnen mit'), findsOneWidget);
-    expect(find.text('Systemstandard'), findsOneWidget);
+    expect(find.text('Browser öffnen mit'), findsNothing);
+    expect(find.text('Systemstandard'), findsNothing);
+    expect(find.text('Anderer Browser'), findsNothing);
+    expect(find.text('Nicht festgelegt'), findsNothing);
     await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pump();
     expect(find.text('Daten & Hilfe'), findsOneWidget);

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talvori/core/services/browser_return_service.dart';
 
 class ProfilePreferences {
   const ProfilePreferences({
@@ -12,7 +11,6 @@ class ProfilePreferences {
     this.autoPronounceCards = false,
     this.learningRemindersEnabled = false,
     this.pendingTranslationRemindersEnabled = false,
-    this.browserPreference = BrowserPreference.system,
   });
 
   final bool hapticsEnabled;
@@ -21,7 +19,6 @@ class ProfilePreferences {
   final bool autoPronounceCards;
   final bool learningRemindersEnabled;
   final bool pendingTranslationRemindersEnabled;
-  final BrowserPreference browserPreference;
 
   ProfilePreferences copyWith({
     bool? hapticsEnabled,
@@ -30,7 +27,6 @@ class ProfilePreferences {
     bool? autoPronounceCards,
     bool? learningRemindersEnabled,
     bool? pendingTranslationRemindersEnabled,
-    BrowserPreference? browserPreference,
   }) {
     return ProfilePreferences(
       hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
@@ -42,7 +38,6 @@ class ProfilePreferences {
       pendingTranslationRemindersEnabled:
           pendingTranslationRemindersEnabled ??
           this.pendingTranslationRemindersEnabled,
-      browserPreference: browserPreference ?? this.browserPreference,
     );
   }
 }
@@ -75,9 +70,6 @@ class SharedPreferencesProfilePreferencesRepository
       learningRemindersEnabled: prefs.getBool(_learningRemindersKey) ?? false,
       pendingTranslationRemindersEnabled:
           prefs.getBool(_pendingTranslationRemindersKey) ?? false,
-      browserPreference: BrowserPreference.fromStorage(
-        prefs.getString(BrowserReturnService.browserPreferenceStorageKey),
-      ),
     );
   }
 
@@ -95,10 +87,6 @@ class SharedPreferencesProfilePreferencesRepository
     await prefs.setBool(
       _pendingTranslationRemindersKey,
       preferences.pendingTranslationRemindersEnabled,
-    );
-    await prefs.setString(
-      BrowserReturnService.browserPreferenceStorageKey,
-      preferences.browserPreference.name,
     );
   }
 }
@@ -156,10 +144,6 @@ class ProfilePreferencesController extends StateNotifier<ProfilePreferences> {
 
   Future<void> setPendingTranslationRemindersEnabled(bool value) {
     return _save(state.copyWith(pendingTranslationRemindersEnabled: value));
-  }
-
-  Future<void> setBrowserPreference(BrowserPreference value) {
-    return _save(state.copyWith(browserPreference: value));
   }
 
   Future<void> _save(ProfilePreferences preferences) async {

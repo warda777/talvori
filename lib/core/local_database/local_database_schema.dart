@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalDatabaseSchema {
   const LocalDatabaseSchema._();
 
-  static const int version = 2;
+  static const int version = 3;
 
   static Future<void> createV1(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
@@ -188,6 +188,8 @@ CREATE TABLE settings (
   updated_at TEXT NOT NULL
 )
 ''');
+
+    await createWordSourcesTable(db);
   }
 
   static Future<void> migrateV1ToV2(Database db) async {
@@ -204,5 +206,28 @@ SET translation_status = CASE
   ELSE 'translated'
 END
 ''');
+  }
+
+  static Future<void> migrateV2ToV3(Database db) async {
+    await createWordSourcesTable(db);
+  }
+
+  static Future<void> createWordSourcesTable(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS word_sources (
+  id TEXT PRIMARY KEY,
+  word_id TEXT NOT NULL,
+  source_url TEXT NOT NULL,
+  source_title TEXT,
+  source_app TEXT,
+  shared_text_preview TEXT,
+  created_at TEXT NOT NULL,
+  UNIQUE (word_id, source_url),
+  FOREIGN KEY (word_id) REFERENCES words (id)
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_word_sources_word_id ON word_sources (word_id)',
+    );
   }
 }

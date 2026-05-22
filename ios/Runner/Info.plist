@@ -37,6 +37,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechrome</string>
+		<string>googlechromes</string>
+		<string>brave</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Talvori nutzt das Mikrofon, damit du Chatnachrichten diktieren kannst.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

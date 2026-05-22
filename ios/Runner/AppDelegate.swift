@@ -11,6 +11,7 @@ import UserNotifications
   private let pendingCreatedAtKey = "pendingSharedTextCreatedAt"
   private let pendingSourceKey = "pendingSharedTextSource"
   private let pendingTypeKey = "pendingSharedTextType"
+  private let pendingSourceUrlKey = "pendingSharedTextSourceUrl"
   private var shareChannelsConfigured = false
 
   override func application(
@@ -77,19 +78,26 @@ import UserNotifications
       ?? Date().timeIntervalSince1970
     let source = defaults.string(forKey: pendingSourceKey) ?? "ios_share_extension"
     let type = defaults.string(forKey: pendingTypeKey) ?? "text"
+    let rawSourceUrl = defaults.string(forKey: pendingSourceUrlKey)
+    let sourceUrl = rawSourceUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
     clearPendingSharedPayload(defaults)
     NSLog(
-      "Talvori share runner pending text payload found=true shareId=%@",
-      id
+      "Talvori share runner pending text payload found=true shareId=%@ hasSourceUrl=%@",
+      id,
+      sourceUrl == nil || sourceUrl!.isEmpty ? "false" : "true"
     )
 
-    return [
+    var payload: [String: Any] = [
       "id": id,
       "text": text,
       "createdAt": createdAt,
       "source": source,
       "type": type,
     ]
+    if let sourceUrl, !sourceUrl.isEmpty {
+      payload["sourceUrl"] = sourceUrl
+    }
+    return payload
   }
 
   private func clearPendingSharedPayload(_ defaults: UserDefaults) {
@@ -98,6 +106,7 @@ import UserNotifications
     defaults.removeObject(forKey: pendingCreatedAtKey)
     defaults.removeObject(forKey: pendingSourceKey)
     defaults.removeObject(forKey: pendingTypeKey)
+    defaults.removeObject(forKey: pendingSourceUrlKey)
     defaults.synchronize()
   }
 }

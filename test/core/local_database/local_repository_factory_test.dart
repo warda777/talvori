@@ -70,6 +70,13 @@ void main() {
       expect(readState.currentTerm, isNotNull);
       expect(readState.currentStage, SrsStage.s0);
       expect(activeSessions, hasLength(1));
+      final savedSource = await repositoryFactory.wordSourceRepository
+          .saveSource(
+            wordId: 'word-1',
+            sourceUrl: 'https://example.com/article',
+            createdAt: now,
+          );
+      expect(savedSource?.sourceUrl, 'https://example.com/article');
     });
   });
 }
