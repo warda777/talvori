@@ -38,9 +38,9 @@ angeboten.
 
 ## Aktuelle Spielkarten
 
-Die ersten echten Spielmodi sind `Hoer & Schreib` und `Wort-Match`. Die
-anderen neun Karten sind bewusst vorbereitet und starten noch keine echte
-Spielsession:
+Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match` und
+`Blitzrunde`. Die anderen acht Karten sind bewusst vorbereitet und starten noch
+keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -65,6 +65,23 @@ Spielsession:
 Beim Tippen auf vorbereitete Karten erscheint nur der Hinweis
 `Dieses Wortspiel wird vorbereitet.` Es wird keine Queue gestartet und kein
 SRS-Fortschritt geschrieben.
+
+## Blitzrunde
+
+`Blitzrunde` ist der dritte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur Woerter mit Begriff und Uebersetzung
+- benoetigt mindestens vier passende Wortpaare
+- startet erst nach der Startkarte `Bereit fuer die Blitzrunde?`
+- laeuft im Produkt mit 60 Sekunden
+- zeigt Zeit, lokalen Punktestand, ein Wort und vier Uebersetzungen
+- waehlt eine richtige Antwort und drei lokale Ablenker
+- vergleicht Antworten ueber stabile Wort-IDs
+- erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
+- zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
 ## Wort-Match
 
@@ -103,9 +120,8 @@ Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
 
 ## Spaetere Umsetzungsprioritaet
 
-1. `Blitzrunde`, weil es gut zu XP, Wochenliga und kurzen Sessions passt.
-2. `Boss-Fight`, sobald Fehlerstatistiken sauber verfuegbar sind.
-3. `Kontext-Challenge`, sobald KI-Satz-Kontext stabil angebunden ist.
+1. `Boss-Fight`, sobald Fehlerstatistiken sauber verfuegbar sind.
+2. `Kontext-Challenge`, sobald KI-Satz-Kontext stabil angebunden ist.
 
 ## Entfernt
 

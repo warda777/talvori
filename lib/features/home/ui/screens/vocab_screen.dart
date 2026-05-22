@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_promo_card.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_tile.dart';
@@ -51,6 +52,15 @@ class VocabScreen extends ConsumerWidget {
   }
 
   static void _openGame(BuildContext context, VocabPracticeItem item) {
+    if (item.id == 'speed_round') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: SpeedRoundGameScreen.routeName),
+          builder: (_) => const SpeedRoundGameScreen(),
+        ),
+      );
+      return;
+    }
     if (item.id == 'word_match') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(

@@ -1,0 +1,707 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
+import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+
+class SpeedRoundGameScreen extends ConsumerStatefulWidget {
+  const SpeedRoundGameScreen({
+    super.key,
+    this.roundDuration = const Duration(seconds: 60),
+  });
+
+  static const routeName = 'speed-round-game';
+
+  final Duration roundDuration;
+
+  @override
+  ConsumerState<SpeedRoundGameScreen> createState() =>
+      _SpeedRoundGameScreenState();
+}
+
+class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
+  List<SpeedRoundPair> _roundPairs = const <SpeedRoundPair>[];
+  String _roundKey = '';
+  int _currentQuestionIndex = 0;
+  int _score = 0;
+  int _secondsLeft = 60;
+  bool _started = false;
+  bool _finished = false;
+  String? _feedback;
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wordsAsync = ref.watch(
+      localWordsForSourceProvider(LocalLearningSource.allWords),
+    );
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF050912),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF050912),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('Blitzrunde'),
+      ),
+      body: SafeArea(
+        child: wordsAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Color(0xFFFFD166)),
+          ),
+          error: (_, __) => _SpeedRoundMessageState(
+            title: 'Wörter konnten nicht geladen werden',
+            text: 'Versuche es gleich noch einmal.',
+            buttonLabel: 'Zurück',
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          data: (words) {
+            final pairs = buildSpeedRoundPairs(words);
+            if (pairs.length < 4) {
+              return _SpeedRoundMessageState(
+                title: 'Noch nicht genug Wörter',
+                text:
+                    'Füge mindestens vier Wörter mit Übersetzung hinzu, um Blitzrunde zu spielen.',
+                buttonLabel: 'Zurück',
+                onPressed: () => Navigator.of(context).maybePop(),
+              );
+            }
+
+            _ensureRound(pairs);
+            if (_finished) {
+              return _FinishedView(
+                score: _score,
+                onRestart: () => setState(() => _restartRound(pairs)),
+                onBack: () => Navigator.of(context).maybePop(),
+              );
+            }
+
+            if (!_started) {
+              return _StartView(onStart: _startRound);
+            }
+
+            final question = buildSpeedRoundQuestion(
+              pairs: _roundPairs,
+              questionIndex: _currentQuestionIndex,
+            );
+
+            return _QuestionView(
+              secondsLeft: _secondsLeft,
+              score: _score,
+              question: question,
+              feedback: _feedback,
+              onAnswer: _answer,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _ensureRound(List<SpeedRoundPair> pairs) {
+    final nextKey = pairs.map((pair) => pair.id).join('|');
+    if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
+    _roundKey = nextKey;
+    _restartRound(pairs);
+  }
+
+  void _restartRound(List<SpeedRoundPair> pairs) {
+    _timer?.cancel();
+    _roundPairs = List<SpeedRoundPair>.unmodifiable(pairs);
+    _currentQuestionIndex = 0;
+    _score = 0;
+    _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
+    _started = false;
+    _finished = false;
+    _feedback = null;
+  }
+
+  void _startRound() {
+    setState(() {
+      _started = true;
+      _finished = false;
+      _score = 0;
+      _currentQuestionIndex = 0;
+      _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
+      _feedback = null;
+    });
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {
+        if (_secondsLeft <= 1) {
+          _secondsLeft = 0;
+          _finishRound();
+          return;
+        }
+        _secondsLeft -= 1;
+      });
+    });
+  }
+
+  void _finishRound() {
+    _timer?.cancel();
+    _started = false;
+    _finished = true;
+    _feedback = null;
+  }
+
+  void _answer(SpeedRoundAnswer answer) {
+    if (_finished || !_started) return;
+    setState(() {
+      if (answer.isCorrect) {
+        _score += 1;
+        _feedback = 'Richtig!';
+      } else {
+        _feedback = 'Nicht ganz.';
+      }
+      _currentQuestionIndex = (_currentQuestionIndex + 1) % _roundPairs.length;
+    });
+  }
+}
+
+@visibleForTesting
+List<SpeedRoundPair> buildSpeedRoundPairs(List<LocalWord> words) {
+  final pairs = <SpeedRoundPair>[];
+  final seenTerms = <String>{};
+  final seenTranslations = <String>{};
+
+  for (final word in words) {
+    final term = word.term.trim();
+    final translation = word.translation.trim();
+    if (term.isEmpty || translation.isEmpty || word.isArchived) continue;
+
+    final normalizedTerm = _normalizeSpeedRoundText(term);
+    final normalizedTranslation = _normalizeSpeedRoundText(translation);
+    if (!seenTerms.add(normalizedTerm)) continue;
+    if (!seenTranslations.add(normalizedTranslation)) continue;
+
+    pairs.add(
+      SpeedRoundPair(id: word.id, term: term, translation: translation),
+    );
+  }
+
+  return List<SpeedRoundPair>.unmodifiable(pairs);
+}
+
+@visibleForTesting
+SpeedRoundQuestion buildSpeedRoundQuestion({
+  required List<SpeedRoundPair> pairs,
+  required int questionIndex,
+}) {
+  final correct = pairs[questionIndex % pairs.length];
+  final distractors = <SpeedRoundPair>[];
+  for (var offset = 1; distractors.length < 3; offset += 1) {
+    final candidate = pairs[(questionIndex + offset) % pairs.length];
+    if (candidate.id == correct.id) continue;
+    if (distractors.any((pair) => pair.id == candidate.id)) continue;
+    distractors.add(candidate);
+  }
+
+  final rawAnswers = <SpeedRoundAnswer>[
+    SpeedRoundAnswer(pairId: correct.id, text: correct.translation),
+    for (final pair in distractors)
+      SpeedRoundAnswer(pairId: pair.id, text: pair.translation),
+  ];
+  final shift = questionIndex % rawAnswers.length;
+  final answers = <SpeedRoundAnswer>[
+    ...rawAnswers.skip(shift),
+    ...rawAnswers.take(shift),
+  ];
+
+  return SpeedRoundQuestion(
+    correctPairId: correct.id,
+    prompt: correct.term,
+    answers: List<SpeedRoundAnswer>.unmodifiable(
+      answers.map(
+        (answer) => SpeedRoundAnswer(
+          pairId: answer.pairId,
+          text: answer.text,
+          isCorrect: answer.pairId == correct.id,
+        ),
+      ),
+    ),
+  );
+}
+
+String _normalizeSpeedRoundText(String value) {
+  return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+}
+
+class SpeedRoundPair {
+  const SpeedRoundPair({
+    required this.id,
+    required this.term,
+    required this.translation,
+  });
+
+  final String id;
+  final String term;
+  final String translation;
+}
+
+class SpeedRoundQuestion {
+  const SpeedRoundQuestion({
+    required this.correctPairId,
+    required this.prompt,
+    required this.answers,
+  });
+
+  final String correctPairId;
+  final String prompt;
+  final List<SpeedRoundAnswer> answers;
+}
+
+class SpeedRoundAnswer {
+  const SpeedRoundAnswer({
+    required this.pairId,
+    required this.text,
+    this.isCorrect = false,
+  });
+
+  final String pairId;
+  final String text;
+  final bool isCorrect;
+}
+
+class _StartView extends StatelessWidget {
+  const _StartView({required this.onStart});
+
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFFFFD166)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFD166).withValues(alpha: 0.14),
+                blurRadius: 30,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                color: Color(0xFFFFD166),
+                size: 46,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Bereit für die Blitzrunde?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Du hast 60 Sekunden. Wähle so viele richtige Bedeutungen wie möglich.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton(
+                key: const ValueKey('speed-round-start-button'),
+                onPressed: onStart,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFD166),
+                  foregroundColor: const Color(0xFF041018),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                child: const Text('Starten'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestionView extends StatelessWidget {
+  const _QuestionView({
+    required this.secondsLeft,
+    required this.score,
+    required this.question,
+    required this.feedback,
+    required this.onAnswer,
+  });
+
+  final int secondsLeft;
+  final int score;
+  final SpeedRoundQuestion question;
+  final String? feedback;
+  final ValueChanged<SpeedRoundAnswer> onAnswer;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _StatusPill(
+                icon: Icons.timer_rounded,
+                label: 'Zeit: ${secondsLeft}s',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatusPill(
+                icon: Icons.check_circle_rounded,
+                label: 'Richtig: $score',
+              ),
+            ),
+          ],
+        ),
+        if (feedback != null) ...[
+          const SizedBox(height: 14),
+          _FeedbackBanner(text: feedback!, isPositive: feedback == 'Richtig!'),
+        ],
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: const Color(0xFFFFD166).withValues(alpha: 0.6),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFD166).withValues(alpha: 0.11),
+                blurRadius: 28,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Welche Bedeutung passt?',
+                style: TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                question.prompt,
+                key: const ValueKey('speed-round-prompt'),
+                style: const TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 30,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 22),
+              for (final answer in question.answers) ...[
+                _AnswerButton(answer: answer, onTap: () => onAnswer(answer)),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B1220),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF26354B)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: const Color(0xFF7DFFE3), size: 18),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFFF4F8FF),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnswerButton extends StatelessWidget {
+  const _AnswerButton({required this.answer, required this.onTap});
+
+  final SpeedRoundAnswer answer;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: ValueKey('speed-round-answer-${answer.pairId}'),
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF050912),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFF26354B)),
+          ),
+          child: Text(
+            answer.text,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFFF4F8FF),
+              fontSize: 16,
+              height: 1.15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeedbackBanner extends StatelessWidget {
+  const _FeedbackBanner({required this.text, required this.isPositive});
+
+  final String text;
+  final bool isPositive;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isPositive
+        ? const Color(0xFF9DFF7D)
+        : const Color(0xFFFFD166);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.48)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 15,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _FinishedView extends StatelessWidget {
+  const _FinishedView({
+    required this.score,
+    required this.onRestart,
+    required this.onBack,
+  });
+
+  final int score;
+  final VoidCallback onRestart;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 28),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFFFFD166)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFD166).withValues(alpha: 0.14),
+                blurRadius: 30,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.timer_off_rounded,
+                color: Color(0xFFFFD166),
+                size: 44,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Zeit vorbei',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Du hast $score Wörter richtig erkannt.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton(
+                key: const ValueKey('speed-round-restart-button'),
+                onPressed: onRestart,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFD166),
+                  foregroundColor: const Color(0xFF041018),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                child: const Text('Nochmal spielen'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                key: const ValueKey('speed-round-back-button'),
+                onPressed: onBack,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFF4F8FF),
+                  side: const BorderSide(color: Color(0xFFFFD166)),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                child: const Text('Zurück zu Wortspiele'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SpeedRoundMessageState extends StatelessWidget {
+  const _SpeedRoundMessageState({
+    required this.title,
+    required this.text,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String text;
+  final String buttonLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFFFD166)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                color: Color(0xFFFFD166),
+                size: 40,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton(
+                onPressed: onPressed,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFD166),
+                  foregroundColor: const Color(0xFF041018),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                child: Text(buttonLabel),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
