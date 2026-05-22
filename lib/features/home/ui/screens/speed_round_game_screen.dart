@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +11,13 @@ class SpeedRoundGameScreen extends ConsumerStatefulWidget {
   const SpeedRoundGameScreen({
     super.key,
     this.roundDuration = const Duration(seconds: 60),
+    this.random,
   });
 
   static const routeName = 'speed-round-game';
 
   final Duration roundDuration;
+  final Random? random;
 
   @override
   ConsumerState<SpeedRoundGameScreen> createState() =>
@@ -23,6 +26,7 @@ class SpeedRoundGameScreen extends ConsumerStatefulWidget {
 
 class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
   List<SpeedRoundPair> _roundPairs = const <SpeedRoundPair>[];
+  List<int> _answerShifts = const <int>[];
   String _roundKey = '';
   int _currentQuestionIndex = 0;
   int _score = 0;
@@ -91,6 +95,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
             final question = buildSpeedRoundQuestion(
               pairs: _roundPairs,
               questionIndex: _currentQuestionIndex,
+              answerShift: _answerShifts[_currentQuestionIndex],
             );
 
             return _QuestionView(
@@ -115,7 +120,11 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
 
   void _restartRound(List<SpeedRoundPair> pairs) {
     _timer?.cancel();
-    _roundPairs = List<SpeedRoundPair>.unmodifiable(pairs);
+    final random = widget.random ?? Random();
+    _roundPairs = selectSpeedRoundRoundPairs(pairs, random: random);
+    _answerShifts = List<int>.unmodifiable(
+      List<int>.generate(_roundPairs.length, (_) => random.nextInt(4)),
+    );
     _currentQuestionIndex = 0;
     _score = 0;
     _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
@@ -193,9 +202,20 @@ List<SpeedRoundPair> buildSpeedRoundPairs(List<LocalWord> words) {
 }
 
 @visibleForTesting
+List<SpeedRoundPair> selectSpeedRoundRoundPairs(
+  List<SpeedRoundPair> pairs, {
+  required Random random,
+  int maxQuestions = 10,
+}) {
+  final shuffled = List<SpeedRoundPair>.of(pairs)..shuffle(random);
+  return List<SpeedRoundPair>.unmodifiable(shuffled.take(maxQuestions));
+}
+
+@visibleForTesting
 SpeedRoundQuestion buildSpeedRoundQuestion({
   required List<SpeedRoundPair> pairs,
   required int questionIndex,
+  int? answerShift,
 }) {
   final correct = pairs[questionIndex % pairs.length];
   final distractors = <SpeedRoundPair>[];
@@ -211,7 +231,7 @@ SpeedRoundQuestion buildSpeedRoundQuestion({
     for (final pair in distractors)
       SpeedRoundAnswer(pairId: pair.id, text: pair.translation),
   ];
-  final shift = questionIndex % rawAnswers.length;
+  final shift = (answerShift ?? questionIndex) % rawAnswers.length;
   final answers = <SpeedRoundAnswer>[
     ...rawAnswers.skip(shift),
     ...rawAnswers.take(shift),

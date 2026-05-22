@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,10 +39,22 @@ void main() {
     ];
   }
 
+  List<LocalWord> manyWords() {
+    return List<LocalWord>.generate(12, (index) {
+      final number = index + 1;
+      return word(
+        id: 'word-$number',
+        term: 'word$number',
+        translation: 'Wort $number',
+      );
+    });
+  }
+
   Future<void> pumpGame(
     WidgetTester tester, {
     required List<LocalWord> words,
     Duration roundDuration = const Duration(seconds: 60),
+    Random? random,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -50,7 +64,10 @@ void main() {
           }),
         ],
         child: MaterialApp(
-          home: SpeedRoundGameScreen(roundDuration: roundDuration),
+          home: SpeedRoundGameScreen(
+            roundDuration: roundDuration,
+            random: random ?? Random(7),
+          ),
         ),
       ),
     );
@@ -87,6 +104,44 @@ void main() {
       'emergency',
     );
   });
+
+  test('selectSpeedRoundRoundPairs shuffles and limits to ten questions', () {
+    final pairs = buildSpeedRoundPairs(manyWords());
+    final random = Random(3);
+
+    final firstRound = selectSpeedRoundRoundPairs(pairs, random: random);
+    final secondRound = selectSpeedRoundRoundPairs(pairs, random: random);
+
+    expect(firstRound, hasLength(10));
+    expect(secondRound, hasLength(10));
+    expect(
+      firstRound.map((pair) => pair.id),
+      isNot(pairs.take(10).map((pair) => pair.id)),
+    );
+    expect(
+      firstRound.map((pair) => pair.id),
+      isNot(secondRound.map((pair) => pair.id)),
+    );
+  });
+
+  test(
+    'buildSpeedRoundQuestion can place the correct answer at another position',
+    () {
+      final pairs = buildSpeedRoundPairs(sampleWords());
+      final question = buildSpeedRoundQuestion(
+        pairs: pairs,
+        questionIndex: 0,
+        answerShift: 2,
+      );
+
+      expect(question.answers, hasLength(4));
+      expect(question.answers.indexWhere((answer) => answer.isCorrect), 2);
+      expect(
+        question.answers.singleWhere((answer) => answer.isCorrect).pairId,
+        'emergency',
+      );
+    },
+  );
 
   testWidgets('shows empty state with fewer than four pairs', (tester) async {
     await pumpGame(
@@ -145,9 +200,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
-    await tester.tap(
-      find.byKey(const ValueKey('speed-round-answer-emergency')),
-    );
+    final prompt = tester
+        .widget<Text>(find.byKey(const ValueKey('speed-round-prompt')))
+        .data!;
+    await tester.tap(find.byKey(ValueKey('speed-round-answer-$prompt')));
     await tester.pump();
 
     expect(find.text('Richtig!'), findsOneWidget);
@@ -159,7 +215,13 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('speed-round-answer-shelter')));
+    final prompt = tester
+        .widget<Text>(find.byKey(const ValueKey('speed-round-prompt')))
+        .data!;
+    final wrongId = sampleWords()
+        .map((word) => word.id)
+        .firstWhere((id) => id != prompt);
+    await tester.tap(find.byKey(ValueKey('speed-round-answer-$wrongId')));
     await tester.pump();
 
     expect(find.text('Nicht ganz.'), findsOneWidget);
@@ -181,5 +243,24 @@ void main() {
     expect(find.text('Du hast 0 Wörter richtig erkannt.'), findsOneWidget);
     expect(find.text('Nochmal spielen'), findsOneWidget);
     expect(find.text('Zurück zu Wortspiele'), findsOneWidget);
+  });
+
+  testWidgets('restart returns to a fresh start card', (tester) async {
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      roundDuration: const Duration(seconds: 1),
+      random: Random(11),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.byKey(const ValueKey('speed-round-restart-button')));
+    await tester.pump();
+
+    expect(find.text('Bereit für die Blitzrunde?'), findsOneWidget);
+    expect(find.text('Starten'), findsOneWidget);
+    expect(find.text('Zeit vorbei'), findsNothing);
   });
 }
