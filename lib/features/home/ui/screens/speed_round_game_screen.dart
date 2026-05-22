@@ -3,8 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 
 class SpeedRoundGameScreen extends ConsumerStatefulWidget {
@@ -25,6 +28,9 @@ class SpeedRoundGameScreen extends ConsumerStatefulWidget {
 }
 
 class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
+  SpeedRoundWordSource _selectedSource = SpeedRoundWordSource.standard(
+    LocalLearningSource.allWords,
+  );
   List<SpeedRoundPair> _roundPairs = const <SpeedRoundPair>[];
   List<int> _answerShifts = const <int>[];
   String _roundKey = '';
@@ -44,9 +50,10 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final categoriesAsync = ref.watch(localCategoriesProvider);
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       backgroundColor: const Color(0xFF050912),
@@ -68,13 +75,18 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            final categories = categoriesAsync.value ?? const <LocalCategory>[];
             final pairs = buildSpeedRoundPairs(words);
             if (pairs.length < 4) {
               return _SpeedRoundMessageState(
                 title: 'Noch nicht genug Wörter',
-                text:
-                    'Füge mindestens vier Wörter mit Übersetzung hinzu, um Blitzrunde zu spielen.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Blitzrunde zu spielen.\n\nWähle eine andere Wortquelle oder füge neue Wörter hinzu.'
+                    : 'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um Blitzrunde zu spielen.\n\nWähle eine andere Wortquelle oder füge neue Wörter hinzu.',
                 buttonLabel: 'Zurück',
+                selectedSource: _selectedSource,
+                categories: categories,
+                onSourceSelected: _selectSource,
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
@@ -89,7 +101,12 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
             }
 
             if (!_started) {
-              return _StartView(onStart: _startRound);
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                onSourceSelected: _selectSource,
+                onStart: _startRound,
+              );
             }
 
             final question = buildSpeedRoundQuestion(
@@ -112,10 +129,28 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
   }
 
   void _ensureRound(List<SpeedRoundPair> pairs) {
-    final nextKey = pairs.map((pair) => pair.id).join('|');
+    final nextKey =
+        '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
     if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
     _roundKey = nextKey;
     _restartRound(pairs);
+  }
+
+  void _selectSource(SpeedRoundWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _timer?.cancel();
+      _selectedSource = source;
+      _roundPairs = const <SpeedRoundPair>[];
+      _answerShifts = const <int>[];
+      _roundKey = '';
+      _currentQuestionIndex = 0;
+      _score = 0;
+      _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
+      _started = false;
+      _finished = false;
+      _feedback = null;
+    });
   }
 
   void _restartRound(List<SpeedRoundPair> pairs) {
@@ -292,9 +327,73 @@ class SpeedRoundAnswer {
   final bool isCorrect;
 }
 
-class _StartView extends StatelessWidget {
-  const _StartView({required this.onStart});
+class SpeedRoundWordSource {
+  const SpeedRoundWordSource._({
+    required this.label,
+    required this.shortLabel,
+    required this.source,
+    required this.categoryId,
+  });
 
+  factory SpeedRoundWordSource.standard(LocalLearningSource source) {
+    return SpeedRoundWordSource._(
+      label: source.label,
+      shortLabel: switch (source) {
+        LocalLearningSource.allWords => 'Alle',
+        LocalLearningSource.myWords => 'Meine',
+        LocalLearningSource.favorites => 'Favoriten',
+        LocalLearningSource.knownWords => 'Bekannte',
+        LocalLearningSource.myMix => 'Mix',
+      },
+      source: source,
+      categoryId: null,
+    );
+  }
+
+  factory SpeedRoundWordSource.category(LocalCategory category) {
+    return SpeedRoundWordSource._(
+      label: 'Wortwelt ${category.name}',
+      shortLabel: category.name,
+      source: LocalLearningSource.allWords,
+      categoryId: category.id,
+    );
+  }
+
+  final String label;
+  final String shortLabel;
+  final LocalLearningSource source;
+  final String? categoryId;
+
+  String get key => categoryId == null ? source.id : 'category:$categoryId';
+
+  @override
+  bool operator ==(Object other) {
+    return other is SpeedRoundWordSource && other.key == key;
+  }
+
+  @override
+  int get hashCode => key.hashCode;
+}
+
+const _standardSpeedRoundSources = <LocalLearningSource>[
+  LocalLearningSource.allWords,
+  LocalLearningSource.myWords,
+  LocalLearningSource.favorites,
+  LocalLearningSource.knownWords,
+  LocalLearningSource.myMix,
+];
+
+class _StartView extends StatelessWidget {
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.onSourceSelected,
+    required this.onStart,
+  });
+
+  final SpeedRoundWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final ValueChanged<SpeedRoundWordSource> onSourceSelected;
   final VoidCallback onStart;
 
   @override
@@ -344,6 +443,12 @@ class _StartView extends StatelessWidget {
                   height: 1.35,
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(height: 18),
+              _WordSourcePicker(
+                selectedSource: selectedSource,
+                categories: categories,
+                onSourceSelected: onSourceSelected,
               ),
               const SizedBox(height: 22),
               FilledButton(
@@ -490,6 +595,150 @@ class _StatusPill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _WordSourcePicker extends StatelessWidget {
+  const _WordSourcePicker({
+    required this.selectedSource,
+    required this.categories,
+    required this.onSourceSelected,
+  });
+
+  final SpeedRoundWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final ValueChanged<SpeedRoundWordSource> onSourceSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('speed-round-source-picker'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF050912),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF26354B)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Du spielst mit: ${selectedSource.label}',
+            key: const ValueKey('speed-round-selected-source-label'),
+            style: const TextStyle(
+              color: Color(0xFFF4F8FF),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Wortquelle',
+            style: TextStyle(
+              color: Color(0xFFB8C7D9),
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final source in _standardSpeedRoundSources) ...[
+                  _SourceChip(
+                    key: ValueKey('speed-round-source-${source.id}'),
+                    label: SpeedRoundWordSource.standard(source).shortLabel,
+                    selected:
+                        selectedSource == SpeedRoundWordSource.standard(source),
+                    onTap: () =>
+                        onSourceSelected(SpeedRoundWordSource.standard(source)),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
+          if (categories.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Text(
+              'Wortwelten',
+              style: TextStyle(
+                color: Color(0xFFB8C7D9),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final category in categories) ...[
+                    _SourceChip(
+                      key: ValueKey('speed-round-category-${category.id}'),
+                      label: category.name,
+                      selected:
+                          selectedSource ==
+                          SpeedRoundWordSource.category(category),
+                      onTap: () => onSourceSelected(
+                        SpeedRoundWordSource.category(category),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SourceChip extends StatelessWidget {
+  const _SourceChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = selected
+        ? const Color(0xFFFFD166)
+        : const Color(0xFF26354B);
+    final fillColor = selected
+        ? const Color(0xFFFFD166).withValues(alpha: 0.16)
+        : const Color(0xFF0B1220);
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 38),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: fillColor,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: borderColor),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: selected ? const Color(0xFFFFD166) : const Color(0xFFF4F8FF),
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
       ),
     );
   }
@@ -658,12 +907,18 @@ class _SpeedRoundMessageState extends StatelessWidget {
     required this.title,
     required this.text,
     required this.buttonLabel,
+    this.selectedSource,
+    this.categories = const <LocalCategory>[],
+    this.onSourceSelected,
     required this.onPressed,
   });
 
   final String title;
   final String text;
   final String buttonLabel;
+  final SpeedRoundWordSource? selectedSource;
+  final List<LocalCategory> categories;
+  final ValueChanged<SpeedRoundWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override
@@ -707,6 +962,14 @@ class _SpeedRoundMessageState extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              if (selectedSource != null && onSourceSelected != null) ...[
+                const SizedBox(height: 18),
+                _WordSourcePicker(
+                  selectedSource: selectedSource!,
+                  categories: categories,
+                  onSourceSelected: onSourceSelected!,
+                ),
+              ],
               const SizedBox(height: 22),
               FilledButton(
                 onPressed: onPressed,

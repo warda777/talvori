@@ -3,8 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 
@@ -13,18 +16,35 @@ void main() {
     required String id,
     required String term,
     required String translation,
+    String categoryId = 'local-category-my-words',
     bool isArchived = false,
   }) {
     final now = DateTime(2026, 5, 22, 12);
     return LocalWord(
       id: id,
-      categoryId: LocalLearningSource.myWords.id,
+      categoryId: categoryId,
       term: term,
       translation: translation,
       sourceLanguage: 'en',
       targetLanguage: 'de',
       sortOrder: 0,
       isArchived: isArchived,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  LocalCategory category({
+    required String id,
+    required String name,
+    int sortOrder = 0,
+  }) {
+    final now = DateTime(2026, 5, 22, 12);
+    return LocalCategory(
+      id: id,
+      name: name,
+      sortOrder: sortOrder,
+      isArchived: false,
       createdAt: now,
       updatedAt: now,
     );
@@ -53,6 +73,10 @@ void main() {
   Future<void> pumpGame(
     WidgetTester tester, {
     required List<LocalWord> words,
+    List<LocalCategory> categories = const <LocalCategory>[],
+    Map<String, List<LocalWord>> wordsByCategory =
+        const <String, List<LocalWord>>{},
+    Map<LocalLearningSource, List<LocalWord>>? wordsBySource,
     Duration roundDuration = const Duration(seconds: 60),
     Random? random,
   }) async {
@@ -60,7 +84,13 @@ void main() {
       ProviderScope(
         overrides: [
           localWordsForSourceProvider.overrideWith((ref, source) async {
-            return words;
+            return wordsBySource?[source] ?? words;
+          }),
+          localWordsForCategoryProvider.overrideWith((ref, categoryId) async {
+            return wordsByCategory[categoryId] ?? const <LocalWord>[];
+          }),
+          localCategoriesProvider.overrideWith((ref) async {
+            return categories;
           }),
         ],
         child: MaterialApp(
@@ -152,7 +182,7 @@ void main() {
     expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge mindestens vier Wörter mit Übersetzung hinzu, um Blitzrunde zu spielen.',
+        'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Blitzrunde zu spielen.\n\nWähle eine andere Wortquelle oder füge neue Wörter hinzu.',
       ),
       findsOneWidget,
     );
@@ -166,6 +196,151 @@ void main() {
 
     expect(find.text('Bereit für die Blitzrunde?'), findsOneWidget);
     expect(find.text('Starten'), findsOneWidget);
+  });
+
+  testWidgets('start card shows word source selection with all words default', (
+    tester,
+  ) async {
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [category(id: 'travel', name: 'Reisen')],
+    );
+
+    expect(
+      find.byKey(const ValueKey('speed-round-source-picker')),
+      findsOneWidget,
+    );
+    expect(find.text('Wortquelle'), findsOneWidget);
+    expect(find.text('Wortwelten'), findsOneWidget);
+    expect(find.text('Alle'), findsOneWidget);
+    expect(find.text('Meine'), findsOneWidget);
+    expect(find.text('Favoriten'), findsOneWidget);
+    expect(find.text('Bekannte'), findsOneWidget);
+    expect(find.text('Mix'), findsOneWidget);
+    expect(find.text('Reisen'), findsOneWidget);
+    expect(find.text('Du spielst mit: Alle Wörter'), findsOneWidget);
+  });
+
+  testWidgets('standard source chip switches the active local word source', (
+    tester,
+  ) async {
+    final favoriteWords = [
+      word(id: 'favorite-a', term: 'favorite', translation: 'Favorit'),
+      word(id: 'favorite-b', term: 'star', translation: 'Stern'),
+      word(id: 'favorite-c', term: 'moon', translation: 'Mond'),
+      word(id: 'favorite-d', term: 'sun', translation: 'Sonne'),
+    ];
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      wordsBySource: {
+        LocalLearningSource.allWords: sampleWords(),
+        LocalLearningSource.favorites: favoriteWords,
+      },
+    );
+
+    await tester.tap(
+      find.byKey(
+        ValueKey('speed-round-source-${LocalLearningSource.favorites.id}'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+
+    expect(find.text('Du spielst mit: Favoriten'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
+    await tester.pump();
+
+    final prompt = tester
+        .widget<Text>(find.byKey(const ValueKey('speed-round-prompt')))
+        .data!;
+    expect(favoriteWords.map((word) => word.term), contains(prompt));
+  });
+
+  testWidgets('category chip switches the active word world', (tester) async {
+    final travelCategory = category(id: 'travel', name: 'Reisen');
+    final travelWords = [
+      word(
+        id: 'train',
+        term: 'train',
+        translation: 'Zug',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'ticket',
+        term: 'ticket',
+        translation: 'Ticket',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'hotel',
+        term: 'hotel',
+        translation: 'Hotel',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'map',
+        term: 'map',
+        translation: 'Karte',
+        categoryId: travelCategory.id,
+      ),
+    ];
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [travelCategory],
+      wordsByCategory: {travelCategory.id: travelWords},
+    );
+
+    await tester.tap(
+      find.byKey(ValueKey('speed-round-category-${travelCategory.id}')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+
+    expect(find.text('Du spielst mit: Wortwelt Reisen'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
+    await tester.pump();
+
+    final prompt = tester
+        .widget<Text>(find.byKey(const ValueKey('speed-round-prompt')))
+        .data!;
+    expect(travelWords.map((word) => word.term), contains(prompt));
+  });
+
+  testWidgets('category with too few pairs shows category empty state', (
+    tester,
+  ) async {
+    final schoolCategory = category(id: 'school', name: 'Schule');
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [schoolCategory],
+      wordsByCategory: {
+        schoolCategory.id: sampleWords().take(3).toList(growable: false),
+      },
+    );
+
+    await tester.tap(
+      find.byKey(ValueKey('speed-round-category-${schoolCategory.id}')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+
+    expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
+    expect(
+      find.text(
+        'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um Blitzrunde zu spielen.\n\nWähle eine andere Wortquelle oder füge neue Wörter hinzu.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Du spielst mit: Wortwelt Schule'), findsOneWidget);
   });
 
   testWidgets('start shows timer score prompt and answers', (tester) async {
@@ -262,5 +437,58 @@ void main() {
     expect(find.text('Bereit für die Blitzrunde?'), findsOneWidget);
     expect(find.text('Starten'), findsOneWidget);
     expect(find.text('Zeit vorbei'), findsNothing);
+  });
+
+  testWidgets('restart keeps selected category active', (tester) async {
+    final travelCategory = category(id: 'travel', name: 'Reisen');
+    final travelWords = [
+      word(
+        id: 'train',
+        term: 'train',
+        translation: 'Zug',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'ticket',
+        term: 'ticket',
+        translation: 'Ticket',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'hotel',
+        term: 'hotel',
+        translation: 'Hotel',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'map',
+        term: 'map',
+        translation: 'Karte',
+        categoryId: travelCategory.id,
+      ),
+    ];
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [travelCategory],
+      wordsByCategory: {travelCategory.id: travelWords},
+      roundDuration: const Duration(seconds: 1),
+      random: Random(13),
+    );
+
+    await tester.tap(
+      find.byKey(ValueKey('speed-round-category-${travelCategory.id}')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.byKey(const ValueKey('speed-round-restart-button')));
+    await tester.pump();
+
+    expect(find.text('Bereit für die Blitzrunde?'), findsOneWidget);
+    expect(find.text('Du spielst mit: Wortwelt Reisen'), findsOneWidget);
   });
 }
