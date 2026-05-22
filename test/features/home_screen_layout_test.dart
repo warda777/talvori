@@ -9,6 +9,7 @@ import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.d
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
+import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_sources_screen.dart';
@@ -250,6 +251,29 @@ void main() {
     expect(find.text('Favorites'), findsNothing);
     expect(find.text('Words I know'), findsNothing);
     expect(find.text('My mix'), findsNothing);
+  });
+
+  testWidgets('home top right button opens progress hub', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-progress-hub-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RewardsCenterScreen), findsOneWidget);
+    expect(find.text('Fortschritt'), findsOneWidget);
+    expect(find.text('Liga'), findsOneWidget);
+    expect(find.text('Belohnungen'), findsOneWidget);
+    expect(find.text('Statistik'), findsOneWidget);
   });
 
   testWidgets('bottom practice button opens classic Vocabs Course menu', (

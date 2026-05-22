@@ -395,6 +395,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
           Align(
             alignment: Alignment.topRight,
             child: _RightButtonWithDragAndLongPress(
+              key: const Key('home-progress-hub-button'),
               onLongPress: () {
                 _fireballIconController.play();
                 _showRewardsQuick(context);
@@ -513,6 +514,7 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
 /// Button mit Drag-Down und Long-Press Support
 class _RightButtonWithDragAndLongPress extends StatefulWidget {
   const _RightButtonWithDragAndLongPress({
+    super.key,
     required this.child,
     required this.onDragDown,
     required this.onLongPress,
