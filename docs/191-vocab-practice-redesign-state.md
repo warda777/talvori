@@ -39,8 +39,8 @@ angeboten.
 ## Aktuelle Spielkarten
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
-`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle` und `Bedeutungs-Duell`. Die anderen
-fuenf Karten sind bewusst vorbereitet und starten noch keine echte
+`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell` und
+`Wort-Jagd`. Die anderen vier Karten sind bewusst vorbereitet und starten noch keine echte
 Spielsession:
 
 ### Schnellspiele
@@ -81,6 +81,24 @@ SRS-Fortschritt geschrieben.
 - vergleicht Antworten ueber stabile Wort-IDs
 - erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
 - zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
+
+## Wort-Jagd
+
+`Wort-Jagd` ist der siebte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur Woerter mit Begriff und Uebersetzung
+- benoetigt mindestens vier passende Wortpaare
+- startet erst nach der Startkarte `Bereit fuer die Wort-Jagd?`
+- spielt maximal 10 eindeutige Fragen pro Runde
+- zeigt Fortschritt, lokalen Trefferstand, ein Wort und vier Uebersetzungen
+- waehlt eine richtige Antwort und drei lokale Ablenker
+- wechselt nach jeder Antwort direkt zur naechsten Frage
+- filtert doppelte Begriffe oder Uebersetzungen fuer stabile Runden
+- vergleicht Antworten ueber stabile Wort-IDs
+- zeigt am Ende `Jagd beendet`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 

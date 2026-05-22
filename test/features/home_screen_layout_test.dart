@@ -16,6 +16,7 @@ import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.da
 import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
@@ -748,7 +749,7 @@ void main() {
     expect(overflows, isEmpty);
   });
 
-  testWidgets('word game tap shows prepared hint and does not navigate', (
+  testWidgets('prepared word game tap shows hint and does not navigate', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 2600);
@@ -762,7 +763,7 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.byKey(const ValueKey('word-game-word_hunt'));
+    final tileFinder = find.byKey(const ValueKey('word-game-hangman'));
     await tester.tap(tileFinder);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -771,6 +772,42 @@ void main() {
     expect(find.byKey(const Key('word-game-prepared-toast')), findsOneWidget);
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsOneWidget);
     expect(find.byType(LocalLearningSourcesScreen), findsNothing);
+  });
+
+  testWidgets('word hunt card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [
+              localWord(
+                id: 'emergency',
+                term: 'emergency',
+                translation: 'Notfall',
+              ),
+              localWord(id: 'shelter', term: 'shelter', translation: 'Schutz'),
+              localWord(id: 'rescue', term: 'rescue', translation: 'Rettung'),
+              localWord(id: 'water', term: 'water', translation: 'Wasser'),
+            ];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-word_hunt')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WordHuntGameScreen), findsOneWidget);
+    expect(find.text('Wort-Jagd'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
   testWidgets('speed round card opens game screen', (tester) async {
@@ -974,7 +1011,6 @@ void main() {
     await tester.pump();
 
     const games = [
-      MapEntry('word_hunt', 'Wort-Jagd'),
       MapEntry('hangman', 'Hangman'),
       MapEntry('context_challenge', 'Kontext-Challenge'),
       MapEntry('boss_fight', 'Boss-Fight'),
