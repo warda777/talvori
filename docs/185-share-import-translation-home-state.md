@@ -81,3 +81,22 @@ Typische Fehlercodes:
 Import, Auto-Übersetzung, manuelle Pending-Übersetzung, Home-Counter und Word-Wheel lesen bzw. speichern nur lokale Wortdaten und Übersetzungsstatus.
 Sie starten keine Lernsession automatisch und verändern keine bestehenden Lernfortschritte.
 SRS-Fortschritt entsteht erst im explizit geöffneten Lernmodus durch Nutzeraktionen.
+
+## Profilbereich
+
+Der Profil-Button auf Home führt weiterhin in den Profilbereich, dieser ist jetzt als deutscher Talvori Dark-Neon-Kontrollraum strukturiert statt als altes Mock-Profil.
+
+Die alten Profil-Schwerpunkte `Your Vocabulary`, `Favoriten`, `Deine eigenen` und `Sammlungen` wurden als Navigations-/Kachelbereiche entfernt, weil diese Inhalte über Vocabs, Wortquellen und lokale Detailseiten sinnvoller erreichbar sind.
+
+Der Profilbereich enthält jetzt:
+
+- `Dein Lernen`: Lernstreak aus dem bestehenden Profil-State sowie lokale Counts für `Meine Wörter`, bekannte Wörter, markierte Wörter und offene Übersetzungen.
+- `Sprache & Aussprache`: lokale Lernrichtung, Geräte-TTS-Test, Auto-Aussprache-Vorbereitung und der Hinweis auf `translate-word` als serverseitigen DeepL-Weg.
+- `Benachrichtigungen`: bestehende Tagesimpuls-Einstellung plus lokale vorbereitete Schalter für Lern- und Übersetzungserinnerungen.
+- `Impuls & KI`: globales Impuls-KI-Profil mit Antwortstil, Antwortlänge, Lernziel und Erklärungssprache.
+- `App-Einstellungen`: lokale Schalter für Haptik, Sound/Aussprache, Animationen sowie App-Sprache und Design-Info.
+- `Daten & Hilfe`: Importzählung, Übersetzungsstatus, lokaler Datenschutz-Hinweis und App-Version.
+
+Neue Profil-Einstellungen werden lokal über SharedPreferences gespeichert. Sie verändern keine SRS-Werte, starten keine Lernsession und erzeugen keinen Server-Push.
+
+Die Profilkarten verwenden flexible Kennzahlen-Kacheln und rechtsbündige Werte-Spalten, damit deutsche Labels und längere Statuswerte auf iPhone-Breite ohne RenderFlex-Overflow lesbar bleiben. Der Header nutzt wie die übrigen Detailseiten einen Zurück-Pfeil statt eines Schließen-X.
