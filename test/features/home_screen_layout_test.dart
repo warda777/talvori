@@ -4,10 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
+import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
+import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
@@ -19,6 +23,26 @@ import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 
 void main() {
+  LocalWord localWord({
+    required String id,
+    required String term,
+    String translation = 'Übersetzung',
+  }) {
+    final now = DateTime(2026, 5, 22, 12);
+    return LocalWord(
+      id: id,
+      categoryId: LocalLearningSource.myWords.id,
+      term: term,
+      translation: translation,
+      sourceLanguage: 'en',
+      targetLanguage: 'de',
+      sortOrder: 0,
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
   setUpAll(() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -744,6 +768,33 @@ void main() {
     expect(find.byType(LocalLearningSourcesScreen), findsNothing);
   });
 
+  testWidgets('listen and write card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [localWord(id: 'emergency', term: 'emergency')];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-listen_write')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListenAndWriteGameScreen), findsOneWidget);
+    expect(find.text('Hör & Schreib'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('each word game tap shows prepared hint', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -759,7 +810,6 @@ void main() {
     const games = [
       MapEntry('speed_round', 'Blitzrunde'),
       MapEntry('word_match', 'Wort-Match'),
-      MapEntry('listen_write', 'Hör & Schreib'),
       MapEntry('gap_word', 'Lückenwort'),
       MapEntry('word_hunt', 'Wort-Jagd'),
       MapEntry('meaning_duel', 'Bedeutungs-Duell'),

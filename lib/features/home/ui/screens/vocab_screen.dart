@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
+import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_promo_card.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_tile.dart';
 
@@ -30,22 +31,37 @@ class VocabScreen extends ConsumerWidget {
             _GameSection(
               title: 'Schnellspiele',
               items: state.quickGames,
-              onTap: () => _showPreparedHint(context),
+              onTap: (item) => _openGame(context, item),
             ),
             _GameSection(
               title: 'Wörter bauen',
               items: state.wordBuilders,
-              onTap: () => _showPreparedHint(context),
+              onTap: (item) => _openGame(context, item),
             ),
             _GameSection(
               title: 'Smart Challenges',
               items: state.smartChallenges,
-              onTap: () => _showPreparedHint(context),
+              onTap: (item) => _openGame(context, item),
             ),
           ],
         ),
       ),
     );
+  }
+
+  static void _openGame(BuildContext context, VocabPracticeItem item) {
+    if (item.id == 'listen_write') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(
+            name: ListenAndWriteGameScreen.routeName,
+          ),
+          builder: (_) => const ListenAndWriteGameScreen(),
+        ),
+      );
+      return;
+    }
+    _showPreparedHint(context);
   }
 
   static void _showPreparedHint(BuildContext context) {
@@ -83,7 +99,7 @@ class _GameSection extends StatelessWidget {
 
   final String title;
   final List<VocabPracticeItem> items;
-  final VoidCallback onTap;
+  final ValueChanged<VocabPracticeItem> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +131,7 @@ class _GameSection extends StatelessWidget {
                 VocabTile(
                   key: ValueKey('word-game-${item.id}'),
                   item: item,
-                  onTap: onTap,
+                  onTap: () => onTap(item),
                 ),
             ],
           ),

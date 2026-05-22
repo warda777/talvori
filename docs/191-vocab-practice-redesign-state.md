@@ -38,8 +38,8 @@ angeboten.
 
 ## Aktuelle Spielkarten
 
-Alle elf Karten sind bewusst vorbereitet und starten noch keine echte
-Spielsession:
+Der erste echte Spielmodus ist `Hoer & Schreib`. Die anderen zehn Karten sind
+bewusst vorbereitet und starten noch keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -61,16 +61,34 @@ Spielsession:
 - `Boss-Fight` - Besiege deine schwierigsten Woerter
 - `Daily Word Quest` - Deine taegliche Wortmission
 
-Beim Tippen erscheint nur der Hinweis `Dieses Wortspiel wird vorbereitet.` Es
-wird keine Queue gestartet und kein SRS-Fortschritt geschrieben.
+Beim Tippen auf vorbereitete Karten erscheint nur der Hinweis
+`Dieses Wortspiel wird vorbereitet.` Es wird keine Queue gestartet und kein
+SRS-Fortschritt geschrieben.
+
+## Hoer & Schreib
+
+`Hoer & Schreib` ist der erste echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber die lokale Wortquelle
+- verwendet native TTS ueber den bestehenden Aussprache-Service
+- zeigt das gesuchte Wort nicht sofort an
+- erlaubt `Anhoeren`, `Pruefen`, `Aufloesen` und `Naechstes Wort`
+- vergleicht Eingaben robust mit trim, Kleinschreibung und normalisierten
+  Leerzeichen
+- spielt maximal 10 lokale Woerter pro Runde
+- zeigt am Ende eine lokale Abschlusskarte mit richtig erkannten Woertern
+- zeigt einen freundlichen Empty State, wenn lokal noch keine Woerter vorhanden
+  sind
+
+Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
+`is_mastered`, `next_due_at` oder Review-/Learn-Fortschritt.
 
 ## Spaetere Umsetzungsprioritaet
 
-1. `Hoer & Schreib`, weil TTS bereits vorhanden ist.
-2. `Wort-Match`, weil es einfach, bewaehrt und lokal gut testbar ist.
-3. `Blitzrunde`, weil es gut zu XP, Wochenliga und kurzen Sessions passt.
-4. `Boss-Fight`, sobald Fehlerstatistiken sauber verfuegbar sind.
-5. `Kontext-Challenge`, sobald KI-Satz-Kontext stabil angebunden ist.
+1. `Wort-Match`, weil es einfach, bewaehrt und lokal gut testbar ist.
+2. `Blitzrunde`, weil es gut zu XP, Wochenliga und kurzen Sessions passt.
+3. `Boss-Fight`, sobald Fehlerstatistiken sauber verfuegbar sind.
+4. `Kontext-Challenge`, sobald KI-Satz-Kontext stabil angebunden ist.
 
 ## Entfernt
 
