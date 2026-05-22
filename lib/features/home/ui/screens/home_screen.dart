@@ -12,6 +12,7 @@ import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
+import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
 import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
@@ -358,7 +359,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: HomeTheme.bottomPadding,
           child: HomeBottomNav(
             onImpulseInbox: _openImpulseInbox,
-            onPractice: () => showPracticePicker(context),
+            onPractice: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const VocabScreen())),
             onProfile: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),

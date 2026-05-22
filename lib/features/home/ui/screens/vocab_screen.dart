@@ -1,125 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Provider / Controller
-import '../../application/vocab_controller.dart';
-import '../../providers.dart';
-
-// UI-Bausteine
-import '../widgets/vocab_promo_card.dart';
-import '../widgets/vocab_tile.dart';
-import '../widgets/vocab_section_header.dart';
+import 'package:talvori/features/home/application/vocab_controller.dart';
+import 'package:talvori/features/home/providers.dart';
+import 'package:talvori/features/home/ui/widgets/vocab_promo_card.dart';
+import 'package:talvori/features/home/ui/widgets/vocab_tile.dart';
 
 class VocabScreen extends ConsumerWidget {
   const VocabScreen({super.key});
 
+  static const routeName = 'word-games';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = Theme.of(context);
     final state = ref.watch(vocabControllerProvider);
-    final ctrl  = ref.read(vocabControllerProvider.notifier);
-
-    bool isLocked(String key) => state.locked.contains(key);
 
     return Scaffold(
-      backgroundColor: t.colorScheme.surface,
+      backgroundColor: const Color(0xFF050912),
       appBar: AppBar(
-        title: const Text('Vocab Practice'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF050912),
         elevation: 0,
+        centerTitle: true,
+        title: const Text('Wortspiele'),
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
           children: [
-
-            // Promo / Shuffle
-            VocabPromoCard(onStart: ctrl.startGameShuffle),
-            const SizedBox(height: 16),
-
-            // CHALLENGES
-            const VocabSectionHeader(title: 'Challenges'),
-            Row(
-              children: [
-                Expanded(
-                  child: VocabTile(
-                    title: 'Perfection',
-                    locked: isLocked('challenge_perfection_1'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: VocabTile(
-                    title: 'Perfection',
-                    locked: isLocked('challenge_perfection_2'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: VocabTile(
-                    title: 'Perfection',
-                    locked: isLocked('challenge_perfection_3'),
-                  ),
-                ),
-              ],
+            const VocabPromoCard(),
+            _GameSection(
+              title: 'Schnellspiele',
+              items: state.quickGames,
+              onTap: () => _showPreparedHint(context),
             ),
-
-            const SizedBox(height: 18),
-
-            // PRACTICE
-            const VocabSectionHeader(title: 'Practice'),
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.0,
-              ),
-              children: [
-                VocabTile(
-                  title: 'Vocab classic',
-                  locked: isLocked('practice_vocab_classic'),
-                ),
-                VocabTile(
-                  title: 'Build words',
-                  locked: isLocked('practice_build_words'),
-                ),
-                VocabTile(
-                  title: 'Choose the word',
-                  locked: isLocked('practice_choose_word'),
-                ),
-                VocabTile(
-                  title: 'Guess the word',
-                  locked: isLocked('practice_guess_word'),
-                ),
-              ],
+            _GameSection(
+              title: 'Wörter bauen',
+              items: state.wordBuilders,
+              onTap: () => _showPreparedHint(context),
             ),
-
-            const SizedBox(height: 18),
-
-            // COMING SOON (Tap to vote)
-            const VocabSectionHeader(title: 'Coming soon (tap to vote!)'),
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.0,
-              ),
-              children: [
-                for (final title in state.comingSoon)
-                  VocabTile(
-                    title: title,
-                    onTap: () => ctrl.voteFor(title),
-                  ),
-              ],
+            _GameSection(
+              title: 'Smart Challenges',
+              items: state.smartChallenges,
+              onTap: () => _showPreparedHint(context),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  static void _showPreparedHint(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          key: const Key('word-game-prepared-toast'),
+          backgroundColor: const Color(0xFF061018),
+          behavior: SnackBarBehavior.floating,
+          elevation: 0,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.1),
+          ),
+          content: const Text(
+            'Dieses Wortspiel wird vorbereitet.',
+            style: TextStyle(
+              color: Color(0xFFF4F8FF),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      );
+  }
+}
+
+class _GameSection extends StatelessWidget {
+  const _GameSection({
+    required this.title,
+    required this.items,
+    required this.onTap,
+  });
+
+  final String title;
+  final List<VocabPracticeItem> items;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFFF4F8FF),
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          GridView.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 14,
+            childAspectRatio: 0.82,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              for (final item in items)
+                VocabTile(
+                  key: ValueKey('word-game-${item.id}'),
+                  item: item,
+                  onTap: onTap,
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

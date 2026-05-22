@@ -8,6 +8,7 @@ import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provi
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
+import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
@@ -57,7 +58,7 @@ void main() {
 
     expect(bottomOverflows, isEmpty);
     expect(find.text('0/5'), findsOneWidget);
-    expect(find.text('Üben'), findsOneWidget);
+    expect(find.text('Wortspiele'), findsOneWidget);
     expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
@@ -605,7 +606,7 @@ void main() {
     expect(find.text('Statistik'), findsOneWidget);
   });
 
-  testWidgets('bottom practice button opens classic Vocabs Course menu', (
+  testWidgets('bottom word games button opens word games directly', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -620,16 +621,170 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onPractice();
-    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Wortspiele'), findsOneWidget);
 
-    expect(find.text('Vocabs'), findsOneWidget);
-    expect(find.text('Course'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('home-practice-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(VocabScreen), findsOneWidget);
+    expect(find.text('Wortspiele'), findsWidgets);
+    expect(find.text('Vocabs'), findsNothing);
+    expect(find.text('Course'), findsNothing);
     expect(find.text('Üben wird vorbereitet.'), findsNothing);
     expect(find.text('Kategorie'), findsNothing);
     expect(find.byKey(const Key('category-popup-my-words-tile')), findsNothing);
     expect(find.byType(LocalLearningSourcesScreen), findsNothing);
     expect(find.byType(LocalLearningSourceDetailScreen), findsNothing);
+  });
+
+  testWidgets('word games screen shows all game cards without legacy mocks', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+
+    expect(find.byType(VocabScreen), findsOneWidget);
+    expect(find.text('Wortspiele'), findsOneWidget);
+    const visibleTexts = [
+      'Schnellspiele',
+      'Wörter bauen',
+      'Smart Challenges',
+      'Blitzrunde',
+      'Wort-Match',
+      'Hör & Schreib',
+      'Lückenwort',
+      'Wort-Jagd',
+      'Bedeutungs-Duell',
+      'Wort-Puzzle',
+      'Hangman',
+      'Kontext-Challenge',
+      'Boss-Fight',
+      'Daily Word Quest',
+    ];
+    for (final text in visibleTexts) {
+      expect(find.text(text), findsOneWidget);
+    }
+    expect(find.text('Vocab Practice'), findsNothing);
+    expect(find.text('Übungsarten'), findsNothing);
+    expect(find.text('Try Game shuffle'), findsNothing);
+    expect(find.text('Vocab classic'), findsNothing);
+    expect(find.text('Build words'), findsNothing);
+    expect(find.text('Choose the word'), findsNothing);
+    expect(find.text('Guess the word'), findsNothing);
+    expect(find.text('Coming soon (tap to vote!)'), findsNothing);
+    expect(find.text('Perfection'), findsNothing);
+    expect(find.text('Klassisch üben'), findsNothing);
+    expect(find.text('Frei wiederholen'), findsNothing);
+  });
+
+  testWidgets('word games screen has no tile overflow on iPhone width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final previousOnError = FlutterError.onError;
+    final overflows = <FlutterErrorDetails>[];
+    FlutterError.onError = (details) {
+      final message = details.exceptionAsString();
+      if (message.contains('RenderFlex overflowed')) {
+        overflows.add(details);
+        return;
+      }
+      previousOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = previousOnError);
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+    await tester.fling(find.byType(ListView), const Offset(0, -520), 1000);
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(ListView), const Offset(0, -720), 1000);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wortspiele'), findsOneWidget);
+    expect(find.text('Daily Word Quest'), findsOneWidget);
+    expect(overflows, isEmpty);
+  });
+
+  testWidgets('word game tap shows prepared hint and does not navigate', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Blitzrunde'));
+    await tester.tap(find.text('Blitzrunde'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(VocabScreen), findsOneWidget);
+    expect(find.byKey(const Key('word-game-prepared-toast')), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsOneWidget);
+    expect(find.byType(LocalLearningSourcesScreen), findsNothing);
+  });
+
+  testWidgets('each word game tap shows prepared hint', (tester) async {
+    tester.view.physicalSize = const Size(390, 2600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+
+    const games = [
+      MapEntry('speed_round', 'Blitzrunde'),
+      MapEntry('word_match', 'Wort-Match'),
+      MapEntry('listen_write', 'Hör & Schreib'),
+      MapEntry('gap_word', 'Lückenwort'),
+      MapEntry('word_hunt', 'Wort-Jagd'),
+      MapEntry('meaning_duel', 'Bedeutungs-Duell'),
+      MapEntry('word_puzzle', 'Wort-Puzzle'),
+      MapEntry('hangman', 'Hangman'),
+      MapEntry('context_challenge', 'Kontext-Challenge'),
+      MapEntry('boss_fight', 'Boss-Fight'),
+      MapEntry('daily_word_quest', 'Daily Word Quest'),
+    ];
+
+    for (final game in games) {
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: VocabScreen())),
+      );
+      await tester.pump();
+      final tileFinder = find.byKey(ValueKey('word-game-${game.key}'));
+      expect(find.text(game.value), findsOneWidget);
+      await tester.tap(tileFinder);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+
+      expect(find.byType(VocabScreen), findsOneWidget);
+      expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsOneWidget);
+      expect(find.byType(LocalLearningSourcesScreen), findsNothing);
+    }
   });
 
   testWidgets('local sources open source details and keep back stack', (

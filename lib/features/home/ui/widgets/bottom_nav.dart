@@ -126,7 +126,7 @@ class HomeBottomNav extends ConsumerWidget {
           ),
 
           SizedBox(
-            width: 140,
+            width: 168,
             height: 52,
             child: GestureDetector(
               key: const Key('home-practice-button'),
@@ -157,19 +157,28 @@ class HomeBottomNav extends ConsumerWidget {
                           ]
                         : null,
                   ),
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   alignment: Alignment.center,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.school_rounded, size: 22, color: Colors.white),
+                      const Icon(
+                        Icons.sports_esports_rounded,
+                        size: 22,
+                        color: Colors.white,
+                      ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Üben',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Flexible(
+                        child: Text(
+                          'Wortspiele',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
