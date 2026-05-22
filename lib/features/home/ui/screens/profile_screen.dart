@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/services/browser_return_service.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
@@ -256,6 +257,17 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'App-Sprache',
                   value: 'Deutsch',
                 ),
+                _ActionRow(
+                  key: const Key('profile-browser-preference-row'),
+                  icon: Icons.travel_explore_rounded,
+                  title: 'Browser öffnen mit',
+                  value: preferences.browserPreference.label,
+                  onTap: () => _showBrowserPreferenceSheet(
+                    context,
+                    preferenceController,
+                    preferences.browserPreference,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -337,6 +349,83 @@ class ProfileScreen extends ConsumerWidget {
       SnackBar(
         content: Text(result.message ?? 'Aussprache konnte nicht starten.'),
       ),
+    );
+  }
+
+  static Future<void> _showBrowserPreferenceSheet(
+    BuildContext context,
+    ProfilePreferencesController controller,
+    BrowserPreference selected,
+  ) async {
+    final next = await showModalBottomSheet<BrowserPreference>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: _neonDecoration(_cyan.withValues(alpha: 0.28)),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Bevorzugter Browser',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Talvori nutzt immer einen sicheren Fallback auf den Systembrowser.',
+                  style: TextStyle(color: _muted, fontSize: 13, height: 1.3),
+                ),
+                const SizedBox(height: 12),
+                for (final preference in BrowserPreference.values)
+                  _BrowserPreferenceOption(
+                    preference: preference,
+                    selected: preference == selected,
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (next == null) return;
+    await controller.setBrowserPreference(next);
+  }
+}
+
+class _BrowserPreferenceOption extends StatelessWidget {
+  const _BrowserPreferenceOption({
+    required this.preference,
+    required this.selected,
+  });
+
+  final BrowserPreference preference;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        selected ? Icons.radio_button_checked : Icons.radio_button_off,
+        color: selected ? ProfileScreen._mint : ProfileScreen._muted,
+      ),
+      title: Text(
+        preference.label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      onTap: () => Navigator.of(context).pop(preference),
     );
   }
 }

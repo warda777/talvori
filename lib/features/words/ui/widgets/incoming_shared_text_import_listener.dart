@@ -125,7 +125,7 @@ class _IncomingSharedTextImportListenerState
       SharedTextImportStatus.imported => 'Gespeichert in Meine Wörter',
       SharedTextImportStatus.duplicate =>
         'Dieses Wort ist bereits in Meine Wörter.',
-      SharedTextImportStatus.empty => 'Der geteilte Text war leer.',
+      SharedTextImportStatus.empty => result.message,
       SharedTextImportStatus.invalid => result.message,
       SharedTextImportStatus.error =>
         'Import konnte nicht abgeschlossen werden.',

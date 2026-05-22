@@ -253,6 +253,35 @@ void main() {
     expect(find.text('My mix'), findsNothing);
   });
 
+  testWidgets('home browser button explains missing shared source', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tester.pump();
+
+    expect(find.text('Browser-Rückkehr wird vorbereitet.'), findsOneWidget);
+    expect(find.byKey(const Key('home-browser-return-toast')), findsOneWidget);
+    final snackBar = tester.widget<SnackBar>(
+      find.byKey(const Key('home-browser-return-toast')),
+    );
+    expect(snackBar.backgroundColor, const Color(0xFF061018));
+    expect(find.text('Kategorie'), findsNothing);
+    expect(find.text('Vocabs'), findsNothing);
+    expect(find.byType(ImpulsPostfachScreen), findsNothing);
+  });
+
   testWidgets('home top right button opens progress hub', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;

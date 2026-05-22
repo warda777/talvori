@@ -11,6 +11,7 @@ class SharedTextPayload {
     this.createdAt,
     this.source,
     this.type,
+    this.platform,
   });
 
   final String id;
@@ -18,17 +19,15 @@ class SharedTextPayload {
   final DateTime? createdAt;
   final String? source;
   final String? type;
+  final String? platform;
 }
 
 class SharedTextPlatformReceiver {
   SharedTextPlatformReceiver({
     MethodChannel methodChannel = const MethodChannel('talvori/share'),
-    EventChannel eventChannel = const EventChannel('talvori/share/events'),
-  }) : _methodChannel = methodChannel,
-       _eventChannel = eventChannel;
+  }) : _methodChannel = methodChannel;
 
   final MethodChannel _methodChannel;
-  final EventChannel _eventChannel;
   final Set<String> _deliveredPayloadIds = <String>{};
 
   Future<SharedTextPayload?> getInitialSharedPayload() async {
@@ -73,7 +72,6 @@ class SharedTextPlatformReceiver {
 
   Stream<SharedTextPayload> _watchSharedPayloadWithResumeChecks() {
     late final _SharedTextLifecycleObserver lifecycleObserver;
-    StreamSubscription<SharedTextPayload>? eventSubscription;
     final controller = StreamController<SharedTextPayload>();
 
     Future<void> pullPendingPayload(String reason) async {
@@ -91,18 +89,6 @@ class SharedTextPlatformReceiver {
     }
 
     controller.onListen = () {
-      eventSubscription = _watchNativeSharedPayload().listen(
-        (payload) {
-          final nextPayload = _takePayloadIfNew(payload, reason: 'event');
-          if (nextPayload != null && !controller.isClosed) {
-            controller.add(nextPayload);
-          }
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          debugPrint('Talvori SharedTextReceiver stream failed: $error');
-        },
-      );
-
       lifecycleObserver = _SharedTextLifecycleObserver(
         onResume: () => pullPendingPayload('resume'),
       );
@@ -112,24 +98,9 @@ class SharedTextPlatformReceiver {
 
     controller.onCancel = () {
       WidgetsBinding.instance.removeObserver(lifecycleObserver);
-      unawaited(eventSubscription?.cancel() ?? Future<void>.value());
     };
 
     return controller.stream;
-  }
-
-  Stream<SharedTextPayload> _watchNativeSharedPayload() async* {
-    try {
-      await for (final event in _eventChannel.receiveBroadcastStream()) {
-        final payload = _payloadFromPlatformValue(event);
-        if (payload == null) continue;
-        yield payload;
-      }
-    } on MissingPluginException {
-      return;
-    } on PlatformException {
-      return;
-    }
   }
 
   SharedTextPayload? _takePayloadIfNew(
@@ -184,6 +155,7 @@ class SharedTextPlatformReceiver {
     };
     final rawSource = value['source'];
     final rawType = value['type'];
+    final rawPlatform = value['platform'];
 
     debugPrint('Talvori Flutter received shared text id=$id');
     return SharedTextPayload(
@@ -192,6 +164,7 @@ class SharedTextPlatformReceiver {
       createdAt: createdAt,
       source: rawSource is String ? rawSource : null,
       type: rawType is String ? rawType : null,
+      platform: rawPlatform is String ? rawPlatform.trim() : null,
     );
   }
 }

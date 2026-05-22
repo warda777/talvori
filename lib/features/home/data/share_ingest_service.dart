@@ -8,15 +8,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:talvori/core/services/services.dart';
 
 class ShareIngestService {
-  ShareIngestService({AppLinks? appLinks})
-      : _appLinks = appLinks ?? AppLinks();
+  ShareIngestService({AppLinks? appLinks}) : _appLinks = appLinks ?? AppLinks();
 
   final AppLinks _appLinks;
   StreamSubscription<Uri>? _linksSub;
-  StreamSubscription<String>? _savedUrlSub;
 
   Future<void> init({
     required void Function(String) onIncomingText,
@@ -40,24 +37,15 @@ class ShareIngestService {
       if (text != null && text.isNotEmpty) onIncomingText(text);
     });
 
-    // 3) Browser-Return (PDF/Seitenposition)
-    _savedUrlSub = BrowserReturnService.onSavedUrl.listen((url) {
-      final isPdf = url.toLowerCase().trim().endsWith('.pdf');
-      onSavedUrl(isPdf: isPdf);
-    });
+    // Browser-Return ist wegen nativer iOS-Crashes vorerst deaktiviert.
   }
 
   Future<void> dispose() async {
     await _linksSub?.cancel();
-    await _savedUrlSub?.cancel();
   }
 
-  /// URL aus Text erkennen und persistieren (für Browser-Return).
   Future<void> captureUrlIfPresent(String text) async {
-    final m = RegExp(r'(https?:\/\/[^\s<>()\[\]]+)').firstMatch(text);
-    if (m != null) {
-      await BrowserReturnService.setLastUrl(m.group(1)!);
-    }
+    // Browser-Return ist vorerst deaktiviert; Text-Import bleibt aktiv.
   }
 
   /// Erstes Wort aus Text extrahieren (ohne URL).
@@ -66,10 +54,9 @@ class ShareIngestService {
     final textWithoutUrl = text.replaceAll(urlPattern, '').trim();
     final sourceText = textWithoutUrl.isEmpty ? text : textWithoutUrl;
 
-    final matches = RegExp(r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+")
-        .allMatches(sourceText)
-        .map((m) => m.group(0)!)
-        .toList();
+    final matches = RegExp(
+      r"[A-Za-zÀ-ÖØ-öø-ÿ'-]+",
+    ).allMatches(sourceText).map((m) => m.group(0)!).toList();
 
     if (matches.isEmpty) return null;
     return matches.first;
@@ -106,7 +93,9 @@ class ShareIngestService {
 
     // Token neu holen, wenn nötig
     var session = sb.auth.currentSession;
-    session ??= await sb.auth.refreshSession().then((_) => sb.auth.currentSession);
+    session ??= await sb.auth.refreshSession().then(
+      (_) => sb.auth.currentSession,
+    );
     final token = session?.accessToken;
 
     // Supabase Functions (Edge)
@@ -120,11 +109,7 @@ class ShareIngestService {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'text': text,
-          'fromLang': 'EN',
-          'toLang': 'DE',
-        }),
+        body: jsonEncode({'text': text, 'fromLang': 'EN', 'toLang': 'DE'}),
       );
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         return marked;

@@ -170,6 +170,30 @@ void main() {
     expect(result?.word?.term, 'hello');
   });
 
+  test(
+    'url_only_share_keeps_text_import_result_without_browser_return',
+    () async {
+      final receiver = _FakeSharedTextPlatformReceiver(
+        initialText: 'https://example.com/article',
+      );
+      final controller = IncomingSharedTextImportController(
+        receiver: receiver,
+        now: () => now,
+        importText: ({required rawText, required now}) async {
+          return const SharedTextImportResult(
+            status: SharedTextImportStatus.empty,
+            message: 'Kein Wort zum Importieren gefunden.',
+          );
+        },
+      );
+
+      final result = await controller.importInitialSharedText();
+
+      expect(result?.status, SharedTextImportStatus.empty);
+      expect(result?.message, 'Kein Wort zum Importieren gefunden.');
+    },
+  );
+
   test('starts_auto_translation_after_imported_word', () async {
     final receiver = _FakeSharedTextPlatformReceiver(initialText: 'river');
     final translatedWordIds = <String>[];

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui' as ui;
 import 'tap_flash.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:talvori/core/services/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
 import 'package:talvori/features/words/ui/cards/glow_orb.dart';
@@ -540,8 +538,8 @@ class _WordCardState extends ConsumerState<WordCard> {
                       bottom: 16,
                       right: 8,
                       child: Semantics(
-                        label:
-                            'Zuletzt geteilte Quelle öffnen (Long-press: zurücksetzen)',
+                        key: const Key('home-browser-return-button'),
+                        label: 'Browser-Rückkehr wird vorbereitet',
                         child: SizedBox.square(
                           dimension: 52,
                           child: TapFlash(
@@ -553,66 +551,20 @@ class _WordCardState extends ConsumerState<WordCard> {
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
-                              child: GestureDetector(
-                                // ⬅️ Long-Press Handler (außerhalb von SpinningChromeButton)
-                                onLongPress: () async {
-                                  final ok =
-                                      await showDialog<bool>(
-                                        context: context,
-                                        builder: (ctx) => AlertDialog(
-                                          title: const Text(
-                                            'Gespeicherten Link löschen?',
-                                          ),
-                                          content: const Text(
-                                            'Die „Zurück zum Browser"-Position wird zurückgesetzt.',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(ctx).pop(false),
-                                              child: const Text('Abbrechen'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(ctx).pop(true),
-                                              child: const Text('Löschen'),
-                                            ),
-                                          ],
-                                        ),
-                                      ) ??
-                                      false;
-
-                                  if (!context.mounted) return;
-                                  if (ok) {
-                                    await BrowserReturnService.clear();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Zurück-Position gelöscht',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                behavior: HitTestBehavior
-                                    .translucent, // Erlaube Pan-Gesten durchzulassen
-                                child: SpinningChromeButton(
-                                  svgAsset: 'assets/icons/line_chrome.svg',
-                                  size: 56,
-                                  baseRotationDuration: const Duration(
-                                    milliseconds: 3000,
-                                  ),
-                                  loop:
-                                      false, // Farbrotation & Auto-Spin deaktiviert
-                                  colorFilter: ColorFilter.mode(
-                                    widget.isImageExpanded
-                                        ? onImageIcon
-                                        : cs.onSurface,
-                                    BlendMode.srcIn,
-                                  ),
-                                  onTap: () =>
-                                      onChromeButtonTap(context), // wie zuvor
+                              child: SpinningChromeButton(
+                                svgAsset: 'assets/icons/line_chrome.svg',
+                                size: 56,
+                                baseRotationDuration: const Duration(
+                                  milliseconds: 3000,
                                 ),
+                                loop: false,
+                                colorFilter: ColorFilter.mode(
+                                  widget.isImageExpanded
+                                      ? onImageIcon
+                                      : cs.onSurface,
+                                  BlendMode.srcIn,
+                                ),
+                                onTap: () => onChromeButtonTap(context),
                               ),
                             ),
                           ),
@@ -633,49 +585,67 @@ class _WordCardState extends ConsumerState<WordCard> {
 void onChromeButtonTap(BuildContext context) {
   final messenger = ScaffoldMessenger.of(context);
 
-  BrowserReturnService.getLastUrl().then((url) async {
-    if (!context.mounted) return;
+  _showBrowserReturnToast(
+    messenger,
+    icon: Icons.travel_explore_rounded,
+    message: 'Browser-Rückkehr wird vorbereitet.',
+  );
+}
 
-    if (url == null) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Kein geteilter Link gefunden')),
-      );
-      return;
-    }
-
-    final isPdf = looksLikePdf(url);
-
-    // vorher: SnackBar mit Action „Kopieren“
-    // nachher: kurzer Auto-Dismiss, kein Button
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            isPdf
-                ? 'Öffne zuletzt geteilte PDF …'
-                : 'Öffne zuletzt geteilte Quelle …',
-          ),
-          duration: const Duration(milliseconds: 1500),
-          behavior: SnackBarBehavior.floating,
-          dismissDirection: DismissDirection.horizontal,
+void _showBrowserReturnToast(
+  ScaffoldMessengerState messenger, {
+  required IconData icon,
+  required String message,
+  Duration duration = const Duration(seconds: 4),
+}) {
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        key: const Key('home-browser-return-toast'),
+        backgroundColor: const Color(0xFF061018),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        duration: duration,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 118),
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.2),
         ),
-      );
-
-    // Primär öffnen
-    final Uri primary = url.startsWith('/') ? Uri.file(url) : Uri.parse(url);
-    final ok = await launchUrl(primary, mode: LaunchMode.externalApplication);
-
-    // PDF-Fallback (nur http/https)
-    if (!ok &&
-        isPdf &&
-        (primary.scheme == 'http' || primary.scheme == 'https')) {
-      final gview = Uri.parse(
-        'https://docs.google.com/gview?embedded=1&url=${Uri.encodeComponent(url)}',
-      );
-      await launchUrl(gview, mode: LaunchMode.externalApplication);
-    }
-  });
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: const Color(0xFF061018),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
+                blurRadius: 24,
+                spreadRadius: -8,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFF7DFFE3), size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Color(0xFFF4F8FF),
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 }
 
 /// Optionaler Helfer (falls du den Titel separat brauchst)

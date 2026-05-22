@@ -5,7 +5,6 @@ import UserNotifications
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private let shareMethodChannel = "talvori/share"
-  private let shareEventChannel = "talvori/share/events"
   private let appGroupId = "group.com.talvori.talvori"
   private let pendingTextKey = "pendingSharedText"
   private let pendingIdKey = "pendingSharedTextId"
@@ -59,17 +58,17 @@ import UserNotifications
           result(FlutterMethodNotImplemented)
         }
       }
-
-    FlutterEventChannel(name: shareEventChannel, binaryMessenger: messenger)
-      .setStreamHandler(self)
   }
 
   private func consumePendingSharedPayload() -> [String: Any]? {
-    guard let defaults = UserDefaults(suiteName: appGroupId) else { return nil }
+    guard let defaults = UserDefaults(suiteName: appGroupId) else {
+      NSLog("Talvori share runner pending payload found=false reason=no_app_group_defaults")
+      return nil
+    }
     let rawText = defaults.string(forKey: pendingTextKey)
     let text = rawText?.trimmingCharacters(in: .whitespacesAndNewlines)
     guard let text, !text.isEmpty else {
-      clearPendingSharedPayload(defaults)
+      NSLog("Talvori share runner pending payload found=false reason=no_text")
       return nil
     }
 
@@ -79,7 +78,10 @@ import UserNotifications
     let source = defaults.string(forKey: pendingSourceKey) ?? "ios_share_extension"
     let type = defaults.string(forKey: pendingTypeKey) ?? "text"
     clearPendingSharedPayload(defaults)
-    NSLog("Talvori share runner found pending payload id=%@", id)
+    NSLog(
+      "Talvori share runner pending text payload found=true shareId=%@",
+      id
+    )
 
     return [
       "id": id,
@@ -97,17 +99,5 @@ import UserNotifications
     defaults.removeObject(forKey: pendingSourceKey)
     defaults.removeObject(forKey: pendingTypeKey)
     defaults.synchronize()
-  }
-}
-
-extension AppDelegate: FlutterStreamHandler {
-  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
-    -> FlutterError?
-  {
-    return nil
-  }
-
-  func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    return nil
   }
 }

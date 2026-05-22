@@ -107,9 +107,12 @@ void main() {
     await tester.pump();
     expect(find.text('Impuls & KI'), findsOneWidget);
     expect(find.text('App-Einstellungen'), findsOneWidget);
+    expect(find.text('Browser öffnen mit'), findsOneWidget);
+    expect(find.text('Systemstandard'), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pump();
     expect(find.text('Daten & Hilfe'), findsOneWidget);
+    expect(find.text('Share-Diagnose'), findsNothing);
     expect(find.text('Your Vocabulary'), findsNothing);
     expect(find.text('Customize the app'), findsNothing);
     expect(find.text('Deine eigenen'), findsNothing);
