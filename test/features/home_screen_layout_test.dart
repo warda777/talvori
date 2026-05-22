@@ -10,6 +10,7 @@ import 'package:talvori/core/local_database/providers/local_words_for_source_pro
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
+import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
@@ -1028,6 +1029,43 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('daily word quest card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [
+              localWord(
+                id: 'emergency',
+                term: 'emergency',
+                translation: 'Notfall',
+              ),
+              localWord(id: 'shelter', term: 'shelter', translation: 'Schutz'),
+              localWord(id: 'rescue', term: 'rescue', translation: 'Rettung'),
+              localWord(id: 'water', term: 'water', translation: 'Wasser'),
+              localWord(id: 'level', term: 'level', translation: 'Stufe'),
+            ];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-daily_word_quest')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DailyWordQuestGameScreen), findsOneWidget);
+    expect(find.text('Daily Word Quest'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('each word game tap shows prepared hint', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -1043,7 +1081,6 @@ void main() {
     const games = [
       MapEntry('context_challenge', 'Kontext-Challenge'),
       MapEntry('boss_fight', 'Boss-Fight'),
-      MapEntry('daily_word_quest', 'Daily Word Quest'),
     ];
 
     for (final game in games) {

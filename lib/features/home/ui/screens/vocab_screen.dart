@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
+import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
@@ -116,6 +117,17 @@ class VocabScreen extends ConsumerWidget {
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: HangmanGameScreen.routeName),
           builder: (_) => const HangmanGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'daily_word_quest') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(
+            name: DailyWordQuestGameScreen.routeName,
+          ),
+          builder: (_) => const DailyWordQuestGameScreen(),
         ),
       );
       return;

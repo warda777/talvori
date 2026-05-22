@@ -39,9 +39,9 @@ angeboten.
 ## Aktuelle Spielkarten
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
-`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell` und
-`Wort-Jagd` und `Hangman`. Die anderen drei Karten sind bewusst vorbereitet und starten noch keine echte
-Spielsession:
+`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell`,
+`Wort-Jagd`, `Hangman` und `Daily Word Quest`. Die anderen zwei Karten sind
+bewusst vorbereitet und starten noch keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -66,6 +66,28 @@ Spielsession:
 Beim Tippen auf vorbereitete Karten erscheint nur der Hinweis
 `Dieses Wortspiel wird vorbereitet.` Es wird keine Queue gestartet und kein
 SRS-Fortschritt geschrieben.
+
+## Daily Word Quest
+
+`Daily Word Quest` ist der neunte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur stabile lokale Wortpaare mit Begriff und Uebersetzung
+- benoetigt mindestens fuenf passende Woerter
+- bleibt in dieser Version komplett sessionbasiert ohne echte Tagespersistenz
+- startet mit der Karte `Deine heutige Wortmission`
+- besteht aus fuenf kleinen Aufgaben:
+  - drei Bedeutungsfragen
+  - einem Lueckenwort
+  - einem Mini-Puzzle
+- zeigt lokalen Quest-Score und Fortschritt `Aufgabe X / 5`
+- zeigt bei falschen Antworten neutral die richtige Loesung
+- erlaubt `Aufloesen` bei Lueckenwort und Puzzle
+- zeigt am Ende `Quest abgeschlossen`
+- weist sichtbar darauf hin, dass der SRS-Fortschritt nicht veraendert wurde
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten und
+legt keinen Daily-Streak dauerhaft ab.
 
 ## Blitzrunde
 
