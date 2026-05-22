@@ -17,7 +17,8 @@ import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
-import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_duel_preview_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_finder_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
@@ -696,6 +697,7 @@ void main() {
       'Hör & Schreib',
       'Lückenwort',
       'Wort-Jagd',
+      'Bedeutung finden',
       'Bedeutungs-Duell',
       'Wort-Puzzle',
       'Hangman',
@@ -862,7 +864,7 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
-  testWidgets('meaning duel card opens game screen', (tester) async {
+  testWidgets('meaning finder card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 1800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -890,11 +892,39 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byKey(const ValueKey('word-game-meaning_duel')));
+    await tester.tap(find.byKey(const ValueKey('word-game-meaning_finder')));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MeaningDuelGameScreen), findsOneWidget);
-    expect(find.text('Bedeutungs-Duell'), findsOneWidget);
+    expect(find.byType(MeaningFinderGameScreen), findsOneWidget);
+    expect(find.text('Bedeutung finden'), findsWidgets);
+    expect(find.byKey(const ValueKey('meaning-finder-hint')), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
+  testWidgets('meaning duel card opens preview screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+
+    final duelTile = find.byKey(const ValueKey('word-game-meaning_duel'));
+    await tester.ensureVisible(duelTile);
+    await tester.pump();
+    await tester.tap(duelTile);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MeaningDuelPreviewScreen), findsOneWidget);
+    expect(find.text('Bedeutungs-Duell'), findsWidgets);
+    expect(
+      find.textContaining('echtes Duell gegen andere Talvori-Spieler'),
+      findsOneWidget,
+    );
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
@@ -1129,6 +1159,7 @@ void main() {
     const gameIds = [
       'speed_round',
       'word_hunt',
+      'meaning_finder',
       'meaning_duel',
       'word_match',
       'word_puzzle',

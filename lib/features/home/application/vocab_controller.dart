@@ -48,9 +48,9 @@ class VocabState {
         accent: Color(0xFFFF7AB6),
       ),
       VocabPracticeItem(
-        id: 'meaning_duel',
-        title: 'Bedeutungs-Duell',
-        subtitle: 'Wähle die richtige Antwort',
+        id: 'meaning_finder',
+        title: 'Bedeutung finden',
+        subtitle: 'Erkenne die passende Bedeutung',
         icon: Icons.psychology_alt_rounded,
         accent: Color(0xFFFF8A5B),
       ),
@@ -113,6 +113,13 @@ class VocabState {
         subtitle: 'Deine tägliche Wortmission',
         icon: Icons.flag_rounded,
         accent: Color(0xFF5DDCFF),
+      ),
+      VocabPracticeItem(
+        id: 'meaning_duel',
+        title: 'Bedeutungs-Duell',
+        subtitle: 'Tritt später gegen andere an',
+        icon: Icons.sports_esports_rounded,
+        accent: Color(0xFFFF8A5B),
       ),
     ],
   );

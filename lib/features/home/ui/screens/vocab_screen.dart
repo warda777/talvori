@@ -8,7 +8,8 @@ import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.da
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
-import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_duel_preview_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_finder_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
@@ -69,11 +70,24 @@ class VocabScreen extends ConsumerWidget {
       );
       return;
     }
+    if (item.id == 'meaning_finder') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(
+            name: MeaningFinderGameScreen.routeName,
+          ),
+          builder: (_) => const MeaningFinderGameScreen(),
+        ),
+      );
+      return;
+    }
     if (item.id == 'meaning_duel') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          settings: const RouteSettings(name: MeaningDuelGameScreen.routeName),
-          builder: (_) => const MeaningDuelGameScreen(),
+          settings: const RouteSettings(
+            name: MeaningDuelPreviewScreen.routeName,
+          ),
+          builder: (_) => const MeaningDuelPreviewScreen(),
         ),
       );
       return;
