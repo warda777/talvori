@@ -13,6 +13,7 @@ import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_scre
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
@@ -795,6 +796,41 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('word match card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [
+              localWord(
+                id: 'emergency',
+                term: 'emergency',
+                translation: 'Notfall',
+              ),
+              localWord(id: 'shelter', term: 'shelter', translation: 'Schutz'),
+              localWord(id: 'rescue', term: 'rescue', translation: 'Rettung'),
+            ];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-word_match')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WordMatchGameScreen), findsOneWidget);
+    expect(find.text('Wort-Match'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('each word game tap shows prepared hint', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -809,7 +845,6 @@ void main() {
 
     const games = [
       MapEntry('speed_round', 'Blitzrunde'),
-      MapEntry('word_match', 'Wort-Match'),
       MapEntry('gap_word', 'Lückenwort'),
       MapEntry('word_hunt', 'Wort-Jagd'),
       MapEntry('meaning_duel', 'Bedeutungs-Duell'),
