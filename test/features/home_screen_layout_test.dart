@@ -11,6 +11,7 @@ import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provi
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/boss_fight_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
@@ -752,9 +753,7 @@ void main() {
     expect(overflows, isEmpty);
   });
 
-  testWidgets('prepared word game tap shows hint and does not navigate', (
-    tester,
-  ) async {
+  testWidgets('context challenge card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -762,20 +761,32 @@ void main() {
     SharedPreferences.setMockInitialValues({});
 
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [
+              localWord(
+                id: 'emergency',
+                term: 'emergency',
+                translation: 'Notfall',
+              ),
+              localWord(id: 'shelter', term: 'shelter', translation: 'Schutz'),
+              localWord(id: 'rescue', term: 'rescue', translation: 'Rettung'),
+              localWord(id: 'water', term: 'water', translation: 'Wasser'),
+            ];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
     );
     await tester.pump();
 
-    final tileFinder = find.byKey(
-      const ValueKey('word-game-context_challenge'),
-    );
-    await tester.tap(tileFinder);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const ValueKey('word-game-context_challenge')));
+    await tester.pumpAndSettle();
 
-    expect(find.byType(VocabScreen), findsOneWidget);
-    expect(find.byKey(const Key('word-game-prepared-toast')), findsOneWidget);
-    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsOneWidget);
+    expect(find.byType(ContextChallengeGameScreen), findsOneWidget);
+    expect(find.text('Kontext-Challenge'), findsWidgets);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
     expect(find.byType(LocalLearningSourcesScreen), findsNothing);
   });
 
@@ -1103,7 +1114,7 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
-  testWidgets('each word game tap shows prepared hint', (tester) async {
+  testWidgets('word games hub has no prepared dummy card left', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -1115,23 +1126,25 @@ void main() {
     );
     await tester.pump();
 
-    const games = [MapEntry('context_challenge', 'Kontext-Challenge')];
+    const gameIds = [
+      'speed_round',
+      'word_hunt',
+      'meaning_duel',
+      'word_match',
+      'word_puzzle',
+      'gap_word',
+      'hangman',
+      'listen_write',
+      'context_challenge',
+      'boss_fight',
+      'daily_word_quest',
+    ];
 
-    for (final game in games) {
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: VocabScreen())),
-      );
-      await tester.pump();
-      final tileFinder = find.byKey(ValueKey('word-game-${game.key}'));
-      expect(find.text(game.value), findsOneWidget);
-      await tester.tap(tileFinder);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 80));
-
-      expect(find.byType(VocabScreen), findsOneWidget);
-      expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsOneWidget);
-      expect(find.byType(LocalLearningSourcesScreen), findsNothing);
+    for (final id in gameIds) {
+      expect(find.byKey(ValueKey('word-game-$id')), findsOneWidget);
     }
+    expect(find.byKey(const Key('word-game-prepared-toast')), findsNothing);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
   testWidgets('local sources open source details and keep back stack', (

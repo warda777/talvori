@@ -38,10 +38,10 @@ angeboten.
 
 ## Aktuelle Spielkarten
 
-Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
-`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell`,
-`Wort-Jagd`, `Hangman`, `Daily Word Quest` und `Boss-Fight`. Die andere Karte
-ist bewusst vorbereitet und startet noch keine echte Spielsession:
+Alle elf Wortspielkarten oeffnen jetzt echte lokale Spielseiten:
+`Hoer & Schreib`, `Wort-Match`, `Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`,
+`Bedeutungs-Duell`, `Wort-Jagd`, `Hangman`, `Daily Word Quest`,
+`Boss-Fight` und `Kontext-Challenge`.
 
 ### Schnellspiele
 
@@ -63,9 +63,31 @@ ist bewusst vorbereitet und startet noch keine echte Spielsession:
 - `Boss-Fight` - Besiege deine schwierigsten Woerter
 - `Daily Word Quest` - Deine taegliche Wortmission
 
-Beim Tippen auf vorbereitete Karten erscheint nur der Hinweis
-`Dieses Wortspiel wird vorbereitet.` Es wird keine Queue gestartet und kein
-SRS-Fortschritt geschrieben.
+Keine der elf Karten nutzt mehr den alten Dummy-Hinweis
+`Dieses Wortspiel wird vorbereitet.` Beim Oeffnen der Spielseiten wird keine
+Queue gestartet und kein SRS-Fortschritt geschrieben.
+
+## Kontext-Challenge
+
+`Kontext-Challenge` ist der elfte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur stabile Wortpaare mit Begriff und Uebersetzung
+- benoetigt mindestens vier passende Wortpaare
+- startet mit `Challenge starten`
+- nutzt bewusst lokale Satzvorlagen statt KI-Calls
+- zeigt maximal 10 Kontext-Aufgaben pro Runde
+- zeigt einen einfachen Satz mit Luecke, z. B. `Ich denke an ___.`
+- zeigt die lokale Uebersetzung als Hinweis
+- bietet vier lokale Woerter als Antwortoptionen an
+- vergleicht Antworten ueber stabile Wort-IDs
+- erlaubt `Aufloesen` ohne Punkt
+- zeigt am Ende `Challenge beendet`
+- weist sichtbar darauf hin, dass der Lernfortschritt nicht veraendert wurde
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten und
+sendet keine Anfrage an KI, Supabase oder DeepL. Spaeter kann die Satzqualitaet
+ueber KI verbessert werden, wenn dieser Pfad isoliert und stabil angebunden ist.
 
 ## Daily Word Quest
 
@@ -255,10 +277,12 @@ Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
 Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
 `is_mastered`, `next_due_at` oder Review-/Learn-Fortschritt.
 
-## Spaetere Umsetzungsprioritaet
+## Spaetere Ausbaumoeglichkeiten
 
-1. `Boss-Fight`, sobald Fehlerstatistiken sauber verfuegbar sind.
-2. `Kontext-Challenge`, sobald KI-Satz-Kontext stabil angebunden ist.
+1. `Boss-Fight` kann echte Fehlerstatistiken bevorzugen, sobald diese sauber
+   lokal verfuegbar sind.
+2. `Kontext-Challenge` kann bessere KI-Satzkontexte nutzen, sobald ein
+   isolierter, optionaler und stabiler KI-Pfad geplant ist.
 
 ## Entfernt
 
@@ -281,9 +305,8 @@ Sichtbar entfernt wurden:
 
 ## Sicherheit
 
-Beim Oeffnen der Seite und beim Tippen auf vorbereitete Spielkarten werden
-keine SRS-Daten veraendert. Die Seite startet keine Queue und keine Lernsession
-automatisch.
+Beim Oeffnen der Seite und beim Spielen der Wortspiele werden keine SRS-Daten
+veraendert. Die Seite startet keine Queue und keine Lernsession automatisch.
 
 Keine Secrets, keine Server-Push-Logik und keine neue Supabase-Logik wurden
 eingefuehrt.
