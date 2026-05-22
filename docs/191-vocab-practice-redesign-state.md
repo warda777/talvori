@@ -39,8 +39,9 @@ angeboten.
 ## Aktuelle Spielkarten
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
-`Blitzrunde`, `Lueckenwort` und `Wort-Puzzle`. Die anderen sechs Karten sind
-bewusst vorbereitet und starten noch keine echte Spielsession:
+`Blitzrunde`, `Lueckenwort`, `Wort-Puzzle` und `Bedeutungs-Duell`. Die anderen
+fuenf Karten sind bewusst vorbereitet und starten noch keine echte
+Spielsession:
 
 ### Schnellspiele
 
@@ -80,6 +81,25 @@ SRS-Fortschritt geschrieben.
 - vergleicht Antworten ueber stabile Wort-IDs
 - erlaubt Wiederholungen, wenn die lokale Wortbasis klein ist
 - zeigt am Ende `Zeit vorbei`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
+
+## Bedeutungs-Duell
+
+`Bedeutungs-Duell` ist der sechste echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur Woerter mit Begriff und Uebersetzung
+- benoetigt mindestens vier passende Wortpaare
+- spielt maximal 10 Fragen pro Runde
+- zeigt keinen Timer und keine Startkarte
+- zeigt ein Wort und vier lokale Uebersetzungen
+- waehlt eine richtige Antwort und drei lokale Ablenker
+- filtert doppelte Begriffe oder Uebersetzungen fuer stabile Runden
+- vergleicht Antworten ueber stabile Wort-IDs
+- zeigt bei falschen Antworten die richtige Bedeutung ohne Strafe
+- erlaubt `Aufloesen` und `Naechste Frage`
+- zeigt am Ende `Duell beendet`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 

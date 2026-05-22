@@ -4,6 +4,7 @@ import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
@@ -59,6 +60,15 @@ class VocabScreen extends ConsumerWidget {
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: SpeedRoundGameScreen.routeName),
           builder: (_) => const SpeedRoundGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'meaning_duel') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: MeaningDuelGameScreen.routeName),
+          builder: (_) => const MeaningDuelGameScreen(),
         ),
       );
       return;

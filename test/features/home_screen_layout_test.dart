@@ -13,6 +13,7 @@ import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_scre
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/meaning_duel_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
@@ -808,6 +809,42 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
+  testWidgets('meaning duel card opens game screen', (tester) async {
+    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordsForSourceProvider.overrideWith((ref, source) async {
+            return [
+              localWord(
+                id: 'emergency',
+                term: 'emergency',
+                translation: 'Notfall',
+              ),
+              localWord(id: 'shelter', term: 'shelter', translation: 'Schutz'),
+              localWord(id: 'rescue', term: 'rescue', translation: 'Rettung'),
+              localWord(id: 'water', term: 'water', translation: 'Wasser'),
+            ];
+          }),
+        ],
+        child: const MaterialApp(home: VocabScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('word-game-meaning_duel')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MeaningDuelGameScreen), findsOneWidget);
+    expect(find.text('Bedeutungs-Duell'), findsOneWidget);
+    expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
+  });
+
   testWidgets('listen and write card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 1800);
     tester.view.devicePixelRatio = 1;
@@ -938,7 +975,6 @@ void main() {
 
     const games = [
       MapEntry('word_hunt', 'Wort-Jagd'),
-      MapEntry('meaning_duel', 'Bedeutungs-Duell'),
       MapEntry('hangman', 'Hangman'),
       MapEntry('context_challenge', 'Kontext-Challenge'),
       MapEntry('boss_fight', 'Boss-Fight'),
