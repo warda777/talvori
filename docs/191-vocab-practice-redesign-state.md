@@ -40,8 +40,8 @@ angeboten.
 
 Die ersten echten Spielmodi sind `Hoer & Schreib`, `Wort-Match`,
 `Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`, `Bedeutungs-Duell`,
-`Wort-Jagd`, `Hangman` und `Daily Word Quest`. Die anderen zwei Karten sind
-bewusst vorbereitet und starten noch keine echte Spielsession:
+`Wort-Jagd`, `Hangman`, `Daily Word Quest` und `Boss-Fight`. Die andere Karte
+ist bewusst vorbereitet und startet noch keine echte Spielsession:
 
 ### Schnellspiele
 
@@ -88,6 +88,29 @@ SRS-Fortschritt geschrieben.
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten und
 legt keinen Daily-Streak dauerhaft ab.
+
+## Boss-Fight
+
+`Boss-Fight` ist der zehnte echte Wortspielmodus:
+
+- liest lokale Woerter offline ueber dieselbe lokale Wortquelle
+- nutzt nur stabile Wortpaare mit Begriff und Uebersetzung
+- benoetigt mindestens vier passende Wortpaare
+- nutzt lokale Woerter als robuste Auswahl, solange keine sichere Fehlerstatistik vorausgesetzt wird
+- startet mit `Kampf starten`
+- spielt maximal acht Boss-Fragen
+- zeigt `Boss-HP`, `Energie` und `Runde`
+- kombiniert drei lokale Fragetypen:
+  - Multiple Choice
+  - Lueckenwort
+  - kurze Eingabe zur Uebersetzung
+- reduziert Boss-HP nur bei richtigen Antworten
+- reduziert Energie nur bei falschen Antworten
+- erlaubt `Aufloesen` bei Eingabe- und Lueckenaufgaben ohne Treffer
+- zeigt je nach Verlauf `Boss besiegt`, `Boss entkommen` oder `Kampf beendet`
+
+Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten und
+speichert keine Boss-Ergebnisse.
 
 ## Blitzrunde
 
