@@ -675,7 +675,7 @@ void main() {
   testWidgets('word games screen shows all game cards without legacy mocks', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -699,9 +699,15 @@ void main() {
       'Wort-Jagd',
       'Wort erkennen',
       'Wort-Duell',
+      'Hör-Fang',
       'Wort-Puzzle',
       'Hangman',
+      'Silben-Regen',
+      'Wortpfad',
+      'Wortsuche',
       'Kontext-Challenge',
+      'Gegenwort',
+      'Synonym-Rätsel',
       'Boss-Fight',
       'Daily Word Quest',
     ];
@@ -789,10 +795,10 @@ void main() {
       find.text('Besiege deine schwierigsten Wörter'),
     );
 
-    expect(blitzSubtitle.maxLines, 3);
-    expect(blitzSubtitle.overflow, TextOverflow.ellipsis);
-    expect(bossSubtitle.maxLines, 3);
-    expect(bossSubtitle.overflow, TextOverflow.ellipsis);
+    expect(blitzSubtitle.maxLines, greaterThanOrEqualTo(3));
+    expect(blitzSubtitle.overflow, TextOverflow.fade);
+    expect(bossSubtitle.maxLines, greaterThanOrEqualTo(3));
+    expect(bossSubtitle.overflow, TextOverflow.fade);
   });
 
   testWidgets('context challenge card opens game screen', (tester) async {
@@ -833,7 +839,7 @@ void main() {
   });
 
   testWidgets('word hunt card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -869,7 +875,7 @@ void main() {
   });
 
   testWidgets('speed round card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -905,7 +911,7 @@ void main() {
   });
 
   testWidgets('word recognition card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -946,7 +952,7 @@ void main() {
   });
 
   testWidgets('word duel card opens preview screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -974,7 +980,7 @@ void main() {
   });
 
   testWidgets('listen and write card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1001,7 +1007,7 @@ void main() {
   });
 
   testWidgets('gap word card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1028,7 +1034,7 @@ void main() {
   });
 
   testWidgets('word match card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1063,7 +1069,7 @@ void main() {
   });
 
   testWidgets('word puzzle card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1090,7 +1096,7 @@ void main() {
   });
 
   testWidgets('hangman card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1117,7 +1123,7 @@ void main() {
   });
 
   testWidgets('daily word quest card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1145,6 +1151,11 @@ void main() {
     );
     await tester.pump();
 
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('word-game-daily_word_quest')),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('word-game-daily_word_quest')));
     await tester.pumpAndSettle();
 
@@ -1154,7 +1165,7 @@ void main() {
   });
 
   testWidgets('boss fight card opens game screen', (tester) async {
-    tester.view.physicalSize = const Size(390, 1800);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1181,6 +1192,11 @@ void main() {
     );
     await tester.pump();
 
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('word-game-boss_fight')),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('word-game-boss_fight')));
     await tester.pumpAndSettle();
 
@@ -1206,12 +1222,18 @@ void main() {
       'word_hunt',
       'word_recognition',
       'word_duel',
+      'audio_catch',
       'word_match',
       'word_puzzle',
       'gap_word',
       'hangman',
+      'syllable_rain',
+      'word_path',
+      'word_search',
       'listen_write',
       'context_challenge',
+      'odd_word',
+      'synonym_riddle',
       'boss_fight',
       'daily_word_quest',
     ];
@@ -1219,6 +1241,8 @@ void main() {
     for (final id in gameIds) {
       expect(find.byKey(ValueKey('word-game-$id')), findsOneWidget);
     }
+    expect(find.byKey(const ValueKey('word-game-training_camp')), findsNothing);
+    expect(find.text('Trainingscamp'), findsNothing);
     expect(find.byKey(const Key('word-game-prepared-toast')), findsNothing);
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });

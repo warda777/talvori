@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_ai_provider.dart';
+import 'package:talvori/features/home/application/word_game_language_pair.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
 import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
@@ -26,6 +30,7 @@ class _ContextChallengeGameScreenState
   final SharedPreferencesWordGameProgressRepository _progressRepository =
       const SharedPreferencesWordGameProgressRepository();
   int _wordsPerRound = 10;
+  WordGameLanguagePair _languagePair = WordGameLanguagePair.englishGerman;
   List<ContextChallengePair> _roundPairs = const <ContextChallengePair>[];
   String _roundKey = '';
   int _currentTaskIndex = 0;
@@ -33,11 +38,14 @@ class _ContextChallengeGameScreenState
   bool _hasStarted = false;
   bool _isFinished = false;
   bool _resolved = false;
+  bool _isAiLoading = false;
+  String? _aiSentence;
   String? _feedback;
   String? _selectedPairId;
 
   @override
   Widget build(BuildContext context) {
+    final categoriesAsync = ref.watch(localCategoriesProvider);
     final wordsAsync = _selectedSource.categoryId == null
         ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
         : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
@@ -62,7 +70,7 @@ class _ContextChallengeGameScreenState
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
-            const categories = <LocalCategory>[];
+            final categories = categoriesAsync.value ?? const <LocalCategory>[];
             final pairs = buildContextChallengePairs(words);
             if (pairs.length < 4) {
               return _ContextMessageState(
@@ -97,8 +105,12 @@ class _ContextChallengeGameScreenState
                     .map((pair) => pair.id)
                     .toList(growable: false),
                 wordsPerRound: _effectiveWordsPerRound(pairs.length),
+                languagePair: _languagePair,
                 onSourceSelected: _selectSource,
                 onWordsPerRoundChanged: _selectWordsPerRound,
+                onLanguagePairChanged: (pair) {
+                  setState(() => _languagePair = pair);
+                },
                 onStart: _startChallenge,
               );
             }
@@ -106,6 +118,8 @@ class _ContextChallengeGameScreenState
             final task = buildContextChallengeTask(
               pairs: _roundPairs,
               taskIndex: _currentTaskIndex,
+              languagePair: _languagePair,
+              sentenceOverride: _aiSentence,
             );
             return _TaskView(
               key: ValueKey('context-challenge-task-$_currentTaskIndex'),
@@ -113,6 +127,7 @@ class _ContextChallengeGameScreenState
               currentTaskIndex: _currentTaskIndex,
               totalCount: _roundPairs.length,
               score: _score,
+              isAiLoading: _isAiLoading,
               feedback: _feedback,
               resolved: _resolved,
               selectedPairId: _selectedPairId,
@@ -134,6 +149,8 @@ class _ContextChallengeGameScreenState
     _hasStarted = false;
     _isFinished = false;
     _resolved = false;
+    _isAiLoading = false;
+    _aiSentence = null;
     _feedback = null;
     _selectedPairId = null;
   }
@@ -160,6 +177,8 @@ class _ContextChallengeGameScreenState
     _hasStarted = false;
     _isFinished = false;
     _resolved = false;
+    _isAiLoading = false;
+    _aiSentence = null;
     _feedback = null;
     _selectedPairId = null;
   }
@@ -184,9 +203,12 @@ class _ContextChallengeGameScreenState
     setState(() {
       _hasStarted = true;
       _resolved = false;
+      _isAiLoading = true;
+      _aiSentence = null;
       _feedback = null;
       _selectedPairId = null;
     });
+    _loadAiSentence();
   }
 
   void _answer(ContextChallengeAnswer answer) {
@@ -220,9 +242,59 @@ class _ContextChallengeGameScreenState
       }
       _currentTaskIndex += 1;
       _resolved = false;
+      _isAiLoading = true;
+      _aiSentence = null;
       _feedback = null;
       _selectedPairId = null;
     });
+    _loadAiSentence();
+  }
+
+  Future<void> _loadAiSentence() async {
+    if (_roundPairs.isEmpty) return;
+    final pair = _roundPairs[_currentTaskIndex];
+    final sourceTarget = _contextSourceText(pair, _languagePair);
+    try {
+      final result = await ref
+          .read(wordGameAiClientProvider)
+          .sendMessage(
+            AiChatRequest(
+              language: _languagePair.sourceCode,
+              message:
+                  'Erzeuge einen kurzen Kontextsatz in ${_languagePair.sourceLabel} mit genau einer Luecke ___ fuer das Zielwort "$sourceTarget". Nenne das Zielwort nicht im Satz. Die Antwortoptionen sind in ${_languagePair.answerLabel}. Antworte nur mit dem Satz.',
+              context: {
+                'game': 'context-challenge',
+                'word': pair.term,
+                'translation': pair.translation,
+                'sourceTarget': sourceTarget,
+                'sourceLanguage': _languagePair.sourceCode,
+                'answerLanguage': _languagePair.answerCode,
+                'languagePair': _languagePair.label,
+              },
+            ),
+          );
+      final sentence = sanitizeContextChallengeAiSentence(
+        result.reply,
+        sourceTarget,
+      );
+      if (!mounted) return;
+      setState(() {
+        _aiSentence = sentence;
+        _isAiLoading = false;
+        if (sentence == null) {
+          _feedback =
+              'KI-Kontext momentan nicht verfügbar. Lokale Vorlage aktiv.';
+        }
+      });
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        _aiSentence = null;
+        _isAiLoading = false;
+        _feedback =
+            'KI-Kontext momentan nicht verfügbar. Lokale Vorlage aktiv.';
+      });
+    }
   }
 }
 
@@ -261,6 +333,8 @@ List<ContextChallengePair> buildContextChallengePairs(List<LocalWord> words) {
 ContextChallengeTask buildContextChallengeTask({
   required List<ContextChallengePair> pairs,
   required int taskIndex,
+  WordGameLanguagePair languagePair = WordGameLanguagePair.englishGerman,
+  String? sentenceOverride,
 }) {
   final correct = pairs[taskIndex % pairs.length];
   final distractors = <ContextChallengePair>[];
@@ -272,9 +346,15 @@ ContextChallengeTask buildContextChallengeTask({
   }
 
   final rawAnswers = <ContextChallengeAnswer>[
-    ContextChallengeAnswer(pairId: correct.id, text: correct.term),
+    ContextChallengeAnswer(
+      pairId: correct.id,
+      text: _contextAnswerText(correct, languagePair),
+    ),
     for (final pair in distractors)
-      ContextChallengeAnswer(pairId: pair.id, text: pair.term),
+      ContextChallengeAnswer(
+        pairId: pair.id,
+        text: _contextAnswerText(pair, languagePair),
+      ),
   ];
   final shift = (taskIndex + 2) % rawAnswers.length;
   final answers = <ContextChallengeAnswer>[
@@ -284,9 +364,11 @@ ContextChallengeTask buildContextChallengeTask({
 
   return ContextChallengeTask(
     correctPairId: correct.id,
-    correctAnswerText: correct.term,
+    correctAnswerText: _contextAnswerText(correct, languagePair),
     hintTranslation: correct.translation,
+    hintTerm: _contextSourceText(correct, languagePair),
     sentence:
+        sentenceOverride ??
         contextChallengeTemplates[taskIndex % contextChallengeTemplates.length],
     answers: List<ContextChallengeAnswer>.unmodifiable(
       answers.map(
@@ -298,6 +380,30 @@ ContextChallengeTask buildContextChallengeTask({
       ),
     ),
   );
+}
+
+String _contextAnswerText(
+  ContextChallengePair pair,
+  WordGameLanguagePair languagePair,
+) {
+  return languagePair.answerCode == 'de' ? pair.translation : pair.term;
+}
+
+String _contextSourceText(
+  ContextChallengePair pair,
+  WordGameLanguagePair languagePair,
+) {
+  return languagePair.sourceCode == 'de' ? pair.translation : pair.term;
+}
+
+@visibleForTesting
+String? sanitizeContextChallengeAiSentence(String reply, String targetWord) {
+  final sentence = reply.trim().replaceAll(RegExp(r'^["“”]|["“”]$'), '');
+  if (sentence.isEmpty || !sentence.contains('___')) return null;
+  if (sentence.toLowerCase().contains(targetWord.trim().toLowerCase())) {
+    return null;
+  }
+  return sentence.length <= 180 ? sentence : null;
 }
 
 @visibleForTesting
@@ -322,6 +428,7 @@ class ContextChallengeTask {
     required this.correctPairId,
     required this.correctAnswerText,
     required this.hintTranslation,
+    required this.hintTerm,
     required this.sentence,
     required this.answers,
   });
@@ -329,6 +436,7 @@ class ContextChallengeTask {
   final String correctPairId;
   final String correctAnswerText;
   final String hintTranslation;
+  final String hintTerm;
   final String sentence;
   final List<ContextChallengeAnswer> answers;
 }
@@ -351,8 +459,10 @@ class _StartView extends StatelessWidget {
     required this.categories,
     required this.availableIds,
     required this.wordsPerRound,
+    required this.languagePair,
     required this.onSourceSelected,
     required this.onWordsPerRoundChanged,
+    required this.onLanguagePairChanged,
     required this.onStart,
   });
 
@@ -360,8 +470,10 @@ class _StartView extends StatelessWidget {
   final List<LocalCategory> categories;
   final List<String> availableIds;
   final int wordsPerRound;
+  final WordGameLanguagePair languagePair;
   final ValueChanged<GameWordSource> onSourceSelected;
   final ValueChanged<int> onWordsPerRoundChanged;
+  final ValueChanged<WordGameLanguagePair> onLanguagePairChanged;
   final VoidCallback onStart;
 
   @override
@@ -404,13 +516,20 @@ class _StartView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Erkenne Wörter im Zusammenhang. Diese erste Version funktioniert lokal ohne KI.',
+                'Dieses KI-Spiel erzeugt kurze Kontextsätze mit Talvori KI.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFFB8C7D9),
                   height: 1.35,
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(height: 10),
+              const _ContextAiBadge(),
+              const SizedBox(height: 16),
+              _ContextLanguagePicker(
+                selected: languagePair,
+                onSelected: onLanguagePairChanged,
               ),
               const SizedBox(height: 20),
               GameWordSourcePicker(
@@ -447,6 +566,7 @@ class _TaskView extends StatelessWidget {
     required this.currentTaskIndex,
     required this.totalCount,
     required this.score,
+    required this.isAiLoading,
     required this.feedback,
     required this.resolved,
     required this.selectedPairId,
@@ -459,6 +579,7 @@ class _TaskView extends StatelessWidget {
   final int currentTaskIndex;
   final int totalCount;
   final int score;
+  final bool isAiLoading;
   final String? feedback;
   final bool resolved;
   final String? selectedPairId;
@@ -514,6 +635,10 @@ class _TaskView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
+              if (isAiLoading) ...[
+                const _ContextAiLoading(),
+                const SizedBox(height: 12),
+              ],
               Container(
                 key: const ValueKey('context-challenge-sentence-card'),
                 padding: const EdgeInsets.all(18),
@@ -535,7 +660,7 @@ class _TaskView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _RevealingHintChip(term: task.correctAnswerText),
+              _RevealingHintChip(term: task.hintTerm),
               const SizedBox(height: 18),
               for (final answer in task.answers) ...[
                 _AnswerButton(
@@ -574,6 +699,146 @@ class _TaskView extends StatelessWidget {
                 ),
               ],
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ContextAiBadge extends StatelessWidget {
+  const _ContextAiBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7DFFE3).withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFF7DFFE3).withValues(alpha: 0.38),
+        ),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_awesome_rounded, size: 16, color: Color(0xFF7DFFE3)),
+          SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'KI-Spiel: keine Speicherung im Lernfortschritt.',
+              style: TextStyle(
+                color: Color(0xFFF4F8FF),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContextLanguagePicker extends StatelessWidget {
+  const _ContextLanguagePicker({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final WordGameLanguagePair selected;
+  final ValueChanged<WordGameLanguagePair> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final pairs = availableWordGameLanguagePairs();
+    final swapped = selected.swapped();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Sprachen',
+          style: TextStyle(
+            color: Color(0xFFB8C7D9),
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final pair in pairs)
+              ChoiceChip(
+                key: ValueKey(
+                  'context-challenge-language-${pair.sourceCode}-${pair.answerCode}',
+                ),
+                label: Text(pair.label),
+                selected: selected == pair,
+                selectedColor: const Color(0xFF5DDCFF),
+                backgroundColor: const Color(0xFF050912),
+                labelStyle: TextStyle(
+                  color: selected == pair
+                      ? const Color(0xFF041018)
+                      : const Color(0xFFF4F8FF),
+                  fontWeight: FontWeight.w900,
+                ),
+                onSelected: (_) => onSelected(pair),
+              ),
+            if (swapped != null)
+              IconButton(
+                key: const ValueKey('context-challenge-language-swap'),
+                tooltip: 'Richtung wechseln',
+                onPressed: () => onSelected(swapped),
+                style: IconButton.styleFrom(
+                  backgroundColor: const Color(
+                    0xFF5DDCFF,
+                  ).withValues(alpha: 0.14),
+                  foregroundColor: const Color(0xFF5DDCFF),
+                  side: BorderSide(
+                    color: const Color(0xFF5DDCFF).withValues(alpha: 0.42),
+                  ),
+                ),
+                icon: const Icon(Icons.swap_horiz_rounded),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Dieses KI-Spiel nutzt die gewählte Sprachkombination.',
+          style: TextStyle(
+            color: Color(0xFFB8C7D9),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ContextAiLoading extends StatelessWidget {
+  const _ContextAiLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.4,
+            color: Color(0xFF7DFFE3),
+          ),
+        ),
+        SizedBox(width: 10),
+        Text(
+          'KI-Kontext wird vorbereitet',
+          style: TextStyle(
+            color: Color(0xFFB8C7D9),
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],

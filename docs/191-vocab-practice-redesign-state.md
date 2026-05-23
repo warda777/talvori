@@ -38,17 +38,19 @@ angeboten.
 
 ## Aktuelle Spielkarten
 
-Elf Wortspielkarten oeffnen echte lokale Spielseiten. Zusaetzlich gibt es eine
+Zusaetzliche Wortspielkarten oeffnen echte lokale Spielseiten. Zusaetzlich gibt es eine
 Vorschaukarte fuer den spaeteren Online-Modus `Wort-Duell`:
 `Hoer & Schreib`, `Wort-Match`, `Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`,
 `Wort erkennen`, `Wort-Jagd`, `Hangman`, `Daily Word Quest`,
-`Boss-Fight` und `Kontext-Challenge`.
+`Boss-Fight`, `Kontext-Challenge`, `Gegenwort`, `Synonym-Raetsel`,
+`Hoer-Fang`, `Silben-Regen`, `Wortpfad` und `Wortsuche`.
 
 ### Schnellspiele
 
 - `Blitzrunde` - 60 Sekunden, so viele Woerter wie moeglich
 - `Wort-Jagd` - Tippe schnell die richtige Bedeutung
 - `Wort-Duell` - Tritt spaeter gegen andere an
+- `Hoer-Fang` - Tippe das Wort, das du hoerst
 - `Wort erkennen` - Wähle die passende Übersetzung
 
 ### Woerter bauen
@@ -57,13 +59,21 @@ Vorschaukarte fuer den spaeteren Online-Modus `Wort-Duell`:
 - `Wort-Puzzle` - Sortiere Buchstaben zum richtigen Wort
 - `Lueckenwort` - Ergaenze fehlende Buchstaben
 - `Hangman` - Errate das Wort Schritt fuer Schritt
+- `Silben-Regen` - Fange Silben und bilde Woerter
+- `Wortpfad` - Wische durch Buchstaben und bilde Woerter
+- `Wortsuche` - Finde Woerter waagerecht, senkrecht und diagonal
 
 ### Smart Challenges
 
 - `Hoer & Schreib` - Hoere das Wort und schreibe es
 - `Kontext-Challenge` - Verstehe Woerter im KI-Satz
+- `Gegenwort` - Finde das Wort, das nicht dazugehoert
+- `Synonym-Raetsel` - Erkenne das Wort aus aehnlichen Bedeutungen
 - `Boss-Fight` - Besiege deine schwierigsten Woerter
 - `Daily Word Quest` - Deine taegliche Wortmission
+
+`Trainingscamp` wurde entfernt, weil die Trainingsbereiche als eigene
+Wortspiele erreichbar sind.
 
 Keine der lokalen Spielkarten nutzt mehr den alten Dummy-Hinweis
 `Dieses Wortspiel wird vorbereitet.` Beim Oeffnen der Spielseiten wird keine
@@ -77,7 +87,10 @@ Queue gestartet und kein SRS-Fortschritt geschrieben.
 - nutzt nur stabile Wortpaare mit Begriff und Uebersetzung
 - benoetigt mindestens vier passende Wortpaare
 - startet mit `Challenge starten`
-- nutzt bewusst lokale Satzvorlagen statt KI-Calls
+- nutzt die bestehende Talvori-KI ueber die `ai-chat` Edge-Function-Struktur
+  und faellt bei KI-Ausfall markiert auf lokale Satzvorlagen zurueck
+- bietet eine Sprachwahl fuer KI-Aufgaben an und schliesst Deutsch -> Deutsch
+  aus, solange Deutsch die Muttersprache ist
 - zeigt maximal 10 Kontext-Aufgaben pro Runde
 - zeigt einen einfachen Satz mit Luecke, z. B. `Ich denke an ___.`
 - zeigt die lokale Uebersetzung als Hinweis
@@ -306,8 +319,8 @@ Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
 
 1. `Boss-Fight` kann echte Fehlerstatistiken bevorzugen, sobald diese sauber
    lokal verfuegbar sind.
-2. `Kontext-Challenge` kann bessere KI-Satzkontexte nutzen, sobald ein
-   isolierter, optionaler und stabiler KI-Pfad geplant ist.
+2. KI-Spiele koennen spaeter weitere Sprachpaare nutzen, sobald die
+   Muttersprache-/Zielsprache-Einstellung global verfuegbar ist.
 
 ## Entfernt
 
@@ -316,6 +329,7 @@ Sichtbar entfernt wurden:
 - `Vocab Practice`
 - `Uebungsarten`
 - `Try Game shuffle`
+- `Trainingscamp` im Wortspiele-Hub
 - `Vocab classic`
 - `Build words`
 - `Choose the word`

@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/ai/ai_chat_client.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_ai_provider.dart';
 import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
 
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    _FakeContextAiChatClient.lastContext = null;
   });
 
   LocalWord word({
@@ -42,16 +47,37 @@ void main() {
     ];
   }
 
+  LocalCategory category(String id, String name) {
+    final now = DateTime(2026, 5, 22, 12);
+    return LocalCategory(
+      id: id,
+      name: name,
+      sortOrder: 0,
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
   Future<void> pumpGame(
     WidgetTester tester, {
     required List<LocalWord> words,
+    AiChatClient aiClient = const _FakeContextAiChatClient(),
   }) async {
+    tester.view.physicalSize = const Size(800, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localWordsForSourceProvider.overrideWith((ref, source) async {
             return words;
           }),
+          localCategoriesProvider.overrideWith(
+            (ref) async => [category('seed-category-travel', 'Travel')],
+          ),
+          wordGameAiClientProvider.overrideWithValue(aiClient),
         ],
         child: const MaterialApp(home: ContextChallengeGameScreen()),
       ),
@@ -68,6 +94,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(startButton);
     await tester.pump();
+    await tester.pumpAndSettle();
   }
 
   test('buildContextChallengePairs keeps only complete unique pairs', () {
@@ -96,7 +123,8 @@ void main() {
       final task = buildContextChallengeTask(pairs: pairs, taskIndex: 0);
 
       expect(task.sentence, contains('___'));
-      expect(task.correctAnswerText, 'emergency');
+      expect(task.correctAnswerText, 'Notfall');
+      expect(task.hintTerm, 'emergency');
       expect(task.hintTranslation, 'Notfall');
       expect(task.answers, hasLength(4));
       expect(task.answers.where((answer) => answer.isCorrect), hasLength(1));
@@ -132,17 +160,25 @@ void main() {
     expect(find.text('Zurück'), findsOneWidget);
   });
 
-  testWidgets('shows start card with local offline copy', (tester) async {
+  testWidgets('shows start card with KI copy', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
     expect(find.text('Kontext-Challenge'), findsWidgets);
     expect(
-      find.text(
-        'Erkenne Wörter im Zusammenhang. Diese erste Version funktioniert lokal ohne KI.',
-      ),
+      find.text('Dieses KI-Spiel erzeugt kurze Kontextsätze mit Talvori KI.'),
       findsOneWidget,
     );
+    expect(find.textContaining('KI-Spiel'), findsWidgets);
     expect(find.text('Challenge starten'), findsOneWidget);
+    expect(find.text('Sprachen'), findsOneWidget);
+    expect(find.text('Englisch → Deutsch'), findsOneWidget);
+    expect(find.text('Deutsch → Englisch'), findsOneWidget);
+    expect(find.text('Englisch → Englisch'), findsOneWidget);
+    expect(find.text('Deutsch → Deutsch'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('context-challenge-language-swap')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows context task after start', (tester) async {
@@ -156,6 +192,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('___'), findsOneWidget);
+    final sentence = tester.widget<Text>(
+      find.byKey(const ValueKey('context-challenge-sentence')),
+    );
+    expect(sentence.data, isNot(contains('emergency')));
     expect(
       find.byKey(const ValueKey('context-challenge-hidden-hint')),
       findsOneWidget,
@@ -206,14 +246,17 @@ void main() {
     await pumpGame(tester, words: sampleWords());
     await startGame(tester);
 
-    await tester.tap(
-      find.byKey(const ValueKey('context-challenge-answer-emergency')),
+    final correctAnswer = find.byKey(
+      const ValueKey('context-challenge-answer-emergency'),
     );
+    await tester.ensureVisible(correctAnswer);
+    await tester.pump();
+    await tester.tap(correctAnswer);
     await tester.pump();
 
     expect(find.text('Passt in den Kontext!'), findsOneWidget);
     expect(find.text('Richtige Lösung'), findsOneWidget);
-    expect(find.text('emergency'), findsWidgets);
+    expect(find.text('Notfall'), findsWidgets);
     expect(find.text('Richtig: 1'), findsOneWidget);
     expect(find.text('Weiter'), findsOneWidget);
   });
@@ -239,7 +282,7 @@ void main() {
 
     expect(find.text('Nicht ganz.'), findsOneWidget);
     expect(find.text('Richtige Lösung'), findsOneWidget);
-    expect(find.text('emergency'), findsWidgets);
+    expect(find.text('Notfall'), findsWidgets);
     expect(find.text('Richtig: 0'), findsOneWidget);
   });
 
@@ -264,7 +307,7 @@ void main() {
       find.byKey(const ValueKey('context-challenge-solution')),
       findsOneWidget,
     );
-    expect(find.text('emergency'), findsWidgets);
+    expect(find.text('Notfall'), findsWidgets);
     expect(find.text('Richtig: 0'), findsOneWidget);
   });
 
@@ -298,4 +341,82 @@ void main() {
     expect(find.text('Nochmal spielen'), findsOneWidget);
     expect(find.text('Zurück zu Wortspiele'), findsOneWidget);
   });
+
+  testWidgets('shows marked fallback state when KI fails', (tester) async {
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      aiClient: const _FailingContextAiChatClient(),
+    );
+    await startGame(tester);
+
+    expect(
+      find.text('KI-Kontext momentan nicht verfügbar. Lokale Vorlage aktiv.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('___'), findsOneWidget);
+  });
+
+  testWidgets('passes selected language pair to KI request', (tester) async {
+    await pumpGame(tester, words: sampleWords());
+
+    await tester.tap(
+      find.byKey(const ValueKey('context-challenge-language-en-en')),
+    );
+    await tester.pump();
+    await startGame(tester);
+
+    expect(
+      _FakeContextAiChatClient.lastContext?['languagePair'],
+      'Englisch → Englisch',
+    );
+    expect(_FakeContextAiChatClient.lastContext?['sourceLanguage'], 'en');
+    expect(_FakeContextAiChatClient.lastContext?['answerLanguage'], 'en');
+    expect(find.text('Deutsch → Deutsch'), findsNothing);
+  });
+
+  testWidgets('swaps selected language pair direction for KI request', (
+    tester,
+  ) async {
+    await pumpGame(tester, words: sampleWords());
+
+    await tester.tap(
+      find.byKey(const ValueKey('context-challenge-language-swap')),
+    );
+    await tester.pump();
+    await startGame(tester);
+
+    expect(
+      _FakeContextAiChatClient.lastContext?['languagePair'],
+      'Deutsch → Englisch',
+    );
+    expect(_FakeContextAiChatClient.lastContext?['sourceLanguage'], 'de');
+    expect(_FakeContextAiChatClient.lastContext?['answerLanguage'], 'en');
+    expect(_FakeContextAiChatClient.lastContext?['sourceTarget'], 'Notfall');
+    expect(find.text('Deutsch → Deutsch'), findsNothing);
+  });
+}
+
+class _FakeContextAiChatClient implements AiChatClient {
+  const _FakeContextAiChatClient();
+
+  static Map<dynamic, dynamic>? lastContext;
+
+  @override
+  Future<AiChatResult> sendMessage(AiChatRequest request) async {
+    final context = request.context;
+    if (context is Map) lastContext = context;
+    return const AiChatResult(
+      reply: 'Wenn schnelle Hilfe noetig ist, passt ___ in diesen Satz.',
+    );
+  }
+}
+
+class _FailingContextAiChatClient implements AiChatClient {
+  const _FailingContextAiChatClient();
+
+  @override
+  Future<AiChatResult> sendMessage(AiChatRequest request) {
+    throw const AiChatException('test_failure');
+  }
 }

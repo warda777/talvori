@@ -10,6 +10,7 @@ class VocabPracticeItem {
     required this.subtitle,
     required this.icon,
     required this.accent,
+    this.badgeLabel,
   });
 
   final String id;
@@ -17,6 +18,7 @@ class VocabPracticeItem {
   final String subtitle;
   final IconData icon;
   final Color accent;
+  final String? badgeLabel;
   VocabPracticeStatus get status => VocabPracticeStatus.prepared;
 }
 
@@ -52,7 +54,14 @@ class VocabState {
         title: 'Wort-Duell',
         subtitle: 'Tritt später gegen andere an',
         icon: Icons.sports_esports_rounded,
-        accent: Color(0xFFFF8A5B),
+        accent: Color(0xFFB36BFF),
+      ),
+      VocabPracticeItem(
+        id: 'audio_catch',
+        title: 'Hör-Fang',
+        subtitle: 'Tippe das Wort, das du hörst',
+        icon: Icons.graphic_eq_rounded,
+        accent: Color(0xFF7DFFE3),
       ),
       VocabPracticeItem(
         id: 'word_recognition',
@@ -91,6 +100,27 @@ class VocabState {
         icon: Icons.lightbulb_rounded,
         accent: Color(0xFFFFE66D),
       ),
+      VocabPracticeItem(
+        id: 'syllable_rain',
+        title: 'Silben-Regen',
+        subtitle: 'Fange Silben und bilde Wörter',
+        icon: Icons.water_drop_rounded,
+        accent: Color(0xFF5DDCFF),
+      ),
+      VocabPracticeItem(
+        id: 'word_path',
+        title: 'Wortpfad',
+        subtitle: 'Wische durch Buchstaben und bilde Wörter',
+        icon: Icons.route_rounded,
+        accent: Color(0xFF9DFF7D),
+      ),
+      VocabPracticeItem(
+        id: 'word_search',
+        title: 'Wortsuche',
+        subtitle: 'Finde Wörter waagerecht, senkrecht und diagonal',
+        icon: Icons.grid_view_rounded,
+        accent: Color(0xFFFF7AB6),
+      ),
     ],
     smartChallenges: [
       VocabPracticeItem(
@@ -106,6 +136,23 @@ class VocabState {
         subtitle: 'Verstehe Wörter im KI-Satz',
         icon: Icons.auto_awesome_rounded,
         accent: Color(0xFF7DFFE3),
+        badgeLabel: 'KI',
+      ),
+      VocabPracticeItem(
+        id: 'odd_word',
+        title: 'Gegenwort',
+        subtitle: 'Finde das Wort, das nicht dazugehört',
+        icon: Icons.category_rounded,
+        accent: Color(0xFFFFD166),
+        badgeLabel: 'KI',
+      ),
+      VocabPracticeItem(
+        id: 'synonym_riddle',
+        title: 'Synonym-Rätsel',
+        subtitle: 'Erkenne das Wort aus ähnlichen Bedeutungen',
+        icon: Icons.format_quote_rounded,
+        accent: Color(0xFFFF8A5B),
+        badgeLabel: 'KI',
       ),
       VocabPracticeItem(
         id: 'boss_fight',

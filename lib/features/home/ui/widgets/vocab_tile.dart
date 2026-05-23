@@ -51,7 +51,7 @@ class VocabTile extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: _StatusPill(
-                          label: 'bald spielbar',
+                          label: item.badgeLabel ?? 'bald spielbar',
                           color: item.accent,
                         ),
                       ),
@@ -74,12 +74,13 @@ class VocabTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.subtitle,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 4,
+                    overflow: TextOverflow.fade,
+                    softWrap: true,
                     style: const TextStyle(
                       color: Color(0xFFB8C7D9),
-                      fontSize: 12.5,
-                      height: 1.25,
+                      fontSize: 12,
+                      height: 1.18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
+import 'package:talvori/features/home/ui/screens/audio_catch_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/boss_fight_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/odd_word_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/syllable_rain_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/synonym_riddle_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_duel_preview_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_path_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_recognition_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_search_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_promo_card.dart';
 import 'package:talvori/features/home/ui/widgets/vocab_tile.dart';
@@ -99,6 +105,15 @@ class VocabScreen extends ConsumerWidget {
       );
       return;
     }
+    if (item.id == 'audio_catch') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: AudioCatchGameScreen.routeName),
+          builder: (_) => const AudioCatchGameScreen(),
+        ),
+      );
+      return;
+    }
     if (item.id == 'word_match') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -135,6 +150,33 @@ class VocabScreen extends ConsumerWidget {
       );
       return;
     }
+    if (item.id == 'syllable_rain') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: SyllableRainGameScreen.routeName),
+          builder: (_) => const SyllableRainGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'word_path') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: WordPathGameScreen.routeName),
+          builder: (_) => const WordPathGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'word_search') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: WordSearchGameScreen.routeName),
+          builder: (_) => const WordSearchGameScreen(),
+        ),
+      );
+      return;
+    }
     if (item.id == 'daily_word_quest') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -151,6 +193,26 @@ class VocabScreen extends ConsumerWidget {
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: BossFightGameScreen.routeName),
           builder: (_) => const BossFightGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'odd_word') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(name: OddWordGameScreen.routeName),
+          builder: (_) => const OddWordGameScreen(),
+        ),
+      );
+      return;
+    }
+    if (item.id == 'synonym_riddle') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          settings: const RouteSettings(
+            name: SynonymRiddleGameScreen.routeName,
+          ),
+          builder: (_) => const SynonymRiddleGameScreen(),
         ),
       );
       return;
