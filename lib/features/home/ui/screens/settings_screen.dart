@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Controller/Provider
-import '../../application/settings_controller.dart';
 import '../../providers.dart';
 import 'package:talvori/features/onboarding/application/onboarding_settings_provider.dart';
 import 'package:talvori/features/onboarding/ui/screens/onboarding_flow_screen.dart';
@@ -20,7 +18,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = Theme.of(context);
     final state = ref.watch(settingsControllerProvider);
-    final ctrl  = ref.read(settingsControllerProvider.notifier);
+    final ctrl = ref.read(settingsControllerProvider.notifier);
 
     return Scaffold(
       backgroundColor: t.colorScheme.surface,
@@ -33,7 +31,6 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
           children: [
-
             // TOOLTIPS
             SettingsSection(
               title: 'Hinweise',
@@ -42,8 +39,9 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Tooltips bei Nutzung anzeigen',
                   subtitle: 'Zeigt kurze Hinweise bei der Bedienung.',
                   value: ref.watch(showTooltipsAlwaysProvider),
-                  onChanged: (v) =>
-                      ref.read(showTooltipsAlwaysProvider.notifier).setShowTooltipsAlways(v),
+                  onChanged: (v) => ref
+                      .read(showTooltipsAlwaysProvider.notifier)
+                      .setShowTooltipsAlways(v),
                 ),
                 SettingsTile(
                   title: 'Tooltips zurücksetzen',
@@ -51,7 +49,9 @@ class SettingsScreen extends ConsumerWidget {
                     await resetAllTooltipFlags(ref);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Tooltips wurden zurückgesetzt')),
+                        const SnackBar(
+                          content: Text('Tooltips wurden zurückgesetzt'),
+                        ),
                       );
                     }
                   },
@@ -65,10 +65,12 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SettingsSwitchTile(
                   title: 'Onboarding bei Start anzeigen',
-                  subtitle: 'Zeigt die Einführung beim Öffnen einer Kategorie im Word Hub.',
+                  subtitle:
+                      'Zeigt die Einführung beim Öffnen einer Kategorie im Word Hub.',
                   value: ref.watch(showOnboardingOnStartProvider),
-                  onChanged: (v) =>
-                      ref.read(showOnboardingOnStartProvider.notifier).setShowOnStart(v),
+                  onChanged: (v) => ref
+                      .read(showOnboardingOnStartProvider.notifier)
+                      .setShowOnStart(v),
                 ),
                 SettingsTile(
                   title: 'Onboarding erneut ansehen',
@@ -168,17 +170,23 @@ class SettingsScreen extends ConsumerWidget {
                 SettingsTile(
                   title: 'Instagram',
                   external: true,
-                  onTap: () { /* TODO: launchUrl(instagram) */ },
+                  onTap: () {
+                    /* TODO: launchUrl(instagram) */
+                  },
                 ),
                 SettingsTile(
                   title: 'Facebook',
                   external: true,
-                  onTap: () { /* TODO: launchUrl(facebook) */ },
+                  onTap: () {
+                    /* TODO: launchUrl(facebook) */
+                  },
                 ),
                 SettingsTile(
                   title: 'X (formerly Twitter)',
                   external: true,
-                  onTap: () { /* TODO: launchUrl(x) */ },
+                  onTap: () {
+                    /* TODO: launchUrl(x) */
+                  },
                 ),
               ],
             ),
@@ -189,7 +197,9 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SettingsTile(
                   title: 'Help',
-                  onTap: () { /* TODO: open help/faq */ },
+                  onTap: () {
+                    /* TODO: open help/faq */
+                  },
                 ),
               ],
             ),
@@ -200,11 +210,15 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SettingsTile(
                   title: 'Privacy Policy',
-                  onTap: () { /* TODO: open privacy page */ },
+                  onTap: () {
+                    /* TODO: open privacy page */
+                  },
                 ),
                 SettingsTile(
                   title: 'Terms and Conditions',
-                  onTap: () { /* TODO: open terms page */ },
+                  onTap: () {
+                    /* TODO: open terms page */
+                  },
                 ),
               ],
             ),

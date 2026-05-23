@@ -51,6 +51,13 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
+    final startButton = find.byKey(const ValueKey('hangman-start-button'));
+    if (startButton.evaluate().isNotEmpty) {
+      await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+      await tester.pumpAndSettle();
+      await tester.tap(startButton);
+      await tester.pump();
+    }
   }
 
   test('buildHangmanRoundWords keeps playable unique words', () {
@@ -84,7 +91,7 @@ void main() {
     expect(find.text('Noch keine passenden Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge Wörter mit mindestens drei Buchstaben hinzu, um Hangman zu spielen.',
+        'Diese Wortquelle braucht Wörter mit mindestens drei Buchstaben, um Hangman zu spielen.',
       ),
       findsOneWidget,
     );

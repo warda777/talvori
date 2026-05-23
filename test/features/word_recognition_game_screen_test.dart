@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
@@ -10,6 +11,10 @@ import 'package:talvori/core/local_database/providers/local_words_for_source_pro
 import 'package:talvori/features/home/ui/screens/word_recognition_game_screen.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   LocalWord word({
     required String id,
     required String term,
@@ -82,10 +87,27 @@ void main() {
   }
 
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+    if (finder.evaluate().isEmpty) {
+      final scrollable = find.byType(Scrollable);
+      if (scrollable.evaluate().isNotEmpty) {
+        await tester.scrollUntilVisible(
+          finder,
+          520,
+          scrollable: scrollable.first,
+        );
+      }
+    }
     await tester.ensureVisible(finder);
     await tester.pump();
     await tester.tap(finder);
     await tester.pump();
+  }
+
+  Future<void> startGame(WidgetTester tester) async {
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-recognition-start-button')),
+    );
   }
 
   test('buildWordRecognitionPairs keeps only complete unique pairs', () {
@@ -138,22 +160,43 @@ void main() {
     expect(find.text('Zurück'), findsOneWidget);
   });
 
-  testWidgets('shows prompt counter and four answer options', (tester) async {
+  testWidgets('shows start screen before answers', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
     expect(find.text('Wort erkennen'), findsWidgets);
-    expect(find.text('1 / 4'), findsOneWidget);
-    expect(find.byKey(const ValueKey('word-recognition-hint')), findsOneWidget);
-    expect(
-      find.text('Welches deutsche Wort passt zu "emergency"?'),
-      findsOneWidget,
-    );
+    expect(find.text('Wähle die passende Übersetzung.'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('word-recognition-source-picker')),
       findsOneWidget,
     );
     expect(find.text('Du spielst mit'), findsOneWidget);
     expect(find.text('Alle Wörter'), findsOneWidget);
+    expect(find.text('Wörter pro Runde'), findsOneWidget);
+    expect(find.text('Gespielt: 0 / 4 Wörter'), findsOneWidget);
+    expect(find.text('Diese Runde: 4 Wörter'), findsOneWidget);
+    expect(find.text('Fortschritt zurücksetzen'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('word-recognition-start-button')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('word-recognition-answer-emergency')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('start opens prompt counter and four answer options', (
+    tester,
+  ) async {
+    await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
+
+    expect(find.text('1 / 4'), findsOneWidget);
+    expect(find.byKey(const ValueKey('word-recognition-hint')), findsOneWidget);
+    expect(
+      find.text('Welches deutsche Wort passt zu "emergency"?'),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('word-recognition-prompt')),
       findsOneWidget,
@@ -174,6 +217,14 @@ void main() {
     expect(
       find.byKey(const ValueKey('word-recognition-answer-water')),
       findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('word-recognition-change-source-button')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('word-recognition-select-world-button')),
+      findsNothing,
     );
   });
 
@@ -204,6 +255,11 @@ void main() {
 
     expect(find.text('Alle Wörter'), findsWidgets);
     expect(find.text('Meine Wörter'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Favoriten'),
+      520,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Favoriten'), findsOneWidget);
     expect(find.text('Mein Mix'), findsOneWidget);
 
@@ -217,6 +273,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.text('Favoriten'), findsOneWidget);
+    await startGame(tester);
     expect(find.text('flame'), findsOneWidget);
     expect(find.text('emergency'), findsNothing);
   });
@@ -259,7 +316,8 @@ void main() {
       wordsByCategory: {travelCategory.id: travelWords},
     );
 
-    await tester.tap(
+    await tapVisible(
+      tester,
       find.byKey(const ValueKey('word-recognition-select-world-button')),
     );
     await tester.pumpAndSettle();
@@ -282,12 +340,86 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
+    await tester.scrollUntilVisible(
+      find.text('Wortwelt: Travel'),
+      520,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Wortwelt: Travel'), findsOneWidget);
+    await startGame(tester);
     expect(find.text('train'), findsOneWidget);
+  });
+
+  testWidgets('stored word world stays selected after reopening', (
+    tester,
+  ) async {
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
+    final travelWords = [
+      word(
+        id: 'train',
+        term: 'train',
+        translation: 'Zug',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'ticket',
+        term: 'ticket',
+        translation: 'Ticket',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'hotel',
+        term: 'hotel',
+        translation: 'Hotel',
+        categoryId: travelCategory.id,
+      ),
+      word(
+        id: 'map',
+        term: 'map',
+        translation: 'Karte',
+        categoryId: travelCategory.id,
+      ),
+    ];
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [travelCategory],
+      wordsByCategory: {travelCategory.id: travelWords},
+    );
+
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-recognition-select-world-button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('word-recognition-word-world-travel')),
+      520,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('word-recognition-word-world-travel')),
+    );
+    await tester.pumpAndSettle();
+
+    await pumpGame(
+      tester,
+      words: sampleWords(),
+      categories: [travelCategory],
+      wordsByCategory: {travelCategory.id: travelWords},
+    );
+
+    expect(find.text('Wortwelt: Travel'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('word-recognition-answer-train')),
+      findsNothing,
+    );
   });
 
   testWidgets('correct answer is accepted', (tester) async {
     await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
 
     await tapVisible(
       tester,
@@ -305,6 +437,7 @@ void main() {
     tester,
   ) async {
     await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
 
     await tapVisible(
       tester,
@@ -324,6 +457,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
 
     await tapVisible(
       tester,
@@ -343,6 +477,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
 
     await tapVisible(
       tester,
@@ -353,6 +488,11 @@ void main() {
       find.byKey(const ValueKey('word-recognition-next-button')),
     );
 
+    await tester.scrollUntilVisible(
+      find.text('2 / 4'),
+      -520,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('2 / 4'), findsOneWidget);
     expect(find.text('shelter'), findsOneWidget);
     expect(find.text('Richtig!'), findsNothing);
@@ -365,6 +505,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
 
     for (final id in ['emergency', 'shelter', 'rescue', 'water']) {
       await tapVisible(

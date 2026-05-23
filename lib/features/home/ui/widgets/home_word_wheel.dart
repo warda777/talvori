@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
-import 'package:talvori/features/words/application/word_providers.dart';
 
 class HomeWordWheel extends ConsumerStatefulWidget {
   const HomeWordWheel({super.key});
@@ -24,7 +23,11 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
     t = t.replaceAll(RegExp(r'^&quot;|&quot;$'), '');
 
     // Alle gängigen Quotes am Rand (beliebig viele, auch verschachtelt)
-    final edgeQuotes = RegExp(r'^[\"“"„‟‚''`´«»‹›＂]+|[\"“"„‟‚''`´«»‹›＂]+\$');
+    final edgeQuotes = RegExp(
+      r'^[\"“"„‟‚'
+      '`´«»‹›＂]+|[\"“"„‟‚'
+      '`´«»‹›＂]+\$',
+    );
     while (edgeQuotes.hasMatch(t)) {
       t = t.replaceAll(edgeQuotes, '');
     }
@@ -33,8 +36,17 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
     t = t.replaceAll(RegExp(r'[\u200B-\u200D\uFEFF\u2060]'), '');
 
     // Fallback: falls wirklich noch ein Quote übrig blieb → komplett raus
-    if (RegExp(r'[\"“"„‟‚''`´«»‹›＂]').hasMatch(t)) {
-      t = t.replaceAll(RegExp(r'[\"“"„‟‚''`´«»‹›＂]'), '');
+    if (RegExp(
+      r'[\"“"„‟‚'
+      '`´«»‹›＂]',
+    ).hasMatch(t)) {
+      t = t.replaceAll(
+        RegExp(
+          r'[\"“"„‟‚'
+          '`´«»‹›＂]',
+        ),
+        '',
+      );
     }
     return t.trim();
   }
@@ -50,11 +62,17 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
     final repo = SupabaseWordRepository();
     final items = await repo.fetchMyWords(limit: 50);
     if (mounted) {
-      setState(() => _words = items.map((e) => WordUserView(
-        id: e.id,
-        text: _sanitize(e.text),
-        translation: e.translation,
-      )).toList());
+      setState(
+        () => _words = items
+            .map(
+              (e) => WordUserView(
+                id: e.id,
+                text: _sanitize(e.text),
+                translation: e.translation,
+              ),
+            )
+            .toList(),
+      );
     }
   }
 
@@ -70,7 +88,6 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final cs = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final wheelHeight = 180.0; // zeigt ca. 3–4 Wörter
@@ -90,7 +107,10 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
-                  border: Border.all(color: const Color(0xFF6D7473), width: 1.4),
+                  border: Border.all(
+                    color: const Color(0xFF6D7473),
+                    width: 1.4,
+                  ),
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: Text(
@@ -132,7 +152,9 @@ class _HomeWordWheelState extends ConsumerState<HomeWordWheel> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             fontSize: isCenter ? 22 : 18,
-                            fontWeight: isCenter ? FontWeight.w800 : FontWeight.w600,
+                            fontWeight: isCenter
+                                ? FontWeight.w800
+                                : FontWeight.w600,
                             color: isCenter
                                 ? const Color(0xFFB0CCFE)
                                 : Colors.white.withOpacity(0.9),

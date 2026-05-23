@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   LocalWord word({
     required String id,
     required String term,
@@ -56,9 +61,12 @@ void main() {
   }
 
   Future<void> startGame(WidgetTester tester) async {
-    await tester.tap(
-      find.byKey(const ValueKey('context-challenge-start-button')),
+    final startButton = find.byKey(
+      const ValueKey('context-challenge-start-button'),
     );
+    await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+    await tester.pumpAndSettle();
+    await tester.tap(startButton);
     await tester.pump();
   }
 
@@ -99,6 +107,13 @@ void main() {
     },
   );
 
+  test('buildContextChallengeHiddenHint reveals letters progressively', () {
+    expect(buildContextChallengeHiddenHint('travel', 0), '_ _ _ _ _ _');
+    expect(buildContextChallengeHiddenHint('travel', 1), 't _ _ _ _ _');
+    expect(buildContextChallengeHiddenHint('travel', 2), 't r _ _ _ _');
+    expect(buildContextChallengeHiddenHint('travel', 3), 't r a _ _ _');
+  });
+
   testWidgets('shows empty state with fewer than four word pairs', (
     tester,
   ) async {
@@ -110,7 +125,7 @@ void main() {
     expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge mindestens vier Wörter mit Übersetzung hinzu, um die Kontext-Challenge zu starten.',
+        'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um die Kontext-Challenge zu starten.',
       ),
       findsOneWidget,
     );
@@ -141,7 +156,12 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('___'), findsOneWidget);
-    expect(find.text('Hinweis: Notfall'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('context-challenge-hidden-hint')),
+      findsOneWidget,
+    );
+    expect(find.text('_ _ _ _ _ _ _ _ _'), findsOneWidget);
+    expect(find.text('Hinweis: Notfall'), findsNothing);
     expect(
       find.byKey(const ValueKey('context-challenge-answer-emergency')),
       findsOneWidget,
@@ -158,6 +178,28 @@ void main() {
       find.byKey(const ValueKey('context-challenge-answer-water')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('hidden hint reveals one more letter on every tap', (
+    tester,
+  ) async {
+    await pumpGame(tester, words: sampleWords());
+    await startGame(tester);
+
+    final hint = find.byKey(const ValueKey('context-challenge-hidden-hint'));
+    expect(find.text('_ _ _ _ _ _ _ _ _'), findsOneWidget);
+
+    await tester.tap(hint);
+    await tester.pump();
+    expect(find.text('e _ _ _ _ _ _ _ _'), findsOneWidget);
+
+    await tester.tap(hint);
+    await tester.pump();
+    expect(find.text('e m _ _ _ _ _ _ _'), findsOneWidget);
+
+    await tester.tap(hint);
+    await tester.pump();
+    expect(find.text('e m e _ _ _ _ _ _'), findsOneWidget);
   });
 
   testWidgets('correct answer increases local score', (tester) async {

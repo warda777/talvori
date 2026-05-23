@@ -30,7 +30,6 @@ class VocabTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -72,15 +71,17 @@ class VocabTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  item.subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFFB8C7D9),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w700,
+                Expanded(
+                  child: Text(
+                    item.subtitle,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFFB8C7D9),
+                      fontSize: 12.5,
+                      height: 1.25,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],

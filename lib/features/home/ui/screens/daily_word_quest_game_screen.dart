@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
 class DailyWordQuestGameScreen extends ConsumerStatefulWidget {
   const DailyWordQuestGameScreen({super.key});
@@ -18,6 +22,12 @@ class _DailyWordQuestGameScreenState
     extends ConsumerState<DailyWordQuestGameScreen> {
   final TextEditingController _gapController = TextEditingController();
   final FocusNode _gapFocusNode = FocusNode();
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<DailyQuestPair> _roundPairs = const <DailyQuestPair>[];
   List<QuestPuzzleLetter> _puzzleLetters = const <QuestPuzzleLetter>[];
   List<int> _selectedPuzzleIndexes = const <int>[];
@@ -39,9 +49,9 @@ class _DailyWordQuestGameScreenState
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -64,27 +74,45 @@ class _DailyWordQuestGameScreenState
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            const categories = <LocalCategory>[];
             final pairs = buildDailyQuestPairs(words);
             if (pairs.length < 5) {
               return _QuestMessageState(
                 title: 'Noch nicht genug Wörter',
-                text:
-                    'Füge mindestens fünf Wörter hinzu, um deine Daily Word Quest zu starten.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht mindestens fünf Wörter, um deine Daily Word Quest zu starten.'
+                    : 'Diese Wortwelt braucht mindestens fünf Wörter, um deine Daily Word Quest zu starten.',
                 buttonLabel: 'Zurück',
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
 
-            _ensureRound(pairs);
+            final sourceKey =
+                '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
+            if (_roundKey != sourceKey) {
+              _roundKey = sourceKey;
+              _restartRound(pairs);
+            }
             if (_isFinished) {
               return _FinishedView(
                 score: _score,
+                totalCount: _roundPairs.length,
                 onRestart: () => setState(() => _restartRound(pairs)),
                 onBack: () => Navigator.of(context).maybePop(),
               );
             }
             if (!_hasStarted) {
-              return _StartView(onStart: _startQuest);
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: _startQuest,
+              );
             }
 
             final task = buildDailyQuestTask(
@@ -94,6 +122,7 @@ class _DailyWordQuestGameScreenState
             return _TaskView(
               task: task,
               currentTaskIndex: _currentTaskIndex,
+              totalCount: _roundPairs.length,
               score: _score,
               feedback: _feedback,
               resolved: _resolved,
@@ -114,15 +143,38 @@ class _DailyWordQuestGameScreenState
     );
   }
 
-  void _ensureRound(List<DailyQuestPair> pairs) {
-    final nextKey = pairs.map((pair) => pair.id).join('|');
-    if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
-    _roundKey = nextKey;
-    _restartRound(pairs);
+  void _resetForSelection(String sourceKey) {
+    _roundKey = sourceKey;
+    _roundPairs = const <DailyQuestPair>[];
+    _puzzleLetters = const <QuestPuzzleLetter>[];
+    _selectedPuzzleIndexes = const <int>[];
+    _currentTaskIndex = 0;
+    _score = 0;
+    _hasStarted = false;
+    _isFinished = false;
+    _resolved = false;
+    _feedback = null;
+    _selectedAnswerId = null;
+    _gapController.clear();
+  }
+
+  void _selectSource(GameWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _selectedSource = source;
+      _resetForSelection('');
+    });
   }
 
   void _restartRound(List<DailyQuestPair> pairs) {
-    _roundPairs = List<DailyQuestPair>.unmodifiable(pairs.take(5));
+    _roundPairs = List<DailyQuestPair>.unmodifiable(
+      pairs.take(_effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'daily-quest',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
     _currentTaskIndex = 0;
     _score = 0;
     _hasStarted = false;
@@ -133,6 +185,22 @@ class _DailyWordQuestGameScreenState
     _selectedPuzzleIndexes = const <int>[];
     _puzzleLetters = buildQuestPuzzleLetters(_roundPairs.last.term);
     _gapController.clear();
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 5,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _startQuest() {
@@ -209,7 +277,7 @@ class _DailyWordQuestGameScreenState
 
   void _nextTask() {
     setState(() {
-      if (_currentTaskIndex >= dailyQuestTaskCount - 1) {
+      if (_currentTaskIndex >= _roundPairs.length - 1) {
         _isFinished = true;
         return;
       }
@@ -224,8 +292,10 @@ class _DailyWordQuestGameScreenState
     _selectedAnswerId = null;
     _selectedPuzzleIndexes = const <int>[];
     _gapController.clear();
-    if (_currentTaskIndex == 4 && _roundPairs.isNotEmpty) {
-      _puzzleLetters = buildQuestPuzzleLetters(_roundPairs[4].term);
+    if (_currentTaskIndex >= 4 && _roundPairs.isNotEmpty) {
+      _puzzleLetters = buildQuestPuzzleLetters(
+        _roundPairs[_currentTaskIndex % _roundPairs.length].term,
+      );
     }
   }
 }
@@ -349,6 +419,28 @@ String buildDailyQuestGapPattern(String term) {
 }
 
 @visibleForTesting
+String buildDailyQuestHiddenHint(String term, int revealedCount) {
+  final chars = term.trim().split('');
+  var remaining = revealedCount.clamp(0, chars.length).toInt();
+  final visible = <String>[];
+
+  for (final char in chars) {
+    if (RegExp(r'\s').hasMatch(char)) {
+      visible.add(' ');
+      continue;
+    }
+    if (remaining > 0) {
+      visible.add(char);
+      remaining -= 1;
+    } else {
+      visible.add('_');
+    }
+  }
+
+  return visible.join(' ');
+}
+
+@visibleForTesting
 List<QuestPuzzleLetter> buildQuestPuzzleLetters(String term) {
   final chars = term.trim().split('');
   final indexed = [
@@ -463,13 +555,28 @@ class QuestPuzzleLetter {
 }
 
 class _StartView extends StatelessWidget {
-  const _StartView({required this.onStart});
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
+  });
 
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
+      cacheExtent: 1400,
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
       children: [
         Container(
@@ -507,6 +614,19 @@ class _StartView extends StatelessWidget {
               const _QuestGoal(text: '3 Bedeutungen erkennen'),
               const _QuestGoal(text: '1 Wort ergänzen'),
               const _QuestGoal(text: '1 Wort zusammensetzen'),
+              const SizedBox(height: 20),
+              GameWordSourcePicker(
+                keyPrefix: 'daily-quest',
+                selectedSource: selectedSource,
+                categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
+                minWordsPerRound: 5,
+                accentColor: const Color(0xFF5DDCFF),
+                secondaryAccentColor: const Color(0xFF7DFFE3),
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
+              ),
               const SizedBox(height: 22),
               FilledButton(
                 key: const ValueKey('daily-quest-start-button'),
@@ -526,6 +646,7 @@ class _TaskView extends StatelessWidget {
   const _TaskView({
     required this.task,
     required this.currentTaskIndex,
+    required this.totalCount,
     required this.score,
     required this.feedback,
     required this.resolved,
@@ -543,6 +664,7 @@ class _TaskView extends StatelessWidget {
 
   final DailyQuestTask task;
   final int currentTaskIndex;
+  final int totalCount;
   final int score;
   final String? feedback;
   final bool resolved;
@@ -561,9 +683,14 @@ class _TaskView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       key: ValueKey('daily-quest-task-list-$currentTaskIndex'),
+      cacheExtent: 1400,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
       children: [
-        _QuestHeader(currentTaskIndex: currentTaskIndex, score: score),
+        _QuestHeader(
+          currentTaskIndex: currentTaskIndex,
+          totalCount: totalCount,
+          score: score,
+        ),
         const SizedBox(height: 18),
         Container(
           padding: const EdgeInsets.all(20),
@@ -591,6 +718,7 @@ class _TaskView extends StatelessWidget {
                 )
               else
                 _PuzzleTask(
+                  term: task.pair.term,
                   letters: puzzleLetters,
                   selectedIndexes: selectedPuzzleIndexes,
                   resolved: resolved,
@@ -741,12 +869,14 @@ class _GapTask extends StatelessWidget {
 
 class _PuzzleTask extends StatelessWidget {
   const _PuzzleTask({
+    required this.term,
     required this.letters,
     required this.selectedIndexes,
     required this.resolved,
     required this.onLetterTap,
   });
 
+  final String term;
   final List<QuestPuzzleLetter> letters;
   final List<int> selectedIndexes;
   final bool resolved;
@@ -757,6 +887,8 @@ class _PuzzleTask extends StatelessWidget {
     final answer = selectedIndexes.map((index) => letters[index].char).join();
     return Column(
       children: [
+        _RevealingPuzzleHint(term: term),
+        const SizedBox(height: 16),
         _AnswerBox(answer: answer),
         const SizedBox(height: 16),
         Wrap(
@@ -813,8 +945,7 @@ class _TaskHint extends StatelessWidget {
     final text = switch (task.type) {
       DailyQuestTaskType.choice => 'Wähle die passende Übersetzung.',
       DailyQuestTaskType.gap => 'Hinweis: ${task.pair.translation}',
-      DailyQuestTaskType.puzzle =>
-        'Sortiere die Buchstaben. Hinweis: ${task.pair.translation}',
+      DailyQuestTaskType.puzzle => 'Sortiere die Buchstaben.',
     };
     return Text(
       text,
@@ -822,6 +953,101 @@ class _TaskHint extends StatelessWidget {
         color: Color(0xFFB8C7D9),
         height: 1.35,
         fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+class _RevealingPuzzleHint extends StatefulWidget {
+  const _RevealingPuzzleHint({required this.term});
+
+  final String term;
+
+  @override
+  State<_RevealingPuzzleHint> createState() => _RevealingPuzzleHintState();
+}
+
+class _RevealingPuzzleHintState extends State<_RevealingPuzzleHint> {
+  int _revealedCount = 0;
+
+  @override
+  void didUpdateWidget(covariant _RevealingPuzzleHint oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.term != widget.term) {
+      _revealedCount = 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chars = widget.term.trim().split('');
+    final mask = buildDailyQuestHiddenHint(widget.term, _revealedCount);
+
+    return InkWell(
+      key: const ValueKey('daily-quest-puzzle-hint'),
+      borderRadius: BorderRadius.circular(18),
+      onTap: _revealedCount >= chars.length
+          ? null
+          : () => setState(() => _revealedCount += 1),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF071523),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF26354B)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF5DDCFF).withValues(alpha: 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(
+                  Icons.touch_app_rounded,
+                  color: Color(0xFF5DDCFF),
+                  size: 18,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Hinweis',
+                  style: TextStyle(
+                    color: Color(0xFFB8C7D9),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              mask,
+              key: const ValueKey('daily-quest-puzzle-hint-mask'),
+              style: const TextStyle(
+                color: Color(0xFFF4F8FF),
+                fontSize: 24,
+                height: 1.2,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tippe für den nächsten Buchstaben',
+              style: TextStyle(
+                color: Color(0xFF7DFFE3),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1053,9 +1279,14 @@ class _SolutionBox extends StatelessWidget {
 }
 
 class _QuestHeader extends StatelessWidget {
-  const _QuestHeader({required this.currentTaskIndex, required this.score});
+  const _QuestHeader({
+    required this.currentTaskIndex,
+    required this.totalCount,
+    required this.score,
+  });
 
   final int currentTaskIndex;
+  final int totalCount;
   final int score;
 
   @override
@@ -1073,7 +1304,7 @@ class _QuestHeader extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Aufgabe ${currentTaskIndex + 1} / $dailyQuestTaskCount',
+              'Aufgabe ${currentTaskIndex + 1} / $totalCount',
               style: const TextStyle(
                 color: Color(0xFFF4F8FF),
                 fontWeight: FontWeight.w900,
@@ -1158,17 +1389,20 @@ class _FeedbackBanner extends StatelessWidget {
 class _FinishedView extends StatelessWidget {
   const _FinishedView({
     required this.score,
+    required this.totalCount,
     required this.onRestart,
     required this.onBack,
   });
 
   final int score;
+  final int totalCount;
   final VoidCallback onRestart;
   final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
+      cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(20, 40, 20, 28),
       children: [
         Container(
@@ -1194,7 +1428,7 @@ class _FinishedView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Du hast $score von $dailyQuestTaskCount Quest-Punkten gesammelt.',
+                'Du hast $score von $totalCount Quest-Punkten gesammelt.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Color(0xFFB8C7D9),
@@ -1248,6 +1482,7 @@ class _QuestMessageState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(20, 52, 20, 28),
       children: [
         Container(

@@ -9,6 +9,9 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
+    as game_picker;
 
 class WordHuntGameScreen extends ConsumerStatefulWidget {
   const WordHuntGameScreen({
@@ -16,7 +19,7 @@ class WordHuntGameScreen extends ConsumerStatefulWidget {
     this.random,
     this.waveDuration,
     this.maxWavesPerTarget = 4,
-    this.maxTargets = 20,
+    this.maxTargets = 9999,
   });
 
   static const routeName = 'word-hunt-game';
@@ -31,10 +34,13 @@ class WordHuntGameScreen extends ConsumerStatefulWidget {
 }
 
 class _WordHuntGameScreenState extends ConsumerState<WordHuntGameScreen> {
-  WordHuntWordSource _selectedSource = WordHuntWordSource.standard(
+  GameWordSource _selectedSource = GameWordSource.standard(
     LocalLearningSource.allWords,
   );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
   WordHuntSpeed _selectedSpeed = WordHuntSpeed.medium;
+  int _wordsPerRound = 10;
   List<WordHuntPair> _roundPairs = const <WordHuntPair>[];
   List<int> _answerShifts = const <int>[];
   String _roundKey = '';
@@ -113,7 +119,12 @@ class _WordHuntGameScreenState extends ConsumerState<WordHuntGameScreen> {
                 selectedSource: _selectedSource,
                 selectedSpeed: _selectedSpeed,
                 categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
                 onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
                 onSpeedSelected: _selectSpeed,
                 onStart: _startRound,
               );
@@ -148,7 +159,7 @@ class _WordHuntGameScreenState extends ConsumerState<WordHuntGameScreen> {
     _restartRound(pairs);
   }
 
-  void _selectSource(WordHuntWordSource source) {
+  void _selectSource(GameWordSource source) {
     if (_selectedSource == source) return;
     setState(() {
       _waveTimer?.cancel();
@@ -180,7 +191,12 @@ class _WordHuntGameScreenState extends ConsumerState<WordHuntGameScreen> {
     _roundPairs = selectWordHuntRoundPairs(
       pairs,
       random: random,
-      maxTargets: widget.maxTargets,
+      maxTargets: min(widget.maxTargets, _effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'word-hunt',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
     );
     _answerShifts = List<int>.unmodifiable(
       List<int>.generate(_roundPairs.length, (_) => random.nextInt(4)),
@@ -207,6 +223,33 @@ class _WordHuntGameScreenState extends ConsumerState<WordHuntGameScreen> {
       _finishReason = _WordHuntFinishReason.completed;
     });
     _startWaveTimer();
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 4,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _waveTimer?.cancel();
+      _wordsPerRound = count;
+      _roundPairs = const <WordHuntPair>[];
+      _answerShifts = const <int>[];
+      _roundKey = '';
+      _currentQuestionIndex = 0;
+      _waveIndex = 0;
+      _hitCount = 0;
+      _lives = 10;
+      _started = false;
+      _finished = false;
+      _feedback = null;
+      _finishReason = _WordHuntFinishReason.completed;
+    });
   }
 
   void _startWaveTimer() {
@@ -395,32 +438,20 @@ enum WordHuntSpeed {
   final Duration duration;
 }
 
-class WordHuntWordSource {
-  const WordHuntWordSource._({
+class GameWordSource {
+  const GameWordSource._({
     required this.label,
     required this.source,
     required this.categoryId,
     required this.worldKey,
   });
 
-  factory WordHuntWordSource.standard(LocalLearningSource source) {
-    return WordHuntWordSource._(
+  factory GameWordSource.standard(LocalLearningSource source) {
+    return GameWordSource._(
       label: source.label,
       source: source,
       categoryId: null,
       worldKey: null,
-    );
-  }
-
-  factory WordHuntWordSource._wordWorld(
-    _WordHuntWordWorld world,
-    List<LocalCategory> categories,
-  ) {
-    return WordHuntWordSource._(
-      label: 'Wortwelt: ${world.name}',
-      source: LocalLearningSource.allWords,
-      categoryId: world.resolveCategoryId(categories),
-      worldKey: world.key,
     );
   }
 
@@ -433,107 +464,11 @@ class WordHuntWordSource {
 
   @override
   bool operator ==(Object other) {
-    return other is WordHuntWordSource && other.key == key;
+    return other is GameWordSource && other.key == key;
   }
 
   @override
   int get hashCode => key.hashCode;
-}
-
-const _standardWordHuntSources = <LocalLearningSource>[
-  LocalLearningSource.allWords,
-  LocalLearningSource.myWords,
-  LocalLearningSource.favorites,
-  LocalLearningSource.myMix,
-];
-
-const _wordHuntWordWorldGroups = <_WordHuntWordWorldGroup>[
-  _WordHuntWordWorldGroup('Alltag & Leben', [
-    _WordHuntWordWorld(
-      key: 'health_fitness',
-      name: 'Health & Fitness',
-      localCategoryId: 'seed-category-basics',
-    ),
-    _WordHuntWordWorld(key: 'home_living', name: 'Home & Living'),
-    _WordHuntWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
-    _WordHuntWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
-    _WordHuntWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
-    _WordHuntWordWorld(key: 'productivity', name: 'Productivity'),
-  ]),
-  _WordHuntWordWorldGroup('Mensch & Gesellschaft', [
-    _WordHuntWordWorld(key: 'personality', name: 'Personality'),
-    _WordHuntWordWorld(key: 'feelings', name: 'Feelings'),
-    _WordHuntWordWorld(key: 'relationships', name: 'Relationships'),
-    _WordHuntWordWorld(key: 'thoughts', name: 'Thoughts'),
-    _WordHuntWordWorld(key: 'law_politics', name: 'Law & Politics'),
-    _WordHuntWordWorld(key: 'environment', name: 'Environment'),
-  ]),
-  _WordHuntWordWorldGroup('Wissen & Bildung', [
-    _WordHuntWordWorld(key: 'school_studies', name: 'School & Studies'),
-    _WordHuntWordWorld(key: 'science', name: 'Science'),
-    _WordHuntWordWorld(key: 'space', name: 'Space'),
-    _WordHuntWordWorld(key: 'nature', name: 'Nature'),
-    _WordHuntWordWorld(key: 'animals', name: 'Animals'),
-    _WordHuntWordWorld(key: 'tech_innovation', name: 'Tech & Innovation'),
-  ]),
-  _WordHuntWordWorldGroup('Medien & Freizeit', [
-    _WordHuntWordWorld(key: 'media_news', name: 'Media & News'),
-    _WordHuntWordWorld(key: 'sports', name: 'Sports'),
-    _WordHuntWordWorld(
-      key: 'travel',
-      name: 'Travel',
-      localCategoryId: 'seed-category-travel',
-    ),
-    _WordHuntWordWorld(key: 'gaming', name: 'Gaming'),
-    _WordHuntWordWorld(key: 'transport', name: 'Transport'),
-    _WordHuntWordWorld(
-      key: 'music_entertainment',
-      name: 'Music & Entertainment',
-    ),
-    _WordHuntWordWorld(key: 'art_literature', name: 'Art & Literature'),
-  ]),
-  _WordHuntWordWorldGroup('Beruf & Sprache', [
-    _WordHuntWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    _WordHuntWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    _WordHuntWordWorld(key: 'a1', name: 'A1'),
-    _WordHuntWordWorld(key: 'a2', name: 'A2'),
-    _WordHuntWordWorld(key: 'b1', name: 'B1'),
-    _WordHuntWordWorld(key: 'b2', name: 'B2'),
-    _WordHuntWordWorld(key: 'c1', name: 'C1'),
-    _WordHuntWordWorld(key: 'c2', name: 'C2'),
-  ]),
-];
-
-class _WordHuntWordWorldGroup {
-  const _WordHuntWordWorldGroup(this.title, this.worlds);
-
-  final String title;
-  final List<_WordHuntWordWorld> worlds;
-}
-
-class _WordHuntWordWorld {
-  const _WordHuntWordWorld({
-    required this.key,
-    required this.name,
-    this.localCategoryId,
-  });
-
-  final String key;
-  final String name;
-  final String? localCategoryId;
-
-  String resolveCategoryId(List<LocalCategory> categories) {
-    if (localCategoryId != null) return localCategoryId!;
-
-    final normalizedName = normalizeWordHuntText(name);
-    for (final category in categories) {
-      if (normalizeWordHuntText(category.name) == normalizedName) {
-        return category.id;
-      }
-    }
-
-    return key;
-  }
 }
 
 class _StartView extends StatelessWidget {
@@ -541,15 +476,21 @@ class _StartView extends StatelessWidget {
     required this.selectedSource,
     required this.selectedSpeed,
     required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
     required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
     required this.onSpeedSelected,
     required this.onStart,
   });
 
-  final WordHuntWordSource selectedSource;
+  final GameWordSource selectedSource;
   final WordHuntSpeed selectedSpeed;
   final List<LocalCategory> categories;
-  final ValueChanged<WordHuntWordSource> onSourceSelected;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final ValueChanged<WordHuntSpeed> onSpeedSelected;
   final VoidCallback onStart;
 
@@ -605,7 +546,10 @@ class _StartView extends StatelessWidget {
               _WordSourcePicker(
                 selectedSource: selectedSource,
                 categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
                 onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
               ),
               const SizedBox(height: 14),
               _SpeedPicker(
@@ -636,141 +580,50 @@ class _WordSourcePicker extends StatelessWidget {
   const _WordSourcePicker({
     required this.selectedSource,
     required this.categories,
+    this.availableIds = const <String>[],
+    this.wordsPerRound = 10,
     required this.onSourceSelected,
+    this.onWordsPerRoundChanged,
   });
 
-  final WordHuntWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordHuntWordSource> onSourceSelected;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int>? onWordsPerRoundChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('word-hunt-source-picker'),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF050912),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF26354B)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Du spielst mit',
-            style: TextStyle(
-              color: Color(0xFFB8C7D9),
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            selectedSource.label,
-            key: const ValueKey('word-hunt-selected-source-label'),
-            style: const TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontSize: 18,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _PickerActionButton(
-            key: const ValueKey('word-hunt-change-source-button'),
-            icon: Icons.folder_copy_rounded,
-            title: 'Wortquelle ändern',
-            subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
-            onTap: () => _showSourceSheet(context),
-          ),
-          const SizedBox(height: 10),
-          _PickerActionButton(
-            key: const ValueKey('word-hunt-select-world-button'),
-            icon: Icons.public_rounded,
-            title: 'Wortwelt auswählen',
-            subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
-            onTap: () => _showWordWorldSheet(context),
-          ),
-        ],
-      ),
+    return game_picker.GameWordSourcePicker(
+      keyPrefix: 'word-hunt',
+      selectedSource: _toSharedSource(selectedSource),
+      categories: categories,
+      availableIds: availableIds,
+      wordsPerRound: wordsPerRound,
+      minWordsPerRound: 4,
+      accentColor: const Color(0xFF7DFFE3),
+      secondaryAccentColor: const Color(0xFF5DDCFF),
+      onWordsPerRoundChanged: onWordsPerRoundChanged,
+      onSourceSelected: (source) => onSourceSelected(_fromSharedSource(source)),
     );
   }
 
-  Future<void> _showSourceSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordHuntSheetFrame(
-          title: 'Wortquelle ändern',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final source in _standardWordHuntSources)
-                _SheetOption(
-                  key: ValueKey('word-hunt-source-${source.id}'),
-                  title: source.label,
-                  selected:
-                      selectedSource == WordHuntWordSource.standard(source),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onSourceSelected(WordHuntWordSource.standard(source));
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+  game_picker.GameWordSource _toSharedSource(GameWordSource source) {
+    return game_picker.GameWordSource.custom(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
     );
   }
 
-  Future<void> _showWordWorldSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordHuntSheetFrame(
-          title: 'Wortwelt auswählen',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final group in _wordHuntWordWorldGroups) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
-                  child: Text(
-                    group.title,
-                    style: const TextStyle(
-                      color: Color(0xFFFF7AB6),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                for (final world in group.worlds)
-                  Builder(
-                    builder: (context) {
-                      final source = WordHuntWordSource._wordWorld(
-                        world,
-                        categories,
-                      );
-                      return _SheetOption(
-                        key: ValueKey('word-hunt-word-world-${world.key}'),
-                        title: world.name,
-                        selected: selectedSource == source,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onSourceSelected(source);
-                        },
-                      );
-                    },
-                  ),
-              ],
-            ],
-          ),
-        );
-      },
+  GameWordSource _fromSharedSource(game_picker.GameWordSource source) {
+    return GameWordSource._(
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
+      worldKey: source.key,
     );
   }
 }
@@ -874,203 +727,6 @@ class _SpeedChip extends StatelessWidget {
                   : const Color(0xFFF4F8FF),
               fontSize: 13,
               fontWeight: FontWeight.w900,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PickerActionButton extends StatelessWidget {
-  const _PickerActionButton({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0B1220),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF26354B)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF7DFFE3), size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFF4F8FF),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFB8C7D9),
-                        fontSize: 12,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFFFF7AB6)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WordHuntSheetFrame extends StatelessWidget {
-  const _WordHuntSheetFrame({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.84,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF050912),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFFF7AB6)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF7AB6).withValues(alpha: 0.14),
-                  blurRadius: 32,
-                  spreadRadius: -6,
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF26354B),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFFF4F8FF),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  child,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetOption extends StatelessWidget {
-  const _SheetOption({
-    super.key,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = selected
-        ? const Color(0xFFFF7AB6)
-        : const Color(0xFF26354B);
-    final fillColor = selected
-        ? const Color(0xFFFF7AB6).withValues(alpha: 0.16)
-        : const Color(0xFF0B1220);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: fillColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected
-                          ? const Color(0xFFFF7AB6)
-                          : const Color(0xFFF4F8FF),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Color(0xFFFF7AB6),
-                    size: 20,
-                  ),
-              ],
             ),
           ),
         ),
@@ -1422,9 +1078,9 @@ class _WordHuntMessageState extends StatelessWidget {
   final String title;
   final String text;
   final String buttonLabel;
-  final WordHuntWordSource? selectedSource;
+  final GameWordSource? selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordHuntWordSource>? onSourceSelected;
+  final ValueChanged<GameWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override

@@ -761,6 +761,40 @@ void main() {
     expect(overflows, isEmpty);
   });
 
+  testWidgets('word game subtitles can use a third line on compact cards', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: VocabScreen())),
+    );
+    await tester.pump();
+
+    final blitzSubtitle = tester.widget<Text>(
+      find.text('60 Sekunden, so viele Wörter wie möglich'),
+    );
+    final bossTile = find.byKey(const ValueKey('word-game-boss_fight'));
+    await tester.scrollUntilVisible(
+      bossTile,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    final bossSubtitle = tester.widget<Text>(
+      find.text('Besiege deine schwierigsten Wörter'),
+    );
+
+    expect(blitzSubtitle.maxLines, 3);
+    expect(blitzSubtitle.overflow, TextOverflow.ellipsis);
+    expect(bossSubtitle.maxLines, 3);
+    expect(bossSubtitle.overflow, TextOverflow.ellipsis);
+  });
+
   testWidgets('context challenge card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 2600);
     tester.view.devicePixelRatio = 1;
@@ -903,7 +937,11 @@ void main() {
 
     expect(find.byType(WordRecognitionGameScreen), findsOneWidget);
     expect(find.text('Wort erkennen'), findsWidgets);
-    expect(find.byKey(const ValueKey('word-recognition-hint')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('word-recognition-start-button')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('word-recognition-hint')), findsNothing);
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 

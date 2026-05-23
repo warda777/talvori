@@ -57,13 +57,23 @@ void main() {
 
   Future<void> tapByKey(WidgetTester tester, ValueKey<String> key) async {
     final finder = find.byKey(key);
-    await tester.ensureVisible(finder);
+    try {
+      await tester.scrollUntilVisible(finder, 120);
+    } catch (_) {
+      if (find.byType(ListView).evaluate().isNotEmpty) {
+        await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+        await tester.pumpAndSettle();
+      }
+      await tester.ensureVisible(finder);
+    }
     await tester.pump();
     await tester.tap(finder);
     await tester.pump();
   }
 
   Future<void> startFight(WidgetTester tester) async {
+    await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+    await tester.pumpAndSettle();
     await tapByKey(tester, const ValueKey('boss-fight-start-button'));
   }
 
@@ -123,7 +133,7 @@ void main() {
     expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge mindestens vier Wörter mit Übersetzung hinzu, um den Boss-Fight zu starten.',
+        'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um den Boss-Fight zu starten.',
       ),
       findsOneWidget,
     );

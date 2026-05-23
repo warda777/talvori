@@ -6,6 +6,9 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
+    as game_picker;
 
 class WordRecognitionGameScreen extends ConsumerStatefulWidget {
   const WordRecognitionGameScreen({super.key});
@@ -19,10 +22,15 @@ class WordRecognitionGameScreen extends ConsumerStatefulWidget {
 
 class _WordRecognitionGameScreenState
     extends ConsumerState<WordRecognitionGameScreen> {
-  WordRecognitionWordSource _selectedSource =
-      WordRecognitionWordSource.standard(LocalLearningSource.allWords);
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<WordRecognitionPair> _roundPairs = const <WordRecognitionPair>[];
   String _roundKey = '';
+  bool _hasStarted = false;
   int _currentQuestionIndex = 0;
   int _correctCount = 0;
   bool _isFinished = false;
@@ -73,12 +81,26 @@ class _WordRecognitionGameScreenState
               );
             }
 
+            if (!_hasStarted) {
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: () => setState(() => _startRound(pairs)),
+              );
+            }
+
             _ensureRound(pairs);
             if (_isFinished) {
               return _FinishedView(
                 correctCount: _correctCount,
                 totalCount: _roundPairs.length,
-                onRestart: () => setState(() => _restartRound(pairs)),
+                onRestart: () => setState(() => _startRound(pairs)),
                 onBack: () => Navigator.of(context).maybePop(),
               );
             }
@@ -97,9 +119,6 @@ class _WordRecognitionGameScreenState
               onAnswer: _answer,
               onReveal: _reveal,
               onNext: _nextQuestion,
-              selectedSource: _selectedSource,
-              categories: categories,
-              onSourceSelected: _selectSource,
             );
           },
         ),
@@ -115,12 +134,13 @@ class _WordRecognitionGameScreenState
     _restartRound(pairs);
   }
 
-  void _selectSource(WordRecognitionWordSource source) {
+  void _selectSource(GameWordSource source) {
     if (_selectedSource == source) return;
     setState(() {
       _selectedSource = source;
       _roundPairs = const <WordRecognitionPair>[];
       _roundKey = '';
+      _hasStarted = false;
       _currentQuestionIndex = 0;
       _correctCount = 0;
       _isFinished = false;
@@ -131,13 +151,51 @@ class _WordRecognitionGameScreenState
   }
 
   void _restartRound(List<WordRecognitionPair> pairs) {
-    _roundPairs = List<WordRecognitionPair>.unmodifiable(pairs.take(10));
+    _roundPairs = List<WordRecognitionPair>.unmodifiable(
+      pairs.take(_effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'word-recognition',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
     _currentQuestionIndex = 0;
     _correctCount = 0;
     _isFinished = false;
     _resolved = false;
     _selectedPairId = null;
     _feedback = null;
+  }
+
+  void _startRound(List<WordRecognitionPair> pairs) {
+    _hasStarted = true;
+    _roundKey =
+        '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
+    _restartRound(pairs);
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 4,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _roundPairs = const <WordRecognitionPair>[];
+      _roundKey = '';
+      _hasStarted = false;
+      _currentQuestionIndex = 0;
+      _correctCount = 0;
+      _isFinished = false;
+      _resolved = false;
+      _selectedPairId = null;
+      _feedback = null;
+    });
   }
 
   void _answer(WordRecognitionAnswer answer) {
@@ -299,32 +357,20 @@ class WordRecognitionAnswer {
   final bool isCorrect;
 }
 
-class WordRecognitionWordSource {
-  const WordRecognitionWordSource._({
+class GameWordSource {
+  const GameWordSource._({
     required this.label,
     required this.source,
     required this.categoryId,
     required this.worldKey,
   });
 
-  factory WordRecognitionWordSource.standard(LocalLearningSource source) {
-    return WordRecognitionWordSource._(
+  factory GameWordSource.standard(LocalLearningSource source) {
+    return GameWordSource._(
       label: source.label,
       source: source,
       categoryId: null,
       worldKey: null,
-    );
-  }
-
-  factory WordRecognitionWordSource._wordWorld(
-    _WordRecognitionWordWorld world,
-    List<LocalCategory> categories,
-  ) {
-    return WordRecognitionWordSource._(
-      label: 'Wortwelt: ${world.name}',
-      source: LocalLearningSource.allWords,
-      categoryId: world.resolveCategoryId(categories),
-      worldKey: world.key,
     );
   }
 
@@ -337,109 +383,107 @@ class WordRecognitionWordSource {
 
   @override
   bool operator ==(Object other) {
-    return other is WordRecognitionWordSource && other.key == key;
+    return other is GameWordSource && other.key == key;
   }
 
   @override
   int get hashCode => key.hashCode;
 }
 
-const _standardWordRecognitionSources = <LocalLearningSource>[
-  LocalLearningSource.allWords,
-  LocalLearningSource.myWords,
-  LocalLearningSource.favorites,
-  LocalLearningSource.myMix,
-];
-
-const _wordRecognitionWordWorldGroups = <_WordRecognitionWordWorldGroup>[
-  _WordRecognitionWordWorldGroup('Alltag & Leben', [
-    _WordRecognitionWordWorld(
-      key: 'health_fitness',
-      name: 'Health & Fitness',
-      localCategoryId: 'seed-category-basics',
-    ),
-    _WordRecognitionWordWorld(key: 'home_living', name: 'Home & Living'),
-    _WordRecognitionWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
-    _WordRecognitionWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
-    _WordRecognitionWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
-    _WordRecognitionWordWorld(key: 'productivity', name: 'Productivity'),
-  ]),
-  _WordRecognitionWordWorldGroup('Mensch & Gesellschaft', [
-    _WordRecognitionWordWorld(key: 'personality', name: 'Personality'),
-    _WordRecognitionWordWorld(key: 'feelings', name: 'Feelings'),
-    _WordRecognitionWordWorld(key: 'relationships', name: 'Relationships'),
-    _WordRecognitionWordWorld(key: 'thoughts', name: 'Thoughts'),
-    _WordRecognitionWordWorld(key: 'law_politics', name: 'Law & Politics'),
-    _WordRecognitionWordWorld(key: 'environment', name: 'Environment'),
-  ]),
-  _WordRecognitionWordWorldGroup('Wissen & Bildung', [
-    _WordRecognitionWordWorld(key: 'school_studies', name: 'School & Studies'),
-    _WordRecognitionWordWorld(key: 'science', name: 'Science'),
-    _WordRecognitionWordWorld(key: 'space', name: 'Space'),
-    _WordRecognitionWordWorld(key: 'nature', name: 'Nature'),
-    _WordRecognitionWordWorld(key: 'animals', name: 'Animals'),
-    _WordRecognitionWordWorld(
-      key: 'tech_innovation',
-      name: 'Tech & Innovation',
-    ),
-  ]),
-  _WordRecognitionWordWorldGroup('Medien & Freizeit', [
-    _WordRecognitionWordWorld(key: 'media_news', name: 'Media & News'),
-    _WordRecognitionWordWorld(key: 'sports', name: 'Sports'),
-    _WordRecognitionWordWorld(
-      key: 'travel',
-      name: 'Travel',
-      localCategoryId: 'seed-category-travel',
-    ),
-    _WordRecognitionWordWorld(key: 'gaming', name: 'Gaming'),
-    _WordRecognitionWordWorld(key: 'transport', name: 'Transport'),
-    _WordRecognitionWordWorld(
-      key: 'music_entertainment',
-      name: 'Music & Entertainment',
-    ),
-    _WordRecognitionWordWorld(key: 'art_literature', name: 'Art & Literature'),
-  ]),
-  _WordRecognitionWordWorldGroup('Beruf & Sprache', [
-    _WordRecognitionWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    _WordRecognitionWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    _WordRecognitionWordWorld(key: 'a1', name: 'A1'),
-    _WordRecognitionWordWorld(key: 'a2', name: 'A2'),
-    _WordRecognitionWordWorld(key: 'b1', name: 'B1'),
-    _WordRecognitionWordWorld(key: 'b2', name: 'B2'),
-    _WordRecognitionWordWorld(key: 'c1', name: 'C1'),
-    _WordRecognitionWordWorld(key: 'c2', name: 'C2'),
-  ]),
-];
-
-class _WordRecognitionWordWorldGroup {
-  const _WordRecognitionWordWorldGroup(this.title, this.worlds);
-
-  final String title;
-  final List<_WordRecognitionWordWorld> worlds;
-}
-
-class _WordRecognitionWordWorld {
-  const _WordRecognitionWordWorld({
-    required this.key,
-    required this.name,
-    this.localCategoryId,
+class _StartView extends StatelessWidget {
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
   });
 
-  final String key;
-  final String name;
-  final String? localCategoryId;
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
+  final VoidCallback onStart;
 
-  String resolveCategoryId(List<LocalCategory> categories) {
-    if (localCategoryId != null) return localCategoryId!;
-
-    final normalizedName = normalizeWordRecognitionText(name);
-    for (final category in categories) {
-      if (normalizeWordRecognitionText(category.name) == normalizedName) {
-        return category.id;
-      }
-    }
-
-    return key;
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: const Color(0xFFFF8A5B).withValues(alpha: 0.58),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF8A5B).withValues(alpha: 0.12),
+                blurRadius: 28,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.psychology_alt_rounded,
+                color: Color(0xFFFF8A5B),
+                size: 46,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Wort erkennen',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Wähle die passende Übersetzung.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 22),
+              _WordSourcePicker(
+                selectedSource: selectedSource,
+                categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
+              ),
+              const SizedBox(height: 22),
+              FilledButton(
+                key: const ValueKey('word-recognition-start-button'),
+                onPressed: onStart,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF8A5B),
+                  foregroundColor: const Color(0xFF041018),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                child: const Text('Starten'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -454,9 +498,6 @@ class _QuestionView extends StatelessWidget {
     required this.onAnswer,
     required this.onReveal,
     required this.onNext,
-    required this.selectedSource,
-    required this.categories,
-    required this.onSourceSelected,
   });
 
   final WordRecognitionQuestion question;
@@ -468,123 +509,117 @@ class _QuestionView extends StatelessWidget {
   final ValueChanged<WordRecognitionAnswer> onAnswer;
   final VoidCallback onReveal;
   final VoidCallback onNext;
-  final WordRecognitionWordSource selectedSource;
-  final List<LocalCategory> categories;
-  final ValueChanged<WordRecognitionWordSource> onSourceSelected;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-      children: [
-        _RoundHeader(currentIndex: currentIndex, totalCount: totalCount),
-        const SizedBox(height: 12),
-        _WordSourcePicker(
-          selectedSource: selectedSource,
-          categories: categories,
-          onSourceSelected: onSourceSelected,
-        ),
-        const SizedBox(height: 18),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0B1220),
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: const Color(0xFFFF8A5B).withValues(alpha: 0.56),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _RoundHeader(currentIndex: currentIndex, totalCount: totalCount),
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B1220),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: const Color(0xFFFF8A5B).withValues(alpha: 0.56),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF8A5B).withValues(alpha: 0.12),
+                  blurRadius: 28,
+                  spreadRadius: -4,
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFFF8A5B).withValues(alpha: 0.12),
-                blurRadius: 28,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Welches Wort passt?',
-                style: TextStyle(
-                  color: Color(0xFFF4F8FF),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Wähle ruhig und konzentriert die passende Übersetzung.',
-                style: TextStyle(
-                  color: Color(0xFFB8C7D9),
-                  height: 1.35,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _MeaningHint(text: question.hint),
-              const SizedBox(height: 14),
-              Container(
-                key: const ValueKey('word-recognition-prompt-card'),
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF050912),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF26354B)),
-                ),
-                child: Text(
-                  question.prompt,
-                  key: const ValueKey('word-recognition-prompt'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Welches Wort passt?',
+                  style: TextStyle(
                     color: Color(0xFFF4F8FF),
-                    fontSize: 30,
-                    height: 1.2,
+                    fontSize: 22,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              for (final answer in question.answers) ...[
-                _AnswerButton(
-                  key: ValueKey('word-recognition-answer-${answer.pairId}'),
-                  answer: answer,
-                  isResolved: resolved,
-                  isSelected: selectedPairId == answer.pairId,
-                  onTap: () => onAnswer(answer),
-                ),
-                const SizedBox(height: 10),
-              ],
-              if (feedback != null) ...[
-                const SizedBox(height: 4),
-                _FeedbackBanner(
-                  text: feedback!,
-                  isPositive: feedback == 'Richtig!',
-                ),
-              ],
-              if (resolved) ...[
-                const SizedBox(height: 14),
-                _CorrectAnswer(text: question.correctAnswerText),
-                const SizedBox(height: 18),
-                FilledButton(
-                  key: const ValueKey('word-recognition-next-button'),
-                  onPressed: onNext,
-                  style: _primaryButtonStyle(),
-                  child: const Text('Nächste Frage'),
-                ),
-              ] else ...[
                 const SizedBox(height: 8),
-                OutlinedButton(
-                  key: const ValueKey('word-recognition-reveal-button'),
-                  onPressed: onReveal,
-                  style: _secondaryButtonStyle(),
-                  child: const Text('Auflösen'),
+                const Text(
+                  'Wähle ruhig und konzentriert die passende Übersetzung.',
+                  style: TextStyle(
+                    color: Color(0xFFB8C7D9),
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+                const SizedBox(height: 20),
+                _MeaningHint(text: question.hint),
+                const SizedBox(height: 14),
+                Container(
+                  key: const ValueKey('word-recognition-prompt-card'),
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF050912),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF26354B)),
+                  ),
+                  child: Text(
+                    question.prompt,
+                    key: const ValueKey('word-recognition-prompt'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFF4F8FF),
+                      fontSize: 30,
+                      height: 1.2,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                for (final answer in question.answers) ...[
+                  _AnswerButton(
+                    key: ValueKey('word-recognition-answer-${answer.pairId}'),
+                    answer: answer,
+                    isResolved: resolved,
+                    isSelected: selectedPairId == answer.pairId,
+                    onTap: () => onAnswer(answer),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                if (feedback != null) ...[
+                  const SizedBox(height: 4),
+                  _FeedbackBanner(
+                    text: feedback!,
+                    isPositive: feedback == 'Richtig!',
+                  ),
+                ],
+                if (resolved) ...[
+                  const SizedBox(height: 14),
+                  _CorrectAnswer(text: question.correctAnswerText),
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    key: const ValueKey('word-recognition-next-button'),
+                    onPressed: onNext,
+                    style: _primaryButtonStyle(),
+                    child: const Text('Nächste Frage'),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton(
+                    key: const ValueKey('word-recognition-reveal-button'),
+                    onPressed: onReveal,
+                    style: _secondaryButtonStyle(),
+                    child: const Text('Auflösen'),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -640,343 +675,56 @@ class _WordSourcePicker extends StatelessWidget {
   const _WordSourcePicker({
     required this.selectedSource,
     required this.categories,
+    this.availableIds = const <String>[],
+    this.wordsPerRound = 10,
     required this.onSourceSelected,
+    this.onWordsPerRoundChanged,
   });
 
-  final WordRecognitionWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordRecognitionWordSource> onSourceSelected;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int>? onWordsPerRoundChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('word-recognition-source-picker'),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0B1220),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF26354B)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Du spielst mit',
-            style: TextStyle(
-              color: Color(0xFFB8C7D9),
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            selectedSource.label,
-            key: const ValueKey('word-recognition-selected-source-label'),
-            style: const TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontSize: 18,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _PickerActionButton(
-            key: const ValueKey('word-recognition-change-source-button'),
-            icon: Icons.folder_copy_rounded,
-            title: 'Wortquelle ändern',
-            subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
-            onTap: () => _showSourceSheet(context),
-          ),
-          const SizedBox(height: 10),
-          _PickerActionButton(
-            key: const ValueKey('word-recognition-select-world-button'),
-            icon: Icons.public_rounded,
-            title: 'Wortwelt auswählen',
-            subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
-            onTap: () => _showWordWorldSheet(context),
-          ),
-        ],
-      ),
+    return game_picker.GameWordSourcePicker(
+      keyPrefix: 'word-recognition',
+      selectedSource: _toSharedSource(selectedSource),
+      categories: categories,
+      availableIds: availableIds,
+      wordsPerRound: wordsPerRound,
+      minWordsPerRound: 4,
+      accentColor: const Color(0xFFB56DFF),
+      secondaryAccentColor: const Color(0xFF5DDCFF),
+      onWordsPerRoundChanged: onWordsPerRoundChanged,
+      onSourceSelected: (source) => onSourceSelected(_fromSharedSource(source)),
     );
   }
 
-  Future<void> _showSourceSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordRecognitionSheetFrame(
-          title: 'Wortquelle ändern',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final source in _standardWordRecognitionSources)
-                _SheetOption(
-                  key: ValueKey('word-recognition-source-${source.id}'),
-                  title: source.label,
-                  selected:
-                      selectedSource ==
-                      WordRecognitionWordSource.standard(source),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onSourceSelected(
-                      WordRecognitionWordSource.standard(source),
-                    );
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+  game_picker.GameWordSource _toSharedSource(GameWordSource source) {
+    if (source.categoryId == null) {
+      return game_picker.GameWordSource.standard(source.source);
+    }
+    return game_picker.GameWordSource.custom(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
     );
   }
 
-  Future<void> _showWordWorldSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordRecognitionSheetFrame(
-          title: 'Wortwelt auswählen',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final group in _wordRecognitionWordWorldGroups) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
-                  child: Text(
-                    group.title,
-                    style: const TextStyle(
-                      color: Color(0xFFFF8A5B),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                for (final world in group.worlds)
-                  Builder(
-                    builder: (context) {
-                      final source = WordRecognitionWordSource._wordWorld(
-                        world,
-                        categories,
-                      );
-                      return _SheetOption(
-                        key: ValueKey(
-                          'word-recognition-word-world-${world.key}',
-                        ),
-                        title: world.name,
-                        selected: selectedSource == source,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onSourceSelected(source);
-                        },
-                      );
-                    },
-                  ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _PickerActionButton extends StatelessWidget {
-  const _PickerActionButton({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: const Color(0xFF050912),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF26354B)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF7DFFE3), size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFF4F8FF),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFB8C7D9),
-                        fontSize: 12,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFFFF8A5B)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WordRecognitionSheetFrame extends StatelessWidget {
-  const _WordRecognitionSheetFrame({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.84,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF050912),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFFF8A5B)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF8A5B).withValues(alpha: 0.14),
-                  blurRadius: 32,
-                  spreadRadius: -6,
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF26354B),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFFF4F8FF),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  child,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetOption extends StatelessWidget {
-  const _SheetOption({
-    super.key,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = selected
-        ? const Color(0xFFFF8A5B)
-        : const Color(0xFF26354B);
-    final fillColor = selected
-        ? const Color(0xFFFF8A5B).withValues(alpha: 0.16)
-        : const Color(0xFF0B1220);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: fillColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected
-                          ? const Color(0xFFFF8A5B)
-                          : const Color(0xFFF4F8FF),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Color(0xFFFF8A5B),
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
+  GameWordSource _fromSharedSource(game_picker.GameWordSource source) {
+    if (source.categoryId == null) {
+      return GameWordSource.standard(source.source);
+    }
+    return GameWordSource._(
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
+      worldKey: source.key,
     );
   }
 }
@@ -1178,6 +926,7 @@ class _FinishedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(20, 40, 20, 28),
       children: [
         Container(
@@ -1261,9 +1010,9 @@ class _WordRecognitionMessageState extends StatelessWidget {
   final String title;
   final String text;
   final String buttonLabel;
-  final WordRecognitionWordSource? selectedSource;
+  final GameWordSource? selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordRecognitionWordSource>? onSourceSelected;
+  final ValueChanged<GameWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override

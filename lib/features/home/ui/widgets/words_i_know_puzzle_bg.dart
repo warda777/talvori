@@ -14,8 +14,8 @@ class WordsIKnowPuzzleBackground extends StatefulWidget {
       _WordsIKnowPuzzleBackgroundState();
 }
 
-class _WordsIKnowPuzzleBackgroundState
-    extends State<WordsIKnowPuzzleBackground> with SingleTickerProviderStateMixin {
+class _WordsIKnowPuzzleBackgroundState extends State<WordsIKnowPuzzleBackground>
+    with SingleTickerProviderStateMixin {
   static const _gold = Color(0xFFFFC66A); // Gold wie bei "My words"
   late final AnimationController _c = AnimationController(
     vsync: this,
@@ -42,21 +42,14 @@ class _WordsIKnowPuzzleBackgroundState
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: const [
-                    Color(0xFF020203),
-                    Color(0xFF000000),
-                  ],
+                  colors: const [Color(0xFF020203), Color(0xFF000000)],
                 ),
               ),
             ),
             // leichte Abdunklung, damit Glows nicht ausgrauen
-            Container(
-              color: Colors.black.withOpacity(0.35),
-            ),
+            Container(color: Colors.black.withOpacity(0.35)),
             Positioned.fill(
-              child: CustomPaint(
-                painter: _GlowBackdropPainter(color: _gold),
-              ),
+              child: CustomPaint(painter: _GlowBackdropPainter(color: _gold)),
             ),
             // Puzzle-Ebene
             Positioned.fill(
@@ -156,7 +149,9 @@ class _PuzzlePainter extends CustomPainter {
         // BL: rechts=tab, oben=hole
         // BR: links=hole, oben=hole
         top: (i == 2 || i == 3) ? _Edge.hole : _Edge.flat,
-        right: (i == 0 || i == 2) ? _Edge.tab : ((i == 1 || i == 3) ? _Edge.flat : _Edge.flat),
+        right: (i == 0 || i == 2)
+            ? _Edge.tab
+            : ((i == 1 || i == 3) ? _Edge.flat : _Edge.flat),
         bottom: (i == 0 || i == 1) ? _Edge.tab : _Edge.flat,
         left: (i == 1 || i == 3) ? _Edge.hole : _Edge.flat,
         radius: 18,
@@ -224,11 +219,7 @@ class _PuzzlePainter extends CustomPainter {
         p.lineTo(to.dx, to.dy);
         return p;
       }
-      final dir = (isHorizontal ? (to.dx > from.dx) : (to.dy > from.dy)) ? 1.0 : -1.0;
-      final mid = Offset(
-        (from.dx + to.dx) / 2,
-        (from.dy + to.dy) / 2,
-      );
+      final mid = Offset((from.dx + to.dx) / 2, (from.dy + to.dy) / 2);
       final out = tabSize * 0.65;
       final knob = (kind == _Edge.tab) ? out : -out;
 
@@ -236,28 +227,40 @@ class _PuzzlePainter extends CustomPainter {
         // --- horizontaler Rand: Welle nach oben/unten ---
         p.lineTo(mid.dx - tabSize * 0.45, mid.dy);
         p.cubicTo(
-          mid.dx - tabSize * 0.25, mid.dy,
-          mid.dx - tabSize * 0.25, mid.dy + knob,
-          mid.dx,                 mid.dy + knob,
+          mid.dx - tabSize * 0.25,
+          mid.dy,
+          mid.dx - tabSize * 0.25,
+          mid.dy + knob,
+          mid.dx,
+          mid.dy + knob,
         );
         p.cubicTo(
-          mid.dx + tabSize * 0.25, mid.dy + knob,
-          mid.dx + tabSize * 0.25, mid.dy,
-          mid.dx + tabSize * 0.45, mid.dy,
+          mid.dx + tabSize * 0.25,
+          mid.dy + knob,
+          mid.dx + tabSize * 0.25,
+          mid.dy,
+          mid.dx + tabSize * 0.45,
+          mid.dy,
         );
         p.lineTo(to.dx, to.dy);
       } else {
         // --- vertikaler Rand: Welle nach links/rechts ---
         p.lineTo(mid.dx, mid.dy - tabSize * 0.45);
         p.cubicTo(
-          mid.dx, mid.dy - tabSize * 0.25,
-          mid.dx + knob, mid.dy - tabSize * 0.25,
-          mid.dx + knob, mid.dy,
+          mid.dx,
+          mid.dy - tabSize * 0.25,
+          mid.dx + knob,
+          mid.dy - tabSize * 0.25,
+          mid.dx + knob,
+          mid.dy,
         );
         p.cubicTo(
-          mid.dx + knob, mid.dy + tabSize * 0.25,
-          mid.dx,        mid.dy + tabSize * 0.25,
-          mid.dx,        mid.dy + tabSize * 0.45,
+          mid.dx + knob,
+          mid.dy + tabSize * 0.25,
+          mid.dx,
+          mid.dy + tabSize * 0.25,
+          mid.dx,
+          mid.dy + tabSize * 0.45,
         );
         p.lineTo(to.dx, to.dy);
       }
@@ -267,16 +270,15 @@ class _PuzzlePainter extends CustomPainter {
     final path = Path();
 
     // Start oben links mit Rundung
-    path.addRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(r)));
+    path.addRRect(
+      RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(r)),
+    );
     // Wir ersetzen die geraden Kanten mit Tabs/Holes:
     // Vorgehen: Kontur neu aufbauen
     final p = Path();
 
     // Top edge
-    p.addPath(
-      edgePath(Offset(r, 0), Offset(w - r, 0), top, true),
-      Offset.zero,
-    );
+    p.addPath(edgePath(Offset(r, 0), Offset(w - r, 0), top, true), Offset.zero);
     // Right edge
     p.addPath(
       edgePath(Offset(w, r), Offset(w, h - r), right, false),
@@ -300,9 +302,13 @@ class _PuzzlePainter extends CustomPainter {
       ..close();
 
     // Vereinen mit unsichtbarem RRect (für runde Ecken an Segmentenden)
-    return Path.combine(PathOperation.union,
-        Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(r))),
-        rounded);
+    return Path.combine(
+      PathOperation.union,
+      Path()..addRRect(
+        RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(r)),
+      ),
+      rounded,
+    );
   }
 
   double _lerp(double a, double b, double t) => a + (b - a) * t;

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
 class BossFightGameScreen extends ConsumerStatefulWidget {
   const BossFightGameScreen({super.key});
@@ -17,6 +21,12 @@ class BossFightGameScreen extends ConsumerStatefulWidget {
 class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
   final TextEditingController _answerController = TextEditingController();
   final FocusNode _answerFocusNode = FocusNode();
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<BossFightPair> _roundPairs = const <BossFightPair>[];
   String _roundKey = '';
   int _questionIndex = 0;
@@ -38,9 +48,9 @@ class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -63,18 +73,25 @@ class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            const categories = <LocalCategory>[];
             final pairs = buildBossFightPairs(words);
             if (pairs.length < 4) {
               return _BossMessageState(
                 title: 'Noch nicht genug Wörter',
-                text:
-                    'Füge mindestens vier Wörter mit Übersetzung hinzu, um den Boss-Fight zu starten.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um den Boss-Fight zu starten.'
+                    : 'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um den Boss-Fight zu starten.',
                 buttonLabel: 'Zurück',
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
 
-            _ensureRound(pairs);
+            final sourceKey =
+                '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
+            if (_roundKey != sourceKey) {
+              _roundKey = sourceKey;
+              _restartRound(pairs);
+            }
             if (_endState != null) {
               return _FinishedView(
                 endState: _endState!,
@@ -84,7 +101,17 @@ class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
               );
             }
             if (!_started) {
-              return _StartView(onStart: _startFight);
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: _startFight,
+              );
             }
 
             final question = buildBossFightQuestion(
@@ -112,15 +139,9 @@ class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
     );
   }
 
-  void _ensureRound(List<BossFightPair> pairs) {
-    final nextKey = pairs.map((pair) => pair.id).join('|');
-    if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
-    _roundKey = nextKey;
-    _restartRound(pairs);
-  }
-
-  void _restartRound(List<BossFightPair> pairs) {
-    _roundPairs = List<BossFightPair>.unmodifiable(pairs.take(8));
+  void _resetForSelection(String sourceKey) {
+    _roundKey = sourceKey;
+    _roundPairs = const <BossFightPair>[];
     _questionIndex = 0;
     _bossHp = bossFightMaxHp;
     _energy = bossFightMaxEnergy;
@@ -131,6 +152,51 @@ class _BossFightGameScreenState extends ConsumerState<BossFightGameScreen> {
     _feedback = null;
     _selectedAnswerId = null;
     _answerController.clear();
+  }
+
+  void _selectSource(GameWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _selectedSource = source;
+      _resetForSelection('');
+    });
+  }
+
+  void _restartRound(List<BossFightPair> pairs) {
+    _roundPairs = List<BossFightPair>.unmodifiable(
+      pairs.take(_effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'boss-fight',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
+    _questionIndex = 0;
+    _bossHp = bossFightMaxHp;
+    _energy = bossFightMaxEnergy;
+    _hits = 0;
+    _started = false;
+    _resolved = false;
+    _endState = null;
+    _feedback = null;
+    _selectedAnswerId = null;
+    _answerController.clear();
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 4,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _startFight() {
@@ -382,8 +448,22 @@ class BossFightAnswer {
 }
 
 class _StartView extends StatelessWidget {
-  const _StartView({required this.onStart});
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
+  });
 
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final VoidCallback onStart;
 
   @override
@@ -431,6 +511,19 @@ class _StartView extends StatelessWidget {
                   height: 1.35,
                   fontWeight: FontWeight.w800,
                 ),
+              ),
+              const SizedBox(height: 20),
+              GameWordSourcePicker(
+                keyPrefix: 'boss-fight',
+                selectedSource: selectedSource,
+                categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
+                minWordsPerRound: 4,
+                accentColor: const Color(0xFFFF5F7A),
+                secondaryAccentColor: const Color(0xFF7DFFE3),
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
               ),
               const SizedBox(height: 22),
               FilledButton(

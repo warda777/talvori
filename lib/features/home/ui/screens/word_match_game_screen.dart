@@ -9,6 +9,9 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
+    as game_picker;
 
 class WordMatchGameScreen extends ConsumerStatefulWidget {
   const WordMatchGameScreen({super.key});
@@ -21,10 +24,13 @@ class WordMatchGameScreen extends ConsumerStatefulWidget {
 }
 
 class _WordMatchGameScreenState extends ConsumerState<WordMatchGameScreen> {
-  WordMatchWordSource _selectedSource = WordMatchWordSource.standard(
+  GameWordSource _selectedSource = GameWordSource.standard(
     LocalLearningSource.allWords,
   );
   final Random _random = Random();
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<WordMatchPair> _roundPairs = const <WordMatchPair>[];
   List<String> _visibleIds = const <String>[];
   List<String> _translationIds = const <String>[];
@@ -92,8 +98,13 @@ class _WordMatchGameScreenState extends ConsumerState<WordMatchGameScreen> {
               return _StartView(
                 selectedSource: _selectedSource,
                 categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
                 soundEnabled: _soundEnabled,
                 onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
                 onToggleSound: () {
                   setState(() => _soundEnabled = !_soundEnabled);
                 },
@@ -158,7 +169,7 @@ class _WordMatchGameScreenState extends ConsumerState<WordMatchGameScreen> {
     _feedback = null;
   }
 
-  void _selectSource(WordMatchWordSource source) {
+  void _selectSource(GameWordSource source) {
     if (_selectedSource == source) return;
     setState(() {
       _selectedSource = source;
@@ -168,12 +179,35 @@ class _WordMatchGameScreenState extends ConsumerState<WordMatchGameScreen> {
 
   void _startNewSet(List<WordMatchPair> pairs) {
     final selected = pairs.length > 16 ? ([...pairs]..shuffle(_random)) : pairs;
-    _roundPairs = List<WordMatchPair>.unmodifiable(selected.take(16));
+    _roundPairs = List<WordMatchPair>.unmodifiable(
+      selected.take(_effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'word-match',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
     _beginCurrentSet();
   }
 
   void _replaySameSet() {
     _beginCurrentSet();
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 6,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _beginCurrentSet() {
@@ -302,31 +336,19 @@ class WordMatchDragData {
 
 enum WordMatchCardSide { term, translation }
 
-class WordMatchWordSource {
-  const WordMatchWordSource._({
+class GameWordSource {
+  const GameWordSource._({
     required this.key,
     required this.label,
     required this.source,
     this.categoryId,
   });
 
-  factory WordMatchWordSource.standard(LocalLearningSource source) {
-    return WordMatchWordSource._(
+  factory GameWordSource.standard(LocalLearningSource source) {
+    return GameWordSource._(
       key: 'source:${source.id}',
       label: source.label,
       source: source,
-    );
-  }
-
-  factory WordMatchWordSource._wordWorld(
-    _WordMatchWordWorld world,
-    List<LocalCategory> categories,
-  ) {
-    return WordMatchWordSource._(
-      key: 'world:${world.key}',
-      label: 'Wortwelt: ${world.name}',
-      source: LocalLearningSource.allWords,
-      categoryId: world.resolveCategoryId(categories),
     );
   }
 
@@ -337,120 +359,33 @@ class WordMatchWordSource {
 
   @override
   bool operator ==(Object other) {
-    return other is WordMatchWordSource && other.key == key;
+    return other is GameWordSource && other.key == key;
   }
 
   @override
   int get hashCode => key.hashCode;
 }
 
-const _standardWordMatchSources = <LocalLearningSource>[
-  LocalLearningSource.allWords,
-  LocalLearningSource.myWords,
-  LocalLearningSource.favorites,
-  LocalLearningSource.myMix,
-];
-
-const _wordMatchWordWorldGroups = <_WordMatchWordWorldGroup>[
-  _WordMatchWordWorldGroup('Alltag & Leben', [
-    _WordMatchWordWorld(
-      key: 'health_fitness',
-      name: 'Health & Fitness',
-      localCategoryId: 'seed-category-basics',
-    ),
-    _WordMatchWordWorld(key: 'home_living', name: 'Home & Living'),
-    _WordMatchWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
-    _WordMatchWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
-    _WordMatchWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
-    _WordMatchWordWorld(key: 'productivity', name: 'Productivity'),
-  ]),
-  _WordMatchWordWorldGroup('Mensch & Gesellschaft', [
-    _WordMatchWordWorld(key: 'personality', name: 'Personality'),
-    _WordMatchWordWorld(key: 'feelings', name: 'Feelings'),
-    _WordMatchWordWorld(key: 'relationships', name: 'Relationships'),
-    _WordMatchWordWorld(key: 'thoughts', name: 'Thoughts'),
-    _WordMatchWordWorld(key: 'law_politics', name: 'Law & Politics'),
-    _WordMatchWordWorld(key: 'environment', name: 'Environment'),
-  ]),
-  _WordMatchWordWorldGroup('Wissen & Bildung', [
-    _WordMatchWordWorld(key: 'school_studies', name: 'School & Studies'),
-    _WordMatchWordWorld(key: 'science', name: 'Science'),
-    _WordMatchWordWorld(key: 'space', name: 'Space'),
-    _WordMatchWordWorld(key: 'nature', name: 'Nature'),
-    _WordMatchWordWorld(key: 'animals', name: 'Animals'),
-    _WordMatchWordWorld(key: 'tech_innovation', name: 'Tech & Innovation'),
-  ]),
-  _WordMatchWordWorldGroup('Medien & Freizeit', [
-    _WordMatchWordWorld(key: 'media_news', name: 'Media & News'),
-    _WordMatchWordWorld(key: 'sports', name: 'Sports'),
-    _WordMatchWordWorld(
-      key: 'travel',
-      name: 'Travel',
-      localCategoryId: 'seed-category-travel',
-    ),
-    _WordMatchWordWorld(key: 'gaming', name: 'Gaming'),
-    _WordMatchWordWorld(key: 'transport', name: 'Transport'),
-    _WordMatchWordWorld(
-      key: 'music_entertainment',
-      name: 'Music & Entertainment',
-    ),
-    _WordMatchWordWorld(key: 'art_literature', name: 'Art & Literature'),
-  ]),
-  _WordMatchWordWorldGroup('Beruf & Sprache', [
-    _WordMatchWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    _WordMatchWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    _WordMatchWordWorld(key: 'a1', name: 'A1'),
-    _WordMatchWordWorld(key: 'a2', name: 'A2'),
-    _WordMatchWordWorld(key: 'b1', name: 'B1'),
-    _WordMatchWordWorld(key: 'b2', name: 'B2'),
-    _WordMatchWordWorld(key: 'c1', name: 'C1'),
-    _WordMatchWordWorld(key: 'c2', name: 'C2'),
-  ]),
-];
-
-class _WordMatchWordWorldGroup {
-  const _WordMatchWordWorldGroup(this.title, this.worlds);
-
-  final String title;
-  final List<_WordMatchWordWorld> worlds;
-}
-
-class _WordMatchWordWorld {
-  const _WordMatchWordWorld({
-    required this.key,
-    required this.name,
-    this.localCategoryId,
-  });
-
-  final String key;
-  final String name;
-  final String? localCategoryId;
-
-  String resolveCategoryId(List<LocalCategory> categories) {
-    final normalizedName = normalizeWordMatchText(name);
-    for (final category in categories) {
-      if (normalizeWordMatchText(category.name) == normalizedName) {
-        return category.id;
-      }
-    }
-    return localCategoryId ?? 'word-world-$key';
-  }
-}
-
 class _StartView extends StatelessWidget {
   const _StartView({
     required this.selectedSource,
     required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
     required this.soundEnabled,
     required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
     required this.onToggleSound,
     required this.onStart,
   });
 
-  final WordMatchWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
   final bool soundEnabled;
-  final ValueChanged<WordMatchWordSource> onSourceSelected;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final VoidCallback onToggleSound;
   final VoidCallback onStart;
 
@@ -501,7 +436,10 @@ class _StartView extends StatelessWidget {
               _WordSourcePicker(
                 selectedSource: selectedSource,
                 categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
                 onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
               ),
               const SizedBox(height: 14),
               _SoundToggle(soundEnabled: soundEnabled, onToggle: onToggleSound),
@@ -537,7 +475,7 @@ class _MatchPlayView extends StatelessWidget {
   final List<WordMatchPair> translationPairs;
   final int doneCount;
   final int totalCount;
-  final WordMatchWordSource selectedSource;
+  final GameWordSource selectedSource;
   final bool soundEnabled;
   final String? feedback;
   final VoidCallback onDragStarted;
@@ -828,7 +766,7 @@ class _ProgressHeader extends StatelessWidget {
 
   final int doneCount;
   final int totalCount;
-  final WordMatchWordSource selectedSource;
+  final GameWordSource selectedSource;
   final bool soundEnabled;
 
   @override
@@ -887,141 +825,50 @@ class _WordSourcePicker extends StatelessWidget {
   const _WordSourcePicker({
     required this.selectedSource,
     required this.categories,
+    this.availableIds = const <String>[],
+    this.wordsPerRound = 10,
     required this.onSourceSelected,
+    this.onWordsPerRoundChanged,
   });
 
-  final WordMatchWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordMatchWordSource> onSourceSelected;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int>? onWordsPerRoundChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('word-match-source-picker'),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF050912),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF26354B)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Du spielst mit',
-            style: TextStyle(
-              color: Color(0xFFB8C7D9),
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            selectedSource.label,
-            key: const ValueKey('word-match-selected-source-label'),
-            style: const TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontSize: 18,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _PickerActionButton(
-            key: const ValueKey('word-match-change-source-button'),
-            icon: Icons.folder_copy_rounded,
-            title: 'Wortquelle ändern',
-            subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
-            onTap: () => _showSourceSheet(context),
-          ),
-          const SizedBox(height: 10),
-          _PickerActionButton(
-            key: const ValueKey('word-match-select-world-button'),
-            icon: Icons.public_rounded,
-            title: 'Wortwelt auswählen',
-            subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
-            onTap: () => _showWordWorldSheet(context),
-          ),
-        ],
-      ),
+    return game_picker.GameWordSourcePicker(
+      keyPrefix: 'word-match',
+      selectedSource: _toSharedSource(selectedSource),
+      categories: categories,
+      availableIds: availableIds,
+      wordsPerRound: wordsPerRound,
+      minWordsPerRound: 6,
+      accentColor: const Color(0xFF7DFFE3),
+      secondaryAccentColor: const Color(0xFFFFD166),
+      onWordsPerRoundChanged: onWordsPerRoundChanged,
+      onSourceSelected: (source) => onSourceSelected(_fromSharedSource(source)),
     );
   }
 
-  Future<void> _showSourceSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordMatchSheetFrame(
-          title: 'Wortquelle ändern',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final source in _standardWordMatchSources)
-                _SheetOption(
-                  key: ValueKey('word-match-source-${source.id}'),
-                  title: source.label,
-                  selected:
-                      selectedSource == WordMatchWordSource.standard(source),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onSourceSelected(WordMatchWordSource.standard(source));
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+  game_picker.GameWordSource _toSharedSource(GameWordSource source) {
+    return game_picker.GameWordSource.custom(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
     );
   }
 
-  Future<void> _showWordWorldSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _WordMatchSheetFrame(
-          title: 'Wortwelt auswählen',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final group in _wordMatchWordWorldGroups) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
-                  child: Text(
-                    group.title,
-                    style: const TextStyle(
-                      color: Color(0xFF5DDCFF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                for (final world in group.worlds)
-                  Builder(
-                    builder: (context) {
-                      final source = WordMatchWordSource._wordWorld(
-                        world,
-                        categories,
-                      );
-                      return _SheetOption(
-                        key: ValueKey('word-match-word-world-${world.key}'),
-                        title: world.name,
-                        selected: selectedSource == source,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onSourceSelected(source);
-                        },
-                      );
-                    },
-                  ),
-              ],
-            ],
-          ),
-        );
-      },
+  GameWordSource _fromSharedSource(game_picker.GameWordSource source) {
+    return GameWordSource._(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
     );
   }
 }
@@ -1040,158 +887,6 @@ class _SoundToggle extends StatelessWidget {
       style: _secondaryButtonStyle(),
       icon: Icon(soundEnabled ? Icons.volume_up_rounded : Icons.volume_off),
       label: Text(soundEnabled ? 'Sound: An' : 'Sound: Aus'),
-    );
-  }
-}
-
-class _PickerActionButton extends StatelessWidget {
-  const _PickerActionButton({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: _secondaryButtonStyle(),
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WordMatchSheetFrame extends StatelessWidget {
-  const _WordMatchSheetFrame({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B1220),
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: const Color(0xFF5DDCFF)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Color(0xFFF4F8FF),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(child: SingleChildScrollView(child: child)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetOption extends StatelessWidget {
-  const _SheetOption({
-    super.key,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: selected
-                  ? const Color(0xFF102837)
-                  : const Color(0xFF050912),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: selected
-                    ? const Color(0xFF7DFFE3)
-                    : const Color(0xFF26354B),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFFF4F8FF),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Color(0xFF7DFFE3),
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1355,9 +1050,9 @@ class _WordMatchMessageState extends StatelessWidget {
   final String text;
   final String buttonLabel;
   final VoidCallback onPressed;
-  final WordMatchWordSource? selectedSource;
+  final GameWordSource? selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<WordMatchWordSource>? onSourceSelected;
+  final ValueChanged<GameWordSource>? onSourceSelected;
 
   @override
   Widget build(BuildContext context) {

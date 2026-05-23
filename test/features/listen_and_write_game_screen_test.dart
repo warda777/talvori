@@ -69,6 +69,13 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
+    final startButton = find.byKey(const ValueKey('listen-write-start-button'));
+    if (startButton.evaluate().isNotEmpty) {
+      await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+      await tester.pumpAndSettle();
+      await tester.tap(startButton);
+      await tester.pump();
+    }
   }
 
   test('normalizes answers for simple comparison', () {
@@ -83,7 +90,7 @@ void main() {
     expect(find.text('Noch keine Wörter verfügbar'), findsOneWidget);
     expect(
       find.text(
-        'Füge zuerst eigene Wörter hinzu, um Hör & Schreib zu spielen.',
+        'Diese Wortquelle braucht Wörter mit einem abfragbaren Begriff, um Hör & Schreib zu spielen.',
       ),
       findsOneWidget,
     );

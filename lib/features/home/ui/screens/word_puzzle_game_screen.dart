@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
+    as game_picker;
 
 class WordPuzzleGameScreen extends ConsumerStatefulWidget {
   const WordPuzzleGameScreen({super.key});
@@ -15,12 +21,19 @@ class WordPuzzleGameScreen extends ConsumerStatefulWidget {
 }
 
 class _WordPuzzleGameScreenState extends ConsumerState<WordPuzzleGameScreen> {
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<LocalWord> _roundWords = const <LocalWord>[];
   List<PuzzleLetter> _letters = const <PuzzleLetter>[];
   List<int> _selectedIndexes = const <int>[];
   String _roundKey = '';
   int _currentIndex = 0;
   int _correctCount = 0;
+  bool _hasStarted = false;
   bool _answeredCorrectly = false;
   bool _revealed = false;
   bool _isFinished = false;
@@ -28,9 +41,10 @@ class _WordPuzzleGameScreenState extends ConsumerState<WordPuzzleGameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final categoriesAsync = ref.watch(localCategoriesProvider);
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       backgroundColor: const Color(0xFF050912),
@@ -52,18 +66,42 @@ class _WordPuzzleGameScreenState extends ConsumerState<WordPuzzleGameScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            final categories = categoriesAsync.value ?? const <LocalCategory>[];
             final playableWords = buildWordPuzzleRoundWords(words);
             if (playableWords.isEmpty) {
               return _WordPuzzleMessageState(
                 title: 'Noch keine passenden Wörter',
-                text:
-                    'Füge Wörter mit mindestens drei Buchstaben hinzu, um Wort-Puzzle zu spielen.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht Wörter mit mindestens drei Buchstaben, um Wort-Puzzle zu spielen.'
+                    : 'Diese Wortwelt braucht Wörter mit mindestens drei Buchstaben, um Wort-Puzzle zu spielen.',
                 buttonLabel: 'Zurück',
+                selectedSource: _selectedSource,
+                categories: categories,
+                onSourceSelected: _selectSource,
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
 
-            _ensureRound(playableWords);
+            final sourceKey =
+                '${_selectedSource.key}:${playableWords.map((word) => word.id).join('|')}';
+            if (_roundKey != sourceKey) {
+              _resetForSelection(sourceKey);
+            }
+
+            if (!_hasStarted) {
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                wordsPerRound: _effectiveWordsPerRound(playableWords.length),
+                availableIds: playableWords
+                    .map((word) => word.id)
+                    .toList(growable: false),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: () => setState(() => _restartRound(playableWords)),
+              );
+            }
+
             if (_isFinished) {
               return _FinishedView(
                 correctCount: _correctCount,
@@ -96,23 +134,65 @@ class _WordPuzzleGameScreenState extends ConsumerState<WordPuzzleGameScreen> {
     );
   }
 
-  void _ensureRound(List<LocalWord> playableWords) {
-    final nextKey = playableWords.map((word) => word.id).join('|');
-    if (_roundKey == nextKey && _roundWords.isNotEmpty) return;
-    _roundKey = nextKey;
-    _restartRound(playableWords);
+  void _resetForSelection(String sourceKey) {
+    _roundKey = sourceKey;
+    _roundWords = const <LocalWord>[];
+    _letters = const <PuzzleLetter>[];
+    _selectedIndexes = const <int>[];
+    _currentIndex = 0;
+    _correctCount = 0;
+    _hasStarted = false;
+    _answeredCorrectly = false;
+    _revealed = false;
+    _isFinished = false;
+    _feedback = null;
+  }
+
+  void _selectSource(GameWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _selectedSource = source;
+      _resetForSelection('');
+    });
   }
 
   void _restartRound(List<LocalWord> playableWords) {
-    _roundWords = List<LocalWord>.unmodifiable(playableWords.take(10));
+    _roundWords = selectWordGameRoundItemsByCount<LocalWord>(
+      items: playableWords,
+      idOf: (word) => word.id,
+      playedIds: const <String>{},
+      wordsPerRound: _effectiveWordsPerRound(playableWords.length),
+    );
+    _progressRepository.markPlayedIds(
+      'word-puzzle',
+      _selectedSource.key,
+      _roundWords.map((word) => word.id),
+    );
     _currentIndex = 0;
     _correctCount = 0;
+    _hasStarted = true;
     _answeredCorrectly = false;
     _revealed = false;
     _isFinished = false;
     _feedback = null;
     _selectedIndexes = const <int>[];
     _letters = buildWordPuzzleLetters(_roundWords.first.term);
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 1,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _selectLetter(int index) {
@@ -193,7 +273,6 @@ List<LocalWord> buildWordPuzzleRoundWords(List<LocalWord> words) {
     final normalized = normalizeWordPuzzleAnswer(term);
     if (normalized.isEmpty || !seen.add(normalized)) continue;
     playable.add(word);
-    if (playable.length == 10) break;
   }
   return List<LocalWord>.unmodifiable(playable);
 }
@@ -240,6 +319,124 @@ class PuzzleLetter {
 
   final int index;
   final String char;
+}
+
+class GameWordSource {
+  const GameWordSource._({
+    required this.key,
+    required this.label,
+    required this.source,
+    this.categoryId,
+  });
+
+  factory GameWordSource.standard(LocalLearningSource source) {
+    return GameWordSource._(
+      key: 'source:${source.id}',
+      label: source.label,
+      source: source,
+    );
+  }
+
+  final String key;
+  final String label;
+  final LocalLearningSource source;
+  final String? categoryId;
+
+  @override
+  bool operator ==(Object other) {
+    return other is GameWordSource && other.key == key;
+  }
+
+  @override
+  int get hashCode => key.hashCode;
+}
+
+class _StartView extends StatelessWidget {
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.wordsPerRound,
+    required this.availableIds,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
+  });
+
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final int wordsPerRound;
+  final List<String> availableIds;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFF7DFFE3)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7DFFE3).withValues(alpha: 0.12),
+                blurRadius: 28,
+                spreadRadius: -5,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.extension_rounded,
+                color: Color(0xFF7DFFE3),
+                size: 44,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Bereit fürs Wort-Puzzle?',
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Sortiere Buchstaben zum richtigen Wort.',
+                style: TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _WordSourcePicker(
+                selectedSource: selectedSource,
+                categories: categories,
+                wordsPerRound: wordsPerRound,
+                availableIds: availableIds,
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
+              ),
+              const SizedBox(height: 18),
+              FilledButton(
+                key: const ValueKey('word-puzzle-start-button'),
+                onPressed: onStart,
+                style: _primaryPuzzleButtonStyle(),
+                child: const Text('Starten'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _WordPuzzlePlayView extends StatelessWidget {
@@ -409,23 +606,31 @@ class _WordPuzzlePlayView extends StatelessWidget {
   }
 
   ButtonStyle _primaryButtonStyle() {
-    return FilledButton.styleFrom(
-      backgroundColor: const Color(0xFF5DDCFF),
-      foregroundColor: const Color(0xFF041018),
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      textStyle: const TextStyle(fontWeight: FontWeight.w900),
-    );
+    return _primaryPuzzleButtonStyle();
   }
 
   ButtonStyle _secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: const Color(0xFFF4F8FF),
-      disabledForegroundColor: const Color(0xFF607086),
-      side: const BorderSide(color: Color(0xFF7DFFE3)),
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      textStyle: const TextStyle(fontWeight: FontWeight.w900),
-    );
+    return _secondaryPuzzleButtonStyle();
   }
+}
+
+ButtonStyle _primaryPuzzleButtonStyle() {
+  return FilledButton.styleFrom(
+    backgroundColor: const Color(0xFF5DDCFF),
+    foregroundColor: const Color(0xFF041018),
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    textStyle: const TextStyle(fontWeight: FontWeight.w900),
+  );
+}
+
+ButtonStyle _secondaryPuzzleButtonStyle() {
+  return OutlinedButton.styleFrom(
+    foregroundColor: const Color(0xFFF4F8FF),
+    disabledForegroundColor: const Color(0xFF607086),
+    side: const BorderSide(color: Color(0xFF7DFFE3)),
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    textStyle: const TextStyle(fontWeight: FontWeight.w900),
+  );
 }
 
 class _AnswerBox extends StatelessWidget {
@@ -716,17 +921,75 @@ class _FinishedView extends StatelessWidget {
   }
 }
 
+class _WordSourcePicker extends StatelessWidget {
+  const _WordSourcePicker({
+    required this.selectedSource,
+    required this.categories,
+    this.wordsPerRound = 10,
+    this.availableIds = const <String>[],
+    required this.onSourceSelected,
+    this.onWordsPerRoundChanged,
+  });
+
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final int wordsPerRound;
+  final List<String> availableIds;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int>? onWordsPerRoundChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return game_picker.GameWordSourcePicker(
+      keyPrefix: 'word-puzzle',
+      selectedSource: _toSharedSource(selectedSource),
+      categories: categories,
+      wordsPerRound: wordsPerRound,
+      minWordsPerRound: 1,
+      availableIds: availableIds,
+      accentColor: const Color(0xFF7DFFE3),
+      secondaryAccentColor: const Color(0xFF5DDCFF),
+      onWordsPerRoundChanged: onWordsPerRoundChanged,
+      onSourceSelected: (source) => onSourceSelected(_fromSharedSource(source)),
+    );
+  }
+
+  game_picker.GameWordSource _toSharedSource(GameWordSource source) {
+    return game_picker.GameWordSource.custom(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
+    );
+  }
+
+  GameWordSource _fromSharedSource(game_picker.GameWordSource source) {
+    return GameWordSource._(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
+    );
+  }
+}
+
 class _WordPuzzleMessageState extends StatelessWidget {
   const _WordPuzzleMessageState({
     required this.title,
     required this.text,
     required this.buttonLabel,
+    this.selectedSource,
+    this.categories = const <LocalCategory>[],
+    this.onSourceSelected,
     required this.onPressed,
   });
 
   final String title;
   final String text;
   final String buttonLabel;
+  final GameWordSource? selectedSource;
+  final List<LocalCategory> categories;
+  final ValueChanged<GameWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override
@@ -770,6 +1033,14 @@ class _WordPuzzleMessageState extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              if (selectedSource != null && onSourceSelected != null) ...[
+                const SizedBox(height: 18),
+                _WordSourcePicker(
+                  selectedSource: selectedSource!,
+                  categories: categories,
+                  onSourceSelected: onSourceSelected!,
+                ),
+              ],
               const SizedBox(height: 22),
               FilledButton(
                 onPressed: onPressed,

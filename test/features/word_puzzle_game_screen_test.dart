@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 
@@ -11,12 +14,13 @@ void main() {
     required String id,
     required String term,
     String translation = 'Notfall',
+    String categoryId = 'local-category-my-words',
     bool isArchived = false,
   }) {
     final now = DateTime(2026, 5, 22, 12);
     return LocalWord(
       id: id,
-      categoryId: LocalLearningSource.myWords.id,
+      categoryId: categoryId,
       term: term,
       translation: translation,
       sourceLanguage: 'en',
@@ -28,15 +32,42 @@ void main() {
     );
   }
 
+  LocalCategory category({required String id, required String name}) {
+    final now = DateTime(2026, 5, 22, 12);
+    return LocalCategory(
+      id: id,
+      name: name,
+      description: null,
+      sortOrder: 0,
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
   Future<void> pumpGame(
     WidgetTester tester, {
     required List<LocalWord> words,
+    Map<String, List<LocalWord>> sourceWords = const {},
+    List<LocalCategory> categories = const <LocalCategory>[],
+    Map<String, List<LocalWord>> categoryWords = const {},
   }) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localWordsForSourceProvider.overrideWith((ref, source) async {
-            return words;
+            return sourceWords[source.id] ?? words;
+          }),
+          localWordsForCategoryProvider.overrideWith((ref, categoryId) async {
+            return categoryWords[categoryId] ?? const <LocalWord>[];
+          }),
+          localCategoriesProvider.overrideWith((ref) async {
+            return categories;
           }),
         ],
         child: const MaterialApp(home: WordPuzzleGameScreen()),
@@ -44,6 +75,40 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
+  }
+
+  Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+    try {
+      await tester.scrollUntilVisible(finder, 120);
+    } catch (_) {
+      await tester.ensureVisible(finder);
+    }
+    await tester.pump();
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapSheetOption(WidgetTester tester, Finder finder) async {
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapScrolledSheetOption(
+    WidgetTester tester,
+    Finder finder,
+  ) async {
+    await tester.ensureVisible(finder);
+    await tester.pump();
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> startGame(WidgetTester tester) async {
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-start-button')),
+    );
+    await tester.pumpAndSettle();
   }
 
   Future<void> tapAnswer(WidgetTester tester, String term, {int? limit}) async {
@@ -106,11 +171,123 @@ void main() {
     expect(find.text('Noch keine passenden Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge Wörter mit mindestens drei Buchstaben hinzu, um Wort-Puzzle zu spielen.',
+        'Diese Wortquelle braucht Wörter mit mindestens drei Buchstaben, um Wort-Puzzle zu spielen.',
       ),
       findsOneWidget,
     );
     expect(find.text('Zurück'), findsOneWidget);
+  });
+
+  testWidgets('start screen shows active source with all words default', (
+    tester,
+  ) async {
+    await pumpGame(
+      tester,
+      words: [word(id: 'cat', term: 'cat')],
+    );
+
+    expect(find.text('Du spielst mit'), findsOneWidget);
+    expect(find.text('Alle Wörter'), findsOneWidget);
+    expect(find.text('Wortquelle ändern'), findsOneWidget);
+    expect(find.text('Wortwelt auswählen'), findsOneWidget);
+    expect(find.text('Starten'), findsOneWidget);
+  });
+
+  testWidgets('source sheet switches to favorites', (tester) async {
+    final allWords = [word(id: 'cat', term: 'cat')];
+    final favoriteWords = [word(id: 'sun', term: 'sun', translation: 'Sonne')];
+    await pumpGame(
+      tester,
+      words: allWords,
+      sourceWords: {LocalLearningSource.favorites.id: favoriteWords},
+    );
+
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-change-source-button')),
+    );
+    expect(find.text('Favoriten'), findsOneWidget);
+    await tapSheetOption(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-source-local-source-favorites')),
+    );
+
+    expect(find.text('Favoriten'), findsOneWidget);
+    await startGame(tester);
+    expect(find.text('Hinweis: Sonne'), findsOneWidget);
+  });
+
+  testWidgets('word world sheet shows full names and switches travel', (
+    tester,
+  ) async {
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
+    final travelWords = [
+      word(
+        id: 'map',
+        term: 'map',
+        translation: 'Karte',
+        categoryId: travelCategory.id,
+      ),
+    ];
+    await pumpGame(
+      tester,
+      words: [word(id: 'cat', term: 'cat')],
+      categories: [travelCategory],
+      categoryWords: {travelCategory.id: travelWords},
+    );
+
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-select-world-button')),
+    );
+
+    expect(find.text('Health & Fitness'), findsOneWidget);
+    expect(find.text('Travel'), findsOneWidget);
+    expect(find.text('Music & Entertainment'), findsOneWidget);
+    expect(find.text('Top 500 Words'), findsOneWidget);
+    expect(find.text('C2'), findsOneWidget);
+
+    await tapScrolledSheetOption(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-word-world-travel')),
+    );
+
+    expect(find.text('Wortwelt: Travel'), findsOneWidget);
+    await startGame(tester);
+    expect(find.text('Hinweis: Karte'), findsOneWidget);
+  });
+
+  testWidgets('category with no puzzle words shows category empty state', (
+    tester,
+  ) async {
+    final travelCategory = category(id: 'seed-category-travel', name: 'Travel');
+    await pumpGame(
+      tester,
+      words: [word(id: 'cat', term: 'cat')],
+      categories: [travelCategory],
+      categoryWords: {
+        travelCategory.id: [
+          word(id: 'no', term: 'no', categoryId: travelCategory.id),
+        ],
+      },
+    );
+
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-select-world-button')),
+    );
+    await tapScrolledSheetOption(
+      tester,
+      find.byKey(const ValueKey('word-puzzle-word-world-travel')),
+    );
+
+    expect(find.text('Noch keine passenden Wörter'), findsOneWidget);
+    expect(
+      find.text(
+        'Diese Wortwelt braucht Wörter mit mindestens drei Buchstaben, um Wort-Puzzle zu spielen.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows mixed letter chips and hint', (tester) async {
@@ -118,6 +295,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     expect(find.text('Wort-Puzzle'), findsOneWidget);
     expect(
@@ -134,6 +312,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat', limit: 2);
 
@@ -145,6 +324,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat', limit: 2);
     await tester.tap(find.byKey(const ValueKey('word-puzzle-undo-button')));
@@ -162,6 +342,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat', limit: 2);
     await tester.tap(find.byKey(const ValueKey('word-puzzle-reset-button')));
@@ -176,6 +357,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat');
     await tester.tap(find.byKey(const ValueKey('word-puzzle-check-button')));
@@ -192,6 +374,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat', limit: 2);
     await tester.tap(find.byKey(const ValueKey('word-puzzle-check-button')));
@@ -206,6 +389,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tester.tap(find.byKey(const ValueKey('word-puzzle-reveal-button')));
     await tester.pump();
@@ -225,6 +409,7 @@ void main() {
       tester,
       words: [word(id: 'cat', term: 'cat')],
     );
+    await startGame(tester);
 
     await tapAnswer(tester, 'cat');
     await tester.tap(find.byKey(const ValueKey('word-puzzle-check-button')));

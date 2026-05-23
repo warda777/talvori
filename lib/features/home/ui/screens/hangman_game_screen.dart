@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
 const int hangmanMaxAttempts = 6;
 
@@ -16,6 +20,12 @@ class HangmanGameScreen extends ConsumerStatefulWidget {
 }
 
 class _HangmanGameScreenState extends ConsumerState<HangmanGameScreen> {
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<LocalWord> _roundWords = const <LocalWord>[];
   String _roundKey = '';
   int _currentIndex = 0;
@@ -23,15 +33,16 @@ class _HangmanGameScreenState extends ConsumerState<HangmanGameScreen> {
   int _attemptsLeft = hangmanMaxAttempts;
   Set<String> _guessedLetters = const <String>{};
   bool _wordSolved = false;
+  bool _hasStarted = false;
   bool _revealed = false;
   bool _isFinished = false;
   String? _feedback;
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       backgroundColor: const Color(0xFF050912),
@@ -53,18 +64,40 @@ class _HangmanGameScreenState extends ConsumerState<HangmanGameScreen> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            const categories = <LocalCategory>[];
             final playableWords = buildHangmanRoundWords(words);
             if (playableWords.isEmpty) {
               return _HangmanMessageState(
                 title: 'Noch keine passenden Wörter',
-                text:
-                    'Füge Wörter mit mindestens drei Buchstaben hinzu, um Hangman zu spielen.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht Wörter mit mindestens drei Buchstaben, um Hangman zu spielen.'
+                    : 'Diese Wortwelt braucht Wörter mit mindestens drei Buchstaben, um Hangman zu spielen.',
                 buttonLabel: 'Zurück',
+                selectedSource: _selectedSource,
+                categories: categories,
+                onSourceSelected: _selectSource,
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
 
-            _ensureRound(playableWords);
+            final sourceKey =
+                '${_selectedSource.key}:${playableWords.map((word) => word.id).join('|')}';
+            if (_roundKey != sourceKey) _resetForSelection(sourceKey);
+
+            if (!_hasStarted) {
+              return _HangmanStartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                availableIds: playableWords
+                    .map((word) => word.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(playableWords.length),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: () => setState(() => _restartRound(playableWords)),
+              );
+            }
+
             if (_isFinished) {
               return _FinishedView(
                 solvedCount: _solvedCount,
@@ -95,19 +128,54 @@ class _HangmanGameScreenState extends ConsumerState<HangmanGameScreen> {
     );
   }
 
-  void _ensureRound(List<LocalWord> playableWords) {
-    final nextKey = playableWords.map((word) => word.id).join('|');
-    if (_roundKey == nextKey && _roundWords.isNotEmpty) return;
-    _roundKey = nextKey;
-    _restartRound(playableWords);
+  void _resetForSelection(String sourceKey) {
+    _roundKey = sourceKey;
+    _roundWords = const <LocalWord>[];
+    _currentIndex = 0;
+    _solvedCount = 0;
+    _hasStarted = false;
+    _isFinished = false;
+    _resetCurrentWord();
+  }
+
+  void _selectSource(GameWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _selectedSource = source;
+      _resetForSelection('');
+    });
   }
 
   void _restartRound(List<LocalWord> playableWords) {
-    _roundWords = List<LocalWord>.unmodifiable(playableWords.take(10));
+    _roundWords = List<LocalWord>.unmodifiable(
+      playableWords.take(_effectiveWordsPerRound(playableWords.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'hangman',
+      _selectedSource.key,
+      _roundWords.map((word) => word.id),
+    );
     _currentIndex = 0;
     _solvedCount = 0;
+    _hasStarted = true;
     _isFinished = false;
     _resetCurrentWord();
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 1,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _resetCurrentWord() {
@@ -179,7 +247,6 @@ List<LocalWord> buildHangmanRoundWords(List<LocalWord> words) {
     final normalized = normalizeHangmanWord(term);
     if (normalized.isEmpty || !seen.add(normalized)) continue;
     playable.add(word);
-    if (playable.length == 10) break;
   }
   return List<LocalWord>.unmodifiable(playable);
 }
@@ -218,6 +285,15 @@ String normalizeHangmanWord(String value) {
   return normalizedHangmanLetters(value).join();
 }
 
+ButtonStyle _primaryHangmanButtonStyle() {
+  return FilledButton.styleFrom(
+    backgroundColor: const Color(0xFFFFE66D),
+    foregroundColor: const Color(0xFF041018),
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    textStyle: const TextStyle(fontWeight: FontWeight.w900),
+  );
+}
+
 bool _isSupportedHangmanLetter(String char) {
   return RegExp(r'[A-Za-zÄÖÜäöü]').hasMatch(char);
 }
@@ -253,6 +329,98 @@ const _hangmanAlphabet = <String>[
   'Ö',
   'Ü',
 ];
+
+class _HangmanStartView extends StatelessWidget {
+  const _HangmanStartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
+  });
+
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1220),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: const Color(0xFFFFE66D)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFFE66D).withValues(alpha: 0.12),
+                blurRadius: 28,
+                spreadRadius: -5,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.lightbulb_rounded,
+                color: Color(0xFFFFE66D),
+                size: 44,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Bereit für Hangman?',
+                style: TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Errate das Wort Buchstabe für Buchstabe.',
+                style: TextStyle(
+                  color: Color(0xFFB8C7D9),
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 20),
+              GameWordSourcePicker(
+                keyPrefix: 'hangman',
+                selectedSource: selectedSource,
+                categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
+                minWordsPerRound: 1,
+                accentColor: const Color(0xFFFFE66D),
+                secondaryAccentColor: const Color(0xFF7DFFE3),
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
+              ),
+              const SizedBox(height: 18),
+              FilledButton(
+                key: const ValueKey('hangman-start-button'),
+                onPressed: onStart,
+                style: _primaryHangmanButtonStyle(),
+                child: const Text('Starten'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _HangmanPlayView extends StatelessWidget {
   const _HangmanPlayView({
@@ -669,12 +837,18 @@ class _HangmanMessageState extends StatelessWidget {
     required this.title,
     required this.text,
     required this.buttonLabel,
+    this.selectedSource,
+    this.categories = const <LocalCategory>[],
+    this.onSourceSelected,
     required this.onPressed,
   });
 
   final String title;
   final String text;
   final String buttonLabel;
+  final GameWordSource? selectedSource;
+  final List<LocalCategory> categories;
+  final ValueChanged<GameWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override
@@ -718,15 +892,21 @@ class _HangmanMessageState extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              if (selectedSource != null && onSourceSelected != null) ...[
+                const SizedBox(height: 18),
+                GameWordSourcePicker(
+                  keyPrefix: 'hangman',
+                  selectedSource: selectedSource!,
+                  categories: categories,
+                  accentColor: const Color(0xFFFFE66D),
+                  secondaryAccentColor: const Color(0xFF7DFFE3),
+                  onSourceSelected: onSourceSelected!,
+                ),
+              ],
               const SizedBox(height: 22),
               FilledButton(
                 onPressed: onPressed,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFE66D),
-                  foregroundColor: const Color(0xFF041018),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                ),
+                style: _primaryHangmanButtonStyle(),
                 child: Text(buttonLabel),
               ),
             ],

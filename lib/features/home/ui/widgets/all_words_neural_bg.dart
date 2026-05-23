@@ -15,7 +15,7 @@ class NeuralGlowBackground extends StatefulWidget {
     this.bgColor = const Color(0xFF000000),
     this.lineColor = const Color(0xFFE6C27A),
     this.focus = Alignment.center, // Cluster-Position
-    this.spread = 0.34,            // 0..1 – kleinere Werte = enger um den Fokus
+    this.spread = 0.34, // 0..1 – kleinere Werte = enger um den Fokus
   });
 
   final int seed;
@@ -24,8 +24,8 @@ class NeuralGlowBackground extends StatefulWidget {
   final int nodeCount;
   final Color bgColor;
   final Color lineColor;
-  final Alignment focus;   // Cluster-Position (z.B. center)
-  final double spread;     // 0..1 – kleinere Werte = enger um den Fokus
+  final Alignment focus; // Cluster-Position (z.B. center)
+  final double spread; // 0..1 – kleinere Werte = enger um den Fokus
 
   @override
   State<NeuralGlowBackground> createState() => _NeuralGlowBackgroundState();
@@ -40,8 +40,12 @@ class _NeuralGlowBackgroundState extends State<NeuralGlowBackground>
     _ctrl = AnimationController.unbounded(vsync: this)
       ..repeat(min: 0, max: 1e9, period: const Duration(days: 1));
   }
+
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,19 +60,19 @@ class _NeuralGlowBackgroundState extends State<NeuralGlowBackground>
               fit: StackFit.expand,
               children: [
                 CustomPaint(
-            painter: _NeuralGlowPainter(
-              t: t,
-              seed: widget.seed,
-              speed: widget.speed,
-              density: widget.density,
-              nodeCount: widget.nodeCount,
-              bgColor: widget.bgColor,
-              lineColor: widget.lineColor,
-              focus: widget.focus,
-              spread: widget.spread,
-            ),
-            isComplex: true,
-            willChange: true,
+                  painter: _NeuralGlowPainter(
+                    t: t,
+                    seed: widget.seed,
+                    speed: widget.speed,
+                    density: widget.density,
+                    nodeCount: widget.nodeCount,
+                    bgColor: widget.bgColor,
+                    lineColor: widget.lineColor,
+                    focus: widget.focus,
+                    spread: widget.spread,
+                  ),
+                  isComplex: true,
+                  willChange: true,
                 ),
                 Container(color: Colors.black.withOpacity(0.35)),
               ],
@@ -101,7 +105,7 @@ class _NeuralGlowPainter extends CustomPainter {
   final Color bgColor;
   final Color lineColor;
   final Alignment focus; // Cluster-Position
-  final double spread;   // 0..1 – kleinere Werte = enger um den Fokus
+  final double spread; // 0..1 – kleinere Werte = enger um den Fokus
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -115,13 +119,6 @@ class _NeuralGlowPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.05
       ..color = lineColor.withOpacity(0.18)
-      ..isAntiAlias = true;
-
-    final subtleGlow = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..color = lineColor.withOpacity(0.26)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.4)
       ..isAntiAlias = true;
 
     final nodeCore = Paint()
@@ -173,7 +170,9 @@ class _NeuralGlowPainter extends CustomPainter {
       canvas.drawCircle(
         p,
         r * 10,
-        Paint()..shader = halo..blendMode = BlendMode.plus,
+        Paint()
+          ..shader = halo
+          ..blendMode = BlendMode.plus,
       );
       canvas.drawCircle(p, 1.6, nodeCore);
     }
@@ -231,7 +230,9 @@ class _NeuralGlowPainter extends CustomPainter {
         canvas.drawCircle(
           pos,
           12,
-          Paint()..shader = comet..blendMode = BlendMode.plus,
+          Paint()
+            ..shader = comet
+            ..blendMode = BlendMode.plus,
         );
       }
     }
@@ -248,11 +249,4 @@ class _NeuralGlowPainter extends CustomPainter {
       o.lineColor != lineColor ||
       o.focus != focus ||
       o.spread != spread;
-}
-
-extension on Offset {
-  Offset get normalized {
-    final len = distance;
-    return len == 0 ? this : this / len;
-  }
 }

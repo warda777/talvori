@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
 class ContextChallengeGameScreen extends ConsumerStatefulWidget {
   const ContextChallengeGameScreen({super.key});
@@ -16,6 +20,12 @@ class ContextChallengeGameScreen extends ConsumerStatefulWidget {
 
 class _ContextChallengeGameScreenState
     extends ConsumerState<ContextChallengeGameScreen> {
+  GameWordSource _selectedSource = GameWordSource.standard(
+    LocalLearningSource.allWords,
+  );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<ContextChallengePair> _roundPairs = const <ContextChallengePair>[];
   String _roundKey = '';
   int _currentTaskIndex = 0;
@@ -28,9 +38,9 @@ class _ContextChallengeGameScreenState
 
   @override
   Widget build(BuildContext context) {
-    final wordsAsync = ref.watch(
-      localWordsForSourceProvider(LocalLearningSource.allWords),
-    );
+    final wordsAsync = _selectedSource.categoryId == null
+        ? ref.watch(localWordsForSourceProvider(_selectedSource.source))
+        : ref.watch(localWordsForCategoryProvider(_selectedSource.categoryId!));
 
     return Scaffold(
       backgroundColor: const Color(0xFF050912),
@@ -52,18 +62,25 @@ class _ContextChallengeGameScreenState
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           data: (words) {
+            const categories = <LocalCategory>[];
             final pairs = buildContextChallengePairs(words);
             if (pairs.length < 4) {
               return _ContextMessageState(
                 title: 'Noch nicht genug Wörter',
-                text:
-                    'Füge mindestens vier Wörter mit Übersetzung hinzu, um die Kontext-Challenge zu starten.',
+                text: _selectedSource.categoryId == null
+                    ? 'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um die Kontext-Challenge zu starten.'
+                    : 'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um die Kontext-Challenge zu starten.',
                 buttonLabel: 'Zurück',
                 onPressed: () => Navigator.of(context).maybePop(),
               );
             }
 
-            _ensureRound(pairs);
+            final sourceKey =
+                '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
+            if (_roundKey != sourceKey) {
+              _roundKey = sourceKey;
+              _restartRound(pairs);
+            }
             if (_isFinished) {
               return _FinishedView(
                 score: _score,
@@ -73,7 +90,17 @@ class _ContextChallengeGameScreenState
               );
             }
             if (!_hasStarted) {
-              return _StartView(onStart: _startChallenge);
+              return _StartView(
+                selectedSource: _selectedSource,
+                categories: categories,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
+                wordsPerRound: _effectiveWordsPerRound(pairs.length),
+                onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
+                onStart: _startChallenge,
+              );
             }
 
             final task = buildContextChallengeTask(
@@ -99,15 +126,9 @@ class _ContextChallengeGameScreenState
     );
   }
 
-  void _ensureRound(List<ContextChallengePair> pairs) {
-    final nextKey = pairs.map((pair) => pair.id).join('|');
-    if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
-    _roundKey = nextKey;
-    _restartRound(pairs);
-  }
-
-  void _restartRound(List<ContextChallengePair> pairs) {
-    _roundPairs = List<ContextChallengePair>.unmodifiable(pairs.take(10));
+  void _resetForSelection(String sourceKey) {
+    _roundKey = sourceKey;
+    _roundPairs = const <ContextChallengePair>[];
     _currentTaskIndex = 0;
     _score = 0;
     _hasStarted = false;
@@ -115,6 +136,48 @@ class _ContextChallengeGameScreenState
     _resolved = false;
     _feedback = null;
     _selectedPairId = null;
+  }
+
+  void _selectSource(GameWordSource source) {
+    if (_selectedSource == source) return;
+    setState(() {
+      _selectedSource = source;
+      _resetForSelection('');
+    });
+  }
+
+  void _restartRound(List<ContextChallengePair> pairs) {
+    _roundPairs = List<ContextChallengePair>.unmodifiable(
+      pairs.take(_effectiveWordsPerRound(pairs.length)),
+    );
+    _progressRepository.markPlayedIds(
+      'context-challenge',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
+    _currentTaskIndex = 0;
+    _score = 0;
+    _hasStarted = false;
+    _isFinished = false;
+    _resolved = false;
+    _feedback = null;
+    _selectedPairId = null;
+  }
+
+  int _effectiveWordsPerRound(int available) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: 4,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _wordsPerRound = count;
+      _resetForSelection('');
+    });
   }
 
   void _startChallenge() {
@@ -283,8 +346,22 @@ class ContextChallengeAnswer {
 }
 
 class _StartView extends StatelessWidget {
-  const _StartView({required this.onStart});
+  const _StartView({
+    required this.selectedSource,
+    required this.categories,
+    required this.availableIds,
+    required this.wordsPerRound,
+    required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
+    required this.onStart,
+  });
 
+  final GameWordSource selectedSource;
+  final List<LocalCategory> categories;
+  final List<String> availableIds;
+  final int wordsPerRound;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final VoidCallback onStart;
 
   @override
@@ -334,6 +411,19 @@ class _StartView extends StatelessWidget {
                   height: 1.35,
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(height: 20),
+              GameWordSourcePicker(
+                keyPrefix: 'context-challenge',
+                selectedSource: selectedSource,
+                categories: categories,
+                availableIds: availableIds,
+                wordsPerRound: wordsPerRound,
+                minWordsPerRound: 4,
+                accentColor: const Color(0xFF5DDCFF),
+                secondaryAccentColor: const Color(0xFF7DFFE3),
+                onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
               ),
               const SizedBox(height: 22),
               FilledButton(
@@ -445,7 +535,7 @@ class _TaskView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _HintChip(text: task.hintTranslation),
+              _RevealingHintChip(term: task.correctAnswerText),
               const SizedBox(height: 18),
               for (final answer in task.answers) ...[
                 _AnswerButton(
@@ -537,29 +627,96 @@ class _QuestHeader extends StatelessWidget {
   }
 }
 
-class _HintChip extends StatelessWidget {
-  const _HintChip({required this.text});
+@visibleForTesting
+String buildContextChallengeHiddenHint(String term, int revealedCount) {
+  final chars = term.trim().split('');
+  if (chars.isEmpty) return '';
 
-  final String text;
+  var revealedLetters = 0;
+  return chars
+      .map((char) {
+        if (char.trim().isEmpty) return ' ';
+        if (revealedLetters < revealedCount) {
+          revealedLetters += 1;
+          return char;
+        }
+        return '_';
+      })
+      .join(' ');
+}
+
+class _RevealingHintChip extends StatefulWidget {
+  const _RevealingHintChip({required this.term});
+
+  final String term;
+
+  @override
+  State<_RevealingHintChip> createState() => _RevealingHintChipState();
+}
+
+class _RevealingHintChipState extends State<_RevealingHintChip> {
+  int _revealedCount = 0;
+
+  @override
+  void didUpdateWidget(_RevealingHintChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.term != widget.term) {
+      _revealedCount = 0;
+    }
+  }
+
+  void _revealNextLetter() {
+    final letterCount = widget.term
+        .trim()
+        .split('')
+        .where((char) => char.trim().isNotEmpty)
+        .length;
+    if (_revealedCount >= letterCount) return;
+    setState(() => _revealedCount += 1);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF5DDCFF).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF5DDCFF).withValues(alpha: 0.35),
+    final hint = buildContextChallengeHiddenHint(widget.term, _revealedCount);
+    return InkWell(
+      key: const ValueKey('context-challenge-hidden-hint'),
+      borderRadius: BorderRadius.circular(16),
+      onTap: _revealNextLetter,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF5DDCFF).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF5DDCFF).withValues(alpha: 0.35),
+          ),
         ),
-      ),
-      child: Text(
-        'Hinweis: $text',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Color(0xFFB8C7D9),
-          fontWeight: FontWeight.w800,
-          height: 1.25,
+        child: Column(
+          children: [
+            const Text(
+              'Hinweis antippen',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFFB8C7D9),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              hint,
+              key: const ValueKey('context-challenge-hidden-hint-text'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFFF4F8FF),
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+                height: 1.25,
+              ),
+            ),
+          ],
         ),
       ),
     );

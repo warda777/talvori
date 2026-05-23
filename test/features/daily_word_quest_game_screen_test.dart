@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   LocalWord word({
     required String id,
     required String term,
@@ -58,6 +63,13 @@ void main() {
 
   Future<void> tapByKey(WidgetTester tester, ValueKey<String> key) async {
     final finder = find.byKey(key);
+    if (finder.evaluate().isEmpty) {
+      final scrollable = find.byType(Scrollable);
+      if (scrollable.evaluate().isNotEmpty) {
+        await tester.drag(scrollable.first, const Offset(0, -520));
+        await tester.pump();
+      }
+    }
     await tester.ensureVisible(finder);
     await tester.pump();
     await tester.tap(finder);
@@ -83,6 +95,20 @@ void main() {
       used.add(index);
       await tapByKey(tester, ValueKey('daily-quest-puzzle-letter-$index'));
     }
+  }
+
+  Future<void> reachPuzzleTask(WidgetTester tester) async {
+    await startQuest(tester);
+    for (final id in ['emergency', 'shelter', 'rescue']) {
+      await answerChoice(tester, id);
+      await tapByKey(tester, const ValueKey('daily-quest-next-button'));
+    }
+    await tester.enterText(
+      find.byKey(const ValueKey('daily-quest-gap-field')),
+      'water',
+    );
+    await tapByKey(tester, const ValueKey('daily-quest-check-button'));
+    await tapByKey(tester, const ValueKey('daily-quest-next-button'));
   }
 
   test('buildDailyQuestPairs keeps five complete stable unique pairs', () {
@@ -133,6 +159,14 @@ void main() {
     expect(normalizeDailyQuestAnswer('  Hello   World  '), 'hello world');
   });
 
+  test('buildDailyQuestHiddenHint reveals letters progressively', () {
+    expect(buildDailyQuestHiddenHint('travel', 0), '_ _ _ _ _ _');
+    expect(buildDailyQuestHiddenHint('travel', 1), 't _ _ _ _ _');
+    expect(buildDailyQuestHiddenHint('travel', 2), 't r _ _ _ _');
+    expect(buildDailyQuestHiddenHint('travel', 3), 't r a _ _ _');
+    expect(buildDailyQuestHiddenHint('travel', 6), 't r a v e l');
+  });
+
   testWidgets('shows empty state with fewer than five matching words', (
     tester,
   ) async {
@@ -144,7 +178,7 @@ void main() {
     expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge mindestens fünf Wörter hinzu, um deine Daily Word Quest zu starten.',
+        'Diese Wortquelle braucht mindestens fünf Wörter, um deine Daily Word Quest zu starten.',
       ),
       findsOneWidget,
     );
@@ -233,27 +267,72 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await pumpGame(tester, words: sampleWords());
-    await startQuest(tester);
-    for (final id in ['emergency', 'shelter', 'rescue']) {
-      await answerChoice(tester, id);
-      await tapByKey(tester, const ValueKey('daily-quest-next-button'));
-    }
-    await tester.enterText(
-      find.byKey(const ValueKey('daily-quest-gap-field')),
-      'water',
-    );
-    await tapByKey(tester, const ValueKey('daily-quest-check-button'));
-    await tapByKey(tester, const ValueKey('daily-quest-next-button'));
+    await reachPuzzleTask(tester);
 
     expect(find.text('Aufgabe 5 / 5'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('daily-quest-puzzle-letters')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const ValueKey('daily-quest-puzzle-hint')),
+      findsOneWidget,
+    );
+    expect(find.text('_ _ _ _ _'), findsOneWidget);
+    expect(find.text('Stufe'), findsNothing);
+    expect(find.text('level'), findsNothing);
 
     await tapPuzzleAnswer(tester, 'level');
 
     expect(find.text('Quest-Punkt!'), findsOneWidget);
+    expect(find.text('level'), findsWidgets);
+  });
+
+  testWidgets('puzzle hint reveals one more letter on every tap', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpGame(tester, words: sampleWords());
+    await reachPuzzleTask(tester);
+
+    final hint = find.byKey(const ValueKey('daily-quest-puzzle-hint'));
+    expect(find.text('_ _ _ _ _'), findsOneWidget);
+    expect(find.text('level'), findsNothing);
+
+    await tapByKey(tester, const ValueKey('daily-quest-puzzle-hint'));
+    expect(find.text('l _ _ _ _'), findsOneWidget);
+
+    await tapByKey(tester, const ValueKey('daily-quest-puzzle-hint'));
+    expect(find.text('l e _ _ _'), findsOneWidget);
+
+    await tester.ensureVisible(hint);
+    for (var i = 0; i < 3; i += 1) {
+      await tester.tap(hint);
+      await tester.pump();
+    }
+    expect(find.text('l e v e l'), findsOneWidget);
+  });
+
+  testWidgets('puzzle reveal still shows complete solution separately', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpGame(tester, words: sampleWords());
+    await reachPuzzleTask(tester);
+
+    expect(find.text('level'), findsNothing);
+    await tapByKey(tester, const ValueKey('daily-quest-reveal-button'));
+
+    expect(find.text('Aufgelöst.'), findsOneWidget);
+    expect(find.text('Lösung'), findsOneWidget);
     expect(find.text('level'), findsWidgets);
   });
 

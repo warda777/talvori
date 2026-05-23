@@ -255,6 +255,9 @@ void main() {
 
     expect(find.text('Favoriten'), findsWidgets);
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
 
@@ -329,6 +332,9 @@ void main() {
 
     expect(find.text('Wortwelt: Travel'), findsOneWidget);
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
 
@@ -381,6 +387,9 @@ void main() {
   testWidgets('start shows timer score prompt and answers', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
 
@@ -408,6 +417,9 @@ void main() {
   testWidgets('correct answer increases local score', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
     final prompt = tester
@@ -423,6 +435,9 @@ void main() {
   testWidgets('wrong answer shows neutral feedback', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
     final prompt = tester
@@ -445,6 +460,9 @@ void main() {
       roundDuration: const Duration(seconds: 1),
     );
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -463,6 +481,9 @@ void main() {
       random: Random(11),
     );
 
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -527,6 +548,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('speed-round-start-button')),
+    );
     await tester.tap(find.byKey(const ValueKey('speed-round-start-button')));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));

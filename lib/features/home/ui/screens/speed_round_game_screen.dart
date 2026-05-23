@@ -9,6 +9,9 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
+    as game_picker;
 
 class SpeedRoundGameScreen extends ConsumerStatefulWidget {
   const SpeedRoundGameScreen({
@@ -28,9 +31,12 @@ class SpeedRoundGameScreen extends ConsumerStatefulWidget {
 }
 
 class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
-  SpeedRoundWordSource _selectedSource = SpeedRoundWordSource.standard(
+  GameWordSource _selectedSource = GameWordSource.standard(
     LocalLearningSource.allWords,
   );
+  final SharedPreferencesWordGameProgressRepository _progressRepository =
+      const SharedPreferencesWordGameProgressRepository();
+  int _wordsPerRound = 10;
   List<SpeedRoundPair> _roundPairs = const <SpeedRoundPair>[];
   List<int> _answerShifts = const <int>[];
   String _roundKey = '';
@@ -104,7 +110,13 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
               return _StartView(
                 selectedSource: _selectedSource,
                 categories: categories,
+                wordsPerRound: _effectiveWordsPerRound(pairs.length, 4),
+                minWordsPerRound: 4,
+                availableIds: pairs
+                    .map((pair) => pair.id)
+                    .toList(growable: false),
                 onSourceSelected: _selectSource,
+                onWordsPerRoundChanged: _selectWordsPerRound,
                 onStart: _startRound,
               );
             }
@@ -136,7 +148,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
     _restartRound(pairs);
   }
 
-  void _selectSource(SpeedRoundWordSource source) {
+  void _selectSource(GameWordSource source) {
     if (_selectedSource == source) return;
     setState(() {
       _timer?.cancel();
@@ -156,7 +168,16 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
   void _restartRound(List<SpeedRoundPair> pairs) {
     _timer?.cancel();
     final random = widget.random ?? Random();
-    _roundPairs = selectSpeedRoundRoundPairs(pairs, random: random);
+    _roundPairs = selectSpeedRoundRoundPairs(
+      pairs,
+      random: random,
+      maxQuestions: _effectiveWordsPerRound(pairs.length, 4),
+    );
+    _progressRepository.markPlayedIds(
+      'speed-round',
+      _selectedSource.key,
+      _roundPairs.map((pair) => pair.id),
+    );
     _answerShifts = List<int>.unmodifiable(
       List<int>.generate(_roundPairs.length, (_) => random.nextInt(4)),
     );
@@ -166,6 +187,31 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
     _started = false;
     _finished = false;
     _feedback = null;
+  }
+
+  int _effectiveWordsPerRound(int available, int minimum) {
+    return clampWordsPerRound(
+      requested: _wordsPerRound,
+      minimum: minimum,
+      available: available,
+    );
+  }
+
+  void _selectWordsPerRound(int count) {
+    if (_wordsPerRound == count) return;
+    setState(() {
+      _timer?.cancel();
+      _wordsPerRound = count;
+      _roundPairs = const <SpeedRoundPair>[];
+      _answerShifts = const <int>[];
+      _roundKey = '';
+      _currentQuestionIndex = 0;
+      _score = 0;
+      _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
+      _started = false;
+      _finished = false;
+      _feedback = null;
+    });
   }
 
   void _startRound() {
@@ -327,8 +373,8 @@ class SpeedRoundAnswer {
   final bool isCorrect;
 }
 
-class SpeedRoundWordSource {
-  const SpeedRoundWordSource._({
+class GameWordSource {
+  const GameWordSource._({
     required this.label,
     required this.shortLabel,
     required this.source,
@@ -336,8 +382,8 @@ class SpeedRoundWordSource {
     required this.worldKey,
   });
 
-  factory SpeedRoundWordSource.standard(LocalLearningSource source) {
-    return SpeedRoundWordSource._(
+  factory GameWordSource.standard(LocalLearningSource source) {
+    return GameWordSource._(
       label: source.label,
       shortLabel: switch (source) {
         LocalLearningSource.allWords => 'Alle',
@@ -352,21 +398,8 @@ class SpeedRoundWordSource {
     );
   }
 
-  factory SpeedRoundWordSource._wordWorld(
-    _SpeedRoundWordWorld world,
-    List<LocalCategory> categories,
-  ) {
-    return SpeedRoundWordSource._(
-      label: 'Wortwelt: ${world.name}',
-      shortLabel: world.name,
-      source: LocalLearningSource.allWords,
-      categoryId: world.resolveCategoryId(categories),
-      worldKey: world.key,
-    );
-  }
-
-  factory SpeedRoundWordSource.category(LocalCategory category) {
-    return SpeedRoundWordSource._(
+  factory GameWordSource.category(LocalCategory category) {
+    return GameWordSource._(
       label: 'Wortwelt: ${category.name}',
       shortLabel: category.name,
       source: LocalLearningSource.allWords,
@@ -385,120 +418,32 @@ class SpeedRoundWordSource {
 
   @override
   bool operator ==(Object other) {
-    return other is SpeedRoundWordSource && other.key == key;
+    return other is GameWordSource && other.key == key;
   }
 
   @override
   int get hashCode => key.hashCode;
 }
 
-const _standardSpeedRoundSources = <LocalLearningSource>[
-  LocalLearningSource.allWords,
-  LocalLearningSource.myWords,
-  LocalLearningSource.favorites,
-  LocalLearningSource.myMix,
-];
-
-const _speedRoundWordWorldGroups = <_SpeedRoundWordWorldGroup>[
-  _SpeedRoundWordWorldGroup('Alltag & Leben', [
-    _SpeedRoundWordWorld(
-      key: 'health_fitness',
-      name: 'Health & Fitness',
-      localCategoryId: 'seed-category-basics',
-    ),
-    _SpeedRoundWordWorld(key: 'home_living', name: 'Home & Living'),
-    _SpeedRoundWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
-    _SpeedRoundWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
-    _SpeedRoundWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
-    _SpeedRoundWordWorld(key: 'productivity', name: 'Productivity'),
-  ]),
-  _SpeedRoundWordWorldGroup('Mensch & Gesellschaft', [
-    _SpeedRoundWordWorld(key: 'personality', name: 'Personality'),
-    _SpeedRoundWordWorld(key: 'feelings', name: 'Feelings'),
-    _SpeedRoundWordWorld(key: 'relationships', name: 'Relationships'),
-    _SpeedRoundWordWorld(key: 'thoughts', name: 'Thoughts'),
-    _SpeedRoundWordWorld(key: 'law_politics', name: 'Law & Politics'),
-    _SpeedRoundWordWorld(key: 'environment', name: 'Environment'),
-  ]),
-  _SpeedRoundWordWorldGroup('Wissen & Bildung', [
-    _SpeedRoundWordWorld(key: 'school_studies', name: 'School & Studies'),
-    _SpeedRoundWordWorld(key: 'science', name: 'Science'),
-    _SpeedRoundWordWorld(key: 'space', name: 'Space'),
-    _SpeedRoundWordWorld(key: 'nature', name: 'Nature'),
-    _SpeedRoundWordWorld(key: 'animals', name: 'Animals'),
-    _SpeedRoundWordWorld(key: 'tech_innovation', name: 'Tech & Innovation'),
-  ]),
-  _SpeedRoundWordWorldGroup('Medien & Freizeit', [
-    _SpeedRoundWordWorld(key: 'media_news', name: 'Media & News'),
-    _SpeedRoundWordWorld(key: 'sports', name: 'Sports'),
-    _SpeedRoundWordWorld(
-      key: 'travel',
-      name: 'Travel',
-      localCategoryId: 'seed-category-travel',
-    ),
-    _SpeedRoundWordWorld(key: 'gaming', name: 'Gaming'),
-    _SpeedRoundWordWorld(key: 'transport', name: 'Transport'),
-    _SpeedRoundWordWorld(
-      key: 'music_entertainment',
-      name: 'Music & Entertainment',
-    ),
-    _SpeedRoundWordWorld(key: 'art_literature', name: 'Art & Literature'),
-  ]),
-  _SpeedRoundWordWorldGroup('Beruf & Sprache', [
-    _SpeedRoundWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    _SpeedRoundWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    _SpeedRoundWordWorld(key: 'a1', name: 'A1'),
-    _SpeedRoundWordWorld(key: 'a2', name: 'A2'),
-    _SpeedRoundWordWorld(key: 'b1', name: 'B1'),
-    _SpeedRoundWordWorld(key: 'b2', name: 'B2'),
-    _SpeedRoundWordWorld(key: 'c1', name: 'C1'),
-    _SpeedRoundWordWorld(key: 'c2', name: 'C2'),
-  ]),
-];
-
-class _SpeedRoundWordWorldGroup {
-  const _SpeedRoundWordWorldGroup(this.title, this.worlds);
-
-  final String title;
-  final List<_SpeedRoundWordWorld> worlds;
-}
-
-class _SpeedRoundWordWorld {
-  const _SpeedRoundWordWorld({
-    required this.key,
-    required this.name,
-    this.localCategoryId,
-  });
-
-  final String key;
-  final String name;
-  final String? localCategoryId;
-
-  String resolveCategoryId(List<LocalCategory> categories) {
-    if (localCategoryId != null) return localCategoryId!;
-
-    final normalizedName = _normalizeSpeedRoundText(name);
-    for (final category in categories) {
-      if (_normalizeSpeedRoundText(category.name) == normalizedName) {
-        return category.id;
-      }
-    }
-
-    return key;
-  }
-}
-
 class _StartView extends StatelessWidget {
   const _StartView({
     required this.selectedSource,
     required this.categories,
+    required this.wordsPerRound,
+    required this.minWordsPerRound,
+    required this.availableIds,
     required this.onSourceSelected,
+    required this.onWordsPerRoundChanged,
     required this.onStart,
   });
 
-  final SpeedRoundWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<SpeedRoundWordSource> onSourceSelected;
+  final int wordsPerRound;
+  final int minWordsPerRound;
+  final List<String> availableIds;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int> onWordsPerRoundChanged;
   final VoidCallback onStart;
 
   @override
@@ -553,7 +498,11 @@ class _StartView extends StatelessWidget {
               _WordSourcePicker(
                 selectedSource: selectedSource,
                 categories: categories,
+                wordsPerRound: wordsPerRound,
+                minWordsPerRound: minWordsPerRound,
+                availableIds: availableIds,
                 onSourceSelected: onSourceSelected,
+                onWordsPerRoundChanged: onWordsPerRoundChanged,
               ),
               const SizedBox(height: 22),
               FilledButton(
@@ -709,338 +658,53 @@ class _WordSourcePicker extends StatelessWidget {
   const _WordSourcePicker({
     required this.selectedSource,
     required this.categories,
+    this.wordsPerRound = 10,
+    this.minWordsPerRound = 1,
+    this.availableIds = const <String>[],
     required this.onSourceSelected,
+    this.onWordsPerRoundChanged,
   });
 
-  final SpeedRoundWordSource selectedSource;
+  final GameWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<SpeedRoundWordSource> onSourceSelected;
+  final int wordsPerRound;
+  final int minWordsPerRound;
+  final List<String> availableIds;
+  final ValueChanged<GameWordSource> onSourceSelected;
+  final ValueChanged<int>? onWordsPerRoundChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('speed-round-source-picker'),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF050912),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF26354B)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Du spielst mit',
-            style: TextStyle(
-              color: Color(0xFFB8C7D9),
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            selectedSource.label,
-            key: const ValueKey('speed-round-selected-source-label'),
-            style: const TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontSize: 18,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _PickerActionButton(
-            key: const ValueKey('speed-round-change-source-button'),
-            icon: Icons.folder_copy_rounded,
-            title: 'Wortquelle ändern',
-            subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
-            onTap: () => _showSourceSheet(context),
-          ),
-          const SizedBox(height: 10),
-          _PickerActionButton(
-            key: const ValueKey('speed-round-select-world-button'),
-            icon: Icons.public_rounded,
-            title: 'Wortwelt auswählen',
-            subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
-            onTap: () => _showWordWorldSheet(context),
-          ),
-        ],
-      ),
+    return game_picker.GameWordSourcePicker(
+      keyPrefix: 'speed-round',
+      selectedSource: _toSharedSource(selectedSource),
+      categories: categories,
+      wordsPerRound: wordsPerRound,
+      minWordsPerRound: minWordsPerRound,
+      availableIds: availableIds,
+      accentColor: const Color(0xFFFFD166),
+      secondaryAccentColor: const Color(0xFFFFD166),
+      onWordsPerRoundChanged: onWordsPerRoundChanged,
+      onSourceSelected: (source) => onSourceSelected(_fromSharedSource(source)),
     );
   }
 
-  Future<void> _showSourceSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _SpeedRoundSheetFrame(
-          title: 'Wortquelle ändern',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final source in _standardSpeedRoundSources)
-                _SheetOption(
-                  key: ValueKey('speed-round-source-${source.id}'),
-                  title: source.label,
-                  selected:
-                      selectedSource == SpeedRoundWordSource.standard(source),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onSourceSelected(SpeedRoundWordSource.standard(source));
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+  game_picker.GameWordSource _toSharedSource(GameWordSource source) {
+    return game_picker.GameWordSource.custom(
+      key: source.key,
+      label: source.label,
+      source: source.source,
+      categoryId: source.categoryId,
     );
   }
 
-  Future<void> _showWordWorldSheet(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _SpeedRoundSheetFrame(
-          title: 'Wortwelt auswählen',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final group in _speedRoundWordWorldGroups) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
-                  child: Text(
-                    group.title,
-                    style: const TextStyle(
-                      color: Color(0xFFFFD166),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                for (final world in group.worlds)
-                  Builder(
-                    builder: (context) {
-                      final source = SpeedRoundWordSource._wordWorld(
-                        world,
-                        categories,
-                      );
-                      return _SheetOption(
-                        key: ValueKey('speed-round-word-world-${world.key}'),
-                        title: world.name,
-                        selected: selectedSource == source,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          onSourceSelected(source);
-                        },
-                      );
-                    },
-                  ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _PickerActionButton extends StatelessWidget {
-  const _PickerActionButton({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0B1220),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF26354B)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF7DFFE3), size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFF4F8FF),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFB8C7D9),
-                        fontSize: 12,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFFFFD166)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SpeedRoundSheetFrame extends StatelessWidget {
-  const _SpeedRoundSheetFrame({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.84,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF050912),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFFFD166)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFFD166).withValues(alpha: 0.14),
-                  blurRadius: 32,
-                  spreadRadius: -6,
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF26354B),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFFF4F8FF),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  child,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetOption extends StatelessWidget {
-  const _SheetOption({
-    super.key,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = selected
-        ? const Color(0xFFFFD166)
-        : const Color(0xFF26354B);
-    final fillColor = selected
-        ? const Color(0xFFFFD166).withValues(alpha: 0.16)
-        : const Color(0xFF0B1220);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: fillColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected
-                          ? const Color(0xFFFFD166)
-                          : const Color(0xFFF4F8FF),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Color(0xFFFFD166),
-                    size: 20,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
+  GameWordSource _fromSharedSource(game_picker.GameWordSource source) {
+    return GameWordSource._(
+      label: source.label,
+      shortLabel: source.label.replaceFirst('Wortwelt: ', ''),
+      source: source.source,
+      categoryId: source.categoryId,
+      worldKey: source.key,
     );
   }
 }
@@ -1217,9 +881,9 @@ class _SpeedRoundMessageState extends StatelessWidget {
   final String title;
   final String text;
   final String buttonLabel;
-  final SpeedRoundWordSource? selectedSource;
+  final GameWordSource? selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<SpeedRoundWordSource>? onSourceSelected;
+  final ValueChanged<GameWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override

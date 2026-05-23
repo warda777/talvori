@@ -110,7 +110,11 @@ void main() {
   }
 
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-    await tester.ensureVisible(finder);
+    try {
+      await tester.scrollUntilVisible(finder, 120);
+    } catch (_) {
+      await tester.ensureVisible(finder);
+    }
     await tester.pump();
     await tester.tap(finder);
     await tester.pump();

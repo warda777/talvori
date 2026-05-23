@@ -44,6 +44,13 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
+    final startButton = find.byKey(const ValueKey('gap-word-start-button'));
+    if (startButton.evaluate().isNotEmpty) {
+      await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+      await tester.pumpAndSettle();
+      await tester.tap(startButton);
+      await tester.pump();
+    }
   }
 
   test(
@@ -86,7 +93,7 @@ void main() {
     expect(find.text('Noch keine passenden Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Füge Wörter mit mindestens vier Buchstaben hinzu, um Lückenwort zu spielen.',
+        'Diese Wortquelle braucht Wörter mit mindestens vier Buchstaben, um Lückenwort zu spielen.',
       ),
       findsOneWidget,
     );
