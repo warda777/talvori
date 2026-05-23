@@ -29,10 +29,33 @@ void main() {
     expect(find.text('Wort importiert'), findsOneWidget);
     expect(find.text('Gespeichert in Meine Wörter'), findsOneWidget);
     expect(find.text('Meine Wörter öffnen'), findsOneWidget);
+    final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(snackBar.duration, const Duration(seconds: 3));
     expect(
       find.byKey(const Key('incoming-share-open-my-words-action')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('success_feedback_stays_visible_long_enough_to_read', (
+    tester,
+  ) async {
+    await _pumpListener(
+      tester,
+      result: const SharedTextImportResult(
+        status: SharedTextImportStatus.imported,
+        message: 'ok',
+      ),
+    );
+
+    expect(find.text('Gespeichert in Meine Wörter'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 2500));
+    expect(find.text('Gespeichert in Meine Wörter'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(find.text('Gespeichert in Meine Wörter'), findsNothing);
   });
 
   testWidgets('shows_duplicate_feedback_with_my_words_action', (tester) async {
@@ -176,6 +199,112 @@ void main() {
     expect(imported, ['river', 'river']);
     expect(find.text('Wort importiert'), findsOneWidget);
   });
+
+  testWidgets('shows_summary_for_multiple_queued_initial_shares', (
+    tester,
+  ) async {
+    final receiver = _FakeSharedTextPlatformReceiver(
+      initialPayloads: const [
+        SharedTextPayload(id: 'queued-1', text: 'river'),
+        SharedTextPayload(id: 'queued-2', text: 'forest'),
+        SharedTextPayload(id: 'queued-3', text: 'river'),
+      ],
+    );
+    final seen = <String>{};
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      importText: ({required rawText, required now}) async {
+        final isNew = seen.add(rawText);
+        return SharedTextImportResult(
+          status: isNew
+              ? SharedTextImportStatus.imported
+              : SharedTextImportStatus.duplicate,
+          message: rawText,
+          word: _word(id: 'word-$rawText', term: rawText),
+        );
+      },
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          incomingSharedTextImportControllerProvider.overrideWith(
+            (ref) async => controller,
+          ),
+          localWordsForCategoryProvider.overrideWith(
+            (ref, categoryId) async => const <LocalWord>[],
+          ),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: IncomingSharedTextImportListener(
+            child: Scaffold(body: SizedBox.expand()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('2 Wörter gespeichert'), findsOneWidget);
+    expect(
+      find.text('1 bereits vorhanden · Übersetzung läuft im Hintergrund'),
+      findsOneWidget,
+    );
+    final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(snackBar.duration, const Duration(seconds: 3));
+  });
+
+  testWidgets('multiple_all_new_initial_shares_show_saved_count', (
+    tester,
+  ) async {
+    final receiver = _FakeSharedTextPlatformReceiver(
+      initialPayloads: const [
+        SharedTextPayload(id: 'queued-1', text: 'river'),
+        SharedTextPayload(id: 'queued-2', text: 'forest'),
+        SharedTextPayload(id: 'queued-3', text: 'mountain'),
+      ],
+    );
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: rawText,
+          word: _word(id: 'word-$rawText', term: rawText),
+        );
+      },
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          incomingSharedTextImportControllerProvider.overrideWith(
+            (ref) async => controller,
+          ),
+          localWordsForCategoryProvider.overrideWith(
+            (ref, categoryId) async => const <LocalWord>[],
+          ),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: IncomingSharedTextImportListener(
+            child: Scaffold(body: SizedBox.expand()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('3 Wörter gespeichert'), findsOneWidget);
+    expect(
+      find.text(
+        'Gespeichert in Meine Wörter · Übersetzung läuft im Hintergrund',
+      ),
+      findsOneWidget,
+    );
+  });
 }
 
 Future<void> _pumpListener(
@@ -208,29 +337,43 @@ Future<void> _pumpListener(
 }
 
 class _FakeSharedTextPlatformReceiver implements SharedTextPlatformReceiver {
-  _FakeSharedTextPlatformReceiver({this.initialText});
+  _FakeSharedTextPlatformReceiver({this.initialText, this.initialPayloads});
 
   final String? initialText;
-  final _events = StreamController<SharedTextPayload>.broadcast();
+  final List<SharedTextPayload>? initialPayloads;
+  final _events = StreamController<List<SharedTextPayload>>.broadcast();
 
-  void addPayload(SharedTextPayload payload) => _events.add(payload);
+  void addPayload(SharedTextPayload payload) => _events.add([payload]);
+
+  @override
+  Future<List<SharedTextPayload>> getInitialSharedPayloads() async {
+    final payloads = initialPayloads;
+    if (payloads != null) return payloads;
+    final text = initialText;
+    if (text == null) return const [];
+    return [SharedTextPayload(id: 'initial-1', text: text)];
+  }
 
   @override
   Future<SharedTextPayload?> getInitialSharedPayload() async {
-    final text = initialText;
-    if (text == null) return null;
-    return SharedTextPayload(id: 'initial-1', text: text);
+    final payloads = await getInitialSharedPayloads();
+    return payloads.isEmpty ? null : payloads.first;
   }
 
   @override
   Future<String?> getInitialSharedText() async => initialText;
 
   @override
-  Stream<SharedTextPayload> watchSharedPayload() => _events.stream;
+  Stream<SharedTextPayload> watchSharedPayload() {
+    return watchSharedPayloads().expand((payloads) => payloads);
+  }
+
+  @override
+  Stream<List<SharedTextPayload>> watchSharedPayloads() => _events.stream;
 
   @override
   Stream<String> watchSharedText() {
-    return _events.stream.map((payload) => payload.text);
+    return watchSharedPayload().map((payload) => payload.text);
   }
 }
 

@@ -61,6 +61,35 @@ void main() {
     expect(payload?.sharedTextPreview, 'Umbrella');
   });
 
+  test('getInitialSharedPayloads_reads_queued_ios_payloads', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'getInitialSharedText');
+          return [
+            {
+              'id': 'share-1',
+              'text': '  Umbrella  ',
+              'source': 'ios_share_extension',
+              'type': 'text',
+              'platform': 'ios',
+            },
+            {
+              'id': 'share-2',
+              'text': 'river',
+              'source': 'ios_share_extension',
+              'type': 'text',
+              'platform': 'ios',
+            },
+          ];
+        });
+
+    final receiver = SharedTextPlatformReceiver();
+
+    final payloads = await receiver.getInitialSharedPayloads();
+    expect(payloads.map((payload) => payload.id), ['share-1', 'share-2']);
+    expect(payloads.map((payload) => payload.text), ['Umbrella', 'river']);
+  });
+
   test('getInitialSharedText_returns_null_for_blank_text', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (_) async => '   ');
@@ -152,6 +181,51 @@ void main() {
       expect(payloads.single.text, 'First');
     },
   );
+
+  test('watchSharedPayload_expands_queued_resume_payloads', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    var pendingReadCount = 0;
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      expect(call.method, 'getInitialSharedText');
+      pendingReadCount += 1;
+      if (pendingReadCount == 1) return null;
+      return [
+        {
+          'id': 'resume-share-1',
+          'text': 'First',
+          'source': 'ios_share_extension',
+          'type': 'text',
+        },
+        {
+          'id': 'resume-share-2',
+          'text': 'Second',
+          'source': 'ios_share_extension',
+          'type': 'text',
+        },
+      ];
+    });
+
+    final receiver = SharedTextPlatformReceiver();
+    final payloads = <SharedTextPayload>[];
+    final payloadsReceived = Completer<void>();
+    final subscription = receiver.watchSharedPayload().listen((payload) {
+      payloads.add(payload);
+      if (payloads.length == 2 && !payloadsReceived.isCompleted) {
+        payloadsReceived.complete();
+      }
+    });
+    await testerIdle();
+
+    TestWidgetsFlutterBinding.instance.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+
+    await payloadsReceived.future;
+    await subscription.cancel();
+    expect(payloads.map((payload) => payload.text), ['First', 'Second']);
+  });
 }
 
 Future<void> testerIdle() async {

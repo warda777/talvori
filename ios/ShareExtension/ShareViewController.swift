@@ -9,11 +9,25 @@ final class ShareViewController: UIViewController {
   private let pendingSourceKey = "pendingSharedTextSource"
   private let pendingTypeKey = "pendingSharedTextType"
   private let pendingSourceUrlKey = "pendingSharedTextSourceUrl"
+  private let pendingPayloadsKey = "pendingSharedPayloads"
+  private let successDisplayDuration: TimeInterval = 2.8
   private var didStartProcessing = false
+  private let statusLabel = UILabel()
 
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = UIColor(red: 0.02, green: 0.04, blue: 0.07, alpha: 1)
+    statusLabel.translatesAutoresizingMaskIntoConstraints = false
+    statusLabel.text = "Wort wird gespeichert …"
+    statusLabel.textColor = .white
+    statusLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+    statusLabel.textAlignment = .center
+    view.addSubview(statusLabel)
+    NSLayoutConstraint.activate([
+      statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+      statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+      statusLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+    ])
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -39,8 +53,14 @@ final class ShareViewController: UIViewController {
       }
 
       self.storePendingSharedText(trimmed, sourceUrl: input.sourceUrl)
-      self.openContainingApp()
-      self.extensionContext?.completeRequest(returningItems: nil)
+      self.finishWithSuccess()
+    }
+  }
+
+  private func finishWithSuccess() {
+    statusLabel.text = "Gespeichert in Meine Wörter"
+    DispatchQueue.main.asyncAfter(deadline: .now() + successDisplayDuration) { [weak self] in
+      self?.extensionContext?.completeRequest(returningItems: nil)
     }
   }
 
@@ -110,27 +130,44 @@ final class ShareViewController: UIViewController {
     }
 
     let shareId = UUID().uuidString
+    let createdAt = Date().timeIntervalSince1970
+    let type = webUrl(from: text) == nil ? "text" : "url"
+    var payload: [String: Any] = [
+      "id": shareId,
+      "text": text,
+      "createdAt": createdAt,
+      "source": "ios_share_extension",
+      "type": type,
+      "platform": "ios",
+      "sharedTextPreview": String(text.prefix(120))
+    ]
+    if let sourceUrl, !sourceUrl.isEmpty {
+      payload["sourceUrl"] = sourceUrl
+    }
+    var pendingPayloads = defaults.array(forKey: pendingPayloadsKey) as? [[String: Any]] ?? []
+    pendingPayloads.append(payload)
+    defaults.set(pendingPayloads, forKey: pendingPayloadsKey)
+
+    // Keep the legacy single-payload keys for older app builds. The current
+    // Flutter side consumes the queue above and can import several shares later.
     defaults.set(text, forKey: pendingTextKey)
     defaults.set(shareId, forKey: pendingIdKey)
-    defaults.set(Date().timeIntervalSince1970, forKey: pendingCreatedAtKey)
+    defaults.set(createdAt, forKey: pendingCreatedAtKey)
     defaults.set("ios_share_extension", forKey: pendingSourceKey)
-    defaults.set(webUrl(from: text) == nil ? "text" : "url", forKey: pendingTypeKey)
+    defaults.set(type, forKey: pendingTypeKey)
     if let sourceUrl, !sourceUrl.isEmpty {
       defaults.set(sourceUrl, forKey: pendingSourceUrlKey)
     } else {
       defaults.removeObject(forKey: pendingSourceUrlKey)
     }
+
     defaults.synchronize()
     NSLog(
-      "TalvoriShareExtension wrote text payload id=%@ hasSourceUrl=%@",
+      "TalvoriShareExtension queued text payload id=%@ count=%d hasSourceUrl=%@",
       shareId,
+      pendingPayloads.count,
       sourceUrl == nil ? "false" : "true"
     )
-  }
-
-  private func openContainingApp() {
-    guard let url = URL(string: "talvori://share") else { return }
-    extensionContext?.open(url, completionHandler: nil)
   }
 
   private func webUrl(from rawText: String) -> String? {

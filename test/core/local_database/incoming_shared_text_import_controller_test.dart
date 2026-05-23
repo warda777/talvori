@@ -40,6 +40,39 @@ void main() {
     expect(imported, ['Umbrella']);
   });
 
+  test('imports_multiple_initial_shared_payloads_as_queue', () async {
+    final receiver = _FakeSharedTextPlatformReceiver(
+      initialPayloads: const [
+        SharedTextPayload(id: 'queued-1', text: 'river'),
+        SharedTextPayload(id: 'queued-2', text: 'forest'),
+        SharedTextPayload(id: 'queued-3', text: 'river'),
+      ],
+    );
+    final imported = <String>[];
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        imported.add(rawText);
+        return SharedTextImportResult(
+          status: imported.where((word) => word == rawText).length > 1
+              ? SharedTextImportStatus.duplicate
+              : SharedTextImportStatus.imported,
+          message: 'ok',
+        );
+      },
+    );
+
+    final results = await controller.importInitialSharedTexts();
+
+    expect(imported, ['river', 'forest', 'river']);
+    expect(results.map((result) => result.status), [
+      SharedTextImportStatus.imported,
+      SharedTextImportStatus.imported,
+      SharedTextImportStatus.duplicate,
+    ]);
+  });
+
   test('ignores_missing_initial_shared_text', () async {
     final receiver = _FakeSharedTextPlatformReceiver();
     var calls = 0;
@@ -87,6 +120,62 @@ void main() {
       SharedTextImportStatus.imported,
       SharedTextImportStatus.imported,
     ]);
+  });
+
+  test('imports_warm_shared_payload_batches_sequentially', () async {
+    final receiver = _FakeSharedTextPlatformReceiver();
+    final imported = <String>[];
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        imported.add(rawText);
+        return const SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+        );
+      },
+    );
+
+    final results = <SharedTextImportResult>[];
+    final sub = controller.watchIncomingSharedText().listen(results.add);
+    receiver.addPayloads(const [
+      SharedTextPayload(id: 'batch-1', text: 'river'),
+      SharedTextPayload(id: 'batch-2', text: 'house'),
+    ]);
+    await Future<void>.delayed(Duration.zero);
+    await sub.cancel();
+
+    expect(imported, ['river', 'house']);
+    expect(results, hasLength(2));
+  });
+
+  test('translation_failure_leaves_import_result_stable', () async {
+    final receiver = _FakeSharedTextPlatformReceiver(initialText: 'river');
+    final controller = IncomingSharedTextImportController(
+      receiver: receiver,
+      now: () => now,
+      importText: ({required rawText, required now}) async {
+        return SharedTextImportResult(
+          status: SharedTextImportStatus.imported,
+          message: 'ok',
+          word: _word(
+            id: 'word-river',
+            term: rawText,
+            status: TranslationStatus.pending,
+          ),
+        );
+      },
+      translateWord: ({required wordId}) async {
+        throw StateError('translation offline');
+      },
+    );
+
+    final result = await controller.importInitialSharedText();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result?.status, SharedTextImportStatus.imported);
+    expect(result?.word?.translationStatus, TranslationStatus.pending);
   });
 
   test('ignores_same_ios_share_id_but_accepts_same_text_with_new_id', () async {
@@ -478,33 +567,49 @@ void main() {
 }
 
 class _FakeSharedTextPlatformReceiver implements SharedTextPlatformReceiver {
-  _FakeSharedTextPlatformReceiver({this.initialText});
+  _FakeSharedTextPlatformReceiver({this.initialText, this.initialPayloads});
 
   final String? initialText;
-  final _events = StreamController<SharedTextPayload>.broadcast();
+  final List<SharedTextPayload>? initialPayloads;
+  final _events = StreamController<List<SharedTextPayload>>.broadcast();
 
   void add(String text) {
-    _events.add(SharedTextPayload(id: 'legacy:${text.hashCode}', text: text));
+    _events.add([SharedTextPayload(id: 'legacy:${text.hashCode}', text: text)]);
   }
 
-  void addPayload(SharedTextPayload payload) => _events.add(payload);
+  void addPayload(SharedTextPayload payload) => _events.add([payload]);
+
+  void addPayloads(List<SharedTextPayload> payloads) => _events.add(payloads);
+
+  @override
+  Future<List<SharedTextPayload>> getInitialSharedPayloads() async {
+    final payloads = initialPayloads;
+    if (payloads != null) return payloads;
+    final text = initialText;
+    if (text == null) return const [];
+    return [SharedTextPayload(id: 'initial-1', text: text)];
+  }
 
   @override
   Future<SharedTextPayload?> getInitialSharedPayload() async {
-    final text = initialText;
-    if (text == null) return null;
-    return SharedTextPayload(id: 'initial-1', text: text);
+    final payloads = await getInitialSharedPayloads();
+    return payloads.isEmpty ? null : payloads.first;
   }
 
   @override
   Future<String?> getInitialSharedText() async => initialText;
 
   @override
-  Stream<SharedTextPayload> watchSharedPayload() => _events.stream;
+  Stream<SharedTextPayload> watchSharedPayload() {
+    return watchSharedPayloads().expand((payloads) => payloads);
+  }
+
+  @override
+  Stream<List<SharedTextPayload>> watchSharedPayloads() => _events.stream;
 
   @override
   Stream<String> watchSharedText() {
-    return _events.stream.map((payload) => payload.text);
+    return watchSharedPayload().map((payload) => payload.text);
   }
 }
 

@@ -30,6 +30,7 @@ class _IncomingSharedTextImportListenerState
   static const _red = Color(0xFFFF4E6A);
   static const _textPrimary = Color(0xFFF4F8FF);
   static const _textSecondary = Color(0xFFB8C7D9);
+  static const _feedbackDuration = Duration(seconds: 3);
 
   StreamSubscription<SharedTextImportResult>? _subscription;
 
@@ -45,15 +46,45 @@ class _IncomingSharedTextImportListenerState
     final controller = await ref.read(
       incomingSharedTextImportControllerProvider.future,
     );
-    final initialResult = await controller.importInitialSharedText();
-    if (initialResult != null) {
-      _showResult(initialResult);
+    final initialResults = await controller.importInitialSharedTexts();
+    if (initialResults.isNotEmpty) {
+      _showResults(initialResults);
     }
     _subscription = controller.watchIncomingSharedText().listen(
       _showResult,
       onError: (Object error, StackTrace stackTrace) {
         debugPrint('Shared text listener disabled: $error');
       },
+    );
+  }
+
+  void _showResults(List<SharedTextImportResult> results) {
+    if (results.length == 1) {
+      _showResult(results.single);
+      return;
+    }
+    for (final result in results) {
+      if (result.status == SharedTextImportStatus.imported ||
+          result.status == SharedTextImportStatus.duplicate) {
+        _refreshMyWordsProviders();
+      }
+    }
+    final imported = results
+        .where((result) => result.status == SharedTextImportStatus.imported)
+        .length;
+    final duplicates = results
+        .where((result) => result.status == SharedTextImportStatus.duplicate)
+        .length;
+    if (imported == 0 && duplicates == 0) {
+      _showResult(results.last);
+      return;
+    }
+    _showCompactMessage(
+      title: '$imported ${imported == 1 ? 'Wort' : 'Wörter'} gespeichert',
+      subtitle: duplicates > 0
+          ? '$duplicates bereits vorhanden · Übersetzung läuft im Hintergrund'
+          : 'Gespeichert in Meine Wörter · Übersetzung läuft im Hintergrund',
+      accentColor: _green,
     );
   }
 
@@ -96,7 +127,34 @@ class _IncomingSharedTextImportListenerState
           behavior: SnackBarBehavior.floating,
           padding: EdgeInsets.zero,
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
-          duration: const Duration(seconds: 4),
+          duration: _feedbackDuration,
+        ),
+      );
+  }
+
+  void _showCompactMessage({
+    required String title,
+    required String subtitle,
+    required Color accentColor,
+  }) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: _TalvoriImportSummarySnackBarContent(
+            title: title,
+            subtitle: subtitle,
+            accentColor: accentColor,
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.zero,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
+          duration: _feedbackDuration,
         ),
       );
   }
@@ -279,5 +337,89 @@ class _TalvoriImportSnackBarContent extends StatelessWidget {
       SharedTextImportStatus.invalid ||
       SharedTextImportStatus.error => Icons.error_outline_rounded,
     };
+  }
+}
+
+class _TalvoriImportSummarySnackBarContent extends StatelessWidget {
+  const _TalvoriImportSummarySnackBarContent({
+    required this.title,
+    required this.subtitle,
+    required this.accentColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _IncomingSharedTextImportListenerState._surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accentColor.withValues(alpha: 0.72)),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.22),
+            blurRadius: 24,
+            spreadRadius: -4,
+          ),
+          const BoxShadow(
+            color: Colors.black87,
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accentColor.withValues(alpha: 0.13),
+                border: Border.all(color: accentColor.withValues(alpha: 0.75)),
+              ),
+              child: Icon(Icons.library_add_check_rounded, color: accentColor),
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color:
+                          _IncomingSharedTextImportListenerState._textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color:
+                          _IncomingSharedTextImportListenerState._textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

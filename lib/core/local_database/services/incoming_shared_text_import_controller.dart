@@ -53,17 +53,20 @@ class IncomingSharedTextImportController {
   final Set<String> _activeTranslations = <String>{};
 
   Future<SharedTextImportResult?> importInitialSharedText() async {
-    final payload = await _receiver.getInitialSharedPayload();
-    if (payload == null) return null;
-    return importSharedPayload(payload);
+    final results = await importInitialSharedTexts();
+    return results.isEmpty ? null : results.last;
+  }
+
+  Future<List<SharedTextImportResult>> importInitialSharedTexts() async {
+    final payloads = await _receiver.getInitialSharedPayloads();
+    return _importPayloadBatch(payloads);
   }
 
   Stream<SharedTextImportResult> watchIncomingSharedText() {
     return _receiver
-        .watchSharedPayload()
-        .asyncMap(importSharedPayload)
-        .where((result) => result != null)
-        .cast<SharedTextImportResult>();
+        .watchSharedPayloads()
+        .asyncMap(_importPayloadBatch)
+        .expand((results) => results);
   }
 
   Future<SharedTextImportResult> importSharedText(String rawText) async {
@@ -85,6 +88,19 @@ class IncomingSharedTextImportController {
     await _saveSourceIfPresent(result.word, payload, now);
     _scheduleAutoTranslation(result.word);
     return result;
+  }
+
+  Future<List<SharedTextImportResult>> _importPayloadBatch(
+    List<SharedTextPayload> payloads,
+  ) async {
+    final results = <SharedTextImportResult>[];
+    for (final payload in payloads) {
+      final result = await importSharedPayload(payload);
+      if (result != null) {
+        results.add(result);
+      }
+    }
+    return results;
   }
 
   Future<void> _saveSourceIfPresent(

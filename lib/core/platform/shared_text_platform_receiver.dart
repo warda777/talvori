@@ -39,10 +39,15 @@ class SharedTextPlatformReceiver {
   final Set<String> _deliveredPayloadIds = <String>{};
 
   Future<SharedTextPayload?> getInitialSharedPayload() async {
-    return _readPendingSharedPayload(reason: 'initial');
+    final payloads = await getInitialSharedPayloads();
+    return payloads.isEmpty ? null : payloads.first;
   }
 
-  Future<SharedTextPayload?> _readPendingSharedPayload({
+  Future<List<SharedTextPayload>> getInitialSharedPayloads() {
+    return _readPendingSharedPayloads(reason: 'initial');
+  }
+
+  Future<List<SharedTextPayload>> _readPendingSharedPayloads({
     required String reason,
   }) async {
     debugPrint('Talvori SharedTextReceiver $reason check');
@@ -52,12 +57,16 @@ class SharedTextPlatformReceiver {
         'getInitialSharedText',
       );
     } on MissingPluginException {
-      return null;
+      return const [];
     } on PlatformException {
-      return null;
+      return const [];
     }
-    final parsedPayload = _payloadFromPlatformValue(payload);
-    return _takePayloadIfNew(parsedPayload, reason: reason);
+    final parsedPayloads = _payloadsFromPlatformValue(payload);
+    return [
+      for (final parsedPayload in parsedPayloads)
+        if (_takePayloadIfNew(parsedPayload, reason: reason) case final fresh?)
+          fresh,
+    ];
   }
 
   Future<String?> getInitialSharedText() async {
@@ -69,24 +78,28 @@ class SharedTextPlatformReceiver {
   }
 
   Stream<SharedTextPayload> watchSharedPayload() {
+    return watchSharedPayloads().expand((payloads) => payloads);
+  }
+
+  Stream<List<SharedTextPayload>> watchSharedPayloads() {
     final supportsNativeShareStream =
         defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
     if (kIsWeb || !supportsNativeShareStream) {
       return const Stream.empty();
     }
-    return _watchSharedPayloadWithResumeChecks();
+    return _watchSharedPayloadsWithResumeChecks();
   }
 
-  Stream<SharedTextPayload> _watchSharedPayloadWithResumeChecks() {
+  Stream<List<SharedTextPayload>> _watchSharedPayloadsWithResumeChecks() {
     late final _SharedTextLifecycleObserver lifecycleObserver;
-    final controller = StreamController<SharedTextPayload>();
+    final controller = StreamController<List<SharedTextPayload>>();
 
     Future<void> pullPendingPayload(String reason) async {
       try {
-        final payload = await _readPendingSharedPayload(reason: reason);
-        if (payload != null && !controller.isClosed) {
-          controller.add(payload);
+        final payloads = await _readPendingSharedPayloads(reason: reason);
+        if (payloads.isNotEmpty && !controller.isClosed) {
+          controller.add(payloads);
         }
       } on Object catch (error, stackTrace) {
         debugPrint('Talvori SharedTextReceiver $reason failed: $error');
@@ -104,7 +117,7 @@ class SharedTextPlatformReceiver {
       unawaited(pullPendingPayload('watch-start'));
     };
 
-    controller.onCancel = () {
+    controller.onCancel = () async {
       WidgetsBinding.instance.removeObserver(lifecycleObserver);
     };
 
@@ -137,7 +150,19 @@ class SharedTextPlatformReceiver {
     return payload;
   }
 
-  SharedTextPayload? _payloadFromPlatformValue(Object? value) {
+  List<SharedTextPayload> _payloadsFromPlatformValue(Object? value) {
+    if (value is List) {
+      return [
+        for (final item in value)
+          if (_payloadFromSinglePlatformValue(item) case final payload?)
+            payload,
+      ];
+    }
+    final payload = _payloadFromSinglePlatformValue(value);
+    return payload == null ? const [] : [payload];
+  }
+
+  SharedTextPayload? _payloadFromSinglePlatformValue(Object? value) {
     if (value is String) {
       final text = value.trim();
       if (text.isEmpty) return null;

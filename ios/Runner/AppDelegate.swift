@@ -12,6 +12,7 @@ import UserNotifications
   private let pendingSourceKey = "pendingSharedTextSource"
   private let pendingTypeKey = "pendingSharedTextType"
   private let pendingSourceUrlKey = "pendingSharedTextSourceUrl"
+  private let pendingPayloadsKey = "pendingSharedPayloads"
   private var shareChannelsConfigured = false
 
   override func application(
@@ -54,23 +55,34 @@ import UserNotifications
         }
         switch call.method {
         case "getInitialSharedText":
-          result(self.consumePendingSharedPayload())
+          result(self.consumePendingSharedPayloads())
         default:
           result(FlutterMethodNotImplemented)
         }
       }
   }
 
-  private func consumePendingSharedPayload() -> [String: Any]? {
+  private func consumePendingSharedPayloads() -> [[String: Any]] {
     guard let defaults = UserDefaults(suiteName: appGroupId) else {
       NSLog("Talvori share runner pending payload found=false reason=no_app_group_defaults")
-      return nil
+      return []
     }
+
+    if let queuedPayloads = defaults.array(forKey: pendingPayloadsKey) as? [[String: Any]],
+       !queuedPayloads.isEmpty {
+      clearPendingSharedPayload(defaults)
+      NSLog(
+        "Talvori share runner pending queue found=true count=%d",
+        queuedPayloads.count
+      )
+      return queuedPayloads
+    }
+
     let rawText = defaults.string(forKey: pendingTextKey)
     let text = rawText?.trimmingCharacters(in: .whitespacesAndNewlines)
     guard let text, !text.isEmpty else {
       NSLog("Talvori share runner pending payload found=false reason=no_text")
-      return nil
+      return []
     }
 
     let id = defaults.string(forKey: pendingIdKey) ?? UUID().uuidString
@@ -97,7 +109,7 @@ import UserNotifications
     if let sourceUrl, !sourceUrl.isEmpty {
       payload["sourceUrl"] = sourceUrl
     }
-    return payload
+    return [payload]
   }
 
   private func clearPendingSharedPayload(_ defaults: UserDefaults) {
@@ -107,6 +119,7 @@ import UserNotifications
     defaults.removeObject(forKey: pendingSourceKey)
     defaults.removeObject(forKey: pendingTypeKey)
     defaults.removeObject(forKey: pendingSourceUrlKey)
+    defaults.removeObject(forKey: pendingPayloadsKey)
     defaults.synchronize()
   }
 }
