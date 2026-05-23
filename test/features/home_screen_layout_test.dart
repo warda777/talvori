@@ -17,8 +17,8 @@ import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/home/ui/screens/listen_and_write_game_screen.dart';
-import 'package:talvori/features/home/ui/screens/meaning_duel_preview_screen.dart';
-import 'package:talvori/features/home/ui/screens/meaning_finder_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_duel_preview_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_recognition_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/speed_round_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
@@ -697,8 +697,8 @@ void main() {
       'Hör & Schreib',
       'Lückenwort',
       'Wort-Jagd',
-      'Bedeutung finden',
-      'Bedeutungs-Duell',
+      'Wort erkennen',
+      'Wort-Duell',
       'Wort-Puzzle',
       'Hangman',
       'Kontext-Challenge',
@@ -708,8 +708,14 @@ void main() {
     for (final text in visibleTexts) {
       expect(find.text(text), findsOneWidget);
     }
+    expect(
+      tester.getTopLeft(find.text('Wort-Duell')).dy,
+      lessThan(tester.getTopLeft(find.text('Wörter bauen')).dy),
+    );
     expect(find.text('Vocab Practice'), findsNothing);
     expect(find.text('Übungsarten'), findsNothing);
+    expect(find.text('Bedeutung finden'), findsNothing);
+    expect(find.text('Bedeutungs-Duell'), findsNothing);
     expect(find.text('Try Game shuffle'), findsNothing);
     expect(find.text('Vocab classic'), findsNothing);
     expect(find.text('Build words'), findsNothing);
@@ -864,7 +870,7 @@ void main() {
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
-  testWidgets('meaning finder card opens game screen', (tester) async {
+  testWidgets('word recognition card opens game screen', (tester) async {
     tester.view.physicalSize = const Size(390, 1800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -892,16 +898,16 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byKey(const ValueKey('word-game-meaning_finder')));
+    await tester.tap(find.byKey(const ValueKey('word-game-word_recognition')));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MeaningFinderGameScreen), findsOneWidget);
-    expect(find.text('Bedeutung finden'), findsWidgets);
-    expect(find.byKey(const ValueKey('meaning-finder-hint')), findsOneWidget);
+    expect(find.byType(WordRecognitionGameScreen), findsOneWidget);
+    expect(find.text('Wort erkennen'), findsWidgets);
+    expect(find.byKey(const ValueKey('word-recognition-hint')), findsOneWidget);
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
-  testWidgets('meaning duel card opens preview screen', (tester) async {
+  testWidgets('word duel card opens preview screen', (tester) async {
     tester.view.physicalSize = const Size(390, 1800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -913,18 +919,19 @@ void main() {
     );
     await tester.pump();
 
-    final duelTile = find.byKey(const ValueKey('word-game-meaning_duel'));
+    final duelTile = find.byKey(const ValueKey('word-game-word_duel'));
     await tester.ensureVisible(duelTile);
     await tester.pump();
     await tester.tap(duelTile);
     await tester.pumpAndSettle();
 
-    expect(find.byType(MeaningDuelPreviewScreen), findsOneWidget);
-    expect(find.text('Bedeutungs-Duell'), findsWidgets);
+    expect(find.byType(WordDuelPreviewScreen), findsOneWidget);
+    expect(find.text('Wort-Duell'), findsWidgets);
     expect(
       find.textContaining('echtes Duell gegen andere Talvori-Spieler'),
       findsOneWidget,
     );
+    expect(find.text('Bedeutungs-Duell'), findsNothing);
     expect(find.text('Dieses Wortspiel wird vorbereitet.'), findsNothing);
   });
 
@@ -1159,8 +1166,8 @@ void main() {
     const gameIds = [
       'speed_round',
       'word_hunt',
-      'meaning_finder',
-      'meaning_duel',
+      'word_recognition',
+      'word_duel',
       'word_match',
       'word_puzzle',
       'gap_word',

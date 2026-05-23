@@ -48,9 +48,16 @@ class VocabState {
         accent: Color(0xFFFF7AB6),
       ),
       VocabPracticeItem(
-        id: 'meaning_finder',
-        title: 'Bedeutung finden',
-        subtitle: 'Erkenne die passende Bedeutung',
+        id: 'word_duel',
+        title: 'Wort-Duell',
+        subtitle: 'Tritt später gegen andere an',
+        icon: Icons.sports_esports_rounded,
+        accent: Color(0xFFFF8A5B),
+      ),
+      VocabPracticeItem(
+        id: 'word_recognition',
+        title: 'Wort erkennen',
+        subtitle: 'Wähle die passende Übersetzung',
         icon: Icons.psychology_alt_rounded,
         accent: Color(0xFFFF8A5B),
       ),
@@ -113,13 +120,6 @@ class VocabState {
         subtitle: 'Deine tägliche Wortmission',
         icon: Icons.flag_rounded,
         accent: Color(0xFF5DDCFF),
-      ),
-      VocabPracticeItem(
-        id: 'meaning_duel',
-        title: 'Bedeutungs-Duell',
-        subtitle: 'Tritt später gegen andere an',
-        icon: Icons.sports_esports_rounded,
-        accent: Color(0xFFFF8A5B),
       ),
     ],
   );

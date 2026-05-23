@@ -39,16 +39,17 @@ angeboten.
 ## Aktuelle Spielkarten
 
 Elf Wortspielkarten oeffnen echte lokale Spielseiten. Zusaetzlich gibt es eine
-Vorschaukarte fuer den spaeteren Online-Modus `Bedeutungs-Duell`:
+Vorschaukarte fuer den spaeteren Online-Modus `Wort-Duell`:
 `Hoer & Schreib`, `Wort-Match`, `Blitzrunde`, `Lueckenwort`, `Wort-Puzzle`,
-`Bedeutung finden`, `Wort-Jagd`, `Hangman`, `Daily Word Quest`,
+`Wort erkennen`, `Wort-Jagd`, `Hangman`, `Daily Word Quest`,
 `Boss-Fight` und `Kontext-Challenge`.
 
 ### Schnellspiele
 
 - `Blitzrunde` - 60 Sekunden, so viele Woerter wie moeglich
 - `Wort-Jagd` - Tippe schnell die richtige Bedeutung
-- `Bedeutung finden` - Erkenne die passende Bedeutung
+- `Wort-Duell` - Tritt spaeter gegen andere an
+- `Wort erkennen` - Wähle die passende Übersetzung
 
 ### Woerter bauen
 
@@ -63,7 +64,6 @@ Vorschaukarte fuer den spaeteren Online-Modus `Bedeutungs-Duell`:
 - `Kontext-Challenge` - Verstehe Woerter im KI-Satz
 - `Boss-Fight` - Besiege deine schwierigsten Woerter
 - `Daily Word Quest` - Deine taegliche Wortmission
-- `Bedeutungs-Duell` - Tritt spaeter gegen andere an
 
 Keine der lokalen Spielkarten nutzt mehr den alten Dummy-Hinweis
 `Dieses Wortspiel wird vorbereitet.` Beim Oeffnen der Spielseiten wird keine
@@ -188,43 +188,47 @@ Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
-## Bedeutung finden
+## Wort erkennen
 
-`Bedeutung finden` ist der lokale Multiple-Choice-Modus fuer Bedeutungen.
-Der Name `Bedeutungs-Duell` ist fuer den spaeteren Online-/Gegner-Modus
-reserviert.
+`Wort erkennen` ist der lokale Multiple-Choice-Modus fuer das Erkennen der
+passenden Uebersetzung. Der Name `Wort-Duell` ist fuer den spaeteren
+Online-/Gegner-Modus reserviert.
 
 - liest lokale Woerter offline ueber dieselbe lokale Wortquelle
 - nutzt nur Woerter mit Begriff und Uebersetzung
 - benoetigt mindestens vier passende Wortpaare
 - spielt maximal 10 Fragen pro Runde
 - zeigt keinen Timer und keine Startkarte
-- zeigt ein Wort, einen einfachen lokalen Bedeutungshinweis und vier lokale
+- zeigt ein Wort, einen einfachen lokalen Hinweis und vier lokale
   Uebersetzungen
 - nutzt aktuell nur lokale Satzvorlagen und keine KI
-- kann spaeter echte Felder wie `meaningHint`, Beispielsatz oder KI-Kontext
-  verwenden
+- behauptet keine echte Woerterbuchdefinition oder KI-Erklaerung
 - bietet dieselbe Wortquelle-/Wortwelt-Auswahl wie `Blitzrunde` und
   `Wort-Jagd`
 - waehlt eine richtige Antwort und drei lokale Ablenker
 - filtert doppelte Begriffe oder Uebersetzungen fuer stabile Runden
 - vergleicht Antworten ueber stabile Wort-IDs
-- zeigt bei falschen Antworten die richtige Bedeutung ohne Strafe
+- zeigt bei falschen Antworten die passende Uebersetzung ohne Strafe
 - erlaubt `Aufloesen` und `Naechste Frage`
 - zeigt am Ende `Runde beendet`
 
 Der Modus schreibt keine SRS-, XP-, Liga-, Rewards- oder Statistikdaten.
 
-## Bedeutungs-Duell Vorschau
+## Wort-Duell Vorschau
 
-`Bedeutungs-Duell` ist jetzt eine Vorschauseite fuer einen spaeteren
-Online-/Gegner-Modus:
+`Wort-Duell` ist jetzt eine Vorschauseite fuer einen spaeteren
+Online-/Gegner-Modus. Zwei Spieler sollen spaeter dieselben Woerter erkennen;
+wer schneller und richtiger antwortet, gewinnt.
 
 - zeigt nur deaktivierte Vorschau-Elemente wie `Spieler einladen`,
   `Duell-Anfrage`, `Live-Ranking`, `Antwortzeit` und `Gewinner`
 - fuehrt keine Online-Anfrage aus
 - legt keine Supabase-Tabellen oder Multiplayer-Daten an
 - speichert keine Rankings, XP, Liga-, Rewards-, Statistik- oder SRS-Daten
+
+Ein echtes Bedeutungs- oder Definitionsspiel kann spaeter separat entstehen,
+wenn KI-Saetze, lokale Beschreibungstexte oder sichere Beispielsatzfelder
+verfuegbar sind.
 
 ## Wort-Puzzle
 

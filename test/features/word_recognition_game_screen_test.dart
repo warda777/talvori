@@ -7,7 +7,7 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
-import 'package:talvori/features/home/ui/screens/meaning_finder_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/word_recognition_game_screen.dart';
 
 void main() {
   LocalWord word({
@@ -74,7 +74,7 @@ void main() {
             return categories;
           }),
         ],
-        child: const MaterialApp(home: MeaningFinderGameScreen()),
+        child: const MaterialApp(home: WordRecognitionGameScreen()),
       ),
     );
     await tester.pump();
@@ -88,8 +88,8 @@ void main() {
     await tester.pump();
   }
 
-  test('buildMeaningFinderPairs keeps only complete unique pairs', () {
-    final pairs = buildMeaningFinderPairs([
+  test('buildWordRecognitionPairs keeps only complete unique pairs', () {
+    final pairs = buildWordRecognitionPairs([
       word(id: 'one', term: 'one', translation: 'eins'),
       word(id: 'duplicate-translation', term: 'single', translation: 'eins'),
       word(id: 'empty-translation', term: 'empty', translation: ''),
@@ -105,9 +105,12 @@ void main() {
     expect(pairs.map((pair) => pair.id), ['one', 'two']);
   });
 
-  test('buildMeaningFinderQuestion creates one correct answer by id', () {
-    final pairs = buildMeaningFinderPairs(sampleWords());
-    final question = buildMeaningFinderQuestion(pairs: pairs, questionIndex: 0);
+  test('buildWordRecognitionQuestion creates one correct answer by id', () {
+    final pairs = buildWordRecognitionPairs(sampleWords());
+    final question = buildWordRecognitionQuestion(
+      pairs: pairs,
+      questionIndex: 0,
+    );
 
     expect(question.prompt, 'emergency');
     expect(question.correctAnswerText, 'Notfall');
@@ -128,7 +131,7 @@ void main() {
     expect(find.text('Noch nicht genug Wörter'), findsOneWidget);
     expect(
       find.text(
-        'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Bedeutung finden zu spielen.',
+        'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Wort erkennen zu spielen.',
       ),
       findsOneWidget,
     );
@@ -138,37 +141,38 @@ void main() {
   testWidgets('shows prompt counter and four answer options', (tester) async {
     await pumpGame(tester, words: sampleWords());
 
-    expect(find.text('Bedeutung finden'), findsWidgets);
+    expect(find.text('Wort erkennen'), findsWidgets);
     expect(find.text('1 / 4'), findsOneWidget);
-    expect(find.byKey(const ValueKey('meaning-finder-hint')), findsOneWidget);
+    expect(find.byKey(const ValueKey('word-recognition-hint')), findsOneWidget);
     expect(
-      find.text(
-        'Gesucht ist die Bedeutung, die im Deutschen am besten zu "emergency" passt.',
-      ),
+      find.text('Welches deutsche Wort passt zu "emergency"?'),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('meaning-finder-source-picker')),
+      find.byKey(const ValueKey('word-recognition-source-picker')),
       findsOneWidget,
     );
     expect(find.text('Du spielst mit'), findsOneWidget);
     expect(find.text('Alle Wörter'), findsOneWidget);
-    expect(find.byKey(const ValueKey('meaning-finder-prompt')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('word-recognition-prompt')),
+      findsOneWidget,
+    );
     expect(find.text('emergency'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('meaning-finder-answer-emergency')),
+      find.byKey(const ValueKey('word-recognition-answer-emergency')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('meaning-finder-answer-shelter')),
+      find.byKey(const ValueKey('word-recognition-answer-shelter')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('meaning-finder-answer-rescue')),
+      find.byKey(const ValueKey('word-recognition-answer-rescue')),
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('meaning-finder-answer-water')),
+      find.byKey(const ValueKey('word-recognition-answer-water')),
       findsOneWidget,
     );
   });
@@ -194,7 +198,7 @@ void main() {
 
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-change-source-button')),
+      find.byKey(const ValueKey('word-recognition-change-source-button')),
     );
     await tester.pumpAndSettle();
 
@@ -205,7 +209,7 @@ void main() {
 
     await tester.tap(
       find.byKey(
-        const ValueKey('meaning-finder-source-local-source-favorites'),
+        const ValueKey('word-recognition-source-local-source-favorites'),
       ),
     );
     await tester.pumpAndSettle();
@@ -256,7 +260,7 @@ void main() {
     );
 
     await tester.tap(
-      find.byKey(const ValueKey('meaning-finder-select-world-button')),
+      find.byKey(const ValueKey('word-recognition-select-world-button')),
     );
     await tester.pumpAndSettle();
 
@@ -267,12 +271,12 @@ void main() {
     expect(find.text('C2'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('meaning-finder-word-world-travel')),
+      find.byKey(const ValueKey('word-recognition-word-world-travel')),
       520,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.tap(
-      find.byKey(const ValueKey('meaning-finder-word-world-travel')),
+      find.byKey(const ValueKey('word-recognition-word-world-travel')),
     );
     await tester.pumpAndSettle();
     await tester.pump();
@@ -287,11 +291,11 @@ void main() {
 
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-answer-emergency')),
+      find.byKey(const ValueKey('word-recognition-answer-emergency')),
     );
 
     expect(find.text('Richtig!'), findsOneWidget);
-    expect(find.text('Richtige Bedeutung'), findsOneWidget);
+    expect(find.text('Passende Übersetzung'), findsOneWidget);
     expect(find.text('Notfall'), findsWidgets);
     expect(find.text('Nächste Frage'), findsOneWidget);
     expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
@@ -304,11 +308,11 @@ void main() {
 
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-answer-shelter')),
+      find.byKey(const ValueKey('word-recognition-answer-shelter')),
     );
 
     expect(find.text('Nicht ganz.'), findsOneWidget);
-    expect(find.text('Richtige Bedeutung'), findsOneWidget);
+    expect(find.text('Passende Übersetzung'), findsOneWidget);
     expect(find.text('Notfall'), findsWidgets);
     expect(find.byIcon(Icons.radio_button_checked_rounded), findsOneWidget);
   });
@@ -323,11 +327,11 @@ void main() {
 
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-reveal-button')),
+      find.byKey(const ValueKey('word-recognition-reveal-button')),
     );
 
     expect(find.text('Aufgelöst.'), findsOneWidget);
-    expect(find.text('Richtige Bedeutung'), findsOneWidget);
+    expect(find.text('Passende Übersetzung'), findsOneWidget);
     expect(find.text('Notfall'), findsWidgets);
     expect(find.text('Nächste Frage'), findsOneWidget);
   });
@@ -342,11 +346,11 @@ void main() {
 
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-answer-emergency')),
+      find.byKey(const ValueKey('word-recognition-answer-emergency')),
     );
     await tapVisible(
       tester,
-      find.byKey(const ValueKey('meaning-finder-next-button')),
+      find.byKey(const ValueKey('word-recognition-next-button')),
     );
 
     expect(find.text('2 / 4'), findsOneWidget);
@@ -365,17 +369,17 @@ void main() {
     for (final id in ['emergency', 'shelter', 'rescue', 'water']) {
       await tapVisible(
         tester,
-        find.byKey(ValueKey('meaning-finder-answer-$id')),
+        find.byKey(ValueKey('word-recognition-answer-$id')),
       );
       await tapVisible(
         tester,
-        find.byKey(const ValueKey('meaning-finder-next-button')),
+        find.byKey(const ValueKey('word-recognition-next-button')),
       );
     }
 
     expect(find.text('Runde beendet'), findsOneWidget);
     expect(
-      find.text('Du hast 4 von 4 Bedeutungen richtig erkannt.'),
+      find.text('Du hast 4 von 4 Wörtern richtig erkannt.'),
       findsOneWidget,
     );
     expect(find.text('Nochmal spielen'), findsOneWidget);

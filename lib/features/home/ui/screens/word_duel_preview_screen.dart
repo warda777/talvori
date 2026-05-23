@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class MeaningDuelPreviewScreen extends StatelessWidget {
-  const MeaningDuelPreviewScreen({super.key});
+class WordDuelPreviewScreen extends StatelessWidget {
+  const WordDuelPreviewScreen({super.key});
 
-  static const routeName = 'meaning-duel-preview';
+  static const routeName = 'word-duel-preview';
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class MeaningDuelPreviewScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF050912),
         elevation: 0,
         centerTitle: true,
-        title: const Text('Bedeutungs-Duell'),
+        title: const Text('Wort-Duell'),
       ),
       body: SafeArea(
         child: ListView(
@@ -43,7 +43,7 @@ class MeaningDuelPreviewScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Bedeutungs-Duell',
+                    'Wort-Duell',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFFF4F8FF),
@@ -53,7 +53,7 @@ class MeaningDuelPreviewScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Dieser Modus wird später ein echtes Duell gegen andere Talvori-Spieler. Ihr beantwortet dieselben Bedeutungsfragen. Wer schneller und richtiger antwortet, gewinnt.',
+                    'Dieser Modus wird später ein echtes Duell gegen andere Talvori-Spieler. Ihr erkennt dieselben Wörter. Wer schneller und richtiger antwortet, gewinnt.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFFB8C7D9),
@@ -65,7 +65,7 @@ class MeaningDuelPreviewScreen extends StatelessWidget {
                   const _PreviewFeatureGrid(),
                   const SizedBox(height: 22),
                   OutlinedButton(
-                    key: const ValueKey('meaning-duel-preview-back-button'),
+                    key: const ValueKey('word-duel-preview-back-button'),
                     onPressed: () => Navigator.of(context).maybePop(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFF4F8FF),

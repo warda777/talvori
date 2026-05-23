@@ -7,22 +7,21 @@ import 'package:talvori/core/local_database/providers/local_categories_provider.
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 
-class MeaningFinderGameScreen extends ConsumerStatefulWidget {
-  const MeaningFinderGameScreen({super.key});
+class WordRecognitionGameScreen extends ConsumerStatefulWidget {
+  const WordRecognitionGameScreen({super.key});
 
-  static const routeName = 'meaning-finder-game';
+  static const routeName = 'word-recognition-game';
 
   @override
-  ConsumerState<MeaningFinderGameScreen> createState() =>
-      _MeaningFinderGameScreenState();
+  ConsumerState<WordRecognitionGameScreen> createState() =>
+      _WordRecognitionGameScreenState();
 }
 
-class _MeaningFinderGameScreenState
-    extends ConsumerState<MeaningFinderGameScreen> {
-  MeaningFinderWordSource _selectedSource = MeaningFinderWordSource.standard(
-    LocalLearningSource.allWords,
-  );
-  List<MeaningFinderPair> _roundPairs = const <MeaningFinderPair>[];
+class _WordRecognitionGameScreenState
+    extends ConsumerState<WordRecognitionGameScreen> {
+  WordRecognitionWordSource _selectedSource =
+      WordRecognitionWordSource.standard(LocalLearningSource.allWords);
+  List<WordRecognitionPair> _roundPairs = const <WordRecognitionPair>[];
   String _roundKey = '';
   int _currentQuestionIndex = 0;
   int _correctCount = 0;
@@ -44,14 +43,14 @@ class _MeaningFinderGameScreenState
         backgroundColor: const Color(0xFF050912),
         elevation: 0,
         centerTitle: true,
-        title: const Text('Bedeutung finden'),
+        title: const Text('Wort erkennen'),
       ),
       body: SafeArea(
         child: wordsAsync.when(
           loading: () => const Center(
             child: CircularProgressIndicator(color: Color(0xFFFF8A5B)),
           ),
-          error: (_, __) => _MeaningFinderMessageState(
+          error: (_, __) => _WordRecognitionMessageState(
             title: 'Wörter konnten nicht geladen werden',
             text: 'Versuche es gleich noch einmal.',
             buttonLabel: 'Zurück',
@@ -59,13 +58,13 @@ class _MeaningFinderGameScreenState
           ),
           data: (words) {
             final categories = categoriesAsync.value ?? const <LocalCategory>[];
-            final pairs = buildMeaningFinderPairs(words);
+            final pairs = buildWordRecognitionPairs(words);
             if (pairs.length < 4) {
-              return _MeaningFinderMessageState(
+              return _WordRecognitionMessageState(
                 title: 'Noch nicht genug Wörter',
                 text: _selectedSource.categoryId == null
-                    ? 'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Bedeutung finden zu spielen.'
-                    : 'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um Bedeutung finden zu spielen.',
+                    ? 'Diese Wortquelle braucht mindestens vier Wörter mit Übersetzung, um Wort erkennen zu spielen.'
+                    : 'Diese Wortwelt braucht mindestens vier Wörter mit Übersetzung, um Wort erkennen zu spielen.',
                 buttonLabel: 'Zurück',
                 selectedSource: _selectedSource,
                 categories: categories,
@@ -84,7 +83,7 @@ class _MeaningFinderGameScreenState
               );
             }
 
-            final question = buildMeaningFinderQuestion(
+            final question = buildWordRecognitionQuestion(
               pairs: _roundPairs,
               questionIndex: _currentQuestionIndex,
             );
@@ -108,7 +107,7 @@ class _MeaningFinderGameScreenState
     );
   }
 
-  void _ensureRound(List<MeaningFinderPair> pairs) {
+  void _ensureRound(List<WordRecognitionPair> pairs) {
     final nextKey =
         '${_selectedSource.key}:${pairs.map((pair) => pair.id).join('|')}';
     if (_roundKey == nextKey && _roundPairs.isNotEmpty) return;
@@ -116,11 +115,11 @@ class _MeaningFinderGameScreenState
     _restartRound(pairs);
   }
 
-  void _selectSource(MeaningFinderWordSource source) {
+  void _selectSource(WordRecognitionWordSource source) {
     if (_selectedSource == source) return;
     setState(() {
       _selectedSource = source;
-      _roundPairs = const <MeaningFinderPair>[];
+      _roundPairs = const <WordRecognitionPair>[];
       _roundKey = '';
       _currentQuestionIndex = 0;
       _correctCount = 0;
@@ -131,8 +130,8 @@ class _MeaningFinderGameScreenState
     });
   }
 
-  void _restartRound(List<MeaningFinderPair> pairs) {
-    _roundPairs = List<MeaningFinderPair>.unmodifiable(pairs.take(10));
+  void _restartRound(List<WordRecognitionPair> pairs) {
+    _roundPairs = List<WordRecognitionPair>.unmodifiable(pairs.take(10));
     _currentQuestionIndex = 0;
     _correctCount = 0;
     _isFinished = false;
@@ -141,7 +140,7 @@ class _MeaningFinderGameScreenState
     _feedback = null;
   }
 
-  void _answer(MeaningFinderAnswer answer) {
+  void _answer(WordRecognitionAnswer answer) {
     if (_resolved) return;
     setState(() {
       _resolved = true;
@@ -179,8 +178,8 @@ class _MeaningFinderGameScreenState
 }
 
 @visibleForTesting
-List<MeaningFinderPair> buildMeaningFinderPairs(List<LocalWord> words) {
-  final pairs = <MeaningFinderPair>[];
+List<WordRecognitionPair> buildWordRecognitionPairs(List<LocalWord> words) {
+  final pairs = <WordRecognitionPair>[];
   final seenTerms = <String>{};
   final seenTranslations = <String>{};
 
@@ -189,26 +188,26 @@ List<MeaningFinderPair> buildMeaningFinderPairs(List<LocalWord> words) {
     final translation = word.translation.trim();
     if (term.isEmpty || translation.isEmpty || word.isArchived) continue;
 
-    final normalizedTerm = normalizeMeaningFinderText(term);
-    final normalizedTranslation = normalizeMeaningFinderText(translation);
+    final normalizedTerm = normalizeWordRecognitionText(term);
+    final normalizedTranslation = normalizeWordRecognitionText(translation);
     if (!seenTerms.add(normalizedTerm)) continue;
     if (!seenTranslations.add(normalizedTranslation)) continue;
 
     pairs.add(
-      MeaningFinderPair(id: word.id, term: term, translation: translation),
+      WordRecognitionPair(id: word.id, term: term, translation: translation),
     );
   }
 
-  return List<MeaningFinderPair>.unmodifiable(pairs);
+  return List<WordRecognitionPair>.unmodifiable(pairs);
 }
 
 @visibleForTesting
-MeaningFinderQuestion buildMeaningFinderQuestion({
-  required List<MeaningFinderPair> pairs,
+WordRecognitionQuestion buildWordRecognitionQuestion({
+  required List<WordRecognitionPair> pairs,
   required int questionIndex,
 }) {
   final correct = pairs[questionIndex % pairs.length];
-  final distractors = <MeaningFinderPair>[];
+  final distractors = <WordRecognitionPair>[];
   for (var offset = 1; distractors.length < 3; offset += 1) {
     final candidate = pairs[(questionIndex + offset) % pairs.length];
     if (candidate.id == correct.id) continue;
@@ -216,25 +215,25 @@ MeaningFinderQuestion buildMeaningFinderQuestion({
     distractors.add(candidate);
   }
 
-  final rawAnswers = <MeaningFinderAnswer>[
-    MeaningFinderAnswer(pairId: correct.id, text: correct.translation),
+  final rawAnswers = <WordRecognitionAnswer>[
+    WordRecognitionAnswer(pairId: correct.id, text: correct.translation),
     for (final pair in distractors)
-      MeaningFinderAnswer(pairId: pair.id, text: pair.translation),
+      WordRecognitionAnswer(pairId: pair.id, text: pair.translation),
   ];
   final shift = (questionIndex + 1) % rawAnswers.length;
-  final answers = <MeaningFinderAnswer>[
+  final answers = <WordRecognitionAnswer>[
     ...rawAnswers.skip(shift),
     ...rawAnswers.take(shift),
   ];
 
-  return MeaningFinderQuestion(
+  return WordRecognitionQuestion(
     correctPairId: correct.id,
     prompt: correct.term,
-    hint: buildMeaningFinderHint(correct.term, questionIndex),
+    hint: buildWordRecognitionHint(correct.term, questionIndex),
     correctAnswerText: correct.translation,
-    answers: List<MeaningFinderAnswer>.unmodifiable(
+    answers: List<WordRecognitionAnswer>.unmodifiable(
       answers.map(
-        (answer) => MeaningFinderAnswer(
+        (answer) => WordRecognitionAnswer(
           pairId: answer.pairId,
           text: answer.text,
           isCorrect: answer.pairId == correct.id,
@@ -245,23 +244,23 @@ MeaningFinderQuestion buildMeaningFinderQuestion({
 }
 
 @visibleForTesting
-String buildMeaningFinderHint(String term, int questionIndex) {
+String buildWordRecognitionHint(String term, int questionIndex) {
   final templates = <String>[
-    'Gesucht ist die Bedeutung, die im Deutschen am besten zu "$term" passt.',
-    'Wähle die Bedeutung, die zu diesem Wort gehört.',
-    'Achte auf die Grundbedeutung dieses Wortes.',
-    'Welche Antwort beschreibt dieses Wort am besten?',
+    'Welches deutsche Wort passt zu "$term"?',
+    'Wähle die passende Übersetzung.',
+    'Erkenne das Wort anhand der passenden Übersetzung.',
+    'Welche Übersetzung gehört zu diesem Wort?',
   ];
   return templates[questionIndex % templates.length];
 }
 
 @visibleForTesting
-String normalizeMeaningFinderText(String value) {
+String normalizeWordRecognitionText(String value) {
   return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 }
 
-class MeaningFinderPair {
-  const MeaningFinderPair({
+class WordRecognitionPair {
+  const WordRecognitionPair({
     required this.id,
     required this.term,
     required this.translation,
@@ -272,8 +271,8 @@ class MeaningFinderPair {
   final String translation;
 }
 
-class MeaningFinderQuestion {
-  const MeaningFinderQuestion({
+class WordRecognitionQuestion {
+  const WordRecognitionQuestion({
     required this.correctPairId,
     required this.prompt,
     required this.hint,
@@ -285,11 +284,11 @@ class MeaningFinderQuestion {
   final String prompt;
   final String hint;
   final String correctAnswerText;
-  final List<MeaningFinderAnswer> answers;
+  final List<WordRecognitionAnswer> answers;
 }
 
-class MeaningFinderAnswer {
-  const MeaningFinderAnswer({
+class WordRecognitionAnswer {
+  const WordRecognitionAnswer({
     required this.pairId,
     required this.text,
     this.isCorrect = false,
@@ -300,16 +299,16 @@ class MeaningFinderAnswer {
   final bool isCorrect;
 }
 
-class MeaningFinderWordSource {
-  const MeaningFinderWordSource._({
+class WordRecognitionWordSource {
+  const WordRecognitionWordSource._({
     required this.label,
     required this.source,
     required this.categoryId,
     required this.worldKey,
   });
 
-  factory MeaningFinderWordSource.standard(LocalLearningSource source) {
-    return MeaningFinderWordSource._(
+  factory WordRecognitionWordSource.standard(LocalLearningSource source) {
+    return WordRecognitionWordSource._(
       label: source.label,
       source: source,
       categoryId: null,
@@ -317,11 +316,11 @@ class MeaningFinderWordSource {
     );
   }
 
-  factory MeaningFinderWordSource._wordWorld(
-    _MeaningFinderWordWorld world,
+  factory WordRecognitionWordSource._wordWorld(
+    _WordRecognitionWordWorld world,
     List<LocalCategory> categories,
   ) {
-    return MeaningFinderWordSource._(
+    return WordRecognitionWordSource._(
       label: 'Wortwelt: ${world.name}',
       source: LocalLearningSource.allWords,
       categoryId: world.resolveCategoryId(categories),
@@ -338,86 +337,89 @@ class MeaningFinderWordSource {
 
   @override
   bool operator ==(Object other) {
-    return other is MeaningFinderWordSource && other.key == key;
+    return other is WordRecognitionWordSource && other.key == key;
   }
 
   @override
   int get hashCode => key.hashCode;
 }
 
-const _standardMeaningFinderSources = <LocalLearningSource>[
+const _standardWordRecognitionSources = <LocalLearningSource>[
   LocalLearningSource.allWords,
   LocalLearningSource.myWords,
   LocalLearningSource.favorites,
   LocalLearningSource.myMix,
 ];
 
-const _meaningFinderWordWorldGroups = <_MeaningFinderWordWorldGroup>[
-  _MeaningFinderWordWorldGroup('Alltag & Leben', [
-    _MeaningFinderWordWorld(
+const _wordRecognitionWordWorldGroups = <_WordRecognitionWordWorldGroup>[
+  _WordRecognitionWordWorldGroup('Alltag & Leben', [
+    _WordRecognitionWordWorld(
       key: 'health_fitness',
       name: 'Health & Fitness',
       localCategoryId: 'seed-category-basics',
     ),
-    _MeaningFinderWordWorld(key: 'home_living', name: 'Home & Living'),
-    _MeaningFinderWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
-    _MeaningFinderWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
-    _MeaningFinderWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
-    _MeaningFinderWordWorld(key: 'productivity', name: 'Productivity'),
+    _WordRecognitionWordWorld(key: 'home_living', name: 'Home & Living'),
+    _WordRecognitionWordWorld(key: 'food_cooking', name: 'Food & Cooking'),
+    _WordRecognitionWordWorld(key: 'style_fashion', name: 'Style & Fashion'),
+    _WordRecognitionWordWorld(key: 'money_shopping', name: 'Money & Shopping'),
+    _WordRecognitionWordWorld(key: 'productivity', name: 'Productivity'),
   ]),
-  _MeaningFinderWordWorldGroup('Mensch & Gesellschaft', [
-    _MeaningFinderWordWorld(key: 'personality', name: 'Personality'),
-    _MeaningFinderWordWorld(key: 'feelings', name: 'Feelings'),
-    _MeaningFinderWordWorld(key: 'relationships', name: 'Relationships'),
-    _MeaningFinderWordWorld(key: 'thoughts', name: 'Thoughts'),
-    _MeaningFinderWordWorld(key: 'law_politics', name: 'Law & Politics'),
-    _MeaningFinderWordWorld(key: 'environment', name: 'Environment'),
+  _WordRecognitionWordWorldGroup('Mensch & Gesellschaft', [
+    _WordRecognitionWordWorld(key: 'personality', name: 'Personality'),
+    _WordRecognitionWordWorld(key: 'feelings', name: 'Feelings'),
+    _WordRecognitionWordWorld(key: 'relationships', name: 'Relationships'),
+    _WordRecognitionWordWorld(key: 'thoughts', name: 'Thoughts'),
+    _WordRecognitionWordWorld(key: 'law_politics', name: 'Law & Politics'),
+    _WordRecognitionWordWorld(key: 'environment', name: 'Environment'),
   ]),
-  _MeaningFinderWordWorldGroup('Wissen & Bildung', [
-    _MeaningFinderWordWorld(key: 'school_studies', name: 'School & Studies'),
-    _MeaningFinderWordWorld(key: 'science', name: 'Science'),
-    _MeaningFinderWordWorld(key: 'space', name: 'Space'),
-    _MeaningFinderWordWorld(key: 'nature', name: 'Nature'),
-    _MeaningFinderWordWorld(key: 'animals', name: 'Animals'),
-    _MeaningFinderWordWorld(key: 'tech_innovation', name: 'Tech & Innovation'),
+  _WordRecognitionWordWorldGroup('Wissen & Bildung', [
+    _WordRecognitionWordWorld(key: 'school_studies', name: 'School & Studies'),
+    _WordRecognitionWordWorld(key: 'science', name: 'Science'),
+    _WordRecognitionWordWorld(key: 'space', name: 'Space'),
+    _WordRecognitionWordWorld(key: 'nature', name: 'Nature'),
+    _WordRecognitionWordWorld(key: 'animals', name: 'Animals'),
+    _WordRecognitionWordWorld(
+      key: 'tech_innovation',
+      name: 'Tech & Innovation',
+    ),
   ]),
-  _MeaningFinderWordWorldGroup('Medien & Freizeit', [
-    _MeaningFinderWordWorld(key: 'media_news', name: 'Media & News'),
-    _MeaningFinderWordWorld(key: 'sports', name: 'Sports'),
-    _MeaningFinderWordWorld(
+  _WordRecognitionWordWorldGroup('Medien & Freizeit', [
+    _WordRecognitionWordWorld(key: 'media_news', name: 'Media & News'),
+    _WordRecognitionWordWorld(key: 'sports', name: 'Sports'),
+    _WordRecognitionWordWorld(
       key: 'travel',
       name: 'Travel',
       localCategoryId: 'seed-category-travel',
     ),
-    _MeaningFinderWordWorld(key: 'gaming', name: 'Gaming'),
-    _MeaningFinderWordWorld(key: 'transport', name: 'Transport'),
-    _MeaningFinderWordWorld(
+    _WordRecognitionWordWorld(key: 'gaming', name: 'Gaming'),
+    _WordRecognitionWordWorld(key: 'transport', name: 'Transport'),
+    _WordRecognitionWordWorld(
       key: 'music_entertainment',
       name: 'Music & Entertainment',
     ),
-    _MeaningFinderWordWorld(key: 'art_literature', name: 'Art & Literature'),
+    _WordRecognitionWordWorld(key: 'art_literature', name: 'Art & Literature'),
   ]),
-  _MeaningFinderWordWorldGroup('Beruf & Sprache', [
-    _MeaningFinderWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    _MeaningFinderWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    _MeaningFinderWordWorld(key: 'a1', name: 'A1'),
-    _MeaningFinderWordWorld(key: 'a2', name: 'A2'),
-    _MeaningFinderWordWorld(key: 'b1', name: 'B1'),
-    _MeaningFinderWordWorld(key: 'b2', name: 'B2'),
-    _MeaningFinderWordWorld(key: 'c1', name: 'C1'),
-    _MeaningFinderWordWorld(key: 'c2', name: 'C2'),
+  _WordRecognitionWordWorldGroup('Beruf & Sprache', [
+    _WordRecognitionWordWorld(key: 'work_careers', name: 'Work & Careers'),
+    _WordRecognitionWordWorld(key: 'top_500', name: 'Top 500 Words'),
+    _WordRecognitionWordWorld(key: 'a1', name: 'A1'),
+    _WordRecognitionWordWorld(key: 'a2', name: 'A2'),
+    _WordRecognitionWordWorld(key: 'b1', name: 'B1'),
+    _WordRecognitionWordWorld(key: 'b2', name: 'B2'),
+    _WordRecognitionWordWorld(key: 'c1', name: 'C1'),
+    _WordRecognitionWordWorld(key: 'c2', name: 'C2'),
   ]),
 ];
 
-class _MeaningFinderWordWorldGroup {
-  const _MeaningFinderWordWorldGroup(this.title, this.worlds);
+class _WordRecognitionWordWorldGroup {
+  const _WordRecognitionWordWorldGroup(this.title, this.worlds);
 
   final String title;
-  final List<_MeaningFinderWordWorld> worlds;
+  final List<_WordRecognitionWordWorld> worlds;
 }
 
-class _MeaningFinderWordWorld {
-  const _MeaningFinderWordWorld({
+class _WordRecognitionWordWorld {
+  const _WordRecognitionWordWorld({
     required this.key,
     required this.name,
     this.localCategoryId,
@@ -430,9 +432,9 @@ class _MeaningFinderWordWorld {
   String resolveCategoryId(List<LocalCategory> categories) {
     if (localCategoryId != null) return localCategoryId!;
 
-    final normalizedName = normalizeMeaningFinderText(name);
+    final normalizedName = normalizeWordRecognitionText(name);
     for (final category in categories) {
-      if (normalizeMeaningFinderText(category.name) == normalizedName) {
+      if (normalizeWordRecognitionText(category.name) == normalizedName) {
         return category.id;
       }
     }
@@ -457,18 +459,18 @@ class _QuestionView extends StatelessWidget {
     required this.onSourceSelected,
   });
 
-  final MeaningFinderQuestion question;
+  final WordRecognitionQuestion question;
   final int currentIndex;
   final int totalCount;
   final String? feedback;
   final bool resolved;
   final String? selectedPairId;
-  final ValueChanged<MeaningFinderAnswer> onAnswer;
+  final ValueChanged<WordRecognitionAnswer> onAnswer;
   final VoidCallback onReveal;
   final VoidCallback onNext;
-  final MeaningFinderWordSource selectedSource;
+  final WordRecognitionWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<MeaningFinderWordSource> onSourceSelected;
+  final ValueChanged<WordRecognitionWordSource> onSourceSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +505,7 @@ class _QuestionView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Welche Bedeutung passt?',
+                'Welches Wort passt?',
                 style: TextStyle(
                   color: Color(0xFFF4F8FF),
                   fontSize: 22,
@@ -512,7 +514,7 @@ class _QuestionView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Wähle ruhig und konzentriert die richtige Übersetzung.',
+                'Wähle ruhig und konzentriert die passende Übersetzung.',
                 style: TextStyle(
                   color: Color(0xFFB8C7D9),
                   height: 1.35,
@@ -523,7 +525,7 @@ class _QuestionView extends StatelessWidget {
               _MeaningHint(text: question.hint),
               const SizedBox(height: 14),
               Container(
-                key: const ValueKey('meaning-finder-prompt-card'),
+                key: const ValueKey('word-recognition-prompt-card'),
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: const Color(0xFF050912),
@@ -532,7 +534,7 @@ class _QuestionView extends StatelessWidget {
                 ),
                 child: Text(
                   question.prompt,
-                  key: const ValueKey('meaning-finder-prompt'),
+                  key: const ValueKey('word-recognition-prompt'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Color(0xFFF4F8FF),
@@ -545,7 +547,7 @@ class _QuestionView extends StatelessWidget {
               const SizedBox(height: 18),
               for (final answer in question.answers) ...[
                 _AnswerButton(
-                  key: ValueKey('meaning-finder-answer-${answer.pairId}'),
+                  key: ValueKey('word-recognition-answer-${answer.pairId}'),
                   answer: answer,
                   isResolved: resolved,
                   isSelected: selectedPairId == answer.pairId,
@@ -565,7 +567,7 @@ class _QuestionView extends StatelessWidget {
                 _CorrectAnswer(text: question.correctAnswerText),
                 const SizedBox(height: 18),
                 FilledButton(
-                  key: const ValueKey('meaning-finder-next-button'),
+                  key: const ValueKey('word-recognition-next-button'),
                   onPressed: onNext,
                   style: _primaryButtonStyle(),
                   child: const Text('Nächste Frage'),
@@ -573,7 +575,7 @@ class _QuestionView extends StatelessWidget {
               ] else ...[
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  key: const ValueKey('meaning-finder-reveal-button'),
+                  key: const ValueKey('word-recognition-reveal-button'),
                   onPressed: onReveal,
                   style: _secondaryButtonStyle(),
                   child: const Text('Auflösen'),
@@ -613,7 +615,7 @@ class _MeaningHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: const ValueKey('meaning-finder-hint'),
+      key: const ValueKey('word-recognition-hint'),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFFF8A5B).withValues(alpha: 0.1),
@@ -641,14 +643,14 @@ class _WordSourcePicker extends StatelessWidget {
     required this.onSourceSelected,
   });
 
-  final MeaningFinderWordSource selectedSource;
+  final WordRecognitionWordSource selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<MeaningFinderWordSource> onSourceSelected;
+  final ValueChanged<WordRecognitionWordSource> onSourceSelected;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: const ValueKey('meaning-finder-source-picker'),
+      key: const ValueKey('word-recognition-source-picker'),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFF0B1220),
@@ -669,7 +671,7 @@ class _WordSourcePicker extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             selectedSource.label,
-            key: const ValueKey('meaning-finder-selected-source-label'),
+            key: const ValueKey('word-recognition-selected-source-label'),
             style: const TextStyle(
               color: Color(0xFFF4F8FF),
               fontSize: 18,
@@ -679,7 +681,7 @@ class _WordSourcePicker extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _PickerActionButton(
-            key: const ValueKey('meaning-finder-change-source-button'),
+            key: const ValueKey('word-recognition-change-source-button'),
             icon: Icons.folder_copy_rounded,
             title: 'Wortquelle ändern',
             subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
@@ -687,7 +689,7 @@ class _WordSourcePicker extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _PickerActionButton(
-            key: const ValueKey('meaning-finder-select-world-button'),
+            key: const ValueKey('word-recognition-select-world-button'),
             icon: Icons.public_rounded,
             title: 'Wortwelt auswählen',
             subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
@@ -704,21 +706,23 @@ class _WordSourcePicker extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return _MeaningFinderSheetFrame(
+        return _WordRecognitionSheetFrame(
           title: 'Wortquelle ändern',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (final source in _standardMeaningFinderSources)
+              for (final source in _standardWordRecognitionSources)
                 _SheetOption(
-                  key: ValueKey('meaning-finder-source-${source.id}'),
+                  key: ValueKey('word-recognition-source-${source.id}'),
                   title: source.label,
                   selected:
                       selectedSource ==
-                      MeaningFinderWordSource.standard(source),
+                      WordRecognitionWordSource.standard(source),
                   onTap: () {
                     Navigator.of(context).pop();
-                    onSourceSelected(MeaningFinderWordSource.standard(source));
+                    onSourceSelected(
+                      WordRecognitionWordSource.standard(source),
+                    );
                   },
                 ),
             ],
@@ -734,12 +738,12 @@ class _WordSourcePicker extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return _MeaningFinderSheetFrame(
+        return _WordRecognitionSheetFrame(
           title: 'Wortwelt auswählen',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final group in _meaningFinderWordWorldGroups) ...[
+              for (final group in _wordRecognitionWordWorldGroups) ...[
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
                   child: Text(
@@ -754,12 +758,14 @@ class _WordSourcePicker extends StatelessWidget {
                 for (final world in group.worlds)
                   Builder(
                     builder: (context) {
-                      final source = MeaningFinderWordSource._wordWorld(
+                      final source = WordRecognitionWordSource._wordWorld(
                         world,
                         categories,
                       );
                       return _SheetOption(
-                        key: ValueKey('meaning-finder-word-world-${world.key}'),
+                        key: ValueKey(
+                          'word-recognition-word-world-${world.key}',
+                        ),
                         title: world.name,
                         selected: selectedSource == source,
                         onTap: () {
@@ -848,8 +854,8 @@ class _PickerActionButton extends StatelessWidget {
   }
 }
 
-class _MeaningFinderSheetFrame extends StatelessWidget {
-  const _MeaningFinderSheetFrame({required this.title, required this.child});
+class _WordRecognitionSheetFrame extends StatelessWidget {
+  const _WordRecognitionSheetFrame({required this.title, required this.child});
 
   final String title;
   final Widget child;
@@ -984,7 +990,7 @@ class _AnswerButton extends StatelessWidget {
     required this.onTap,
   });
 
-  final MeaningFinderAnswer answer;
+  final WordRecognitionAnswer answer;
   final bool isResolved;
   final bool isSelected;
   final VoidCallback onTap;
@@ -1065,7 +1071,7 @@ class _RoundHeader extends StatelessWidget {
           const SizedBox(width: 10),
           const Expanded(
             child: Text(
-              'Bedeutung finden',
+              'Wort erkennen',
               style: TextStyle(
                 color: Color(0xFFF4F8FF),
                 fontWeight: FontWeight.w900,
@@ -1123,7 +1129,7 @@ class _CorrectAnswer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: const ValueKey('meaning-finder-correct-answer'),
+      key: const ValueKey('word-recognition-correct-answer'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF050912),
@@ -1134,7 +1140,7 @@ class _CorrectAnswer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Richtige Bedeutung',
+            'Passende Übersetzung',
             style: TextStyle(
               color: Color(0xFFB8C7D9),
               fontSize: 12,
@@ -1201,7 +1207,7 @@ class _FinishedView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Du hast $correctCount von $totalCount Bedeutungen richtig erkannt.',
+                'Du hast $correctCount von $totalCount Wörtern richtig erkannt.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Color(0xFFB8C7D9),
@@ -1211,7 +1217,7 @@ class _FinishedView extends StatelessWidget {
               ),
               const SizedBox(height: 22),
               FilledButton(
-                key: const ValueKey('meaning-finder-restart-button'),
+                key: const ValueKey('word-recognition-restart-button'),
                 onPressed: onRestart,
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFFFF8A5B),
@@ -1223,7 +1229,7 @@ class _FinishedView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                key: const ValueKey('meaning-finder-back-button'),
+                key: const ValueKey('word-recognition-back-button'),
                 onPressed: onBack,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFF4F8FF),
@@ -1241,8 +1247,8 @@ class _FinishedView extends StatelessWidget {
   }
 }
 
-class _MeaningFinderMessageState extends StatelessWidget {
-  const _MeaningFinderMessageState({
+class _WordRecognitionMessageState extends StatelessWidget {
+  const _WordRecognitionMessageState({
     required this.title,
     required this.text,
     required this.buttonLabel,
@@ -1255,9 +1261,9 @@ class _MeaningFinderMessageState extends StatelessWidget {
   final String title;
   final String text;
   final String buttonLabel;
-  final MeaningFinderWordSource? selectedSource;
+  final WordRecognitionWordSource? selectedSource;
   final List<LocalCategory> categories;
-  final ValueChanged<MeaningFinderWordSource>? onSourceSelected;
+  final ValueChanged<WordRecognitionWordSource>? onSourceSelected;
   final VoidCallback onPressed;
 
   @override
