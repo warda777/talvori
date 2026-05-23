@@ -5,28 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
-import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
-import 'package:talvori/core/pronunciation/word_pronunciation_service.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
-
-class _FakePronunciationService implements WordPronunciationService {
-  String? spokenWord;
-  String? languageCode;
-
-  @override
-  Future<WordPronunciationResult> speakWord(
-    String word, {
-    String? languageCode,
-  }) async {
-    spokenWord = word;
-    this.languageCode = languageCode;
-    return const WordPronunciationResult(WordPronunciationStatus.spoken);
-  }
-
-  @override
-  Future<void> stop() async {}
-}
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 void main() {
   final now = DateTime(2026, 5, 21, 12);
@@ -52,19 +34,11 @@ void main() {
     );
   }
 
-  Future<void> pumpProfile(
-    WidgetTester tester, {
-    WordPronunciationService? pronunciationService,
-  }) async {
+  Future<void> pumpProfile(WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     final allWords = [
       word(id: 'emergency', term: 'emergency', translation: 'Notfall'),
-      word(
-        id: 'pending',
-        term: 'shelter',
-        translation: '',
-        status: TranslationStatus.pending,
-      ),
+      word(id: 'travel', term: 'travel', translation: 'reisen'),
     ];
 
     await tester.pumpWidget(
@@ -79,10 +53,15 @@ void main() {
               LocalLearningSource.myMix => [allWords.first],
             };
           }),
-          if (pronunciationService != null)
-            wordPronunciationServiceProvider.overrideWithValue(
-              pronunciationService,
-            ),
+          localWordsForCategoryProvider.overrideWith((ref, categoryId) async {
+            if (categoryId == LocalLearningSource.myWords.id) {
+              return allWords;
+            }
+            if (categoryId == LocalLearningSource.favorites.id) {
+              return [allWords.first];
+            }
+            return const <LocalWord>[];
+          }),
         ],
         child: const MaterialApp(home: ProfileScreen()),
       ),
@@ -91,8 +70,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 120));
   }
 
-  testWidgets('profile screen uses German dark-neon structure', (tester) async {
-    tester.view.physicalSize = const Size(900, 1800);
+  Future<void> scrollTo(WidgetTester tester, String text) async {
+    await tester.scrollUntilVisible(
+      find.text(text),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+  }
+
+  testWidgets('profile shows personal overview sections', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -100,25 +88,29 @@ void main() {
     await pumpProfile(tester);
 
     expect(find.text('Profil'), findsOneWidget);
-    expect(find.text('Dein Lernen'), findsOneWidget);
-    expect(find.text('Sprache & Aussprache'), findsOneWidget);
-    expect(find.text('Benachrichtigungen'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -700));
-    await tester.pump();
-    expect(find.text('Impuls & KI'), findsOneWidget);
-    expect(find.text('App-Einstellungen'), findsOneWidget);
-    expect(find.text('Browser öffnen mit'), findsNothing);
-    expect(find.text('Systemstandard'), findsNothing);
-    expect(find.text('Anderer Browser'), findsNothing);
-    expect(find.text('Nicht festgelegt'), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0, -700));
-    await tester.pump();
-    expect(find.text('Daten & Hilfe'), findsOneWidget);
-    expect(find.text('Share-Diagnose'), findsNothing);
-    expect(find.text('Your Vocabulary'), findsNothing);
-    expect(find.text('Customize the app'), findsNothing);
-    expect(find.text('Deine eigenen'), findsNothing);
-    expect(find.text('Sammlungen'), findsNothing);
+    expect(find.byKey(const Key('profile-settings-button')), findsOneWidget);
+    expect(find.text('Auf Premium upgraden'), findsOneWidget);
+    expect(find.text('Dein Fortschritt'), findsOneWidget);
+    expect(find.text('Taler'), findsOneWidget);
+    expect(find.text('Wochenserie'), findsOneWidget);
+    expect(find.text('Belohnungen'), findsOneWidget);
+    expect(find.text('Statistik'), findsOneWidget);
+
+    await scrollTo(tester, 'Dein Wortschatz');
+    expect(find.text('Favoriten'), findsOneWidget);
+    expect(find.text('Meine Wörter'), findsOneWidget);
+    expect(find.text('Sammlungen'), findsOneWidget);
+    expect(find.text('Verlauf'), findsOneWidget);
+
+    await scrollTo(tester, 'App anpassen');
+    expect(find.text('Wortwelten'), findsOneWidget);
+    expect(find.text('Stimmen'), findsOneWidget);
+    expect(find.text('Erinnerungen'), findsOneWidget);
+    expect(find.text('Widgets'), findsOneWidget);
+
+    expect(find.text('Geschlechtsidentität'), findsNothing);
+    expect(find.text('Marketing & Analysen'), findsNothing);
+    expect(find.text('AGB'), findsNothing);
   });
 
   testWidgets('profile screen renders on phone size without flex overflow', (
@@ -141,8 +133,7 @@ void main() {
     addTearDown(() => FlutterError.onError = previousOnError);
 
     await pumpProfile(tester);
-    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.close_rounded), findsNothing);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -900));
     await tester.pump();
     await tester.drag(find.byType(ListView), const Offset(0, -900));
@@ -151,51 +142,15 @@ void main() {
     expect(flexOverflows, isEmpty);
   });
 
-  testWidgets('profile screen shows local learning counts', (tester) async {
-    tester.view.physicalSize = const Size(900, 1800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await pumpProfile(tester);
-
-    expect(find.text('Deine Wörter'), findsWidgets);
-    expect(find.text('Bekannt'), findsOneWidget);
-    expect(find.text('Markiert'), findsOneWidget);
-    expect(find.text('Offene Übersetzungen'), findsOneWidget);
-    expect(find.text('pending oder fehlgeschlagen'), findsOneWidget);
-  });
-
-  testWidgets('pronunciation test calls pronunciation service', (tester) async {
-    tester.view.physicalSize = const Size(900, 1800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final pronunciationService = _FakePronunciationService();
-
-    await pumpProfile(tester, pronunciationService: pronunciationService);
-
-    final pronunciationRow = find.byKey(
-      const Key('profile-pronunciation-test-row'),
-    );
-    await tester.ensureVisible(pronunciationRow);
-    await tester.pump();
-    final inkWell = tester.widget<InkWell>(
-      find.descendant(of: pronunciationRow, matching: find.byType(InkWell)),
-    );
-    inkWell.onTap!();
-    await tester.pumpAndSettle();
-
-    expect(pronunciationService.spokenWord, 'emergency');
-    expect(pronunciationService.languageCode, 'en');
-  });
-
-  testWidgets('profile back arrow pops profile route', (tester) async {
+  testWidgets('profile close button pops profile route', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           localWordsForSourceProvider.overrideWith((ref, source) async {
+            return const <LocalWord>[];
+          }),
+          localWordsForCategoryProvider.overrideWith((ref, categoryId) async {
             return const <LocalWord>[];
           }),
         ],
@@ -222,27 +177,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Profil'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+    await tester.tap(find.byKey(const Key('profile-close-button')));
     await tester.pumpAndSettle();
 
     expect(find.text('Profil öffnen'), findsOneWidget);
   });
 
   testWidgets('profile settings gear opens settings screen', (tester) async {
-    tester.view.physicalSize = const Size(900, 1800);
+    tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await pumpProfile(tester);
 
-    final settingsButton = find.byKey(const Key('profile-settings-button'));
-    expect(settingsButton, findsOneWidget);
-
-    await tester.tap(settingsButton);
+    await tester.tap(find.byKey(const Key('profile-settings-button')));
     await tester.pumpAndSettle();
 
     expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Abonnement verwalten'), findsOneWidget);
+  });
+
+  testWidgets('profile opens an existing vocabulary target', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpProfile(tester);
+    await scrollTo(tester, 'Meine Wörter');
+    await tester.tap(find.text('Meine Wörter'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LocalWordListScreen), findsOneWidget);
+    expect(find.text('emergency'), findsOneWidget);
+  });
+
+  testWidgets('profile placeholder cards show a prepared hint', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpProfile(tester);
+    await scrollTo(tester, 'Sammlungen');
+    await tester.tap(find.text('Sammlungen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sammlungen'), findsOneWidget);
+    expect(
+      find.textContaining('Sammlungen werden vorbereitet'),
+      findsOneWidget,
+    );
   });
 }
