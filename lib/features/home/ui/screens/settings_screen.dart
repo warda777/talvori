@@ -134,7 +134,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.notifications_active_rounded,
                 title: 'Erinnerungen',
                 value: preferences.dailyReminderEnabled ? 'An' : 'Aus',
-                onTap: () => _push(context, const _ReminderSettingsScreen()),
+                onTap: () => _push(context, const ReminderSettingsScreen()),
               ),
               _SettingsTile(
                 icon: Icons.volume_off_rounded,
@@ -913,8 +913,8 @@ class _LanguageSettingsScreen extends ConsumerWidget {
   }
 }
 
-class _ReminderSettingsScreen extends ConsumerWidget {
-  const _ReminderSettingsScreen();
+class ReminderSettingsScreen extends ConsumerWidget {
+  const ReminderSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

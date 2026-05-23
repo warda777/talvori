@@ -5,6 +5,7 @@ import 'package:talvori/core/local_database/providers/local_words_for_source_pro
 import 'package:talvori/features/favorites/ui/local_favorites_list_screen.dart';
 import 'package:talvori/features/home/application/word_game_rewards_controller.dart';
 import 'package:talvori/features/home/ui/screens/settings_screen.dart';
+import 'package:talvori/features/home/ui/screens/vocabulary_level_test_screen.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
@@ -50,6 +51,14 @@ class ProfileScreen extends ConsumerWidget {
                 body:
                     'Premium ist vorbereitet. Später erhältst du hier Zugriff auf KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken.',
                 actionLabel: 'Premium-Mitglied werden',
+              ),
+            ),
+            const SizedBox(height: 16),
+            _LevelTestCard(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const VocabularyLevelTestScreen(),
+                ),
               ),
             ),
             const SizedBox(height: 22),
@@ -182,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
                   accent: _gold,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const SettingsScreen(),
+                      builder: (_) => const ReminderSettingsScreen(),
                     ),
                   ),
                 ),
@@ -207,17 +216,6 @@ class ProfileScreen extends ConsumerWidget {
             _ProfileSection(
               title: 'Hilfe & Konto',
               children: [
-                _ProfileQuickCard(
-                  icon: Icons.settings_rounded,
-                  title: 'Einstellungen',
-                  value: 'öffnen',
-                  accent: _cyan,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const SettingsScreen(),
-                    ),
-                  ),
-                ),
                 _ProfileQuickCard(
                   icon: Icons.help_outline_rounded,
                   title: 'Hilfe',
@@ -358,6 +356,96 @@ class _RoundHeaderButton extends StatelessWidget {
             ],
           ),
           child: Icon(icon, color: Colors.white, size: 24),
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelTestCard extends StatelessWidget {
+  const _LevelTestCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: ProfileScreen._panel.withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: ProfileScreen._mint.withValues(alpha: 0.28),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: ProfileScreen._mint.withValues(alpha: 0.1),
+                blurRadius: 22,
+                spreadRadius: -12,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: ProfileScreen._mint.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: ProfileScreen._mint.withValues(alpha: 0.28),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.school_rounded,
+                  color: ProfileScreen._mint,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mach einen Test',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w900,
+                        height: 1.12,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'um dein aktuelles Level zu sehen',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ProfileScreen._muted,
+                        fontSize: 14,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white54,
+                size: 28,
+              ),
+            ],
+          ),
         ),
       ),
     );
