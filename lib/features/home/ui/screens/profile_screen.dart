@@ -9,6 +9,7 @@ import 'package:talvori/core/local_database/providers/local_words_for_source_pro
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/providers.dart';
+import 'package:talvori/features/home/ui/screens/settings_screen.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/tagesimpuls/notifications/tagesimpuls_notification_settings.dart';
 import 'package:talvori/features/words/application/primary_language_provider.dart';
@@ -410,7 +411,57 @@ class _ProfileHeader extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          _ProfileHeaderButton(
+            tooltip: 'Einstellungen',
+            icon: Icons.settings_rounded,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileHeaderButton extends StatelessWidget {
+  const _ProfileHeaderButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        key: tooltip == 'Einstellungen'
+            ? const Key('profile-settings-button')
+            : null,
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: ProfileScreen._panelSoft.withValues(alpha: 0.92),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            boxShadow: [
+              BoxShadow(
+                color: ProfileScreen._cyan.withValues(alpha: 0.12),
+                blurRadius: 18,
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
       ),
     );
   }

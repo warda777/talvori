@@ -227,4 +227,22 @@ void main() {
 
     expect(find.text('Profil öffnen'), findsOneWidget);
   });
+
+  testWidgets('profile settings gear opens settings screen', (tester) async {
+    tester.view.physicalSize = const Size(900, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpProfile(tester);
+
+    final settingsButton = find.byKey(const Key('profile-settings-button'));
+    expect(settingsButton, findsOneWidget);
+
+    await tester.tap(settingsButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Einstellungen'), findsOneWidget);
+    expect(find.text('Abonnement verwalten'), findsOneWidget);
+  });
 }
