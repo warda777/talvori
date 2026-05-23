@@ -14,6 +14,7 @@ import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/features/home/application/word_game_ai_provider.dart';
 import 'package:talvori/features/home/application/word_game_language_pair.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/application/word_game_rewards_controller.dart';
 import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
 enum ArcadeGameKind {
@@ -50,6 +51,8 @@ class WordGameArcadeScreen extends ConsumerStatefulWidget {
 class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
   final SharedPreferencesWordGameProgressRepository _progressRepository =
       const SharedPreferencesWordGameProgressRepository();
+  final SharedPreferencesWordGameRewardsRepository _rewardsRepository =
+      const SharedPreferencesWordGameRewardsRepository();
   GameWordSource _selectedSource = GameWordSource.standard(
     LocalLearningSource.allWords,
   );
@@ -67,6 +70,7 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
   Timer? _audioFeedbackTimer;
   Timer? _audioInstructionTimer;
   bool _audioInitialInstructionConsumed = false;
+  bool _rewardRecorded = false;
   bool _hasStarted = false;
   bool _resolved = false;
   bool _isFinished = false;
@@ -216,6 +220,7 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
     _audioFeedbackTimer?.cancel();
     _audioInstructionTimer?.cancel();
     _audioInitialInstructionConsumed = false;
+    _rewardRecorded = false;
     _hasStarted = false;
     _resolved = false;
     _isFinished = false;
@@ -272,6 +277,7 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
     _audioFeedbackTimer?.cancel();
     _audioInstructionTimer?.cancel();
     _audioInitialInstructionConsumed = false;
+    _rewardRecorded = false;
     _hasStarted = true;
     _resolved = false;
     _isFinished = false;
@@ -497,6 +503,7 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
     setState(() {
       if (_currentIndex >= _roundItems.length - 1) {
         _isFinished = true;
+        _recordRewardOnce();
         _audioMissTimer?.cancel();
         return;
       }
@@ -511,10 +518,34 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
     _feedback = feedback;
   }
 
+  void _recordRewardOnce() {
+    if (_rewardRecorded || _roundItems.isEmpty) return;
+    _rewardRecorded = true;
+    unawaited(
+      _rewardsRepository.recordRound(
+        WordGameRoundRewardInput(
+          gameId: _config.gameId,
+          sourceKey: _selectedSource.key,
+          wordsPerRound: _roundItems.length,
+          playedWords: _roundItems.length,
+          correctWithoutHint: _score,
+          wrong: max(0, _roundItems.length - _score - _missed),
+          missed: _missed,
+          completed: true,
+          isAiGame: _config.usesAi,
+          isPremiumAiGame: _config.usesAi,
+          roundId:
+              '${_config.gameId}:${_selectedSource.key}:${_roundItems.map((item) => item.id).join(",")}:$_score:$_missed',
+        ),
+      ),
+    );
+  }
+
   void _next() {
     setState(() {
       if (_currentIndex >= _roundItems.length - 1) {
         _isFinished = true;
+        _recordRewardOnce();
         _audioMissTimer?.cancel();
         return;
       }
@@ -1973,6 +2004,24 @@ class _ArcadeFinishedView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: config.accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Serie aktualisiert',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7DFFE3),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Taler verdient: +${score * 10 + 20}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFFFD166),
                   fontWeight: FontWeight.w900,
                 ),
               ),

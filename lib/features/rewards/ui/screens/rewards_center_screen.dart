@@ -4,6 +4,7 @@ import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/home/application/word_game_rewards_controller.dart';
 
 enum RewardsTab { leaderboard, rewards, stats }
 
@@ -53,11 +54,14 @@ class _RewardsCenterScreenState extends ConsumerState<RewardsCenterScreen> {
     final knownWords = ref.watch(
       localWordsForSourceProvider(LocalLearningSource.knownWords),
     );
+    final wordGameRewards = ref.watch(wordGameRewardsSnapshotProvider);
     final snapshot = _ProgressSnapshot.from(
       allWords: allWords,
       myWords: myWords,
       favorites: favorites,
       knownWords: knownWords,
+      rewards: wordGameRewards.valueOrNull ?? WordGameRewardsSnapshot.empty(),
+      rewardsLoading: wordGameRewards.isLoading,
     );
 
     return Scaffold(
@@ -106,6 +110,7 @@ class _ProgressSnapshot {
     required this.favoriteWords,
     required this.knownWords,
     required this.pendingTranslations,
+    required this.rewards,
     required this.isLoading,
   });
 
@@ -114,35 +119,30 @@ class _ProgressSnapshot {
   final int favoriteWords;
   final int knownWords;
   final int pendingTranslations;
+  final WordGameRewardsSnapshot rewards;
   final bool isLoading;
 
-  int get localXp => knownWords * 25;
+  int get localXp => rewards.totalTalers;
 
   int get nextLeagueXp {
-    if (localXp < 250) return 250;
-    if (localXp < 750) return 750;
+    if (localXp < 500) return 500;
     if (localXp < 1500) return 1500;
     if (localXp < 3000) return 3000;
-    if (localXp < 5000) return 5000;
-    return 5000;
+    return 3000;
   }
 
   int get previousLeagueXp {
-    if (localXp < 250) return 0;
-    if (localXp < 750) return 250;
-    if (localXp < 1500) return 750;
+    if (localXp < 500) return 0;
+    if (localXp < 1500) return 500;
     if (localXp < 3000) return 1500;
-    if (localXp < 5000) return 3000;
-    return 5000;
+    return 3000;
   }
 
   String get leagueName {
-    if (localXp < 250) return 'Bronze';
-    if (localXp < 750) return 'Silber';
-    if (localXp < 1500) return 'Gold';
-    if (localXp < 3000) return 'Diamant';
-    if (localXp < 5000) return 'Neon';
-    return 'Talvori Elite';
+    if (localXp < 500) return 'Bronze';
+    if (localXp < 1500) return 'Silber';
+    if (localXp < 3000) return 'Gold';
+    return 'Diamant';
   }
 
   double get leagueProgress {
@@ -156,6 +156,8 @@ class _ProgressSnapshot {
     required AsyncValue<List<LocalWord>> myWords,
     required AsyncValue<List<LocalWord>> favorites,
     required AsyncValue<List<LocalWord>> knownWords,
+    required WordGameRewardsSnapshot rewards,
+    required bool rewardsLoading,
   }) {
     final all = allWords.valueOrNull ?? const <LocalWord>[];
     return _ProgressSnapshot(
@@ -163,6 +165,7 @@ class _ProgressSnapshot {
       myWords: myWords.valueOrNull?.length ?? 0,
       favoriteWords: favorites.valueOrNull?.length ?? 0,
       knownWords: knownWords.valueOrNull?.length ?? 0,
+      rewards: rewards,
       pendingTranslations: all
           .where(
             (word) =>
@@ -174,7 +177,8 @@ class _ProgressSnapshot {
           allWords.isLoading ||
           myWords.isLoading ||
           favorites.isLoading ||
-          knownWords.isLoading,
+          knownWords.isLoading ||
+          rewardsLoading,
     );
   }
 }
@@ -290,12 +294,23 @@ class _WeeklyStatusCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             snapshot.isLoading
-                ? 'Lokale Lernpunkte werden geladen.'
-                : '${snapshot.localXp} lokale Lernpunkte · Liga ${snapshot.leagueName}',
+                ? 'Lokale Taler werden geladen.'
+                : '${snapshot.rewards.talersThisWeek()} Wochentaler · Lokale Wochenliga ${snapshot.leagueName}',
             style: const TextStyle(
               color: _RewardsCenterScreenState._muted,
               fontWeight: FontWeight.w700,
               height: 1.25,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _WeekSeriesRow(snapshot: snapshot.rewards),
+          const SizedBox(height: 10),
+          Text(
+            'Serie: ${snapshot.rewards.currentStreak} Tage · Beste Serie: ${snapshot.rewards.bestStreak} Tage',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 14),
@@ -313,8 +328,8 @@ class _WeeklyStatusCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             snapshot.localXp >= snapshot.nextLeagueXp
-                ? 'Talvori Elite erreicht.'
-                : '${snapshot.nextLeagueXp - snapshot.localXp} Punkte bis zur nächsten Stufe.',
+                ? 'Diamant erreicht.'
+                : '${snapshot.nextLeagueXp - snapshot.localXp} Taler bis zur nächsten Liga.',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
@@ -323,6 +338,69 @@ class _WeeklyStatusCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _WeekSeriesRow extends StatelessWidget {
+  const _WeekSeriesRow({required this.snapshot});
+
+  final WordGameRewardsSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final days = const ['Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.', 'So.'];
+    final active = snapshot.activeWeekDays();
+    final todayIndex = DateTime.now().weekday - 1;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        for (var i = 0; i < days.length; i += 1)
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: active[i]
+                        ? _RewardsCenterScreenState._mint.withValues(
+                            alpha: 0.18,
+                          )
+                        : Colors.white.withValues(alpha: 0.06),
+                    border: Border.all(
+                      color: i == todayIndex
+                          ? _RewardsCenterScreenState._gold
+                          : active[i]
+                          ? _RewardsCenterScreenState._mint
+                          : Colors.white.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Icon(
+                    active[i] ? Icons.check_rounded : Icons.circle_outlined,
+                    size: 18,
+                    color: active[i]
+                        ? _RewardsCenterScreenState._mint
+                        : _RewardsCenterScreenState._muted,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  days[i],
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: _RewardsCenterScreenState._muted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
@@ -440,36 +518,31 @@ class _LeagueTab extends StatelessWidget {
     return _TabPanel(
       children: [
         _SectionTitle(
-          title: 'Wochenliga',
-          subtitle: 'Neue Woche, neue Chance. Online-Ranking ist vorbereitet.',
+          title: 'Lokale Wochenliga',
+          subtitle: 'Nur deine lokalen Wortspiel-Taler. Kein Online-Ranking.',
         ),
         _LeagueRow(
-          rank: '1',
-          name: 'Du',
-          points: '${snapshot.localXp} LP',
+          rank: 'Du',
+          name: snapshot.leagueName,
+          points: '${snapshot.rewards.talersThisWeek()} Taler',
           color: _RewardsCenterScreenState._mint,
-          note: 'lokal gezählt',
+          note: 'diese Woche',
         ),
-        const _LeagueRow(
-          rank: '2',
-          name: 'Online-Liga vorbereitet',
-          points: '-',
-          color: _RewardsCenterScreenState._violet,
-          note: 'keine globalen Daten aktiv',
-        ),
-        const _LeagueRow(
-          rank: '3',
-          name: 'Wöchentlicher Reset',
-          points: 'Mo',
+        _LeagueRow(
+          rank: '→',
+          name: 'Nächste Liga',
+          points: snapshot.localXp >= snapshot.nextLeagueXp
+              ? 'erreicht'
+              : '${snapshot.nextLeagueXp - snapshot.localXp} fehlen',
           color: _RewardsCenterScreenState._gold,
-          note: 'fairer Neustart',
+          note: 'Bronze · Silber · Gold · Diamant',
         ),
         const SizedBox(height: 12),
         const _InfoCard(
           icon: Icons.verified_user_rounded,
-          title: 'Fairness-Regel',
+          title: 'Offline-first',
           text:
-              'Punkte sollen später nur aus echten Lernaktionen entstehen: richtige Antworten, abgeschlossene Sessions und wiederholte Wörter. Öffnen dieser Seite gibt keine Punkte.',
+              'Die Liga ist lokal vorbereitet. Talvori erfindet keine fremden Nutzer und zeigt kein Fake-Leaderboard.',
         ),
       ],
     );
@@ -485,41 +558,72 @@ class _RewardsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final rewards = [
       _RewardBadge(
-        title: 'Erste 10 Wörter',
-        progress: snapshot.totalWords,
-        target: 10,
-        icon: Icons.library_books_rounded,
+        title: 'Erste Runde',
+        progress: snapshot.rewards.totalRounds,
+        target: 1,
+        icon: Icons.play_circle_rounded,
       ),
       _RewardBadge(
-        title: 'Erste 50 Wörter',
-        progress: snapshot.totalWords,
-        target: 50,
-        icon: Icons.auto_stories_rounded,
+        title: '100 Taler',
+        progress: snapshot.rewards.totalTalers,
+        target: 100,
+        icon: Icons.toll_rounded,
       ),
       _RewardBadge(
-        title: 'Aussprache-Profi',
-        progress: 0,
-        target: 5,
-        icon: Icons.volume_up_rounded,
-        comingSoon: true,
+        title: '1.000 Taler',
+        progress: snapshot.rewards.totalTalers,
+        target: 1000,
+        icon: Icons.savings_rounded,
       ),
       _RewardBadge(
-        title: 'Übersetzungsmeister',
-        progress: snapshot.totalWords - snapshot.pendingTranslations,
-        target: 20,
-        icon: Icons.translate_rounded,
+        title: 'Serien-Starter',
+        progress: snapshot.rewards.bestStreak,
+        target: 3,
+        icon: Icons.local_fire_department_rounded,
       ),
       _RewardBadge(
-        title: 'Kategorie-Champion',
-        progress: snapshot.knownWords,
-        target: 25,
+        title: 'Wochenheld',
+        progress: snapshot.rewards.bestStreak,
+        target: 7,
         icon: Icons.emoji_events_rounded,
       ),
       _RewardBadge(
-        title: 'Neon-Rahmen',
-        progress: snapshot.localXp,
-        target: 750,
-        icon: Icons.crop_square_rounded,
+        title: 'Perfekte Runde',
+        progress: snapshot.rewards.earnedBadgeIds.contains('perfect_round')
+            ? 1
+            : 0,
+        target: 1,
+        icon: Icons.diamond_rounded,
+      ),
+      _RewardBadge(
+        title: 'Wortjäger',
+        progress: _gameCorrect(snapshot, const {
+          wordGameIdWordHunt,
+          wordGameIdAudioCatch,
+          wordGameIdSyllableRain,
+        }),
+        target: 50,
+        icon: Icons.track_changes_rounded,
+      ),
+      _RewardBadge(
+        title: 'Puzzle-Profi',
+        progress: _gameCorrect(snapshot, const {
+          wordGameIdWordPuzzle,
+          wordGameIdWordPath,
+          wordGameIdWordSearch,
+        }),
+        target: 50,
+        icon: Icons.extension_rounded,
+      ),
+      _RewardBadge(
+        title: 'KI-Entdecker',
+        progress: _gameRounds(snapshot, const {
+          wordGameIdContextChallenge,
+          wordGameIdOppositeWord,
+          wordGameIdSynonymRiddle,
+        }),
+        target: 5,
+        icon: Icons.auto_awesome_rounded,
       ),
     ];
 
@@ -568,27 +672,42 @@ class _StatsTab extends StatelessWidget {
         ),
         _StatsGrid(
           stats: [
-            _StatItem('Wörter insgesamt', '${snapshot.totalWords}'),
-            _StatItem('Meine Wörter', '${snapshot.myWords}'),
-            _StatItem('Favoriten', '${snapshot.favoriteWords}'),
-            _StatItem('Bekannte Wörter', '${snapshot.knownWords}'),
+            _StatItem('Gesamt-Taler', '${snapshot.rewards.totalTalers}'),
+            _StatItem('Gespielte Runden', '${snapshot.rewards.totalRounds}'),
+            _StatItem('Richtig gelöst', '${snapshot.rewards.totalCorrect}'),
+            _StatItem('Fehler', '${snapshot.rewards.totalWrong}'),
+            _StatItem('Verpasst', '${snapshot.rewards.totalMissed}'),
+            _StatItem('Beste Runde', '+${snapshot.rewards.bestRoundTalers}'),
             _StatItem(
-              'Offene Übersetzungen',
-              '${snapshot.pendingTranslations}',
+              'Heute verdient',
+              '${snapshot.rewards.talersForDate(DateTime.now())}',
             ),
-            _StatItem('Lokale Lernpunkte', '${snapshot.localXp}'),
+            _StatItem('Diese Woche', '${snapshot.rewards.talersThisWeek()}'),
+            _StatItem('Meistgespielt', snapshot.rewards.mostPlayedGameId),
           ],
         ),
         const SizedBox(height: 12),
         const _InfoCard(
           icon: Icons.timeline_rounded,
-          title: 'Wochenverlauf',
+          title: 'Getrennt vom Lernen',
           text:
-              'Antworten, Lernzeit und Trefferquote werden als lokale Statistik vorbereitet. Noch nicht vorhandene Daten werden nicht erfunden.',
+              'Diese Statistik zählt nur abgeschlossene Wortspielrunden. SRS-Fortschritt, Review-Stufen und Lernstatus bleiben unverändert.',
         ),
       ],
     );
   }
+}
+
+int _gameCorrect(_ProgressSnapshot snapshot, Set<String> gameIds) {
+  return snapshot.rewards.roundsByGame.values
+      .where((stats) => gameIds.contains(stats.gameId))
+      .fold(0, (sum, stats) => sum + stats.correct);
+}
+
+int _gameRounds(_ProgressSnapshot snapshot, Set<String> gameIds) {
+  return snapshot.rewards.roundsByGame.values
+      .where((stats) => gameIds.contains(stats.gameId))
+      .fold(0, (sum, stats) => sum + stats.rounds);
 }
 
 class _TabPanel extends StatelessWidget {
@@ -715,16 +834,14 @@ class _RewardBadge {
     required this.progress,
     required this.target,
     required this.icon,
-    this.comingSoon = false,
   });
 
   final String title;
   final int progress;
   final int target;
   final IconData icon;
-  final bool comingSoon;
 
-  bool get unlocked => !comingSoon && progress >= target;
+  bool get unlocked => progress >= target;
 
   double get ratio => target <= 0 ? 0 : (progress / target).clamp(0, 1);
 }
@@ -738,8 +855,6 @@ class _RewardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = reward.unlocked
         ? _RewardsCenterScreenState._mint
-        : reward.comingSoon
-        ? _RewardsCenterScreenState._violet
         : _RewardsCenterScreenState._gold;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -768,9 +883,7 @@ class _RewardCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            reward.comingSoon
-                ? 'bald verfügbar'
-                : reward.unlocked
+            reward.unlocked
                 ? 'freigeschaltet'
                 : '${reward.progress}/${reward.target}',
             style: TextStyle(

@@ -322,6 +322,22 @@ Der Modus schreibt keine SRS-Daten. Er veraendert nicht `pass_count`, `stage`,
 2. KI-Spiele koennen spaeter weitere Sprachpaare nutzen, sobald die
    Muttersprache-/Zielsprache-Einstellung global verfuegbar ist.
 
+## Lokale Wortspiel-Belohnungen
+
+Die Wortspiele haben eine lokale Taler-/Punktebasis fuer Motivation:
+
+- abgeschlossene Wortspielrunden koennen lokale `Taler` vergeben
+- korrekt geloeste Woerter zaehlen fuer Rundenergebnisse und Statistik
+- Hinweise koennen separat als `mit Hinweis` gewertet werden
+- falsche oder verpasste Aufgaben geben keine negativen Taler
+- Wochenserie basiert auf abgeschlossenen Wortspielrunden, nicht auf SRS
+- die lokale Wochenliga nutzt nur lokal verdiente Wochentaler
+- Belohnungs-Badges werden lokal berechnet
+
+Diese Werte beeinflussen keinen SRS-Fortschritt. Sie veraendern nicht
+`pass_count`, `stage`, `is_mastered`, `next_due_at` oder Review-/Learn-Status.
+Die Liga ist offline-first vorbereitet und zeigt kein echtes Online-Ranking.
+
 ## Entfernt
 
 Sichtbar entfernt wurden:

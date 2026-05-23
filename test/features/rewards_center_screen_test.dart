@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/models/translation_status.dart';
@@ -34,6 +35,7 @@ void main() {
     WidgetTester tester, {
     RewardsTab initialTab = RewardsTab.leaderboard,
   }) async {
+    SharedPreferences.setMockInitialValues({});
     final words = [
       word(id: 'one', term: 'emergency'),
       word(id: 'two', term: 'shelter', status: TranslationStatus.pending),
@@ -56,7 +58,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pumpAndSettle();
   }
 
   testWidgets('progress hub shows German tabs and weekly league', (
@@ -73,9 +75,9 @@ void main() {
     expect(find.text('Liga'), findsOneWidget);
     expect(find.text('Belohnungen'), findsOneWidget);
     expect(find.text('Statistik'), findsOneWidget);
-    expect(find.text('Wochenliga'), findsOneWidget);
+    expect(find.text('Lokale Wochenliga'), findsOneWidget);
     expect(find.text('Reset montags'), findsOneWidget);
-    expect(find.text('Online-Liga vorbereitet'), findsOneWidget);
+    expect(find.text('Offline-first'), findsOneWidget);
     expect(find.text('Leaderboard'), findsNothing);
     expect(find.text('Rewards'), findsNothing);
     expect(find.text('Stats'), findsNothing);
@@ -88,16 +90,16 @@ void main() {
 
       await tester.tap(find.text('Belohnungen'));
       await tester.pumpAndSettle();
-      expect(find.text('Erste 10 Wörter'), findsOneWidget);
-      expect(find.text('Übersetzungsmeister'), findsOneWidget);
-      expect(find.text('bald verfügbar'), findsOneWidget);
+      expect(find.text('Erste Runde'), findsOneWidget);
+      expect(find.text('100 Taler'), findsOneWidget);
+      expect(find.text('Serien-Starter'), findsOneWidget);
 
       await tester.tap(find.text('Statistik'));
       await tester.pumpAndSettle();
-      expect(find.text('Wörter insgesamt'), findsOneWidget);
-      expect(find.text('Meine Wörter'), findsOneWidget);
-      expect(find.text('Bekannte Wörter'), findsOneWidget);
-      expect(find.text('Offene Übersetzungen'), findsOneWidget);
+      expect(find.text('Gesamt-Taler'), findsOneWidget);
+      expect(find.text('Gespielte Runden'), findsOneWidget);
+      expect(find.text('Richtig gelöst'), findsOneWidget);
+      expect(find.text('Heute verdient'), findsOneWidget);
       expect(find.text('keine globalen Daten aktiv'), findsNothing);
     },
   );
@@ -123,7 +125,8 @@ void main() {
     await pumpRewards(tester, initialTab: RewardsTab.rewards);
     await tester.drag(find.byType(ListView), const Offset(0, -900));
     await tester.pump();
-    await tester.tap(find.text('Statistik'));
+
+    await pumpRewards(tester, initialTab: RewardsTab.stats);
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView), const Offset(0, -900));
     await tester.pump();

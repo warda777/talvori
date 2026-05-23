@@ -10,6 +10,7 @@ import 'package:talvori/core/local_database/providers/local_categories_provider.
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
+import 'package:talvori/features/home/application/word_game_rewards_controller.dart';
 import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart'
     as game_picker;
 
@@ -36,6 +37,8 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
   );
   final SharedPreferencesWordGameProgressRepository _progressRepository =
       const SharedPreferencesWordGameProgressRepository();
+  final SharedPreferencesWordGameRewardsRepository _rewardsRepository =
+      const SharedPreferencesWordGameRewardsRepository();
   int _wordsPerRound = 10;
   List<SpeedRoundPair> _roundPairs = const <SpeedRoundPair>[];
   List<int> _answerShifts = const <int>[];
@@ -45,6 +48,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
   int _secondsLeft = 60;
   bool _started = false;
   bool _finished = false;
+  bool _rewardRecorded = false;
   String? _feedback;
   Timer? _timer;
 
@@ -161,6 +165,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
       _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
       _started = false;
       _finished = false;
+      _rewardRecorded = false;
       _feedback = null;
     });
   }
@@ -186,6 +191,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
     _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
     _started = false;
     _finished = false;
+    _rewardRecorded = false;
     _feedback = null;
   }
 
@@ -210,6 +216,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
       _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
       _started = false;
       _finished = false;
+      _rewardRecorded = false;
       _feedback = null;
     });
   }
@@ -218,6 +225,7 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
     setState(() {
       _started = true;
       _finished = false;
+      _rewardRecorded = false;
       _score = 0;
       _currentQuestionIndex = 0;
       _secondsLeft = widget.roundDuration.inSeconds.clamp(1, 60);
@@ -242,6 +250,27 @@ class _SpeedRoundGameScreenState extends ConsumerState<SpeedRoundGameScreen> {
     _started = false;
     _finished = true;
     _feedback = null;
+    _recordRewardOnce();
+  }
+
+  void _recordRewardOnce() {
+    if (_rewardRecorded || _roundPairs.isEmpty) return;
+    _rewardRecorded = true;
+    unawaited(
+      _rewardsRepository.recordRound(
+        WordGameRoundRewardInput(
+          gameId: wordGameIdSpeedRound,
+          sourceKey: _selectedSource.key,
+          wordsPerRound: _roundPairs.length,
+          playedWords: _roundPairs.length,
+          correctWithoutHint: _score,
+          wrong: max(0, _roundPairs.length - _score),
+          completed: true,
+          roundId:
+              '$wordGameIdSpeedRound:${_selectedSource.key}:${_roundPairs.map((pair) => pair.id).join(",")}:$_score',
+        ),
+      ),
+    );
   }
 
   void _answer(SpeedRoundAnswer answer) {
@@ -833,6 +862,15 @@ class _FinishedView extends StatelessWidget {
                   color: Color(0xFFB8C7D9),
                   height: 1.35,
                   fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Taler verdient: +${score * 10 + 20}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFFFD166),
+                  fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 22),

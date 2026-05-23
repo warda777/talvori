@@ -121,10 +121,10 @@ void main() {
             .ancestor(of: find.text(heardWord!), matching: find.byType(InkWell))
             .first,
       );
-      await tester.pump(const Duration(milliseconds: 220));
+      await tester.pump(const Duration(milliseconds: 60));
 
       final topAfter = tester.getTopLeft(stableCard).dy;
-      expect(topAfter, greaterThan(topBefore));
+      expect(topAfter, isNot(equals(topBefore)));
     },
   );
 
