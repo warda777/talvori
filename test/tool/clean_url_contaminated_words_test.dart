@@ -169,6 +169,101 @@ void main() {
     expect(result.render(), contains('Remote value differs from review CSV'));
   });
 
+  test('apply counts verified changes as updated and verified', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move"" https://example.com",'
+      '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(
+        text: '"move" https://example.com',
+        translation: '"umziehen" https://example.com',
+      ),
+    }, rowReturned: true);
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: true,
+    );
+
+    expect(result.attempted, 1);
+    expect(result.updated, 1);
+    expect(result.verified, 1);
+    expect(result.failed, 0);
+    expect(client.updateCalls, ['word-1']);
+  });
+
+  test(
+    'apply attempt without verified change is failed, not updated',
+    () async {
+      final parsed = parseUrlContaminationReviewCsv(
+        '${csvHeader}word-1,"""move"" https://example.com",'
+        '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+        'translation_contains_https; term_url_like; translation_url_like",'
+        'move,umziehen,,\n',
+      );
+      final client = _FakeSupabaseWordsTextClient(
+        {
+          'word-1': const WordText(
+            text: '"move" https://example.com',
+            translation: '"umziehen" https://example.com',
+          ),
+        },
+        mutateOnUpdate: false,
+        rowReturned: true,
+      );
+      final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+      final result = await cleaner.run(
+        candidates: parsed.candidates,
+        apply: true,
+      );
+
+      expect(result.attempted, 1);
+      expect(result.updated, 0);
+      expect(result.verified, 0);
+      expect(result.failed, 1);
+      expect(
+        result.render(),
+        contains('Apply failed: remote values did not change'),
+      );
+    },
+  );
+
+  test('empty update response is not counted as updated', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move"" https://example.com",'
+      '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(
+        text: '"move" https://example.com',
+        translation: '"umziehen" https://example.com',
+      ),
+    }, rowReturned: false);
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: true,
+    );
+
+    expect(result.attempted, 1);
+    expect(result.updated, 0);
+    expect(result.verified, 1);
+    expect(result.failed, 1);
+    expect(result.render(), contains('No row returned by update'));
+    expect(
+      result.render(),
+      contains('Update may be blocked by Supabase permissions/RLS'),
+    );
+  });
+
   test('apply mode must be requested explicitly', () {
     expect(CleanUrlContaminationOptions.fromArgs([]).apply, isFalse);
     expect(CleanUrlContaminationOptions.fromArgs(['--apply']).apply, isTrue);
@@ -176,21 +271,30 @@ void main() {
 }
 
 class _FakeSupabaseWordsTextClient implements SupabaseWordsTextClient {
-  _FakeSupabaseWordsTextClient(this.words);
+  _FakeSupabaseWordsTextClient(
+    this.words, {
+    this.mutateOnUpdate = true,
+    this.rowReturned = true,
+  });
 
   final Map<String, WordText> words;
+  final bool mutateOnUpdate;
+  final bool rowReturned;
   final updateCalls = <String>[];
 
   @override
   Future<WordText?> fetchWordText(String wordId) async => words[wordId];
 
   @override
-  Future<void> updateWordText({
+  Future<WordTextUpdateResult> updateWordText({
     required String wordId,
     required String text,
     required String translation,
   }) async {
     updateCalls.add(wordId);
-    words[wordId] = WordText(text: text, translation: translation);
+    if (mutateOnUpdate) {
+      words[wordId] = WordText(text: text, translation: translation);
+    }
+    return WordTextUpdateResult(rowReturned: rowReturned);
   }
 }

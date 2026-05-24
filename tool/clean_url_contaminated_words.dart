@@ -51,6 +51,9 @@ Future<void> main(List<String> args) async {
       apply: options.apply,
     );
     stdout.write(result.render());
+    if (options.apply && result.failed > 0) {
+      exitCode = 1;
+    }
   } on Object catch (error) {
     stderr.writeln('URL contamination cleanup failed: $error');
     exitCode = 1;
@@ -295,8 +298,10 @@ class SupabaseUrlContaminatedWordsCleaner {
 
     if (!apply) return UrlCleanRunResult.dryRun(plans);
 
+    var attempted = 0;
     var updated = 0;
     var verified = 0;
+    var failed = 0;
     final warnings = <String>[];
 
     for (final plan in plans) {
@@ -306,26 +311,48 @@ class SupabaseUrlContaminatedWordsCleaner {
         continue;
       }
 
-      await activeClient.updateWordText(
+      attempted++;
+      final updateResult = await activeClient.updateWordText(
         wordId: candidate.wordId,
         text: candidate.proposedTerm,
         translation: candidate.proposedTranslation,
       );
-      updated++;
+      if (!updateResult.rowReturned) {
+        warnings.add(
+          '${candidate.wordId}: No row returned by update. Check '
+          'RLS/permissions. Update may be blocked by Supabase '
+          'permissions/RLS.',
+        );
+      }
 
       final verifiedWord = await activeClient.fetchWordText(candidate.wordId);
       if (verifiedWord?.text == candidate.proposedTerm &&
           verifiedWord?.translation == candidate.proposedTranslation) {
         verified++;
+        if (updateResult.rowReturned) {
+          updated++;
+        } else {
+          failed++;
+          warnings.add(
+            '${candidate.wordId}: verification saw changed values, but the '
+            'update returned no row; not counted as updated.',
+          );
+        }
       } else {
-        warnings.add('${candidate.wordId}: verification failed.');
+        failed++;
+        warnings.add(
+          '${candidate.wordId}: verification failed. Apply failed: remote '
+          'values did not change.',
+        );
       }
     }
 
     return UrlCleanRunResult.apply(
       plans: plans,
+      attempted: attempted,
       updated: updated,
       verified: verified,
+      failed: failed,
       warnings: warnings,
     );
   }
@@ -334,7 +361,7 @@ class SupabaseUrlContaminatedWordsCleaner {
 abstract class SupabaseWordsTextClient {
   Future<WordText?> fetchWordText(String wordId);
 
-  Future<void> updateWordText({
+  Future<WordTextUpdateResult> updateWordText({
     required String wordId,
     required String text,
     required String translation,
@@ -346,6 +373,12 @@ class WordText {
 
   final String text;
   final String translation;
+}
+
+class WordTextUpdateResult {
+  const WordTextUpdateResult({required this.rowReturned});
+
+  final bool rowReturned;
 }
 
 class UrlCleanPlan {
@@ -415,8 +448,10 @@ class UrlCleanRunResult {
   const UrlCleanRunResult._({
     required this.dryRun,
     required this.plans,
+    required this.attempted,
     required this.updated,
     required this.verified,
+    required this.failed,
     required this.warnings,
   });
 
@@ -424,31 +459,39 @@ class UrlCleanRunResult {
     return UrlCleanRunResult._(
       dryRun: true,
       plans: plans,
+      attempted: 0,
       updated: 0,
       verified: 0,
+      failed: 0,
       warnings: const [],
     );
   }
 
   factory UrlCleanRunResult.apply({
     required List<UrlCleanPlan> plans,
+    required int attempted,
     required int updated,
     required int verified,
+    required int failed,
     required List<String> warnings,
   }) {
     return UrlCleanRunResult._(
       dryRun: false,
       plans: plans,
+      attempted: attempted,
       updated: updated,
       verified: verified,
+      failed: failed,
       warnings: warnings,
     );
   }
 
   final bool dryRun;
   final List<UrlCleanPlan> plans;
+  final int attempted;
   final int updated;
   final int verified;
+  final int failed;
   final List<String> warnings;
 
   int get candidatesFromReview => plans.length;
@@ -514,14 +557,19 @@ class UrlCleanRunResult {
         ..writeln('Applying URL contamination cleanup...')
         ..writeln('Candidates from review: $candidatesFromReview')
         ..writeln('Updatable: $updatable')
+        ..writeln('Attempted: $attempted')
         ..writeln('Updated: $updated')
         ..writeln('Skipped: $skipped')
-        ..writeln('Verified: $verified');
+        ..writeln('Verified: $verified')
+        ..writeln('Failed: $failed');
       if (updatable == 0) {
         buffer.writeln(
           'No matching remote rows to update. Refresh the review export if '
           'needed.',
         );
+      }
+      if (failed > 0) {
+        buffer.writeln('Apply failed: remote values did not change.');
       }
       if (warnings.isNotEmpty) {
         buffer.writeln('Warnings:');
@@ -607,16 +655,19 @@ class SupabaseRestWordsTextClient implements SupabaseWordsTextClient {
   }
 
   @override
-  Future<void> updateWordText({
+  Future<WordTextUpdateResult> updateWordText({
     required String wordId,
     required String text,
     required String translation,
   }) async {
-    await _request(
+    final response = await _request(
       method: 'PATCH',
       path: 'words',
       queryParameters: {'id': 'eq.$wordId'},
       body: {'text': text, 'translation': translation},
+    );
+    return WordTextUpdateResult(
+      rowReturned: response is List && response.isNotEmpty,
     );
   }
 
