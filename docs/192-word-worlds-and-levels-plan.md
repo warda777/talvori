@@ -556,3 +556,20 @@ Dry-Run/Apply-Skript vorbereitet:
 - Es werden keine Woerter geloescht, keine Kategorien geaendert und keine
   SRS-Daten beruehrt.
 - Das Skript wurde nicht produktiv mit `--apply` ausgefuehrt.
+
+## Umsetzungsschritt 5: URL-Bereinigung per SQL vorbereitet
+
+Stand: 2026-05-24
+
+Fuer drei eindeutig URL-verunreinigte Woerter wurde ein manuelles SQL-Skript
+vorbereitet:
+
+- Apply per Tool wurde durch Supabase RLS/Permissions blockiert.
+- Das SQL-Skript liegt unter
+  `supabase/manual/2026-05-24_clean_url_contaminated_words.sql`.
+- Es darf manuell im Supabase SQL Editor ausgefuehrt werden.
+- Es betrifft nur drei explizite `words.id` Werte.
+- Es aktualisiert nur `words.text` und `words.translation`.
+- Es aendert keine Sprachcodes, Kategorien, Woerterlisten oder SRS-Daten.
+- Jede `UPDATE`-Anweisung prueft zusaetzlich auf den erwarteten URL-Rest,
+  damit geaenderte Daten nicht still ueberschrieben werden.

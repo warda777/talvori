@@ -1,6 +1,6 @@
 # Supabase Words Review Summary
 
-Stand: 2026-05-24T09:52:17.712978
+Stand: 2026-05-24T14:49:47.423442
 
 Dieser Export ist read-only. Es wurden keine produktiven Daten,
 Kategorien oder SRS-Fortschritte veraendert.
@@ -130,7 +130,7 @@ Kategorien oder SRS-Fortschritte veraendert.
 
 ## Moegliche Dubletten
 
-- Gleiche term/from_lang/to_lang: 22
+- Gleiche term/from_lang/to_lang: 24
 - Gleiche term/translation/from_lang/to_lang: 16
 
 ### Gleiche term/from_lang/to_lang
@@ -147,6 +147,7 @@ Kategorien oder SRS-Fortschritte veraendert.
 - `march|en|de`: march / märz (580cb159-f590-48a8-8097-5f071ae3910b); March / März (4b25bc9e-6b24-4365-94a7-eafc643f3478)
 - `may|en|de`: may / mai (7e13f364-e57a-4b02-a693-dbfd6b82dbc9); May / Mai (1258ac7f-a1cf-4272-89fd-133da42d97be)
 - `monday|en|de`: monday / montag (f46d6361-092b-43f9-89d1-c38e629a1188); Monday / Montag (d0690e47-e51b-4378-a132-9f2947af74d0)
+- `move|en|de`: move / bewegen (ba6b854f-c6af-4751-b9e8-61d8374272a2); move / umziehen (0c165b4c-2afb-4861-ac60-75bf59a8611b)
 - `noun|en|de`: noun / substantiv (04bec203-a957-492b-80ae-3daeda5a8cb3); NOUN / NOUN (d2b0a941-bc29-4b99-a1c6-0b117d905a42)
 - `pin|en|de`: pin / stift (fed1826a-4021-4a7e-9df7-26741afc9b29); PIN / PIN (dd592b58-277e-421f-ae9c-7bd20a8806db)
 - `preposition|en|de`: preposition / präposition (5a8e0e08-2488-4b37-99a0-9c01edde2c47); PREPOSITION / PREPOSITION (4ccd9745-b256-40b4-b93b-5289af9b1709)
@@ -154,6 +155,7 @@ Kategorien oder SRS-Fortschritte veraendert.
 - `satellite|en|de`: satellite / Satellit (32464b29-fec5-4fd3-ba25-a873e3b0f8eb); satellite / satellit (e0d7acc3-7b01-48b4-a6e8-2f0cb06ad422)
 - `saturday|en|de`: saturday / samstag (56ceb18d-3262-4031-9884-2d96fce9ea6c); Saturday / Samstag (f7fc6762-bd28-4bc5-97f5-97402cce62a4)
 - `sunday|en|de`: sunday / sonntags (25f3eb07-223e-4ce4-ae32-3501a3daa0a7); Sunday / Sonntag (78aeddcd-d89e-4110-b59b-a4dd72cde9e7)
+- `throughout|en|de`: throughout / durchgehend (6a6e9ac6-ddc4-4ee0-a6a6-51d8ad8edf3f); throughout / in ganz (8aae50ac-dadb-49ad-8ce6-89f6c501ecac)
 - `thursday|en|de`: thursday / donnerstag (9a8d6592-71d2-4cdb-91dc-e9654eb84307); Thursday / Donnerstag (ceda131e-81c9-4b26-8435-31d0b8dbc09a)
 - `tuesday|en|de`: tuesday / dienstag (fa3902de-3324-4c19-9e27-cdd8e2df6bd6); Tuesday / Dienstag (fe0f12d5-4818-4a01-ab40-4c7301106525)
 - `verb|en|de`: verb / verb (bba73cb7-263e-4c75-8d55-9c869e8af29f); VERB / VERB (b89c2920-f157-43ce-8313-00318b189057)
