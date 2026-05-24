@@ -540,3 +540,19 @@ Problemgruppen erzeugt:
 Die Dateien liegen unter `docs/word-review/` und dienen nur als Grundlage fuer
 manuelle Entscheidungen. Es wurden keine Supabase-Daten veraendert, keine
 Woerter geloescht, keine Kategorien geaendert und keine SRS-Felder beruehrt.
+
+## Umsetzungsschritt 4: Sprachcode-Normalisierung vorbereitet
+
+Stand: 2026-05-24
+
+Fuer die 25 Kandidaten mit Sprachpaar `EN` -> `DE` wurde ein sicheres
+Dry-Run/Apply-Skript vorbereitet:
+
+- Standardmodus ist Dry-Run; ohne `--apply` werden keine Daten geschrieben.
+- Das Skript liest `docs/word-review/language_code_normalization_review.csv`.
+- Es betrifft nur die 25 expliziten Kandidaten fuer `EN`/`DE` zu `en`/`de`.
+- Im Schreibmodus duerfen nur `words.from_lang` und `words.to_lang`
+  aktualisiert werden.
+- Es werden keine Woerter geloescht, keine Kategorien geaendert und keine
+  SRS-Daten beruehrt.
+- Das Skript wurde nicht produktiv mit `--apply` ausgefuehrt.
