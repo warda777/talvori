@@ -22,6 +22,9 @@ class LocalDatabaseFactory {
         if (oldVersion < 3) {
           await LocalDatabaseSchema.migrateV2ToV3(db);
         }
+        if (oldVersion < 4) {
+          await LocalDatabaseSchema.migrateV3ToV4(db);
+        }
       },
     );
   }

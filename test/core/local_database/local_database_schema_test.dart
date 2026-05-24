@@ -78,8 +78,128 @@ void main() {
           'session_items',
           'settings',
           'word_sources',
+          'word_world_memberships',
         }),
       );
+
+      final wordColumns = await db.rawQuery('PRAGMA table_info(words)');
+      expect(wordColumns.map((row) => row['name']), contains('level'));
+    });
+
+    test('word_world_memberships_is_unique_per_word_and_category', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db);
+      await insertWord(db);
+
+      final membership = {
+        'word_id': 'word-1',
+        'category_id': 'category-1',
+        'created_at': '2026-05-13T10:00:00.000',
+      };
+
+      await db.insert('word_world_memberships', membership);
+
+      expect(
+        () => db.insert('word_world_memberships', membership),
+        throwsA(isA<DatabaseException>()),
+      );
+    });
+
+    test(
+      'migration_v3_to_v4_adds_level_and_memberships_without_srs_changes',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await insertCategory(db, id: 'seed-category-travel');
+        await insertWord(
+          db,
+          id: 'word-travel',
+          categoryId: 'seed-category-travel',
+        );
+        await db.insert('word_progress', {
+          'id': 'progress-1',
+          'word_id': 'word-travel',
+          'category_id': 'seed-category-travel',
+          'mode_id': 'time',
+          'stage': 's2',
+          'pass_count': 3,
+          'wrong_count': 1,
+          'next_due_at': '2026-05-14T10:00:00.000',
+          'created_at': '2026-05-13T10:00:00.000',
+          'updated_at': '2026-05-13T10:00:00.000',
+        });
+
+        final progressBefore = await db.query('word_progress');
+        await LocalDatabaseSchema.migrateV3ToV4(db);
+        final progressAfter = await db.query('word_progress');
+
+        final wordColumns = await db.rawQuery('PRAGMA table_info(words)');
+        expect(wordColumns.map((row) => row['name']), contains('level'));
+        expect(progressAfter, progressBefore);
+        final word = await db.query(
+          'words',
+          where: 'id = ?',
+          whereArgs: ['word-travel'],
+        );
+        expect(word.single['category_id'], 'seed-category-travel');
+      },
+    );
+
+    test('migration_mirrors_only_thematic_word_world_categories', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await insertCategory(db, id: 'seed-category-travel');
+      await db.update(
+        'categories',
+        {'name': 'Travel'},
+        where: 'id = ?',
+        whereArgs: ['seed-category-travel'],
+      );
+      await insertCategory(db, id: 'seed-category-basics');
+      await db.update(
+        'categories',
+        {'name': 'Basics'},
+        where: 'id = ?',
+        whereArgs: ['seed-category-basics'],
+      );
+      await insertCategory(db, id: 'level-a1');
+      await db.update(
+        'categories',
+        {'name': 'A1'},
+        where: 'id = ?',
+        whereArgs: ['level-a1'],
+      );
+      await insertCategory(db, id: 'top-500');
+      await db.update(
+        'categories',
+        {'name': 'Top 500 Words'},
+        where: 'id = ?',
+        whereArgs: ['top-500'],
+      );
+      await insertWord(
+        db,
+        id: 'word-travel',
+        categoryId: 'seed-category-travel',
+      );
+      await insertWord(
+        db,
+        id: 'word-basics',
+        categoryId: 'seed-category-basics',
+      );
+      await insertWord(db, id: 'word-a1', categoryId: 'level-a1');
+      await insertWord(db, id: 'word-top', categoryId: 'top-500');
+
+      await LocalDatabaseSchema.migrateV3ToV4(db);
+      await LocalDatabaseSchema.migrateV3ToV4(db);
+
+      final memberships = await db.query(
+        'word_world_memberships',
+        orderBy: 'word_id ASC',
+      );
+      expect(memberships, hasLength(1));
+      expect(memberships.single['word_id'], 'word-travel');
+      expect(memberships.single['category_id'], 'seed-category-travel');
     });
 
     test('word_progress_is_unique_per_word_category_and_mode', () async {

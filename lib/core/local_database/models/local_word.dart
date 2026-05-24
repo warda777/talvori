@@ -16,6 +16,7 @@ class LocalWord {
     this.sourceLanguage,
     this.targetLanguage,
     this.translationError,
+    this.level,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class LocalWord {
   final String? sourceLanguage;
   final String? targetLanguage;
   final String? translationError;
+  final String? level;
   final String? exampleSentence;
   final String? notes;
   final int sortOrder;

@@ -30,5 +30,5 @@ final localWordsForCategoryProvider =
       }
 
       return bootstrapResult.repositoryFactory.wordRepository
-          .loadWordsForCategory(categoryId: categoryId);
+          .loadWordsForWordWorld(categoryId: categoryId);
     });

@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalDatabaseSchema {
   const LocalDatabaseSchema._();
 
-  static const int version = 3;
+  static const int version = 4;
 
   static Future<void> createV1(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
@@ -30,6 +30,7 @@ CREATE TABLE words (
   source_language TEXT,
   target_language TEXT,
   translation_error TEXT,
+  level TEXT,
   example_sentence TEXT,
   notes TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -190,6 +191,7 @@ CREATE TABLE settings (
 ''');
 
     await createWordSourcesTable(db);
+    await ensureWordWorldMembershipsSchema(db);
   }
 
   static Future<void> migrateV1ToV2(Database db) async {
@@ -212,6 +214,12 @@ END
     await createWordSourcesTable(db);
   }
 
+  static Future<void> migrateV3ToV4(Database db) async {
+    await _addColumnIfMissing(db, 'words', 'level', 'TEXT');
+    await ensureWordWorldMembershipsSchema(db);
+    await mirrorExistingWordWorldMemberships(db);
+  }
+
   static Future<void> createWordSourcesTable(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS word_sources (
@@ -230,4 +238,115 @@ CREATE TABLE IF NOT EXISTS word_sources (
       'CREATE INDEX IF NOT EXISTS idx_word_sources_word_id ON word_sources (word_id)',
     );
   }
+
+  static Future<void> ensureWordWorldMembershipsSchema(Database db) async {
+    await db.execute('''
+CREATE TABLE IF NOT EXISTS word_world_memberships (
+  word_id TEXT NOT NULL,
+  category_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (word_id, category_id),
+  FOREIGN KEY (word_id) REFERENCES words (id),
+  FOREIGN KEY (category_id) REFERENCES categories (id)
+)
+''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_word_world_memberships_word_id ON word_world_memberships (word_id)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_word_world_memberships_category_id ON word_world_memberships (category_id)',
+    );
+  }
+
+  static Future<void> mirrorExistingWordWorldMemberships(Database db) async {
+    final rows = await db.rawQuery('''
+SELECT w.id AS word_id, w.category_id AS category_id, c.name AS category_name
+FROM words w
+JOIN categories c ON c.id = w.category_id
+WHERE w.category_id IS NOT NULL
+''');
+    final now = DateTime.now().toIso8601String();
+    for (final row in rows) {
+      final categoryName = row['category_name'] as String?;
+      if (!isThematicWordWorldName(categoryName)) continue;
+      await db.insert('word_world_memberships', {
+        'word_id': row['word_id'],
+        'category_id': row['category_id'],
+        'created_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+  }
+
+  static bool isThematicWordWorldName(String? name) {
+    final normalized = _normalizeCategoryName(name);
+    if (normalized.isEmpty) return false;
+    if (_excludedWordWorldNames.contains(normalized)) return false;
+    return _thematicWordWorldNames.contains(normalized);
+  }
+
+  static Future<void> _addColumnIfMissing(
+    Database db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final info = await db.rawQuery('PRAGMA table_info($table)');
+    final exists = info.any((row) => row['name'] == column);
+    if (exists) return;
+    await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+  }
+
+  static String _normalizeCategoryName(String? name) {
+    return (name ?? '')
+        .trim()
+        .toLowerCase()
+        .replaceAll('&', 'and')
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+  }
+
+  static const Set<String> _thematicWordWorldNames = {
+    'health-and-fitness',
+    'home-and-living',
+    'food-and-cooking',
+    'style-and-fashion',
+    'money-and-shopping',
+    'productivity',
+    'personality',
+    'feelings',
+    'relationships',
+    'thoughts',
+    'law-and-politics',
+    'environment',
+    'school-and-studies',
+    'science',
+    'space',
+    'nature',
+    'animals',
+    'tech-and-innovation',
+    'media-and-news',
+    'sports',
+    'travel',
+    'gaming',
+    'transport',
+    'music-and-entertainment',
+    'art-and-literature',
+    'work-and-careers',
+  };
+
+  static const Set<String> _excludedWordWorldNames = {
+    'a1',
+    'a2',
+    'b1',
+    'b2',
+    'c1',
+    'c2',
+    'top-500-words',
+    'basics',
+    'exam-practice',
+    'meine-worter',
+    'meine-woerter',
+    'favoriten',
+  };
 }

@@ -46,10 +46,11 @@ void main() {
     String? notes,
     int sortOrder = 0,
     bool isArchived = false,
+    String? level,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) async {
-    await db.insert('words', {
+    final wordRow = {
       'id': id,
       'category_id': categoryId,
       'term': term,
@@ -60,7 +61,12 @@ void main() {
       'is_archived': isArchived ? 1 : 0,
       'created_at': (createdAt ?? now).toIso8601String(),
       'updated_at': (updatedAt ?? now).toIso8601String(),
-    });
+    };
+    final columns = await db.rawQuery('PRAGMA table_info(words)');
+    if (columns.any((row) => row['name'] == 'level')) {
+      wordRow['level'] = level;
+    }
+    await db.insert('words', wordRow);
   }
 
   group('WordRepository', () {
@@ -77,6 +83,7 @@ void main() {
         translation: 'house',
         exampleSentence: 'Das Haus ist klein.',
         notes: 'Noun',
+        level: 'A2',
         sortOrder: 1,
         now: now,
       );
@@ -88,6 +95,7 @@ void main() {
       expect(word.translationStatus, TranslationStatus.translated);
       expect(word.exampleSentence, 'Das Haus ist klein.');
       expect(word.notes, 'Noun');
+      expect(word.level, 'A2');
       expect(word.sortOrder, 1);
       expect(word.isArchived, isFalse);
       expect(word.createdAt, now);
@@ -96,6 +104,7 @@ void main() {
       final rows = await db.query('words');
       expect(rows, hasLength(1));
       expect(rows.single['translation_status'], 'translated');
+      expect(rows.single['level'], 'A2');
     });
 
     test('upsert_word_without_translation_defaults_to_pending', () async {
@@ -676,6 +685,194 @@ CREATE TABLE words (
 
       expect(words.map((word) => word.id), ['word-archived', 'word-active']);
       expect(words.where((word) => word.isArchived), hasLength(1));
+    });
+
+    test('upsert_word_adds_membership_for_thematic_word_world', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      final repository = WordRepository(database: db);
+
+      await repository.upsertWord(
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+        now: now,
+      );
+
+      final memberships = await repository.loadMembershipsForWord(
+        'word-ticket',
+      );
+      expect(memberships, hasLength(1));
+      expect(memberships.single.categoryId, 'category-travel');
+    });
+
+    test(
+      'upsert_word_does_not_add_membership_for_packages_or_levels',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedCategory(db, id: 'category-a1', name: 'A1');
+        await seedCategory(db, id: 'category-top', name: 'Top 500 Words');
+        final repository = WordRepository(database: db);
+
+        await repository.upsertWord(
+          id: 'word-basics',
+          categoryId: 'category-basics',
+          term: 'hello',
+          translation: 'hallo',
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-a1',
+          categoryId: 'category-a1',
+          term: 'behind',
+          translation: 'hinter',
+          now: now,
+        );
+        await repository.upsertWord(
+          id: 'word-top',
+          categoryId: 'category-top',
+          term: 'move',
+          translation: 'bewegen',
+          now: now,
+        );
+
+        expect(await repository.loadMembershipsForWord('word-basics'), isEmpty);
+        expect(await repository.loadMembershipsForWord('word-a1'), isEmpty);
+        expect(await repository.loadMembershipsForWord('word-top'), isEmpty);
+      },
+    );
+
+    test(
+      'load_words_for_word_world_reads_memberships_and_excludes_archived',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+          sortOrder: 2,
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+          sortOrder: 1,
+        );
+        await seedWord(
+          db,
+          id: 'word-archived',
+          categoryId: 'category-basics',
+          term: 'archived',
+          translation: 'archiviert',
+          isArchived: true,
+        );
+        final repository = WordRepository(database: db);
+        await repository.addWordWorldMembership(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+        await repository.addWordWorldMembership(
+          wordId: 'word-hotel',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+        await repository.addWordWorldMembership(
+          wordId: 'word-archived',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+
+        final words = await repository.loadWordsForWordWorld(
+          categoryId: 'category-travel',
+        );
+
+        expect(words.map((word) => word.id), ['word-hotel', 'word-ticket']);
+      },
+    );
+
+    test('load_words_for_word_world_falls_back_to_category_id', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+
+      final words = await repository.loadWordsForWordWorld(
+        categoryId: 'category-travel',
+      );
+
+      expect(words.map((word) => word.id), ['word-ticket']);
+    });
+
+    test('add_word_world_membership_ignores_duplicates', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+
+      await repository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await repository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+
+      final memberships = await db.query('word_world_memberships');
+      expect(memberships, hasLength(1));
+    });
+
+    test('set_word_level_updates_only_word_level', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+      final updatedAt = now.add(const Duration(minutes: 30));
+
+      final updated = await repository.setWordLevel(
+        wordId: 'word-ticket',
+        level: 'A2',
+        updatedAt: updatedAt,
+      );
+
+      expect(updated?.level, 'A2');
+      expect(updated?.categoryId, 'category-travel');
+      expect(updated?.updatedAt, updatedAt);
     });
 
     test('archive_word_sets_is_archived_and_updated_at', () async {
