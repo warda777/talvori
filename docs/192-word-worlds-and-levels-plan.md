@@ -634,3 +634,35 @@ Die SQL-Konfliktanalyse fuer `EN`/`DE` -> `en`/`de` wurde ausgewertet:
   `docs/word-review/language_code_conflicts_remaining_review.csv`.
 - Die Konfliktfaelle werden separat geprueft.
 - In diesem Schritt wurden keine Supabase-Daten geaendert.
+
+## Umsetzungsschritt 8: Merge-Plan fuer exakte Sprachcode-Dubletten
+
+Stand: 2026-05-24
+
+Die drei risikoaermsten exakten Sprachcode-Dubletten wurden als
+Merge-/Archivierungskandidaten vorbereitet:
+
+- `behind`
+- `entire`
+- `interview`
+
+Fuer diese Gruppen gilt:
+
+- gleicher englischer Begriff
+- gleiche deutsche Uebersetzung
+- Konflikt durch `EN`/`DE` vs. bereits vorhandenes `en`/`de`
+- unterschiedliche Kategorie-/Level-Kontexte
+
+Es wurde kein Merge ausgefuehrt und keine Supabase-Daten wurden geaendert.
+
+Vorbereitet wurden:
+
+- Review-Plan:
+  `docs/word-review/exact_duplicate_merge_plan.md`
+- blockierter SQL-Entwurf:
+  `supabase/manual/2026-05-24_plan_merge_exact_language_duplicates.sql`
+
+Der SQL-Entwurf ist als `NICHT AUSFUEHREN - NUR PLAN` markiert. Vor einem
+produktiven Merge muessen `word_categories`, `user_words`, `word_progress`
+und `user_word_srs` live erneut geprueft werden. SRS-/User-Daten duerfen
+nicht geloescht oder stillschweigend umgehaengt werden.
