@@ -524,3 +524,19 @@ erstellt:
 
 Naechster Schritt ist die manuelle Pruefung und Zuordnung in der Review-CSV,
 bevor eine spaetere Migration geplant wird.
+
+## Umsetzungsschritt 3: Cleanup-Kandidaten
+
+Stand: 2026-05-24
+
+Aus dem Supabase-Review-Export wurden separate Review-Dateien fuer kleine
+Problemgruppen erzeugt:
+
+- Sprachcode-Normalisierung (`EN`/`DE` zu `en`/`de`)
+- Dubletten-Kandidaten
+- Woerter ohne Kategorie
+- Top-500- und A1-C2-Kandidaten
+
+Die Dateien liegen unter `docs/word-review/` und dienen nur als Grundlage fuer
+manuelle Entscheidungen. Es wurden keine Supabase-Daten veraendert, keine
+Woerter geloescht, keine Kategorien geaendert und keine SRS-Felder beruehrt.
