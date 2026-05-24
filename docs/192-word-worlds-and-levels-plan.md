@@ -503,3 +503,24 @@ Der zentrale Wortwelt-Picker der Wortspiele wurde fachlich bereinigt:
 - Es wurde keine Datenmigration durchgefuehrt.
 - Es wurden keine Woerter geloescht, importiert oder verschoben.
 - SRS-Fortschritt bleibt unveraendert.
+
+## Umsetzungsschritt 2: Supabase-Review-Export
+
+Stand: 2026-05-24
+
+Es wurde ein read-only Review-Export der vorhandenen Supabase-Woerter
+erstellt:
+
+- Review-Dateien liegen unter `docs/word-review/`.
+- `docs/word-review/supabase_words_review.csv` enthaelt eine manuell
+  reviewbare Wortliste mit leeren Entscheidungsfeldern.
+- `docs/word-review/supabase_words_summary.md` enthaelt Zaehlungen,
+  Kategorie-/Level-Hinweise und Dubletten-Kandidaten.
+- Der Export liest nur `words`, `categories` und `word_categories`.
+- Es wurden keine produktiven Daten veraendert.
+- Es wurden keine Woerter geloescht, importiert oder verschoben.
+- Es wurde keine Supabase-Migration ausgefuehrt.
+- SRS-Fortschritt bleibt unveraendert.
+
+Naechster Schritt ist die manuelle Pruefung und Zuordnung in der Review-CSV,
+bevor eine spaetere Migration geplant wird.
