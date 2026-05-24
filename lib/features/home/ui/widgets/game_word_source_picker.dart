@@ -108,15 +108,9 @@ const gameWordWorldGroups = <GameWordWorldGroup>[
     GameWordWorld(key: 'music_entertainment', name: 'Music & Entertainment'),
     GameWordWorld(key: 'art_literature', name: 'Art & Literature'),
   ]),
-  GameWordWorldGroup('Beruf & Sprache', [
+  // Level-Filter A1-C2 wird später separat ergänzt.
+  GameWordWorldGroup('Beruf', [
     GameWordWorld(key: 'work_careers', name: 'Work & Careers'),
-    GameWordWorld(key: 'top_500', name: 'Top 500 Words'),
-    GameWordWorld(key: 'a1', name: 'A1'),
-    GameWordWorld(key: 'a2', name: 'A2'),
-    GameWordWorld(key: 'b1', name: 'B1'),
-    GameWordWorld(key: 'b2', name: 'B2'),
-    GameWordWorld(key: 'c1', name: 'C1'),
-    GameWordWorld(key: 'c2', name: 'C2'),
   ]),
 ];
 

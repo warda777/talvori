@@ -486,3 +486,20 @@ Empfohlen als nächster kleiner, sicherer Schritt:
   - separate Pakete für kuratierte Sets
 - SRS-Fortschritt bleibt währenddessen unverändert und wird nicht migriert,
   bis die neue Struktur stabil ist.
+
+## Umsetzungsschritt 1: Picker-Bereinigung
+
+Stand: 2026-05-24
+
+Der zentrale Wortwelt-Picker der Wortspiele wurde fachlich bereinigt:
+
+- `Top 500 Words` wurde aus der Wortwelt-Auswahl entfernt.
+- `A1`, `A2`, `B1`, `B2`, `C1` und `C2` wurden aus der Wortwelt-Auswahl
+  entfernt.
+- Die Wortwelt-Auswahl zeigt jetzt nur thematische Wortwelten.
+- Die Gruppe `Beruf & Sprache` wurde im Picker zu `Beruf`, weil dort nur noch
+  `Work & Careers` steht.
+- Eine separate Level-Auswahl fuer A1-C2 wird spaeter umgesetzt.
+- Es wurde keine Datenmigration durchgefuehrt.
+- Es wurden keine Woerter geloescht, importiert oder verschoben.
+- SRS-Fortschritt bleibt unveraendert.

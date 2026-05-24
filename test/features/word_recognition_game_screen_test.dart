@@ -325,8 +325,13 @@ void main() {
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('Travel'), findsOneWidget);
     expect(find.text('Music & Entertainment'), findsOneWidget);
-    expect(find.text('Top 500 Words'), findsOneWidget);
-    expect(find.text('C2'), findsOneWidget);
+    expect(find.text('Top 500 Words'), findsNothing);
+    expect(find.text('A1'), findsNothing);
+    expect(find.text('A2'), findsNothing);
+    expect(find.text('B1'), findsNothing);
+    expect(find.text('B2'), findsNothing);
+    expect(find.text('C1'), findsNothing);
+    expect(find.text('C2'), findsNothing);
 
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('word-recognition-word-world-travel')),

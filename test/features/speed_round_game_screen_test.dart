@@ -315,8 +315,21 @@ void main() {
     expect(find.text('Health & Fitness'), findsOneWidget);
     expect(find.text('Tech & Innovation'), findsOneWidget);
     expect(find.text('Music & Entertainment'), findsOneWidget);
-    expect(find.text('Top 500 Words'), findsOneWidget);
-    expect(find.text('C2'), findsOneWidget);
+    expect(find.text('Top 500 Words'), findsNothing);
+    expect(find.text('A1'), findsNothing);
+    expect(find.text('A2'), findsNothing);
+    expect(find.text('B1'), findsNothing);
+    expect(find.text('B2'), findsNothing);
+    expect(find.text('C1'), findsNothing);
+    expect(find.text('C2'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('speed-round-word-world-work_careers')),
+      520,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Beruf'), findsOneWidget);
+    expect(find.text('Work & Careers'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('speed-round-word-world-travel')),
