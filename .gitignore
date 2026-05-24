@@ -121,4 +121,5 @@ app.*.symbols
 .env.local
 /.metadata
 
+supabase/.temp/.DS_Store
 supabase/.temp/
