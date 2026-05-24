@@ -1,6 +1,6 @@
 # Supabase Words Review Summary
 
-Stand: 2026-05-24T14:49:47.423442
+Stand: 2026-05-24T15:34:22.645938
 
 Dieser Export ist read-only. Es wurden keine produktiven Daten,
 Kategorien oder SRS-Fortschritte veraendert.
@@ -20,8 +20,8 @@ Kategorien oder SRS-Fortschritte veraendert.
 
 ## Sprachpaare
 
-- en->de: 13604
-- EN->DE: 25
+- en->de: 13620
+- EN->DE: 9
 
 ## Current Level
 

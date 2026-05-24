@@ -573,3 +573,64 @@ vorbereitet:
 - Es aendert keine Sprachcodes, Kategorien, Woerterlisten oder SRS-Daten.
 - Jede `UPDATE`-Anweisung prueft zusaetzlich auf den erwarteten URL-Rest,
   damit geaenderte Daten nicht still ueberschrieben werden.
+
+## Umsetzungsschritt 6: Sprachcode-Normalisierung per SQL vorbereitet
+
+Stand: 2026-05-24
+
+Fuer die 25 Kandidaten mit Sprachpaar `EN` -> `DE` wurde ein manuelles
+SQL-Skript vorbereitet:
+
+- Tool-Apply wurde nicht verifiziert; die Remote-Werte blieben unveraendert.
+- Das SQL-Skript liegt unter
+  `supabase/manual/2026-05-24_normalize_language_codes.sql`.
+- Es darf manuell im Supabase SQL Editor ausgefuehrt werden.
+- Es betrifft nur 25 explizite `words.id` Werte.
+- Es aktualisiert nur `words.from_lang` und `words.to_lang`.
+- Es aendert keine Worttexte, Kategorien, Woerterlisten oder SRS-Daten.
+- Das SQL wurde noch nicht ausgefuehrt.
+
+## Sprachcode-Normalisierung blockiert durch Dubletten
+
+Stand: 2026-05-24
+
+Der manuelle SQL-Update-Versuch fuer `EN`/`DE` -> `en`/`de` wurde von
+Supabase abgebrochen:
+
+- Fehler: Unique Constraint `words_text_lang_uniq`.
+- Beispiel: `(text, from_lang, to_lang) = (dash, en, de)` existiert bereits.
+- Dadurch duerfen die 25 Kandidaten nicht pauschal normalisiert werden.
+- Das Update-Skript
+  `supabase/manual/2026-05-24_normalize_language_codes.sql` wurde als
+  blockiert markiert.
+- Eine reine SELECT-Konfliktanalyse wurde vorbereitet:
+  `supabase/manual/2026-05-24_analyze_language_code_conflicts.sql`.
+- Eine Review-Datei fuer manuelle Entscheidungen wurde vorbereitet:
+  `docs/word-review/language_code_conflicts_review.csv`.
+- Keine Daten wurden normalisiert.
+- SRS-Fortschritt, Kategorien und Worttexte bleiben unveraendert.
+
+Naechster Schritt: Konflikte pruefen und je Kandidat entscheiden, ob Woerter
+zusammengefuehrt, geloescht, separat behalten oder sicher normalisiert werden
+sollen.
+
+## Umsetzungsschritt 7: Sprachcode-Konflikte aufgeteilt
+
+Stand: 2026-05-24
+
+Die SQL-Konfliktanalyse fuer `EN`/`DE` -> `en`/`de` wurde ausgewertet:
+
+- 16 Kandidaten sind nicht-konfliktierend und koennen separat normalisiert
+  werden.
+- 9 Kandidaten haben Konflikte mit einem bestehenden `en`/`de` Unique Key.
+- Das urspruengliche 25er-SQL bleibt blockiert und darf nicht ausgefuehrt
+  werden.
+- Ein Safe-Subset-SQL wurde vorbereitet:
+  `supabase/manual/2026-05-24_normalize_language_codes_safe_subset.sql`.
+- Das Safe-Subset-SQL leitet die nicht-konfliktierenden Kandidaten dynamisch
+  aus der 25er-Kandidatenliste ab und ueberspringt Kandidaten mit gleichem
+  `text` in `en`/`de`.
+- Eine Review-Datei fuer die verbleibenden Konfliktfaelle wurde vorbereitet:
+  `docs/word-review/language_code_conflicts_remaining_review.csv`.
+- Die Konfliktfaelle werden separat geprueft.
+- In diesem Schritt wurden keine Supabase-Daten geaendert.

@@ -1,6 +1,6 @@
 # Cleanup Candidates Summary
 
-Stand: 2026-05-24T14:50:03.287411
+Stand: 2026-05-24T15:34:38.041942
 
 Dieser Schritt erzeugt nur Review-Dateien. Es wurden keine
 Supabase-Daten, Woerter, Kategorien oder SRS-Fortschritte
@@ -15,7 +15,7 @@ veraendert.
 
 ## Kandidaten
 
-- EN->DE-/Sprachcode-Normalisierungskandidaten: 25
+- EN->DE-/Sprachcode-Normalisierungskandidaten: 9
 - Dubletten-Gruppen: 40
 - Dubletten-Zeilen in Review-Datei: 80
 - Eindeutige Dubletten-Woerter: 48
