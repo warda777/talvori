@@ -25,3 +25,12 @@ enthalten nur vorsichtige Review-Hinweise; `keep_word_id` bleibt bewusst leer.
 - 3 Bedeutungsvarianten: `incident`, `move`, `throughout`.
 - Keine automatische Bereinigung empfohlen, bevor Kategorien, Tags,
   `word_categories`, `user_words` und SRS-Verweise geprueft wurden.
+
+## Entscheidungsvorbereitung
+
+Die detaillierte fachliche Entscheidungsvorbereitung liegt in
+`docs/word-review/language_code_conflict_decisions.md`.
+
+Diese Datei sammelt pro Konfliktgruppe Kontext, Risiko, empfohlene
+Review-Entscheidung und den naechsten technischen Schritt. Sie ist keine
+produktive Migrationsanweisung.
