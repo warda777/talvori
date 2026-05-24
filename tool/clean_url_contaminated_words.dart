@@ -42,7 +42,7 @@ Future<void> main(List<String> args) async {
   }
 
   final cleaner = SupabaseUrlContaminatedWordsCleaner(
-    client: options.apply ? _createSupabaseClient() : null,
+    client: _createSupabaseClient(),
   );
 
   try {
@@ -237,6 +237,42 @@ bool _looksUrlContaminated(String value) {
       lower.contains(':~:text=');
 }
 
+String normalizeForSafetyCompare(String value) {
+  var normalized = value
+      .replaceAll('\uFEFF', '')
+      .replaceAll('\u200B', '')
+      .replaceAll('\u200C', '')
+      .replaceAll('\u200D', '')
+      .replaceAll(r'\r\n', '\n')
+      .replaceAll(r'\n', '\n')
+      .replaceAll(r'\r', '\n')
+      .replaceAll('\r\n', '\n')
+      .replaceAll('\r', '\n')
+      .replaceAll('""', '"')
+      .trim();
+
+  normalized = _stripWholeWrappingQuotes(normalized);
+  normalized = _stripLeadingTokenQuotesBeforeUrl(normalized);
+  return normalized.trim();
+}
+
+String _stripWholeWrappingQuotes(String value) {
+  var normalized = value;
+  while (normalized.length >= 2 &&
+      normalized.startsWith('"') &&
+      normalized.endsWith('"')) {
+    normalized = normalized.substring(1, normalized.length - 1).trim();
+  }
+  return normalized;
+}
+
+String _stripLeadingTokenQuotesBeforeUrl(String value) {
+  return value.replaceFirstMapped(
+    RegExp(r'^"([^"\r\n]+)"(?=\s+(?:https?://|www\.))', caseSensitive: false),
+    (match) => match.group(1) ?? '',
+  );
+}
+
 class SupabaseUrlContaminatedWordsCleaner {
   const SupabaseUrlContaminatedWordsCleaner({this.client});
 
@@ -246,32 +282,27 @@ class SupabaseUrlContaminatedWordsCleaner {
     required List<UrlCleanCandidate> candidates,
     required bool apply,
   }) async {
-    if (!apply) return UrlCleanRunResult.dryRun(candidates);
-
     final activeClient = client;
     if (activeClient == null) {
-      throw StateError('Apply mode requires a Supabase client.');
+      throw StateError('Dry-run and apply mode require a Supabase client.');
     }
 
+    final plans = <UrlCleanPlan>[];
+    for (final candidate in candidates) {
+      final current = await activeClient.fetchWordText(candidate.wordId);
+      plans.add(UrlCleanPlan.fromRemote(candidate: candidate, remote: current));
+    }
+
+    if (!apply) return UrlCleanRunResult.dryRun(plans);
+
     var updated = 0;
-    var skipped = 0;
     var verified = 0;
     final warnings = <String>[];
 
-    for (final candidate in candidates) {
-      final current = await activeClient.fetchWordText(candidate.wordId);
-      if (current == null) {
-        skipped++;
-        warnings.add('${candidate.wordId}: not found, skipped.');
-        continue;
-      }
-      if (current.text != candidate.oldTerm ||
-          current.translation != candidate.oldTranslation) {
-        skipped++;
-        warnings.add(
-          '${candidate.wordId}: current text/translation no longer match '
-          'the review CSV, skipped.',
-        );
+    for (final plan in plans) {
+      final candidate = plan.candidate;
+      if (!plan.updatable) {
+        warnings.add('${candidate.wordId}: ${plan.reason}, skipped.');
         continue;
       }
 
@@ -292,8 +323,8 @@ class SupabaseUrlContaminatedWordsCleaner {
     }
 
     return UrlCleanRunResult.apply(
+      plans: plans,
       updated: updated,
-      skipped: skipped,
       verified: verified,
       warnings: warnings,
     );
@@ -317,72 +348,181 @@ class WordText {
   final String translation;
 }
 
+class UrlCleanPlan {
+  const UrlCleanPlan({
+    required this.candidate,
+    required this.remote,
+    required this.updatable,
+    required this.reason,
+    required this.normalizedTextMatches,
+    required this.normalizedTranslationMatches,
+  });
+
+  factory UrlCleanPlan.fromRemote({
+    required UrlCleanCandidate candidate,
+    required WordText? remote,
+  }) {
+    if (remote == null) {
+      return UrlCleanPlan(
+        candidate: candidate,
+        remote: null,
+        updatable: false,
+        reason: 'Remote row not found',
+        normalizedTextMatches: false,
+        normalizedTranslationMatches: false,
+      );
+    }
+    final normalizedRemoteText = normalizeForSafetyCompare(remote.text);
+    final normalizedReviewText = normalizeForSafetyCompare(candidate.oldTerm);
+    final normalizedRemoteTranslation = normalizeForSafetyCompare(
+      remote.translation,
+    );
+    final normalizedReviewTranslation = normalizeForSafetyCompare(
+      candidate.oldTranslation,
+    );
+    final textMatches = normalizedRemoteText == normalizedReviewText;
+    final translationMatches =
+        normalizedRemoteTranslation == normalizedReviewTranslation;
+    if (!textMatches || !translationMatches) {
+      return UrlCleanPlan(
+        candidate: candidate,
+        remote: remote,
+        updatable: false,
+        reason: 'Remote value differs from review CSV',
+        normalizedTextMatches: textMatches,
+        normalizedTranslationMatches: translationMatches,
+      );
+    }
+    return UrlCleanPlan(
+      candidate: candidate,
+      remote: remote,
+      updatable: true,
+      reason: 'Remote value matches review CSV',
+      normalizedTextMatches: true,
+      normalizedTranslationMatches: true,
+    );
+  }
+
+  final UrlCleanCandidate candidate;
+  final WordText? remote;
+  final bool updatable;
+  final String reason;
+  final bool normalizedTextMatches;
+  final bool normalizedTranslationMatches;
+}
+
 class UrlCleanRunResult {
   const UrlCleanRunResult._({
     required this.dryRun,
-    required this.candidates,
+    required this.plans,
     required this.updated,
-    required this.skipped,
     required this.verified,
     required this.warnings,
   });
 
-  factory UrlCleanRunResult.dryRun(List<UrlCleanCandidate> candidates) {
+  factory UrlCleanRunResult.dryRun(List<UrlCleanPlan> plans) {
     return UrlCleanRunResult._(
       dryRun: true,
-      candidates: candidates,
+      plans: plans,
       updated: 0,
-      skipped: 0,
       verified: 0,
       warnings: const [],
     );
   }
 
   factory UrlCleanRunResult.apply({
+    required List<UrlCleanPlan> plans,
     required int updated,
-    required int skipped,
     required int verified,
     required List<String> warnings,
   }) {
     return UrlCleanRunResult._(
       dryRun: false,
-      candidates: const [],
+      plans: plans,
       updated: updated,
-      skipped: skipped,
       verified: verified,
       warnings: warnings,
     );
   }
 
   final bool dryRun;
-  final List<UrlCleanCandidate> candidates;
+  final List<UrlCleanPlan> plans;
   final int updated;
-  final int skipped;
   final int verified;
   final List<String> warnings;
+
+  int get candidatesFromReview => plans.length;
+  int get updatable => plans.where((plan) => plan.updatable).length;
+  int get skipped => plans.length - updatable;
 
   String render() {
     final buffer = StringBuffer();
     if (dryRun) {
       buffer
         ..writeln('URL contamination cleanup dry-run')
-        ..writeln('Candidates: ${candidates.length}')
-        ..writeln('Will update:');
-      for (final candidate in candidates) {
+        ..writeln('Candidates from review: $candidatesFromReview')
+        ..writeln('Updatable: $updatable')
+        ..writeln('Skipped: $skipped');
+      final updatablePlans = plans.where((plan) => plan.updatable).toList();
+      final skippedPlans = plans.where((plan) => !plan.updatable).toList();
+      if (updatablePlans.isNotEmpty) {
+        buffer.writeln('Would update:');
+      }
+      for (final plan in updatablePlans) {
+        final candidate = plan.candidate;
         buffer
           ..writeln('- ${candidate.wordId}')
-          ..writeln('  term: ${_oneLine(candidate.oldTerm)}')
+          ..writeln('  review term: ${_oneLine(candidate.oldTerm)}')
+          ..writeln('  remote term: ${_oneLine(plan.remote?.text ?? '')}')
           ..writeln('    => ${candidate.proposedTerm}')
-          ..writeln('  translation: ${_oneLine(candidate.oldTranslation)}')
+          ..writeln(
+            '  review translation: ${_oneLine(candidate.oldTranslation)}',
+          )
+          ..writeln(
+            '  remote translation: '
+            '${_oneLine(plan.remote?.translation ?? '')}',
+          )
           ..writeln('    => ${candidate.proposedTranslation}');
+      }
+      if (skippedPlans.isNotEmpty) {
+        buffer.writeln('Skipped:');
+      }
+      for (final plan in skippedPlans) {
+        final candidate = plan.candidate;
+        buffer
+          ..writeln('- ${candidate.wordId}: ${plan.reason}')
+          ..writeln('  review term: ${_oneLine(candidate.oldTerm)}')
+          ..writeln('  remote term: ${_oneLine(plan.remote?.text ?? '')}')
+          ..writeln(
+            '  review translation: ${_oneLine(candidate.oldTranslation)}',
+          )
+          ..writeln(
+            '  remote translation: '
+            '${_oneLine(plan.remote?.translation ?? '')}',
+          )
+          ..write(_debugCompareDetails(plan));
+      }
+      if (updatable == 0) {
+        buffer.writeln(
+          'No matching remote rows to update. Refresh the review export if '
+          'needed.',
+        );
       }
       buffer.writeln('No data changed. Run with --apply to write.');
     } else {
       buffer
         ..writeln('Applying URL contamination cleanup...')
+        ..writeln('Candidates from review: $candidatesFromReview')
+        ..writeln('Updatable: $updatable')
         ..writeln('Updated: $updated')
         ..writeln('Skipped: $skipped')
         ..writeln('Verified: $verified');
+      if (updatable == 0) {
+        buffer.writeln(
+          'No matching remote rows to update. Refresh the review export if '
+          'needed.',
+        );
+      }
       if (warnings.isNotEmpty) {
         buffer.writeln('Warnings:');
         for (final warning in warnings) {
@@ -393,6 +533,49 @@ class UrlCleanRunResult {
     }
     return buffer.toString();
   }
+}
+
+String _debugCompareDetails(UrlCleanPlan plan) {
+  final remote = plan.remote;
+  if (remote == null) return '';
+  final candidate = plan.candidate;
+  final buffer = StringBuffer()
+    ..writeln(
+      '  term lengths: review=${candidate.oldTerm.length}, '
+      'remote=${remote.text.length}, normalizedEqual='
+      '${plan.normalizedTextMatches}',
+    )
+    ..writeln(
+      '  translation lengths: review=${candidate.oldTranslation.length}, '
+      'remote=${remote.translation.length}, normalizedEqual='
+      '${plan.normalizedTranslationMatches}',
+    );
+  if (!plan.normalizedTextMatches) {
+    buffer
+      ..writeln('  review term debug: ${_debugValue(candidate.oldTerm)}')
+      ..writeln('  remote term debug: ${_debugValue(remote.text)}');
+  }
+  if (!plan.normalizedTranslationMatches) {
+    buffer
+      ..writeln(
+        '  review translation debug: '
+        '${_debugValue(candidate.oldTranslation)}',
+      )
+      ..writeln(
+        '  remote translation debug: ${_debugValue(remote.translation)}',
+      );
+  }
+  return buffer.toString();
+}
+
+String _debugValue(String value) {
+  final escaped = value
+      .replaceAll('\\', r'\\')
+      .replaceAll('\r', r'\r')
+      .replaceAll('\n', r'\n')
+      .replaceAll('\t', r'\t');
+  if (escaped.length <= 220) return '"$escaped"';
+  return '"${escaped.substring(0, 217)}..."';
 }
 
 class SupabaseRestWordsTextClient implements SupabaseWordsTextClient {

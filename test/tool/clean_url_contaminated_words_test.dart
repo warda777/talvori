@@ -50,31 +50,147 @@ void main() {
     );
   });
 
-  test(
-    'dry-run does not require a Supabase client and does not write',
-    () async {
-      final parsed = parseUrlContaminationReviewCsv(
-        '${csvHeader}word-1,"""move"" https://example.com",'
-        '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
-        'translation_contains_https; term_url_like; translation_url_like",'
-        'move,umziehen,,\n',
-      );
-      final cleaner = SupabaseUrlContaminatedWordsCleaner();
+  test('safety compare treats display quotes and edge whitespace as equal', () {
+    expect(
+      normalizeForSafetyCompare('  "move"\\n https://example.com  '),
+      normalizeForSafetyCompare('move\n https://example.com'),
+    );
+    expect(
+      normalizeForSafetyCompare('  ""superstar"" https://example.com  '),
+      normalizeForSafetyCompare('superstar https://example.com'),
+    );
+  });
 
-      final result = await cleaner.run(
-        candidates: parsed.candidates,
-        apply: false,
-      );
+  test('dry-run does not write and reports matching remote rows', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move"" https://example.com",'
+      '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(
+        text: '"move" https://example.com',
+        translation: '"umziehen" https://example.com',
+      ),
+    });
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
 
-      expect(result.dryRun, isTrue);
-      expect(result.updated, 0);
-      expect(result.verified, 0);
-      expect(result.render(), contains('No data changed'));
-    },
-  );
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: false,
+    );
+
+    expect(result.dryRun, isTrue);
+    expect(result.updatable, 1);
+    expect(result.updated, 0);
+    expect(result.verified, 0);
+    expect(client.updateCalls, isEmpty);
+    expect(result.render(), contains('Candidates from review: 1'));
+    expect(result.render(), contains('Updatable: 1'));
+    expect(result.render(), contains('No data changed'));
+  });
+
+  test('dry-run accepts remote rows after safety normalization', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move""\\n https://example.com",'
+      '"""umziehen""\\n https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(
+        text: '  move\n https://example.com  ',
+        translation: 'umziehen\n https://example.com',
+      ),
+    });
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: false,
+    );
+
+    expect(result.updatable, 1);
+    expect(result.skipped, 0);
+    expect(client.updateCalls, isEmpty);
+    expect(result.render(), contains('Updatable: 1'));
+  });
+
+  test('dry-run skips remote values that differ from the review CSV', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move"" https://example.com",'
+      '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(text: 'move', translation: 'umziehen'),
+    });
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: false,
+    );
+    final rendered = result.render();
+
+    expect(result.updatable, 0);
+    expect(result.skipped, 1);
+    expect(client.updateCalls, isEmpty);
+    expect(rendered, isNot(contains('Will update')));
+    expect(rendered, contains('Remote value differs from review CSV'));
+    expect(rendered, contains('term lengths: review='));
+    expect(rendered, contains('normalizedEqual=false'));
+    expect(rendered, contains('No matching remote rows to update'));
+  });
+
+  test('apply skips remote values that differ from the review CSV', () async {
+    final parsed = parseUrlContaminationReviewCsv(
+      '${csvHeader}word-1,"""move"" https://example.com",'
+      '"""umziehen"" https://example.com",EN,DE,,,"term_contains_https; '
+      'translation_contains_https; term_url_like; translation_url_like",'
+      'move,umziehen,,\n',
+    );
+    final client = _FakeSupabaseWordsTextClient({
+      'word-1': const WordText(text: 'move', translation: 'umziehen'),
+    });
+    final cleaner = SupabaseUrlContaminatedWordsCleaner(client: client);
+
+    final result = await cleaner.run(
+      candidates: parsed.candidates,
+      apply: true,
+    );
+
+    expect(result.updatable, 0);
+    expect(result.skipped, 1);
+    expect(result.updated, 0);
+    expect(client.updateCalls, isEmpty);
+    expect(result.render(), contains('Remote value differs from review CSV'));
+  });
 
   test('apply mode must be requested explicitly', () {
     expect(CleanUrlContaminationOptions.fromArgs([]).apply, isFalse);
     expect(CleanUrlContaminationOptions.fromArgs(['--apply']).apply, isTrue);
   });
+}
+
+class _FakeSupabaseWordsTextClient implements SupabaseWordsTextClient {
+  _FakeSupabaseWordsTextClient(this.words);
+
+  final Map<String, WordText> words;
+  final updateCalls = <String>[];
+
+  @override
+  Future<WordText?> fetchWordText(String wordId) async => words[wordId];
+
+  @override
+  Future<void> updateWordText({
+    required String wordId,
+    required String text,
+    required String translation,
+  }) async {
+    updateCalls.add(wordId);
+    words[wordId] = WordText(text: text, translation: translation);
+  }
 }
