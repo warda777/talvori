@@ -700,3 +700,34 @@ Vorbereitet wurden:
 Der SQL-Entwurf ist als `NICHT AUSFUEHREN - NUR PLAN` markiert. Vor einem
 produktiven Merge muessen Kategorien, POS, Level sowie `user_words`,
 `word_progress` und `user_word_srs` live erneut geprueft werden.
+
+## Umsetzungsschritt 10: Bedeutungsvarianten geplant
+
+Stand: 2026-05-24
+
+Die letzten drei verbleibenden Sprachcode-Konflikte wurden als
+Bedeutungsvarianten identifiziert:
+
+- `incident`
+- `move`
+- `throughout`
+
+Diese Gruppen sind keine einfachen Dubletten, weil derselbe englische Begriff
+unterschiedliche deutsche Bedeutungen tragen kann. Eine automatische
+Bereinigung wird deshalb nicht empfohlen.
+
+Empfohlene Zielrichtung:
+
+- kurzfristig keine automatische Loeschung oder Zusammenfuehrung,
+- mittelfristig fachliche Review der Uebersetzungen,
+- langfristig ein Mehrbedeutungsmodell, z. B. `word_meanings`.
+
+Vorbereitet wurden:
+
+- Konzept- und Review-Plan:
+  `docs/word-review/meaning_variant_model_plan.md`
+- blockierter SQL-/Schema-Entwurf:
+  `supabase/manual/2026-05-24_plan_meaning_variants.sql`
+
+Es wurde kein produktiver Merge durchgefuehrt. Es wurden keine Supabase-,
+SRS-, `user_words`-, `word_progress`- oder `user_word_srs`-Daten veraendert.
