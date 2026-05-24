@@ -666,3 +666,37 @@ Der SQL-Entwurf ist als `NICHT AUSFUEHREN - NUR PLAN` markiert. Vor einem
 produktiven Merge muessen `word_categories`, `user_words`, `word_progress`
 und `user_word_srs` live erneut geprueft werden. SRS-/User-Daten duerfen
 nicht geloescht oder stillschweigend umgehaengt werden.
+
+## Umsetzungsschritt 9: Plan fuer Gross-/Kleinschreibungsvarianten
+
+Stand: 2026-05-24
+
+Die drei Gross-/Kleinschreibungsvarianten unter den verbleibenden
+Sprachcode-Konflikten wurden als Review-Kandidaten vorbereitet:
+
+- `dash`
+- `report`
+- `satellite`
+
+Fuer diese Gruppen gilt:
+
+- Deutsche Nomen sollen spaeter grossgeschrieben bleiben:
+  `Bindestrich`, `Bericht`, `Satellit`.
+- Eine kanonische `en`/`de`-ID wirkt voraussichtlich sinnvoll.
+- Level-, Kategorie- und POS-Daten muessen erhalten bleiben.
+- Besonders `report` benoetigt eine fachliche POS-Pruefung, weil der
+  bestehende `en`/`de`-Eintrag `pos = verb` traegt, waehrend `Bericht` ein
+  Nomen ist.
+
+Es wurden keine produktiven Daten geaendert.
+
+Vorbereitet wurden:
+
+- Review-Plan:
+  `docs/word-review/case_variant_merge_plan.md`
+- blockierter SQL-Entwurf:
+  `supabase/manual/2026-05-24_plan_merge_case_variants.sql`
+
+Der SQL-Entwurf ist als `NICHT AUSFUEHREN - NUR PLAN` markiert. Vor einem
+produktiven Merge muessen Kategorien, POS, Level sowie `user_words`,
+`word_progress` und `user_word_srs` live erneut geprueft werden.
