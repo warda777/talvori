@@ -233,3 +233,26 @@ Empfehlung:
 4. Noch keine produktiven Supabase-Daten anfassen.
 5. SRS-/User-Daten in dieser Migration weiterhin unveraendert lassen.
 
+## Umsetzungsschritt 1: Remote-zu-Local-Import vorbereitet
+
+Ein kontrollierter Supabase-zu-SQLite-Import wurde vorbereitet:
+
+- `SupabaseWordsLocalImportService` kann Remote-Woerter lokal als Preview
+  planen oder im expliziten Apply-Modus schreiben.
+- Das CLI-Tool `tool/import_supabase_words_to_local.dart` liest Supabase nur
+  read-only und schreibt standardmaessig nichts lokal.
+- Apply muss explizit mit `--apply` gestartet werden.
+- Woerter werden anhand normalisiertem Begriff sowie Sprachpaar
+  wiederverwendet, damit erneute Importe idempotent bleiben.
+- Bestehende lokale Uebersetzungen werden bei Konflikten nicht ueberschrieben;
+  Konflikte werden im Report/CSV ausgewiesen.
+- Echte Wortwelten werden als `word_world_memberships` gesetzt.
+- `A1` bis `C2`, `Top 500 Words`, `Basics`, `Exam Practice`,
+  `Grammar & Syntax`, `Irregular Verbs` und `Phrases & Idioms` werden nicht
+  als Wortwelt-Membership uebernommen.
+- Level werden in `words.level` gespeichert, wenn sie direkt am Wort oder als
+  A1-C2-Kategorie vorliegen.
+- `word_progress` und SRS-Felder bleiben unangetastet; der Report prueft die
+  `word_progress`-Zeilenzahl vor und nach dem Import.
+
+In diesem Schritt wurde kein produktiver lokaler Apply ausgefuehrt.
