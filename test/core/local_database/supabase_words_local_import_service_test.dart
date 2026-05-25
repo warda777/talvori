@@ -202,9 +202,94 @@ void main() {
 
         expect(second.localWordsCreated, 0);
         expect(second.localWordsReused, 1);
+        expect(second.localWordsUpdated, 0);
         expect(second.membershipsCreated, 0);
+        expect(second.levelsSet, 0);
+        expect(second.translationConflicts, isEmpty);
         expect(await db.query('words'), hasLength(1));
         expect(await db.query('word_world_memberships'), hasLength(1));
+      },
+    );
+
+    test(
+      'second apply of duplicate-heavy fixture is fully idempotent',
+      () async {
+        final db = await openDatabase();
+        addTearDown(db.close);
+        final service = SupabaseWordsLocalImportService();
+        const science = SupabaseRemoteCategory(
+          id: 'remote-science',
+          name: 'Science',
+        );
+        const work = SupabaseRemoteCategory(
+          id: 'remote-work',
+          name: 'Work & Careers',
+        );
+        final remoteBundle = bundle(
+          words: const [
+            SupabaseRemoteWord(
+              id: 'remote-report-a',
+              text: 'report',
+              translation: 'Bericht',
+              fromLang: 'EN',
+              toLang: 'DE',
+              level: 'B1',
+            ),
+            SupabaseRemoteWord(
+              id: 'remote-report-b',
+              text: ' report ',
+              translation: ' bericht ',
+              fromLang: 'en',
+              toLang: 'de',
+              level: 'b1',
+            ),
+            SupabaseRemoteWord(
+              id: 'remote-satellite',
+              text: 'satellite',
+              translation: 'Satellit',
+              fromLang: 'en',
+              toLang: 'de',
+            ),
+          ],
+          categories: const [science, work, a1, top500],
+          links: const [
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-report-a',
+              categoryId: 'remote-work',
+            ),
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-report-b',
+              categoryId: 'remote-science',
+            ),
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-report-b',
+              categoryId: 'remote-a1',
+            ),
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-satellite',
+              categoryId: 'remote-science',
+            ),
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-satellite',
+              categoryId: 'remote-top-500',
+            ),
+          ],
+        );
+
+        await service.apply(database: db, bundle: remoteBundle, now: now);
+        final second = await service.apply(
+          database: db,
+          bundle: remoteBundle,
+          now: now,
+        );
+
+        expect(second.localWordsCreated, 0);
+        expect(second.localWordsReused, 3);
+        expect(second.localWordsUpdated, 0);
+        expect(second.membershipsCreated, 0);
+        expect(second.levelsSet, 0);
+        expect(second.translationConflicts, isEmpty);
+        expect(second.wordProgressRowsBefore, second.wordProgressRowsAfter);
       },
     );
 
@@ -421,5 +506,132 @@ void main() {
       final words = await db.query('words');
       expect(words.single['translation'], 'bewegen');
     });
+
+    test('empty level remains stable and does not cause update loop', () async {
+      final db = await openDatabase();
+      addTearDown(db.close);
+      final service = SupabaseWordsLocalImportService();
+      final remoteBundle = bundle(
+        words: const [
+          SupabaseRemoteWord(
+            id: 'remote-river',
+            text: 'river',
+            translation: 'Fluss',
+            fromLang: 'en',
+            toLang: 'de',
+          ),
+        ],
+        categories: const [travel],
+        links: const [
+          SupabaseRemoteWordCategory(
+            wordId: 'remote-river',
+            categoryId: 'remote-travel',
+          ),
+        ],
+      );
+
+      await service.apply(database: db, bundle: remoteBundle, now: now);
+      final second = await service.apply(
+        database: db,
+        bundle: remoteBundle,
+        now: now,
+      );
+
+      expect(second.localWordsUpdated, 0);
+      expect(second.levelsSet, 0);
+      final words = await db.query('words');
+      expect(words.single['level'], isNull);
+    });
+
+    test('existing membership is not counted as created again', () async {
+      final db = await openDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'seed-category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'local-ticket',
+        categoryId: 'seed-category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+        sourceLanguage: 'en',
+        targetLanguage: 'de',
+      );
+      await db.insert('word_world_memberships', {
+        'word_id': 'local-ticket',
+        'category_id': 'seed-category-travel',
+        'created_at': now.toIso8601String(),
+      });
+      final service = SupabaseWordsLocalImportService();
+
+      final report = await service.apply(
+        database: db,
+        bundle: bundle(
+          words: const [
+            SupabaseRemoteWord(
+              id: 'remote-ticket',
+              text: 'ticket',
+              translation: 'Fahrkarte',
+              fromLang: 'en',
+              toLang: 'de',
+            ),
+          ],
+          categories: const [travel],
+          links: const [
+            SupabaseRemoteWordCategory(
+              wordId: 'remote-ticket',
+              categoryId: 'remote-travel',
+            ),
+          ],
+        ),
+        now: now,
+      );
+
+      expect(report.membershipsCreated, 0);
+    });
+
+    test(
+      'same translation with casing and whitespace does not create conflict',
+      () async {
+        final db = await openDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'seed-category-travel', name: 'Travel');
+        await seedWord(
+          db,
+          id: 'local-report',
+          categoryId: 'seed-category-travel',
+          term: 'report',
+          translation: ' Bericht ',
+          sourceLanguage: 'en',
+          targetLanguage: 'de',
+        );
+        final service = SupabaseWordsLocalImportService();
+
+        final report = await service.apply(
+          database: db,
+          bundle: bundle(
+            words: const [
+              SupabaseRemoteWord(
+                id: 'remote-report',
+                text: 'report',
+                translation: 'bericht',
+                fromLang: 'en',
+                toLang: 'de',
+              ),
+            ],
+            categories: const [travel],
+            links: const [
+              SupabaseRemoteWordCategory(
+                wordId: 'remote-report',
+                categoryId: 'remote-travel',
+              ),
+            ],
+          ),
+          now: now,
+        );
+
+        expect(report.translationConflicts, isEmpty);
+        expect(report.localWordsUpdated, 0);
+      },
+    );
   });
 }

@@ -82,26 +82,18 @@ class SupabaseWordsLocalImportService {
 
     final localWords = await _loadLocalWords(executor);
     final localWordIds = <String>{};
+    final wordsById = <String, Map<String, Object?>>{};
     final wordsByExactKey = <String, Map<String, Object?>>{};
     final wordsByTermWithBlankLanguages = <String, Map<String, Object?>>{};
     for (final row in localWords) {
       final id = row['id']?.toString();
       if (id != null && id.isNotEmpty) localWordIds.add(id);
-
-      final termKey = normalizeWordPart(row['term']?.toString());
-      final source = normalizeLanguage(row['source_language']?.toString());
-      final target = normalizeLanguage(row['target_language']?.toString());
-      if (termKey.isEmpty) continue;
-
-      final exactKey = _wordKey(
-        term: termKey,
-        sourceLanguage: source,
-        targetLanguage: target,
+      _indexLocalWord(
+        row,
+        wordsById: wordsById,
+        wordsByExactKey: wordsByExactKey,
+        wordsByTermWithBlankLanguages: wordsByTermWithBlankLanguages,
       );
-      wordsByExactKey.putIfAbsent(exactKey, () => row);
-      if (source.isEmpty && target.isEmpty) {
-        wordsByTermWithBlankLanguages.putIfAbsent(termKey, () => row);
-      }
     }
 
     final membershipKeys = await _loadMembershipKeys(executor);
@@ -149,6 +141,7 @@ class SupabaseWordsLocalImportService {
 
       final resolvedLevel = _resolveLevel(word, linkedCategories);
       final localWord =
+          wordsById[word.id] ??
           wordsByExactKey[exactKey] ??
           wordsByTermWithBlankLanguages[normalizeWordPart(term)];
 
@@ -175,27 +168,32 @@ class SupabaseWordsLocalImportService {
         plannedWordIds.add(wordId);
         report.localWordsCreated++;
 
+        final insertedRow = <String, Object?>{
+          'id': wordId,
+          'category_id': categoryId,
+          'term': term,
+          'translation': translation,
+          'translation_status': translation.isEmpty ? 'pending' : 'translated',
+          'source_language': sourceLanguage.isEmpty ? null : sourceLanguage,
+          'target_language': targetLanguage.isEmpty ? null : targetLanguage,
+          'translation_error': null,
+          'level': resolvedLevel,
+          'example_sentence': word.exampleSentence,
+          'notes': word.notes,
+          'sort_order': 0,
+          'is_archived': 0,
+          'created_at': _encodeDateTime(now),
+          'updated_at': _encodeDateTime(now),
+        };
+
         if (apply) {
-          await executor.insert('words', {
-            'id': wordId,
-            'category_id': categoryId,
-            'term': term,
-            'translation': translation,
-            'translation_status': translation.isEmpty
-                ? 'pending'
-                : 'translated',
-            'source_language': sourceLanguage.isEmpty ? null : sourceLanguage,
-            'target_language': targetLanguage.isEmpty ? null : targetLanguage,
-            'translation_error': null,
-            'level': resolvedLevel,
-            'example_sentence': word.exampleSentence,
-            'notes': word.notes,
-            'sort_order': 0,
-            'is_archived': 0,
-            'created_at': _encodeDateTime(now),
-            'updated_at': _encodeDateTime(now),
-          });
+          await executor.insert('words', insertedRow);
         }
+        // Remote rows keep their stable IDs locally. Do not add freshly
+        // inserted rows to the text/language lookup during the same run:
+        // Supabase still contains reviewed same-text variants, and folding
+        // them together here would create false conflicts on later imports.
+        wordsById[wordId] = insertedRow;
 
         if (resolvedLevel != null) report.levelsSet++;
         for (final category in thematicCategories) {
@@ -278,6 +276,16 @@ class SupabaseWordsLocalImportService {
             whereArgs: [localWordId],
           );
         }
+        final updatedRow = Map<String, Object?>.from(localWord)
+          ..addAll(updates)
+          ..['id'] = localWordId;
+        _indexLocalWord(
+          updatedRow,
+          wordsById: wordsById,
+          wordsByExactKey: wordsByExactKey,
+          wordsByTermWithBlankLanguages: wordsByTermWithBlankLanguages,
+          replaceExisting: true,
+        );
       }
 
       if (thematicCategories.isEmpty) {
@@ -328,6 +336,41 @@ class SupabaseWordsLocalImportService {
     DatabaseExecutor executor,
   ) {
     return executor.query('words');
+  }
+
+  void _indexLocalWord(
+    Map<String, Object?> row, {
+    required Map<String, Map<String, Object?>> wordsById,
+    required Map<String, Map<String, Object?>> wordsByExactKey,
+    required Map<String, Map<String, Object?>> wordsByTermWithBlankLanguages,
+    bool replaceExisting = false,
+  }) {
+    final id = row['id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      if (replaceExisting || !wordsById.containsKey(id)) {
+        wordsById[id] = row;
+      }
+    }
+
+    final termKey = normalizeWordPart(row['term']?.toString());
+    final source = normalizeLanguage(row['source_language']?.toString());
+    final target = normalizeLanguage(row['target_language']?.toString());
+    if (termKey.isEmpty) return;
+
+    final exactKey = _wordKey(
+      term: termKey,
+      sourceLanguage: source,
+      targetLanguage: target,
+    );
+    if (replaceExisting || !wordsByExactKey.containsKey(exactKey)) {
+      wordsByExactKey[exactKey] = row;
+    }
+    if (source.isEmpty && target.isEmpty) {
+      if (replaceExisting ||
+          !wordsByTermWithBlankLanguages.containsKey(termKey)) {
+        wordsByTermWithBlankLanguages[termKey] = row;
+      }
+    }
   }
 
   Future<Set<String>> _loadMembershipKeys(DatabaseExecutor executor) async {
@@ -630,9 +673,13 @@ class SupabaseWordsLocalImportReport {
         ..writeln();
       for (final conflict in translationConflicts.take(25)) {
         buffer.writeln(
-          '- ${conflict.remoteText}: remote "${conflict.remoteTranslation}" '
-          'vs. lokal "${conflict.localTranslation}" '
-          '(${conflict.localWordId})',
+          '- remote_word_id=${conflict.remoteWordId}; '
+          'remote_text="${conflict.remoteText}"; '
+          'remote_translation="${conflict.remoteTranslation}"; '
+          'local_word_id=${conflict.localWordId}; '
+          'local_term="${conflict.localTerm}"; '
+          'local_translation="${conflict.localTranslation}"; '
+          'issue_type=${conflict.issueType}; notes=${conflict.notes}',
         );
       }
       if (translationConflicts.length > 25) {
