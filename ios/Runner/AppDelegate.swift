@@ -3,7 +3,7 @@ import UIKit
 import UserNotifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+@objc class AppDelegate: FlutterAppDelegate {
   private let shareMethodChannel = "talvori/share"
   private let appGroupId = "group.com.talvori.talvori"
   private let pendingTextKey = "pendingSharedText"
@@ -20,10 +20,11 @@ import UserNotifications
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     UNUserNotificationCenter.current().delegate = self
-    let didFinish = super.application(application, didFinishLaunchingWithOptions: launchOptions)
-    if let controller = window?.rootViewController as? FlutterViewController {
-      configureShareChannels(binaryMessenger: controller.binaryMessenger)
+    GeneratedPluginRegistrant.register(with: self)
+    if let shareRegistrar = registrar(forPlugin: "TalvoriShareChannel") {
+      configureShareChannels(binaryMessenger: shareRegistrar.messenger())
     }
+    let didFinish = super.application(application, didFinishLaunchingWithOptions: launchOptions)
     return didFinish
   }
 
@@ -37,11 +38,6 @@ import UserNotifications
       return true
     }
     return super.application(app, open: url, options: options)
-  }
-
-  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-    configureShareChannels(binaryMessenger: engineBridge.applicationRegistrar.messenger())
   }
 
   private func configureShareChannels(binaryMessenger messenger: FlutterBinaryMessenger) {

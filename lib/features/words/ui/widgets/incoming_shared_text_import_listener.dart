@@ -43,19 +43,24 @@ class _IncomingSharedTextImportListenerState
   }
 
   Future<void> _start() async {
-    final controller = await ref.read(
-      incomingSharedTextImportControllerProvider.future,
-    );
-    final initialResults = await controller.importInitialSharedTexts();
-    if (initialResults.isNotEmpty) {
-      _showResults(initialResults);
+    try {
+      final controller = await ref.read(
+        incomingSharedTextImportControllerProvider.future,
+      );
+      final initialResults = await controller.importInitialSharedTexts();
+      if (initialResults.isNotEmpty) {
+        _showResults(initialResults);
+      }
+      _subscription = controller.watchIncomingSharedText().listen(
+        _showResult,
+        onError: (Object error, StackTrace stackTrace) {
+          debugPrint('Shared text listener disabled: $error');
+        },
+      );
+    } on Object catch (error, stackTrace) {
+      debugPrint('Shared text startup skipped: $error');
+      debugPrint('$stackTrace');
     }
-    _subscription = controller.watchIncomingSharedText().listen(
-      _showResult,
-      onError: (Object error, StackTrace stackTrace) {
-        debugPrint('Shared text listener disabled: $error');
-      },
-    );
   }
 
   void _showResults(List<SharedTextImportResult> results) {

@@ -27,15 +27,32 @@ class ShareIngestService {
     //   // ... Android Share-Code
     // }
 
-    // 2) Deep-Links (talvori://... oder https://... mit ?text=)
-    final initialLink = await _appLinks.getInitialLink();
-    final t = initialLink?.queryParameters['text']?.trim();
-    if (t != null && t.isNotEmpty) onIncomingText(t);
+    if (Platform.isIOS) {
+      debugPrint(
+        'ShareIngestService: app_links startup listener disabled on iOS; '
+        'using stable shared-text method channel instead.',
+      );
+      return;
+    }
 
-    _linksSub = _appLinks.uriLinkStream.listen((uri) {
-      final text = uri.queryParameters['text']?.trim();
-      if (text != null && text.isNotEmpty) onIncomingText(text);
-    });
+    // 2) Deep-Links (talvori://... oder https://... mit ?text=)
+    try {
+      final initialLink = await _appLinks.getInitialLink();
+      final t = initialLink?.queryParameters['text']?.trim();
+      if (t != null && t.isNotEmpty) onIncomingText(t);
+
+      _linksSub = _appLinks.uriLinkStream.listen(
+        (uri) {
+          final text = uri.queryParameters['text']?.trim();
+          if (text != null && text.isNotEmpty) onIncomingText(text);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          debugPrint('ShareIngestService app_links stream disabled: $error');
+        },
+      );
+    } on Object catch (error) {
+      debugPrint('ShareIngestService app_links init skipped: $error');
+    }
 
     // Browser-Return ist wegen nativer iOS-Crashes vorerst deaktiviert.
   }

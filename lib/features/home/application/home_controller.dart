@@ -48,29 +48,34 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
   Future<void> init(BuildContext context) async {
     WidgetsBinding.instance.addObserver(this);
 
-    await _shareService.init(
-      onIncomingText: (text) async {
-        await _importSharedTextLocally(text);
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Inhalt erfasst')));
-        }
-      },
-      onSavedUrl: ({required bool isPdf}) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isPdf
-                    ? 'PDF-Position gespeichert'
-                    : 'Seitenposition gespeichert',
+    try {
+      await _shareService.init(
+        onIncomingText: (text) async {
+          await _importSharedTextLocally(text);
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Inhalt erfasst')));
+          }
+        },
+        onSavedUrl: ({required bool isPdf}) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isPdf
+                      ? 'PDF-Position gespeichert'
+                      : 'Seitenposition gespeichert',
+                ),
               ),
-            ),
-          );
-        }
-      },
-    );
+            );
+          }
+        },
+      );
+    } on Object catch (error, stackTrace) {
+      debugPrint('Share ingest startup skipped: $error');
+      debugPrint('$stackTrace');
+    }
   }
 
   Future<void> dispose() async {

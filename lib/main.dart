@@ -81,6 +81,7 @@ class _InitGate extends StatefulWidget {
 
 class _InitGateState extends State<_InitGate> {
   late Future<void> _init;
+  bool _didMarkRouterReady = false;
 
   @override
   void initState() {
@@ -220,10 +221,13 @@ class _InitGateState extends State<_InitGate> {
             ),
           );
         }
-        // Fertig initialisiert → eigentliche App
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ImpulseInboxNotificationRouter.markReady();
-        });
+        // Fertig initialisiert -> eigentliche App.
+        if (!_didMarkRouterReady) {
+          _didMarkRouterReady = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ImpulseInboxNotificationRouter.markReady();
+          });
+        }
         return widget.child;
       },
     );
