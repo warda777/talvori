@@ -94,10 +94,30 @@ void main() {
     expect(bottomOverflows, isEmpty);
     expect(find.text('0/5'), findsOneWidget);
     expect(find.text('Wortspiele'), findsOneWidget);
+    expect(find.text('Meine Wörter'), findsNothing);
     expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
     expect(find.text('Impuls-Vorschau'), findsNothing);
+  });
+
+  testWidgets('home screen shows Talvori companion on regular height', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
+    expect(find.text('Talvori'), findsOneWidget);
   });
 
   testWidgets('home screen shows impulse inbox entry with unread badge', (
@@ -355,7 +375,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    final browserButton = find.byKey(const Key('home-browser-return-button'));
+    await tester.scrollUntilVisible(
+      browserButton,
+      120,
+      scrollable: find.byType(Scrollable),
+    );
+    await tester.pump();
+    await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-set-start-url')));

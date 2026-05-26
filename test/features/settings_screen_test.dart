@@ -42,6 +42,9 @@ void main() {
     expect(find.text('UNTERSTÜTZUNG'), findsOneWidget);
     await scrollTo(tester, 'RECHTLICHES');
     expect(find.text('RECHTLICHES'), findsOneWidget);
+    await scrollTo(tester, 'ENTWICKLER');
+    expect(find.text('ENTWICKLER'), findsOneWidget);
+    expect(find.text('Supabase-Wörter lokal importieren'), findsOneWidget);
 
     expect(find.text('Manage subscription'), findsNothing);
     expect(find.text('Make it yours'), findsNothing);
@@ -104,6 +107,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Du hast noch nichts stummgeschaltet'), findsOneWidget);
     expect(find.text('Inhalte hinzufügen'), findsOneWidget);
+  });
+
+  testWidgets('debug import tile opens Supabase local import screen', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+
+    await scrollTo(tester, 'Supabase-Wörter lokal importieren');
+    await tester.tap(find.text('Supabase-Wörter lokal importieren'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Preview ausführen'), findsOneWidget);
+    expect(find.text('Import starten'), findsOneWidget);
+    expect(
+      find.textContaining('SRS-Fortschritt bleibt unverändert'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('marketing analytics toggle changes locally', (tester) async {

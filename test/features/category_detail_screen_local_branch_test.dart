@@ -9,6 +9,7 @@ import 'package:talvori/core/local_database/models/local_practice_card.dart';
 import 'package:talvori/core/local_database/models/local_session_read_state.dart';
 import 'package:talvori/core/local_database/models/local_stage_due_summary.dart';
 import 'package:talvori/core/local_database/models/local_stage_inspector_item.dart';
+import 'package:talvori/core/local_database/models/local_word_package_definition.dart';
 import 'package:talvori/core/local_database/providers/local_category_progress_reset_provider.dart';
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
@@ -22,11 +23,13 @@ import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
@@ -142,6 +145,146 @@ void main() {
       expect(find.text('Start'), findsOneWidget);
     },
   );
+
+  testWidgets('level package detail wheel shows packages from the same level', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async {
+            if (categoryId == '${localLevelPackageCategoryPrefix}a1_alltag') {
+              return 7;
+            }
+            return 0;
+          }),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'A1 Starter',
+            listFilter: WordListFilter(WordFilterKind.about, 'A1 Starter'),
+            useLocalOfflineFlow: true,
+            localCategoryId: '${localLevelPackageCategoryPrefix}a1_starter',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    final wheel = tester.widget<CategoryWheel>(find.byType(CategoryWheel));
+    expect(wheel.initialIndex, 0);
+    expect(wheel.categories, const [
+      'A1 Starter',
+      'A1 Alltag',
+      'A1 Verben',
+      'A1 Nomen',
+      'A1 Adjektive',
+      'A1 Reisen & Orientierung',
+      'A1 Essen & Einkaufen',
+    ]);
+    expect(wheel.categories, isNot(contains('A2 Alltag')));
+    expect(wheel.categories, isNot(contains('B2 Diskussion')));
+
+    final header = tester.widget<CategoryHeaderCapsule>(
+      find.byType(CategoryHeaderCapsule),
+    );
+    expect(header.accentColor, const Color(0xFFB1CCFE));
+
+    wheel.onChanged(1, 'A1 Alltag');
+    await tester.pump();
+
+    final updatedWheel = tester.widget<CategoryWheel>(
+      find.byType(CategoryWheel),
+    );
+    expect(updatedWheel.initialIndex, 1);
+  });
+
+  testWidgets('level package detail wheel is scoped to A2 and B2 groups', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    Future<List<String>> pumpFor(String title, String categoryId) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localCategoriesProvider.overrideWith((ref) async => const []),
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: MaterialApp(
+            home: CategoryDetailScreen(
+              title: title,
+              listFilter: WordListFilter(WordFilterKind.about, title),
+              useLocalOfflineFlow: true,
+              localCategoryId: categoryId,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      return tester
+          .widget<CategoryWheel>(find.byType(CategoryWheel))
+          .categories;
+    }
+
+    final a2Categories = await pumpFor(
+      'A2 Alltag',
+      '${localLevelPackageCategoryPrefix}a2_alltag',
+    );
+    expect(a2Categories, containsAll(['A2 Alltag', 'A2 Arbeit & Schule']));
+    expect(a2Categories, isNot(contains('A1 Starter')));
+    expect(a2Categories, isNot(contains('B2 Diskussion')));
+
+    final b2Categories = await pumpFor(
+      'B2 Diskussion',
+      '${localLevelPackageCategoryPrefix}b2_diskussion',
+    );
+    expect(b2Categories, containsAll(['B2 Diskussion', 'B2 Beruf & Studium']));
+    expect(b2Categories, isNot(contains('A2 Alltag')));
+    expect(b2Categories, isNot(contains('C1 Argumentation')));
+  });
+
+  test('learning level package colors use distinct package accents', () {
+    final a1 = CategoryStrokeColors.getWheelStrokeColor('A1 Starter');
+    final a1Alltag = CategoryStrokeColors.getWheelStrokeColor('A1 Alltag');
+    final a1Verben = CategoryStrokeColors.getWheelStrokeColor('A1 Verben');
+    final a1Nouns = CategoryStrokeColors.getWheelStrokeColor('A1 Nomen');
+    final a2 = CategoryStrokeColors.getWheelStrokeColor('A2 Alltag');
+    final a2Travel = CategoryStrokeColors.getWheelStrokeColor('A2 Reisen');
+    final b1 = CategoryStrokeColors.getWheelStrokeColor('B1 Redemittel');
+    final c2 = CategoryStrokeColors.getWheelStrokeColor('C2 Redemittel');
+    final c1 = CategoryStrokeColors.getWheelStrokeColor('C1 Argumentation');
+    final b2Discussion = CategoryStrokeColors.getWheelStrokeColor(
+      'B2 Diskussion',
+    );
+    final b2Nouns = CategoryStrokeColors.getWheelStrokeColor('B2 Nomen');
+
+    expect(a1, isNot(a2));
+    expect(a1, isNot(c2));
+    expect(a1, isNot(a1Alltag));
+    expect(a1Alltag, isNot(a1Verben));
+    expect(a1Verben, isNot(a1Nouns));
+    expect(a2, isNot(a2Travel));
+    expect(b1, isNot(b2Discussion));
+    expect(c1, isNot(c2));
+    expect(b2Discussion, isNot(b2Nouns));
+    expect(CategoryStrokeColors.colorForLevel('A1'), isNot(a1));
+    expect(CategoryStrokeColors.colorForLevel('A2'), isNot(a2));
+    expect(
+      CategoryStrokeColors.getStrokeColor('A1 Starter'),
+      isNot(CategoryStrokeColors.getWheelStrokeColor('A1 Starter')),
+    );
+  });
 
   testWidgets('category_detail_screen_local_start_opens_local_learn_mode', (
     tester,

@@ -242,7 +242,9 @@ void main() {
     expect(find.text('Meine Wörter'), findsOneWidget);
     expect(find.text('Favoriten'), findsOneWidget);
     expect(find.text('Mein Mix'), findsOneWidget);
-    expect(find.text('Wörter, die ich kenne'), findsNothing);
+    expect(find.text('Wörter, die ich kenne'), findsOneWidget);
+    expect(find.text('Lernlevel'), findsAtLeastNWidgets(1));
+    expect(find.text('Sprachwerkzeuge'), findsAtLeastNWidgets(1));
 
     await tester.tap(
       find.byKey(

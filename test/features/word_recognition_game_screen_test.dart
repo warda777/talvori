@@ -255,15 +255,11 @@ void main() {
 
     expect(find.text('Alle Wörter'), findsWidgets);
     expect(find.text('Meine Wörter'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Favoriten'),
-      520,
-      scrollable: find.byType(Scrollable).first,
-    );
     expect(find.text('Favoriten'), findsOneWidget);
     expect(find.text('Mein Mix'), findsOneWidget);
 
-    await tester.tap(
+    await tapVisible(
+      tester,
       find.byKey(
         const ValueKey('word-recognition-source-local-source-favorites'),
       ),

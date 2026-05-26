@@ -57,7 +57,10 @@ class _CategoryWheelState extends State<CategoryWheel>
   @override
   void initState() {
     super.initState();
-    _current = widget.initialIndex.clamp(0, (widget.categories.length - 1).clamp(0, 9999));
+    _current = widget.initialIndex.clamp(
+      0,
+      (widget.categories.length - 1).clamp(0, 9999),
+    );
     _ctrl = FixedExtentScrollController(initialItem: _current);
   }
 
@@ -73,13 +76,18 @@ class _CategoryWheelState extends State<CategoryWheel>
     super.didUpdateWidget(oldWidget);
 
     if (widget.categories.length != oldWidget.categories.length) {
-      _current = _current.clamp(0, (widget.categories.length - 1).clamp(0, 9999));
+      _current = _current.clamp(
+        0,
+        (widget.categories.length - 1).clamp(0, 9999),
+      );
     }
 
     if (widget.initialIndex != oldWidget.initialIndex &&
         !_ctrl.position.isScrollingNotifier.value) {
-      final newIndex =
-          widget.initialIndex.clamp(0, (widget.categories.length - 1).clamp(0, 9999));
+      final newIndex = widget.initialIndex.clamp(
+        0,
+        (widget.categories.length - 1).clamp(0, 9999),
+      );
       _current = newIndex;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _ctrl.jumpToItem(_current);
@@ -119,7 +127,7 @@ class _CategoryWheelState extends State<CategoryWheel>
         width: kWheelWidth,
         height: kWheelHeight,
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.3),
+          color: Colors.red.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Center(
@@ -169,7 +177,9 @@ class _CategoryWheelState extends State<CategoryWheel>
                           height: kWheelItemExtent - 6,
                           radius: kWheelPillRadius,
                           active: dist == 0,
-                          strokeColor: CategoryStrokeColors.getStrokeColor(cats[index]),
+                          strokeColor: CategoryStrokeColors.getWheelStrokeColor(
+                            cats[index],
+                          ),
                         ),
                       ),
                     ),
@@ -188,38 +198,38 @@ class _CategoryWheelState extends State<CategoryWheel>
                 alignment: Alignment.centerRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: kWheelArrowNudge),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: _showArrows ? 1.0 : 0.0,
-                            child: _ArrowIcon(
-                              up: true,
-                              flash: _flashUp,
-                              onTap: () => _ctrl.animateToItem(
-                                (_current - 1).clamp(0, cats.length - 1),
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOut,
-                              ),
-                            ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: _showArrows ? 1.0 : 0.0,
+                        child: _ArrowIcon(
+                          up: true,
+                          flash: _flashUp,
+                          onTap: () => _ctrl.animateToItem(
+                            (_current - 1).clamp(0, cats.length - 1),
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
                           ),
-                          const SizedBox(height: 8),
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: _showArrows ? 1.0 : 0.0,
-                            child: _ArrowIcon(
-                              up: false,
-                              flash: _flashDown,
-                              onTap: () => _ctrl.animateToItem(
-                                (_current + 1).clamp(0, cats.length - 1),
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOut,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
+                      const SizedBox(height: 8),
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: _showArrows ? 1.0 : 0.0,
+                        child: _ArrowIcon(
+                          up: false,
+                          flash: _flashDown,
+                          onTap: () => _ctrl.animateToItem(
+                            (_current + 1).clamp(0, cats.length - 1),
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -259,7 +269,7 @@ class _AdaptivePill extends StatelessWidget {
         boxShadow: active && kWheelGlowBlur > 0
             ? [
                 BoxShadow(
-                  color: strokeColor.withOpacity(kWheelGlowOpacity),
+                  color: strokeColor.withValues(alpha: kWheelGlowOpacity),
                   blurRadius: kWheelGlowBlur,
                 ),
               ]
@@ -297,18 +307,32 @@ class _EdgeFade extends StatelessWidget {
       children: [
         child,
         Positioned(
-          left: 0, right: 0, top: 0, height: fadeHeight,
+          left: 0,
+          right: 0,
+          top: 0,
+          height: fadeHeight,
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: [
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.7),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.4),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.1),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
                 ),
@@ -317,18 +341,32 @@ class _EdgeFade extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 0, right: 0, bottom: 0, height: fadeHeight,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: fadeHeight,
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.bottomCenter, end: Alignment.topCenter,
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
                   colors: [
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.7),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.4),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.1),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
                 ),
@@ -345,7 +383,11 @@ class _ArrowIcon extends StatelessWidget {
   final bool up;
   final bool flash;
   final VoidCallback onTap;
-  const _ArrowIcon({required this.up, required this.flash, required this.onTap});
+  const _ArrowIcon({
+    required this.up,
+    required this.flash,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -362,14 +404,16 @@ class _ArrowIcon extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white24),
             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
           ),
           alignment: Alignment.center,
           child: Icon(
-            up ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+            up
+                ? Icons.keyboard_arrow_up_rounded
+                : Icons.keyboard_arrow_down_rounded,
             color: Colors.white,
             size: 22,
           ),
@@ -378,4 +422,3 @@ class _ArrowIcon extends StatelessWidget {
     );
   }
 }
-

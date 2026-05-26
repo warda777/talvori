@@ -291,27 +291,7 @@ class _WordCardState extends ConsumerState<WordCard> {
                     // ─── GLOW SWITCH (rechts oben) ───
                     Positioned(top: 18, right: 16, child: GlowSwitch()),
 
-                    // ─── "Meine Wörter" (immer identisch) ───
-                    Positioned(
-                      top: 70,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Text(
-                          'Meine Wörter',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: onImageFg, // Weiß
-                            shadows: const [
-                              Shadow(color: Colors.black54, blurRadius: 6),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ─── SPEAKER unter "Meine Wörter" ───
+                    // ─── SPEAKER ───
                     Positioned(
                       top: 110,
                       left: 0,

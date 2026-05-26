@@ -98,8 +98,8 @@ void main() {
 
       expect(find.text('Wortwelten'), findsOneWidget);
       expect(find.text('Word Hub'), findsNothing);
-      expect(find.text('Life & Daily Flow'), findsOneWidget);
-      expect(find.text('Health & Fitness'), findsOneWidget);
+      expect(find.text('Alltag & Leben'), findsOneWidget);
+      expect(find.text('Gesundheit & Fitness'), findsOneWidget);
     });
 
     testWidgets('debug_hub_opens_ai_chat_dev_screen', (tester) async {

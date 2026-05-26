@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +37,7 @@ final _categoryIdForSubProvider = FutureProvider.family<String?, HubSubcat>((ref
 class CategoryCard extends ConsumerStatefulWidget {
   final String sectionKey;
   final HubSubcat sub;
+  final String? displayLabel;
   final VoidCallback? onTap;
   final String? paletteId; // Eindeutige ID für Farb-Overrides
   final GlobalKey? titleKey; // Key für Titel-Target
@@ -47,6 +47,7 @@ class CategoryCard extends ConsumerStatefulWidget {
   const CategoryCard({
     required this.sectionKey,
     required this.sub,
+    this.displayLabel,
     this.onTap,
     this.paletteId,
     this.titleKey,
@@ -150,10 +151,6 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
     } else {
       debugPrint('🎯 CategoryCard "${widget.sub.label}": Server-Daten | total=$total, stages=$stages');
     }
-    final String normalizedLabel = widget.sub.label
-        .toLowerCase()
-        .trim()
-        .replaceAll('&', 'and');
     final Color defaultStrokeColor = CategoryStrokeColors.getStrokeColor(
       widget.sub.label,
     );
@@ -282,10 +279,15 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
 
   Widget _buildTitle(ThemeData t, Color titleColor, bool isTitleFocused, WidgetRef ref) {
     Widget title = Text(
-      widget.sub.label,
+      widget.displayLabel ?? widget.sub.label,
       key: widget.titleKey, // 🔹 der Key, damit das Target gemessen werden kann
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      softWrap: true,
+      textWidthBasis: TextWidthBasis.parent,
       style: t.textTheme.titleMedium?.copyWith(
         color: titleColor,
+        height: 1.12,
       ),
     );
 
@@ -332,7 +334,7 @@ class _CategoryCardState extends ConsumerState<CategoryCard>
                     // BlendMode.modulate multipliziert die Farben, behält aber die Struktur
                     colorFilter: ColorFilter.mode(iconColor, BlendMode.modulate),
                     child: Text(
-                      emoji!,
+                      emoji,
                       style: TextStyle(
                         fontSize: iconSize,
                         color: Colors.white,

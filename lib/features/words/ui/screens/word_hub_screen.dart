@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_screen.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
@@ -14,6 +14,7 @@ import 'package:talvori/features/words/application/word_hub_glow_provider.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/data/word_world_display_names.dart';
 import 'package:talvori/features/words/data/word_hub_taxonomy.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
@@ -26,7 +27,6 @@ import 'package:talvori/features/words/ui/widgets/glow_toggle_button.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_tools.dart';
 import 'package:talvori/features/words/ui/widgets/radial_palette_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/slide_hint_button.dart';
-import 'package:talvori/features/words/ui/widgets/floating_palette_button.dart';
 
 Widget debugBorder(Widget child, {bool focused = false}) {
   // nur noch Platzhalter – Fokus wird komplett von FocusGlow übernommen
@@ -82,7 +82,6 @@ class WordHubScreen extends ConsumerStatefulWidget {
 class _WordHubScreenState extends ConsumerState<WordHubScreen> {
   static const double _frontButtonWidth = 120.0;
   static const double _maxReveal = 90.0;
-  static const double _laneWidth = _frontButtonWidth + _maxReveal;
 
   final SlideHintController _slideCtrl = SlideHintController();
   final ScrollController _scroll = ScrollController();
@@ -479,25 +478,17 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final glowEnabled = ref.watch(wordHubGlowProvider);
     final radialPalette = ref.watch(radialPaletteProvider);
     final focusedIds = radialPalette.focusedIds;
+    final nativeLanguage = ref.watch(
+      profilePreferencesControllerProvider.select(
+        (preferences) => preferences.nativeLanguage,
+      ),
+    );
 
-    // Extra Platz nur, wenn der Fokus auf einer der letzten Kacheln ist (Levels & Progress)
+    // Extra Platz nur, wenn der Fokus auf den letzten sichtbaren Wortwelt-Kacheln ist.
     final bool isNearBottom =
         _isRadialOpen &&
         focusedIds.isNotEmpty &&
-        () {
-          // Basis-ID extrahieren (ohne .title oder .count)
-          final primaryId = focusedIds.first;
-          final baseId = primaryId.replaceAll(RegExp(r'\.(title|count)$'), '');
-
-          // Prüfen, ob es eine Levels & Progress Kachel ist (a1, a2, b1, b2, c1, c2)
-          final lastTileKeys = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
-          for (final key in lastTileKeys) {
-            if (baseId.endsWith('levels_progress.$key')) {
-              return true;
-            }
-          }
-          return false;
-        }();
+        focusedIds.first.contains('culture_creativity');
 
     // Header-Overrides beim ersten Build laden
     if (!_headerTargetsRegistered) {
@@ -607,13 +598,23 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
     // Sektionen-Widgets erstellen
     final sectionWidgets = <Widget>[];
-    for (final section in hubSections) {
-      sectionWidgets.add(_SectionHeader(section.title, section.key));
+    for (final section in wordWorldHubSections) {
+      sectionWidgets.add(
+        _SectionHeader(
+          wordHubGroupDisplayName(
+            section.key,
+            fallbackName: section.title,
+            nativeLanguage: nativeLanguage,
+          ),
+          section.key,
+        ),
+      );
       sectionWidgets.add(
         _GridSection(
           sectionKey: section.key,
           subs: section.subcats,
           repo: repo,
+          nativeLanguage: nativeLanguage,
           onTapSub: (sub) async {
             String? catId;
             try {
@@ -623,6 +624,12 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             } catch (_) {
               catId = null;
             }
+
+            final displayLabel = wordHubItemDisplayName(
+              sub.key,
+              fallbackName: sub.label,
+              nativeLanguage: nativeLanguage,
+            );
 
             if (!context.mounted) return;
             if (catId == null && sub.supabaseId == null) {
@@ -638,8 +645,8 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
             final categoryRoute = catId != null
                 ? MaterialPageRoute(
                     builder: (_) => CategoryDetailScreen(
-                      title: sub.label,
-                      categoryId: catId!,
+                      title: displayLabel,
+                      categoryId: catId,
                       categorySlug: null,
                       listFilter: WordListFilter(
                         WordFilterKind.category,
@@ -654,7 +661,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                         sub.label,
                       );
                       return CategoryDetailScreen(
-                        title: sub.label,
+                        title: displayLabel,
                         categoryId: null,
                         categorySlug: _slugifyLocal(sub.label),
                         listFilter: WordListFilter(kind, value),
@@ -987,6 +994,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
     final glowEnabled = ref.watch(wordHubGlowProvider);
     final radialPalette = ref.watch(radialPaletteProvider);
     final focusedIds = radialPalette.focusedIds;
+    final nativeLanguage = ref.watch(
+      profilePreferencesControllerProvider.select(
+        (preferences) => preferences.nativeLanguage,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: _hubBackgroundColor ?? Colors.black,
@@ -1165,8 +1177,15 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                   ),
                 ),
               ),
-              for (final section in hubSections) ...[
-                _SectionHeader(section.title, section.key),
+              for (final section in wordWorldHubSections) ...[
+                _SectionHeader(
+                  wordHubGroupDisplayName(
+                    section.key,
+                    fallbackName: section.title,
+                    nativeLanguage: nativeLanguage,
+                  ),
+                  section.key,
+                ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
@@ -1189,8 +1208,14 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                       );
                       final mappedLocalCategoryId =
                           tappedLocalItem?.localCategoryId;
+                      final displayLabel = wordHubItemDisplayName(
+                        sub.key,
+                        fallbackName: sub.label,
+                        nativeLanguage: nativeLanguage,
+                      );
                       return _LocalTaxonomyCategoryCard(
                         sub: sub,
+                        displayLabel: displayLabel,
                         localCategoryId: mappedLocalCategoryId,
                         localWordCount: tappedLocalItem?.vocabsCount,
                         glowEnabled: glowEnabled,
@@ -1204,7 +1229,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                                     )
                                     .ensureCategoryChat(
                                       categoryId: mappedLocalCategoryId,
-                                      title: sub.label,
+                                      title: displayLabel,
                                     )
                                     .then((chat) {
                                       if (!context.mounted) return;
@@ -1234,7 +1259,7 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                             MaterialPageRoute(
                               builder: (_) => CategoryDetailScreen(
                                 categoryId: mappedLocalCategoryId,
-                                title: sub.label,
+                                title: displayLabel,
                                 listFilter: WordListFilter(
                                   WordFilterKind.category,
                                   mappedLocalCategoryId,
@@ -1285,6 +1310,7 @@ LocalCategoryDetailGroupItem? _localItemForWordHubKey(
 class _LocalTaxonomyCategoryCard extends StatelessWidget {
   const _LocalTaxonomyCategoryCard({
     required this.sub,
+    required this.displayLabel,
     required this.localCategoryId,
     required this.localWordCount,
     required this.glowEnabled,
@@ -1293,6 +1319,7 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
   });
 
   final HubSubcat sub;
+  final String displayLabel;
   final String? localCategoryId;
   final int? localWordCount;
   final bool glowEnabled;
@@ -1303,100 +1330,120 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strokeColor = CategoryStrokeColors.getStrokeColor(sub.label);
     final fillColor = Color.lerp(const Color(0xFF050505), strokeColor, 0.10)!;
-    return Stack(
+    return Material(
+      key: Key('word_hub_category_card_${sub.key}'),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
       clipBehavior: Clip.none,
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          clipBehavior: Clip.none,
-          child: InkWell(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        overlayColor: WidgetStatePropertyAll(
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+        ),
+        splashFactory: InkRipple.splashFactory,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            onTap: onTap,
-            overlayColor: WidgetStatePropertyAll(
-              Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
-            ),
-            splashFactory: InkRipple.splashFactory,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: glowEnabled
-                    ? [
-                        BoxShadow(
-                          color: strokeColor.withValues(alpha: 0.20),
-                          blurRadius: 18,
-                          spreadRadius: 1,
-                        ),
-                        BoxShadow(
-                          color: strokeColor.withValues(alpha: 0.10),
-                          blurRadius: 30,
-                          spreadRadius: 5,
-                        ),
-                      ]
-                    : const [],
+            boxShadow: glowEnabled
+                ? [
+                    BoxShadow(
+                      color: strokeColor.withValues(alpha: 0.20),
+                      blurRadius: 18,
+                      spreadRadius: 1,
+                    ),
+                    BoxShadow(
+                      color: strokeColor.withValues(alpha: 0.10),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                    ),
+                  ]
+                : const [],
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [fillColor, const Color(0xFF050507)],
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [fillColor, const Color(0xFF050507)],
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: strokeColor.withValues(alpha: 0.72),
+                width: 1.6,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      width: 1,
+                    ),
+                    color: const Color(0xFF08080A).withValues(alpha: 0.74),
                   ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: strokeColor.withValues(alpha: 0.72),
-                    width: 1.6,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
                   child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          width: 1,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayLabel,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          textWidthBasis: TextWidthBasis.parent,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                height: 1.12,
+                              ),
                         ),
-                        color: const Color(0xFF08080A).withValues(alpha: 0.74),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        const Spacer(),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: onChatTap == null ? 0 : 38,
-                              ),
-                              child: Text(
-                                sub.label,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
+                            if (onChatTap != null)
+                              _CategoryChatButton(
+                                categoryId: localCategoryId!,
+                                color: strokeColor,
+                                onTap: onChatTap!,
+                              )
+                            else
+                              const SizedBox(width: 34, height: 34),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      localCategoryId == null
+                                          ? 'local pending'
+                                          : '${localWordCount ?? 0}',
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        color: localCategoryId == null
+                                            ? Colors.white54
+                                            : strokeColor,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
-                              ),
-                            ),
-                            const Spacer(),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: Text(
-                                localCategoryId == null
-                                    ? 'local pending'
-                                    : '${localWordCount ?? 0}',
-                                style: TextStyle(
-                                  color: localCategoryId == null
-                                      ? Colors.white54
-                                      : strokeColor,
-                                  fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
@@ -1404,17 +1451,7 @@ class _LocalTaxonomyCategoryCard extends StatelessWidget {
             ),
           ),
         ),
-        if (onChatTap != null)
-          Positioned(
-            top: 14,
-            right: 14,
-            child: _CategoryChatButton(
-              categoryId: localCategoryId!,
-              color: strokeColor,
-              onTap: onChatTap!,
-            ),
-          ),
-      ],
+      ),
     );
   }
 }
@@ -1546,12 +1583,14 @@ class _GridSection extends ConsumerStatefulWidget {
   final String sectionKey;
   final List<HubSubcat> subs;
   final SupabaseWordRepository repo;
+  final String nativeLanguage;
   final void Function(HubSubcat sub)? onTapSub;
 
   const _GridSection({
     required this.sectionKey,
     required this.subs,
     required this.repo,
+    required this.nativeLanguage,
     this.onTapSub,
   });
 
@@ -1740,6 +1779,11 @@ class _GridSectionState extends ConsumerState<_GridSection> {
         delegate: SliverChildBuilderDelegate((context, i) {
           final sub = widget.subs[i];
           final baseId = 'wordHub.${widget.sectionKey}.${sub.key}';
+          final displayLabel = wordHubItemDisplayName(
+            sub.key,
+            fallbackName: sub.label,
+            nativeLanguage: widget.nativeLanguage,
+          );
 
           return _HighlightableTarget(
             id: baseId, // ganze Kachel
@@ -1748,6 +1792,7 @@ class _GridSectionState extends ConsumerState<_GridSection> {
               paletteId: baseId,
               sectionKey: widget.sectionKey,
               sub: sub,
+              displayLabel: displayLabel,
               // 🔽 NEU: Keys für Titel & Counter in die Kachel hineinreichen
               titleKey: _titleKeys[i],
               countKey: _countKeys[i],
@@ -1770,11 +1815,7 @@ class _GridSectionState extends ConsumerState<_GridSection> {
 }
 
 class _HighlightableTarget extends ConsumerWidget {
-  const _HighlightableTarget({
-    super.key,
-    required this.id,
-    required this.child,
-  });
+  const _HighlightableTarget({required this.id, required this.child});
 
   final String id;
   final Widget child;
@@ -1783,8 +1824,6 @@ class _HighlightableTarget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = ref.watch(radialPaletteProvider);
 
-    final glowColor =
-        palette.selectionGlowColor ?? Colors.white.withOpacity(0.6);
     bool isFocused = false;
 
     if (palette.activeTool != null) {
@@ -1796,9 +1835,6 @@ class _HighlightableTarget extends ConsumerWidget {
     if (!isFocused) {
       return child;
     }
-
-    // Bei ONE und ALL: nur Rahmen, kein Glow
-    final showGlow = false; // Kein Glow mehr, nur Rahmen
 
     // Rahmenfarbe: Rot wenn gelockt, sonst weiß
     final borderColor = palette.isBallLocked ? Colors.redAccent : Colors.white;
@@ -1817,15 +1853,6 @@ class _HighlightableTarget extends ConsumerWidget {
                   color: borderColor, // Rot wenn gelockt, sonst weiß
                   width: 6, // Deutlich fetterer Rahmen
                 ),
-                boxShadow: showGlow
-                    ? [
-                        BoxShadow(
-                          color: glowColor.withOpacity(0.5),
-                          blurRadius: 12,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : [], // Leere Liste statt null, damit kein Glow angezeigt wird
                 color: Colors.transparent,
               ),
             ),

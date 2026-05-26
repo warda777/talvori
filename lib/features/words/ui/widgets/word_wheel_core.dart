@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +31,8 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
   bool _loadInFlight = false;
   bool _reloadRequested = false;
   int _loadToken = 0;
+  Timer? _emptyHintTimer;
+  bool _showEmptyHint = true;
 
   String _sanitize(String t) {
     // Unicode-Whitespaces inkl. NBSP entfernen
@@ -85,9 +89,11 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
       });
 
       if (_words.isNotEmpty) {
+        _cancelEmptyHintTimer();
         widget.onCenterChange?.call(_center, _words[_center]);
         widget.onTotalLoaded?.call(_words.length);
       } else {
+        _restartEmptyHintTimer();
         widget.onTotalLoaded?.call(0);
         debugPrint('⚠️ WordWheelCore: No local words found in Meine Wörter');
       }
@@ -109,6 +115,22 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
         });
       }
     }
+  }
+
+  void _restartEmptyHintTimer() {
+    _emptyHintTimer?.cancel();
+    if (!_showEmptyHint && mounted) {
+      setState(() => _showEmptyHint = true);
+    }
+    _emptyHintTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      setState(() => _showEmptyHint = false);
+    });
+  }
+
+  void _cancelEmptyHintTimer() {
+    _emptyHintTimer?.cancel();
+    _emptyHintTimer = null;
   }
 
   WordUserView _mapLocalWord(LocalWord word) {
@@ -134,6 +156,7 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
 
   @override
   void dispose() {
+    _cancelEmptyHintTimer();
     _controller.dispose();
     super.dispose();
   }
@@ -167,20 +190,27 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
     }
 
     if (_words.isEmpty) {
+      final emptyLabel = wordWheelBrowserEmptyLabel(const Locale('de'));
       return SizedBox(
         height: 160,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.only(right: 24),
-            child: Text(
-              'Mark your first word\nin the browser',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: 0.6),
-                height: 1.3,
-              ),
+            child: AnimatedOpacity(
+              opacity: _showEmptyHint ? 1 : 0,
+              duration: const Duration(milliseconds: 220),
+              child: _showEmptyHint
+                  ? Text(
+                      emptyLabel,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        height: 1.3,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
           ),
         ),
@@ -247,4 +277,12 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
       ),
     );
   }
+}
+
+@visibleForTesting
+String wordWheelBrowserEmptyLabel(Locale? locale) {
+  if (locale?.languageCode.toLowerCase() == 'en') {
+    return 'Mark your first word\nin the browser';
+  }
+  return 'Markiere ein Wort im Browser und teile es mit Talvori.';
 }

@@ -12,4 +12,5 @@ export 'settings_footer_card.dart';
 export 'settings_section.dart';
 export 'settings_tile.dart';
 export 'tap_flash.dart';
+export 'talvori_companion_card.dart';
 export 'top_bar.dart';

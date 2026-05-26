@@ -103,3 +103,16 @@ const hubSections = <HubSection>[
     ],
   ),
 ];
+
+const wordWorldHubSectionKeys = <String>{
+  'life_daily_flow',
+  'people_mind',
+  'society_systems',
+  'nature_beyond',
+  'action_adventure',
+  'culture_creativity',
+};
+
+List<HubSection> get wordWorldHubSections => hubSections
+    .where((section) => wordWorldHubSectionKeys.contains(section.key))
+    .toList(growable: false);

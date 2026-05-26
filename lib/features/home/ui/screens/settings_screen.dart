@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
+import 'package:talvori/features/home/ui/screens/supabase_words_local_import_screen.dart';
 
 import '../../providers.dart';
 
@@ -226,6 +228,19 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+          if (kDebugMode)
+            _SettingsSection(
+              title: 'Entwickler',
+              children: [
+                _SettingsTile(
+                  icon: Icons.cloud_download_rounded,
+                  title: 'Supabase-Wörter lokal importieren',
+                  value: 'Preview und manueller Import',
+                  onTap: () =>
+                      _push(context, const SupabaseWordsLocalImportScreen()),
+                ),
+              ],
+            ),
           const SizedBox(height: 8),
           _FooterCard(
             appVersion: settings.appVersion,

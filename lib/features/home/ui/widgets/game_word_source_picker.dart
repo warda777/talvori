@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talvori/core/local_database/models/local_category.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
+import 'package:talvori/core/local_database/models/local_word_package_definition.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
 
 class GameWordSource {
@@ -28,6 +29,24 @@ class GameWordSource {
       label: 'Wortwelt: ${world.name}',
       source: LocalLearningSource.allWords,
       categoryId: world.resolveCategoryId(categories),
+    );
+  }
+
+  factory GameWordSource.levelPackage(LocalLevelPackageDefinition package) {
+    return GameWordSource._(
+      key: 'level_package:${package.key}',
+      label: 'Lernlevel: ${package.label}',
+      source: LocalLearningSource.allWords,
+      categoryId: '$localLevelPackageCategoryPrefix${package.key}',
+    );
+  }
+
+  factory GameWordSource.languageTool(LocalLanguageToolDefinition tool) {
+    return GameWordSource._(
+      key: 'language_tool:${tool.key}',
+      label: 'Sprachwerkzeug: ${tool.label}',
+      source: LocalLearningSource.allWords,
+      categoryId: '$localLanguageToolCategoryPrefix${tool.key}',
     );
   }
 
@@ -63,6 +82,7 @@ const gameStandardWordSources = <LocalLearningSource>[
   LocalLearningSource.allWords,
   LocalLearningSource.myWords,
   LocalLearningSource.favorites,
+  LocalLearningSource.knownWords,
   LocalLearningSource.myMix,
 ];
 
@@ -108,7 +128,6 @@ const gameWordWorldGroups = <GameWordWorldGroup>[
     GameWordWorld(key: 'music_entertainment', name: 'Music & Entertainment'),
     GameWordWorld(key: 'art_literature', name: 'Art & Literature'),
   ]),
-  // Level-Filter A1-C2 wird später separat ergänzt.
   GameWordWorldGroup('Beruf', [
     GameWordWorld(key: 'work_careers', name: 'Work & Careers'),
   ]),
@@ -278,6 +297,18 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
         }
       }
     }
+    if (key.startsWith('level_package:')) {
+      final packageKey = key.substring('level_package:'.length);
+      final package = localLevelPackageByKey(packageKey);
+      if (package != null) return GameWordSource.levelPackage(package);
+      return null;
+    }
+    if (key.startsWith('language_tool:')) {
+      final toolKey = key.substring('language_tool:'.length);
+      final tool = localLanguageToolByKey(toolKey);
+      if (tool != null) return GameWordSource.languageTool(tool);
+      return null;
+    }
     return null;
   }
 
@@ -355,7 +386,7 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
             key: ValueKey('${widget.keyPrefix}-change-source-button'),
             icon: Icons.folder_copy_rounded,
             title: 'Wortquelle ändern',
-            subtitle: 'Alle Wörter, Meine Wörter, Favoriten oder Mein Mix',
+            subtitle: 'Alle Wörter, Lernlevel, Wortwelten und mehr',
             accentColor: widget.accentColor,
             onTap: () => _showSourceSheet(context),
           ),
@@ -364,9 +395,27 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
             key: ValueKey('${widget.keyPrefix}-select-world-button'),
             icon: Icons.public_rounded,
             title: 'Wortwelt auswählen',
-            subtitle: 'Spiele mit einer festen Talvori-Wortwelt',
+            subtitle: 'Themen wie Reisen und Alltag',
             accentColor: widget.accentColor,
             onTap: () => _showWordWorldSheet(context),
+          ),
+          const SizedBox(height: 10),
+          _PickerActionButton(
+            key: ValueKey('${widget.keyPrefix}-select-level-packages-button'),
+            icon: Icons.school_rounded,
+            title: 'Lernlevel',
+            subtitle: 'Kleine Pakete von A1 bis C2',
+            accentColor: widget.accentColor,
+            onTap: () => _showLevelPackageSheet(context),
+          ),
+          const SizedBox(height: 10),
+          _PickerActionButton(
+            key: ValueKey('${widget.keyPrefix}-select-language-tools-button'),
+            icon: Icons.construction_rounded,
+            title: 'Sprachwerkzeuge',
+            subtitle: 'Phrasen, Grammatik und Verben',
+            accentColor: widget.accentColor,
+            onTap: () => _showLanguageToolSheet(context),
           ),
           if (widget.onRoundSizeSelected != null) ...[
             const SizedBox(height: 16),
@@ -443,6 +492,7 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
   }
 
   Future<void> _showSourceSheet(BuildContext context) {
+    final parentContext = context;
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -452,21 +502,242 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
       builder: (context) {
         return _GameWordSourceSheetFrame(
           title: 'Wortquelle ändern',
-          maxHeightFactor: 0.48,
+          subtitle: 'Wähle deine Wortquelle oder öffne eine Unterauswahl.',
+          maxHeightFactor: 0.86,
+          accentColor: widget.secondaryAccentColor,
+          child: GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.32,
+            children: [
+              _SourceCategoryTile(
+                key: ValueKey(
+                  '${widget.keyPrefix}-source-${LocalLearningSource.allWords.id}',
+                ),
+                icon: Icons.all_inclusive_rounded,
+                title: LocalLearningSource.allWords.label,
+                selected:
+                    widget.selectedSource ==
+                    GameWordSource.standard(LocalLearningSource.allWords),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _selectSource(
+                    GameWordSource.standard(LocalLearningSource.allWords),
+                  );
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey(
+                  '${widget.keyPrefix}-source-${LocalLearningSource.myWords.id}',
+                ),
+                icon: Icons.edit_note_rounded,
+                title: LocalLearningSource.myWords.label,
+                selected:
+                    widget.selectedSource ==
+                    GameWordSource.standard(LocalLearningSource.myWords),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _selectSource(
+                    GameWordSource.standard(LocalLearningSource.myWords),
+                  );
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey(
+                  '${widget.keyPrefix}-source-${LocalLearningSource.favorites.id}',
+                ),
+                icon: Icons.favorite_rounded,
+                title: LocalLearningSource.favorites.label,
+                selected:
+                    widget.selectedSource ==
+                    GameWordSource.standard(LocalLearningSource.favorites),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _selectSource(
+                    GameWordSource.standard(LocalLearningSource.favorites),
+                  );
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey(
+                  '${widget.keyPrefix}-source-${LocalLearningSource.knownWords.id}',
+                ),
+                icon: Icons.verified_rounded,
+                title: LocalLearningSource.knownWords.label,
+                selected:
+                    widget.selectedSource ==
+                    GameWordSource.standard(LocalLearningSource.knownWords),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _selectSource(
+                    GameWordSource.standard(LocalLearningSource.knownWords),
+                  );
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey(
+                  '${widget.keyPrefix}-source-${LocalLearningSource.myMix.id}',
+                ),
+                icon: Icons.shuffle_rounded,
+                title: LocalLearningSource.myMix.label,
+                selected:
+                    widget.selectedSource ==
+                    GameWordSource.standard(LocalLearningSource.myMix),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _selectSource(
+                    GameWordSource.standard(LocalLearningSource.myMix),
+                  );
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey('${widget.keyPrefix}-source-word-worlds'),
+                icon: Icons.public_rounded,
+                title: 'Wortwelten',
+                subtitle: 'Themen wie Reisen und Alltag',
+                selected: widget.selectedSource.key.startsWith('world:'),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _openNestedSheet(() => _showWordWorldSheet(parentContext));
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey('${widget.keyPrefix}-source-level-packages'),
+                icon: Icons.school_rounded,
+                title: 'Lernlevel',
+                subtitle: 'Kleine Pakete von A1 bis C2',
+                selected: widget.selectedSource.key.startsWith(
+                  'level_package:',
+                ),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _openNestedSheet(() => _showLevelPackageSheet(parentContext));
+                },
+              ),
+              _SourceCategoryTile(
+                key: ValueKey('${widget.keyPrefix}-source-language-tools'),
+                icon: Icons.construction_rounded,
+                title: 'Sprachwerkzeuge',
+                subtitle: 'Phrasen, Grammatik und Verben',
+                selected: widget.selectedSource.key.startsWith(
+                  'language_tool:',
+                ),
+                accentColor: widget.accentColor,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _openNestedSheet(() => _showLanguageToolSheet(parentContext));
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openNestedSheet(VoidCallback openSheet) {
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+      openSheet();
+    });
+  }
+
+  Future<void> _showLevelPackageSheet(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _GameWordSourceSheetFrame(
+          title: 'Lernlevel',
+          subtitle: 'Wähle ein kleines Paket statt ein ganzes Level.',
+          maxHeightFactor: 0.78,
           accentColor: widget.secondaryAccentColor,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final source in gameStandardWordSources)
-                _SheetOption(
-                  key: ValueKey('${widget.keyPrefix}-source-${source.id}'),
-                  title: source.label,
-                  selected:
-                      widget.selectedSource == GameWordSource.standard(source),
-                  accentColor: widget.accentColor,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    _selectSource(GameWordSource.standard(source));
+              for (final group in localLevelPackageGroups) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 14, 4, 8),
+                  child: Text(
+                    group.level,
+                    style: TextStyle(
+                      color: widget.secondaryAccentColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                for (final package in group.packages)
+                  Builder(
+                    builder: (context) {
+                      final source = GameWordSource.levelPackage(package);
+                      return _SheetOption(
+                        key: ValueKey(
+                          '${widget.keyPrefix}-level-package-${package.key}',
+                        ),
+                        title: package.label,
+                        selected: widget.selectedSource == source,
+                        accentColor: widget.accentColor,
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          _selectSource(source);
+                        },
+                      );
+                    },
+                  ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showLanguageToolSheet(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _GameWordSourceSheetFrame(
+          title: 'Sprachwerkzeuge',
+          subtitle: 'Übe besondere Wortgruppen und Sprachmuster.',
+          maxHeightFactor: 0.56,
+          accentColor: widget.secondaryAccentColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final tool in localLanguageToolDefinitions)
+                Builder(
+                  builder: (context) {
+                    final source = GameWordSource.languageTool(tool);
+                    return _SheetOption(
+                      key: ValueKey(
+                        '${widget.keyPrefix}-language-tool-${tool.key}',
+                      ),
+                      title: tool.label,
+                      selected: widget.selectedSource == source,
+                      accentColor: widget.accentColor,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _selectSource(source);
+                      },
+                    );
                   },
                 ),
             ],
@@ -486,6 +757,7 @@ class _GameWordSourcePickerState extends State<GameWordSourcePicker> {
       builder: (context) {
         return _GameWordSourceSheetFrame(
           title: 'Wortwelt auswählen',
+          subtitle: 'Themen wie Reisen und Alltag.',
           maxHeightFactor: 0.68,
           accentColor: widget.secondaryAccentColor,
           child: Column(
@@ -902,12 +1174,14 @@ class _PickerActionButton extends StatelessWidget {
 class _GameWordSourceSheetFrame extends StatelessWidget {
   const _GameWordSourceSheetFrame({
     required this.title,
+    this.subtitle,
     required this.maxHeightFactor,
     required this.accentColor,
     required this.child,
   });
 
   final String title;
+  final String? subtitle;
   final double maxHeightFactor;
   final Color accentColor;
   final Widget child;
@@ -960,11 +1234,107 @@ class _GameWordSourceSheetFrame extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        color: Color(0xFFB8C7D9),
+                        fontSize: 12,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   child,
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceCategoryTile extends StatelessWidget {
+  const _SourceCategoryTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    required this.selected,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool selected;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = selected ? accentColor : const Color(0xFF26354B);
+    final fillColor = selected
+        ? accentColor.withValues(alpha: 0.14)
+        : const Color(0xFF0B1220);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: fillColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: accentColor, size: 20),
+                  const Spacer(),
+                  if (selected)
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: accentColor,
+                      size: 18,
+                    ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFFF4F8FF),
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 3),
+                Text(
+                  subtitle!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFFB8C7D9),
+                    fontSize: 11,
+                    height: 1.12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),

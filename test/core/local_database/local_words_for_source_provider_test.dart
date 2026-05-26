@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talvori/core/local_database/local_app_database_path.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
+import 'package:talvori/core/local_database/models/local_word_package_definition.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
@@ -163,6 +164,140 @@ void main() {
 
     expect(words.map((word) => word.term), ['signal']);
   });
+
+  test(
+    'level_package_uses_level_and_topic_memberships_without_progress_writes',
+    () async {
+      final container = await createContainer(
+        prefix: 'talvori_local_words_for_source_level_package_',
+      );
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      final repositories = bootstrap.repositoryFactory;
+      final now = DateTime(2026, 5, 26, 10);
+      final travel = await repositories.categoryRepository.upsertCategory(
+        id: 'travel',
+        name: 'Travel',
+        sortOrder: 1,
+        now: now,
+      );
+      final food = await repositories.categoryRepository.upsertCategory(
+        id: 'food',
+        name: 'Food & Cooking',
+        sortOrder: 2,
+        now: now,
+      );
+      final ticket = await repositories.wordRepository.upsertWord(
+        id: 'ticket',
+        categoryId: travel.id,
+        term: 'ticket',
+        translation: 'Ticket',
+        level: 'A1',
+        now: now,
+      );
+      await repositories.wordRepository.upsertWord(
+        id: 'journey',
+        categoryId: travel.id,
+        term: 'journey',
+        translation: 'Reise',
+        level: 'B1',
+        now: now,
+      );
+      await repositories.wordRepository.upsertWord(
+        id: 'bread',
+        categoryId: food.id,
+        term: 'bread',
+        translation: 'Brot',
+        level: 'A1',
+        now: now,
+      );
+
+      final progressBefore = await repositories.wordProgressRepository
+          .loadProgress(
+            wordId: ticket.id,
+            categoryId: travel.id,
+            mode: LearningMode.time,
+          );
+      final words = await container.read(
+        localWordsForCategoryProvider(
+          '${localLevelPackageCategoryPrefix}a1_reisen_orientierung',
+        ).future,
+      );
+      final progressAfter = await repositories.wordProgressRepository
+          .loadProgress(
+            wordId: ticket.id,
+            categoryId: travel.id,
+            mode: LearningMode.time,
+          );
+
+      expect(words.map((word) => word.term), ['ticket']);
+      expect(progressBefore, isNull);
+      expect(progressAfter, isNull);
+    },
+  );
+
+  test('part_of_speech_level_package_stays_empty_until_pos_exists', () async {
+    final container = await createContainer(
+      prefix: 'talvori_local_words_for_source_pos_package_',
+    );
+    final bootstrap = await container.read(localBootstrapProvider.future);
+    await bootstrap.repositoryFactory.categoryRepository.upsertCategory(
+      id: localMyWordsCategoryId,
+      name: localMyWordsCategoryLabel,
+      description: 'Lokal importierte Wörter.',
+      sortOrder: 10000,
+      now: DateTime(2026, 5, 26, 10),
+    );
+    await bootstrap.repositoryFactory.wordRepository.upsertWord(
+      id: 'walk',
+      categoryId: localMyWordsCategoryId,
+      term: 'walk',
+      translation: 'gehen',
+      level: 'A1',
+      now: DateTime(2026, 5, 26, 10),
+    );
+
+    final words = await container.read(
+      localWordsForCategoryProvider(
+        '${localLevelPackageCategoryPrefix}a1_verben',
+      ).future,
+    );
+
+    expect(words, isEmpty);
+  });
+
+  test(
+    'language_tool_uses_clean_tool_category_without_word_world_membership',
+    () async {
+      final container = await createContainer(
+        prefix: 'talvori_local_words_for_source_language_tool_',
+      );
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      final repositories = bootstrap.repositoryFactory;
+      final now = DateTime(2026, 5, 26, 10);
+      final top500 = await repositories.categoryRepository.upsertCategory(
+        id: 'top-500',
+        name: 'Top 500 Words',
+        sortOrder: 10,
+        now: now,
+      );
+      await repositories.wordRepository.upsertWord(
+        id: 'common',
+        categoryId: top500.id,
+        term: 'common',
+        translation: 'häufig',
+        level: 'A1',
+        now: now,
+      );
+
+      final words = await container.read(
+        localWordsForCategoryProvider(
+          '${localLanguageToolCategoryPrefix}top_500',
+        ).future,
+      );
+
+      expect(words.map((word) => word.term), ['common']);
+    },
+  );
 }
 
 class _MemoryLocalFavoritesRepository implements LocalFavoritesRepository {

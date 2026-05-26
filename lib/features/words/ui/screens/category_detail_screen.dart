@@ -10,6 +10,7 @@ import 'package:talvori/core/local_database/providers/local_category_progress_re
 import 'package:talvori/core/local_database/providers/local_categories_provider.dart';
 import 'package:talvori/core/local_database/providers/local_learning_view_model_provider.dart';
 import 'package:talvori/core/local_database/models/local_stage_due_summary.dart';
+import 'package:talvori/core/local_database/models/local_word_package_definition.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_due_summary_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
@@ -796,26 +797,74 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     return wheelLabels;
   }
 
+  List<LocalCategoryDetailGroupItem> _syntheticLocalCategoryItemsFor(
+    String? localCategoryId,
+  ) {
+    final normalized = localCategoryId?.trim() ?? '';
+    if (normalized.startsWith(localLevelPackageCategoryPrefix)) {
+      final packageKey = normalized.substring(
+        localLevelPackageCategoryPrefix.length,
+      );
+      final selectedPackage = localLevelPackageByKey(packageKey);
+      if (selectedPackage == null) return const [];
+      LocalLevelPackageGroup? group;
+      for (final candidate in localLevelPackageGroups) {
+        if (candidate.level == selectedPackage.level) {
+          group = candidate;
+          break;
+        }
+      }
+      if (group == null) return const [];
+      return [
+        for (final package in group.packages)
+          LocalCategoryDetailGroupItem(
+            wordHubKey: package.key,
+            displayLabel: package.label,
+            localCategoryId: '$localLevelPackageCategoryPrefix${package.key}',
+          ),
+      ];
+    }
+
+    if (normalized.startsWith(localLanguageToolCategoryPrefix)) {
+      return [
+        for (final tool in localLanguageToolDefinitions)
+          LocalCategoryDetailGroupItem(
+            wordHubKey: tool.key,
+            displayLabel: tool.label,
+            localCategoryId: '$localLanguageToolCategoryPrefix${tool.key}',
+          ),
+      ];
+    }
+
+    return const [];
+  }
+
   Widget _buildLocalOfflineFlow(BuildContext context) {
-    final localCategoryItems =
+    final providedLocalCategoryItems =
         widget.localCategoryItems
             ?.where((item) => item.displayLabel.trim().isNotEmpty)
             .toList(growable: false) ??
         const <LocalCategoryDetailGroupItem>[];
+    final localCategoryItems = providedLocalCategoryItems.isNotEmpty
+        ? providedLocalCategoryItems
+        : _syntheticLocalCategoryItemsFor(widget.localCategoryId);
     if (localCategoryItems.isNotEmpty) {
       final selectedWordHubKey = widget.localSelectedWordHubKey
           ?.trim()
           .toLowerCase();
-      if (selectedWordHubKey != null && selectedWordHubKey.isNotEmpty) {
-        final selectedItemIndex = localCategoryItems.indexWhere(
-          (item) => item.wordHubKey == selectedWordHubKey,
-        );
-        if (selectedItemIndex >= 0 &&
-            _localSelectedIndex >= localCategoryItems.length) {
-          _localSelectedIndex = selectedItemIndex;
-        } else if (selectedItemIndex >= 0 && _localSelectedIndex == 0) {
-          _localSelectedIndex = selectedItemIndex;
-        }
+      final selectedItemIndex =
+          selectedWordHubKey != null && selectedWordHubKey.isNotEmpty
+          ? localCategoryItems.indexWhere(
+              (item) => item.wordHubKey == selectedWordHubKey,
+            )
+          : localCategoryItems.indexWhere(
+              (item) => item.localCategoryId == widget.localCategoryId,
+            );
+      if (selectedItemIndex >= 0 &&
+          _localSelectedIndex >= localCategoryItems.length) {
+        _localSelectedIndex = selectedItemIndex;
+      } else if (selectedItemIndex >= 0 && _localSelectedIndex == 0) {
+        _localSelectedIndex = selectedItemIndex;
       }
     }
     final localCategoryIds =
@@ -894,7 +943,6 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         : ref.watch(localWordCountProvider(selectedCategoryId));
     final resolvedLocalVocabsCount =
         localVocabsCount ?? fallbackLocalVocabsCountAsync.valueOrNull ?? 0;
-
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
