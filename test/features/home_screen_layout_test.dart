@@ -130,6 +130,48 @@ void main() {
     );
   });
 
+  testWidgets('home companion compacts after rest delay and wakes on tap', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump();
+
+    expect(find.text('Bereit für dein nächstes Wort?'), findsNothing);
+    var mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.bored,
+    );
+
+    await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
+    await tester.pump();
+
+    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.greeting,
+    );
+  });
+
   testWidgets('home screen shows impulse inbox entry with unread badge', (
     tester,
   ) async {

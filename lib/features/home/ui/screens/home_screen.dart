@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
@@ -34,7 +36,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  static const _companionRestDelay = Duration(seconds: 6);
+
   ProviderSubscription<HomeState>? _homeSub;
+  Timer? _companionRestTimer;
   bool _progressAnimationRunning =
       false; // Verfolgt ob Progressbar-Animation noch läuft
 
@@ -53,15 +58,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Controller initialisieren (kümmert sich um Lifecycle & Share-Listener)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeControllerProvider.notifier).init(context);
+      _restartCompanionRestTimer();
     });
   }
 
   @override
   void dispose() {
+    _companionRestTimer?.cancel();
+    _companionRestTimer = null;
     // ✅ Subscription ohne ref schließen
     _homeSub?.close();
     _homeSub = null;
     super.dispose();
+  }
+
+  void _restartCompanionRestTimer() {
+    _companionRestTimer?.cancel();
+    _companionRestTimer = Timer(_companionRestDelay, () {
+      if (!mounted) return;
+      ref.read(companionControllerProvider.notifier).compact();
+    });
+  }
+
+  void _wakeCompanion() {
+    ref.read(companionControllerProvider.notifier).wakeUp();
+    _restartCompanionRestTimer();
   }
 
   void _todo(String what) {
@@ -417,9 +438,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             bubbleVisible: companionState.bubbleVisible,
                             isExpanded: companionState.isExpanded,
                             mascotSize: companionMascotSize,
-                            onMascotTap: () => ref
-                                .read(companionControllerProvider.notifier)
-                                .wakeUp(),
+                            onMascotTap: _wakeCompanion,
                           ),
                         ),
                       ),
