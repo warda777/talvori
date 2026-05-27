@@ -120,6 +120,7 @@ void main() {
 
     expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
     expect(find.text('Talvori'), findsOneWidget);
+    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
     final mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/features/companion/application/companion_controller.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
@@ -130,6 +131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       0,
       (sum, chat) => sum + chat.unreadCount,
     );
+    final companionState = ref.watch(companionControllerProvider);
 
     return Scaffold(
       backgroundColor: HomeTheme.background,
@@ -406,13 +408,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Positioned(
                         top: companionTop,
                         left: companionLeft,
-                        child: IgnorePointer(
-                          child: SizedBox(
-                            width: companionWidth,
-                            child: TalvoriCompanionCard(
-                              mood: TalvoriCompanionMood.neutral,
-                              mascotSize: companionMascotSize,
-                            ),
+                        child: SizedBox(
+                          width: companionWidth,
+                          child: TalvoriCompanionCard(
+                            mascotMood: companionState.mascotMood,
+                            title: companionState.title,
+                            message: companionState.message,
+                            bubbleVisible: companionState.bubbleVisible,
+                            isExpanded: companionState.isExpanded,
+                            mascotSize: companionMascotSize,
+                            onMascotTap: () => ref
+                                .read(companionControllerProvider.notifier)
+                                .wakeUp(),
                           ),
                         ),
                       ),
