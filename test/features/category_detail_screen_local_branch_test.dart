@@ -34,6 +34,8 @@ import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.da
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
 
+const _healthWordWorldId = 'word-world-health-and-fitness';
+
 class _FakeLocalCategoryProgressResetService
     implements LocalCategoryProgressResetService {
   LocalCategoryProgressResetRequest? lastRequest;
@@ -92,6 +94,9 @@ void main() {
         .resolve('health_fitness')
         .map(
           (item) => item.copyWith(
+            localCategoryId: item.wordHubKey == 'health_fitness'
+                ? _healthWordWorldId
+                : item.localCategoryId,
             vocabsCount: item.wordHubKey == 'health_fitness'
                 ? 3
                 : item.wordHubKey == 'travel'
@@ -570,8 +575,8 @@ void main() {
         find.byType(LearnModeScreen),
       );
       expect(screen.useLocalOfflineFlow, isTrue);
-      expect(screen.localCategoryId, 'seed-category-basics');
-      expect(screen.categoryId, 'seed-category-basics');
+      expect(screen.localCategoryId, _healthWordWorldId);
+      expect(screen.categoryId, _healthWordWorldId);
     },
   );
 
@@ -899,7 +904,7 @@ void main() {
       final screen = tester.widget<LearnModeScreen>(
         find.byType(LearnModeScreen),
       );
-      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.localCategoryId, _healthWordWorldId);
       expect(screen.localLearningMode, LearningMode.time);
     },
   );
@@ -962,7 +967,7 @@ void main() {
       final screen = tester.widget<LearnModeScreen>(
         find.byType(LearnModeScreen),
       );
-      expect(screen.localCategoryId, 'seed-category-basics');
+      expect(screen.localCategoryId, _healthWordWorldId);
       expect(screen.localLearningMode, LearningMode.adaptive);
     },
   );
@@ -1011,7 +1016,7 @@ void main() {
     await tester.tap(find.text('Zurücksetzen'));
     await tester.pumpAndSettle();
 
-    expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+    expect(resetService.lastRequest?.categoryId, _healthWordWorldId);
     expect(resetService.lastRequest?.mode, LearningMode.time);
   });
 
@@ -1065,7 +1070,7 @@ void main() {
       await tester.tap(find.text('Zurücksetzen'));
       await tester.pumpAndSettle();
 
-      expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+      expect(resetService.lastRequest?.categoryId, _healthWordWorldId);
       expect(resetService.lastRequest?.mode, LearningMode.adaptive);
       expect(find.text('Lernfortschritt wurde zurückgesetzt'), findsOneWidget);
     },
@@ -1102,7 +1107,7 @@ void main() {
       );
       const freshReadState = LocalSessionReadState(
         sessionId: 'fresh-session',
-        categoryId: 'seed-category-basics',
+        categoryId: _healthWordWorldId,
         mode: LearningMode.adaptive,
         trainingArea: TrainingArea.all,
         status: 'active',
@@ -1179,7 +1184,7 @@ void main() {
       await tester.tap(find.text('Zurücksetzen'));
       await tester.pumpAndSettle();
 
-      expect(resetService.lastRequest?.categoryId, 'seed-category-basics');
+      expect(resetService.lastRequest?.categoryId, _healthWordWorldId);
       expect(resetService.lastRequest?.mode, LearningMode.adaptive);
 
       await tester.tap(find.byType(StartButtonPulse));
@@ -1248,7 +1253,7 @@ void main() {
       final screen = tester.widget<LocalWordListScreen>(
         find.byType(LocalWordListScreen),
       );
-      expect(screen.categoryId, 'seed-category-basics');
+      expect(screen.categoryId, _healthWordWorldId);
       expect(screen.title, 'Health & Fitness');
       expect(find.text('Health & Fitness'), findsWidgets);
       expect(find.text('Noch keine Wörter'), findsOneWidget);

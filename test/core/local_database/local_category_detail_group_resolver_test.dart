@@ -32,13 +32,12 @@ void main() {
       );
 
       expect(health.displayLabel, 'Health & Fitness');
-      expect(health.localCategoryId, 'seed-category-basics');
+      expect(health.localCategoryId, isNull);
       expect(travel.displayLabel, 'Travel');
       expect(travel.localCategoryId, 'seed-category-travel');
       expect(home.displayLabel, 'Home & Living');
       expect(home.localCategoryId, isNull);
       expect(items.map((item) => item.localCategoryId).whereType<String>(), [
-        'seed-category-basics',
         'seed-category-travel',
       ]);
       expect(items.every((item) => item.vocabsCount == null), isTrue);
@@ -56,6 +55,10 @@ void main() {
 
       expect(resolver.resolve('basics'), isEmpty);
       expect(resolver.resolveCategory('basics'), isNull);
+      expect(
+        resolver.resolveCategory('health_fitness')?.localCategoryId,
+        isNull,
+      );
       expect(resolver.resolve('food_cooking'), isNotEmpty);
       expect(resolver.resolveCategory('food_cooking')?.localCategoryId, isNull);
     });

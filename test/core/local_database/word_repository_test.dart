@@ -802,6 +802,66 @@ CREATE TABLE words (
       },
     );
 
+    test(
+      'word_world_ids_and_count_read_memberships_and_exclude_archived',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+          sortOrder: 2,
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+          sortOrder: 1,
+        );
+        await seedWord(
+          db,
+          id: 'word-archived',
+          categoryId: 'category-basics',
+          term: 'archived',
+          translation: 'archiviert',
+          isArchived: true,
+        );
+        final repository = WordRepository(database: db);
+        await repository.addWordWorldMembership(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+        await repository.addWordWorldMembership(
+          wordId: 'word-hotel',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+        await repository.addWordWorldMembership(
+          wordId: 'word-archived',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+
+        final ids = await repository.loadWordIdsForWordWorld(
+          categoryId: 'category-travel',
+        );
+        final count = await repository.countWordsForWordWorld(
+          categoryId: 'category-travel',
+        );
+
+        expect(ids, ['word-hotel', 'word-ticket']);
+        expect(count, 2);
+      },
+    );
+
     test('load_words_for_word_world_falls_back_to_category_id', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);
@@ -820,6 +880,30 @@ CREATE TABLE words (
       );
 
       expect(words.map((word) => word.id), ['word-ticket']);
+    });
+
+    test('word_world_ids_and_count_fall_back_to_category_id', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+
+      final ids = await repository.loadWordIdsForWordWorld(
+        categoryId: 'category-travel',
+      );
+      final count = await repository.countWordsForWordWorld(
+        categoryId: 'category-travel',
+      );
+
+      expect(ids, ['word-ticket']);
+      expect(count, 1);
     });
 
     test('add_word_world_membership_ignores_duplicates', () async {

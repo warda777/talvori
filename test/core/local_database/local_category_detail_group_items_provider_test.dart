@@ -48,8 +48,8 @@ void main() {
       );
 
       expect(health.displayLabel, 'Health & Fitness');
-      expect(health.localCategoryId, 'seed-category-basics');
-      expect(health.vocabsCount, 25);
+      expect(health.localCategoryId, isNull);
+      expect(health.vocabsCount, 0);
       expect(travel.displayLabel, 'Travel');
       expect(travel.localCategoryId, 'seed-category-travel');
       expect(travel.vocabsCount, 3);
@@ -130,6 +130,56 @@ void main() {
         expect(home.vocabsCount, 1);
       },
     );
+
+    test('resolves_health_fitness_only_when_real_word_world_exists', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'talvori_local_category_detail_group_items_provider_health_test_',
+      );
+      late final ProviderContainer container;
+
+      addTearDown(() async {
+        container.dispose();
+        await Future<void>.delayed(Duration.zero);
+        final databasePath = LocalAppDatabasePath.buildPath(tempDir.path);
+        await databaseFactoryFfi.deleteDatabase(databasePath);
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+
+      container = ProviderContainer(
+        overrides: [
+          localBootstrapDatabasesPathProvider.overrideWithValue(tempDir.path),
+        ],
+      );
+
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      final now = DateTime.utc(2026, 5, 27);
+      await bootstrap.repositoryFactory.categoryRepository.upsertCategory(
+        id: 'word-world-health-and-fitness',
+        name: 'Health & Fitness',
+        now: now,
+      );
+      await bootstrap.repositoryFactory.wordRepository.upsertWord(
+        id: 'health-active',
+        categoryId: 'word-world-health-and-fitness',
+        term: 'pulse',
+        translation: 'Puls',
+        sourceLanguage: 'en',
+        targetLanguage: 'de',
+        now: now,
+      );
+
+      final items = await container.read(
+        localCategoryDetailGroupItemsProvider('health_fitness').future,
+      );
+      final health = items.singleWhere(
+        (item) => item.wordHubKey == 'health_fitness',
+      );
+
+      expect(health.localCategoryId, 'word-world-health-and-fitness');
+      expect(health.vocabsCount, 1);
+    });
 
     test(
       'falls_back_to_category_id_count_when_memberships_are_empty',

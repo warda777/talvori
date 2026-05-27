@@ -187,6 +187,65 @@ WHERE category_id = ?
     );
   }
 
+  Future<List<String>> loadWordIdsForWordWorld({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    final membershipCount = await _countWordWorldMemberships(categoryId);
+    if (membershipCount == 0) {
+      return loadWordIdsForCategory(
+        categoryId: categoryId,
+        includeArchived: includeArchived,
+      );
+    }
+
+    final rows = await _database.rawQuery(
+      '''
+SELECT w.id
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ?
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+ORDER BY w.sort_order ASC, w.term ASC
+''',
+      [categoryId],
+    );
+
+    return rows.map((row) => row['id']! as String).toList(growable: false);
+  }
+
+  Future<int> countWordsForWordWorld({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    final membershipCount = await _countWordWorldMemberships(categoryId);
+    if (membershipCount == 0) {
+      return countWordsForCategory(
+        categoryId: categoryId,
+        includeArchived: includeArchived,
+      );
+    }
+
+    final rows = await _database.rawQuery(
+      includeArchived
+          ? '''
+SELECT COUNT(*) AS count
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ?
+'''
+          : '''
+SELECT COUNT(*) AS count
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ? AND w.is_archived = ?
+''',
+      includeArchived ? [categoryId] : [categoryId, 0],
+    );
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
   Future<void> addWordWorldMembership({
     required String wordId,
     required String categoryId,
@@ -370,6 +429,18 @@ WHERE category_id = ?
     );
 
     return rows.map((row) => row['id']! as String).toList(growable: false);
+  }
+
+  Future<int> _countWordWorldMemberships(String categoryId) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT COUNT(*) AS count
+FROM word_world_memberships
+WHERE category_id = ?
+''',
+      [categoryId],
+    );
+    return rows.single['count'] as int? ?? 0;
   }
 
   Future<int> countWordsForCategory({

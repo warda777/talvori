@@ -54,7 +54,6 @@ const _wordHubItems = <LocalCategoryDetailGroupItem>[
   LocalCategoryDetailGroupItem(
     wordHubKey: 'health_fitness',
     displayLabel: 'Health & Fitness',
-    localCategoryId: 'seed-category-basics',
   ),
   LocalCategoryDetailGroupItem(
     wordHubKey: 'home_living',

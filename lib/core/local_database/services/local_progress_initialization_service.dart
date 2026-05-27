@@ -17,7 +17,7 @@ class LocalProgressInitializationService {
     required LearningMode mode,
     required DateTime now,
   }) async {
-    final wordIds = await _wordRepository.loadWordIdsForCategory(
+    final wordIds = await _wordRepository.loadWordIdsForWordWorld(
       categoryId: categoryId,
     );
 
@@ -32,6 +32,6 @@ class LocalProgressInitializationService {
   }
 
   Future<int> countWordsForCategory({required String categoryId}) {
-    return _wordRepository.countWordsForCategory(categoryId: categoryId);
+    return _wordRepository.countWordsForWordWorld(categoryId: categoryId);
   }
 }

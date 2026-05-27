@@ -22,6 +22,8 @@ import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_scre
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
+const _healthWordWorldId = 'word-world-health-and-fitness';
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -1489,7 +1491,12 @@ void main() {
       ...const LocalCategoryDetailGroupResolver()
           .resolve('health_fitness')
           .map(
-            (item) => item.localCategoryId == null
+            (item) => item.wordHubKey == 'health_fitness'
+                ? item.copyWith(
+                    localCategoryId: _healthWordWorldId,
+                    vocabsCount: 3,
+                  )
+                : item.localCategoryId == null
                 ? item
                 : item.copyWith(vocabsCount: 3),
           ),
@@ -1523,18 +1530,15 @@ void main() {
     expect(find.text('Hinzufügen'), findsWidgets);
 
     await tester.tap(
-      find.byKey(const Key('impulse_inbox_category_tile_seed-category-basics')),
+      find.byKey(Key('impulse_inbox_category_tile_$_healthWordWorldId')),
     );
     await tester.pumpAndSettle();
     expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
     expect(find.text('Health & Fitness'), findsOneWidget);
 
-    await repository.setCategoryChatEnabled('seed-category-basics', false);
-    await repository.ensureCategoryChat(
-      'seed-category-basics',
-      'Health & Fitness',
-    );
-    final chat = await repository.getCategoryChat('seed-category-basics');
+    await repository.setCategoryChatEnabled(_healthWordWorldId, false);
+    await repository.ensureCategoryChat(_healthWordWorldId, 'Health & Fitness');
+    final chat = await repository.getCategoryChat(_healthWordWorldId);
     expect(chat?.enabled, isTrue);
   });
 
@@ -1544,17 +1548,19 @@ void main() {
     final repository = SharedPreferencesImpulseInboxRepository(
       storageKey: 'test_inbox_category_statuses',
     );
-    await repository.ensureCategoryChat(
-      'seed-category-basics',
-      'Health & Fitness',
-    );
+    await repository.ensureCategoryChat(_healthWordWorldId, 'Health & Fitness');
     await repository.ensureCategoryChat('seed-category-travel', 'Travel');
     await repository.setCategoryChatEnabled('seed-category-travel', false);
     final categoryItems = [
       ...const LocalCategoryDetailGroupResolver()
           .resolve('health_fitness')
           .map(
-            (item) => item.localCategoryId == null
+            (item) => item.wordHubKey == 'health_fitness'
+                ? item.copyWith(
+                    localCategoryId: _healthWordWorldId,
+                    vocabsCount: 3,
+                  )
+                : item.localCategoryId == null
                 ? item
                 : item.copyWith(vocabsCount: 3),
           ),

@@ -28,13 +28,8 @@ void main() {
               LocalDatabaseSchema.isThematicWordWorldName(item.displayLabel),
         )
         .map(
-          (item) => item.copyWith(
-            vocabsCount: item.wordHubKey == 'health_fitness'
-                ? 3
-                : item.wordHubKey == 'travel'
-                ? 4
-                : 0,
-          ),
+          (item) =>
+              item.copyWith(vocabsCount: item.wordHubKey == 'travel' ? 4 : 0),
         )
         .toList(growable: false);
   }
@@ -87,7 +82,7 @@ void main() {
     expect(find.text('Health & Fitness'), findsNothing);
     expect(find.text('Basics'), findsNothing);
     expect(find.text('seed-category-basics'), findsNothing);
-    expect(find.text('3'), findsOneWidget);
+    expect(find.text('local pending'), findsWidgets);
 
     await tester.scrollUntilVisible(
       find.text('Menschen & Persönlichkeit'),
@@ -221,7 +216,13 @@ void main() {
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.tap(find.text('Gesundheit & Fitness'));
+      await tester.scrollUntilVisible(
+        find.text('Reisen'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reisen'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -230,12 +231,9 @@ void main() {
       );
 
       expect(screen.useLocalOfflineFlow, isTrue);
-      expect(screen.localCategoryId, 'seed-category-basics');
-      expect(screen.localCategoryIds, [
-        'seed-category-basics',
-        'seed-category-travel',
-      ]);
-      expect(screen.localSelectedWordHubKey, 'health_fitness');
+      expect(screen.localCategoryId, 'seed-category-travel');
+      expect(screen.localCategoryIds, ['seed-category-travel']);
+      expect(screen.localSelectedWordHubKey, 'travel');
       expect(screen.localCategoryItems!.length, 26);
       expect(screen.localCategoryItems!.map((item) => item.displayLabel), [
         'Health & Fitness',
@@ -265,8 +263,8 @@ void main() {
         'Music & Entertainment',
         'Art & Literature',
       ]);
-      expect(screen.categoryId, 'seed-category-basics');
-      expect(find.text('Gesundheit & Fitness'), findsWidgets);
+      expect(screen.categoryId, 'seed-category-travel');
+      expect(find.text('Reisen'), findsWidgets);
       expect(find.text('Basics'), findsNothing);
       expect(find.text('seed-category-basics'), findsNothing);
       expect(find.text('Lokale Kategorie'), findsNothing);
@@ -327,7 +325,7 @@ void main() {
         ProviderScope(
           overrides: [
             localCategoryDetailGroupItemsProvider.overrideWith(
-              (ref, wordHubKey) async => localItemsFor(wordHubKey),
+              (ref, wordHubKey) async => resolvedLocalItemsFor(wordHubKey),
             ),
             impulseInboxRepositoryProvider.overrideWithValue(repository),
             impulseInboxAiChatClientProvider.overrideWithValue(
@@ -343,10 +341,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       final buttonKey = const Key(
-        'word_hub_category_chat_button_seed-category-basics',
+        'word_hub_category_chat_button_word-world-health_fitness',
       );
       final circleKey = const Key(
-        'word_hub_category_chat_circle_seed-category-basics',
+        'word_hub_category_chat_circle_word-world-health_fitness',
       );
       final cardKey = const Key('word_hub_category_card_health_fitness');
 
@@ -369,10 +367,10 @@ void main() {
       expect(button.onPressed, isNotNull);
 
       final chat = await repository.ensureCategoryChat(
-        'seed-category-basics',
+        'word-world-health_fitness',
         'Health & Fitness',
       );
-      expect(chat.sourceId, 'seed-category-basics');
+      expect(chat.sourceId, 'word-world-health_fitness');
     },
   );
 

@@ -189,6 +189,70 @@ void main() {
     expect(hybridCards, isEmpty);
   });
 
+  test('practice_cards_for_word_world_use_membership_words', () async {
+    final container = await createContainer('talvori_local_practice_world_');
+    final bootstrap = await container.read(localBootstrapProvider.future);
+    final repositories = bootstrap.repositoryFactory;
+    final now = DateTime(2026, 5, 27, 10);
+    await repositories.categoryRepository.upsertCategory(
+      id: 'category-travel',
+      name: 'Travel',
+      now: now,
+    );
+    await repositories.wordRepository.upsertWord(
+      id: 'word-ticket',
+      categoryId: 'seed-category-basics',
+      term: 'ticket',
+      translation: 'Fahrkarte',
+      now: now,
+    );
+    await repositories.wordRepository.upsertWord(
+      id: 'word-hotel',
+      categoryId: 'seed-category-basics',
+      term: 'hotel',
+      translation: 'Hotel',
+      now: now,
+    );
+    await repositories.wordRepository.addWordWorldMembership(
+      wordId: 'word-ticket',
+      categoryId: 'category-travel',
+      createdAt: now,
+    );
+    await repositories.wordRepository.addWordWorldMembership(
+      wordId: 'word-hotel',
+      categoryId: 'category-travel',
+      createdAt: now,
+    );
+    await repositories.progressInitializationService
+        .initializeProgressForCategoryAndMode(
+          categoryId: 'category-travel',
+          mode: LearningMode.time,
+          now: now,
+        );
+    final ticketProgress = await repositories.wordProgressRepository
+        .loadProgress(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          mode: LearningMode.time,
+        );
+    await repositories.wordProgressRepository.saveProgress(
+      updatedProgress: ticketProgress!.copyWith(stage: SrsStage.s2),
+      updatedAt: now,
+    );
+
+    final cards = await container.read(
+      localPracticeCardsProvider(
+        const LocalPracticeCardsRequest(
+          categoryId: 'category-travel',
+          mode: LearningMode.time,
+          selection: LocalPracticeSelection.singleStage(SrsStage.s2),
+        ),
+      ).future,
+    );
+
+    expect(cards.map((card) => card.wordId), ['word-ticket']);
+  });
+
   test('local_source_practice_cards_use_filtered_source_words', () async {
     final container = await createContainer(
       'talvori_local_practice_source_filter_',

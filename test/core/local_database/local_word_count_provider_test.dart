@@ -113,6 +113,66 @@ void main() {
       expect(count, 1);
     });
 
+    test('counts_word_world_memberships_before_category_id_fallback', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'talvori_local_word_count_word_world_provider_test_',
+      );
+      late final ProviderContainer container;
+
+      addTearDown(() async {
+        container.dispose();
+        await Future<void>.delayed(Duration.zero);
+        final databasePath = LocalAppDatabasePath.buildPath(tempDir.path);
+        await databaseFactoryFfi.deleteDatabase(databasePath);
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+
+      container = ProviderContainer(
+        overrides: [
+          localBootstrapDatabasesPathProvider.overrideWithValue(tempDir.path),
+        ],
+      );
+      final bootstrap = await container.read(localBootstrapProvider.future);
+      final repositories = bootstrap.repositoryFactory;
+      await repositories.categoryRepository.upsertCategory(
+        id: 'category-travel',
+        name: 'Travel',
+        now: DateTime(2026, 5, 27, 10),
+      );
+      await repositories.wordRepository.upsertWord(
+        id: 'word-ticket',
+        categoryId: 'seed-category-basics',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+        now: DateTime(2026, 5, 27, 10),
+      );
+      await repositories.wordRepository.upsertWord(
+        id: 'word-hotel',
+        categoryId: 'seed-category-basics',
+        term: 'hotel',
+        translation: 'Hotel',
+        now: DateTime(2026, 5, 27, 10),
+      );
+      await repositories.wordRepository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: DateTime(2026, 5, 27, 10),
+      );
+      await repositories.wordRepository.addWordWorldMembership(
+        wordId: 'word-hotel',
+        categoryId: 'category-travel',
+        createdAt: DateTime(2026, 5, 27, 10),
+      );
+
+      final count = await container.read(
+        localWordCountProvider('category-travel').future,
+      );
+
+      expect(count, 2);
+    });
+
     test('my_words_count_is_zero_before_first_import', () async {
       final tempDir = await Directory.systemTemp.createTemp(
         'talvori_local_word_count_my_words_empty_provider_test_',

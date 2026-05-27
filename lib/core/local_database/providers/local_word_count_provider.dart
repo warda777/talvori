@@ -40,8 +40,6 @@ final localWordCountProvider = FutureProvider.family<int, String>((
     );
   }
 
-  final words = await bootstrapResult.repositoryFactory.wordRepository
-      .loadWordsForCategory(categoryId: categoryId);
-
-  return words.length;
+  return bootstrapResult.repositoryFactory.wordRepository
+      .countWordsForWordWorld(categoryId: categoryId);
 });

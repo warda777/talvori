@@ -18,7 +18,7 @@ final localPracticeCardsProvider =
       final repositories = bootstrap.repositoryFactory;
       final source = LocalLearningSource.fromId(categoryId);
       final words = source == null
-          ? await repositories.wordRepository.loadWordsForCategory(
+          ? await repositories.wordRepository.loadWordsForWordWorld(
               categoryId: categoryId,
             )
           : await ref.watch(localWordsForSourceProvider(source).future);

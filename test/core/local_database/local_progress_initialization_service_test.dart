@@ -186,5 +186,63 @@ void main() {
         LearningMode.hybrid.name,
       });
     });
+
+    test('initializes_progress_for_word_world_memberships', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      final categoryRepository = CategoryRepository(database: db);
+      final wordRepository = WordRepository(database: db);
+      final progressRepository = WordProgressRepository(database: db);
+      await categoryRepository.upsertCategory(
+        id: categoryId,
+        name: 'Basics',
+        now: now,
+      );
+      await categoryRepository.upsertCategory(
+        id: 'category-travel',
+        name: 'Travel',
+        now: now,
+      );
+      await wordRepository.upsertWord(
+        id: 'word-ticket',
+        categoryId: categoryId,
+        term: 'ticket',
+        translation: 'Fahrkarte',
+        now: now,
+      );
+      await wordRepository.upsertWord(
+        id: 'word-hotel',
+        categoryId: categoryId,
+        term: 'hotel',
+        translation: 'Hotel',
+        now: now,
+      );
+      await wordRepository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await wordRepository.addWordWorldMembership(
+        wordId: 'word-hotel',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      final service = LocalProgressInitializationService(
+        wordRepository: wordRepository,
+        wordProgressRepository: progressRepository,
+      );
+
+      await service.initializeProgressForCategoryAndMode(
+        categoryId: 'category-travel',
+        mode: LearningMode.time,
+        now: now,
+      );
+
+      final rows = await db.query('word_progress', orderBy: 'word_id ASC');
+      expect(rows.map((row) => row['word_id']), ['word-hotel', 'word-ticket']);
+      expect(rows.map((row) => row['category_id']).toSet(), {
+        'category-travel',
+      });
+    });
   });
 }
