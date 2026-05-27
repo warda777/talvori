@@ -46,6 +46,25 @@ void main() {
     expect(state.mascotMood, TalvoriMascotMood.greeting);
   });
 
+  test('toggleExpanded switches between expanded and compact states', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.toggleExpanded();
+    var state = container.read(companionControllerProvider);
+
+    expect(state.isExpanded, isFalse);
+    expect(state.bubbleVisible, isFalse);
+    expect(state.mascotMood, TalvoriMascotMood.bored);
+
+    controller.toggleExpanded();
+    state = container.read(companionControllerProvider);
+
+    expect(state.isExpanded, isTrue);
+    expect(state.bubbleVisible, isTrue);
+    expect(state.mascotMood, TalvoriMascotMood.greeting);
+  });
+
   test('showMessage updates the bubble text and optional mood', () {
     final container = createContainer();
 

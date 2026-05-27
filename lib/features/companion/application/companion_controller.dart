@@ -28,6 +28,14 @@ class CompanionController extends Notifier<CompanionState> {
     );
   }
 
+  void toggleExpanded() {
+    if (state.isExpanded) {
+      compact();
+    } else {
+      wakeUp();
+    }
+  }
+
   void showMessage({required String message, TalvoriMascotMood? mood}) {
     state = state.copyWith(
       isExpanded: true,

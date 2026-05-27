@@ -80,9 +80,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  void _wakeCompanion() {
-    ref.read(companionControllerProvider.notifier).wakeUp();
-    _restartCompanionRestTimer();
+  void _cancelCompanionRestTimer() {
+    _companionRestTimer?.cancel();
+    _companionRestTimer = null;
+  }
+
+  void _toggleCompanion() {
+    final wasExpanded = ref.read(companionControllerProvider).isExpanded;
+    ref.read(companionControllerProvider.notifier).toggleExpanded();
+    if (wasExpanded) {
+      _cancelCompanionRestTimer();
+    } else {
+      _restartCompanionRestTimer();
+    }
   }
 
   void _todo(String what) {
@@ -438,7 +448,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             bubbleVisible: companionState.bubbleVisible,
                             isExpanded: companionState.isExpanded,
                             mascotSize: companionMascotSize,
-                            onMascotTap: _wakeCompanion,
+                            onMascotTap: _toggleCompanion,
                           ),
                         ),
                       ),

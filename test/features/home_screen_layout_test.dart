@@ -130,7 +130,7 @@ void main() {
     );
   });
 
-  testWidgets('home companion compacts after rest delay and wakes on tap', (
+  testWidgets('home companion toggles on tap and rest timer restarts', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -147,7 +147,7 @@ void main() {
 
     expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 6));
+    await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
 
     expect(find.text('Bereit für dein nächstes Wort?'), findsNothing);
@@ -159,6 +159,7 @@ void main() {
       TalvoriMascotAssets.bored,
     );
 
+    await tester.pump(const Duration(seconds: 3));
     await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
 
@@ -169,6 +170,23 @@ void main() {
     expect(
       (mascotImage.image as AssetImage).assetName,
       TalvoriMascotAssets.greeting,
+    );
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump();
+
+    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    expect(find.text('Bereit für dein nächstes Wort?'), findsNothing);
+    mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.bored,
     );
   });
 
