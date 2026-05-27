@@ -13,8 +13,10 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/companion/application/companion_ai_service.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
+import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/boss_fight_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
@@ -183,10 +185,15 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_home_companion_chat_persistence',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
           localWordCountProvider.overrideWith((ref, categoryId) async => 0),
           companionAiServiceProvider.overrideWithValue(
             CompanionAiService(
@@ -255,6 +262,29 @@ void main() {
     );
     expect(reopenedInput.controller?.text, isEmpty);
     expect(reopenedInput.maxLines, 5);
+
+    final chats = await repository.listChats();
+    expect(
+      chats.where((chat) => chat.id == CompanionChatConstants.chatId),
+      hasLength(1),
+    );
+    expect(
+      chats
+          .singleWhere((chat) => chat.id == CompanionChatConstants.chatId)
+          .title,
+      CompanionChatConstants.title,
+    );
+    final messages = await repository.listMessages(
+      CompanionChatConstants.chatId,
+    );
+    expect(messages, hasLength(2));
+    expect(messages[0].source, ImpulseMessageSource.user);
+    expect(
+      messages[0].text,
+      'Was soll ich üben?\nVielleicht A1?\nOder Reisen?',
+    );
+    expect(messages[1].source, ImpulseMessageSource.ai);
+    expect(messages[1].text, 'Starte mit einem Wort.');
   });
 
   testWidgets('home companion chat input survives reduced keyboard height', (

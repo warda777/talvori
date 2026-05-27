@@ -100,6 +100,12 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return chat;
   }
 
+  Future<ImpulseChat> ensureCompanionChat() async {
+    final chat = await _repository.ensureCompanionChat();
+    await loadChats();
+    return chat;
+  }
+
   Future<ImpulseChat> ensureCategoryChat({
     required String categoryId,
     required String title,
@@ -244,6 +250,29 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
         replyToMessageId: replyTo?.id,
         replyPreviewText: replyTo == null ? null : _replyPreviewText(replyTo),
         replyPreviewSource: replyTo?.source,
+      ),
+      incrementUnread: false,
+    );
+    await _refreshChat(chatId);
+    return message;
+  }
+
+  Future<ImpulseMessage> addAiMessage(String chatId, String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      throw const AiChatException(
+        'Impulse inbox AI message must not be empty.',
+      );
+    }
+    final message = await _repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chatId,
+        text: trimmed,
+        createdAt: _now,
+        source: ImpulseMessageSource.ai,
+        status: ImpulseMessageStatus.sent,
+        readAt: _now,
       ),
       incrementUnread: false,
     );

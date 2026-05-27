@@ -11,6 +11,7 @@ import 'package:talvori/features/companion/application/companion_ai_service.dart
 import 'package:talvori/features/companion/application/companion_controller.dart';
 import 'package:talvori/features/companion/application/companion_discovery_tip_resolver.dart';
 import 'package:talvori/features/companion/domain/companion_ai_context.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_context.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
@@ -178,10 +179,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _companionInputController.clear();
     _companionInputLineCount = 1;
     final requestId = ++_companionChatRequestId;
-    final controller = ref.read(companionControllerProvider.notifier);
-    controller.submitUserMessage(trimmed);
+    final companionController = ref.read(companionControllerProvider.notifier);
+    companionController.submitUserMessage(trimmed);
     _cancelCompanionRestTimer();
     _refocusCompanionInput();
+
+    var shouldPersistAiResponse = false;
+    try {
+      final inboxController = ref.read(impulseInboxControllerProvider.notifier);
+      final chat = await inboxController.ensureCompanionChat();
+      await inboxController.addUserMessage(chat.id, trimmed);
+      shouldPersistAiResponse = true;
+    } catch (error) {
+      debugPrint('Companion chat persistence failed for user message: $error');
+    }
 
     try {
       final myWordsCount = await ref.read(
@@ -202,11 +213,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           );
       if (!mounted || requestId != _companionChatRequestId) return;
-      controller.showAiResponse(response);
+      companionController.showAiResponse(response);
+      if (shouldPersistAiResponse) {
+        try {
+          await ref
+              .read(impulseInboxControllerProvider.notifier)
+              .addAiMessage(CompanionChatConstants.chatId, response);
+        } catch (error) {
+          debugPrint(
+            'Companion chat persistence failed for AI response: $error',
+          );
+        }
+      }
       _refocusCompanionInput();
     } catch (error) {
       if (!mounted || requestId != _companionChatRequestId) return;
-      controller.showError(
+      companionController.showError(
         'Das hat gerade nicht geklappt. Versuch es gleich noch einmal.',
       );
       _refocusCompanionInput();

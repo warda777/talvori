@@ -1019,6 +1019,11 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
+  Future<ImpulseChat> ensureCompanionChat() {
+    throw StateError('inbox failed');
+  }
+
+  @override
   Future<ImpulseChat> ensureCategoryChat(String categoryId, String title) {
     throw StateError('inbox failed');
   }

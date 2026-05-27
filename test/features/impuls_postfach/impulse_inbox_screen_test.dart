@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
@@ -105,6 +106,66 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('chat list shows Talvori Companion thread when messages exist', (
+    tester,
+  ) async {
+    final repository = SharedPreferencesImpulseInboxRepository(
+      storageKey: 'test_inbox_companion_thread',
+      clock: () => DateTime(2026, 5, 20, 12),
+    );
+    final chat = await repository.ensureCompanionChat();
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Hallo Talvori',
+        createdAt: DateTime(2026, 5, 20, 12, 1),
+        source: ImpulseMessageSource.user,
+        status: ImpulseMessageStatus.sent,
+        readAt: DateTime(2026, 5, 20, 12, 1),
+      ),
+      incrementUnread: false,
+    );
+    await repository.addMessage(
+      ImpulseMessage(
+        id: '',
+        chatId: chat.id,
+        text: 'Ich bin da.',
+        createdAt: DateTime(2026, 5, 20, 12, 2),
+        source: ImpulseMessageSource.ai,
+        status: ImpulseMessageStatus.sent,
+        readAt: DateTime(2026, 5, 20, 12, 2),
+      ),
+      incrementUnread: false,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          impulseInboxRepositoryProvider.overrideWithValue(repository),
+          impulseInboxAiChatClientProvider.overrideWithValue(
+            _FakeAiChatClient('Gern.'),
+          ),
+        ],
+        child: const MaterialApp(home: ImpulsPostfachScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(CompanionChatConstants.title), findsOneWidget);
+    expect(find.text('Ich bin da.'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(Key('impulse_chat_tile_${CompanionChatConstants.chatId}')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
+    expect(find.text(CompanionChatConstants.title), findsWidgets);
+    expect(find.text('Hallo Talvori'), findsOneWidget);
+    expect(find.text('Ich bin da.'), findsOneWidget);
   });
 
   testWidgets('chat hub shows search field and filters chats', (tester) async {

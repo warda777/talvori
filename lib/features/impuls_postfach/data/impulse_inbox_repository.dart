@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
@@ -9,6 +10,7 @@ import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
 abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
+  Future<ImpulseChat> ensureCompanionChat();
   Future<ImpulseChat> ensureCategoryChat(String categoryId, String title);
   Future<ImpulseChat> createCustomAiChat(String title);
   Future<void> renameCustomAiChat(String chatId, String title);
@@ -84,6 +86,36 @@ class SharedPreferencesImpulseInboxRepository
       sourceType: ImpulseChatSourceType.dailyImpulse,
       title: 'Tagesimpuls',
       avatarKey: 'spark',
+      createdAt: _now,
+    );
+    store.chats[chat.id] = chat;
+    await _saveStore(store);
+    return chat;
+  }
+
+  @override
+  Future<ImpulseChat> ensureCompanionChat() async {
+    final store = await _loadStore();
+    final existing = store.chats[CompanionChatConstants.chatId];
+    if (existing != null) {
+      final updated = existing.copyWith(
+        sourceType: ImpulseChatSourceType.customAi,
+        sourceId: CompanionChatConstants.chatId,
+        title: CompanionChatConstants.title,
+        avatarKey: CompanionChatConstants.avatarKey,
+        enabled: true,
+      );
+      store.chats[updated.id] = updated;
+      await _saveStore(store);
+      return updated;
+    }
+
+    final chat = ImpulseChat(
+      id: CompanionChatConstants.chatId,
+      sourceType: ImpulseChatSourceType.customAi,
+      sourceId: CompanionChatConstants.chatId,
+      title: CompanionChatConstants.title,
+      avatarKey: CompanionChatConstants.avatarKey,
       createdAt: _now,
     );
     store.chats[chat.id] = chat;
