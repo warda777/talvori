@@ -171,202 +171,252 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             LayoutBuilder(
               builder: (context, viewport) {
-                final showCompanion = viewport.maxHeight >= 760;
+                final showCompanion = viewport.maxHeight >= 640;
+                final disableHomeScroll = viewport.maxHeight >= 640;
+                final companionMascotSize = viewport.maxWidth < 380
+                    ? 150.0
+                    : 164.0;
+                final companionWidth = (viewport.maxWidth - 28)
+                    .clamp(280.0, 340.0)
+                    .toDouble();
+                final companionTop = (viewport.maxHeight * 0.49)
+                    .clamp(
+                      250.0,
+                      viewport.maxHeight - companionMascotSize - 110,
+                    )
+                    .toDouble();
+                final companionLeft = (viewport.maxWidth * 0.08)
+                    .clamp(24.0, 40.0)
+                    .toDouble();
 
-                return Padding(
-                  padding: HomeTheme.horizontal,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HomeTopBar(
-                          buttonKey: _rightButtonKey,
-                          progressPillKey: _progressPillKey,
-                          counterKey: _counterKey, // <-- NEU: Counter Key
-                          crownButtonKey: _crownButtonKey,
-                          fireballKey: _fireballKey,
-                          onAllWords: () {
-                            // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                          },
-                          onRewards: () => _todo('Rewards/Leaderboard/Stats'),
-                          onProgressTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const CourseScreen(),
-                              ),
-                            );
-                          },
-                          selected: tagesimpulsSelection.count,
-                          max: tagesimpulsSelection.maxCount,
-                          showProgress:
-                              tagesimpulsSelection.count <
-                                  tagesimpulsSelection.maxCount ||
-                              _progressAnimationRunning,
-                          onProgressAnimationStart: () {
-                            // Animation gestartet - verzögere setState
-                            if (mounted) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  setState(() {
-                                    _progressAnimationRunning = true;
-                                  });
-                                }
-                              });
-                            }
-                          },
-                          onProgressAnimationComplete: () {
-                            // Animation fertig - jetzt kann die Pill ausgeblendet werden
-                            // Verzögere setState, damit es nicht während des Builds aufgerufen wird
-                            if (mounted) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  setState(() {
-                                    _progressAnimationRunning = false;
-                                  });
-                                }
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        if (showCompanion) ...[
-                          const TalvoriCompanionCard(
-                            mood: TalvoriCompanionMood.neutral,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 360),
-                            child: LayoutBuilder(
-                              builder: (ctx, box) {
-                                final w = box.maxWidth;
-                                final h = w * (570 / 360);
-
-                                return SizedBox(
-                                  width: w,
-                                  height: h,
-                                  child: wc.WordCard(
-                                    key: ValueKey((
-                                      state.imageIsDark,
-                                      state.imageExpanded,
-                                    )),
-                                    progressPillKey: _progressPillKey,
-                                    counterKey:
-                                        _counterKey, // <-- NEU: Counter Key
-                                    initialWord:
-                                        null, // lastSharedWordProvider regelt das
-                                    onQuickSend: (word) async {
-                                      // Füge nur das aktuell ausgewählte Wort hinzu
-                                      final res = await ref
-                                          .read(
-                                            tagesimpulsSelectionControllerProvider
-                                                .notifier,
-                                          )
-                                          .add(
-                                            TagesimpulsSelectionItem(
-                                              wordId: word.id,
-                                              text: word.text,
-                                              translation: word.translation,
-                                              addedAt: DateTime.now(),
-                                            ),
-                                          );
-
-                                      if (!context.mounted) return res;
-
-                                      switch (res) {
-                                        case TagesimpulsSelectionAddResult.ok:
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Wort wurde zum Tagesimpuls hinzugefügt.',
-                                              ),
-                                            ),
-                                          );
-                                          break;
-                                        case TagesimpulsSelectionAddResult
-                                            .duplicate:
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Wort ist bereits im Tagesimpuls.',
-                                              ),
-                                            ),
-                                          );
-                                          break;
-                                        case TagesimpulsSelectionAddResult.full:
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Tagesimpuls ist voll.',
-                                              ),
-                                            ),
-                                          );
-                                          break;
-                                        case TagesimpulsSelectionAddResult
-                                            .invalid:
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Ungültiges Wort'),
-                                            ),
-                                          );
-                                          break;
-                                      }
-
-                                      return res; // Gib das Ergebnis zurück
-                                    },
-                                    onImpulseInboxTap: null,
-                                    impulseInboxUnreadCount: impulseUnreadCount,
-                                    isImageExpanded: state.imageExpanded,
-                                    onToggleImage: () => ref
-                                        .read(homeControllerProvider.notifier)
-                                        .toggleImage(),
-                                    isImageDark: state.imageIsDark,
-                                    onImageBrightnessChanged: (isDark) => ref
-                                        .read(homeControllerProvider.notifier)
-                                        .setImageDark(isDark),
-                                    contentPadding: HomeTheme.contentPadding,
-                                    userWordCount: state.myWordsCount,
-                                    onCountTap: () async {
-                                      final nav = Navigator.of(context);
-                                      await nav.push(
-                                        MaterialPageRoute(
-                                          settings: const RouteSettings(
-                                            name: 'local-vocabs-my_words',
-                                          ),
-                                          builder: (_) =>
-                                              const LocalWordListScreen(
-                                                categoryId:
-                                                    localMyWordsCategoryId,
-                                                title:
-                                                    localMyWordsCategoryLabel,
-                                              ),
-                                        ),
-                                      );
-                                      if (!context.mounted) return;
-                                    },
-                                    onSpeak: _speakHomeWord,
-                                    onMarkWords: () =>
-                                        _todo('Wörter markieren'),
-                                    onGo: _showLearningSourcesPopup,
+                return Stack(
+                  children: [
+                    Padding(
+                      padding: HomeTheme.horizontal,
+                      child: SingleChildScrollView(
+                        physics: disableHomeScroll
+                            ? const NeverScrollableScrollPhysics()
+                            : null,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            HomeTopBar(
+                              buttonKey: _rightButtonKey,
+                              progressPillKey: _progressPillKey,
+                              counterKey: _counterKey, // <-- NEU: Counter Key
+                              crownButtonKey: _crownButtonKey,
+                              fireballKey: _fireballKey,
+                              onAllWords: () {
+                                // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                              },
+                              onRewards: () =>
+                                  _todo('Rewards/Leaderboard/Stats'),
+                              onProgressTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const CourseScreen(),
                                   ),
                                 );
                               },
+                              selected: tagesimpulsSelection.count,
+                              max: tagesimpulsSelection.maxCount,
+                              showProgress:
+                                  tagesimpulsSelection.count <
+                                      tagesimpulsSelection.maxCount ||
+                                  _progressAnimationRunning,
+                              onProgressAnimationStart: () {
+                                // Animation gestartet - verzögere setState
+                                if (mounted) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (mounted) {
+                                      setState(() {
+                                        _progressAnimationRunning = true;
+                                      });
+                                    }
+                                  });
+                                }
+                              },
+                              onProgressAnimationComplete: () {
+                                // Animation fertig - jetzt kann die Pill ausgeblendet werden
+                                // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                                if (mounted) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (mounted) {
+                                      setState(() {
+                                        _progressAnimationRunning = false;
+                                      });
+                                    }
+                                  });
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 360,
+                                ),
+                                child: LayoutBuilder(
+                                  builder: (ctx, box) {
+                                    final w = box.maxWidth;
+                                    final h = w * (570 / 360);
+
+                                    return SizedBox(
+                                      width: w,
+                                      height: h,
+                                      child: wc.WordCard(
+                                        key: ValueKey((
+                                          state.imageIsDark,
+                                          state.imageExpanded,
+                                        )),
+                                        progressPillKey: _progressPillKey,
+                                        counterKey:
+                                            _counterKey, // <-- NEU: Counter Key
+                                        initialWord:
+                                            null, // lastSharedWordProvider regelt das
+                                        onQuickSend: (word) async {
+                                          // Füge nur das aktuell ausgewählte Wort hinzu
+                                          final res = await ref
+                                              .read(
+                                                tagesimpulsSelectionControllerProvider
+                                                    .notifier,
+                                              )
+                                              .add(
+                                                TagesimpulsSelectionItem(
+                                                  wordId: word.id,
+                                                  text: word.text,
+                                                  translation: word.translation,
+                                                  addedAt: DateTime.now(),
+                                                ),
+                                              );
+
+                                          if (!context.mounted) return res;
+
+                                          switch (res) {
+                                            case TagesimpulsSelectionAddResult
+                                                .ok:
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Wort wurde zum Tagesimpuls hinzugefügt.',
+                                                  ),
+                                                ),
+                                              );
+                                              break;
+                                            case TagesimpulsSelectionAddResult
+                                                .duplicate:
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Wort ist bereits im Tagesimpuls.',
+                                                  ),
+                                                ),
+                                              );
+                                              break;
+                                            case TagesimpulsSelectionAddResult
+                                                .full:
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Tagesimpuls ist voll.',
+                                                  ),
+                                                ),
+                                              );
+                                              break;
+                                            case TagesimpulsSelectionAddResult
+                                                .invalid:
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Ungültiges Wort',
+                                                  ),
+                                                ),
+                                              );
+                                              break;
+                                          }
+
+                                          return res; // Gib das Ergebnis zurück
+                                        },
+                                        onImpulseInboxTap: null,
+                                        impulseInboxUnreadCount:
+                                            impulseUnreadCount,
+                                        isImageExpanded: state.imageExpanded,
+                                        onToggleImage: () => ref
+                                            .read(
+                                              homeControllerProvider.notifier,
+                                            )
+                                            .toggleImage(),
+                                        isImageDark: state.imageIsDark,
+                                        onImageBrightnessChanged: (isDark) =>
+                                            ref
+                                                .read(
+                                                  homeControllerProvider
+                                                      .notifier,
+                                                )
+                                                .setImageDark(isDark),
+                                        contentPadding:
+                                            HomeTheme.contentPadding,
+                                        userWordCount: state.myWordsCount,
+                                        onCountTap: () async {
+                                          final nav = Navigator.of(context);
+                                          await nav.push(
+                                            MaterialPageRoute(
+                                              settings: const RouteSettings(
+                                                name: 'local-vocabs-my_words',
+                                              ),
+                                              builder: (_) =>
+                                                  const LocalWordListScreen(
+                                                    categoryId:
+                                                        localMyWordsCategoryId,
+                                                    title:
+                                                        localMyWordsCategoryLabel,
+                                                  ),
+                                            ),
+                                          );
+                                          if (!context.mounted) return;
+                                        },
+                                        onSpeak: _speakHomeWord,
+                                        onMarkWords: () =>
+                                            _todo('Wörter markieren'),
+                                        onGo: _showLearningSourcesPopup,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 96),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (showCompanion)
+                      Positioned(
+                        top: companionTop,
+                        left: companionLeft,
+                        child: IgnorePointer(
+                          child: SizedBox(
+                            width: companionWidth,
+                            child: TalvoriCompanionCard(
+                              mood: TalvoriCompanionMood.neutral,
+                              mascotSize: companionMascotSize,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 96),
-                      ],
-                    ),
-                  ),
+                      ),
+                  ],
                 );
               },
             ),

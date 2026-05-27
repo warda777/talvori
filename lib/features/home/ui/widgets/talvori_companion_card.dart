@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 
 enum TalvoriCompanionMood { neutral, happy, streak, tired, proud }
 
@@ -7,95 +8,111 @@ class TalvoriCompanionCard extends StatelessWidget {
   const TalvoriCompanionCard({
     super.key,
     this.mood = TalvoriCompanionMood.neutral,
+    this.mascotSize = 156,
   });
 
   final TalvoriCompanionMood mood;
+  final double mascotSize;
 
   @override
   Widget build(BuildContext context) {
     final accent = _accentForMood(mood);
+    final mascotMood = _mascotMoodForCompanion(mood);
+    final mascotPath = TalvoriMascotAssets.pathFor(mascotMood);
 
     return Semantics(
       label: 'Talvori Companion ${mood.name}',
-      child: Container(
-        key: const Key('talvori-companion-card'),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: accent.withValues(alpha: 0.45), width: 1.2),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF101821).withValues(alpha: 0.9),
-              const Color(0xFF060A10).withValues(alpha: 0.96),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: accent.withValues(alpha: 0.18),
-              blurRadius: 26,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accent.withValues(alpha: 0.14),
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.34),
-                    blurRadius: 24,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: SvgPicture.asset(
-                'assets/icons/fireball_black.svg',
-                width: 44,
-                height: 44,
-                colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Talvori',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bubbleLeft = mascotSize * 0.8;
+          final bubbleWidth = (constraints.maxWidth - bubbleLeft - 4)
+              .clamp(118.0, 176.0)
+              .toDouble();
+
+          return SizedBox(
+            key: const Key('talvori-companion-card'),
+            width: double.infinity,
+            height: mascotSize + 18,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    width: mascotSize,
+                    height: mascotSize,
+                    child: Image.asset(
+                      mascotPath,
+                      key: const Key('talvori-companion-mascot-image'),
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                      semanticLabel: 'Talvori Maskottchen ${mascotMood.name}',
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _subtitleForMood(mood),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.72),
-                      height: 1.25,
-                      letterSpacing: 0,
+                ),
+                Positioned(
+                  left: bubbleLeft,
+                  top: 0,
+                  child: SizedBox(
+                    width: bubbleWidth,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(12, 9, 12, 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF07101A).withValues(alpha: 0.88),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: accent.withValues(alpha: 0.34),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.34),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: accent.withValues(alpha: 0.13),
+                            blurRadius: 20,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Talvori',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: accent,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0,
+                                ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _subtitleForMood(mood),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.82),
+                                  height: 1.18,
+                                  letterSpacing: 0,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -112,11 +129,21 @@ class TalvoriCompanionCard extends StatelessWidget {
 
   static String _subtitleForMood(TalvoriCompanionMood mood) {
     return switch (mood) {
-      TalvoriCompanionMood.neutral => 'Bereit für dein nächstes Wort.',
+      TalvoriCompanionMood.neutral => 'Bereit für dein nächstes Wort?',
       TalvoriCompanionMood.happy => 'Stark, das sitzt.',
       TalvoriCompanionMood.streak => 'Deine Serie wächst.',
       TalvoriCompanionMood.tired => 'Kurz durchatmen, dann weiter.',
       TalvoriCompanionMood.proud => 'Das war sauber gelöst.',
+    };
+  }
+
+  static TalvoriMascotMood _mascotMoodForCompanion(TalvoriCompanionMood mood) {
+    return switch (mood) {
+      TalvoriCompanionMood.neutral => TalvoriMascotMood.greeting,
+      TalvoriCompanionMood.happy => TalvoriMascotMood.happy,
+      TalvoriCompanionMood.streak => TalvoriMascotMood.proud,
+      TalvoriCompanionMood.tired => TalvoriMascotMood.tired,
+      TalvoriCompanionMood.proud => TalvoriMascotMood.proud,
     };
   }
 }

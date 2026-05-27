@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
@@ -90,9 +91,10 @@ void main() {
       const ProviderScope(child: MaterialApp(home: HomeScreen())),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    FlutterError.onError = previousOnError;
 
     expect(bottomOverflows, isEmpty);
-    expect(find.text('0/5'), findsOneWidget);
     expect(find.text('Wortspiele'), findsOneWidget);
     expect(find.text('Meine Wörter'), findsNothing);
     expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
@@ -118,6 +120,13 @@ void main() {
 
     expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
     expect(find.text('Talvori'), findsOneWidget);
+    final mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.greeting,
+    );
   });
 
   testWidgets('home screen shows impulse inbox entry with unread badge', (

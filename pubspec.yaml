@@ -52,5 +52,6 @@ flutter:
     - .env
     - assets/icons/
     - assets/images/
+    - assets/images/mascot/
     - assets/sounds/
     - assets/local_import/default_words_v1.json
