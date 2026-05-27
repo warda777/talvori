@@ -1,14 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:talvori/core/ai/ai_chat_client.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/features/companion/application/companion_ai_service.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
@@ -27,6 +31,7 @@ import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
+import 'package:talvori/features/home/ui/widgets/talvori_companion_card.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart';
@@ -168,6 +173,223 @@ void main() {
       TalvoriMascotAssets.greeting,
     );
   });
+
+  testWidgets('home companion chat input sends prompt and shows response', (
+    tester,
+  ) async {
+    final aiReply = Completer<AiChatResult>();
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          companionAiServiceProvider.overrideWithValue(
+            CompanionAiService(
+              aiChatClient: _HomeFakeAiChatClient((request) => aiReply.future),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.byKey(const Key('talvori-companion-chat-icon')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getRect(find.byKey(const Key('talvori-companion-chat-input')))
+          .width,
+      greaterThan(300),
+    );
+
+    await tester.pump(const Duration(seconds: 7));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+    expect(find.text('Ich denke kurz nach ...'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('talvori-companion-chat-text-field')),
+      'Was soll ich üben?\nVielleicht A1?\nOder Reisen?',
+    );
+    expect(find.textContaining('Vielleicht A1?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-send')));
+    await tester.pump();
+
+    expect(find.text('Ich denke kurz nach ...'), findsOneWidget);
+
+    aiReply.complete(const AiChatResult(reply: 'Starte mit einem Wort.'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Starte mit einem Wort.'), findsOneWidget);
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+    final chatCompanion = tester.widget<TalvoriCompanionCard>(
+      find.byType(TalvoriCompanionCard),
+    );
+    expect(chatCompanion.messageMaxLines, 6);
+    final reopenedInput = tester.widget<TextField>(
+      find.byKey(const Key('talvori-companion-chat-text-field')),
+    );
+    expect(reopenedInput.controller?.text, isEmpty);
+    expect(reopenedInput.maxLines, 5);
+  });
+
+  testWidgets('home companion chat input survives reduced keyboard height', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+
+    tester.view.physicalSize = const Size(800, 520);
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+    await tester.enterText(
+      find.byKey(const Key('talvori-companion-chat-text-field')),
+      'Bleib offen',
+    );
+    expect(find.text('Bleib offen'), findsOneWidget);
+  });
+
+  testWidgets('home companion chat input closes on outside tap', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('talvori-companion-chat-text-field')),
+      'Nicht senden',
+    );
+    await tester.tapAt(const Offset(24, 560));
+    await tester.pump();
+
+    expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
+    expect(find.text('Nicht senden'), findsNothing);
+  });
+
+  testWidgets(
+    'home companion chat input closes when keyboard inset returns to zero',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+      SharedPreferences.setMockInitialValues({});
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+      await tester.pump();
+      expect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+        findsOneWidget,
+      );
+      final inputRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+      );
+      final textFieldRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
+      );
+      final companionRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-card')),
+      );
+      expect(inputRect.top, greaterThanOrEqualTo(0));
+      expect(inputRect.bottom, closeTo(878, 1));
+      expect(inputRect.bottom, lessThanOrEqualTo(880));
+      expect(textFieldRect.top, greaterThanOrEqualTo(inputRect.top));
+      expect(textFieldRect.bottom, lessThanOrEqualTo(inputRect.bottom));
+      expect(companionRect.bottom, lessThan(inputRect.top));
+
+      tester.view.resetViewInsets();
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('home companion toggles on tap and rest timer restarts', (
     tester,
@@ -1441,6 +1663,15 @@ void main() {
       expect(find.text('Wortquellen'), findsOneWidget);
     }
   });
+}
+
+class _HomeFakeAiChatClient implements AiChatClient {
+  const _HomeFakeAiChatClient(this._handler);
+
+  final Future<AiChatResult> Function(AiChatRequest request) _handler;
+
+  @override
+  Future<AiChatResult> sendMessage(AiChatRequest request) => _handler(request);
 }
 
 class _RecordingNavigatorObserver extends NavigatorObserver {

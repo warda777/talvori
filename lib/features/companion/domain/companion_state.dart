@@ -7,6 +7,11 @@ class CompanionState {
     required this.mascotMood,
     required this.title,
     required this.message,
+    required this.inputVisible,
+    required this.isThinking,
+    this.inputText = '',
+    this.lastUserMessage,
+    this.errorMessage,
   });
 
   factory CompanionState.initial() {
@@ -16,6 +21,8 @@ class CompanionState {
       mascotMood: TalvoriMascotMood.greeting,
       title: 'Talvori',
       message: 'Bereit für dein nächstes Wort?',
+      inputVisible: false,
+      isThinking: false,
     );
   }
 
@@ -24,6 +31,11 @@ class CompanionState {
   final TalvoriMascotMood mascotMood;
   final String title;
   final String message;
+  final bool inputVisible;
+  final bool isThinking;
+  final String inputText;
+  final String? lastUserMessage;
+  final String? errorMessage;
 
   CompanionState copyWith({
     bool? isExpanded,
@@ -31,6 +43,13 @@ class CompanionState {
     TalvoriMascotMood? mascotMood,
     String? title,
     String? message,
+    bool? inputVisible,
+    bool? isThinking,
+    String? inputText,
+    String? lastUserMessage,
+    String? errorMessage,
+    bool clearLastUserMessage = false,
+    bool clearErrorMessage = false,
   }) {
     return CompanionState(
       isExpanded: isExpanded ?? this.isExpanded,
@@ -38,6 +57,15 @@ class CompanionState {
       mascotMood: mascotMood ?? this.mascotMood,
       title: title ?? this.title,
       message: message ?? this.message,
+      inputVisible: inputVisible ?? this.inputVisible,
+      isThinking: isThinking ?? this.isThinking,
+      inputText: inputText ?? this.inputText,
+      lastUserMessage: clearLastUserMessage
+          ? null
+          : lastUserMessage ?? this.lastUserMessage,
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
     );
   }
 }

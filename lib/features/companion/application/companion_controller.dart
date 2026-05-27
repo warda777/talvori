@@ -18,6 +18,7 @@ class CompanionController extends Notifier<CompanionState> {
       isExpanded: true,
       bubbleVisible: true,
       mascotMood: TalvoriMascotMood.greeting,
+      clearErrorMessage: true,
     );
   }
 
@@ -26,6 +27,8 @@ class CompanionController extends Notifier<CompanionState> {
       isExpanded: false,
       bubbleVisible: false,
       mascotMood: TalvoriMascotMood.bored,
+      inputVisible: false,
+      isThinking: false,
     );
   }
 
@@ -43,6 +46,7 @@ class CompanionController extends Notifier<CompanionState> {
       bubbleVisible: true,
       mascotMood: mood ?? state.mascotMood,
       message: message,
+      clearErrorMessage: true,
     );
   }
 
@@ -53,6 +57,7 @@ class CompanionController extends Notifier<CompanionState> {
       mascotMood: tip.mood,
       title: tip.title,
       message: tip.message,
+      clearErrorMessage: true,
     );
   }
 
@@ -62,5 +67,77 @@ class CompanionController extends Notifier<CompanionState> {
 
   void showBrowserShareHint() {
     showDiscoveryTip(CompanionDiscoveryTips.browserShare);
+  }
+
+  void openChatInput() {
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      inputVisible: true,
+      mascotMood: TalvoriMascotMood.thinkingChin,
+      clearErrorMessage: true,
+    );
+  }
+
+  void closeChatInput() {
+    state = state.copyWith(inputVisible: false);
+  }
+
+  void submitUserMessage(String message) {
+    final trimmed = message.trim();
+    if (trimmed.isEmpty) return;
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      inputVisible: true,
+      isThinking: true,
+      mascotMood: TalvoriMascotMood.thinkingChin,
+      message: 'Ich denke kurz nach ...',
+      inputText: '',
+      lastUserMessage: trimmed,
+      clearErrorMessage: true,
+    );
+  }
+
+  void setThinking() {
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      inputVisible: true,
+      isThinking: true,
+      mascotMood: TalvoriMascotMood.thinkingChin,
+      message: 'Ich denke kurz nach ...',
+      clearErrorMessage: true,
+    );
+  }
+
+  void showAiResponse(String response) {
+    final trimmed = response.trim();
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      inputVisible: true,
+      isThinking: false,
+      mascotMood: TalvoriMascotMood.happy,
+      message: trimmed.isEmpty
+          ? 'Ich bin da. Frag mich einfach noch mal kurz.'
+          : trimmed,
+      clearErrorMessage: true,
+    );
+  }
+
+  void showError(String message) {
+    final trimmed = message.trim();
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      inputVisible: true,
+      isThinking: false,
+      mascotMood: TalvoriMascotMood.sad,
+      message: trimmed.isEmpty
+          ? 'Das hat gerade nicht geklappt. Versuch es gleich noch einmal.'
+          : trimmed,
+      errorMessage: trimmed.isEmpty ? 'unknown' : trimmed,
+    );
   }
 }

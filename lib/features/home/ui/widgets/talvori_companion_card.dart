@@ -14,7 +14,11 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.message = 'Bereit für dein nächstes Wort?',
     this.bubbleVisible = true,
     this.isExpanded = true,
+    this.inputVisible = false,
+    this.isThinking = false,
+    this.messageMaxLines = 3,
     this.onMascotTap,
+    this.onBubbleTap,
   });
 
   final TalvoriCompanionMood mood;
@@ -24,7 +28,11 @@ class TalvoriCompanionCard extends StatelessWidget {
   final String message;
   final bool bubbleVisible;
   final bool isExpanded;
+  final bool inputVisible;
+  final bool isThinking;
+  final int messageMaxLines;
   final VoidCallback? onMascotTap;
+  final VoidCallback? onBubbleTap;
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +50,12 @@ class TalvoriCompanionCard extends StatelessWidget {
           final bubbleWidth = (constraints.maxWidth - bubbleLeft - 4)
               .clamp(160.0, 260.0)
               .toDouble();
+          final topInset = bubbleVisible ? 88.0 : 0.0;
 
           return SizedBox(
             key: const Key('talvori-companion-card'),
             width: double.infinity,
-            height: effectiveMascotSize + 18,
+            height: topInset + effectiveMascotSize + 18,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -76,57 +85,123 @@ class TalvoriCompanionCard extends StatelessWidget {
                     bottom: bubbleBottom,
                     child: SizedBox(
                       width: bubbleWidth,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(12, 9, 12, 10),
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF07101A,
-                          ).withValues(alpha: 0.88),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: accent.withValues(alpha: 0.34),
-                            width: 1,
+                      child: GestureDetector(
+                        key: const Key('talvori-companion-bubble'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onBubbleTap,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(12, 9, 12, 10),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF07101A,
+                            ).withValues(alpha: 0.88),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: accent.withValues(alpha: 0.34),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.34),
+                                blurRadius: 18,
+                                offset: const Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: accent.withValues(alpha: 0.13),
+                                blurRadius: 20,
+                              ),
+                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.34),
-                              blurRadius: 18,
-                              offset: const Offset(0, 8),
-                            ),
-                            BoxShadow(
-                              color: accent.withValues(alpha: 0.13),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    color: accent,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: accent,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0,
+                                          ),
+                                    ),
                                   ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              message,
-                              maxLines: 3,
-                              overflow: TextOverflow.clip,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.82),
-                                    height: 1.18,
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                          ],
+                                  if (isThinking)
+                                    SizedBox(
+                                      key: const Key(
+                                        'talvori-companion-thinking-indicator',
+                                      ),
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: accent,
+                                      ),
+                                    )
+                                  else
+                                    Tooltip(
+                                      message: 'Chat öffnen',
+                                      key: const Key(
+                                        'talvori-companion-chat-icon',
+                                      ),
+                                      child: InkWell(
+                                        customBorder: const CircleBorder(),
+                                        onTap: onBubbleTap,
+                                        child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: accent.withValues(
+                                              alpha: 0.16,
+                                            ),
+                                            border: Border.all(
+                                              color: accent.withValues(
+                                                alpha: 0.55,
+                                              ),
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: accent.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                                blurRadius: 12,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            Icons.chat_bubble_outline_rounded,
+                                            size: 17,
+                                            color: accent,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                message,
+                                maxLines: messageMaxLines,
+                                overflow: TextOverflow.clip,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.82,
+                                      ),
+                                      height: 1.18,
+                                      letterSpacing: 0,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
