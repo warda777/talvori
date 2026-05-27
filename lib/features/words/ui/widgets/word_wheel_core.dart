@@ -190,7 +190,6 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
     }
 
     if (_words.isEmpty) {
-      final emptyLabel = wordWheelBrowserEmptyLabel(const Locale('de'));
       return SizedBox(
         height: 160,
         child: Center(
@@ -199,18 +198,7 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
             child: AnimatedOpacity(
               opacity: _showEmptyHint ? 1 : 0,
               duration: const Duration(milliseconds: 220),
-              child: _showEmptyHint
-                  ? Text(
-                      emptyLabel,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.6),
-                        height: 1.3,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+              child: const SizedBox.shrink(),
             ),
           ),
         ),
@@ -282,7 +270,7 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
 @visibleForTesting
 String wordWheelBrowserEmptyLabel(Locale? locale) {
   if (locale?.languageCode.toLowerCase() == 'en') {
-    return 'Mark your first word\nin the browser';
+    return '';
   }
-  return 'Markiere ein Wort im Browser und teile es mit Talvori.';
+  return '';
 }

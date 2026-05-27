@@ -11,14 +11,14 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('word wheel empty state uses German browser copy', (
+  testWidgets('word wheel empty state does not show browser guidance', (
     tester,
   ) async {
     await _pumpEmptyWordWheel(tester, const Locale('de'));
 
     expect(
       find.text('Markiere ein Wort im Browser und teile es mit Talvori.'),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.text('Mark your first word\nin the browser'), findsNothing);
 
@@ -32,14 +32,8 @@ void main() {
   });
 
   test('word wheel empty state label helper supports German and English', () {
-    expect(
-      wordWheelBrowserEmptyLabel(const Locale('de')),
-      'Markiere ein Wort im Browser und teile es mit Talvori.',
-    );
-    expect(
-      wordWheelBrowserEmptyLabel(const Locale('en')),
-      'Mark your first word\nin the browser',
-    );
+    expect(wordWheelBrowserEmptyLabel(const Locale('de')), isEmpty);
+    expect(wordWheelBrowserEmptyLabel(const Locale('en')), isEmpty);
   });
 }
 
