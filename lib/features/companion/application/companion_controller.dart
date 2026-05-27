@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 import 'package:talvori/features/companion/domain/companion_state.dart';
 
 final companionControllerProvider =
@@ -45,14 +46,21 @@ class CompanionController extends Notifier<CompanionState> {
     );
   }
 
+  void showDiscoveryTip(CompanionDiscoveryTip tip) {
+    state = state.copyWith(
+      isExpanded: true,
+      bubbleVisible: true,
+      mascotMood: tip.mood,
+      title: tip.title,
+      message: tip.message,
+    );
+  }
+
   void hideBubble() {
     state = state.copyWith(bubbleVisible: false);
   }
 
   void showBrowserShareHint() {
-    showMessage(
-      message: 'Markiere ein Wort im Browser und teile es mit Talvori.',
-      mood: TalvoriMascotMood.greeting,
-    );
+    showDiscoveryTip(CompanionDiscoveryTips.browserShare);
   }
 }

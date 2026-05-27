@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/companion/application/companion_controller.dart';
+import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 
 void main() {
   ProviderContainer createContainer() {
@@ -82,6 +83,21 @@ void main() {
     expect(state.message, 'Stark, weiter so.');
   });
 
+  test('showDiscoveryTip displays a local discovery tip', () {
+    final container = createContainer();
+
+    container
+        .read(companionControllerProvider.notifier)
+        .showDiscoveryTip(CompanionDiscoveryTips.wordGames);
+    final state = container.read(companionControllerProvider);
+
+    expect(state.isExpanded, isTrue);
+    expect(state.bubbleVisible, isTrue);
+    expect(state.title, CompanionDiscoveryTips.wordGames.title);
+    expect(state.message, CompanionDiscoveryTips.wordGames.message);
+    expect(state.mascotMood, CompanionDiscoveryTips.wordGames.mood);
+  });
+
   test('hideBubble only hides the bubble', () {
     final container = createContainer();
 
@@ -100,10 +116,7 @@ void main() {
     final state = container.read(companionControllerProvider);
 
     expect(state.bubbleVisible, isTrue);
-    expect(
-      state.message,
-      'Markiere ein Wort im Browser und teile es mit Talvori.',
-    );
-    expect(state.mascotMood, TalvoriMascotMood.greeting);
+    expect(state.message, CompanionDiscoveryTips.browserShare.message);
+    expect(state.mascotMood, CompanionDiscoveryTips.browserShare.mood);
   });
 }

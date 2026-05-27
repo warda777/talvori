@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/companion/application/companion_controller.dart';
+import 'package:talvori/features/companion/application/companion_discovery_tip_resolver.dart';
+import 'package:talvori/features/companion/domain/companion_discovery_context.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
@@ -41,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   ProviderSubscription<HomeState>? _homeSub;
   Timer? _companionRestTimer;
-  bool _didShowBrowserShareHintForEmptyMyWords = false;
+  bool _didShowInitialCompanionDiscoveryTip = false;
   bool _progressAnimationRunning =
       false; // Verfolgt ob Progressbar-Animation noch läuft
 
@@ -60,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Controller initialisieren (kümmert sich um Lifecycle & Share-Listener)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeControllerProvider.notifier).init(context);
-      unawaited(_showBrowserShareHintIfMyWordsEmpty());
+      unawaited(_showInitialCompanionDiscoveryTip());
       _restartCompanionRestTimer();
     });
   }
@@ -98,18 +100,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _showBrowserShareHintIfMyWordsEmpty() async {
-    if (_didShowBrowserShareHintForEmptyMyWords) return;
+  Future<void> _showInitialCompanionDiscoveryTip() async {
+    if (_didShowInitialCompanionDiscoveryTip) return;
+    _didShowInitialCompanionDiscoveryTip = true;
     try {
       final myWordsCount = await ref.read(
         localWordCountProvider(localMyWordsCategoryId).future,
       );
-      if (!mounted || myWordsCount != 0) return;
-      _didShowBrowserShareHintForEmptyMyWords = true;
-      ref.read(companionControllerProvider.notifier).showBrowserShareHint();
+      if (!mounted) return;
+      final discoveryContext = CompanionDiscoveryContext(
+        myWordsCount: myWordsCount,
+        favoritesCount: 0,
+        hasUsedBrowserShare: myWordsCount > 0,
+        hasUsedWordGames: false,
+        hasCreatedDailyImpulse: false,
+        hasOpenedLearningLevels: false,
+        hasOpenedLanguageTools: false,
+        hasOpenedWordWorlds: false,
+      );
+      final tip = const CompanionDiscoveryTipResolver().resolve(
+        discoveryContext,
+      );
+      if (tip == null) return;
+      ref.read(companionControllerProvider.notifier).showDiscoveryTip(tip);
       _restartCompanionRestTimer();
     } catch (error, stackTrace) {
-      debugPrint('Browser share companion hint skipped: $error');
+      debugPrint('Companion discovery tip skipped: $error');
       debugPrint('$stackTrace');
     }
   }
