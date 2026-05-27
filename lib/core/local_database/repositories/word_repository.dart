@@ -297,6 +297,17 @@ WHERE m.category_id = ? AND w.is_archived = ?
     return rows.map(_mapWord).toList(growable: false);
   }
 
+  Future<int> countAllWords({bool includeArchived = false}) async {
+    final rows = await _database.rawQuery(
+      includeArchived
+          ? 'SELECT COUNT(*) AS count FROM words'
+          : 'SELECT COUNT(*) AS count FROM words WHERE is_archived = ?',
+      includeArchived ? null : [0],
+    );
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
   Future<List<LocalWord>> loadPendingTranslations({
     String? categoryId,
     bool includeArchived = false,

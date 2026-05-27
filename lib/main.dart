@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:talvori/core/theme/app_theme.dart';
+import 'package:talvori/core/local_database/providers/supabase_words_local_import_controller_provider.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
 import 'package:talvori/features/impuls_postfach/notifications/impulse_inbox_notification_router.dart';
 import 'package:talvori/features/local_learning_debug/routing/local_learning_debug_routes.dart';
@@ -52,8 +53,10 @@ class TalvoriApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       home: const _InitGate(
-        child: OnboardingGate(
-          child: IncomingSharedTextImportListener(child: HomeScreen()),
+        child: _SupabaseWordsLocalAutoSyncBootstrap(
+          child: OnboardingGate(
+            child: IncomingSharedTextImportListener(child: HomeScreen()),
+          ),
         ),
       ),
       routes: kDebugMode
@@ -66,6 +69,40 @@ class TalvoriApp extends ConsumerWidget {
             }
           : const {},
     );
+  }
+}
+
+class _SupabaseWordsLocalAutoSyncBootstrap extends ConsumerStatefulWidget {
+  const _SupabaseWordsLocalAutoSyncBootstrap({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_SupabaseWordsLocalAutoSyncBootstrap> createState() =>
+      _SupabaseWordsLocalAutoSyncBootstrapState();
+}
+
+class _SupabaseWordsLocalAutoSyncBootstrapState
+    extends ConsumerState<_SupabaseWordsLocalAutoSyncBootstrap> {
+  bool _didStartAutoSync = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _didStartAutoSync) return;
+      _didStartAutoSync = true;
+      unawaited(
+        ref
+            .read(supabaseWordsLocalAutoSyncServiceProvider)
+            .runIfNeeded(now: DateTime.now().toUtc()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
 

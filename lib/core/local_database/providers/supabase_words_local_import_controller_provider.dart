@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../services/supabase_words_local_auto_sync_service.dart';
 import '../services/supabase_words_local_import_service.dart';
 import '../services/supabase_words_remote_reader.dart';
 import 'local_bootstrap_provider.dart';
@@ -14,6 +16,28 @@ final supabaseWordsRemoteReaderProvider = Provider<SupabaseWordsRemoteReader>((
 final supabaseWordsLocalImportServiceProvider =
     Provider<SupabaseWordsLocalImportService>((ref) {
       return const SupabaseWordsLocalImportService();
+    });
+
+final supabaseWordsLocalAutoSyncServiceProvider =
+    Provider<SupabaseWordsLocalAutoSyncService>((ref) {
+      return SupabaseWordsLocalAutoSyncService(
+        loadLocalWordCount: () async {
+          final bootstrap = await ref.read(localBootstrapProvider.future);
+          return bootstrap.repositoryFactory.wordRepository.countAllWords();
+        },
+        importWords: (now) async {
+          final bootstrap = await ref.read(localBootstrapProvider.future);
+          final reader = ref.read(supabaseWordsRemoteReaderProvider);
+          final service = ref.read(supabaseWordsLocalImportServiceProvider);
+          final bundle = await reader.readBundle();
+          return service.apply(
+            database: bootstrap.database,
+            bundle: bundle,
+            now: now,
+          );
+        },
+        logMessage: debugPrint,
+      );
     });
 
 final supabaseWordsLocalAdminImportControllerProvider =
