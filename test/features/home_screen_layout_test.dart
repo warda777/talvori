@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
@@ -121,6 +122,44 @@ void main() {
     expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
     expect(find.text('Talvori'), findsOneWidget);
     expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    final mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.greeting,
+    );
+  });
+
+  testWidgets('home empty my words state lets companion show browser hint', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.text('Markiere ein Wort im Browser und teile es mit Talvori.'),
+      findsOneWidget,
+    );
+    final browserHint = tester.widget<Text>(
+      find.text('Markiere ein Wort im Browser und teile es mit Talvori.'),
+    );
+    expect(browserHint.maxLines, 3);
+    expect(browserHint.overflow, TextOverflow.clip);
     final mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );

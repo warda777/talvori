@@ -37,9 +37,10 @@ class TalvoriCompanionCard extends StatelessWidget {
       label: 'Talvori Companion ${effectiveMascotMood.name}',
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final bubbleLeft = effectiveMascotSize * 0.8;
+          final bubbleLeft = effectiveMascotSize * 0.68;
+          final bubbleBottom = effectiveMascotSize * 0.82;
           final bubbleWidth = (constraints.maxWidth - bubbleLeft - 4)
-              .clamp(118.0, 176.0)
+              .clamp(160.0, 260.0)
               .toDouble();
 
           return SizedBox(
@@ -72,7 +73,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                 if (bubbleVisible)
                   Positioned(
                     left: bubbleLeft,
-                    top: 0,
+                    bottom: bubbleBottom,
                     child: SizedBox(
                       width: bubbleWidth,
                       child: Container(
@@ -116,8 +117,8 @@ class TalvoriCompanionCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             Text(
                               message,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                              maxLines: 3,
+                              overflow: TextOverflow.clip,
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Colors.white.withValues(alpha: 0.82),
