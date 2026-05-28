@@ -42,7 +42,7 @@ class TalvoriCompanionCard extends StatelessWidget {
     final effectiveMascotSize = isExpanded ? mascotSize : mascotSize * 0.62;
 
     return Semantics(
-      label: 'Talvori Companion ${effectiveMascotMood.name}',
+      label: 'Tali ${effectiveMascotMood.name}',
       child: LayoutBuilder(
         builder: (context, constraints) {
           final bubbleLeft = effectiveMascotSize * 0.68;

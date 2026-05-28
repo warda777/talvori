@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/vocab_controller.dart';
 import 'package:talvori/features/home/providers.dart';
 import 'package:talvori/features/home/ui/screens/audio_catch_game_screen.dart';
@@ -243,28 +244,12 @@ class VocabScreen extends ConsumerWidget {
   }
 
   static void _showPreparedHint(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const Key('word-game-prepared-toast'),
-          backgroundColor: const Color(0xFF061018),
-          behavior: SnackBarBehavior.floating,
-          elevation: 0,
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.1),
-          ),
-          content: const Text(
-            'Dieses Wortspiel wird vorbereitet.',
-            style: TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      );
+    TalvoriSnackBar.show(
+      context,
+      key: const Key('word-game-prepared-toast'),
+      message: 'Dieses Wortspiel wird vorbereitet.',
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+    );
   }
 }
 

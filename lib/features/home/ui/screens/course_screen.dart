@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
@@ -1104,23 +1105,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
   }
 
   void _showTagesimpulsSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF07111A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF59D7FF), width: 1),
-        ),
-      ),
-    );
+    TalvoriSnackBar.show(context, message: message);
   }
 }
 

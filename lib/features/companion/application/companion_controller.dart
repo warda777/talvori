@@ -26,7 +26,7 @@ class CompanionController extends Notifier<CompanionState> {
     state = state.copyWith(
       isExpanded: false,
       bubbleVisible: false,
-      mascotMood: TalvoriMascotMood.bored,
+      mascotMood: TalvoriMascotMood.idle,
       inputVisible: false,
       isThinking: false,
     );

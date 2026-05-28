@@ -16,6 +16,7 @@ import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/application/application.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
@@ -1803,24 +1804,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _showLocalQuickActionMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF061018),
-        elevation: 0,
-        margin: const EdgeInsets.fromLTRB(18, 0, 18, 22),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.1),
-        ),
-      ),
+    TalvoriSnackBar.show(
+      context,
+      message: message,
+      margin: const EdgeInsets.fromLTRB(18, 0, 18, 22),
     );
   }
 

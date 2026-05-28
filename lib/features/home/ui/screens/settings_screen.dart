@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/supabase_words_local_import_screen.dart';
 
@@ -250,8 +251,10 @@ class SettingsScreen extends ConsumerWidget {
                   .read(settingsControllerProvider.notifier)
                   .copyUserIdToClipboard();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nutzer-ID kopiert.')),
+                TalvoriSnackBar.show(
+                  context,
+                  message: 'Nutzer-ID kopiert.',
+                  type: TalvoriSnackBarType.success,
                 );
               }
             },
@@ -266,9 +269,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   static void _preparedSnack(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Diese Funktion wird vorbereitet.')),
-    );
+    TalvoriSnackBar.show(context, message: 'Diese Funktion wird vorbereitet.');
   }
 }
 
@@ -689,8 +690,10 @@ class _NameSettingsScreenState extends ConsumerState<_NameSettingsScreen> {
                       .read(profilePreferencesControllerProvider.notifier)
                       .setDisplayName(_controller.text);
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Name gespeichert.')),
+                    TalvoriSnackBar.show(
+                      context,
+                      message: 'Name gespeichert.',
+                      type: TalvoriSnackBarType.success,
                     );
                   }
                 },

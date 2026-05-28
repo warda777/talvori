@@ -25,7 +25,7 @@ void main() {
     expect(state.isThinking, isFalse);
   });
 
-  test('compact hides the bubble and shows the bored mascot', () {
+  test('compact hides the bubble and shows the idle mascot', () {
     final container = createContainer();
 
     container.read(companionControllerProvider.notifier).openChatInput();
@@ -34,7 +34,7 @@ void main() {
 
     expect(state.isExpanded, isFalse);
     expect(state.bubbleVisible, isFalse);
-    expect(state.mascotMood, TalvoriMascotMood.bored);
+    expect(state.mascotMood, TalvoriMascotMood.idle);
     expect(state.inputVisible, isFalse);
     expect(state.isThinking, isFalse);
   });
@@ -61,7 +61,7 @@ void main() {
 
     expect(state.isExpanded, isFalse);
     expect(state.bubbleVisible, isFalse);
-    expect(state.mascotMood, TalvoriMascotMood.bored);
+    expect(state.mascotMood, TalvoriMascotMood.idle);
 
     controller.toggleExpanded();
     state = container.read(companionControllerProvider);

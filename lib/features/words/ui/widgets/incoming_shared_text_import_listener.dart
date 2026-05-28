@@ -9,6 +9,7 @@ import 'package:talvori/core/local_database/providers/local_word_count_provider.
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 class IncomingSharedTextImportListener extends ConsumerStatefulWidget {
@@ -99,42 +100,32 @@ class _IncomingSharedTextImportListenerState
         result.status == SharedTextImportStatus.duplicate) {
       _refreshMyWordsProviders();
     }
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: _TalvoriImportSnackBarContent(
-            result: result,
-            title: _titleFor(result),
-            subtitle: _messageFor(result),
-            accentColor: _accentFor(result),
-            onOpenMyWords:
-                result.status == SharedTextImportStatus.imported ||
-                    result.status == SharedTextImportStatus.duplicate
-                ? () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const LocalWordListScreen(
-                          categoryId: localMyWordsCategoryId,
-                          title: localMyWordsCategoryLabel,
-                        ),
-                      ),
-                    );
-                  }
-                : null,
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          padding: EdgeInsets.zero,
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
-          duration: _feedbackDuration,
-        ),
-      );
+    TalvoriSnackBar.showCustom(
+      context,
+      content: _TalvoriImportSnackBarContent(
+        result: result,
+        title: _titleFor(result),
+        subtitle: _messageFor(result),
+        accentColor: _accentFor(result),
+        onOpenMyWords:
+            result.status == SharedTextImportStatus.imported ||
+                result.status == SharedTextImportStatus.duplicate
+            ? () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const LocalWordListScreen(
+                      categoryId: localMyWordsCategoryId,
+                      title: localMyWordsCategoryLabel,
+                    ),
+                  ),
+                );
+              }
+            : null,
+      ),
+      duration: _feedbackDuration,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
+    );
   }
 
   void _showCompactMessage({
@@ -143,25 +134,16 @@ class _IncomingSharedTextImportListenerState
     required Color accentColor,
   }) {
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: _TalvoriImportSummarySnackBarContent(
-            title: title,
-            subtitle: subtitle,
-            accentColor: accentColor,
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          padding: EdgeInsets.zero,
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
-          duration: _feedbackDuration,
-        ),
-      );
+    TalvoriSnackBar.showCustom(
+      context,
+      content: _TalvoriImportSummarySnackBarContent(
+        title: title,
+        subtitle: subtitle,
+        accentColor: accentColor,
+      ),
+      duration: _feedbackDuration,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 112),
+    );
   }
 
   void _refreshMyWordsProviders() {

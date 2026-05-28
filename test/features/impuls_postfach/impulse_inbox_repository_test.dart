@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
@@ -49,6 +50,39 @@ void main() {
       expect(chats.single.unreadCount, 1);
       expect(chats.single.lastMessageText, 'You moved like a superstar.');
       expect(loadedMessages.single.usedWords, ['move', 'superstar']);
+    });
+
+    test('ensures companion chat with stable id and Tali title', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+
+      final first = await repository.ensureCompanionChat();
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: first.id,
+          text: 'Hallo Tali',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+          readAt: DateTime(2026, 5, 20, 12),
+        ),
+        incrementUnread: false,
+      );
+      final second = await repository.ensureCompanionChat();
+      final chats = await repository.listChats();
+
+      expect(first.id, CompanionChatConstants.chatId);
+      expect(second.id, CompanionChatConstants.chatId);
+      expect(second.title, CompanionChatConstants.title);
+      expect(second.avatarKey, CompanionChatConstants.avatarKey);
+      expect(chats.single.title, 'Tali');
+      expect(
+        (await repository.listMessages(
+          CompanionChatConstants.chatId,
+        )).single.text,
+        'Hallo Tali',
+      );
     });
 
     test(

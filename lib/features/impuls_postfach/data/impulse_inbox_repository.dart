@@ -98,13 +98,7 @@ class SharedPreferencesImpulseInboxRepository
     final store = await _loadStore();
     final existing = store.chats[CompanionChatConstants.chatId];
     if (existing != null) {
-      final updated = existing.copyWith(
-        sourceType: ImpulseChatSourceType.customAi,
-        sourceId: CompanionChatConstants.chatId,
-        title: CompanionChatConstants.title,
-        avatarKey: CompanionChatConstants.avatarKey,
-        enabled: true,
-      );
+      final updated = _normalizeCompanionChat(existing);
       store.chats[updated.id] = updated;
       await _saveStore(store);
       return updated;
@@ -612,7 +606,11 @@ class SharedPreferencesImpulseInboxRepository
     if (rawChats is List) {
       for (final rawChat in rawChats.whereType<Map<String, dynamic>>()) {
         final chat = ImpulseChat.fromJson(rawChat);
-        if (chat.id.trim().isNotEmpty) chats[chat.id] = chat;
+        if (chat.id.trim().isNotEmpty) {
+          chats[chat.id] = chat.id == CompanionChatConstants.chatId
+              ? _normalizeCompanionChat(chat)
+              : chat;
+        }
       }
     }
 
@@ -664,6 +662,16 @@ class SharedPreferencesImpulseInboxRepository
 
   String _customChatId() {
     return 'impulse-chat-custom-${_now.microsecondsSinceEpoch}';
+  }
+
+  ImpulseChat _normalizeCompanionChat(ImpulseChat chat) {
+    return chat.copyWith(
+      sourceType: ImpulseChatSourceType.customAi,
+      sourceId: CompanionChatConstants.chatId,
+      title: CompanionChatConstants.title,
+      avatarKey: CompanionChatConstants.avatarKey,
+      enabled: true,
+    );
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 
 /// Reset-Button mit Hold-to-Confirm:
 /// - Langes Drücken startet einen 3s-Countdown im Fullscreen-Overlay.
@@ -152,11 +153,12 @@ class _ResetButtonState extends State<ResetButton> {
     await widget.onResetComplete();
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Lernfortschritt wurde zurückgesetzt'),
-        duration: Duration(seconds: 2),
-        backgroundColor: Color(0xFFA05260),
-      ));
+      TalvoriSnackBar.show(
+        context,
+        message: 'Lernfortschritt wurde zurückgesetzt',
+        type: TalvoriSnackBarType.success,
+        duration: const Duration(seconds: 2),
+      );
     }
 
     setState(() {
@@ -184,7 +186,9 @@ class _ResetButtonState extends State<ResetButton> {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: _isPressed ? const Color(0xFFA05260) : const Color(0xFF2D2D2F),
+            color: _isPressed
+                ? const Color(0xFFA05260)
+                : const Color(0xFF2D2D2F),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.black, width: 1),
           ),

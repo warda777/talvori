@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'tap_flash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/ui/widgets/word_wheel_core.dart';
 import 'package:talvori/features/words/ui/cards/glow_orb.dart';
 import 'package:talvori/features/words/ui/cards/center_glow.dart';
@@ -735,29 +736,13 @@ void _showBrowserOpenToast(
   BuildContext context, [
   String message = 'Externer Browser konnte nicht geöffnet werden.',
 ]) {
-  final messenger = ScaffoldMessenger.of(context);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        key: const Key('home-browser-open-toast'),
-        backgroundColor: const Color(0xFF061018),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 118),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.2),
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Color(0xFFF4F8FF),
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    );
+  TalvoriSnackBar.show(
+    context,
+    key: const Key('home-browser-open-toast'),
+    message: message,
+    type: TalvoriSnackBarType.warning,
+    margin: const EdgeInsets.fromLTRB(16, 0, 16, 118),
+  );
 }
 
 class _HomeBrowserOpenSheet extends StatelessWidget {

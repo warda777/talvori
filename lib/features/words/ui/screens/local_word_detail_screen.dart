@@ -12,6 +12,7 @@ import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/review_answer.dart';
 import 'package:talvori/core/srs/models/word_progress.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/ui/screens/local_word_edit_screen.dart';
 
 class LocalWordDetailScreen extends ConsumerStatefulWidget {
@@ -216,19 +217,21 @@ class _LocalWordDetailScreenState extends ConsumerState<LocalWordDetailScreen> {
         ),
       );
       ref.invalidate(localWordsForCategoryProvider(widget.categoryId));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result.translated > 0
-                ? 'Übersetzung aktualisiert.'
-                : 'Übersetzung konnte nicht abgeschlossen werden.',
-          ),
-        ),
+      TalvoriSnackBar.show(
+        context,
+        message: result.translated > 0
+            ? 'Übersetzung aktualisiert.'
+            : 'Übersetzung konnte nicht abgeschlossen werden.',
+        type: result.translated > 0
+            ? TalvoriSnackBarType.success
+            : TalvoriSnackBarType.warning,
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Übersetzung konnte nicht starten.')),
+      TalvoriSnackBar.show(
+        context,
+        message: 'Übersetzung konnte nicht starten.',
+        type: TalvoriSnackBarType.error,
       );
     } finally {
       if (mounted) {
@@ -243,8 +246,10 @@ class _LocalWordDetailScreenState extends ConsumerState<LocalWordDetailScreen> {
         .read(wordPronunciationServiceProvider)
         .speakWord(word.term, languageCode: word.sourceLanguage);
     if (!mounted || result.isSuccess) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
+    TalvoriSnackBar.show(
+      context,
+      message: result.message ?? 'Aussprache nicht verfügbar.',
+      type: TalvoriSnackBarType.warning,
     );
   }
 }

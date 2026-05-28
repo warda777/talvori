@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_voice_input_service.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
@@ -233,12 +236,7 @@ class _ImpulseChatDetailScreenState
 
   void _showVoiceMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF07111A),
-      ),
-    );
+    TalvoriSnackBar.show(context, message: message);
   }
 
   void _scrollToBottom() {
@@ -296,10 +294,10 @@ class _ImpulseChatDetailScreenState
     if (targetIndex < 0) {
       if (!mounted) return;
       setState(() => _highlightedMessageId = null);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gespeicherte Nachricht wurde nicht gefunden.'),
-        ),
+      TalvoriSnackBar.show(
+        context,
+        message: 'Gespeicherte Nachricht wurde nicht gefunden.',
+        type: TalvoriSnackBarType.warning,
       );
       return;
     }
@@ -497,7 +495,7 @@ class _ImpulseChatDetailScreenState
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
         ),
         content: const Text(
-          'Der Chat wird aus dem Impuls-Postfach ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
+          'Der Chat wird aus dem Talvori Chat ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
           style: TextStyle(color: Color(0xFFB8C4D9)),
         ),
         actions: [
@@ -537,7 +535,7 @@ class _ImpulseChatDetailScreenState
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
         ),
         content: const Text(
-          'Der eigene KI-Chat wird aus dem Impuls-Postfach ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
+          'Der eigene KI-Chat wird aus dem Talvori Chat ausgeblendet. Deine lokalen Nachrichten bleiben erhalten.',
           style: TextStyle(color: Color(0xFFB8C4D9)),
         ),
         actions: [
@@ -566,12 +564,7 @@ class _ImpulseChatDetailScreenState
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF07111A),
-      ),
-    );
+    TalvoriSnackBar.show(context, message: message);
   }
 
   bool _isSameMessageDay(DateTime a, DateTime b) {
@@ -588,6 +581,7 @@ class _ChatHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCategory = chat?.sourceType == ImpulseChatSourceType.category;
     final isCustom = chat?.sourceType == ImpulseChatSourceType.customAi;
+    final isCompanion = chat?.id == CompanionChatConstants.chatId;
     return Row(
       children: [
         _HeaderAvatar(
@@ -618,6 +612,8 @@ class _ChatHeader extends StatelessWidget {
               Text(
                 isCategory
                     ? 'Kategorie-Chat'
+                    : isCompanion
+                    ? 'Tali'
                     : isCustom
                     ? 'Eigener KI-Chat'
                     : 'Talvori Impulse',
@@ -646,6 +642,7 @@ class _HeaderAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = chat?.avatarImagePath?.trim();
+    final isCompanion = chat?.id == CompanionChatConstants.chatId;
     return Container(
       width: 34,
       height: 34,
@@ -656,7 +653,16 @@ class _HeaderAvatar extends StatelessWidget {
         boxShadow: const [BoxShadow(color: Color(0x227FFFE7), blurRadius: 14)],
       ),
       clipBehavior: Clip.antiAlias,
-      child: path != null && path.isNotEmpty
+      child: isCompanion
+          ? Padding(
+              padding: const EdgeInsets.all(3),
+              child: Image.asset(
+                TalvoriMascotAssets.idle,
+                key: const Key('impulse_chat_detail_companion_avatar_image'),
+                fit: BoxFit.contain,
+              ),
+            )
+          : path != null && path.isNotEmpty
           ? Image.file(
               File(path),
               fit: BoxFit.cover,
@@ -1494,11 +1500,10 @@ class _AudioMessageState extends ConsumerState<_AudioMessage> {
   }
 
   void _showMissingFile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Audiodatei nicht gefunden.'),
-        backgroundColor: Color(0xFF07111A),
-      ),
+    TalvoriSnackBar.show(
+      context,
+      message: 'Audiodatei nicht gefunden.',
+      type: TalvoriSnackBarType.warning,
     );
   }
 
@@ -2119,11 +2124,9 @@ class _ChatInputBarState extends State<_ChatInputBar> {
                         ),
                         padding: EdgeInsets.zero,
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Anhänge folgen später.'),
-                              backgroundColor: Color(0xFF07111A),
-                            ),
+                          TalvoriSnackBar.show(
+                            context,
+                            message: 'Anhänge folgen später.',
                           );
                         },
                         icon: const Icon(

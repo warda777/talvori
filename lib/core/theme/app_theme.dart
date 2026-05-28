@@ -4,17 +4,20 @@ import 'package:talvori/features/words/ui/theme/theme.dart';
 class AppTheme {
   static ThemeData get dark {
     const seed = Color(0xFF7BB1AA);
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: Brightness.dark,
-    ).copyWith(
-      // Farben für .tonal Buttons (IconButton.filledTonal, FilledButton.tonal)
-      secondaryContainer: const Color(0xFF2F2F3A), // Dunkles Grau für Button-Hintergründe
-      onSecondaryContainer: Colors.white,
-      // Farben für normale FilledButtons
-      primary: const Color(0xFFB0CCFE), // Blau aus Word Wheel
-      onPrimary: Colors.white,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: seed,
+          brightness: Brightness.dark,
+        ).copyWith(
+          // Farben für .tonal Buttons (IconButton.filledTonal, FilledButton.tonal)
+          secondaryContainer: const Color(
+            0xFF2F2F3A,
+          ), // Dunkles Grau für Button-Hintergründe
+          onSecondaryContainer: Colors.white,
+          // Farben für normale FilledButtons
+          primary: const Color(0xFFB0CCFE), // Blau aus Word Wheel
+          onPrimary: Colors.white,
+        );
 
     return ThemeData(
       brightness: Brightness.dark,
@@ -36,12 +39,14 @@ class AppTheme {
         iconTheme: IconThemeData(color: Colors.white),
         leadingWidth: 56, // Standard Breite für Back-Button
       ),
-      chipTheme: const ChipThemeData(side: BorderSide(color: Colors.transparent)),
+      chipTheme: const ChipThemeData(
+        side: BorderSide(color: Colors.transparent),
+      ),
 
       // Optional: Standard-Styles
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: scheme.primary,        // wirkt auf FilledButton()
+          backgroundColor: scheme.primary, // wirkt auf FilledButton()
           foregroundColor: scheme.onPrimary,
         ),
       ),
@@ -51,19 +56,25 @@ class AppTheme {
           foregroundColor: scheme.onSecondaryContainer,
         ),
       ),
-      
-      // SnackBar Theme - transparent mit weißem Stroke und weißer Schrift
+
+      // SnackBar Theme - Talvori Dark-Neon fallback for any direct SnackBar.
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: Colors.transparent,
-        contentTextStyle: const TextStyle(color: Colors.white),
+        backgroundColor: const Color(0xFF07101A),
+        contentTextStyle: const TextStyle(
+          color: Color(0xFFF4F8FF),
+          fontWeight: FontWeight.w800,
+          fontSize: 14,
+        ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999), // Komplett runde Ecken
-          side: const BorderSide(color: Colors.white, width: 1),
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Color(0xFF5DDCFF), width: 1.2),
         ),
         behavior: SnackBarBehavior.floating,
-        elevation: 0,
+        elevation: 8,
+        actionTextColor: const Color(0xFF7DFFE3),
+        disabledActionTextColor: const Color(0x887DFFE3),
       ),
-      
+
       // WordsColors ThemeExtension
       extensions: const [
         WordsColors(

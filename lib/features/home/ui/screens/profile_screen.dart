@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/favorites/ui/local_favorites_list_screen.dart';
 import 'package:talvori/features/home/application/word_game_rewards_controller.dart';
 import 'package:talvori/features/home/ui/screens/settings_screen.dart';
@@ -762,10 +763,9 @@ class _PreparedProfileScreen extends StatelessWidget {
               const SizedBox(height: 26),
               _ProfilePrimaryButton(
                 label: actionLabel!,
-                onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Diese Funktion wird vorbereitet.'),
-                  ),
+                onTap: () => TalvoriSnackBar.show(
+                  context,
+                  message: 'Diese Funktion wird vorbereitet.',
                 ),
               ),
             ],

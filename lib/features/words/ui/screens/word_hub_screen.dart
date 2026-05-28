@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impulse_chat_detail_screen.dart';
@@ -633,12 +634,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
 
             if (!context.mounted) return;
             if (catId == null && sub.supabaseId == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
+              TalvoriSnackBar.show(
+                context,
+                message:
                     'Hinweis: Kategorie-Lookup nicht möglich. Fallback aktiv.',
-                  ),
-                ),
+                type: TalvoriSnackBarType.warning,
               );
             }
 
@@ -1107,12 +1107,9 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                         onSubmitted: (q) {
                           final query = q.trim();
                           if (query.isEmpty) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Lokale Suche ist noch nicht angebunden',
-                              ),
-                            ),
+                          TalvoriSnackBar.show(
+                            context,
+                            message: 'Lokale Suche ist noch nicht angebunden',
                           );
                         },
                         decoration: InputDecoration(
@@ -1247,10 +1244,10 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
                               },
                         onTap: () {
                           if (mappedLocalCategoryId == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Noch nicht lokal verfügbar'),
-                              ),
+                            TalvoriSnackBar.show(
+                              context,
+                              message: 'Noch nicht lokal verfügbar',
+                              type: TalvoriSnackBarType.warning,
                             );
                             return;
                           }

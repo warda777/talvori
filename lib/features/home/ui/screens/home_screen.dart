@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/features/companion/application/companion_ai_service.dart';
 import 'package:talvori/features/companion/application/companion_controller.dart';
@@ -276,9 +277,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _todo(String what) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$what${HomeStrings.todo}')));
+    TalvoriSnackBar.show(context, message: '$what${HomeStrings.todo}');
   }
 
   Future<void> _showLearningSourcesPopup() async {
@@ -303,8 +302,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _speakHomeWord(WordUserView? word) async {
     final text = word?.text.trim() ?? '';
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Noch kein Wort ausgewählt.')),
+      TalvoriSnackBar.show(
+        context,
+        message: 'Noch kein Wort ausgewählt.',
+        type: TalvoriSnackBarType.warning,
       );
       return;
     }
@@ -314,8 +315,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .read(wordPronunciationServiceProvider)
         .speakWord(text, languageCode: 'en');
     if (!mounted || result.isSuccess) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
+    TalvoriSnackBar.show(
+      context,
+      message: result.message ?? 'Aussprache nicht verfügbar.',
+      type: TalvoriSnackBarType.warning,
     );
   }
 
@@ -547,50 +550,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               switch (res) {
                                                 case TagesimpulsSelectionAddResult
                                                     .ok:
-                                                  ScaffoldMessenger.of(
+                                                  TalvoriSnackBar.show(
                                                     context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
+                                                    message:
                                                         'Wort wurde zum Tagesimpuls hinzugefügt.',
-                                                      ),
-                                                    ),
+                                                    type: TalvoriSnackBarType
+                                                        .success,
                                                   );
                                                   break;
                                                 case TagesimpulsSelectionAddResult
                                                     .duplicate:
-                                                  ScaffoldMessenger.of(
+                                                  TalvoriSnackBar.show(
                                                     context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
+                                                    message:
                                                         'Wort ist bereits im Tagesimpuls.',
-                                                      ),
-                                                    ),
+                                                    type: TalvoriSnackBarType
+                                                        .warning,
                                                   );
                                                   break;
                                                 case TagesimpulsSelectionAddResult
                                                     .full:
-                                                  ScaffoldMessenger.of(
+                                                  TalvoriSnackBar.show(
                                                     context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
+                                                    message:
                                                         'Tagesimpuls ist voll.',
-                                                      ),
-                                                    ),
+                                                    type: TalvoriSnackBarType
+                                                        .warning,
                                                   );
                                                   break;
                                                 case TagesimpulsSelectionAddResult
                                                     .invalid:
-                                                  ScaffoldMessenger.of(
+                                                  TalvoriSnackBar.show(
                                                     context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        'Ungültiges Wort',
-                                                      ),
-                                                    ),
+                                                    message: 'Ungültiges Wort',
+                                                    type: TalvoriSnackBarType
+                                                        .error,
                                                   );
                                                   break;
                                               }

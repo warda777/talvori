@@ -447,7 +447,7 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.bored,
+      TalvoriMascotAssets.idle,
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -477,7 +477,7 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.bored,
+      TalvoriMascotAssets.idle,
     );
   });
 

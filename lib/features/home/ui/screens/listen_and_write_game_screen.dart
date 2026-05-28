@@ -6,6 +6,7 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
 import 'package:talvori/features/home/ui/widgets/game_word_source_picker.dart';
 
@@ -214,26 +215,12 @@ class _ListenAndWriteGameScreenState
         .read(wordPronunciationServiceProvider)
         .speakWord(word.term, languageCode: word.sourceLanguage);
     if (!mounted || result.isSuccess) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          backgroundColor: const Color(0xFF061018),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0xFFFF7AB6), width: 1.1),
-          ),
-          content: Text(
-            result.message ?? 'Aussprache konnte nicht gestartet werden.',
-            style: const TextStyle(
-              color: Color(0xFFF4F8FF),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      );
+    TalvoriSnackBar.show(
+      context,
+      message: result.message ?? 'Aussprache konnte nicht gestartet werden.',
+      type: TalvoriSnackBarType.warning,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+    );
   }
 
   void _checkAnswer(LocalWord word) {

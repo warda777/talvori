@@ -19,6 +19,7 @@ import 'package:talvori/core/local_database/providers/local_word_count_provider.
 import 'package:talvori/core/local_database/providers/local_word_review_history_provider.dart';
 import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_debug_local_button_presenter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_category_adapter.dart';
 import 'package:talvori/core/local_database/adapters/category_detail_local_start_path.dart';
@@ -509,9 +510,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               );
             },
             onAdd: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Add tapped')));
+              TalvoriSnackBar.show(context, message: 'Add tapped');
             },
             onSettings: () {
               showDialog(
@@ -630,10 +629,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 titleOffsetY: 0,
                 onStartPressed: () async {
                   if (currentId.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Kategorie konnte nicht geladen werden'),
-                      ),
+                    TalvoriSnackBar.show(
+                      context,
+                      message: 'Kategorie konnte nicht geladen werden',
+                      type: TalvoriSnackBarType.warning,
                     );
                     return;
                   }
@@ -708,8 +707,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                   } catch (e) {
                     if (!context.mounted) return;
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fehler beim Starten: $e')),
+                      TalvoriSnackBar.show(
+                        context,
+                        message: 'Fehler beim Starten: $e',
+                        type: TalvoriSnackBarType.error,
                       );
                     }
                   }
@@ -945,8 +946,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         localVocabsCount ?? fallbackLocalVocabsCountAsync.valueOrNull ?? 0;
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+        TalvoriSnackBar.show(
+          context,
+          message: 'Noch nicht lokal verfügbar',
+          type: TalvoriSnackBarType.warning,
         );
         return;
       }
@@ -980,8 +983,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
     Future<void> resetLocalProgress() async {
       if (selectedCategoryId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+        TalvoriSnackBar.show(
+          context,
+          message: 'Noch nicht lokal verfügbar',
+          type: TalvoriSnackBarType.warning,
         );
         return;
       }
@@ -1029,15 +1034,19 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       ref.invalidate(localWordDetailProvider);
       ref.invalidate(localWordReviewHistoryProvider);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lernfortschritt wurde zurückgesetzt')),
+      TalvoriSnackBar.show(
+        context,
+        message: 'Lernfortschritt wurde zurückgesetzt',
+        type: TalvoriSnackBarType.success,
       );
     }
 
     Future<void> openStageInspector(int stageIndex) async {
       if (selectedCategoryId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+        TalvoriSnackBar.show(
+          context,
+          message: 'Noch nicht lokal verfügbar',
+          type: TalvoriSnackBarType.warning,
         );
         return;
       }
@@ -1075,8 +1084,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               onBack: () => Navigator.of(context).pop(),
               onVocabs: () {
                 if (selectedCategoryId.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Noch nicht lokal verfügbar')),
+                  TalvoriSnackBar.show(
+                    context,
+                    message: 'Noch nicht lokal verfügbar',
+                    type: TalvoriSnackBarType.warning,
                   );
                   return;
                 }
@@ -1091,17 +1102,15 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 );
               },
               onAdd: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Lokales Hinzufügen noch nicht angebunden'),
-                  ),
+                TalvoriSnackBar.show(
+                  context,
+                  message: 'Lokales Hinzufügen noch nicht angebunden',
                 );
               },
               onSettings: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Lokale Einstellungen noch nicht angebunden'),
-                  ),
+                TalvoriSnackBar.show(
+                  context,
+                  message: 'Lokale Einstellungen noch nicht angebunden',
                 );
               },
               wheelOffsetX: WordsLayout.wheelOffsetX,
@@ -1158,15 +1167,16 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 ref.read(selectingSingleProvider.notifier).state =
                     mode == LevelSelectionMode.single;
                 if (mode == LevelSelectionMode.s1toS5) {
-                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Alle Stufen aktiviert')),
+                  TalvoriSnackBar.show(
+                    context,
+                    message: 'Alle Stufen aktiviert',
+                    type: TalvoriSnackBarType.success,
                   );
                   _pulseAllPracticeStages();
                 } else if (mode == LevelSelectionMode.single) {
-                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Wähle eine Stufe aus')),
+                  TalvoriSnackBar.show(
+                    context,
+                    message: 'Wähle eine Stufe aus',
                   );
                   _startSingleStagePracticePulse();
                 } else {
@@ -1197,9 +1207,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 ref.read(singleStageProvider.notifier).state = stage;
                 ref.read(selectingSingleProvider.notifier).state = false;
                 _pulsePracticeStage(stage);
-                ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Drücke Start, um zu beginnen')),
+                TalvoriSnackBar.show(
+                  context,
+                  message: 'Drücke Start, um zu beginnen',
                 );
               },
               learnedInStage5: 0,

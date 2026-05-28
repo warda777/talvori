@@ -7,6 +7,7 @@ import 'package:talvori/core/local_database/models/translation_status.dart';
 import 'package:talvori/core/local_database/providers/local_translation_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
@@ -213,21 +214,21 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
       if (!mounted) return;
 
       ref.invalidate(localWordsForCategoryProvider(widget.categoryId));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result.failed > 0
-                ? 'Übersetzungen verarbeitet: ${result.translated} erfolgreich, ${result.failed} fehlgeschlagen.'
-                : 'Übersetzungen verarbeitet: ${result.translated} erfolgreich.',
-          ),
-        ),
+      TalvoriSnackBar.show(
+        context,
+        message: result.failed > 0
+            ? 'Übersetzungen verarbeitet: ${result.translated} erfolgreich, ${result.failed} fehlgeschlagen.'
+            : 'Übersetzungen verarbeitet: ${result.translated} erfolgreich.',
+        type: result.failed > 0
+            ? TalvoriSnackBarType.warning
+            : TalvoriSnackBarType.success,
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Übersetzungen konnten nicht verarbeitet werden.'),
-        ),
+      TalvoriSnackBar.show(
+        context,
+        message: 'Übersetzungen konnten nicht verarbeitet werden.',
+        type: TalvoriSnackBarType.error,
       );
     } finally {
       if (mounted) {
@@ -537,8 +538,10 @@ class _LocalWordCard extends ConsumerWidget {
         .read(wordPronunciationServiceProvider)
         .speakWord(word.term, languageCode: word.sourceLanguage);
     if (!context.mounted || result.isSuccess) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.message ?? 'Aussprache nicht verfügbar.')),
+    TalvoriSnackBar.show(
+      context,
+      message: result.message ?? 'Aussprache nicht verfügbar.',
+      type: TalvoriSnackBarType.warning,
     );
   }
 }

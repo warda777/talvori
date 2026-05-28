@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/providers/local_category_detail_group_items_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
+import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
@@ -77,11 +80,13 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Impuls-Postfach',
+                'Talvori Chat',
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
               Text(
-                'Chats mit Talvori',
+                'Dein Ort für Tali, Wortwelten und fokussierte Lernchats.',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Color(0xFF7D8BA3),
                   fontSize: 12,
@@ -649,49 +654,13 @@ class _ImpulsPostfachScreenState extends ConsumerState<ImpulsPostfachScreen> {
     String message, {
     IconData icon = Icons.check_rounded,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        key: const Key('impulse_toast'),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-        backgroundColor: const Color(0xFF08111B),
-        margin: const EdgeInsets.fromLTRB(18, 0, 18, 104),
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0x8859D7FF)),
-        ),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x662DE2D1),
-                blurRadius: 22,
-                offset: Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF7FFFE7), size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    TalvoriSnackBar.show(
+      context,
+      key: const Key('impulse_toast'),
+      message: message,
+      type: TalvoriSnackBarType.success,
+      icon: icon,
+      margin: const EdgeInsets.fromLTRB(18, 0, 18, 104),
     );
   }
 
@@ -2295,6 +2264,7 @@ class _ChatAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = chat.avatarImagePath?.trim();
+    final isCompanion = chat.id == CompanionChatConstants.chatId;
     final icon = switch (chat.sourceType) {
       ImpulseChatSourceType.dailyImpulse => Icons.auto_awesome_rounded,
       ImpulseChatSourceType.category => Icons.bubble_chart_rounded,
@@ -2309,6 +2279,7 @@ class _ChatAvatar extends StatelessWidget {
       _ => const Color(0xFF59D7FF),
     };
     return Container(
+      key: Key('impulse_chat_avatar_${chat.id}'),
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -2320,7 +2291,16 @@ class _ChatAvatar extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: path != null && path.isNotEmpty
+      child: isCompanion
+          ? Padding(
+              padding: EdgeInsets.all(size * 0.08),
+              child: Image.asset(
+                TalvoriMascotAssets.idle,
+                key: const Key('impulse_chat_companion_avatar_image'),
+                fit: BoxFit.contain,
+              ),
+            )
+          : path != null && path.isNotEmpty
           ? Image.file(
               File(path),
               fit: BoxFit.cover,

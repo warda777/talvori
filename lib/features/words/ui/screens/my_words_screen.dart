@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/ui/widgets/empty_state.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
@@ -37,7 +38,9 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
               decoration: InputDecoration(
                 hintText: 'Suchen in „Meine Wörter“',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -54,10 +57,13 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
                               EmptyState(
                                 icon: Icons.bookmark_add_outlined,
                                 title: 'Noch keine Wörter gemerkt',
-                                message: 'Markiere Wörter im Word Hub oder in Kategorien, um sie hier zu sehen.',
+                                message:
+                                    'Markiere Wörter im Word Hub oder in Kategorien, um sie hier zu sehen.',
                                 cta: 'Zum Word Hub',
                                 onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const WordHubScreen()),
+                                  MaterialPageRoute(
+                                    builder: (_) => const WordHubScreen(),
+                                  ),
                                 ),
                               ),
                             ],
@@ -69,13 +75,18 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
                             },
                             child: ListView.separated(
                               padding: const EdgeInsets.all(16),
-                              itemCount: vm.items.length + ((vm.loadingMore || vm.hasMore) ? 1 : 0),
-                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              itemCount:
+                                  vm.items.length +
+                                  ((vm.loadingMore || vm.hasMore) ? 1 : 0),
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
                               itemBuilder: (context, i) {
                                 if (i >= vm.items.length) {
                                   return const Padding(
                                     padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(child: CircularProgressIndicator()),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   );
                                 }
                                 final w = vm.items[i];
@@ -83,12 +94,18 @@ class _MyWordsScreenState extends ConsumerState<MyWordsScreen> {
                                   title: Text(w.text),
                                   subtitle: Text(w.translation),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                    ),
                                     tooltip: 'Aus „Meine Wörter" entfernen',
                                     onPressed: () async {
-                                      final messenger = ScaffoldMessenger.of(context);
                                       await c.removeWord(w.id);
-                                      messenger.showSnackBar(SnackBar(content: Text('Entfernt: ${w.text}')));
+                                      if (!context.mounted) return;
+                                      TalvoriSnackBar.show(
+                                        context,
+                                        message: 'Entfernt: ${w.text}',
+                                        type: TalvoriSnackBarType.success,
+                                      );
                                     },
                                   ),
                                 );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/domain/word.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/widgets/word_list_toolbar.dart';
@@ -40,16 +41,15 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
 
     // Re-Online Snackbar - FIX: listenManual statt listen
     _controllerSub = ref.listenManual<WordListState>(
-      wordListControllerProvider(_provKey), 
+      wordListControllerProvider(_provKey),
       (prev, next) {
         if ((prev?.offline ?? false) && !next.offline) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Wieder online'),
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-            ),
+          TalvoriSnackBar.show(
+            context,
+            message: 'Wieder online',
+            type: TalvoriSnackBarType.success,
+            duration: const Duration(seconds: 2),
           );
         }
       },
@@ -61,7 +61,10 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
       if (s.isFirstLoad && s.words.isEmpty) {
         ref
             .read(wordListControllerProvider(_provKey).notifier)
-            .init(filter: widget.filter, overrideCategoryId: widget.overrideCategoryId);
+            .init(
+              filter: widget.filter,
+              overrideCategoryId: widget.overrideCategoryId,
+            );
       }
     });
   }
@@ -117,32 +120,38 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
             child: state.words.isEmpty && state.isFirstLoad
                 ? const ShimmerList(items: 10)
                 : state.error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Fehler: ${state.error}', textAlign: TextAlign.center),
-                            const SizedBox(height: 12),
-                            FilledButton(
-                              onPressed: () => ctrl.loadFirstPage(),
-                              child: const Text('Erneut versuchen'),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Fehler: ${state.error}',
+                          textAlign: TextAlign.center,
                         ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () => ctrl.loadFirstPage(resetCache: true),
-                        child: _buildList(context, list, state, ctrl),
-                      ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: () => ctrl.loadFirstPage(),
+                          child: const Text('Erneut versuchen'),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => ctrl.loadFirstPage(resetCache: true),
+                    child: _buildList(context, list, state, ctrl),
+                  ),
           ),
         ],
       ),
     );
   }
 
-
-  Widget _buildList(BuildContext context, List<Word> list, WordListState state,
-      WordListController ctrl) {
+  Widget _buildList(
+    BuildContext context,
+    List<Word> list,
+    WordListState state,
+    WordListController ctrl,
+  ) {
     if (list.isEmpty) {
       return Center(
         child: Column(
@@ -156,8 +165,10 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
                 ctrl.setQuery('');
                 await ctrl.loadFirstPage();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Filter zurückgesetzt')),
+                  TalvoriSnackBar.show(
+                    context,
+                    message: 'Filter zurückgesetzt',
+                    type: TalvoriSnackBarType.success,
                   );
                 }
               },
@@ -189,7 +200,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
           onTogglePick: () async {
             final msg = await ctrl.togglePick(context, w);
             if (context.mounted && msg != null) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+              TalvoriSnackBar.show(context, message: msg);
             }
           },
           onTap: () {},

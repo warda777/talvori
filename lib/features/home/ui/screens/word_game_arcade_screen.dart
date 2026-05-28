@@ -11,6 +11,7 @@ import 'package:talvori/core/local_database/providers/local_categories_provider.
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/word_game_ai_provider.dart';
 import 'package:talvori/features/home/application/word_game_language_pair.dart';
 import 'package:talvori/features/home/application/word_game_progress_controller.dart';
@@ -386,11 +387,11 @@ class _WordGameArcadeScreenState extends ConsumerState<WordGameArcadeScreen> {
         .read(wordPronunciationServiceProvider)
         .speakWord(item.term, languageCode: item.sourceLanguage);
     if (!mounted || result.isSuccess) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Anhören ist gerade nicht verfügbar.')),
-      );
+    TalvoriSnackBar.show(
+      context,
+      message: 'Anhören ist gerade nicht verfügbar.',
+      type: TalvoriSnackBarType.warning,
+    );
   }
 
   void _selectPart(String part) {

@@ -66,7 +66,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Impuls-Postfach'), findsOneWidget);
+    expect(find.text('Talvori Chat'), findsOneWidget);
+    expect(
+      find.text('Dein Ort für Tali, Wortwelten und fokussierte Lernchats.'),
+      findsOneWidget,
+    );
     expect(find.text('1 Verlauf'), findsOneWidget);
     expect(
       find.descendant(
@@ -98,7 +102,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Impuls-Postfach'), findsOneWidget);
+    expect(find.text('Talvori Chat'), findsOneWidget);
     expect(find.text('Noch keine Chats'), findsOneWidget);
     expect(
       find.text(
@@ -108,7 +112,7 @@ void main() {
     );
   });
 
-  testWidgets('chat list shows Talvori Companion thread when messages exist', (
+  testWidgets('chat list shows Tali thread when messages exist', (
     tester,
   ) async {
     final repository = SharedPreferencesImpulseInboxRepository(
@@ -155,6 +159,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(CompanionChatConstants.title), findsOneWidget);
+    expect(find.text('Tali'), findsOneWidget);
+    expect(
+      find.byKey(const Key('impulse_chat_companion_avatar_image')),
+      findsOneWidget,
+    );
     expect(find.text('Ich bin da.'), findsOneWidget);
 
     await tester.tap(
@@ -164,6 +173,10 @@ void main() {
 
     expect(find.byType(ImpulseChatDetailScreen), findsOneWidget);
     expect(find.text(CompanionChatConstants.title), findsWidgets);
+    expect(
+      find.byKey(const Key('impulse_chat_detail_companion_avatar_image')),
+      findsOneWidget,
+    );
     expect(find.text('Hallo Talvori'), findsOneWidget);
     expect(find.text('Ich bin da.'), findsOneWidget);
   });
@@ -1004,12 +1017,12 @@ void main() {
     for (final tab in ['Du', 'Gespeichert', 'Kategorien']) {
       await tester.tap(find.text(tab).last);
       await tester.pumpAndSettle();
-      expect(find.text('Impuls-Postfach'), findsOneWidget);
+      expect(find.text('Talvori Chat'), findsOneWidget);
 
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(find.text('Impuls-Postfach'), findsOneWidget);
+      expect(find.text('Talvori Chat'), findsOneWidget);
       expect(find.byKey(const Key('impulse_inbox_chat_list')), findsNothing);
       expect(find.text('Noch keine Chats'), findsOneWidget);
     }
@@ -3244,7 +3257,7 @@ void main() {
 
     expect(find.byType(ImpulseChatDetailScreen), findsNothing);
     expect(find.byType(ImpulsPostfachScreen), findsOneWidget);
-    expect(find.text('Impuls-Postfach'), findsOneWidget);
+    expect(find.text('Talvori Chat'), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();

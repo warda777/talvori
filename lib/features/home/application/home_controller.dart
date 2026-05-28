@@ -9,6 +9,7 @@ import 'package:talvori/core/local_database/providers/local_word_count_provider.
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
+import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/home_state.dart';
 import 'package:talvori/features/home/data/share_ingest_service.dart';
 import 'package:talvori/features/words/data/last_shared_word_provider.dart';
@@ -53,21 +54,21 @@ class HomeController extends Notifier<HomeState> with WidgetsBindingObserver {
         onIncomingText: (text) async {
           await _importSharedTextLocally(text);
           if (context.mounted) {
-            ScaffoldMessenger.of(
+            TalvoriSnackBar.show(
               context,
-            ).showSnackBar(const SnackBar(content: Text('Inhalt erfasst')));
+              message: 'Inhalt erfasst',
+              type: TalvoriSnackBarType.success,
+            );
           }
         },
         onSavedUrl: ({required bool isPdf}) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  isPdf
-                      ? 'PDF-Position gespeichert'
-                      : 'Seitenposition gespeichert',
-                ),
-              ),
+            TalvoriSnackBar.show(
+              context,
+              message: isPdf
+                  ? 'PDF-Position gespeichert'
+                  : 'Seitenposition gespeichert',
+              type: TalvoriSnackBarType.success,
             );
           }
         },
