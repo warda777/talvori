@@ -13,6 +13,11 @@ class HeaderBar extends ConsumerWidget {
 
   // ⬇️ NEU: Custom Back-Button-Handler
   final VoidCallback? onBack;
+  final Color? activeStrokeColor;
+  final Color? activeFillColor;
+  final Color? activeTextColor;
+  final Color? wheelEdgeFadeColor;
+  final bool showWheelEdgeFade;
 
   const HeaderBar({
     super.key,
@@ -20,6 +25,11 @@ class HeaderBar extends ConsumerWidget {
     this.customWheelInitialIndex,
     this.customOnWheelChanged,
     this.onBack,
+    this.activeStrokeColor,
+    this.activeFillColor,
+    this.activeTextColor,
+    this.wheelEdgeFadeColor,
+    this.showWheelEdgeFade = true,
   });
 
   @override
@@ -79,6 +89,11 @@ class HeaderBar extends ConsumerWidget {
                                 // Kategorie umschalten → macht Controller (lädt Stages + Queue)
                                 await c!.selectCategoryIndex(idx);
                               },
+                        activeStrokeColor: activeStrokeColor,
+                        activeFillColor: activeFillColor,
+                        activeTextColor: activeTextColor,
+                        edgeFadeColor: wheelEdgeFadeColor,
+                        showEdgeFade: showWheelEdgeFade,
                       ),
               ),
             ),

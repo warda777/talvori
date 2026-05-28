@@ -20,6 +20,7 @@ class VerticalStageSwitch extends StatelessWidget {
   final Color? pulseColor;
   final bool selectedHighlight; // NEU: für Single-Modus Hervorhebung
   final Color? innerStrokeColor; // NEU: injizierbarer Stroke der inneren Kapsel
+  final Color? countColor;
   final Widget Function(Widget knob)?
   knobWrapper; // optionaler Wrapper nur um den Knopf
   final bool isLocked; // ← NEU: nur für Opacity (Switch ausgrauen)
@@ -49,6 +50,7 @@ class VerticalStageSwitch extends StatelessWidget {
     this.pulseColor,
     this.selectedHighlight = false, // NEU: für Single-Modus Hervorhebung
     this.innerStrokeColor,
+    this.countColor,
     this.knobWrapper,
     this.isLocked = false, // ← NEU (Default)
     this.learnedCount,
@@ -203,12 +205,18 @@ class VerticalStageSwitch extends StatelessWidget {
                                         size: 32,
                                         color: Colors.white,
                                       )
-                                    : Text(
-                                        '$count',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                    : FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          '$count',
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: countColor ?? Colors.white,
+                                            height: 1.0,
+                                          ),
                                         ),
                                       ),
                               );
@@ -271,12 +279,18 @@ class VerticalStageSwitch extends StatelessWidget {
                                       size: 32,
                                       color: Colors.white,
                                     )
-                                  : Text(
-                                      '$count',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                  : FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '$count',
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: countColor ?? Colors.white,
+                                          height: 1.0,
+                                        ),
                                       ),
                                     ),
                             );

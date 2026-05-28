@@ -32,12 +32,22 @@ class CategoryWheel extends StatefulWidget {
   final List<String> categories;
   final int initialIndex;
   final void Function(int index, String label) onChanged;
+  final Color? activeStrokeColor;
+  final Color? activeFillColor;
+  final Color? activeTextColor;
+  final Color? edgeFadeColor;
+  final bool showEdgeFade;
 
   const CategoryWheel({
     super.key,
     required this.categories,
     required this.initialIndex,
     required this.onChanged,
+    this.activeStrokeColor,
+    this.activeFillColor,
+    this.activeTextColor,
+    this.edgeFadeColor,
+    this.showEdgeFade = true,
   });
 
   @override
@@ -142,52 +152,29 @@ class _CategoryWheelState extends State<CategoryWheel>
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          _EdgeFade(
-            fadeHeight: kWheelEdgeFadeHeight,
-            child: ListWheelScrollView.useDelegate(
-              controller: _ctrl,
-              itemExtent: kWheelItemExtent,
-              physics: const FixedExtentScrollPhysics(),
-              onSelectedItemChanged: _onChanged,
-              diameterRatio: 2.2,
-              perspective: 0.002,
-              overAndUnderCenterOpacity: 1,
-              childDelegate: ListWheelChildBuilderDelegate(
-                childCount: cats.length,
-                builder: (context, index) {
-                  final dist = (index - _current).abs();
-
-                  final opacity = dist == 0
-                      ? kWheelActiveOpacity
-                      : (dist == 1 ? kWheelNeighborOpacity : kWheelFarOpacity);
-
-                  final scale = dist == 0
-                      ? kWheelActiveScale
-                      : (dist == 1 ? kWheelNeighborScale : kWheelFarScale);
-
-                  return Center(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 120),
-                      opacity: opacity,
-                      child: Transform.scale(
-                        scale: scale,
-                        child: _AdaptivePill(
-                          text: cats[index],
-                          width: kWheelPillWidth,
-                          height: kWheelItemExtent - 6,
-                          radius: kWheelPillRadius,
-                          active: dist == 0,
-                          strokeColor: CategoryStrokeColors.getWheelStrokeColor(
-                            cats[index],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+          (widget.showEdgeFade
+              ? _EdgeFade(
+                  fadeHeight: kWheelEdgeFadeHeight,
+                  fadeColor: widget.edgeFadeColor,
+                  child: _CategoryWheelScrollView(
+                    controller: _ctrl,
+                    cats: cats,
+                    current: _current,
+                    activeStrokeColor: widget.activeStrokeColor,
+                    activeFillColor: widget.activeFillColor,
+                    activeTextColor: widget.activeTextColor,
+                    onChanged: _onChanged,
+                  ),
+                )
+              : _CategoryWheelScrollView(
+                  controller: _ctrl,
+                  cats: cats,
+                  current: _current,
+                  activeStrokeColor: widget.activeStrokeColor,
+                  activeFillColor: widget.activeFillColor,
+                  activeTextColor: widget.activeTextColor,
+                  onChanged: _onChanged,
+                )),
 
           // rechte Pfeile + Counter dazwischen
           Positioned.fill(
@@ -240,6 +227,77 @@ class _CategoryWheelState extends State<CategoryWheel>
   }
 }
 
+class _CategoryWheelScrollView extends StatelessWidget {
+  const _CategoryWheelScrollView({
+    required this.controller,
+    required this.cats,
+    required this.current,
+    required this.activeStrokeColor,
+    required this.activeFillColor,
+    required this.activeTextColor,
+    required this.onChanged,
+  });
+
+  final FixedExtentScrollController controller;
+  final List<String> cats;
+  final int current;
+  final Color? activeStrokeColor;
+  final Color? activeFillColor;
+  final Color? activeTextColor;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListWheelScrollView.useDelegate(
+      controller: controller,
+      itemExtent: kWheelItemExtent,
+      physics: const FixedExtentScrollPhysics(),
+      onSelectedItemChanged: onChanged,
+      diameterRatio: 2.2,
+      perspective: 0.002,
+      overAndUnderCenterOpacity: 1,
+      childDelegate: ListWheelChildBuilderDelegate(
+        childCount: cats.length,
+        builder: (context, index) {
+          final dist = (index - current).abs();
+
+          final opacity = dist == 0
+              ? kWheelActiveOpacity
+              : (dist == 1 ? kWheelNeighborOpacity : kWheelFarOpacity);
+
+          final scale = dist == 0
+              ? kWheelActiveScale
+              : (dist == 1 ? kWheelNeighborScale : kWheelFarScale);
+
+          final strokeColor = dist == 0 && activeStrokeColor != null
+              ? activeStrokeColor!
+              : CategoryStrokeColors.getWheelStrokeColor(cats[index]);
+
+          return Center(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 120),
+              opacity: opacity,
+              child: Transform.scale(
+                scale: scale,
+                child: _AdaptivePill(
+                  text: cats[index],
+                  width: kWheelPillWidth,
+                  height: kWheelItemExtent - 6,
+                  radius: kWheelPillRadius,
+                  active: dist == 0,
+                  strokeColor: strokeColor,
+                  fillColor: dist == 0 ? activeFillColor : null,
+                  textColor: dist == 0 ? activeTextColor : null,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _AdaptivePill extends StatelessWidget {
   final String text;
   final double width;
@@ -247,6 +305,8 @@ class _AdaptivePill extends StatelessWidget {
   final double radius;
   final bool active;
   final Color strokeColor;
+  final Color? fillColor;
+  final Color? textColor;
 
   const _AdaptivePill({
     required this.text,
@@ -255,6 +315,8 @@ class _AdaptivePill extends StatelessWidget {
     required this.radius,
     required this.active,
     required this.strokeColor,
+    this.fillColor,
+    this.textColor,
   });
 
   @override
@@ -263,7 +325,7 @@ class _AdaptivePill extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF2D2C2C),
+        color: fillColor ?? const Color(0xFF2D2C2C),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: strokeColor, width: 1.5),
         boxShadow: active && kWheelGlowBlur > 0
@@ -284,7 +346,7 @@ class _AdaptivePill extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.visible,
             style: TextStyle(
-              color: Colors.white,
+              color: textColor ?? Colors.white,
               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               fontSize: 15,
               letterSpacing: 0.2,
@@ -298,8 +360,13 @@ class _AdaptivePill extends StatelessWidget {
 
 class _EdgeFade extends StatelessWidget {
   final double fadeHeight;
+  final Color? fadeColor;
   final Widget child;
-  const _EdgeFade({required this.fadeHeight, required this.child});
+  const _EdgeFade({
+    required this.fadeHeight,
+    required this.child,
+    this.fadeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -318,21 +385,16 @@ class _EdgeFade extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.7),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.4),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.1),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.0),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.95),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.7),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.4),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.1),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
                 ),
@@ -352,21 +414,16 @@ class _EdgeFade extends StatelessWidget {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.7),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.4),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.1),
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.0),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.95),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.7),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.4),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.1),
+                    (fadeColor ?? Theme.of(context).scaffoldBackgroundColor)
+                        .withValues(alpha: 0.0),
                   ],
                   stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
                 ),

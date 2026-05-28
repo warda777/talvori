@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
 import 'package:talvori/core/local_database/models/local_practice_card.dart';
@@ -22,6 +23,7 @@ import 'package:talvori/features/favorites/data/local_favorites_repository.dart'
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/tagesimpuls/data/tagesimpuls_selection_repository.dart';
 import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.dart';
+import 'package:talvori/features/words/application/category_design_preferences.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/plasma_link_painter.dart';
@@ -202,6 +204,10 @@ void _expectNoActiveSwitchPulse(WidgetTester tester) {
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('learn_mode_screen_local_mode_opens_without_starting_old_flow', (
     tester,
   ) async {
@@ -312,6 +318,139 @@ void main() {
     await tester.pump();
 
     expect(pronunciation.spokenWord, 'hello');
+  });
+
+  testWidgets('learn_mode_screen_local_mode_applies_saved_design_overrides', (
+    tester,
+  ) async {
+    await const CategoryDesignPreferencesRepository().save(
+      'basics',
+      const CategoryDesignPreferences(
+        overrides: {
+          CategoryDesignElement.learnWordText: CategoryDesignElementStyle(
+            color: Color(0xFF00E5FF),
+          ),
+          CategoryDesignElement.audioButton: CategoryDesignElementStyle(
+            color: Color(0xFFFFB000),
+          ),
+          CategoryDesignElement.audioButtonFill: CategoryDesignElementStyle(
+            color: Color(0xFF172033),
+          ),
+          CategoryDesignElement.audioButtonIcon: CategoryDesignElementStyle(
+            color: Color(0xFF19FFD8),
+          ),
+          CategoryDesignElement.levelBadge: CategoryDesignElementStyle(
+            color: Color(0xFF7C4DFF),
+          ),
+          CategoryDesignElement.levelBadgeFill: CategoryDesignElementStyle(
+            color: Color(0xFF1D1A4D),
+          ),
+          CategoryDesignElement.levelBadgeText: CategoryDesignElementStyle(
+            color: Color(0xFFFFF48A),
+          ),
+          CategoryDesignElement.favoriteButton: CategoryDesignElementStyle(
+            color: Color(0xFFFF5EA8),
+          ),
+          CategoryDesignElement.favoriteButtonFill: CategoryDesignElementStyle(
+            color: Color(0xFF261126),
+          ),
+          CategoryDesignElement.favoriteButtonIcon: CategoryDesignElementStyle(
+            color: Color(0xFFFFD1EA),
+          ),
+          CategoryDesignElement.knownButton: CategoryDesignElementStyle(
+            color: Color(0xFF63F58F),
+          ),
+          CategoryDesignElement.knownButtonFill: CategoryDesignElementStyle(
+            color: Color(0xFF10291A),
+          ),
+          CategoryDesignElement.knownButtonIcon: CategoryDesignElementStyle(
+            color: Color(0xFFBEFFD0),
+          ),
+          CategoryDesignElement.learnCardBorder: CategoryDesignElementStyle(
+            color: Color(0xFF2E7DFF),
+          ),
+          CategoryDesignElement.learnCardGlow: CategoryDesignElementStyle(
+            color: Color(0xFFFFB000),
+            glow: CategoryDesignGlowStrength.strong,
+            pulse: CategoryDesignPulseStrength.off,
+          ),
+        },
+      ),
+    );
+    const viewModelState = LocalLearningViewModelState(
+      isLoading: false,
+      hasSession: true,
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      currentWordId: 'word-1',
+      term: 'hello',
+      translation: 'hallo',
+      currentStage: SrsStage.s0,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      stageCounts: [3, 0, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      lastAction: LocalLearningControllerAction.none,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningViewModelProvider.overrideWithValue(viewModelState),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
+    final card = tester.widget<SwipeableWordCard>(
+      find.byType(SwipeableWordCard),
+    );
+    expect(card.wordTextColor, const Color(0xFF00E5FF));
+    expect(card.audioAccentColor, const Color(0xFFFFB000));
+    expect(card.audioFillColor, const Color(0xFF172033));
+    expect(card.audioIconColor, const Color(0xFF19FFD8));
+    expect(card.levelBadgeColor, const Color(0xFF7C4DFF));
+    expect(card.levelBadgeFillColor, const Color(0xFF1D1A4D));
+    expect(card.levelBadgeTextColor, const Color(0xFFFFF48A));
+    expect(card.cardBorderColor, const Color(0xFF2E7DFF));
+    expect(card.cardGlowColor, const Color(0xFFFFB000));
+    expect(card.cardGlowIntensity, greaterThan(1));
+    expect(card.cardPulseSpeed, 0);
+    expect(card.pulseEnabled, isFalse);
+
+    final favorite =
+        tester.widget(
+              find.byKey(
+                const ValueKey('local-learn-mode-favorite-add-button'),
+              ),
+            )
+            as dynamic;
+    expect(favorite.borderColor, const Color(0xFFFF5EA8));
+    expect(favorite.fillColor, const Color(0xFF261126));
+    expect(favorite.iconColor, const Color(0xFFFFD1EA));
+    final known =
+        tester.widget(
+              find.byKey(
+                const ValueKey('local-learn-mode-tagesimpuls-add-button'),
+              ),
+            )
+            as dynamic;
+    expect(known.borderColor, const Color(0xFF63F58F));
+    expect(known.fillColor, const Color(0xFF10291A));
+    expect(known.iconColor, const Color(0xFFBEFFD0));
   });
 
   testWidgets('learn_mode_screen_local_mode_shows_tagesimpuls_add_button', (

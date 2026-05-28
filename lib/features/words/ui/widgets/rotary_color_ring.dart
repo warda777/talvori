@@ -66,7 +66,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   late final AnimationController _momentum;
   Animation<double>? _fling;
-  
+
   // 🔴 Animation für Welle über Farbkeile
   late final AnimationController _waveController;
   late final Animation<double> _waveAnimation;
@@ -78,26 +78,27 @@ class RotaryColorRingState extends State<RotaryColorRing>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     // Welle-Animation: einmal um den Kreis in 2 Sekunden
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     );
-    _waveAnimation = Tween<double>(begin: 0.0, end: 2 * math.pi).animate(
-      CurvedAnimation(parent: _waveController, curve: Curves.linear),
-    );
-    
+    _waveAnimation = Tween<double>(
+      begin: 0.0,
+      end: 2 * math.pi,
+    ).animate(CurvedAnimation(parent: _waveController, curve: Curves.linear));
+
     // Welle starten wenn gelockt, stoppen wenn nicht gelockt
     if (widget.isLocked) {
       _waveController.repeat();
     }
   }
-  
+
   @override
   void didUpdateWidget(RotaryColorRing oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // State zurücksetzen, wenn sich isLocked ändert (Fokuswechsel)
     if (widget.isLocked != oldWidget.isLocked) {
       setState(() {
@@ -106,7 +107,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
         _dragColor = null;
       });
     }
-    
+
     // Welle starten/stoppen basierend auf isLocked
     if (widget.isLocked && !oldWidget.isLocked) {
       // Nur starten wenn nicht gerade gepickt wird
@@ -127,13 +128,15 @@ class RotaryColorRingState extends State<RotaryColorRing>
   }
 
   static const List<
-      ({
-        double saturation,
-        double lightness,
-        double satJitter,
-        double lightJitter,
-        double hueOffset,
-      })> _paletteModes = [
+    ({
+      double saturation,
+      double lightness,
+      double satJitter,
+      double lightJitter,
+      double hueOffset,
+    })
+  >
+  _paletteModes = [
     (
       saturation: .92,
       lightness: .52,
@@ -205,7 +208,9 @@ class RotaryColorRingState extends State<RotaryColorRing>
     [
       const Color(0xFF0D1E4C), // sehr dunkles Marineblau
       const Color(0xFFC48CB3), // gedämpftes, staubiges Rosen/Mauve-Pink
-      const Color(0xFFFFE5E5), // sehr helles, blasses Pink (korrigiert von #E5C907)
+      const Color(
+        0xFFFFE5E5,
+      ), // sehr helles, blasses Pink (korrigiert von #E5C907)
       const Color(0xFF83A6CE), // mittleres, etwas entsättigtes Himmelblau
       const Color(0xFF26415E), // dunkles Schieferblau
       const Color(0xFF0B1B32), // sehr dunkles Marineblau
@@ -223,8 +228,12 @@ class RotaryColorRingState extends State<RotaryColorRing>
       const Color(0xFF190019), // sehr dunkles, tiefes Lila-Schwarz
       const Color(0xFF2B124C), // dunkles, gedämpftes Indigo/tiefes Pflaume
       const Color(0xFF522B5B), // mittel-dunkles, entsättigtes Lila-Grau/Taupe
-      const Color(0xFF854F6C), // mittleres, entsättigtes rosig-braun/warmes Grau
-      const Color(0xFFDFB6B2), // helles, entsättigtes Lavendel-Grau/blasses Taupe
+      const Color(
+        0xFF854F6C,
+      ), // mittleres, entsättigtes rosig-braun/warmes Grau
+      const Color(
+        0xFFDFB6B2,
+      ), // helles, entsättigtes Lavendel-Grau/blasses Taupe
       const Color(0xFFFBE4D8), // sehr helles, warmes Off-White/Creme
     ],
     // Palette 7: Warme/Erdige Töne
@@ -233,14 +242,18 @@ class RotaryColorRingState extends State<RotaryColorRing>
       const Color(0xFFC97D60), // warmes, erdiges Terrakotta/verbranntes Orange
       const Color(0xFFF5E6D3), // helles, cremiges Beige/Off-White
       const Color(0xFFFFD4C4), // weiches, gedämpftes Pfirsich/helles Lachs-Pink
-      const Color(0xFFB8B8C8), // kühles, mittleres Grau mit leichtem Lavendel/Blau-Unterton
+      const Color(
+        0xFFB8B8C8,
+      ), // kühles, mittleres Grau mit leichtem Lavendel/Blau-Unterton
       const Color(0xFF1A4D5E), // dunkles Teal/tiefes Blau-Grün
     ],
     // Palette 8: Teal zu Rot-Braun
     [
       const Color(0xFF1F313B), // sehr dunkles Teal/Schieferblau
       const Color(0xFF383852), // gedämpftes Indigo/dunkles Lila
-      const Color(0xFF7B4259), // staubiges Rosen/Mauve, tendiert zu gedämpftem rötlich-Lila
+      const Color(
+        0xFF7B4259,
+      ), // staubiges Rosen/Mauve, tendiert zu gedämpftem rötlich-Lila
       const Color(0xFFB94E56), // gedämpftes Korallen/Lachs-Pink
       const Color(0xFFBE4039), // verbranntes Orange/Terrakotta-Rot
       const Color(0xFF8B3B3B), // tiefes rötlich-Braun/Maroon
@@ -252,41 +265,49 @@ class RotaryColorRingState extends State<RotaryColorRing>
     if (widget.customColor != null) {
       final customColor = widget.customColor!;
       final hsl = HSLColor.fromColor(customColor);
-      
+
       // Erstelle einen Verlauf um die Custom-Farbe herum
       return List<Color>.generate(n, (i) {
         final t = i / n;
         // Hue-Variation: ±60 Grad um die Custom-Farbe
         final hueVariation = (t - 0.5) * 120; // -60 bis +60
         final hue = (hsl.hue + hueVariation) % 360;
-        
+
         // Saturation: von niedrig zu hoch und zurück
         final satVariation = math.sin(t * 2 * math.pi) * 0.3;
         final sat = (hsl.saturation + satVariation).clamp(0.1, 1.0);
-        
+
         // Lightness: von hell zu dunkel und zurück
         final lightVariation = math.cos(t * 2 * math.pi) * 0.4;
         final light = (hsl.lightness + lightVariation).clamp(0.1, 0.9);
-        
+
         return HSLColor.fromAHSL(1, hue, sat, light).toColor();
       });
     }
-    
+
     // Wenn _paletteIndex >= _paletteModes.length, verwende feste Palette
-    if (_paletteIndex >= _paletteModes.length && _paletteIndex < _paletteModes.length + _fixedPalettes.length) {
+    if (_paletteIndex >= _paletteModes.length &&
+        _paletteIndex < _paletteModes.length + _fixedPalettes.length) {
       final fixedPaletteIndex = _paletteIndex - _paletteModes.length;
-      final fixedPalette = _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
+      final fixedPalette =
+          _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
       // Interpoliere die feste Palette auf n Farben
       return List<Color>.generate(n, (i) {
         final t = i / (n - 1);
-        final paletteIndex = (t * (fixedPalette.length - 1)).clamp(0, fixedPalette.length - 1).toInt();
+        final paletteIndex = (t * (fixedPalette.length - 1))
+            .clamp(0, fixedPalette.length - 1)
+            .toInt();
         final nextIndex = (paletteIndex + 1).clamp(0, fixedPalette.length - 1);
         final localT = (t * (fixedPalette.length - 1)) - paletteIndex;
         // Interpoliere zwischen den beiden nächsten Farben
-        return Color.lerp(fixedPalette[paletteIndex], fixedPalette[nextIndex], localT)!;
+        return Color.lerp(
+          fixedPalette[paletteIndex],
+          fixedPalette[nextIndex],
+          localT,
+        )!;
       });
     }
-    
+
     // Standard-Palette-Modus
     final mode = _paletteModes[_paletteIndex % _paletteModes.length];
     return List<Color>.generate(n, (i) {
@@ -296,9 +317,9 @@ class RotaryColorRingState extends State<RotaryColorRing>
           .clamp(0.05, 1.0);
       final light =
           (mode.lightness + mode.lightJitter * math.cos(t * 2 * math.pi)).clamp(
-        0.05,
-        0.95,
-      );
+            0.05,
+            0.95,
+          );
       return HSLColor.fromAHSL(1, hue.toDouble(), sat, light).toColor();
     });
   }
@@ -371,15 +392,17 @@ class RotaryColorRingState extends State<RotaryColorRing>
   /// Gibt eine repräsentative Farbe für eine Palette zurück (z.B. für Kugeln)
   Color getPaletteColor(int paletteIndex) {
     if (paletteIndex < 0) paletteIndex = 0;
-    
+
     // Feste Palette
-    if (paletteIndex >= _paletteModes.length && paletteIndex < _paletteModes.length + _fixedPalettes.length) {
+    if (paletteIndex >= _paletteModes.length &&
+        paletteIndex < _paletteModes.length + _fixedPalettes.length) {
       final fixedPaletteIndex = paletteIndex - _paletteModes.length;
-      final fixedPalette = _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
+      final fixedPalette =
+          _fixedPalettes[fixedPaletteIndex % _fixedPalettes.length];
       // Hauptfarbe (erste Farbe) der Palette zurückgeben
       return fixedPalette[0];
     }
-    
+
     // Standard-Palette
     if (paletteIndex >= _paletteModes.length) {
       paletteIndex = 0;
@@ -404,7 +427,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   void _onPanStart(DragStartDetails d) {
     _momentum.stop();
-    _dragStartAngle = math.atan2(
+    _dragStartAngle =
+        math.atan2(
           d.localPosition.dy - _center.dy,
           d.localPosition.dx - _center.dx,
         ) -
@@ -413,7 +437,8 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   void _onPanUpdate(DragUpdateDetails d) {
     setState(() {
-      _angle = math.atan2(
+      _angle =
+          math.atan2(
             d.localPosition.dy - _center.dy,
             d.localPosition.dx - _center.dx,
           ) -
@@ -425,12 +450,13 @@ class RotaryColorRingState extends State<RotaryColorRing>
     final v = d.velocity.pixelsPerSecond.distance.clamp(0, 2600) / 2600;
     if (v < 0.05) return;
     final start = _angle;
-    _fling = Tween(begin: 0.0, end: v * 2 * math.pi).animate(
-      CurvedAnimation(parent: _momentum, curve: Curves.decelerate),
-    )..addListener(() {
-        if (!mounted) return;
-        setState(() => _angle = start + _fling!.value);
-      });
+    _fling =
+        Tween(begin: 0.0, end: v * 2 * math.pi).animate(
+          CurvedAnimation(parent: _momentum, curve: Curves.decelerate),
+        )..addListener(() {
+          if (!mounted) return;
+          setState(() => _angle = start + _fling!.value);
+        });
     _momentum
       ..reset()
       ..forward();
@@ -468,26 +494,13 @@ class RotaryColorRingState extends State<RotaryColorRing>
 
   void handleExternalPanEnd(DragEndDetails d) => _onPanEnd(d);
 
-  // ---------- Tap → Farbkeil ----------
-
-  int _indexAt(Offset p, {required Offset center, required double step}) {
-    final ang = math.atan2(p.dy - center.dy, p.dx - center.dx);
-
-    var rel = ang - _angle + step / 2;
-    rel = rel % (2 * math.pi);
-    if (rel < 0) rel += 2 * math.pi;
-
-    final idx = (rel / step).floor() % widget.count;
-    return idx;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Prüfe, ob Icons/Emojis angezeigt werden sollen
     final bool showIcons = widget.selectedIcon != null;
     final bool showEmojis = widget.selectedEmoji != null;
     final bool showIconMode = showIcons || showEmojis;
-    
+
     // State zurücksetzen, wenn sich das ausgewählte Emoji/Icon ändert
     if (showIconMode) {
       if (showEmojis && widget.selectedEmoji != _lastSelectedEmoji) {
@@ -514,11 +527,11 @@ class RotaryColorRingState extends State<RotaryColorRing>
         });
       }
     }
-    
+
     // Liste der Icons/Emojis für den Ring
     List<dynamic> iconEmojiList = [];
     int selectedIndex = 0;
-    
+
     if (showIconMode) {
       if (showEmojis) {
         iconEmojiList = IconPickerDialog.emojis;
@@ -527,21 +540,21 @@ class RotaryColorRingState extends State<RotaryColorRing>
         iconEmojiList = IconPickerDialog.icons;
         selectedIndex = iconEmojiList.indexOf(widget.selectedIcon!);
       }
-      
+
       // Wenn nicht gefunden, auf 0 setzen
       if (selectedIndex < 0) selectedIndex = 0;
     }
-    
-    final colors = showIconMode ? List<Color>.generate(widget.count, (_) => Colors.transparent) : _paletteColors(widget.count);
+
+    final colors = showIconMode
+        ? List<Color>.generate(widget.count, (_) => Colors.transparent)
+        : _paletteColors(widget.count);
 
     return LayoutBuilder(
       builder: (_, constraints) {
-        final w = constraints.maxWidth;
-        final h = constraints.maxHeight;
-        final size = math.min(w, h);
-
-        final center =
-            Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+        final center = Offset(
+          constraints.maxWidth / 2,
+          constraints.maxHeight / 2,
+        );
         _center = center;
 
         const double trapezDepth = 34.0;
@@ -563,17 +576,17 @@ class RotaryColorRingState extends State<RotaryColorRing>
         List<dynamic> ringItems = [];
         final int ringCount = widget.count;
         final int halfCount = ringCount ~/ 2;
-        
+
         // Spezielles "X" Symbol zum Löschen (wird als spezielles Objekt markiert)
         const String clearSymbol = '__CLEAR__';
         // Feste Position für das "X" im Ring (z.B. Position 0, was 6 Uhr entspricht)
         const int clearPosition = 0; // Feste Position im Ring
-        
+
         if (showIconMode && iconEmojiList.isNotEmpty) {
           // Das ausgewählte Icon/Emoji soll auf 12 Uhr sein
           // Berechne die Nachbarn um das ausgewählte Icon/Emoji
           // Reduziere die Anzahl um 1, um Platz für das "X" zu schaffen
-          
+
           // Starte mit dem ausgewählten Item und füge Nachbarn hinzu
           // Wir nehmen einen weniger, damit Platz für das "X" ist
           for (int i = -halfCount + 1; i <= halfCount - 1; i++) {
@@ -581,7 +594,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
             if (listIndex < 0) listIndex += iconEmojiList.length;
             ringItems.add(iconEmojiList[listIndex]);
           }
-          
+
           // Füge das "X" an fester Position ein
           ringItems.insert(clearPosition, clearSymbol);
         }
@@ -608,16 +621,16 @@ class RotaryColorRingState extends State<RotaryColorRing>
             final angleWidth = step;
             final midAngle = adjustedAngle + angleWidth / 2;
             final midRadius = (innerR + outerR) / 2;
-            
+
             // Position relativ zum Stack
             final iconX = midRadius * math.cos(midAngle);
             final iconY = midRadius * math.sin(midAngle);
-            
+
             final item = ringItems[i];
             final isClearSymbol = item == clearSymbol;
             final isEmoji = item is String && !isClearSymbol;
             final isIcon = item is IconData;
-            
+
             children.add(
               Positioned(
                 left: center.dx + iconX - 20,
@@ -633,10 +646,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
                             height: 32,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: Center(
                               child: Icon(
@@ -647,18 +657,14 @@ class RotaryColorRingState extends State<RotaryColorRing>
                             ),
                           )
                         : isEmoji
-                            ? Text(
-                                item as String,
-                                style: const TextStyle(fontSize: 28),
-                                textAlign: TextAlign.center,
-                              )
-                            : isIcon
-                                ? Icon(
-                                    item as IconData,
-                                    color: Colors.white,
-                                    size: 28,
-                                  )
-                                : const SizedBox.shrink(),
+                        ? Text(
+                            item,
+                            style: const TextStyle(fontSize: 28),
+                            textAlign: TextAlign.center,
+                          )
+                        : isIcon
+                        ? Icon(item, color: Colors.white, size: 28)
+                        : const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -682,244 +688,261 @@ class RotaryColorRingState extends State<RotaryColorRing>
                   outerR: hitOuterR,
                 ),
                 child: Container(
-                  color: showIconMode ? Colors.white.withOpacity(0.01) : Colors.transparent,
+                  color: showIconMode
+                      ? Colors.white.withOpacity(0.01)
+                      : Colors.transparent,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                  onTapDown: (d) {
-                    final box = _stackKey.currentContext?.findRenderObject()
-                        as RenderBox?;
-                    if (box == null) return;
-                    final localPos = box.globalToLocal(d.globalPosition);
+                    onTapDown: (d) {
+                      final box =
+                          _stackKey.currentContext?.findRenderObject()
+                              as RenderBox?;
+                      if (box == null) return;
+                      final localPos = box.globalToLocal(d.globalPosition);
 
-                    // Wenn Icon-Modus aktiv, Icon/Emoji picken statt Farbe
-                    if (showIconMode && ringItems.isNotEmpty) {
-                      // Verwende die tatsächliche Tap-Position, um das nächste Item zu finden
-                      final dx = localPos.dx - _center.dx;
-                      final dy = localPos.dy - _center.dy;
-                      final distance = math.sqrt(dx * dx + dy * dy);
-                      
-                      // Prüfe, ob der Tap innerhalb des Rings ist
-                      final midRadius = (innerR + outerR) / 2;
-                      if (distance < innerR - 10 || distance > outerR + 10) {
-                        // Außerhalb des Rings, ignoriere
-                        return;
-                      }
-                      
-                      // Berechne den Winkel des getappten Punktes
-                      double tapAngle = math.atan2(dy, dx);
-                      // Normalisiere auf 0..2π
-                      if (tapAngle < 0) tapAngle += 2 * math.pi;
-                      
-                      // Finde das nächste Item basierend auf dem Winkel
-                      int ringItemIndex = -1;
-                      double minAngleDiff = double.infinity;
-                      
-                      for (int j = 0; j < ringItems.length; j++) {
-                        // Berechne den Winkel für jedes Item im Ring
-                        final itemAngle = _angle + j * step + iconModeAngleOffset;
-                        final itemMidAngle = itemAngle + step / 2;
+                      // Wenn Icon-Modus aktiv, Icon/Emoji picken statt Farbe
+                      if (showIconMode && ringItems.isNotEmpty) {
+                        // Verwende die tatsächliche Tap-Position, um das nächste Item zu finden
+                        final dx = localPos.dx - _center.dx;
+                        final dy = localPos.dy - _center.dy;
+                        final distance = math.sqrt(dx * dx + dy * dy);
+
+                        // Prüfe, ob der Tap innerhalb des Rings ist
+                        if (distance < innerR - 10 || distance > outerR + 10) {
+                          // Außerhalb des Rings, ignoriere
+                          return;
+                        }
+
+                        // Berechne den Winkel des getappten Punktes
+                        double tapAngle = math.atan2(dy, dx);
                         // Normalisiere auf 0..2π
-                        double normalizedItemAngle = itemMidAngle % (2 * math.pi);
-                        if (normalizedItemAngle < 0) normalizedItemAngle += 2 * math.pi;
-                        
-                        // Berechne die Winkeldifferenz (berücksichtige Wraparound)
-                        double angleDiff = (tapAngle - normalizedItemAngle).abs();
-                        if (angleDiff > math.pi) {
-                          angleDiff = 2 * math.pi - angleDiff;
+                        if (tapAngle < 0) tapAngle += 2 * math.pi;
+
+                        // Finde das nächste Item basierend auf dem Winkel
+                        int ringItemIndex = -1;
+                        double minAngleDiff = double.infinity;
+
+                        for (int j = 0; j < ringItems.length; j++) {
+                          // Berechne den Winkel für jedes Item im Ring
+                          final itemAngle =
+                              _angle + j * step + iconModeAngleOffset;
+                          final itemMidAngle = itemAngle + step / 2;
+                          // Normalisiere auf 0..2π
+                          double normalizedItemAngle =
+                              itemMidAngle % (2 * math.pi);
+                          if (normalizedItemAngle < 0)
+                            normalizedItemAngle += 2 * math.pi;
+
+                          // Berechne die Winkeldifferenz (berücksichtige Wraparound)
+                          double angleDiff = (tapAngle - normalizedItemAngle)
+                              .abs();
+                          if (angleDiff > math.pi) {
+                            angleDiff = 2 * math.pi - angleDiff;
+                          }
+
+                          if (angleDiff < minAngleDiff) {
+                            minAngleDiff = angleDiff;
+                            ringItemIndex = j;
+                          }
                         }
-                        
-                        if (angleDiff < minAngleDiff) {
-                          minAngleDiff = angleDiff;
-                          ringItemIndex = j;
-                        }
-                      }
-                      
-                      if (ringItemIndex >= 0 && ringItemIndex < ringItems.length) {
-                        final item = ringItems[ringItemIndex];
-                        
-                        // Prüfe, ob das "X" zum Löschen getappt wurde
-                        // Das "X" funktioniert immer, wenn Icon-Modus aktiv ist (auch ohne Lock)
-                        if (item == clearSymbol) {
-                          widget.onClearIconEmoji?.call();
+
+                        if (ringItemIndex >= 0 &&
+                            ringItemIndex < ringItems.length) {
+                          final item = ringItems[ringItemIndex];
+
+                          // Prüfe, ob das "X" zum Löschen getappt wurde
+                          // Das "X" funktioniert immer, wenn Icon-Modus aktiv ist (auch ohne Lock)
+                          if (item == clearSymbol) {
+                            widget.onClearIconEmoji?.call();
+                            HapticFeedback.lightImpact();
+                            return;
+                          }
+
+                          // Für normale Icons/Emojis: Nur picken, wenn Kugel gelockt ist
+                          if (!widget.isLocked) return;
+
+                          // State zurücksetzen, bevor neues Item gepickt wird
+                          setState(() {
+                            _picking = false;
+                            _selectedIndex = null;
+                            _dragColor = null;
+                          });
+
+                          setState(() {
+                            _picking = true;
+                            _selectedIndex = i;
+                            _dragPos = localPos;
+                          });
+                          _waveController.stop();
+
+                          if (item is String) {
+                            // Emoji
+                            widget.onPickEmoji?.call(item);
+                          } else if (item is IconData) {
+                            // Icon
+                            widget.onPickIcon?.call(item);
+                          }
                           HapticFeedback.lightImpact();
                           return;
                         }
-                        
-                        // Für normale Icons/Emojis: Nur picken, wenn Kugel gelockt ist
-                        if (!widget.isLocked) return;
-                        
-                        // State zurücksetzen, bevor neues Item gepickt wird
+                      }
+
+                      // Für Farben: Nur picken, wenn Kugel gelockt ist
+                      if (!widget.isLocked) return;
+
+                      if (_picking && _selectedIndex != i) return;
+
+                      setState(() {
+                        _picking = true;
+                        _selectedIndex = i;
+                        _dragColor = colors[i];
+                        _dragPos = localPos;
+                      });
+                      // 🔴 Welle sofort stoppen wenn Farbe gepickt wird
+                      _waveController.stop();
+                      widget.onPick(colors[i]);
+                      HapticFeedback.lightImpact();
+                    },
+                    onPanStart: (d) {
+                      final box =
+                          _stackKey.currentContext?.findRenderObject()
+                              as RenderBox?;
+                      if (box == null) return;
+                      final localPos = box.globalToLocal(d.globalPosition);
+
+                      if (_picking && _selectedIndex == i) {
                         setState(() {
-                          _picking = false;
-                          _selectedIndex = null;
-                          _dragColor = null;
-                        });
-                        
-                        setState(() {
-                          _picking = true;
-                          _selectedIndex = i;
                           _dragPos = localPos;
                         });
-                        _waveController.stop();
-                        
-                        if (item is String) {
-                          // Emoji
-                          widget.onPickEmoji?.call(item);
-                        } else if (item is IconData) {
-                          // Icon
-                          widget.onPickIcon?.call(item);
-                        }
-                        HapticFeedback.lightImpact();
                         return;
                       }
-                    }
-                    
-                    // Für Farben: Nur picken, wenn Kugel gelockt ist
-                    if (!widget.isLocked) return;
-                    
-                    if (_picking && _selectedIndex != i) return;
 
-                    setState(() {
-                      _picking = true;
-                      _selectedIndex = i;
-                      _dragColor = colors[i];
-                      _dragPos = localPos;
-                    });
-                    // 🔴 Welle sofort stoppen wenn Farbe gepickt wird
-                    _waveController.stop();
-                    widget.onPick(colors[i]);
-                    HapticFeedback.lightImpact();
-                  },
-                  onPanStart: (d) {
-                    final box = _stackKey.currentContext?.findRenderObject()
-                        as RenderBox?;
-                    if (box == null) return;
-                    final localPos = box.globalToLocal(d.globalPosition);
-
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _dragPos = localPos;
-                      });
-                      return;
-                    }
-
-                    _onPanStart(
-                      DragStartDetails(
-                        globalPosition: d.globalPosition,
-                        localPosition: localPos,
-                        kind: d.kind,
-                      ),
-                    );
-                  },
-                  onPanUpdate: (d) {
-                    final box = _stackKey.currentContext?.findRenderObject()
-                        as RenderBox?;
-                    if (box == null) return;
-                    final localPos = box.globalToLocal(d.globalPosition);
-
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _dragPos = localPos;
-                      });
-                    } else {
-                      _onPanUpdate(
-                        DragUpdateDetails(
+                      _onPanStart(
+                        DragStartDetails(
                           globalPosition: d.globalPosition,
                           localPosition: localPos,
-                          delta: d.delta,
-                          primaryDelta: d.primaryDelta,
-                          sourceTimeStamp: d.sourceTimeStamp,
+                          kind: d.kind,
                         ),
                       );
-                    }
-                  },
-                  onPanEnd: (d) {
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _picking = false;
-                        _dragColor = null;
-                        _dragPos = null;
-                      });
-                      // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
-                      if (widget.isLocked && !_waveController.isAnimating) {
-                        _waveController.repeat();
+                    },
+                    onPanUpdate: (d) {
+                      final box =
+                          _stackKey.currentContext?.findRenderObject()
+                              as RenderBox?;
+                      if (box == null) return;
+                      final localPos = box.globalToLocal(d.globalPosition);
+
+                      if (_picking && _selectedIndex == i) {
+                        setState(() {
+                          _dragPos = localPos;
+                        });
+                      } else {
+                        _onPanUpdate(
+                          DragUpdateDetails(
+                            globalPosition: d.globalPosition,
+                            localPosition: localPos,
+                            delta: d.delta,
+                            primaryDelta: d.primaryDelta,
+                            sourceTimeStamp: d.sourceTimeStamp,
+                          ),
+                        );
                       }
-                      // 🔴 Callback für Pick-Ende (Finger losgelassen)
-                      widget.onPickEnd?.call();
-                    } else {
-                      _onPanEnd(d);
-                    }
-                  },
-                  onPanCancel: () {
-                    if (_picking && _selectedIndex == i) {
-                      setState(() {
-                        _picking = false;
-                        _dragColor = null;
-                        _dragPos = null;
-                      });
-                      // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
-                      if (widget.isLocked && !_waveController.isAnimating) {
-                        _waveController.repeat();
+                    },
+                    onPanEnd: (d) {
+                      if (_picking && _selectedIndex == i) {
+                        setState(() {
+                          _picking = false;
+                          _dragColor = null;
+                          _dragPos = null;
+                        });
+                        // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
+                        if (widget.isLocked && !_waveController.isAnimating) {
+                          _waveController.repeat();
+                        }
+                        // 🔴 Callback für Pick-Ende (Finger losgelassen)
+                        widget.onPickEnd?.call();
+                      } else {
+                        _onPanEnd(d);
                       }
-                      // 🔴 Callback für Pick-Ende (auch bei Cancel)
-                      widget.onPickEnd?.call();
-                    }
-                  },
-                  child: AnimatedBuilder(
-                    animation: _waveAnimation,
-                    builder: (context, _) {
-                      // Welle-Position neu berechnen für jeden Frame
-                      final currentWaveAngle = widget.isLocked ? _waveAnimation.value : null;
-                      bool currentIsInWave = false;
-                      if (currentWaveAngle != null) {
-                        var normalizedWedgeAngle = finalAngle % (2 * math.pi);
-                        if (normalizedWedgeAngle < 0) normalizedWedgeAngle += 2 * math.pi;
-                        var normalizedWaveAngle = currentWaveAngle % (2 * math.pi);
-                        if (normalizedWaveAngle < 0) normalizedWaveAngle += 2 * math.pi;
-                        
-                        const waveWidth = math.pi / 3;
-                        var angleDiff = (normalizedWedgeAngle - normalizedWaveAngle).abs();
-                        if (angleDiff > math.pi) angleDiff = 2 * math.pi - angleDiff;
-                        
-                        currentIsInWave = angleDiff < waveWidth / 2;
+                    },
+                    onPanCancel: () {
+                      if (_picking && _selectedIndex == i) {
+                        setState(() {
+                          _picking = false;
+                          _dragColor = null;
+                          _dragPos = null;
+                        });
+                        // 🔴 Welle wieder starten wenn Pick beendet ist (nur wenn noch gelockt)
+                        if (widget.isLocked && !_waveController.isAnimating) {
+                          _waveController.repeat();
+                        }
+                        // 🔴 Callback für Pick-Ende (auch bei Cancel)
+                        widget.onPickEnd?.call();
                       }
-                      
-                      // Wenn Icon-Modus aktiv, zeige transparenten Hintergrund statt Farbkeil
-                      // (die GestureDetector funktionieren auch mit transparenten Bereichen)
-                      if (showIconMode) {
+                    },
+                    child: AnimatedBuilder(
+                      animation: _waveAnimation,
+                      builder: (context, _) {
+                        // Welle-Position neu berechnen für jeden Frame
+                        final currentWaveAngle = widget.isLocked
+                            ? _waveAnimation.value
+                            : null;
+                        bool currentIsInWave = false;
+                        if (currentWaveAngle != null) {
+                          var normalizedWedgeAngle = finalAngle % (2 * math.pi);
+                          if (normalizedWedgeAngle < 0)
+                            normalizedWedgeAngle += 2 * math.pi;
+                          var normalizedWaveAngle =
+                              currentWaveAngle % (2 * math.pi);
+                          if (normalizedWaveAngle < 0)
+                            normalizedWaveAngle += 2 * math.pi;
+
+                          const waveWidth = math.pi / 3;
+                          var angleDiff =
+                              (normalizedWedgeAngle - normalizedWaveAngle)
+                                  .abs();
+                          if (angleDiff > math.pi)
+                            angleDiff = 2 * math.pi - angleDiff;
+
+                          currentIsInWave = angleDiff < waveWidth / 2;
+                        }
+
+                        // Wenn Icon-Modus aktiv, zeige transparenten Hintergrund statt Farbkeil
+                        // (die GestureDetector funktionieren auch mit transparenten Bereichen)
+                        if (showIconMode) {
+                          return CustomPaint(
+                            painter: _WedgePainter(
+                              baseAngle: finalAngle,
+                              angleWidth: angleWidth,
+                              innerR: innerR,
+                              outerR: outerR,
+                              color: Colors.transparent,
+                              shadow: 0,
+                              waveAngle: null,
+                              isInWave: false,
+                            ),
+                          );
+                        }
+
                         return CustomPaint(
                           painter: _WedgePainter(
                             baseAngle: finalAngle,
                             angleWidth: angleWidth,
                             innerR: innerR,
                             outerR: outerR,
-                            color: Colors.transparent,
-                            shadow: 0,
-                            waveAngle: null,
-                            isInWave: false,
+                            color: colors[i],
+                            shadow: 10,
+                            waveAngle: currentWaveAngle,
+                            isInWave: currentIsInWave,
                           ),
                         );
-                      }
-                      
-                      return CustomPaint(
-                        painter: _WedgePainter(
-                          baseAngle: finalAngle,
-                          angleWidth: angleWidth,
-                          innerR: innerR,
-                          outerR: outerR,
-                          color: colors[i],
-                          shadow: 10,
-                          waveAngle: currentWaveAngle,
-                          isInWave: currentIsInWave,
-                        ),
-                      );
-                    },
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
+          );
         }
 
         if (!_picking) {
@@ -961,10 +984,7 @@ class RotaryColorRingState extends State<RotaryColorRing>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
-                      colors: [
-                        _dragColor!,
-                        _dragColor!.withOpacity(.65),
-                      ],
+                      colors: [_dragColor!, _dragColor!.withOpacity(.65)],
                     ),
                     border: Border.all(color: Colors.white70, width: 1.2),
                     boxShadow: [
@@ -1047,19 +1067,19 @@ class _WedgePainter extends CustomPainter {
       final waveAngleValue = waveAngle!; // Null-Check bereits oben
       var normalizedWaveAngle = waveAngleValue % (2 * math.pi);
       if (normalizedWaveAngle < 0) normalizedWaveAngle += 2 * math.pi;
-      
+
       var angleDiff = (normalizedWedgeAngle - normalizedWaveAngle).abs();
       if (angleDiff > math.pi) angleDiff = 2 * math.pi - angleDiff;
-      
+
       const waveWidth = math.pi / 3; // ~60 Grad
       final intensity = 1.0 - (angleDiff / (waveWidth / 2)).clamp(0.0, 1.0);
-      
+
       // Goldener Glow für die Welle
       final wavePaint = Paint()
         ..color = const Color(0xFFFFC66A).withOpacity(0.6 * intensity)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 15 * intensity);
       canvas.drawPath(path, wavePaint);
-      
+
       // Heller Rand
       final waveStroke = Paint()
         ..color = const Color(0xFFFFC66A).withOpacity(0.9 * intensity)
@@ -1127,23 +1147,4 @@ class _WedgeClipper extends CustomClipper<Path> {
       old.angleWidth != angleWidth ||
       old.innerR != innerR ||
       old.outerR != outerR;
-}
-
-class _AnnulusClipper extends CustomClipper<Path> {
-  _AnnulusClipper({required this.innerR, required this.outerR});
-
-  final double innerR;
-  final double outerR;
-
-  @override
-  Path getClip(Size size) {
-    final c = Offset(size.width / 2, size.height / 2);
-    final outer = Path()..addOval(Rect.fromCircle(center: c, radius: outerR));
-    final inner = Path()..addOval(Rect.fromCircle(center: c, radius: innerR));
-    return Path.combine(PathOperation.difference, outer, inner);
-  }
-
-  @override
-  bool shouldReclip(covariant _AnnulusClipper old) =>
-      old.innerR != innerR || old.outerR != outerR;
 }

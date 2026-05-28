@@ -9,6 +9,13 @@ class GlowRectTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Color outlineColor;
   final Color glowColor;
+  final Color? fillColor;
+  final Color? titleColor;
+  final Color? iconColor;
+  final Color? badgeOutlineColor;
+  final Color? badgeGlowColor;
+  final Color? badgeFillColor;
+  final Color? badgeTextColor;
   final String? badgeText;
   final bool neonStyle;
 
@@ -22,6 +29,13 @@ class GlowRectTile extends StatelessWidget {
     this.onTap,
     this.outlineColor = Colors.white,
     this.glowColor = Colors.white,
+    this.fillColor,
+    this.titleColor,
+    this.iconColor,
+    this.badgeOutlineColor,
+    this.badgeGlowColor,
+    this.badgeFillColor,
+    this.badgeTextColor,
     this.badgeText,
     this.neonStyle = false,
   });
@@ -37,8 +51,10 @@ class GlowRectTile extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: neonStyle ? null : const Color(0xFF2D2C2C),
-            gradient: neonStyle
+            color: fillColor ?? (neonStyle ? null : const Color(0xFF2D2C2C)),
+            gradient: fillColor != null
+                ? null
+                : neonStyle
                 ? const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -120,14 +136,17 @@ class GlowRectTile extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.fade,
                             softWrap: false,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: titleColor ?? Colors.white,
                             ),
                           ),
                         ),
-                        icon,
+                        IconTheme(
+                          data: IconThemeData(color: iconColor ?? Colors.white),
+                          child: icon,
+                        ),
                       ],
                     ),
                   ),
@@ -142,8 +161,10 @@ class GlowRectTile extends StatelessWidget {
             right: -30,
             child: _CountBadge(
               text: badgeText!,
-              outlineColor: outlineColor,
-              glowColor: glowColor,
+              outlineColor: badgeOutlineColor ?? outlineColor,
+              glowColor: badgeGlowColor ?? glowColor,
+              fillColor: badgeFillColor,
+              textColor: badgeTextColor,
               neonStyle: neonStyle,
             ),
           ),
@@ -156,12 +177,16 @@ class _CountBadge extends StatelessWidget {
   final String text;
   final Color outlineColor;
   final Color glowColor;
+  final Color? fillColor;
+  final Color? textColor;
   final bool neonStyle;
 
   const _CountBadge({
     required this.text,
     required this.outlineColor,
     required this.glowColor,
+    this.fillColor,
+    this.textColor,
     required this.neonStyle,
   });
 
@@ -171,7 +196,9 @@ class _CountBadge extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 44, minHeight: 24),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: neonStyle ? const Color(0xFF0B0B0D) : const Color(0xFF2D2C2C),
+        color:
+            fillColor ??
+            (neonStyle ? const Color(0xFF0B0B0D) : const Color(0xFF2D2C2C)),
         borderRadius: BorderRadius.circular(neonStyle ? 16 : 12),
         border: Border.all(color: outlineColor, width: neonStyle ? 1.7 : 1.5),
         boxShadow: [
@@ -195,8 +222,8 @@ class _CountBadge extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.fade,
         softWrap: false,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: textColor ?? Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/features/words/application/category_design_preferences.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
@@ -43,6 +44,7 @@ class LevelsCard extends ConsumerStatefulWidget {
   final GlobalKey? autoButtonKey; // ← für Tooltip
   final GlobalKey? trainingButtonKey; // ← für Tooltip
   final GlobalKey? singleButtonKey; // ← für Tooltip
+  final CategoryDesignPreferences? designPreferences;
 
   const LevelsCard({
     super.key,
@@ -74,6 +76,7 @@ class LevelsCard extends ConsumerStatefulWidget {
     this.autoButtonKey, // ← für Tooltip
     this.trainingButtonKey, // ← für Tooltip
     this.singleButtonKey, // ← für Tooltip
+    this.designPreferences,
   });
 
   @override
@@ -112,6 +115,12 @@ class LevelsCardView extends StatelessWidget {
   final double stageTopGap;
   final double startTopGap;
   final Widget? startTrailingControl;
+  final Color? repeatSectionAccentColor;
+  final Color? stageSectionAccentColor;
+  final Color? modeSectionAccentColor;
+  final Color? startAccentColor;
+  final Color? startFillColor;
+  final Color? startTextColor;
 
   const LevelsCardView({
     super.key,
@@ -144,6 +153,12 @@ class LevelsCardView extends StatelessWidget {
     this.stageTopGap = 24.0,
     this.startTopGap = 12.0,
     this.startTrailingControl,
+    this.repeatSectionAccentColor,
+    this.stageSectionAccentColor,
+    this.modeSectionAccentColor,
+    this.startAccentColor,
+    this.startFillColor,
+    this.startTextColor,
   });
 
   @override
@@ -162,13 +177,16 @@ class LevelsCardView extends StatelessWidget {
           children: [
             SizedBox(height: repeatSectionTopGap),
             if (learningModeSelector != null && !learningModeBelowStages) ...[
-              _SectionLabel('Lernmodus'),
+              _SectionLabel('Lernmodus', accentColor: modeSectionAccentColor),
               const SizedBox(height: 5),
               Center(child: learningModeSelector),
               const SizedBox(height: 22),
             ] else if (!learningModeBelowStages)
               const SizedBox(height: 22),
-            _SectionLabel('Wiederholungsauswahl'),
+            _SectionLabel(
+              'Wiederholungsauswahl',
+              accentColor: repeatSectionAccentColor,
+            ),
             const SizedBox(height: 8),
             Transform.translate(
               offset: Offset(titleOffsetX, titleOffsetY),
@@ -184,7 +202,10 @@ class LevelsCardView extends StatelessWidget {
                         padding: EdgeInsets.only(
                           bottom: stageSectionLabelBottomGap,
                         ),
-                        child: _SectionLabel(stageSectionLabel!),
+                        child: _SectionLabel(
+                          stageSectionLabel!,
+                          accentColor: stageSectionAccentColor,
+                        ),
                       ),
                     ),
             ),
@@ -205,7 +226,7 @@ class LevelsCardView extends StatelessWidget {
               ),
             SizedBox(height: startTopGap),
             if (learningModeSelector != null && learningModeBelowStages) ...[
-              _SectionLabel('Lernmodus'),
+              _SectionLabel('Lernmodus', accentColor: modeSectionAccentColor),
               const SizedBox(height: 12),
               Center(child: learningModeSelector),
               const SizedBox(height: 28),
@@ -249,7 +270,11 @@ class LevelsCardView extends StatelessWidget {
                             height: buttonH,
                             child: StartButtonPulse(
                               onPressed: onStartPressed,
-                              child: const _NeonStartButtonLabel(),
+                              child: _NeonStartButtonLabel(
+                                accentColor: startAccentColor,
+                                fillColor: startFillColor,
+                                textColor: startTextColor,
+                              ),
                             ),
                           ),
                         ),
@@ -302,22 +327,26 @@ class LevelsCardView extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
+  const _SectionLabel(this.label, {this.accentColor});
 
   final String label;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
+    final textColor = accentColor ?? const Color(0xFF9E9EA6);
     return Text(
       label,
       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-        color: const Color(0xFF9E9EA6),
+        color: textColor,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.2,
         shadows: [
           Shadow(
-            color: const Color(0xFF8A5CFF).withValues(alpha: 0.35),
-            blurRadius: 18,
+            color: textColor.withValues(
+              alpha: accentColor == null ? 0.35 : 0.5,
+            ),
+            blurRadius: accentColor == null ? 18 : 22,
           ),
         ],
       ),
@@ -326,23 +355,38 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _NeonStartButtonLabel extends StatelessWidget {
-  const _NeonStartButtonLabel();
+  const _NeonStartButtonLabel({
+    this.accentColor,
+    this.fillColor,
+    this.textColor,
+  });
+
+  final Color? accentColor;
+  final Color? fillColor;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? const Color(0xFF7FFFE7);
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
+        color: fillColor,
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF1A1A1D), Color(0xFF050505)],
+          colors: fillColor == null
+              ? const [Color(0xFF1A1A1D), Color(0xFF050505)]
+              : [
+                  fillColor!.withValues(alpha: 0.95),
+                  fillColor!.withValues(alpha: 0.72),
+                ],
         ),
-        border: Border.all(color: Color(0xFF7FFFE7), width: 1.7),
+        border: Border.all(color: accent, width: 1.7),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7FFFE7).withValues(alpha: 0.3),
+            color: accent.withValues(alpha: 0.3),
             blurRadius: 14,
             spreadRadius: 0.6,
           ),
@@ -372,7 +416,7 @@ class _NeonStartButtonLabel extends StatelessWidget {
         child: Text(
           'Start',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.white,
+            color: textColor ?? Colors.white,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.2,
           ),
@@ -484,6 +528,24 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
         autoButtonKey: widget.autoButtonKey,
         trainingButtonKey: widget.trainingButtonKey,
         singleButtonKey: widget.singleButtonKey,
+        allStagesAccentColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatAllStagesButton)
+            .color,
+        allStagesFillColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatAllStagesButtonFill)
+            .color,
+        allStagesTextColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatAllStagesButtonText)
+            .color,
+        singleStageAccentColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatSingleStageButton)
+            .color,
+        singleStageFillColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatSingleStageButtonFill)
+            .color,
+        singleStageTextColor: widget.designPreferences
+            ?.styleFor(CategoryDesignElement.repeatSingleStageButtonText)
+            .color,
         onModeChanged: (m) async {
           widget.onModeChanged(m);
 
@@ -497,6 +559,24 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
         },
       ),
       learningModeSelector: widget.learningModeSelector,
+      repeatSectionAccentColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.sectionTitleRepeat)
+          .color,
+      stageSectionAccentColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.sectionTitleStages)
+          .color,
+      modeSectionAccentColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.sectionTitleMode)
+          .color,
+      startAccentColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.startButton)
+          .color,
+      startFillColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.startButtonFill)
+          .color,
+      startTextColor: widget.designPreferences
+          ?.styleFor(CategoryDesignElement.startButtonText)
+          .color,
       stageSwitchRow: StageSwitchRow(
         controller: _switchCtrl,
         counts: s,
@@ -511,11 +591,57 @@ class _LevelsCardState extends ConsumerState<LevelsCard> {
           knobBottom: 18,
         ),
         colors: StageSwitchColors(
-          newOuter: const Color(0xFFA05260),
-          stageOuter: const Color(0xFFE4B866),
+          newOuter:
+              widget.designPreferences
+                  ?.styleFor(CategoryDesignElement.stageSwitch0)
+                  .color ??
+              const Color(0xFFA05260),
+          stageOuter:
+              widget.designPreferences
+                  ?.styleFor(CategoryDesignElement.stageSwitches)
+                  .color ??
+              const Color(0xFFE4B866),
+          stageOuterOverrides: {
+            for (var stage = 1; stage <= 5; stage++)
+              if (widget.designPreferences
+                      ?.styleFor(
+                        CategoryDesignElement.values.firstWhere(
+                          (element) => element.name == 'stageSwitch$stage',
+                        ),
+                      )
+                      .color
+                  case final Color color)
+                stage: color,
+          },
           inner: innerFill,
           disabledOuter: Colors.white,
           innerStroke: stroke,
+          innerOverrides: {
+            for (var stage = 0; stage <= 5; stage++)
+              if (widget.designPreferences
+                      ?.styleFor(
+                        CategoryDesignElement.values.firstWhere(
+                          (element) =>
+                              element.name == 'stageSwitch${stage}Inner',
+                        ),
+                      )
+                      .color
+                  case final Color color)
+                stage: color,
+          },
+          numberOverrides: {
+            for (var stage = 0; stage <= 5; stage++)
+              if (widget.designPreferences
+                      ?.styleFor(
+                        CategoryDesignElement.values.firstWhere(
+                          (element) =>
+                              element.name == 'stageSwitch${stage}Number',
+                        ),
+                      )
+                      .color
+                  case final Color color)
+                stage: color,
+          },
         ),
         labels: StageSwitchLabels(
           newLabel: 'New',

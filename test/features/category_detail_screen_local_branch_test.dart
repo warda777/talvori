@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/local_database/adapters/local_category_detail_group_resolver.dart';
 import 'package:talvori/core/local_database/adapters/local_learning_view_model_state.dart';
 import 'package:talvori/core/local_database/controllers/local_learning_controller.dart';
@@ -23,13 +24,18 @@ import 'package:talvori/core/srs/models/learning_mode.dart';
 import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
+import 'package:talvori/features/words/application/category_design_preferences.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/ui/cards/swipeable_word_card.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/category_design_color_panel.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
+import 'package:talvori/features/words/ui/widgets/learning_mode_selector.dart';
+import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
+import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/local_stage_inspector_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/micro_animations.dart';
 import 'package:talvori/features/words/ui/widgets/stage_switch_row.dart';
@@ -77,6 +83,10 @@ class _ResetInvalidationLocalLearningController
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   LocalCategory localCategory(String id, String name) {
     final now = DateTime(2026, 1, 1);
     return LocalCategory(
@@ -185,6 +195,725 @@ void main() {
     expect(find.text('Wörter verwalten'), findsOneWidget);
     expect(find.text('Wort hinzufügen'), findsOneWidget);
     expect(find.text('KI-Vorschläge'), findsOneWidget);
+  });
+
+  testWidgets('category_detail_settings_button_opens_visual_preview_editor', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wortwelt gestalten'), findsOneWidget);
+    expect(find.text('Kategorie'), findsOneWidget);
+    expect(find.text('Lernmodus'), findsAtLeastNWidgets(1));
+    expect(find.text('Info'), findsOneWidget);
+    expect(find.text('Kategorie-Vorschau'), findsOneWidget);
+    expect(find.byKey(const Key('category-real-preview')), findsOneWidget);
+    expect(
+      find.byKey(const Key('design-element-categoryWheelFade')),
+      findsOneWidget,
+    );
+    expect(find.text('Header-Kapsel'), findsNothing);
+    expect(find.text('Home & Living'), findsNothing);
+    expect(find.text('Basics'), findsWidgets);
+    expect(find.text('Vocabs'), findsWidgets);
+    expect(find.text('Wiederholungsauswahl'), findsWidgets);
+    expect(find.text('Alle Stufen'), findsWidgets);
+    expect(find.text('Einzelstufe'), findsWidgets);
+    expect(find.text('Merkstufen'), findsWidgets);
+    for (final stage in ['0', '1', '2', '3', '4', '5']) {
+      expect(find.text(stage), findsWidgets);
+    }
+    expect(find.text('Zeitplan'), findsWidgets);
+    expect(find.text('Limitlos'), findsWidgets);
+    expect(find.text('Kombiniert'), findsWidgets);
+    expect(find.text('Start'), findsWidgets);
+    expect(find.byKey(const Key('design-color-panel')), findsNothing);
+    expect(
+      find.byKey(const Key('selected-design-element-label')),
+      findsNothing,
+    );
+    expect(find.text('Palette'), findsNothing);
+
+    await tester.tap(
+      find.byKey(const Key('design-element-repeatSingleStageButton')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-subtarget-chooser')), findsOneWidget);
+    expect(find.text('Einzelstufe-Button'), findsOneWidget);
+    expect(find.text('Rahmen'), findsOneWidget);
+    expect(find.text('Innenfläche'), findsOneWidget);
+    expect(find.text('Schrift'), findsOneWidget);
+    expect(find.text('Einzelstufe-Innenfläche'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('design-element-vocabsTile')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-subtarget-chooser')), findsOneWidget);
+    expect(
+      find.byKey(const Key('design-subtarget-vocabsTile')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('design-subtarget-vocabsTile')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Vocabs-Kachel'), findsWidgets);
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+    expect(
+      find.byKey(const Key('design-selection-vocabsTile')),
+      findsOneWidget,
+    );
+    expect(find.text('Palette'), findsOneWidget);
+    expect(find.text('Glow'), findsOneWidget);
+    expect(find.text('Puls'), findsOneWidget);
+    expect(find.byKey(const Key('design-swatch-scroll-area')), findsOneWidget);
+    expect(CategoryDesignColorPanel.swatchCount, greaterThanOrEqualTo(200));
+    expect(find.byKey(const Key('design-swatch-Neonblau')), findsOneWidget);
+    expect(find.byKey(const Key('design-swatch-Cyan')), findsOneWidget);
+    expect(find.byKey(const Key('design-swatch-Neonrot')), findsOneWidget);
+    expect(find.text('Element zurücksetzen'), findsOneWidget);
+    expect(find.text('Werkseinstellung'), findsNothing);
+    expect(find.text('Alles zurücksetzen'), findsNothing);
+    expect(find.text('Anwenden'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('design-section-Glow')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-glow-section')), findsOneWidget);
+    expect(find.byKey(const Key('design-glow-strong')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-section-Puls')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-pulse-section')), findsOneWidget);
+    expect(find.byKey(const Key('design-pulse-normal')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-section-Palette')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('design-color-panel-close')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-color-panel')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('design-element-vocabsTile')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-vocabsTile')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('design-swatch-Neonblau')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-swatch-Neonblau')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('#2E7DFF'), findsOneWidget);
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+    expect(find.byKey(const Key('design-selection-vocabsTile')), findsNothing);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('design-factory-defaults-button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-factory-defaults-button')));
+    await tester.pumpAndSettle();
+    expect(find.text('Element zurücksetzen?'), findsOneWidget);
+    expect(
+      find.text('Vocabs-Kachel wird auf die Werkseinstellung zurückgesetzt.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('design-factory-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('#2E7DFF'), findsOneWidget);
+
+    final screenWidth =
+        tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    final autoPositionedPanelRect = tester.getRect(
+      find.byKey(const Key('design-color-panel-positioned')),
+    );
+    expect(autoPositionedPanelRect.left, greaterThanOrEqualTo(0));
+    expect(autoPositionedPanelRect.right, lessThanOrEqualTo(screenWidth));
+
+    final rightPanelDragHandleCenter = tester.getCenter(
+      find.byKey(const Key('design-color-panel-drag-handle')),
+    );
+    final leftOverflowDrag = await tester.startGesture(
+      rightPanelDragHandleCenter,
+    );
+    await tester.pump(const Duration(milliseconds: 650));
+    await leftOverflowDrag.moveBy(const Offset(-500, 0));
+    await leftOverflowDrag.up();
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .getRect(find.byKey(const Key('design-color-panel-positioned')))
+          .left,
+      lessThan(0),
+    );
+
+    await tester.tap(find.byKey(const Key('design-element-addButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-addButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Add-Button'), findsWidgets);
+    expect(find.text('#2E7DFF'), findsNothing);
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+    expect(find.byKey(const Key('design-selection-addButton')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-color-panel-close')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-element-stageSwitch1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-stageSwitch1')));
+    await tester.pumpAndSettle();
+    expect(find.text('Merkstufe 1'), findsWidgets);
+    expect(
+      find.byKey(const Key('design-selection-stageSwitch1')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('design-color-panel-close')));
+    await tester.pumpAndSettle();
+    final repeatTitleRect = tester.getRect(
+      find.byKey(const Key('design-element-sectionTitleRepeat')),
+    );
+    expect(repeatTitleRect.width, lessThan(260));
+
+    await tester.ensureVisible(
+      find.byKey(const Key('design-element-startButton')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-element-startButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-startButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Start-Button'), findsWidgets);
+
+    await tester.drag(
+      find.byKey(const Key('design-color-field')),
+      const Offset(80, -48),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('#2E7DFF'), findsNothing);
+
+    final hexBeforeSlider = tester
+        .widget<Text>(
+          find.descendant(
+            of: find.byKey(const Key('design-hex-value')),
+            matching: find.byType(Text),
+          ),
+        )
+        .data;
+
+    await tester.drag(
+      find.byKey(const Key('design-hue-slider')),
+      const Offset(120, 0),
+    );
+    await tester.pumpAndSettle();
+
+    final hexAfterSlider = tester
+        .widget<Text>(
+          find.descendant(
+            of: find.byKey(const Key('design-hex-value')),
+            matching: find.byType(Text),
+          ),
+        )
+        .data;
+    expect(hexAfterSlider, isNot(hexBeforeSlider));
+
+    final panelTopLeftBeforeDrag = tester.getTopLeft(
+      find.byKey(const Key('design-color-panel-positioned')),
+    );
+    final dragHandleCenter = tester.getCenter(
+      find.byKey(const Key('design-color-panel-drag-handle')),
+    );
+    final panelDrag = await tester.startGesture(dragHandleCenter);
+    await tester.pump(const Duration(milliseconds: 650));
+    await panelDrag.moveBy(const Offset(60, 0));
+    await panelDrag.up();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('design-color-panel-positioned'))),
+      isNot(panelTopLeftBeforeDrag),
+    );
+
+    await tester.tapAt(const Offset(22, 180));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('design-color-panel')), findsNothing);
+
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 600));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('settings-tab-Lernmodus')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('learn-real-preview')), findsOneWidget);
+    expect(find.text('Lernmodus-Vorschau'), findsOneWidget);
+    expect(
+      find.text('Wähle ein Element und passe Farbe, Glow oder Pulsieren an.'),
+      findsOneWidget,
+    );
+    expect(find.text('Talvori'), findsOneWidget);
+    expect(find.text('A1'), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+    expect(find.byKey(const Key('design-element-learnStages')), findsOneWidget);
+    expect(find.byIcon(Icons.play_arrow_rounded), findsNothing);
+    expect(find.byKey(const Key('design-element-resetButton')), findsNothing);
+
+    final learnCardRect = tester.getRect(
+      find.byKey(const Key('design-element-learnCard')),
+    );
+    await tester.tapAt(learnCardRect.topLeft + const Offset(150, 100));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-learnCard')));
+    await tester.pumpAndSettle();
+    expect(find.text('Lernkarte'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('design-color-panel-close')));
+    await tester.pumpAndSettle();
+
+    final learnCardGlowRect = tester.getRect(
+      find.byKey(const Key('design-element-learnCardGlow')),
+    );
+    await tester.tapAt(learnCardGlowRect.topLeft + const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Karten-Glow'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-section-Glow')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('design-glow-strong')), findsOneWidget);
+    expect(find.byKey(const Key('design-color-panel')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-section-Puls')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('design-pulse-off')), findsOneWidget);
+    expect(find.text('Karten-Glow'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-section-Palette')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('design-swatch-Orange')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-swatch-Orange')));
+    await tester.pumpAndSettle();
+    expect(find.text('#FFB255'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('design-color-panel-close')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('settings-tab-Info')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Info & Hilfe'), findsOneWidget);
+    expect(find.text('Lernmodi verstehen'), findsOneWidget);
+    expect(find.text('Merkstufen 0–5'), findsOneWidget);
+    expect(find.text('Antippbare Stufen'), findsOneWidget);
+    expect(find.text('Vocabs & pausierte Wörter'), findsOneWidget);
+
+    await tester.tap(find.text('Lernmodi verstehen'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Alle Stufen mischt alles'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('category-design-sheet-close')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Änderungen übernehmen?'), findsOneWidget);
+    expect(
+      find.text('Möchtest du die Gestaltung für Basics übernehmen?'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('design-close-keep-editing')));
+    await tester.pumpAndSettle();
+    expect(find.text('Wortwelt gestalten'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('category-design-sheet-close')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-close-discard')));
+    await tester.pumpAndSettle();
+    expect(find.text('Wortwelt gestalten'), findsNothing);
+  });
+
+  testWidgets('category_design_color_panel_updates_glow_and_pulse_callbacks', (
+    tester,
+  ) async {
+    var glow = CategoryDesignGlowStrength.normal;
+    var pulse = CategoryDesignPulseStrength.normal;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 320,
+                child: CategoryDesignColorPanel(
+                  selectedElementLabel: 'Karten-Glow',
+                  selectedColor: const Color(0xFFFFB255),
+                  selectedGlowStrength: glow,
+                  selectedPulseStrength: pulse,
+                  onMove: (_) {},
+                  onClose: () {},
+                  onColorChanged: (_) {},
+                  onGlowChanged: (value) => setState(() => glow = value),
+                  onPulseChanged: (value) => setState(() => pulse = value),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('design-section-Glow')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('design-glow-strong')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-glow-strong')));
+    await tester.pumpAndSettle();
+    expect(glow, CategoryDesignGlowStrength.strong);
+
+    await tester.tap(find.byKey(const Key('design-section-Puls')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('design-pulse-off')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-pulse-off')));
+    await tester.pumpAndSettle();
+    expect(pulse, CategoryDesignPulseStrength.off);
+  });
+
+  testWidgets('category_detail_settings_applies_saved_category_design', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith(
+            (ref) async => [localCategory('basics', 'Basics')],
+          ),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-element-vocabsTile')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-vocabsTile')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('design-swatch-Neonblau')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-swatch-Neonblau')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('category-design-sheet-close')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-close-apply')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-element-vocabsTile')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-subtarget-vocabsTile')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('#2E7DFF'), findsOneWidget);
+  });
+
+  testWidgets('category_detail_applies_saved_design_to_real_controls', (
+    tester,
+  ) async {
+    await const CategoryDesignPreferencesRepository().save(
+      'basics',
+      const CategoryDesignPreferences(
+        overrides: {
+          CategoryDesignElement.categoryHeader: CategoryDesignElementStyle(
+            color: Color(0xFF12D6FF),
+          ),
+          CategoryDesignElement.repeatAllStagesButton:
+              CategoryDesignElementStyle(color: Color(0xFFFF5EA8)),
+          CategoryDesignElement.repeatSingleStageButtonFill:
+              CategoryDesignElementStyle(color: Color(0xFF143C54)),
+          CategoryDesignElement.repeatSingleStageButtonText:
+              CategoryDesignElementStyle(color: Color(0xFFFFF04A)),
+          CategoryDesignElement.learningModeTimeButton:
+              CategoryDesignElementStyle(color: Color(0xFF63F58F)),
+          CategoryDesignElement.learningModeTimeButtonFill:
+              CategoryDesignElementStyle(color: Color(0xFF183919)),
+          CategoryDesignElement.learningModeTimeButtonText:
+              CategoryDesignElementStyle(color: Color(0xFFFFE2ED)),
+          CategoryDesignElement.sectionTitleStages: CategoryDesignElementStyle(
+            color: Color(0xFF00E5FF),
+          ),
+          CategoryDesignElement.stageSwitch1: CategoryDesignElementStyle(
+            color: Color(0xFFFFB000),
+          ),
+          CategoryDesignElement.addButtonFill: CategoryDesignElementStyle(
+            color: Color(0xFF102A44),
+          ),
+          CategoryDesignElement.settingsButtonFill: CategoryDesignElementStyle(
+            color: Color(0xFF221044),
+          ),
+          CategoryDesignElement.categoryBackground: CategoryDesignElementStyle(
+            color: Color(0xFF111B2E),
+          ),
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith(
+            (ref) async => [localCategory('basics', 'Basics')],
+          ),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 12),
+          localStageCountsProvider.overrideWith((ref, request) async {
+            return const [8, 4, 0, 0, 0, 0];
+          }),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<CategoryWheel>(find.byType(CategoryWheel))
+          .activeStrokeColor,
+      const Color(0xFF12D6FF),
+    );
+    expect(
+      tester
+          .widget<LevelSelectorButtonsView>(
+            find.byType(LevelSelectorButtonsView),
+          )
+          .allStagesAccentColor,
+      const Color(0xFFFF5EA8),
+    );
+    expect(
+      tester
+          .widget<LevelSelectorButtonsView>(
+            find.byType(LevelSelectorButtonsView),
+          )
+          .singleStageFillColor,
+      const Color(0xFF143C54),
+    );
+    expect(
+      tester
+          .widget<LevelSelectorButtonsView>(
+            find.byType(LevelSelectorButtonsView),
+          )
+          .singleStageTextColor,
+      const Color(0xFFFFF04A),
+    );
+    expect(
+      tester
+          .widget<LearningModeSelectorView>(
+            find.byType(LearningModeSelectorView),
+          )
+          .timeAccentColor,
+      const Color(0xFF63F58F),
+    );
+    expect(
+      tester
+          .widget<LearningModeSelectorView>(
+            find.byType(LearningModeSelectorView),
+          )
+          .timeFillColor,
+      const Color(0xFF183919),
+    );
+    expect(
+      tester
+          .widget<LearningModeSelectorView>(
+            find.byType(LearningModeSelectorView),
+          )
+          .timeTextColor,
+      const Color(0xFFFFE2ED),
+    );
+    expect(
+      tester
+          .widget<CategoryHeaderCapsule>(find.byType(CategoryHeaderCapsule))
+          .backgroundColor,
+      const Color(0xFF111B2E),
+    );
+    expect(
+      tester
+          .widget<CategoryHeaderCapsule>(find.byType(CategoryHeaderCapsule))
+          .addButtonFillColor,
+      const Color(0xFF102A44),
+    );
+    expect(
+      tester
+          .widget<CategoryHeaderCapsule>(find.byType(CategoryHeaderCapsule))
+          .settingsButtonFillColor,
+      const Color(0xFF221044),
+    );
+    expect(
+      tester
+          .widget<LevelsCardView>(find.byType(LevelsCardView))
+          .stageSectionAccentColor,
+      const Color(0xFF00E5FF),
+    );
+    expect(
+      tester
+          .widget<StageSwitchRowView>(find.byType(StageSwitchRowView))
+          .colors
+          .stageOuterOverrides[1],
+      const Color(0xFFFFB000),
+    );
+  });
+
+  testWidgets('category_design_reset_only_clears_current_category_area', (
+    tester,
+  ) async {
+    const repository = CategoryDesignPreferencesRepository();
+    await repository.save(
+      'basics',
+      const CategoryDesignPreferences(
+        overrides: {
+          CategoryDesignElement.categoryHeader: CategoryDesignElementStyle(
+            color: Color(0xFF12D6FF),
+          ),
+          CategoryDesignElement.learnCard: CategoryDesignElementStyle(
+            color: Color(0xFF2E7DFF),
+          ),
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith(
+            (ref) async => [localCategory('basics', 'Basics')],
+          ),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('design-reset-Kategorie')),
+      250,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('design-reset-Kategorie')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('design-factory-confirm')));
+    await tester.pumpAndSettle();
+
+    final saved = await repository.load('basics');
+    expect(
+      saved.overrides.containsKey(CategoryDesignElement.categoryHeader),
+      isFalse,
+    );
+    expect(
+      saved.overrides[CategoryDesignElement.learnCard]?.color,
+      const Color(0xFF2E7DFF),
+    );
+  });
+
+  testWidgets('category_detail_settings_closes_without_prompt_when_unchanged', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wortwelt gestalten'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('category-design-sheet-close')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Änderungen übernehmen?'), findsNothing);
+    expect(find.text('Wortwelt gestalten'), findsNothing);
   });
 
   testWidgets('level package detail wheel shows packages from the same level', (

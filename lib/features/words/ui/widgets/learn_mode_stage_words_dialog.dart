@@ -51,9 +51,7 @@ class LearnModeStageWordsDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: const Color(0xFF1A1A1A),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.8,
@@ -103,7 +101,6 @@ class LearnModeStageWordsDialog extends ConsumerWidget {
                   categoryId,
                   stage,
                   srsSystem: srsSystem,
-                  useDisplayStageForAdaptive: srsSystem == SrsSystem.adaptive,
                 ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -201,10 +198,7 @@ class LearnModeStageWordsDialog extends ConsumerWidget {
                               runSpacing: 4,
                               children: [
                                 if (word.level != null)
-                                  _InfoChip(
-                                    label: 'Level',
-                                    value: word.level!,
-                                  ),
+                                  _InfoChip(label: 'Level', value: word.level!),
                                 _InfoChip(
                                   label: 'Richtig',
                                   value: '${word.passCount}',
@@ -240,11 +234,7 @@ class _InfoChip extends StatelessWidget {
   final String value;
   final Color? color;
 
-  const _InfoChip({
-    required this.label,
-    required this.value,
-    this.color,
-  });
+  const _InfoChip({required this.label, required this.value, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -256,10 +246,7 @@ class _InfoChip extends StatelessWidget {
       ),
       child: Text(
         '$label: $value',
-        style: TextStyle(
-          fontSize: 12,
-          color: color ?? Colors.white70,
-        ),
+        style: TextStyle(fontSize: 12, color: color ?? Colors.white70),
       ),
     );
   }

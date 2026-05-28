@@ -32,6 +32,23 @@ class CategoryHeaderCapsule extends StatelessWidget {
   final double wheelBottomGap; // NEU
 
   final Color accentColor;
+  final Color? headerAccentColor;
+  final Color? headerFillColor;
+  final Color? headerTextColor;
+  final Color? wheelFadeColor;
+  final Color? vocabsAccentColor;
+  final Color? vocabsFillColor;
+  final Color? vocabsTextColor;
+  final Color? vocabsIconColor;
+  final Color? vocabsCounterAccentColor;
+  final Color? vocabsCounterFillColor;
+  final Color? vocabsCounterTextColor;
+  final Color? addButtonAccentColor;
+  final Color? addButtonFillColor;
+  final Color? addButtonIconColor;
+  final Color? settingsButtonAccentColor;
+  final Color? settingsButtonFillColor;
+  final Color? settingsButtonIconColor;
   final Color? backgroundColor;
   final bool neonStyle;
 
@@ -64,6 +81,23 @@ class CategoryHeaderCapsule extends StatelessWidget {
     this.rightBtnsOffsetY = WordsLayout.rightBtnsOffsetY,
     this.wheelBottomGap = WordsLayout.wheelBottomGap,
     this.accentColor = const Color(0xFFB1CCFE),
+    this.headerAccentColor,
+    this.headerFillColor,
+    this.headerTextColor,
+    this.wheelFadeColor,
+    this.vocabsAccentColor,
+    this.vocabsFillColor,
+    this.vocabsTextColor,
+    this.vocabsIconColor,
+    this.vocabsCounterAccentColor,
+    this.vocabsCounterFillColor,
+    this.vocabsCounterTextColor,
+    this.addButtonAccentColor,
+    this.addButtonFillColor,
+    this.addButtonIconColor,
+    this.settingsButtonAccentColor,
+    this.settingsButtonFillColor,
+    this.settingsButtonIconColor,
     this.backgroundColor,
     this.neonStyle = false,
     this.trailingRightBelow,
@@ -73,6 +107,12 @@ class CategoryHeaderCapsule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedHeaderAccent = headerAccentColor ?? accentColor;
+    final resolvedVocabsAccent = vocabsAccentColor ?? accentColor;
+    final resolvedVocabsCounterAccent =
+        vocabsCounterAccentColor ?? resolvedVocabsAccent;
+    final resolvedAddAccent = addButtonAccentColor ?? accentColor;
+    final resolvedSettingsAccent = settingsButtonAccentColor ?? accentColor;
     return Container(
       width: double.infinity,
       height: height,
@@ -111,6 +151,10 @@ class CategoryHeaderCapsule extends StatelessWidget {
                             categories: categories,
                             initialIndex: selectedIndex,
                             onChanged: onWheelChanged,
+                            activeStrokeColor: resolvedHeaderAccent,
+                            activeFillColor: headerFillColor,
+                            activeTextColor: headerTextColor,
+                            edgeFadeColor: wheelFadeColor ?? backgroundColor,
                           ),
                         ),
                       ),
@@ -144,11 +188,17 @@ class CategoryHeaderCapsule extends StatelessWidget {
                               title: 'Vocabs',
                               icon: const Icon(
                                 Icons.menu_book_rounded,
-                                color: Colors.white,
                                 size: 28,
                               ),
-                              outlineColor: accentColor,
-                              glowColor: accentColor,
+                              outlineColor: resolvedVocabsAccent,
+                              glowColor: resolvedVocabsAccent,
+                              fillColor: vocabsFillColor,
+                              titleColor: vocabsTextColor,
+                              iconColor: vocabsIconColor,
+                              badgeOutlineColor: resolvedVocabsCounterAccent,
+                              badgeGlowColor: resolvedVocabsCounterAccent,
+                              badgeFillColor: vocabsCounterFillColor,
+                              badgeTextColor: vocabsCounterTextColor,
                               badgeText: '$vocabsCount',
                               neonStyle: neonStyle,
                             ),
@@ -170,12 +220,13 @@ class CategoryHeaderCapsule extends StatelessWidget {
                                 GlowCircleButton(
                                   size: 62,
                                   onTap: onAdd,
-                                  outlineColor: accentColor,
-                                  glowColor: accentColor,
+                                  outlineColor: resolvedAddAccent,
+                                  glowColor: resolvedAddAccent,
+                                  fillColor: addButtonFillColor,
                                   neonStyle: neonStyle,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.add_rounded,
-                                    color: Colors.white,
+                                    color: addButtonIconColor ?? Colors.white,
                                     size: 28,
                                   ),
                                 ),
@@ -183,12 +234,14 @@ class CategoryHeaderCapsule extends StatelessWidget {
                                 GlowCircleButton(
                                   size: 62,
                                   onTap: onSettings,
-                                  outlineColor: accentColor,
-                                  glowColor: accentColor,
+                                  outlineColor: resolvedSettingsAccent,
+                                  glowColor: resolvedSettingsAccent,
+                                  fillColor: settingsButtonFillColor,
                                   neonStyle: neonStyle,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.tune_rounded,
-                                    color: Colors.white,
+                                    color:
+                                        settingsButtonIconColor ?? Colors.white,
                                     size: 24,
                                   ),
                                 ),

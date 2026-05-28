@@ -38,6 +38,16 @@ class SwipeableWordCard extends StatefulWidget {
   final Color? cardBackgroundColor;
   final Color? cardBorderColor;
   final Color? cardGlowColor;
+  final double? cardGlowIntensity;
+  final double? cardPulseSpeed;
+  final Color? wordTextColor;
+  final Color? audioAccentColor;
+  final Color? audioFillColor;
+  final Color? audioIconColor;
+  final Color? levelBadgeColor;
+  final Color? levelBadgeFillColor;
+  final Color? levelBadgeTextColor;
+  final bool pulseEnabled;
   final double? cardWidth;
   final double? cardHeight;
 
@@ -67,6 +77,16 @@ class SwipeableWordCard extends StatefulWidget {
     this.cardBackgroundColor,
     this.cardBorderColor,
     this.cardGlowColor,
+    this.cardGlowIntensity,
+    this.cardPulseSpeed,
+    this.wordTextColor,
+    this.audioAccentColor,
+    this.audioFillColor,
+    this.audioIconColor,
+    this.levelBadgeColor,
+    this.levelBadgeFillColor,
+    this.levelBadgeTextColor,
+    this.pulseEnabled = true,
     this.cardWidth,
     this.cardHeight,
   });
@@ -254,6 +274,9 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
       backgroundColor: widget.cardBackgroundColor,
       borderColor: widget.cardBorderColor,
       glowColor: widget.cardGlowColor,
+      glowIntensity: widget.cardGlowIntensity,
+      pulseSpeed: widget.cardPulseSpeed,
+      pulseEnabled: widget.pulseEnabled,
       width: widget.cardWidth,
       height: widget.cardHeight,
       child: Stack(
@@ -262,13 +285,23 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             Positioned(
               top: 12,
               right: 12,
-              child: LevelBadge(level: widget.level),
+              child: LevelBadge(
+                level: widget.level,
+                backgroundColor: widget.levelBadgeFillColor,
+                borderColor: widget.levelBadgeColor,
+                textColor: widget.levelBadgeTextColor,
+              ),
             ),
           if (!isDiagnostic && !isCongratulation && widget.onSpeak != null)
             Positioned(
               top: widget.onSettingsTap == null ? 12 : 58,
               left: 12,
-              child: _PronunciationButton(onPressed: widget.onSpeak!),
+              child: _PronunciationButton(
+                onPressed: widget.onSpeak!,
+                accentColor: widget.audioAccentColor,
+                fillColor: widget.audioFillColor,
+                iconColor: widget.audioIconColor,
+              ),
             ),
           if (!isDiagnostic && !isCongratulation && widget.passCount != null)
             Positioned(
@@ -287,6 +320,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                       child: _AdaptiveText(
                         widget.frontText,
                         forceMultiline: true,
+                        color: widget.wordTextColor,
                       ),
                     )
                   : isCongratulation
@@ -295,9 +329,13 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
                         widget.frontText,
                         forceMultiline: true,
                         compactFont: true,
+                        color: widget.wordTextColor,
                       ),
                     )
-                  : _AdaptiveText(widget.frontText),
+                  : _AdaptiveText(
+                      widget.frontText,
+                      color: widget.wordTextColor,
+                    ),
             ),
           ),
           if (widget.footer != null)
@@ -343,6 +381,9 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
       backgroundColor: widget.cardBackgroundColor,
       borderColor: widget.cardBorderColor,
       glowColor: widget.cardGlowColor,
+      glowIntensity: widget.cardGlowIntensity,
+      pulseSpeed: widget.cardPulseSpeed,
+      pulseEnabled: widget.pulseEnabled,
       width: widget.cardWidth,
       height: widget.cardHeight,
       dark: true,
@@ -352,7 +393,11 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 28),
-              child: _AdaptiveText(widget.backText, back: true),
+              child: _AdaptiveText(
+                widget.backText,
+                back: true,
+                color: widget.wordTextColor,
+              ),
             ),
           ),
           _StreakProgressBadge(
@@ -376,7 +421,12 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
             Positioned(
               top: 12,
               left: 12,
-              child: _PronunciationButton(onPressed: widget.onSpeak!),
+              child: _PronunciationButton(
+                onPressed: widget.onSpeak!,
+                accentColor: widget.audioAccentColor,
+                fillColor: widget.audioFillColor,
+                iconColor: widget.audioIconColor,
+              ),
             ),
         ],
       ),
@@ -385,12 +435,21 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
 }
 
 class _PronunciationButton extends StatelessWidget {
-  const _PronunciationButton({required this.onPressed});
+  const _PronunciationButton({
+    required this.onPressed,
+    this.accentColor,
+    this.fillColor,
+    this.iconColor,
+  });
 
   final VoidCallback onPressed;
+  final Color? accentColor;
+  final Color? fillColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? const Color(0xFF5DDCFF);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -401,17 +460,17 @@ class _PronunciationButton extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF0B1820).withValues(alpha: 0.92),
+            color: fillColor ?? const Color(0xFF0B1820).withValues(alpha: 0.92),
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF5DDCFF), width: 1.1),
-            boxShadow: const [
-              BoxShadow(color: Color(0x225DDCFF), blurRadius: 14),
+            border: Border.all(color: accent, width: 1.1),
+            boxShadow: [
+              BoxShadow(color: accent.withValues(alpha: 0.22), blurRadius: 14),
             ],
           ),
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.volume_up_rounded,
-            color: Color(0xFFB8FFF6),
+            color: iconColor ?? accent.withValues(alpha: 0.92),
             size: 22,
           ),
         ),
@@ -616,6 +675,9 @@ class _CardShell extends ConsumerStatefulWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final Color? glowColor;
+  final double? glowIntensity;
+  final double? pulseSpeed;
+  final bool pulseEnabled;
   final double? width;
   final double? height;
   const _CardShell({
@@ -626,6 +688,9 @@ class _CardShell extends ConsumerStatefulWidget {
     this.backgroundColor,
     this.borderColor,
     this.glowColor,
+    this.glowIntensity,
+    this.pulseSpeed,
+    this.pulseEnabled = true,
     this.width,
     this.height,
   });
@@ -647,7 +712,20 @@ class _CardShellState extends ConsumerState<_CardShell>
       duration: const Duration(
         milliseconds: 3000,
       ), // Langsame, sanfte Pulsierung wie Atmung
-    )..repeat();
+    );
+    if (widget.pulseEnabled) {
+      _glowController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _CardShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.pulseEnabled && !_glowController.isAnimating) {
+      _glowController.repeat();
+    } else if (!widget.pulseEnabled && _glowController.isAnimating) {
+      _glowController.stop();
+    }
   }
 
   @override
@@ -682,9 +760,13 @@ class _CardShellState extends ConsumerState<_CardShell>
         // Amplitude wird mit pulseSpeed multipliziert:
         // - Bei speed = 0: Amplitude = 0 → pulse = 0.5 (statisch)
         // - Bei speed > 0: Amplitude steigt smooth → pulse atmet smooth
-        final pulse = 0.5 + 0.5 * math.sin(pulseValue) * settings.pulseSpeed;
+        final pulseSpeed = widget.pulseEnabled
+            ? settings.pulseSpeed * (widget.pulseSpeed ?? 1.0)
+            : 0.0;
+        final pulse = 0.5 + 0.5 * math.sin(pulseValue) * pulseSpeed;
 
         final glowSpread = 12.0 + (48.0 - 12.0) * pulse;
+        final glowIntensity = settings.intensity * (widget.glowIntensity ?? 1);
 
         return Stack(
           children: [
@@ -709,39 +791,39 @@ class _CardShellState extends ConsumerState<_CardShell>
                   // Animierter Glow-Effekt (mit Intensitäts-Steuerung aus Provider)
                   BoxShadow(
                     color: accentColor.withValues(
-                      alpha: 0.25 * (0.6 + 0.4 * pulse) * settings.intensity,
+                      alpha: 0.25 * (0.6 + 0.4 * pulse) * glowIntensity,
                     ),
                     blurRadius:
                         (60 + glowSpread * 2.0).clamp(0.0, 100.0) *
-                        settings.intensity,
-                    spreadRadius: glowSpread * 1.5 * settings.intensity,
+                        glowIntensity,
+                    spreadRadius: glowSpread * 1.5 * glowIntensity,
                   ),
                   BoxShadow(
                     color: accentColor.withValues(
-                      alpha: 0.30 * (0.5 + 0.5 * pulse) * settings.intensity,
+                      alpha: 0.30 * (0.5 + 0.5 * pulse) * glowIntensity,
                     ),
                     blurRadius:
                         (45 + glowSpread * 1.5).clamp(0.0, 100.0) *
-                        settings.intensity,
-                    spreadRadius: glowSpread * 1.2 * settings.intensity,
+                        glowIntensity,
+                    spreadRadius: glowSpread * 1.2 * glowIntensity,
                   ),
                   BoxShadow(
                     color: accentColor.withValues(
-                      alpha: 0.35 * (0.5 + 0.5 * pulse) * settings.intensity,
+                      alpha: 0.35 * (0.5 + 0.5 * pulse) * glowIntensity,
                     ),
                     blurRadius:
                         (35 + glowSpread * 1.2).clamp(0.0, 100.0) *
-                        settings.intensity,
-                    spreadRadius: glowSpread * 0.9 * settings.intensity,
+                        glowIntensity,
+                    spreadRadius: glowSpread * 0.9 * glowIntensity,
                   ),
                   BoxShadow(
                     color: const Color(0xFFEFE9FF).withValues(
-                      alpha: 0.45 * (0.3 + 0.7 * pulse) * settings.intensity,
+                      alpha: 0.45 * (0.3 + 0.7 * pulse) * glowIntensity,
                     ),
                     blurRadius:
                         (18 + glowSpread * 0.5).clamp(0.0, 100.0) *
-                        settings.intensity,
-                    spreadRadius: glowSpread * 0.3 * settings.intensity,
+                        glowIntensity,
+                    spreadRadius: glowSpread * 0.3 * glowIntensity,
                   ),
                 ],
               ),
@@ -759,11 +841,13 @@ class _AdaptiveText extends StatelessWidget {
   final bool back;
   final bool forceMultiline;
   final bool compactFont;
+  final Color? color;
   const _AdaptiveText(
     this.text, {
     this.back = false,
     this.forceMultiline = false,
     this.compactFont = false,
+    this.color,
   });
 
   @override
@@ -842,7 +926,7 @@ class _AdaptiveText extends StatelessWidget {
       overflow: TextOverflow.visible,
       softWrap: true,
       style: TextStyle(
-        color: Colors.white,
+        color: color ?? Colors.white,
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.3,

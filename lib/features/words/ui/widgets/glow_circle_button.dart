@@ -6,6 +6,7 @@ class GlowCircleButton extends StatelessWidget {
   final VoidCallback? onTap;
   final Color outlineColor;
   final Color glowColor;
+  final Color? fillColor;
   final bool neonStyle;
 
   const GlowCircleButton({
@@ -15,6 +16,7 @@ class GlowCircleButton extends StatelessWidget {
     this.onTap,
     required this.outlineColor,
     required this.glowColor,
+    this.fillColor,
     this.neonStyle = false,
   });
 
@@ -27,8 +29,10 @@ class GlowCircleButton extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: neonStyle ? null : const Color(0xFF2D2C2C),
-          gradient: neonStyle
+          color: fillColor ?? (neonStyle ? null : const Color(0xFF2D2C2C)),
+          gradient: fillColor != null
+              ? null
+              : neonStyle
               ? const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,

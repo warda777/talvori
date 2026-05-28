@@ -67,12 +67,18 @@ class _KnobFeedback extends StatelessWidget {
             border: Border.all(color: (stroke ?? Colors.white24), width: 1.6),
           ),
           alignment: Alignment.center,
-          child: Text(
-            '$count',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '$count',
+              maxLines: 1,
+              softWrap: false,
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                height: 1,
+              ),
             ),
           ),
         ),
@@ -233,10 +239,11 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
               : (counts[0] > 0
                     ? widget.colors.newOuter
                     : widget.colors.disabledOuter),
-          innerColor: widget.colors.inner,
+          innerColor: widget.colors.innerForStage(0),
           innerStrokeColor: blocked
               ? const Color(0xFFFF8AA0)
-              : widget.colors.innerStroke,
+              : widget.colors.innerStrokeForStage(0),
+          countColor: widget.colors.numberForStage(0),
           highlight: locked || blocked ? false : counts[0] > 0,
           completed: false,
           label: widget.labels.newLabel,
@@ -268,12 +275,13 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
           outerColor: counts[stage] > 0
               ? blocked
                     ? const Color(0xFFFF4B6E)
-                    : widget.colors.stageOuter
+                    : widget.colors.outerForStage(stage)
               : widget.colors.disabledOuter,
-          innerColor: widget.colors.inner,
+          innerColor: widget.colors.innerForStage(stage),
           innerStrokeColor: blocked
               ? const Color(0xFFFF8AA0)
-              : widget.colors.innerStroke,
+              : widget.colors.innerStrokeForStage(stage),
+          countColor: widget.colors.numberForStage(stage),
           highlight:
               !blocked &&
               counts[stage] > 0 &&
@@ -299,8 +307,8 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
             childWhenDragging: Opacity(opacity: 0.35, child: knob),
             feedback: _KnobFeedback(
               count: counts[stage],
-              innerColor: widget.colors.inner,
-              stroke: widget.colors.innerStroke,
+              innerColor: widget.colors.innerForStage(stage),
+              stroke: widget.colors.innerStrokeForStage(stage),
             ),
             dragAnchorStrategy: knobDragAnchorStrategy,
             feedbackOffset: Offset.zero,
@@ -628,8 +636,10 @@ class _StageSwitchRowState extends State<StageSwitchRow>
                     : (s[0] > 0
                           ? (widget.colors?.newOuter ?? const Color(0xFFA05260))
                           : (widget.colors?.disabledOuter ?? Colors.grey)),
-                innerColor: widget.colors?.inner ?? const Color(0xFF2D2C2C),
-                innerStrokeColor: widget.colors?.innerStroke,
+                innerColor:
+                    widget.colors?.innerForStage(0) ?? const Color(0xFF2D2C2C),
+                innerStrokeColor: widget.colors?.innerStrokeForStage(0),
+                countColor: widget.colors?.numberForStage(0),
                 highlight: locked ? false : (s[0] > 0),
                 completed: false,
                 label: widget.labels?.newLabel ?? 'New',
@@ -668,10 +678,11 @@ class _StageSwitchRowState extends State<StageSwitchRow>
               containerKey: widget.switchKeys?[stage],
               count: s[stage],
               outerColor: s[stage] > 0
-                  ? (widget.colors?.stageOuter ?? Colors.yellow)
+                  ? (widget.colors?.outerForStage(stage) ?? Colors.yellow)
                   : (widget.colors?.disabledOuter ?? Colors.white),
-              innerColor: widget.colors?.inner ?? Colors.grey,
-              innerStrokeColor: widget.colors?.innerStroke,
+              innerColor: widget.colors?.innerForStage(stage) ?? Colors.grey,
+              innerStrokeColor: widget.colors?.innerStrokeForStage(stage),
+              countColor: widget.colors?.numberForStage(stage),
               highlight: s[stage] > 0 && s[stage] < goal,
               completed: s[stage] >= goal,
               label: '$prefix$stage',
@@ -688,8 +699,9 @@ class _StageSwitchRowState extends State<StageSwitchRow>
                 childWhenDragging: Opacity(opacity: 0.35, child: knob),
                 feedback: _KnobFeedback(
                   count: s[stage],
-                  innerColor: widget.colors?.inner ?? Colors.grey,
-                  stroke: widget.colors?.innerStroke,
+                  innerColor:
+                      widget.colors?.innerForStage(stage) ?? Colors.grey,
+                  stroke: widget.colors?.innerStrokeForStage(stage),
                 ),
                 dragAnchorStrategy: knobDragAnchorStrategy,
                 feedbackOffset: Offset.zero,
@@ -817,7 +829,11 @@ class _StageSwitchRowState extends State<StageSwitchRow>
                     : (stages[0] > 0
                           ? WordsUIConstants.stageInnerRed
                           : WordsUIConstants.stageInactive),
-                innerColor: WordsUIConstants.stageInnerDark,
+                innerColor:
+                    widget.colors?.innerForStage(0) ??
+                    WordsUIConstants.stageInnerDark,
+                innerStrokeColor: widget.colors?.innerStrokeForStage(0),
+                countColor: widget.colors?.numberForStage(0),
                 highlight: locked ? false : (stages[0] > 0),
                 completed: false,
                 label: 'New',
@@ -837,9 +853,14 @@ class _StageSwitchRowState extends State<StageSwitchRow>
               containerKey: widget.switchKeys?[stage],
               count: stages[stage],
               outerColor: stages[stage] > 0
-                  ? WordsUIConstants.stageOuter
+                  ? (widget.colors?.outerForStage(stage) ??
+                        WordsUIConstants.stageOuter)
                   : WordsUIConstants.stageInactive,
-              innerColor: WordsUIConstants.stageInner,
+              innerColor:
+                  widget.colors?.innerForStage(stage) ??
+                  WordsUIConstants.stageInner,
+              innerStrokeColor: widget.colors?.innerStrokeForStage(stage),
+              countColor: widget.colors?.numberForStage(stage),
               highlight:
                   stages[stage] > 0 &&
                   stages[stage] < WordsUIConstants.stageGoal,
@@ -966,17 +987,37 @@ class StageSwitchSizes {
 class StageSwitchColors {
   final Color newOuter;
   final Color stageOuter;
+  final Map<int, Color> stageOuterOverrides;
   final Color inner;
   final Color disabledOuter;
   final Color? innerStroke; // NEU
+  final Map<int, Color> innerOverrides;
+  final Map<int, Color> innerStrokeOverrides;
+  final Map<int, Color> numberOverrides;
 
   const StageSwitchColors({
     required this.newOuter,
     required this.stageOuter,
+    this.stageOuterOverrides = const {},
     required this.inner,
     required this.disabledOuter,
     this.innerStroke,
+    this.innerOverrides = const {},
+    this.innerStrokeOverrides = const {},
+    this.numberOverrides = const {},
   });
+
+  Color outerForStage(int stage) {
+    if (stage == 0) return newOuter;
+    return stageOuterOverrides[stage] ?? stageOuter;
+  }
+
+  Color innerForStage(int stage) => innerOverrides[stage] ?? inner;
+
+  Color? innerStrokeForStage(int stage) =>
+      innerStrokeOverrides[stage] ?? innerStroke;
+
+  Color? numberForStage(int stage) => numberOverrides[stage];
 }
 
 class StageSwitchLabels {

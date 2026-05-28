@@ -47,9 +47,10 @@ import 'package:talvori/features/words/ui/theme/theme.dart';
 import 'package:talvori/features/words/ui/widgets/srs_mode_toggle_with_hint.dart';
 import 'package:talvori/features/words/application/learn_navigation_origin.dart';
 import 'package:talvori/features/words/application/srs_mode_controller.dart';
-import 'package:talvori/features/words/ui/widgets/category_settings_dialog.dart';
+import 'package:talvori/features/words/ui/widgets/category_settings_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/category_detail_hint_bubble.dart';
 import 'package:talvori/features/words/application/learn_mode_controller.dart';
+import 'package:talvori/features/words/application/category_design_preferences.dart';
 import 'package:talvori/features/words/application/word_providers.dart';
 import 'package:talvori/features/words/application/s0_lock_provider.dart';
 import 'package:talvori/features/words/application/tooltip_settings_provider.dart'
@@ -473,8 +474,95 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         const CategoryDetailDebugLocalButtonPresenter().present(
           debugLocalStartPath,
         );
-
+    final currentDesign = ref
+        .watch(categoryDesignPreferencesProvider(currentId))
+        .maybeWhen(
+          data: (value) => value,
+          orElse: () => const CategoryDesignPreferences(),
+        );
+    final headerAccent =
+        currentDesign.styleFor(CategoryDesignElement.categoryHeader).color ??
+        kAccentBlue;
+    final headerFill = currentDesign
+        .styleFor(CategoryDesignElement.categoryHeaderFill)
+        .color;
+    final headerText = currentDesign
+        .styleFor(CategoryDesignElement.categoryHeaderText)
+        .color;
+    final vocabsAccent =
+        currentDesign.styleFor(CategoryDesignElement.vocabsTile).color ??
+        kAccentBlue;
+    final vocabsFill = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileFill)
+        .color;
+    final vocabsText = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileText)
+        .color;
+    final vocabsIcon = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileIcon)
+        .color;
+    final vocabsCounterAccent = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterBadge)
+        .color;
+    final vocabsCounterFill = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterFill)
+        .color;
+    final vocabsCounterText = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterText)
+        .color;
+    final addAccent =
+        currentDesign.styleFor(CategoryDesignElement.addButton).color ??
+        kAccentBlue;
+    final addFill = currentDesign
+        .styleFor(CategoryDesignElement.addButtonFill)
+        .color;
+    final addIcon = currentDesign
+        .styleFor(CategoryDesignElement.addButtonIcon)
+        .color;
+    final settingsAccent =
+        currentDesign.styleFor(CategoryDesignElement.settingsButton).color ??
+        kAccentBlue;
+    final settingsFill = currentDesign
+        .styleFor(CategoryDesignElement.settingsButtonFill)
+        .color;
+    final settingsIcon = currentDesign
+        .styleFor(CategoryDesignElement.settingsButtonIcon)
+        .color;
+    final categoryBackground = currentDesign
+        .styleFor(CategoryDesignElement.categoryBackground)
+        .color;
+    final categoryWheelFade = currentDesign
+        .styleFor(CategoryDesignElement.categoryWheelFade)
+        .color;
+    final timeModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButton)
+        .color;
+    final timeModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButtonFill)
+        .color;
+    final timeModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButtonText)
+        .color;
+    final unlimitedModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButton)
+        .color;
+    final unlimitedModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButtonFill)
+        .color;
+    final unlimitedModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButtonText)
+        .color;
+    final combinedModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButton)
+        .color;
+    final combinedModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButtonFill)
+        .color;
+    final combinedModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButtonText)
+        .color;
     return _buildCategoryDetailFrame(
+      backgroundColor: categoryBackground,
       onPointerDown: (_) {
         if (ref.read(returnedFromLearnSessionProvider)) {
           ref.read(userHasInteractedWithModeProvider.notifier).state = true;
@@ -525,9 +613,12 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               TalvoriSnackBar.show(context, message: 'Add tapped');
             },
             onSettings: () {
-              showDialog(
+              showCategorySettingsSheet(
                 context: context,
-                builder: (_) => const CategorySettingsDialog(),
+                categoryId: currentId,
+                categoryLabel: cats.isNotEmpty && validSelIndex < cats.length
+                    ? cats[validSelIndex].name
+                    : widget.title,
               );
             },
             // Offsets wie im Learn-Mode:
@@ -540,8 +631,25 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
             rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
             wheelBottomGap: WordsLayout.wheelBottomGap,
-            accentColor: kAccentBlue,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            accentColor: headerAccent,
+            headerFillColor: headerFill,
+            headerTextColor: headerText,
+            wheelFadeColor: categoryWheelFade ?? categoryBackground,
+            vocabsAccentColor: vocabsAccent,
+            vocabsFillColor: vocabsFill,
+            vocabsTextColor: vocabsText,
+            vocabsIconColor: vocabsIcon,
+            vocabsCounterAccentColor: vocabsCounterAccent,
+            vocabsCounterFillColor: vocabsCounterFill,
+            vocabsCounterTextColor: vocabsCounterText,
+            addButtonAccentColor: addAccent,
+            addButtonFillColor: addFill,
+            addButtonIconColor: addIcon,
+            settingsButtonAccentColor: settingsAccent,
+            settingsButtonFillColor: settingsFill,
+            settingsButtonIconColor: settingsIcon,
+            backgroundColor:
+                categoryBackground ?? Theme.of(context).scaffoldBackgroundColor,
             trailingRightBelow: SrsModeToggleWithHint(
               onUserTap: () {
                 ref.read(userHasInteractedWithModeProvider.notifier).state =
@@ -593,8 +701,19 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 height: _levelsCardWithLearningModeH,
                 stages: displayStages,
                 goalPerStage: 100,
-                learningModeSelector: const LearningModeSelector(),
+                learningModeSelector: LearningModeSelector(
+                  timeAccentColor: timeModeAccent,
+                  timeFillColor: timeModeFill,
+                  timeTextColor: timeModeText,
+                  unlimitedAccentColor: unlimitedModeAccent,
+                  unlimitedFillColor: unlimitedModeFill,
+                  unlimitedTextColor: unlimitedModeText,
+                  combinedAccentColor: combinedModeAccent,
+                  combinedFillColor: combinedModeFill,
+                  combinedTextColor: combinedModeText,
+                ),
                 mode: mode,
+                designPreferences: currentDesign,
                 selectingSingle: selecting,
                 visibleMask: mask,
                 categoryId: currentId.isEmpty ? null : currentId, // Für Dialog
@@ -762,6 +881,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     required List<Widget> children,
     PointerDownEventListener? onPointerDown,
     bool scrollable = false,
+    Color? backgroundColor,
   }) {
     final content = scrollable
         ? LayoutBuilder(
@@ -777,6 +897,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         : Column(children: children);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -1139,8 +1260,109 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
       ref.invalidate(localStageCountsProvider(stageCountsRequest));
     }
 
+    final currentDesign = ref
+        .watch(categoryDesignPreferencesProvider(selectedCategoryId))
+        .maybeWhen(
+          data: (value) => value,
+          orElse: () => const CategoryDesignPreferences(),
+        );
+    final headerAccent =
+        currentDesign.styleFor(CategoryDesignElement.categoryHeader).color ??
+        kAccentBlue;
+    final headerFill = currentDesign
+        .styleFor(CategoryDesignElement.categoryHeaderFill)
+        .color;
+    final headerText = currentDesign
+        .styleFor(CategoryDesignElement.categoryHeaderText)
+        .color;
+    final vocabsAccent =
+        currentDesign.styleFor(CategoryDesignElement.vocabsTile).color ??
+        kAccentBlue;
+    final vocabsFill = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileFill)
+        .color;
+    final vocabsText = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileText)
+        .color;
+    final vocabsIcon = currentDesign
+        .styleFor(CategoryDesignElement.vocabsTileIcon)
+        .color;
+    final vocabsCounterAccent = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterBadge)
+        .color;
+    final vocabsCounterFill = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterFill)
+        .color;
+    final vocabsCounterText = currentDesign
+        .styleFor(CategoryDesignElement.vocabsCounterText)
+        .color;
+    final addAccent =
+        currentDesign.styleFor(CategoryDesignElement.addButton).color ??
+        kAccentBlue;
+    final addFill = currentDesign
+        .styleFor(CategoryDesignElement.addButtonFill)
+        .color;
+    final addIcon = currentDesign
+        .styleFor(CategoryDesignElement.addButtonIcon)
+        .color;
+    final settingsAccent =
+        currentDesign.styleFor(CategoryDesignElement.settingsButton).color ??
+        kAccentBlue;
+    final settingsFill = currentDesign
+        .styleFor(CategoryDesignElement.settingsButtonFill)
+        .color;
+    final settingsIcon = currentDesign
+        .styleFor(CategoryDesignElement.settingsButtonIcon)
+        .color;
+    final stageAccent =
+        currentDesign.styleFor(CategoryDesignElement.stageSwitches).color ??
+        const Color(0xFFB36BFF);
+    final categoryBackground = currentDesign
+        .styleFor(CategoryDesignElement.categoryBackground)
+        .color;
+    final categoryWheelFade = currentDesign
+        .styleFor(CategoryDesignElement.categoryWheelFade)
+        .color;
+    final timeModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButton)
+        .color;
+    final timeModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButtonFill)
+        .color;
+    final timeModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeTimeButtonText)
+        .color;
+    final unlimitedModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButton)
+        .color;
+    final unlimitedModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButtonFill)
+        .color;
+    final unlimitedModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeUnlimitedButtonText)
+        .color;
+    final combinedModeAccent = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButton)
+        .color;
+    final combinedModeFill = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButtonFill)
+        .color;
+    final combinedModeText = currentDesign
+        .styleFor(CategoryDesignElement.learningModeCombinedButtonText)
+        .color;
+    final resetAccent =
+        currentDesign.styleFor(CategoryDesignElement.resetButton).color ??
+        const Color(0xFFF5BFCB);
+    final resetFill = currentDesign
+        .styleFor(CategoryDesignElement.resetButtonFill)
+        .color;
+    final resetIcon = currentDesign
+        .styleFor(CategoryDesignElement.resetButtonIcon)
+        .color;
+
     return _buildCategoryDetailFrame(
       scrollable: true,
+      backgroundColor: categoryBackground,
       children: [
         SizedBox(
           height: WordsLayout.topCapsuleH,
@@ -1197,9 +1419,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 );
               },
               onSettings: () {
-                TalvoriSnackBar.show(
-                  context,
-                  message: 'Lokale Einstellungen noch nicht angebunden',
+                showCategorySettingsSheet(
+                  context: context,
+                  categoryId: selectedCategoryId,
+                  categoryLabel:
+                      selectedLocalCategoryItem?.displayLabel ?? title,
                 );
               },
               wheelOffsetX: WordsLayout.wheelOffsetX,
@@ -1211,8 +1435,26 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               rightBtnsOffsetX: WordsLayout.rightBtnsOffsetX,
               rightBtnsOffsetY: WordsLayout.rightBtnsOffsetY,
               wheelBottomGap: WordsLayout.wheelBottomGap,
-              accentColor: kAccentBlue,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              accentColor: headerAccent,
+              headerFillColor: headerFill,
+              headerTextColor: headerText,
+              wheelFadeColor: categoryWheelFade ?? categoryBackground,
+              vocabsAccentColor: vocabsAccent,
+              vocabsFillColor: vocabsFill,
+              vocabsTextColor: vocabsText,
+              vocabsIconColor: vocabsIcon,
+              vocabsCounterAccentColor: vocabsCounterAccent,
+              vocabsCounterFillColor: vocabsCounterFill,
+              vocabsCounterTextColor: vocabsCounterText,
+              addButtonAccentColor: addAccent,
+              addButtonFillColor: addFill,
+              addButtonIconColor: addIcon,
+              settingsButtonAccentColor: settingsAccent,
+              settingsButtonFillColor: settingsFill,
+              settingsButtonIconColor: settingsIcon,
+              backgroundColor:
+                  categoryBackground ??
+                  Theme.of(context).scaffoldBackgroundColor,
               neonStyle: true,
             ),
           ),
@@ -1234,6 +1476,24 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             useFixedStageLayout: true,
             learningModeBelowStages: true,
             stageSectionLabel: 'Merkstufen',
+            repeatSectionAccentColor: currentDesign
+                .styleFor(CategoryDesignElement.sectionTitleRepeat)
+                .color,
+            stageSectionAccentColor: currentDesign
+                .styleFor(CategoryDesignElement.sectionTitleStages)
+                .color,
+            modeSectionAccentColor: currentDesign
+                .styleFor(CategoryDesignElement.sectionTitleMode)
+                .color,
+            startAccentColor: currentDesign
+                .styleFor(CategoryDesignElement.startButton)
+                .color,
+            startFillColor: currentDesign
+                .styleFor(CategoryDesignElement.startButtonFill)
+                .color,
+            startTextColor: currentDesign
+                .styleFor(CategoryDesignElement.startButtonText)
+                .color,
             repeatSectionTopGap: 0,
             stageSectionLabelAlignment: Alignment.bottomCenter,
             stageSectionLabelBottomGap: 12,
@@ -1241,6 +1501,15 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             startTopGap: 42,
             learningModeSelector: LearningModeSelectorView(
               selectedMode: selectedLearningMode,
+              timeAccentColor: timeModeAccent,
+              timeFillColor: timeModeFill,
+              timeTextColor: timeModeText,
+              unlimitedAccentColor: unlimitedModeAccent,
+              unlimitedFillColor: unlimitedModeFill,
+              unlimitedTextColor: unlimitedModeText,
+              combinedAccentColor: combinedModeAccent,
+              combinedFillColor: combinedModeFill,
+              combinedTextColor: combinedModeText,
               onModeSelected: (mode) {
                 _stopSingleStagePracticePulse();
                 ref.read(srsModeControllerProvider.notifier).setMode(mode);
@@ -1251,6 +1520,24 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             ),
             levelSelector: LevelSelectorButtonsView(
               mode: selectedReviewMode,
+              allStagesAccentColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatAllStagesButton)
+                  .color,
+              allStagesFillColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatAllStagesButtonFill)
+                  .color,
+              allStagesTextColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatAllStagesButtonText)
+                  .color,
+              singleStageAccentColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatSingleStageButton)
+                  .color,
+              singleStageFillColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatSingleStageButtonFill)
+                  .color,
+              singleStageTextColor: currentDesign
+                  .styleFor(CategoryDesignElement.repeatSingleStageButtonText)
+                  .color,
               onModeChanged: (mode) {
                 ref.read(levelSelectionProvider.notifier).state = mode;
                 ref.read(selectingSingleProvider.notifier).state =
@@ -1308,12 +1595,111 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 newNote: '0',
                 stagePrefix: 'T',
               ),
-              colors: const StageSwitchColors(
-                newOuter: Color(0xFF8DBBFF),
-                stageOuter: Color(0xFF8DBBFF),
-                inner: Color(0xFF0B0B0D),
-                disabledOuter: Color(0xFFE9F1FF),
-                innerStroke: Color(0xFFB36BFF),
+              colors: StageSwitchColors(
+                newOuter:
+                    currentDesign
+                        .styleFor(CategoryDesignElement.stageSwitch0)
+                        .color ??
+                    const Color(0xFF8DBBFF),
+                stageOuter:
+                    currentDesign
+                        .styleFor(CategoryDesignElement.stageSwitches)
+                        .color ??
+                    const Color(0xFF8DBBFF),
+                stageOuterOverrides: {
+                  1:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch1)
+                          .color ??
+                      const Color(0xFF8DBBFF),
+                  2:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch2)
+                          .color ??
+                      const Color(0xFF8DBBFF),
+                  3:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch3)
+                          .color ??
+                      const Color(0xFF8DBBFF),
+                  4:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch4)
+                          .color ??
+                      const Color(0xFF8DBBFF),
+                  5:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch5)
+                          .color ??
+                      const Color(0xFF8DBBFF),
+                },
+                inner: const Color(0xFF0B0B0D),
+                disabledOuter: const Color(0xFFE9F1FF),
+                innerStroke: stageAccent,
+                innerOverrides: {
+                  0:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch0Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                  1:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch1Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                  2:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch2Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                  3:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch3Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                  4:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch4Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                  5:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch5Inner)
+                          .color ??
+                      const Color(0xFF0B0B0D),
+                },
+                numberOverrides: {
+                  0:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch0Number)
+                          .color ??
+                      Colors.white,
+                  1:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch1Number)
+                          .color ??
+                      Colors.white,
+                  2:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch2Number)
+                          .color ??
+                      Colors.white,
+                  3:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch3Number)
+                          .color ??
+                      Colors.white,
+                  4:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch4Number)
+                          .color ??
+                      Colors.white,
+                  5:
+                      currentDesign
+                          .styleFor(CategoryDesignElement.stageSwitch5Number)
+                          .color ??
+                      Colors.white,
+                },
               ),
               onTapStage: selectedReviewMode == LevelSelectionMode.single
                   ? null
@@ -1321,6 +1707,9 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             ),
             startTrailingControl: _LocalResetButton(
               onPressed: resetLocalProgress,
+              accentColor: resetAccent,
+              fillColor: resetFill,
+              iconColor: resetIcon,
             ),
           ),
         ),
@@ -1331,9 +1720,17 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 }
 
 class _LocalResetButton extends StatelessWidget {
-  const _LocalResetButton({required this.onPressed});
+  const _LocalResetButton({
+    required this.onPressed,
+    this.accentColor = const Color(0xFFF5BFCB),
+    this.fillColor,
+    this.iconColor,
+  });
 
   final VoidCallback onPressed;
+  final Color accentColor;
+  final Color? fillColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1348,15 +1745,21 @@ class _LocalResetButton extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
+            color: fillColor,
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF1A1A1D), Color(0xFF050505)],
+              colors: fillColor == null
+                  ? const [Color(0xFF1A1A1D), Color(0xFF050505)]
+                  : [
+                      fillColor!.withValues(alpha: 0.95),
+                      fillColor!.withValues(alpha: 0.72),
+                    ],
             ),
-            border: Border.all(color: Color(0xFFF5BFCB), width: 1.4),
+            border: Border.all(color: accentColor, width: 1.4),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFF5BFCB).withValues(alpha: 0.2),
+                color: accentColor.withValues(alpha: 0.2),
                 blurRadius: 10,
                 spreadRadius: 0.2,
               ),
@@ -1373,9 +1776,9 @@ class _LocalResetButton extends StatelessWidget {
                 width: 0.8,
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.restart_alt_rounded,
-              color: Colors.white,
+              color: iconColor ?? Colors.white,
               size: 23,
             ),
           ),

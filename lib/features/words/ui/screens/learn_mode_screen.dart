@@ -18,6 +18,7 @@ import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/core/srs/models/training_area.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/words/application/application.dart';
+import 'package:talvori/features/words/application/category_design_preferences.dart';
 import 'package:talvori/features/words/application/level_selection_provider.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
 import 'package:talvori/features/words/ui/ui_constants.dart';
@@ -929,6 +930,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       }
     });
 
+    final designCategoryId = widget.localCategoryId ?? widget.categoryId;
+    final designPreferences = ref
+        .watch(categoryDesignPreferencesProvider(designCategoryId))
+        .maybeWhen(
+          data: (value) => value,
+          orElse: () => const CategoryDesignPreferences(),
+        );
+
     Widget switchesRow;
     if (s.categoryMastered) {
       // Kategorie absolviert: Switch verschwindet, Mastered-Zahl blinkend in der Mitte
@@ -1044,11 +1053,110 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           knobBottom: 18,
         ),
         colors: StageSwitchColors(
-          newOuter: const Color(0xFFA05260),
-          stageOuter: const Color(0xFFE4B866),
+          newOuter:
+              designPreferences
+                  .styleFor(CategoryDesignElement.learnStageSwitch0)
+                  .color ??
+              const Color(0xFFA05260),
+          stageOuter:
+              designPreferences
+                  .styleFor(CategoryDesignElement.learnStages)
+                  .color ??
+              const Color(0xFFE4B866),
+          stageOuterOverrides: {
+            1:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch1)
+                    .color ??
+                const Color(0xFFE4B866),
+            2:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch2)
+                    .color ??
+                const Color(0xFFE4B866),
+            3:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch3)
+                    .color ??
+                const Color(0xFFE4B866),
+            4:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch4)
+                    .color ??
+                const Color(0xFFE4B866),
+            5:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch5)
+                    .color ??
+                const Color(0xFFE4B866),
+          },
           inner: innerFill,
           disabledOuter: Colors.white,
           innerStroke: stroke,
+          innerOverrides: {
+            0:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch0Inner)
+                    .color ??
+                innerFill,
+            1:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch1Inner)
+                    .color ??
+                innerFill,
+            2:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch2Inner)
+                    .color ??
+                innerFill,
+            3:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch3Inner)
+                    .color ??
+                innerFill,
+            4:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch4Inner)
+                    .color ??
+                innerFill,
+            5:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch5Inner)
+                    .color ??
+                innerFill,
+          },
+          numberOverrides: {
+            0:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch0Number)
+                    .color ??
+                Colors.white,
+            1:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch1Number)
+                    .color ??
+                Colors.white,
+            2:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch2Number)
+                    .color ??
+                Colors.white,
+            3:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch3Number)
+                    .color ??
+                Colors.white,
+            4:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch4Number)
+                    .color ??
+                Colors.white,
+            5:
+                designPreferences
+                    .styleFor(CategoryDesignElement.learnStageSwitch5Number)
+                    .color ??
+                Colors.white,
+          },
         ),
         labels: StageSwitchLabels(
           newLabel: 'New',
@@ -1066,7 +1174,29 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       );
     }
 
+    final learnBackgroundOverride = designPreferences
+        .styleFor(CategoryDesignElement.learnBackground)
+        .color;
+    final learnCardBorderStyle =
+        designPreferences.overrides[CategoryDesignElement.learnCardBorder];
+    final learnCardGlowStyle =
+        designPreferences.overrides[CategoryDesignElement.learnCardGlow] ??
+        learnCardBorderStyle;
+    final pulseEnabled =
+        learnCardGlowStyle == null ||
+        learnCardGlowStyle.pulse != CategoryDesignPulseStrength.off;
+    final learnHeaderAccent = designPreferences
+        .styleFor(CategoryDesignElement.learnHeader)
+        .color;
+    final learnHeaderFill = designPreferences
+        .styleFor(CategoryDesignElement.learnHeaderFill)
+        .color;
+    final learnHeaderText = designPreferences
+        .styleFor(CategoryDesignElement.learnHeaderText)
+        .color;
+
     return Scaffold(
+      backgroundColor: learnBackgroundOverride,
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -1103,6 +1233,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                         }
                       : null,
                   // ⬇️ NEU: Custom Back-Button-Handler mit Navigation-Logik
+                  activeStrokeColor: learnHeaderAccent,
+                  activeFillColor: learnHeaderFill,
+                  activeTextColor: learnHeaderText,
+                  showWheelEdgeFade: false,
                   onBack: () => _handleBackNavigation(context),
                 ),
                 CardArea(
@@ -1113,6 +1247,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       _handleDragReturn, // ← NEU: Link wieder anzeigen wenn Karte zurückkommt
                   onSwipeCommit: _handleSwipeCommit, // ← NEU: Pulse-Animation
                   onSettingsTap: () => showCardGlowSettingsPopup(context),
+                  designPreferences: designPreferences,
                   passCountButtonKey: passCountButtonKey,
                   onSwipeWillStart: _handleSwipeWillStart,
                 ),
@@ -1140,7 +1275,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       switchRect: switchRect,
                       phase: fx.value,
                       visible:
-                          _plasmaLinkEnabled && linkVisible && !hideForMastered,
+                          _plasmaLinkEnabled &&
+                          linkVisible &&
+                          !hideForMastered &&
+                          pulseEnabled,
                     ),
                     size: Size.infinite,
                   );
@@ -1154,7 +1292,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                 animation: pulse,
                 builder: (_, __) {
                   if (!mounted) return const SizedBox.shrink();
-                  if (ref.read(learnModeControllerProvider).categoryMastered) {
+                  if (!pulseEnabled ||
+                      ref.read(learnModeControllerProvider).categoryMastered) {
                     return const SizedBox.shrink();
                   }
                   GlobalKey? targetKey;
@@ -1359,6 +1498,90 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
     Widget cardContent;
     final isLocalPracticeMode = widget.localPracticeSelection != null;
+    final designCategoryId = localCategoryId ?? widget.categoryId;
+    final designPreferences = ref
+        .watch(categoryDesignPreferencesProvider(designCategoryId))
+        .maybeWhen(
+          data: (value) => value,
+          orElse: () => const CategoryDesignPreferences(),
+        );
+    final learnCardStyle =
+        designPreferences.overrides[CategoryDesignElement.learnCard];
+    final learnCardBorderStyle =
+        designPreferences.overrides[CategoryDesignElement.learnCardBorder];
+    final learnCardGlowStyle =
+        designPreferences.overrides[CategoryDesignElement.learnCardGlow] ??
+        learnCardBorderStyle;
+    final learnCardGlowAccent =
+        learnCardGlowStyle?.color ??
+        CategoryDesignDefaults.accentFor(CategoryDesignElement.learnCardGlow);
+    final learnCardBackground = learnCardStyle?.color?.withValues(alpha: 0.18);
+    final learnCardGlow =
+        learnCardGlowStyle?.glow == CategoryDesignGlowStrength.off
+        ? Colors.transparent
+        : learnCardGlowStyle == null
+        ? null
+        : learnCardGlowAccent;
+    final learnCardGlowIntensity = CategoryDesignDefaults.glowIntensityFor(
+      learnCardGlowStyle?.glow ?? CategoryDesignGlowStrength.normal,
+    );
+    final learnCardPulseSpeed = CategoryDesignDefaults.pulseSpeedFor(
+      learnCardGlowStyle?.pulse ?? CategoryDesignPulseStrength.normal,
+    );
+    final learnBackgroundOverride = designPreferences
+        .styleFor(CategoryDesignElement.learnBackground)
+        .color;
+    final pulseEnabled =
+        learnCardGlowStyle == null ||
+        learnCardGlowStyle.pulse != CategoryDesignPulseStrength.off;
+    final learnHeaderAccent = designPreferences
+        .styleFor(CategoryDesignElement.learnHeader)
+        .color;
+    final learnHeaderFill = designPreferences
+        .styleFor(CategoryDesignElement.learnHeaderFill)
+        .color;
+    final learnHeaderText = designPreferences
+        .styleFor(CategoryDesignElement.learnHeaderText)
+        .color;
+    final learnWordTextAccent = designPreferences
+        .styleFor(CategoryDesignElement.learnWordText)
+        .color;
+    final learnAudioAccent = designPreferences
+        .styleFor(CategoryDesignElement.audioButton)
+        .color;
+    final learnAudioFill = designPreferences
+        .styleFor(CategoryDesignElement.audioButtonFill)
+        .color;
+    final learnAudioIcon = designPreferences
+        .styleFor(CategoryDesignElement.audioButtonIcon)
+        .color;
+    final learnLevelBadgeAccent = designPreferences
+        .styleFor(CategoryDesignElement.levelBadge)
+        .color;
+    final learnLevelBadgeFill = designPreferences
+        .styleFor(CategoryDesignElement.levelBadgeFill)
+        .color;
+    final learnLevelBadgeText = designPreferences
+        .styleFor(CategoryDesignElement.levelBadgeText)
+        .color;
+    final learnFavoriteAccent = designPreferences
+        .styleFor(CategoryDesignElement.favoriteButton)
+        .color;
+    final learnFavoriteFill = designPreferences
+        .styleFor(CategoryDesignElement.favoriteButtonFill)
+        .color;
+    final learnFavoriteIcon = designPreferences
+        .styleFor(CategoryDesignElement.favoriteButtonIcon)
+        .color;
+    final learnKnownAccent = designPreferences
+        .styleFor(CategoryDesignElement.knownButton)
+        .color;
+    final learnKnownFill = designPreferences
+        .styleFor(CategoryDesignElement.knownButtonFill)
+        .color;
+    final learnKnownIcon = designPreferences
+        .styleFor(CategoryDesignElement.knownButtonIcon)
+        .color;
 
     if (isLocalPracticeMode &&
         localCategoryId != null &&
@@ -1424,9 +1647,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                           srsStage: null,
                           cardWidth: cardWidth,
                           cardHeight: cardHeight,
-                          cardBackgroundColor: const Color(0xFF071A22),
-                          cardBorderColor: const Color(0xFF5DDCFF),
-                          cardGlowColor: const Color(0xFF29F4FF),
+                          cardBackgroundColor:
+                              learnCardBackground ?? const Color(0xFF071A22),
+                          cardBorderColor:
+                              learnCardBorderStyle?.color ??
+                              const Color(0xFF5DDCFF),
+                          cardGlowColor:
+                              learnCardGlow ?? const Color(0xFF29F4FF),
+                          cardGlowIntensity: learnCardGlowIntensity,
+                          cardPulseSpeed: learnCardPulseSpeed,
+                          wordTextColor: learnWordTextAccent,
+                          audioAccentColor: learnAudioAccent,
+                          audioFillColor: learnAudioFill,
+                          audioIconColor: learnAudioIcon,
+                          levelBadgeColor: learnLevelBadgeAccent,
+                          levelBadgeFillColor: learnLevelBadgeFill,
+                          levelBadgeTextColor: learnLevelBadgeText,
+                          pulseEnabled: pulseEnabled,
                           onFlip: () {
                             setState(
                               () => _localPracticeShowTranslation =
@@ -1538,6 +1775,19 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                         level: null,
                         showTranslation: _localReplayShowTranslation,
                         gesturesEnabled: true,
+                        cardBackgroundColor: learnCardBackground,
+                        cardBorderColor: learnCardBorderStyle?.color,
+                        cardGlowColor: learnCardGlow,
+                        cardGlowIntensity: learnCardGlowIntensity,
+                        cardPulseSpeed: learnCardPulseSpeed,
+                        wordTextColor: learnWordTextAccent,
+                        audioAccentColor: learnAudioAccent,
+                        audioFillColor: learnAudioFill,
+                        audioIconColor: learnAudioIcon,
+                        levelBadgeColor: learnLevelBadgeAccent,
+                        levelBadgeFillColor: learnLevelBadgeFill,
+                        levelBadgeTextColor: learnLevelBadgeText,
+                        pulseEnabled: pulseEnabled,
                         onFlip: () {
                           setState(
                             () => _localReplayShowTranslation =
@@ -1598,7 +1848,26 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         quickActions: _LocalLearnModeQuickActions(
           onAddToTagesimpuls: addCurrentWordToTagesimpuls,
           onAddToFavorites: addCurrentWordToFavorites,
+          favoriteAccentColor: learnFavoriteAccent,
+          favoriteFillColor: learnFavoriteFill,
+          favoriteIconColor: learnFavoriteIcon,
+          knownAccentColor: learnKnownAccent,
+          knownFillColor: learnKnownFill,
+          knownIconColor: learnKnownIcon,
         ),
+        cardBackgroundColor: learnCardBackground,
+        cardBorderColor: learnCardBorderStyle?.color,
+        cardGlowColor: learnCardGlow,
+        cardGlowIntensity: learnCardGlowIntensity,
+        cardPulseSpeed: learnCardPulseSpeed,
+        wordTextColor: learnWordTextAccent,
+        audioAccentColor: learnAudioAccent,
+        audioFillColor: learnAudioFill,
+        audioIconColor: learnAudioIcon,
+        levelBadgeColor: learnLevelBadgeAccent,
+        levelBadgeFillColor: learnLevelBadgeFill,
+        levelBadgeTextColor: learnLevelBadgeText,
+        pulseEnabled: pulseEnabled,
         onFlip: () {
           setState(() => _localShowTranslation = !_localShowTranslation);
         },
@@ -1731,7 +2000,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     const visibleMask = [true, true, true, true, true, true];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: learnBackgroundOverride ?? Colors.black,
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -1743,6 +2012,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                   customWheelLabels: [widget.title],
                   customWheelInitialIndex: 0,
                   customOnWheelChanged: (_, _) {},
+                  activeStrokeColor: learnHeaderAccent,
+                  activeFillColor: learnHeaderFill,
+                  activeTextColor: learnHeaderText,
+                  showWheelEdgeFade: false,
                   onBack: () => Navigator.of(context).maybePop(),
                 ),
                 Expanded(child: Center(child: cardFrame)),
@@ -1767,12 +2040,149 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       newNote: '0',
                       stagePrefix: 'T',
                     ),
-                    colors: const StageSwitchColors(
-                      newOuter: Color(0xFF8DBBFF),
-                      stageOuter: Color(0xFF8DBBFF),
-                      inner: Color(0xFF0B0B0D),
-                      disabledOuter: Color(0xFFE9F1FF),
-                      innerStroke: Color(0xFFB36BFF),
+                    colors: StageSwitchColors(
+                      newOuter:
+                          designPreferences
+                              .styleFor(CategoryDesignElement.learnStageSwitch0)
+                              .color ??
+                          const Color(0xFF8DBBFF),
+                      stageOuter:
+                          designPreferences
+                              .styleFor(CategoryDesignElement.learnStages)
+                              .color ??
+                          const Color(0xFF8DBBFF),
+                      stageOuterOverrides: {
+                        1:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch1,
+                                )
+                                .color ??
+                            const Color(0xFF8DBBFF),
+                        2:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch2,
+                                )
+                                .color ??
+                            const Color(0xFF8DBBFF),
+                        3:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch3,
+                                )
+                                .color ??
+                            const Color(0xFF8DBBFF),
+                        4:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch4,
+                                )
+                                .color ??
+                            const Color(0xFF8DBBFF),
+                        5:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch5,
+                                )
+                                .color ??
+                            const Color(0xFF8DBBFF),
+                      },
+                      inner: const Color(0xFF0B0B0D),
+                      disabledOuter: const Color(0xFFE9F1FF),
+                      innerStroke:
+                          designPreferences
+                              .styleFor(CategoryDesignElement.learnStages)
+                              .color ??
+                          const Color(0xFFB36BFF),
+                      innerOverrides: {
+                        0:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch0Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                        1:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch1Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                        2:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch2Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                        3:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch3Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                        4:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch4Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                        5:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch5Inner,
+                                )
+                                .color ??
+                            const Color(0xFF0B0B0D),
+                      },
+                      numberOverrides: {
+                        0:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch0Number,
+                                )
+                                .color ??
+                            Colors.white,
+                        1:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch1Number,
+                                )
+                                .color ??
+                            Colors.white,
+                        2:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch2Number,
+                                )
+                                .color ??
+                            Colors.white,
+                        3:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch3Number,
+                                )
+                                .color ??
+                            Colors.white,
+                        4:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch4Number,
+                                )
+                                .color ??
+                            Colors.white,
+                        5:
+                            designPreferences
+                                .styleFor(
+                                  CategoryDesignElement.learnStageSwitch5Number,
+                                )
+                                .color ??
+                            Colors.white,
+                      },
                     ),
                   ),
                   const SizedBox(height: WordsUIConstants.sectionSpacing),
@@ -1789,7 +2199,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
                       cardRect: cardRect,
                       switchRect: switchRect,
                       phase: fx.value,
-                      visible: _plasmaLinkEnabled && linkVisible,
+                      visible:
+                          _plasmaLinkEnabled && linkVisible && pulseEnabled,
                     ),
                     size: Size.infinite,
                   );
@@ -1800,7 +2211,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
               child: AnimatedBuilder(
                 animation: pulse,
                 builder: (_, __) {
-                  if (!mounted || pulseStage == null) {
+                  if (!mounted || !pulseEnabled || pulseStage == null) {
                     return const SizedBox.shrink();
                   }
                   final targetKey = switchKeys[pulseStage!];
@@ -1920,10 +2331,22 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
   const _LocalLearnModeQuickActions({
     required this.onAddToTagesimpuls,
     required this.onAddToFavorites,
+    this.favoriteAccentColor,
+    this.favoriteFillColor,
+    this.favoriteIconColor,
+    this.knownAccentColor,
+    this.knownFillColor,
+    this.knownIconColor,
   });
 
   final Future<_LocalQuickActionFeedback> Function() onAddToTagesimpuls;
   final Future<_LocalQuickActionFeedback> Function() onAddToFavorites;
+  final Color? favoriteAccentColor;
+  final Color? favoriteFillColor;
+  final Color? favoriteIconColor;
+  final Color? knownAccentColor;
+  final Color? knownFillColor;
+  final Color? knownIconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1935,8 +2358,12 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
           feedbackKey: const ValueKey('local-learn-mode-favorite-feedback'),
           tooltip: 'Zu Favoriten hinzufügen',
           icon: Icons.favorite_rounded,
-          iconColor: const Color(0xFFFF8ACB),
-          borderColor: const Color(0xFFFF8ACB),
+          iconColor:
+              favoriteIconColor ??
+              favoriteAccentColor ??
+              const Color(0xFFFF8ACB),
+          borderColor: favoriteAccentColor ?? const Color(0xFFFF8ACB),
+          fillColor: favoriteFillColor,
           warningColor: const Color(0xFFFFC857),
           onPressed: onAddToFavorites,
         ),
@@ -1946,8 +2373,10 @@ class _LocalLearnModeQuickActions extends StatelessWidget {
           feedbackKey: const ValueKey('local-learn-mode-tagesimpuls-feedback'),
           tooltip: 'Zum Tagesimpuls hinzufügen',
           icon: Icons.add_task_rounded,
-          iconColor: const Color(0xFFB8FFF6),
-          borderColor: const Color(0xFF5DDCFF),
+          iconColor:
+              knownIconColor ?? knownAccentColor ?? const Color(0xFFB8FFF6),
+          borderColor: knownAccentColor ?? const Color(0xFF5DDCFF),
+          fillColor: knownFillColor,
           warningColor: const Color(0xFFFFC857),
           onPressed: onAddToTagesimpuls,
         ),
@@ -1966,6 +2395,7 @@ class _LocalQuickActionButton extends StatefulWidget {
     required this.icon,
     required this.iconColor,
     required this.borderColor,
+    this.fillColor,
     required this.warningColor,
     required this.onPressed,
   });
@@ -1975,6 +2405,7 @@ class _LocalQuickActionButton extends StatefulWidget {
   final IconData icon;
   final Color iconColor;
   final Color borderColor;
+  final Color? fillColor;
   final Color warningColor;
   final Future<_LocalQuickActionFeedback> Function() onPressed;
 
@@ -2071,7 +2502,9 @@ class _LocalQuickActionButtonState extends State<_LocalQuickActionButton> {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF07101A).withValues(alpha: 0.94),
+                      color:
+                          widget.fillColor ??
+                          const Color(0xFF07101A).withValues(alpha: 0.94),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: _showFeedback

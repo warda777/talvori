@@ -15,6 +15,12 @@ class LevelSelectorButtons extends StatelessWidget {
     this.autoButtonKey,
     this.trainingButtonKey,
     this.singleButtonKey,
+    this.allStagesAccentColor,
+    this.allStagesFillColor,
+    this.allStagesTextColor,
+    this.singleStageAccentColor,
+    this.singleStageFillColor,
+    this.singleStageTextColor,
   });
 
   final LevelSelectionMode mode;
@@ -23,6 +29,12 @@ class LevelSelectorButtons extends StatelessWidget {
   final GlobalKey? autoButtonKey;
   final GlobalKey? trainingButtonKey;
   final GlobalKey? singleButtonKey;
+  final Color? allStagesAccentColor;
+  final Color? allStagesFillColor;
+  final Color? allStagesTextColor;
+  final Color? singleStageAccentColor;
+  final Color? singleStageFillColor;
+  final Color? singleStageTextColor;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +45,12 @@ class LevelSelectorButtons extends StatelessWidget {
       autoButtonKey: autoButtonKey,
       trainingButtonKey: trainingButtonKey,
       singleButtonKey: singleButtonKey,
+      allStagesAccentColor: allStagesAccentColor,
+      allStagesFillColor: allStagesFillColor,
+      allStagesTextColor: allStagesTextColor,
+      singleStageAccentColor: singleStageAccentColor,
+      singleStageFillColor: singleStageFillColor,
+      singleStageTextColor: singleStageTextColor,
     );
   }
 }
@@ -46,6 +64,12 @@ class LevelSelectorButtonsView extends StatelessWidget {
     this.autoButtonKey,
     this.trainingButtonKey,
     this.singleButtonKey,
+    this.allStagesAccentColor,
+    this.allStagesFillColor,
+    this.allStagesTextColor,
+    this.singleStageAccentColor,
+    this.singleStageFillColor,
+    this.singleStageTextColor,
   });
 
   final LevelSelectionMode mode;
@@ -54,6 +78,12 @@ class LevelSelectorButtonsView extends StatelessWidget {
   final GlobalKey? autoButtonKey;
   final GlobalKey? trainingButtonKey;
   final GlobalKey? singleButtonKey;
+  final Color? allStagesAccentColor;
+  final Color? allStagesFillColor;
+  final Color? allStagesTextColor;
+  final Color? singleStageAccentColor;
+  final Color? singleStageFillColor;
+  final Color? singleStageTextColor;
 
   static const _w = 112.0;
   static const _h = 38.0;
@@ -69,6 +99,9 @@ class LevelSelectorButtonsView extends StatelessWidget {
           label: 'Alle Stufen',
           selected: mode == LevelSelectionMode.s1toS5,
           onTap: () => onModeChanged(LevelSelectionMode.s1toS5),
+          accentColor: allStagesAccentColor ?? const Color(0xFF8A5CFF),
+          fillColor: allStagesFillColor,
+          textColor: allStagesTextColor,
         ),
         SizedBox(width: spacing),
         _ModeButton(
@@ -76,6 +109,9 @@ class LevelSelectorButtonsView extends StatelessWidget {
           label: 'Einzelstufe',
           selected: mode == LevelSelectionMode.single,
           onTap: () => onModeChanged(LevelSelectionMode.single),
+          accentColor: singleStageAccentColor ?? const Color(0xFF8A5CFF),
+          fillColor: singleStageFillColor,
+          textColor: singleStageTextColor,
         ),
       ],
     );
@@ -88,11 +124,17 @@ class _ModeButton extends StatefulWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    required this.accentColor,
+    this.fillColor,
+    this.textColor,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Color accentColor;
+  final Color? fillColor;
+  final Color? textColor;
 
   @override
   State<_ModeButton> createState() => _ModeButtonState();
@@ -155,13 +197,13 @@ class _ModeButtonState extends State<_ModeButton>
     final selected = widget.selected;
     final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
       fontWeight: FontWeight.w800,
-      color: selected ? Colors.white : Colors.white.withValues(alpha: 0.82),
+      color:
+          widget.textColor ??
+          (selected ? Colors.white : Colors.white.withValues(alpha: 0.82)),
       letterSpacing: 0.1,
       shadows: [
         Shadow(
-          color: const Color(
-            0xFF8DBBFF,
-          ).withValues(alpha: selected ? 0.48 : 0.24),
+          color: widget.accentColor.withValues(alpha: selected ? 0.48 : 0.24),
           blurRadius: selected ? 12 : 8,
         ),
       ],
@@ -176,31 +218,35 @@ class _ModeButtonState extends State<_ModeButton>
           final v = _glowScale.value;
           final glowOpacity = 0.2 + (0.14 * v);
 
+          final fill = widget.fillColor;
           final decoration = BoxDecoration(
+            color: fill,
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: selected
-                  ? const [Color(0xFF202129), Color(0xFF050505)]
-                  : const [Color(0xFF151519), Color(0xFF030303)],
+              colors: fill == null
+                  ? (selected
+                        ? const [Color(0xFF202129), Color(0xFF050505)]
+                        : const [Color(0xFF151519), Color(0xFF030303)])
+                  : [fill.withValues(alpha: 0.95), fill.withValues(alpha: 0.7)],
             ),
             borderRadius: BorderRadius.circular(_r),
             border: Border.all(
               color: selected
-                  ? const Color(0xFFA8C7FF)
-                  : const Color(0xFF8A5CFF),
+                  ? widget.accentColor
+                  : widget.accentColor.withValues(alpha: 0.85),
               width: selected ? 1.7 : 1.1,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF8DBBFF).withValues(alpha: glowOpacity),
+                color: widget.accentColor.withValues(alpha: glowOpacity),
                 blurRadius: 12 + 4 * v,
                 spreadRadius: selected ? 0.8 : 0,
               ),
               BoxShadow(
-                color: const Color(
-                  0xFF8A5CFF,
-                ).withValues(alpha: selected ? 0.34 : 0.16),
+                color: widget.accentColor.withValues(
+                  alpha: selected ? 0.34 : 0.16,
+                ),
                 blurRadius: selected ? 20 : 12,
                 spreadRadius: selected ? 0.5 : 0,
                 offset: const Offset(0, 3),
