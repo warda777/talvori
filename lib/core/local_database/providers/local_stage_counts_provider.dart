@@ -60,8 +60,18 @@ final localStageCountsProvider =
             now: DateTime.now(),
           );
 
-      return repositories.wordProgressRepository.countByStage(
+      final counts = List<int>.filled(SrsStage.values.length, 0);
+      final words = await repositories.wordRepository.loadWordsForWordWorld(
         categoryId: request.categoryId,
-        mode: request.mode,
       );
+      for (final word in words) {
+        final progress = await repositories.wordProgressRepository.loadProgress(
+          wordId: word.id,
+          categoryId: request.categoryId,
+          mode: request.mode,
+        );
+        if (progress == null) continue;
+        counts[progress.stage.index] += 1;
+      }
+      return counts;
     });

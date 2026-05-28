@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalDatabaseSchema {
   const LocalDatabaseSchema._();
 
-  static const int version = 4;
+  static const int version = 5;
 
   static Future<void> createV1(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
@@ -220,6 +220,11 @@ END
     await mirrorExistingWordWorldMemberships(db);
   }
 
+  static Future<void> migrateV4ToV5(Database db) async {
+    await ensureWordWorldMembershipsSchema(db);
+    await ensureWordWorldMembershipStatusSchema(db);
+  }
+
   static Future<void> createWordSourcesTable(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS word_sources (
@@ -245,6 +250,8 @@ CREATE TABLE IF NOT EXISTS word_world_memberships (
   word_id TEXT NOT NULL,
   category_id TEXT NOT NULL,
   created_at TEXT NOT NULL,
+  is_disabled INTEGER NOT NULL DEFAULT 0,
+  is_known INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (word_id, category_id),
   FOREIGN KEY (word_id) REFERENCES words (id),
   FOREIGN KEY (category_id) REFERENCES categories (id)
@@ -255,6 +262,21 @@ CREATE TABLE IF NOT EXISTS word_world_memberships (
     );
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_word_world_memberships_category_id ON word_world_memberships (category_id)',
+    );
+  }
+
+  static Future<void> ensureWordWorldMembershipStatusSchema(Database db) async {
+    await _addColumnIfMissing(
+      db,
+      'word_world_memberships',
+      'is_disabled',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      'word_world_memberships',
+      'is_known',
+      'INTEGER NOT NULL DEFAULT 0',
     );
   }
 

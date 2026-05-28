@@ -29,6 +29,9 @@ class StageDrag {
 class StageSwitchRowController {
   _StageSwitchRowState? _state;
   void _attach(_StageSwitchRowState s) => _state = s;
+  void _detach(_StageSwitchRowState s) {
+    if (identical(_state, s)) _state = null;
+  }
 
   Future<void> blinkS0toS5() async =>
       _state?._blinkIndices([0, 1, 2, 3, 4, 5], repeats: 2);
@@ -154,6 +157,7 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -173,6 +177,7 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
   }
 
   void _maybeRunPulse() {
+    if (_isDisposed || !mounted) return;
     if (widget.idlePulse) {
       if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat(reverse: true);
     } else {
@@ -182,6 +187,7 @@ class _StageSwitchRowViewState extends State<StageSwitchRowView>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _pulseCtrl.dispose();
     super.dispose();
   }
@@ -403,6 +409,7 @@ class _StageSwitchRowState extends State<StageSwitchRow>
   final Set<int> _blinking = {}; // Indizes die kurz glühen
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse; // 0..1
+  bool _isDisposed = false;
 
   bool _isHybridStageFrozen(LearnModeState s, int stage) {
     if (stage < 0) return false;
@@ -492,12 +499,14 @@ class _StageSwitchRowState extends State<StageSwitchRow>
   void didUpdateWidget(covariant StageSwitchRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._detach(this);
       widget.controller?._attach(this);
     }
     _maybeRunPulse();
   }
 
   void _maybeRunPulse() {
+    if (_isDisposed || !mounted) return;
     if (widget.idlePulse) {
       if (!_pulseCtrl.isAnimating) _pulseCtrl.repeat(reverse: true);
     } else {
@@ -512,14 +521,17 @@ class _StageSwitchRowState extends State<StageSwitchRow>
   }) async {
     const on = Duration(milliseconds: 140);
     const off = Duration(milliseconds: 140);
+    if (_isDisposed || !mounted) return;
 
     if (sequential) {
       for (final i in indices) {
+        if (_isDisposed || !mounted) return;
         _blinking
           ..clear()
           ..add(i);
         setState(() {});
         await Future.delayed(on);
+        if (_isDisposed || !mounted) return;
         _blinking.clear();
         setState(() {});
         await Future.delayed(off);
@@ -528,11 +540,13 @@ class _StageSwitchRowState extends State<StageSwitchRow>
     }
 
     for (int r = 0; r < repeats; r++) {
+      if (_isDisposed || !mounted) return;
       _blinking
         ..clear()
         ..addAll(indices);
       setState(() {});
       await Future.delayed(on);
+      if (_isDisposed || !mounted) return;
       _blinking.clear();
       setState(() {});
       await Future.delayed(off);
@@ -545,6 +559,8 @@ class _StageSwitchRowState extends State<StageSwitchRow>
 
   @override
   void dispose() {
+    _isDisposed = true;
+    widget.controller?._detach(this);
     _pulseCtrl.dispose();
     super.dispose();
   }

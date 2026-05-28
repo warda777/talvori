@@ -84,6 +84,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   double _rotation = 0;
   bool _dragging = false;
   bool _slidingIn = false;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -98,6 +99,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   @override
   void didUpdateWidget(covariant SwipeableWordCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_isDisposed || !mounted) return;
     // Sync Flip-Animation mit showTranslation
     if (widget.showTranslation &&
         _flipCtrl.status != AnimationStatus.forward &&
@@ -110,11 +112,13 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _flipCtrl.dispose();
     super.dispose();
   }
 
   void _resetPos() {
+    if (_isDisposed || !mounted) return;
     setState(() {
       _offset = Offset.zero;
       _rotation = 0;
@@ -122,6 +126,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
   }
 
   Future<void> _animateAway(bool correct) async {
+    if (_isDisposed || !mounted) return;
     final width = MediaQuery.of(context).size.width;
     final endX = correct ? width * 1.5 : -width * 1.5;
 
@@ -133,19 +138,22 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
     });
 
     await Future.delayed(const Duration(milliseconds: 300));
+    if (_isDisposed || !mounted) return;
     await widget.onSwipe(correct);
+    if (_isDisposed || !mounted) return;
 
     // Flip zurück auf Front
     _flipCtrl.reset();
 
     await Future.delayed(const Duration(milliseconds: 50));
+    if (_isDisposed || !mounted) return;
     setState(() {
       _offset = Offset.zero;
       _rotation = 0;
       _slidingIn = true;
     });
     await Future.delayed(const Duration(milliseconds: 400));
-    if (mounted) setState(() => _slidingIn = false);
+    if (!_isDisposed && mounted) setState(() => _slidingIn = false);
   }
 
   @override
@@ -188,6 +196,7 @@ class _SwipeableWordCardState extends State<SwipeableWordCard>
           _resetPos();
           // Karte kommt zurück - Link wieder anzeigen nach Animation
           Future.delayed(const Duration(milliseconds: 300), () {
+            if (_isDisposed || !mounted) return;
             widget.onDragReturn?.call();
           });
         }

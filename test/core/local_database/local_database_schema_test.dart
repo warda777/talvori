@@ -84,6 +84,13 @@ void main() {
 
       final wordColumns = await db.rawQuery('PRAGMA table_info(words)');
       expect(wordColumns.map((row) => row['name']), contains('level'));
+      final membershipColumns = await db.rawQuery(
+        'PRAGMA table_info(word_world_memberships)',
+      );
+      expect(
+        membershipColumns.map((row) => row['name']),
+        containsAll({'is_disabled', 'is_known'}),
+      );
     });
 
     test('word_world_memberships_is_unique_per_word_and_category', () async {

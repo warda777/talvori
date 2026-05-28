@@ -86,6 +86,9 @@ class LearningSessionRepository {
   }) : _database = database,
        _uuid = uuid;
 
+  static const _localMyWordsCategoryId = 'local-category-my-words';
+  static const _localMyWordsCategoryLabel = 'Meine Wörter';
+
   final Database _database;
   final Uuid _uuid;
 
@@ -256,6 +259,8 @@ ORDER BY
       return existing;
     }
 
+    await _ensureCategoryCanOwnSession(categoryId: categoryId, now: now);
+
     final sessionId = _uuid.v4();
 
     await _database.transaction((transaction) async {
@@ -287,6 +292,46 @@ ORDER BY
       mode: mode,
       trainingArea: trainingArea,
     ))!;
+  }
+
+  Future<void> _ensureCategoryCanOwnSession({
+    required String categoryId,
+    required DateTime now,
+  }) async {
+    if (categoryId == _localMyWordsCategoryId) {
+      final existing = await _categoryExists(categoryId);
+      if (existing) return;
+
+      await _database.insert('categories', {
+        'id': _localMyWordsCategoryId,
+        'name': _localMyWordsCategoryLabel,
+        'description': 'Lokal importierte Wörter.',
+        'sort_order': 10000,
+        'is_archived': 0,
+        'created_at': _encodeDateTime(now),
+        'updated_at': _encodeDateTime(now),
+      });
+      return;
+    }
+
+    final exists = await _categoryExists(categoryId);
+    if (!exists) {
+      throw StateError(
+        'Cannot start local learning session because category "$categoryId" '
+        'is not available locally.',
+      );
+    }
+  }
+
+  Future<bool> _categoryExists(String categoryId) async {
+    final rows = await _database.query(
+      'categories',
+      columns: const ['id'],
+      where: 'id = ?',
+      whereArgs: [categoryId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   Future<List<LocalSessionItemRecord>> loadSessionItems(

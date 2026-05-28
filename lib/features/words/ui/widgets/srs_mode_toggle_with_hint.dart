@@ -8,7 +8,7 @@ class SrsModeToggleWithHint extends ConsumerStatefulWidget {
   const SrsModeToggleWithHint({
     super.key,
     this.toggleHeight = 44, // sichtbare Höhe des Toggles
-    this.gap = 6,           // Abstand unter dem Toggle
+    this.gap = 6, // Abstand unter dem Toggle
     this.onUserTap,
     this.showPulsatingArrow = false,
   });
@@ -19,7 +19,8 @@ class SrsModeToggleWithHint extends ConsumerStatefulWidget {
   final bool showPulsatingArrow;
 
   @override
-  ConsumerState<SrsModeToggleWithHint> createState() => _SrsModeToggleWithHintState();
+  ConsumerState<SrsModeToggleWithHint> createState() =>
+      _SrsModeToggleWithHintState();
 }
 
 class _SrsModeToggleWithHintState extends ConsumerState<SrsModeToggleWithHint>
@@ -27,6 +28,7 @@ class _SrsModeToggleWithHintState extends ConsumerState<SrsModeToggleWithHint>
   final _scalePulseKey = GlobalKey<ScalePulseAnimationState>();
   late AnimationController _glowCtrl;
   late Animation<double> _glowAnim;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -43,11 +45,13 @@ class _SrsModeToggleWithHintState extends ConsumerState<SrsModeToggleWithHint>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _glowCtrl.dispose();
     super.dispose();
   }
 
   void _onModeTap() {
+    if (_isDisposed || !mounted) return;
     _scalePulseKey.currentState?.trigger();
     if (!_glowCtrl.isAnimating) _glowCtrl.forward(from: 0);
     widget.onUserTap?.call();
@@ -88,7 +92,11 @@ class _SrsModeToggleWithHintState extends ConsumerState<SrsModeToggleWithHint>
                 ),
                 child: Text(
                   hintText,
-                  style: const TextStyle(fontSize: 10, color: Colors.white, height: 1),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                    height: 1,
+                  ),
                 ),
               ),
             ),
@@ -125,9 +133,10 @@ class _PulsatingArrowState extends State<_PulsatingArrow>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.4, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.4,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

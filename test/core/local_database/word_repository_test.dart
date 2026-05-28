@@ -934,6 +934,82 @@ CREATE TABLE words (
       expect(memberships, hasLength(1));
     });
 
+    test(
+      'disabled_word_world_membership_stays_visible_but_not_practiceable',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-travel',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+        );
+        final repository = WordRepository(database: db);
+        await repository.addWordWorldMembership(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+
+        await repository.setWordWorldMembershipDisabled(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          disabled: true,
+        );
+
+        final visible = await repository.loadWordsForWordWorld(
+          categoryId: 'category-travel',
+          includeDisabled: true,
+        );
+        final practiceable = await repository.loadWordsForWordWorld(
+          categoryId: 'category-travel',
+        );
+        final ids = await repository.loadWordIdsForWordWorld(
+          categoryId: 'category-travel',
+        );
+
+        expect(visible, hasLength(1));
+        expect(visible.single.isDisabledForCategory, isTrue);
+        expect(practiceable, isEmpty);
+        expect(ids, isEmpty);
+      },
+    );
+
+    test('add_or_link_word_to_word_world_reuses_existing_word', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedCategory(db, id: 'category-work', name: 'Work & Careers');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-travel',
+        term: 'Ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+
+      final word = await repository.addOrLinkWordToWordWorld(
+        categoryId: 'category-work',
+        term: ' ticket ',
+        translation: 'Ticket',
+        now: now,
+      );
+
+      expect(word.id, 'word-ticket');
+      expect(await db.query('words'), hasLength(1));
+      expect(
+        await repository.wordWorldMembershipExists(
+          wordId: 'word-ticket',
+          categoryId: 'category-work',
+        ),
+        isTrue,
+      );
+    });
+
     test('set_word_level_updates_only_word_level', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);

@@ -8,6 +8,7 @@ import 'package:talvori/core/local_database/providers/local_translation_provider
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
+import 'package:talvori/features/words/application/category_vocabulary/category_vocabulary_controller.dart';
 import 'package:talvori/features/words/ui/screens/local_word_detail_screen.dart';
 
 enum _LocalWordSortMode {
@@ -141,6 +142,7 @@ class _LocalWordListScreenState extends ConsumerState<LocalWordListScreen> {
                           final word = visibleWords[index];
                           return _LocalWordCard(
                             word: word,
+                            categoryId: widget.categoryId,
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -284,6 +286,7 @@ class _NeonSortControl extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButtonFormField<_LocalWordSortMode>(
           initialValue: value,
+          isExpanded: true,
           dropdownColor: const Color(0xFF101116),
           iconEnabledColor: const Color(0xFF8DBBFF),
           style: const TextStyle(
@@ -303,8 +306,14 @@ class _NeonSortControl extends StatelessWidget {
           ),
           items: _LocalWordSortMode.values
               .map(
-                (mode) =>
-                    DropdownMenuItem(value: mode, child: Text(mode.label)),
+                (mode) => DropdownMenuItem(
+                  value: mode,
+                  child: Text(
+                    mode.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               )
               .toList(growable: false),
           onChanged: onChanged,
@@ -410,9 +419,14 @@ class _TranslationProcessButton extends StatelessWidget {
 }
 
 class _LocalWordCard extends ConsumerWidget {
-  const _LocalWordCard({required this.word, required this.onTap});
+  const _LocalWordCard({
+    required this.word,
+    required this.categoryId,
+    required this.onTap,
+  });
 
   final LocalWord word;
+  final String categoryId;
   final VoidCallback onTap;
 
   @override
@@ -423,6 +437,7 @@ class _LocalWordCard extends ConsumerWidget {
     final statusBadge = _TranslationStatusBadgeData.fromStatus(
       word.translationStatus,
     );
+    final isDisabled = word.isDisabledForCategory;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -434,9 +449,16 @@ class _LocalWordCard extends ConsumerWidget {
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             decoration: BoxDecoration(
-              color: const Color(0xFF0E0F14),
+              color: isDisabled
+                  ? const Color(0xFF0A0A0D)
+                  : const Color(0xFF0E0F14),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF2F557D), width: 1),
+              border: Border.all(
+                color: isDisabled
+                    ? const Color(0xFF555A66)
+                    : const Color(0xFF2F557D),
+                width: 1,
+              ),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x1F8DBBFF),
@@ -459,6 +481,8 @@ class _LocalWordCard extends ConsumerWidget {
                     children: [
                       Text(
                         word.term,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -469,6 +493,8 @@ class _LocalWordCard extends ConsumerWidget {
                       const SizedBox(height: 5),
                       Text(
                         translationText,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Color(0xFFB8C4D9),
                           fontSize: 14,
@@ -480,45 +506,84 @@ class _LocalWordCard extends ConsumerWidget {
                         const SizedBox(height: 10),
                         _TranslationStatusBadge(data: statusBadge),
                       ],
+                      if (isDisabled) ...[
+                        const SizedBox(height: 10),
+                        const _WordDisabledBadge(),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                IconButton(
-                  key: ValueKey('local-word-list-pronunciation-${word.id}'),
-                  tooltip: 'Wort aussprechen',
-                  onPressed: () => _speakWord(context, ref, word),
-                  icon: const Icon(
-                    Icons.volume_up_rounded,
-                    color: Color(0xFFB8FFF6),
-                    size: 22,
-                  ),
-                  style: IconButton.styleFrom(
-                    fixedSize: const Size(38, 38),
-                    backgroundColor: const Color(0xFF0B1820),
-                    side: const BorderSide(color: Color(0xFF59D7FF), width: 1),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF101827),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF8DBBFF),
-                      width: 1,
+                const SizedBox(width: 12),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF101827),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF8DBBFF),
+                          width: 1,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x338DBBFF), blurRadius: 12),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.chevron_right,
+                        color: Color(0xFFBFD5FF),
+                        size: 20,
+                      ),
                     ),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x338DBBFF), blurRadius: 12),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.chevron_right,
-                    color: Color(0xFFBFD5FF),
-                    size: 20,
-                  ),
+                    const SizedBox(height: 6),
+                    IconButton(
+                      key: ValueKey('local-word-list-active-toggle-${word.id}'),
+                      tooltip: isDisabled
+                          ? 'Für Lernmodus aktivieren'
+                          : 'Im Lernmodus pausieren',
+                      onPressed: () => _toggleActive(context, ref),
+                      icon: Icon(
+                        isDisabled
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
+                        color: isDisabled
+                            ? const Color(0xFFFFD166)
+                            : const Color(0xFF91F7B5),
+                        size: 22,
+                      ),
+                      style: IconButton.styleFrom(
+                        fixedSize: const Size(38, 38),
+                        backgroundColor: const Color(0xFF0B1820),
+                        side: BorderSide(
+                          color: isDisabled
+                              ? const Color(0xFFFFD166)
+                              : const Color(0xFF91F7B5),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    IconButton(
+                      key: ValueKey('local-word-list-pronunciation-${word.id}'),
+                      tooltip: 'Wort aussprechen',
+                      onPressed: () => _speakWord(context, ref, word),
+                      icon: const Icon(
+                        Icons.volume_up_rounded,
+                        color: Color(0xFFB8FFF6),
+                        size: 22,
+                      ),
+                      style: IconButton.styleFrom(
+                        fixedSize: const Size(38, 38),
+                        backgroundColor: const Color(0xFF0B1820),
+                        side: const BorderSide(
+                          color: Color(0xFF59D7FF),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -526,6 +591,30 @@ class _LocalWordCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _toggleActive(BuildContext context, WidgetRef ref) async {
+    final disabled = !word.isDisabledForCategory;
+    try {
+      await ref
+          .read(categoryVocabularyControllerProvider.notifier)
+          .setDisabled(categoryId: categoryId, word: word, disabled: disabled);
+      if (!context.mounted) return;
+      TalvoriSnackBar.show(
+        context,
+        message: disabled
+            ? 'Wort im Lernmodus pausiert.'
+            : 'Wort ist wieder im Lernmodus aktiv.',
+        type: TalvoriSnackBarType.success,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      TalvoriSnackBar.show(
+        context,
+        message: 'Status konnte nicht geändert werden.',
+        type: TalvoriSnackBarType.error,
+      );
+    }
   }
 
   Future<void> _speakWord(
@@ -542,6 +631,56 @@ class _LocalWordCard extends ConsumerWidget {
       context,
       message: result.message ?? 'Aussprache nicht verfügbar.',
       type: TalvoriSnackBarType.warning,
+    );
+  }
+}
+
+class _WordDisabledBadge extends StatelessWidget {
+  const _WordDisabledBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 120.0;
+        return SizedBox(
+          width: maxWidth,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD166).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: const Color(0xFFFFD166).withValues(alpha: 0.55),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.pause_circle_outline,
+                  color: Color(0xFFFFD166),
+                  size: 14,
+                ),
+                SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Pausiert',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Color(0xFFFFD166),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -24,24 +24,33 @@ class ScalePulseAnimationState extends State<ScalePulseAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _scale;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: widget.duration);
     _scale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: widget.peakScale), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: widget.peakScale, end: 1.0), weight: 50),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: widget.peakScale),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: widget.peakScale, end: 1.0),
+        weight: 50,
+      ),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _ctrl.dispose();
     super.dispose();
   }
 
   void trigger() {
+    if (_isDisposed || !mounted) return;
     if (_ctrl.isAnimating) return;
     _ctrl.forward(from: 0);
   }
@@ -118,24 +127,33 @@ class _TapScaleAnimationState extends State<TapScaleAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _scale;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: widget.duration);
     _scale = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: widget.peakScale), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: widget.peakScale, end: 1.0), weight: 50),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: widget.peakScale),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: widget.peakScale, end: 1.0),
+        weight: 50,
+      ),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _ctrl.dispose();
     super.dispose();
   }
 
   void _onTap() {
+    if (_isDisposed || !mounted) return;
     if (!_ctrl.isAnimating) {
       HapticFeedback.lightImpact();
       _ctrl.forward(from: 0);
@@ -150,7 +168,8 @@ class _TapScaleAnimationState extends State<TapScaleAnimation>
       onTap: _onTap,
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+        builder: (_, child) =>
+            Transform.scale(scale: _scale.value, child: child),
         child: widget.child,
       ),
     );
@@ -162,11 +181,7 @@ class StartButtonPulse extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
 
-  const StartButtonPulse({
-    super.key,
-    required this.child,
-    this.onPressed,
-  });
+  const StartButtonPulse({super.key, required this.child, this.onPressed});
 
   @override
   State<StartButtonPulse> createState() => _StartButtonPulseState();
@@ -178,6 +193,8 @@ class _StartButtonPulseState extends State<StartButtonPulse>
   late Animation<double> _scale;
   int _pulseCount = 0;
   static const _maxPulses = 2;
+  bool _isDisposed = false;
+  late final AnimationStatusListener _statusListener;
 
   @override
   void initState() {
@@ -190,26 +207,34 @@ class _StartButtonPulseState extends State<StartButtonPulse>
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.035), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.035, end: 1.0), weight: 50),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-    _ctrl.addStatusListener((s) {
+    _statusListener = (s) {
+      if (_isDisposed || !mounted) return;
       if (s == AnimationStatus.completed) {
         _pulseCount++;
         if (_pulseCount < _maxPulses) {
+          if (_isDisposed || !mounted) return;
           _ctrl.forward(from: 0);
         }
       }
-    });
+    };
+    _ctrl.addStatusListener(_statusListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _pulseCount < _maxPulses) _ctrl.forward(from: 0);
+      if (!_isDisposed && mounted && _pulseCount < _maxPulses) {
+        _ctrl.forward(from: 0);
+      }
     });
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _ctrl.removeStatusListener(_statusListener);
     _ctrl.dispose();
     super.dispose();
   }
 
   void _onPressed() {
+    if (_isDisposed || !mounted) return;
     _ctrl.stop();
     _ctrl.reset();
     widget.onPressed?.call();
@@ -222,7 +247,8 @@ class _StartButtonPulseState extends State<StartButtonPulse>
       onTap: _onPressed,
       child: AnimatedBuilder(
         animation: _scale,
-        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+        builder: (_, child) =>
+            Transform.scale(scale: _scale.value, child: child),
         child: IgnorePointer(child: widget.child),
       ),
     );
@@ -234,11 +260,7 @@ class FinalRoundButtonPulse extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
 
-  const FinalRoundButtonPulse({
-    super.key,
-    required this.child,
-    this.onPressed,
-  });
+  const FinalRoundButtonPulse({super.key, required this.child, this.onPressed});
 
   @override
   State<FinalRoundButtonPulse> createState() => _FinalRoundButtonPulseState();
@@ -248,6 +270,7 @@ class _FinalRoundButtonPulseState extends State<FinalRoundButtonPulse>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _glow;
+  bool _isDisposed = false;
 
   static const _green = Color(0xFF4CAF50);
 
@@ -267,11 +290,13 @@ class _FinalRoundButtonPulseState extends State<FinalRoundButtonPulse>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _ctrl.dispose();
     super.dispose();
   }
 
   void _onPressed() {
+    if (_isDisposed || !mounted) return;
     _ctrl.stop();
     widget.onPressed?.call();
   }
@@ -315,11 +340,7 @@ class VocabsTileTapAnimation extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const VocabsTileTapAnimation({
-    super.key,
-    required this.child,
-    this.onTap,
-  });
+  const VocabsTileTapAnimation({super.key, required this.child, this.onTap});
 
   @override
   State<VocabsTileTapAnimation> createState() => _VocabsTileTapAnimationState();
@@ -329,6 +350,7 @@ class _VocabsTileTapAnimationState extends State<VocabsTileTapAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _anim;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -345,11 +367,13 @@ class _VocabsTileTapAnimationState extends State<VocabsTileTapAnimation>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _ctrl.dispose();
     super.dispose();
   }
 
   void _onTap() {
+    if (_isDisposed || !mounted) return;
     if (!_ctrl.isAnimating) _ctrl.forward(from: 0);
     widget.onTap?.call();
   }

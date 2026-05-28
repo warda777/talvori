@@ -1110,6 +1110,171 @@ void main() {
     _expectNoActiveSwitchPulse(tester);
   });
 
+  testWidgets('learn_mode_screen_local_pulse_dispose_does_not_throw', (
+    tester,
+  ) async {
+    const initialReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      stageCounts: [0, 0, 1, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s2,
+    );
+    const updatedReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 2,
+      totalItems: 3,
+      answeredCount: 1,
+      remainingCount: 2,
+      stageCounts: [0, 1, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-2',
+      currentTerm: 'water',
+      currentTranslation: 'Wasser',
+      currentStage: SrsStage.s1,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: initialReadState),
+      wrongReadState: updatedReadState,
+      wrongFeedback: LocalReviewVisualFeedback(
+        wordId: 'word-1',
+        sourceStage: SrsStage.s2,
+        targetStage: SrsStage.s1,
+        outcomeType: LocalReviewOutcomeType.demoted,
+        repeatIndex: 0,
+        wasPromoted: false,
+        wasDemoted: true,
+        timestamp: DateTime(2026, 1, 1),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.drag(find.byType(SwipeableWordCard), const Offset(-500, -40));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(controller.submitWrongCalls, 1);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 2500));
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('learn_mode_screen_local_swipe_dispose_does_not_touch_old_card', (
+    tester,
+  ) async {
+    const initialReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 1,
+      totalItems: 3,
+      answeredCount: 0,
+      remainingCount: 3,
+      stageCounts: [0, 0, 1, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-1',
+      currentTerm: 'hello',
+      currentTranslation: 'hallo',
+      currentStage: SrsStage.s2,
+    );
+    const updatedReadState = LocalSessionReadState(
+      sessionId: 'session-1',
+      categoryId: 'basics',
+      mode: LearningMode.adaptive,
+      trainingArea: TrainingArea.all,
+      status: 'active',
+      sessionSize: 3,
+      currentPosition: 2,
+      totalItems: 3,
+      answeredCount: 1,
+      remainingCount: 2,
+      stageCounts: [0, 1, 0, 0, 0, 0],
+      canSubmitAnswer: true,
+      canCompleteSession: false,
+      currentWordId: 'word-2',
+      currentTerm: 'water',
+      currentTranslation: 'Wasser',
+      currentStage: SrsStage.s1,
+    );
+    final controller = _TestLocalLearningController(
+      const LocalLearningControllerState(readState: initialReadState),
+      wrongReadState: updatedReadState,
+      wrongFeedback: LocalReviewVisualFeedback(
+        wordId: 'word-1',
+        sourceStage: SrsStage.s2,
+        targetStage: SrsStage.s1,
+        outcomeType: LocalReviewOutcomeType.demoted,
+        repeatIndex: 0,
+        wasPromoted: false,
+        wasDemoted: true,
+        timestamp: DateTime(2026, 1, 1),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localLearningControllerProvider.overrideWith(() => controller),
+        ],
+        child: const MaterialApp(
+          home: LearnModeScreen(
+            categoryId: 'legacy-category',
+            title: 'Basics',
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.drag(find.byType(SwipeableWordCard), const Offset(-500, -40));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('learn_mode_local_stage_switch_opens_stage_inspector', (
     tester,
   ) async {

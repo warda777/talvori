@@ -30,7 +30,7 @@ final localStageInspectorProvider =
       }
 
       final words = source == null
-          ? await repositories.wordRepository.loadWordsForCategory(
+          ? await repositories.wordRepository.loadWordsForWordWorld(
               categoryId: request.categoryId,
             )
           : await ref.watch(localWordsForSourceProvider(source).future);

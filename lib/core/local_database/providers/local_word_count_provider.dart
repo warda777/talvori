@@ -41,5 +41,5 @@ final localWordCountProvider = FutureProvider.family<int, String>((
   }
 
   return bootstrapResult.repositoryFactory.wordRepository
-      .countWordsForWordWorld(categoryId: categoryId);
+      .countWordsForWordWorld(categoryId: categoryId, includeDisabled: true);
 });

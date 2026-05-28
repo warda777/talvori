@@ -76,10 +76,45 @@ final localStageDueSummaryProvider =
         return summaries;
       }
 
-      return bootstrap.repositoryFactory.wordProgressRepository
-          .loadStageDueSummaries(
-            categoryId: request.categoryId,
-            mode: request.mode,
-            now: DateTime.now(),
-          );
+      final summaries = List<LocalStageDueSummary>.generate(
+        SrsStage.values.length,
+        (index) =>
+            LocalStageDueSummary(stage: index, totalCount: 0, dueCount: 0),
+      );
+      final words = await repositories.wordRepository.loadWordsForWordWorld(
+        categoryId: request.categoryId,
+      );
+      final now = DateTime.now();
+      final totals = List<int>.filled(SrsStage.values.length, 0);
+      final dueCounts = List<int>.filled(SrsStage.values.length, 0);
+      final nextDueDates = List<DateTime?>.filled(SrsStage.values.length, null);
+      for (final word in words) {
+        final progress = await repositories.wordProgressRepository.loadProgress(
+          wordId: word.id,
+          categoryId: request.categoryId,
+          mode: request.mode,
+        );
+        if (progress == null) continue;
+        final index = progress.stage.index;
+        totals[index] += 1;
+        final nextDueAt = progress.nextDueAt;
+        if (nextDueAt == null) continue;
+        if (!nextDueAt.isAfter(now)) {
+          dueCounts[index] += 1;
+          continue;
+        }
+        final existing = nextDueDates[index];
+        if (existing == null || nextDueAt.isBefore(existing)) {
+          nextDueDates[index] = nextDueAt;
+        }
+      }
+      for (var index = 0; index < summaries.length; index += 1) {
+        summaries[index] = LocalStageDueSummary(
+          stage: index,
+          totalCount: totals[index],
+          dueCount: dueCounts[index],
+          nextDueAt: nextDueDates[index],
+        );
+      }
+      return summaries;
     });

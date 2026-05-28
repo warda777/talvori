@@ -76,6 +76,15 @@ void main() {
     );
   }
 
+  QueueBuildResult emptyQueueResult() {
+    return const QueueBuildResult(
+      items: [],
+      newCardsIncluded: 0,
+      reviewsIncluded: 0,
+      newCardPolicy: NewCardPolicy.allowed,
+    );
+  }
+
   Future<LearningSessionRecord> createSession(
     LearningSessionRepository repository, {
     String categoryId = 'category-1',
@@ -143,6 +152,50 @@ void main() {
       ]);
       expect(items.first.isNewCard, isTrue);
       expect(items.first.status, QueueItemStatus.queued);
+    });
+
+    test('create_session_requires_existing_non_system_category', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      final repository = LearningSessionRepository(database: db);
+
+      expect(
+        () => repository.createSessionFromQueueResult(
+          categoryId: 'missing-category',
+          mode: LearningMode.time,
+          trainingArea: TrainingArea.all,
+          sessionSize: 20,
+          queueBuildResult: emptyQueueResult(),
+          now: now,
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(await db.query('learning_sessions'), isEmpty);
+    });
+
+    test('create_session_ensures_local_my_words_system_category', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      final repository = LearningSessionRepository(database: db);
+
+      final session = await repository.createSessionFromQueueResult(
+        categoryId: 'local-category-my-words',
+        mode: LearningMode.time,
+        trainingArea: TrainingArea.all,
+        sessionSize: 20,
+        queueBuildResult: emptyQueueResult(),
+        now: now,
+      );
+
+      final categories = await db.query(
+        'categories',
+        where: 'id = ?',
+        whereArgs: ['local-category-my-words'],
+      );
+      expect(categories, hasLength(1));
+      expect(categories.single['name'], 'Meine Wörter');
+      expect(session.categoryId, 'local-category-my-words');
     });
 
     test('cannot_create_second_active_session_for_same_context', () async {

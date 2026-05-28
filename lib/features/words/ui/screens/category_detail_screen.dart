@@ -31,6 +31,7 @@ import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/learn_mode_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_header_capsule.dart';
+import 'package:talvori/features/words/ui/widgets/category_vocabulary_add_sheet.dart';
 import 'package:talvori/features/words/ui/widgets/learning_status_panel.dart';
 import 'package:talvori/features/words/ui/widgets/levels_card.dart';
 import 'package:talvori/features/words/ui/widgets/level_selector_buttons.dart';
@@ -116,6 +117,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   Timer? _singleStagePulseTimer;
   int? _practicePulseStage;
   Set<int>? _practicePulseStages;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -139,6 +141,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isDisposed || !mounted) return;
       ref
           .read(categoryDetailControllerProvider.notifier)
           .init(
@@ -158,8 +161,10 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _singleStagePulseTimer?.cancel();
+    _singleStagePulseTimer = null;
     _practicePulseController.dispose();
     // ✅ Subscription ohne ref schließen
     _controllerSub?.close();
@@ -245,7 +250,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   void _stopSingleStagePracticePulse({bool clearStage = true}) {
     _singleStagePulseTimer?.cancel();
     _singleStagePulseTimer = null;
-    if (clearStage && mounted) {
+    if (clearStage && !_isDisposed && mounted) {
       setState(() {
         _practicePulseStage = null;
         _practicePulseStages = null;
@@ -254,30 +259,37 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
   }
 
   void _pulsePracticeStage(int stage) {
-    if (!mounted) return;
+    if (_isDisposed || !mounted) return;
     setState(() {
       _practicePulseStage = stage;
       _practicePulseStages = null;
     });
+    if (_isDisposed || !mounted) return;
     _practicePulseController.forward(from: 0);
   }
 
   void _pulseAllPracticeStages() {
     _stopSingleStagePracticePulse();
-    if (!mounted) return;
+    if (_isDisposed || !mounted) return;
     setState(() {
       _practicePulseStage = null;
       _practicePulseStages = {1, 2, 3, 4, 5};
     });
+    if (_isDisposed || !mounted) return;
     _practicePulseController.forward(from: 0);
   }
 
   void _startSingleStagePracticePulse() {
+    if (_isDisposed || !mounted) return;
     _stopSingleStagePracticePulse();
     var stage = 0;
     _singleStagePulseTimer = Timer.periodic(const Duration(milliseconds: 420), (
-      _,
+      timer,
     ) {
+      if (_isDisposed || !mounted) {
+        timer.cancel();
+        return;
+      }
       stage = stage % 5 + 1;
       _pulsePracticeStage(stage);
     });
@@ -347,7 +359,7 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
     if (state == AppLifecycleState.resumed) {
       // Reload über WidgetsBinding, nicht über ref
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (!_isDisposed && mounted) {
           ref.read(categoryDetailControllerProvider.notifier).reload();
         }
       });
@@ -938,12 +950,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             return stageDueSummaries[index].isBlocked;
           });
     final localVocabsCount = selectedLocalCategoryItem?.vocabsCount;
-    final fallbackLocalVocabsCountAsync =
-        localVocabsCount != null || selectedCategoryId.isEmpty
+    final fallbackLocalVocabsCountAsync = selectedCategoryId.isEmpty
         ? const AsyncValue<int>.data(0)
         : ref.watch(localWordCountProvider(selectedCategoryId));
     final resolvedLocalVocabsCount =
-        localVocabsCount ?? fallbackLocalVocabsCountAsync.valueOrNull ?? 0;
+        fallbackLocalVocabsCountAsync.valueOrNull ?? localVocabsCount ?? 0;
     Future<void> openLocalLearnMode() async {
       if (selectedCategoryId.isEmpty) {
         TalvoriSnackBar.show(
@@ -1169,9 +1180,20 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                 );
               },
               onAdd: () {
-                TalvoriSnackBar.show(
-                  context,
-                  message: 'Lokales Hinzufügen noch nicht angebunden',
+                if (selectedCategoryId.isEmpty) {
+                  TalvoriSnackBar.show(
+                    context,
+                    message: 'Noch nicht lokal verfügbar',
+                    type: TalvoriSnackBarType.warning,
+                  );
+                  return;
+                }
+                showCategoryVocabularyAddSheet(
+                  context: context,
+                  ref: ref,
+                  categoryId: selectedCategoryId,
+                  categoryLabel:
+                      selectedLocalCategoryItem?.displayLabel ?? title,
                 );
               },
               onSettings: () {

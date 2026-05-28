@@ -106,6 +106,7 @@ class _ModeButtonState extends State<_ModeButton>
 
   late AnimationController _ctrl;
   late Animation<double> _glowScale;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -120,7 +121,7 @@ class _ModeButtonState extends State<_ModeButton>
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     if (widget.selected) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && widget.selected) _ctrl.forward();
+        if (!_isDisposed && mounted && widget.selected) _ctrl.forward();
       });
     }
   }
@@ -128,6 +129,7 @@ class _ModeButtonState extends State<_ModeButton>
   @override
   void didUpdateWidget(_ModeButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_isDisposed || !mounted) return;
     if (widget.selected != oldWidget.selected) {
       if (widget.selected) {
         _ctrl.forward(from: 0);
@@ -143,6 +145,7 @@ class _ModeButtonState extends State<_ModeButton>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _ctrl.dispose();
     super.dispose();
   }

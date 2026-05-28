@@ -83,6 +83,7 @@ void main() {
     required String translation,
     TranslationStatus translationStatus = TranslationStatus.translated,
     String? translationError,
+    bool isDisabledForCategory = false,
   }) {
     final now = DateTime(2026, 1, 1);
     return LocalWord(
@@ -96,6 +97,7 @@ void main() {
       translationError: translationError,
       sortOrder: 0,
       isArchived: false,
+      isDisabledForCategory: isDisabledForCategory,
       createdAt: now,
       updatedAt: now,
     );
@@ -458,6 +460,41 @@ void main() {
     expect(find.text('hallo'), findsOneWidget);
     expect(find.text('Übersetzung ausstehend'), findsNothing);
     expect(find.text('Übersetzung fehlgeschlagen'), findsNothing);
+  });
+
+  testWidgets('local_word_list_screen_disabled_word_layout_does_not_overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-disabled',
+          term: 'orientation',
+          translation: 'Orientierung',
+          isDisabledForCategory: true,
+        ),
+      ],
+    );
+
+    expect(find.text('orientation'), findsOneWidget);
+    expect(find.text('Orientierung'), findsOneWidget);
+    expect(find.text('Pausiert'), findsOneWidget);
+    expect(find.text('Im Lernmodus pausiert'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('local-word-list-active-toggle-word-disabled')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('local-word-list-pronunciation-word-disabled')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('local_word_list_screen_shows_empty_state', (tester) async {

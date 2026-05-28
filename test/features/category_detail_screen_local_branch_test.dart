@@ -151,6 +151,42 @@ void main() {
     },
   );
 
+  testWidgets('category_detail_add_button_opens_vocabulary_menu', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wörter verwalten'), findsOneWidget);
+    expect(find.text('Wort hinzufügen'), findsOneWidget);
+    expect(find.text('KI-Vorschläge'), findsOneWidget);
+  });
+
   testWidgets('level package detail wheel shows packages from the same level', (
     tester,
   ) async {
@@ -487,6 +523,44 @@ void main() {
 
     expect(find.text('Übungsmodus'), findsOneWidget);
     expect(find.text('water'), findsOneWidget);
+  });
+
+  testWidgets('category_detail_single_stage_pulse_dispose_does_not_throw', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localCategoriesProvider.overrideWith((ref) async => const []),
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(
+          home: CategoryDetailScreen(
+            title: 'Basics',
+            categoryId: 'legacy-basics',
+            categorySlug: 'basics',
+            listFilter: WordListFilter(WordFilterKind.category, 'basics'),
+            useLocalOfflineFlow: true,
+            localCategoryId: 'basics',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.tap(find.text('Einzelstufe'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

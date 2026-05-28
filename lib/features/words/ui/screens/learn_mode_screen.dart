@@ -116,6 +116,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   int? pulseStage; // Für normale Stages (0-5)
   Color pulseColor = const Color(0xFFB16CFF);
   String? pulseSingleBucket; // Für Single-Modus ('SRC', 'R1', 'R2')
+  bool _isDisposed = false;
 
   // ✅ Swipe-Commit Throttling (verhindert doppelte Swipes)
   DateTime? _lastSwipeCommitAt;
@@ -191,6 +192,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _updateLink(int? targetStage) {
+    if (_isDisposed || !mounted) return;
     if (!_plasmaLinkEnabled) return;
     final mode = ref.read(levelSelectionProvider);
     GlobalKey? targetKey;
@@ -209,9 +211,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     });
   }
 
-  void _hideLink() => setState(() => linkVisible = false);
+  void _hideLink() {
+    if (_isDisposed || !mounted) return;
+    setState(() => linkVisible = false);
+  }
 
   void _hideLinkIfVisible() {
+    if (_isDisposed || !mounted) return;
     if (!linkVisible) return;
     _hideLink();
   }
@@ -243,6 +249,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _updateLocalLink(int? targetStage) {
+    if (_isDisposed || !mounted) return;
     if (!_plasmaLinkEnabled || !widget.useLocalOfflineFlow) return;
     if (targetStage == null) {
       _hideLinkIfVisible();
@@ -270,28 +277,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void triggerPulse(int stage, {Color? color}) {
-    debugPrint(
-      '🎬 triggerPulse aufgerufen: stage=$stage, switchKeys vorhanden: ${switchKeys.containsKey(stage)}',
-    );
+    if (_isDisposed || !mounted || !switchKeys.containsKey(stage)) return;
     setState(() {
       pulseStage = stage;
       pulseColor = color ?? const Color(0xFFB16CFF);
       pulseSingleBucket = null; // Normal-Modus
     });
+    if (_isDisposed || !mounted) return;
     pulse.forward(from: 0);
-    debugPrint('🎬 Pulse-Animation gestartet: pulseStage=$pulseStage');
   }
 
   void triggerPulseSingle(String bucket) {
+    if (_isDisposed || !mounted || !singleSwitchKeys.containsKey(bucket)) {
+      return;
+    }
     setState(() {
       pulseSingleBucket = bucket;
       pulseStage = null; // Single-Modus
     });
+    if (_isDisposed || !mounted) return;
     pulse.forward(from: 0);
   }
 
   void _handlePulseStatus(AnimationStatus status) {
-    if (status != AnimationStatus.completed || !mounted) return;
+    if (status != AnimationStatus.completed || _isDisposed || !mounted) return;
     setState(() {
       pulseStage = null;
       pulseSingleBucket = null;
@@ -328,7 +337,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   void _handleDragReturn() {
     // Karte kommt zurück - Link schnell wieder anzeigen
     Future.delayed(const Duration(milliseconds: 80), () {
-      if (mounted) {
+      if (!_isDisposed && mounted) {
         _showLinkForCurrentCard();
       }
     });
@@ -425,7 +434,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       // Verwende ref.listen, um auf Counts-Änderungen zu reagieren
       // Aber nur einmal, deshalb verwenden wir einen Timer
       Future.delayed(const Duration(milliseconds: 200), () {
-        if (!mounted) return;
+        if (_isDisposed || !mounted) return;
 
         final countsAfter = ref.read(singleSessionCountsProvider);
 
@@ -447,7 +456,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
         }
 
         // Pulse-Animation auf den Ziel-Bucket
-        if (targetBucket != null && mounted) {
+        if (targetBucket != null && !_isDisposed && mounted) {
           triggerPulseSingle(targetBucket);
         }
       });
@@ -469,8 +478,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     // PlasmaLink für neue Karte: Wird vom currentWordProvider-Listener aktualisiert.
     // Fallback nach 400ms falls Listener nicht feuert.
     Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) {
+      if (!_isDisposed && mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_isDisposed || !mounted) return;
           _showLinkForCurrentCard();
         });
       }
@@ -609,12 +619,14 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
   }
 
   void _showLinkForCurrentCard() {
+    if (_isDisposed || !mounted) return;
     if (!_plasmaLinkEnabled) return;
     _updateLink(_targetStageForIdleCard());
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     // ✅ Provider Subscription schließen
     _stagesSub?.close();
     if (!widget.useLocalOfflineFlow) {
@@ -657,9 +669,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
             next.finalPassActive &&
             next.shuffledWordIds.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
+            if (!_isDisposed && mounted) {
               Future.delayed(const Duration(milliseconds: 100), () {
-                if (mounted) _showLinkForCurrentCard();
+                if (!_isDisposed && mounted) _showLinkForCurrentCard();
               });
             }
           });
@@ -712,6 +724,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
       // Init nach 1. Frame (damit Provider hängt)
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_isDisposed || !mounted) return;
         _controller?.init(
           categoryId: widget.categoryId,
           title: widget.title,
@@ -722,8 +735,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
 
         // Link für erste Karte schnell aktivieren
         Future.delayed(const Duration(milliseconds: 150), () {
-          if (mounted) {
+          if (!_isDisposed && mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_isDisposed || !mounted) return;
               _showLinkForCurrentCard();
             });
           }
@@ -885,11 +899,11 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     ref.listen<bool>(
       learnModeControllerProvider.select((s) => s.categoryMastered),
       (prev, next) {
-        if (next && prev != true && mounted) {
+        if (next && prev != true && !_isDisposed && mounted) {
           _hideLink(); // PlasmaLink verschwindet, wenn Finale erreicht
           FireworksService.show(context, duration: const Duration(seconds: 10));
           Future.delayed(const Duration(seconds: 10), () {
-            if (mounted) {
+            if (!_isDisposed && mounted) {
               ref
                   .read(learnModeControllerProvider.notifier)
                   .setCategoryMasteredRestartReady();
@@ -905,8 +919,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
       if (previous?.id != next?.id && !linkVisible) {
         // Karte hat sich geändert – Link schnell anzeigen
         Future.delayed(const Duration(milliseconds: 120), () {
-          if (mounted) {
+          if (!_isDisposed && mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_isDisposed || !mounted) return;
               _showLinkForCurrentCard();
             });
           }
@@ -1197,7 +1212,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !widget.useLocalOfflineFlow) return;
+      if (_isDisposed || !mounted || !widget.useLocalOfflineFlow) return;
       if (cardState.hasCard) {
         _updateLocalLink(localTargetStage);
       } else {
@@ -1226,7 +1241,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           .read(localLearningViewModelProvider)
           .lastReviewFeedback;
       final pulseTargetStage = feedback?.targetStage.index;
-      if (feedback != null && pulseTargetStage != null && mounted) {
+      if (feedback != null &&
+          pulseTargetStage != null &&
+          !_isDisposed &&
+          mounted) {
         triggerPulse(
           pulseTargetStage,
           color: _localPulseColorForFeedback(feedback),
@@ -1243,7 +1261,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen>
           .read(localLearningViewModelProvider)
           .lastReviewFeedback;
       final pulseTargetStage = feedback?.targetStage.index;
-      if (feedback != null && pulseTargetStage != null && mounted) {
+      if (feedback != null &&
+          pulseTargetStage != null &&
+          !_isDisposed &&
+          mounted) {
         triggerPulse(
           pulseTargetStage,
           color: _localPulseColorForFeedback(feedback),

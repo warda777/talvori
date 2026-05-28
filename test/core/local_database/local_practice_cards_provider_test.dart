@@ -253,6 +253,78 @@ void main() {
     expect(cards.map((card) => card.wordId), ['word-ticket']);
   });
 
+  test('practice_cards_exclude_disabled_word_world_memberships', () async {
+    final container = await createContainer(
+      'talvori_local_practice_disabled_world_',
+    );
+    final bootstrap = await container.read(localBootstrapProvider.future);
+    final repositories = bootstrap.repositoryFactory;
+    final now = DateTime(2026, 5, 28, 10);
+    await repositories.categoryRepository.upsertCategory(
+      id: 'category-travel',
+      name: 'Travel',
+      now: now,
+    );
+    await repositories.wordRepository.upsertWord(
+      id: 'word-ticket',
+      categoryId: 'seed-category-basics',
+      term: 'ticket',
+      translation: 'Fahrkarte',
+      now: now,
+    );
+    await repositories.wordRepository.upsertWord(
+      id: 'word-hotel',
+      categoryId: 'seed-category-basics',
+      term: 'hotel',
+      translation: 'Hotel',
+      now: now,
+    );
+    await repositories.wordRepository.addWordWorldMembership(
+      wordId: 'word-ticket',
+      categoryId: 'category-travel',
+      createdAt: now,
+    );
+    await repositories.wordRepository.addWordWorldMembership(
+      wordId: 'word-hotel',
+      categoryId: 'category-travel',
+      createdAt: now,
+    );
+    await repositories.progressInitializationService
+        .initializeProgressForCategoryAndMode(
+          categoryId: 'category-travel',
+          mode: LearningMode.time,
+          now: now,
+        );
+    for (final wordId in ['word-ticket', 'word-hotel']) {
+      final progress = await repositories.wordProgressRepository.loadProgress(
+        wordId: wordId,
+        categoryId: 'category-travel',
+        mode: LearningMode.time,
+      );
+      await repositories.wordProgressRepository.saveProgress(
+        updatedProgress: progress!.copyWith(stage: SrsStage.s2),
+        updatedAt: now,
+      );
+    }
+    await repositories.wordRepository.setWordWorldMembershipDisabled(
+      wordId: 'word-hotel',
+      categoryId: 'category-travel',
+      disabled: true,
+    );
+
+    final cards = await container.read(
+      localPracticeCardsProvider(
+        const LocalPracticeCardsRequest(
+          categoryId: 'category-travel',
+          mode: LearningMode.time,
+          selection: LocalPracticeSelection.singleStage(SrsStage.s2),
+        ),
+      ).future,
+    );
+
+    expect(cards.map((card) => card.wordId), ['word-ticket']);
+  });
+
   test('local_source_practice_cards_use_filtered_source_words', () async {
     final container = await createContainer(
       'talvori_local_practice_source_filter_',

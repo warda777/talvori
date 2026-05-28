@@ -4,11 +4,19 @@ import 'package:flutter/material.dart';
 class SlideHintController {
   _SlideHintButtonState? _s;
   void _bind(_SlideHintButtonState s) => _s = s;
+  void _unbind(_SlideHintButtonState s) {
+    if (identical(_s, s)) _s = null;
+  }
 
-  Future<void> open() async => _s!._animateTo(-_s!.widget.reveal);
+  Future<void> open() async {
+    final s = _s;
+    if (s == null || s._isDisposed || !s.mounted) return;
+    await s._animateTo(-s.widget.reveal);
+  }
+
   Future<void> close() async {
     final s = _s;
-    if (s == null) return;
+    if (s == null || s._isDisposed || !s.mounted) return;
 
     s._lockClosedUntil = DateTime.now().add(const Duration(milliseconds: 900));
     s._suppressFor(const Duration(milliseconds: 900));
@@ -17,47 +25,48 @@ class SlideHintController {
     s._closing = true;
     s._stopHints();
 
-    if (s._ac.isAnimating) s._ac.stop();
+    if (!s._isDisposed && s.mounted && s._ac.isAnimating) s._ac.stop();
 
     await s._animateTo(
       0,
       d: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+    if (s._isDisposed || !s.mounted) return;
 
-    s._offset = 0;
-    s._from = 0;
-    s._to = 0;
-    s.setState(() {});
+    s._resetClosedPosition();
 
     s._hintTimer?.cancel();
     s._hintTimer = null;
     s._closing = false;
   }
 
-  Future<void> nudge({double by = 24}) async => _s!._nudge(by: by);
+  Future<void> nudge({double by = 24}) async {
+    final s = _s;
+    if (s == null || s._isDisposed || !s.mounted) return;
+    await s._nudge(by: by);
+  }
+
   Future<void> closeAndFreeze([
     Duration freeze = const Duration(milliseconds: 800),
   ]) async {
     final s = _s;
-    if (s == null) return;
+    if (s == null || s._isDisposed || !s.mounted) return;
 
     s._suppressFor(freeze);
     s._freezeFor(freeze);
     s._stopHints();
 
-    if (s._ac.isAnimating) s._ac.stop();
+    if (!s._isDisposed && s.mounted && s._ac.isAnimating) s._ac.stop();
 
     await s._animateTo(
       0,
       d: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
+    if (s._isDisposed || !s.mounted) return;
 
-    s._offset = 0;
-    s._from = 0;
-    s._to = 0;
-    s.setState(() {});
+    s._resetClosedPosition();
   }
 
   double get offset => _s?._offset ?? 0;
@@ -113,7 +122,6 @@ class _SlideHintButtonState extends State<SlideHintButton>
     duration: const Duration(milliseconds: 240),
   );
 
-  Animation<double>? _anim;
   double _offset = 0.0; // 0 .. -reveal
   Timer? _hintTimer;
   bool _userInteracted = false;
@@ -122,6 +130,7 @@ class _SlideHintButtonState extends State<SlideHintButton>
   double _from = 0.0;
   double _to = 0.0;
   bool _closing = false;
+  bool _isDisposed = false;
   DateTime? _lockClosedUntil;
   DateTime? _freezeUntil;
   DateTime? _suppressUntil;
@@ -136,14 +145,23 @@ class _SlideHintButtonState extends State<SlideHintButton>
   void _suppressFor(Duration d) => _suppressUntil = DateTime.now().add(d);
   void _freezeFor(Duration d) => _freezeUntil = DateTime.now().add(d);
 
+  void _resetClosedPosition() {
+    if (_isDisposed || !mounted) return;
+    _offset = 0;
+    _from = 0;
+    _to = 0;
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     widget.controller?._bind(this);
     _ac.addListener(() {
+      if (_isDisposed || !mounted) return;
       final v = _ac.value;
       final off = _from + (_to - _from) * v;
-      if (mounted) setState(() => _offset = off);
+      setState(() => _offset = off);
     });
     _scheduleHints();
   }
@@ -151,9 +169,9 @@ class _SlideHintButtonState extends State<SlideHintButton>
   @override
   void didUpdateWidget(covariant SlideHintButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller &&
-        widget.controller != null) {
-      widget.controller!._bind(this);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._unbind(this);
+      widget.controller?._bind(this);
     }
 
     if (oldWidget.autoHint != widget.autoHint) {
@@ -167,7 +185,7 @@ class _SlideHintButtonState extends State<SlideHintButton>
     if (_isFrozen) {
       _stopHints();
       if (_offset != 0) {
-        if (_ac.isAnimating) _ac.stop();
+        if (!_isDisposed && mounted && _ac.isAnimating) _ac.stop();
         _offset = 0;
         _from = 0;
         _to = 0;
@@ -178,7 +196,7 @@ class _SlideHintButtonState extends State<SlideHintButton>
     if (_isLocked) {
       _stopHints();
       if (_offset != 0) {
-        if (_ac.isAnimating) _ac.stop();
+        if (!_isDisposed && mounted && _ac.isAnimating) _ac.stop();
         _offset = 0;
         _from = 0;
         _to = 0;
@@ -189,10 +207,10 @@ class _SlideHintButtonState extends State<SlideHintButton>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _hintTimer?.cancel();
-    if (widget.controller?._s == this) {
-      widget.controller?._s = null;
-    }
+    _hintTimer = null;
+    widget.controller?._unbind(this);
     _ac.dispose();
     super.dispose();
   }
@@ -202,15 +220,17 @@ class _SlideHintButtonState extends State<SlideHintButton>
     Duration d = const Duration(milliseconds: 240),
     Curve curve = Curves.easeOut,
   }) async {
+    if (_isDisposed || !mounted) return;
     if (_ac.isAnimating) _ac.stop();
 
     final double t = target.clamp(-widget.reveal, 0.0);
 
     if ((_offset - t).abs() < 0.5) {
-      if (mounted) setState(() => _offset = t);
+      if (!_isDisposed && mounted) setState(() => _offset = t);
       return;
     }
 
+    if (_isDisposed || !mounted) return;
     _ac.stop();
     _ac.duration = d;
 
@@ -224,22 +244,24 @@ class _SlideHintButtonState extends State<SlideHintButton>
     } catch (_) {
       completed = false;
     }
+    if (_isDisposed || !mounted) return;
 
     final current = _from + (_to - _from) * _ac.value;
     _offset = completed ? t : current;
-    if (mounted) setState(() {});
+    if (!_isDisposed && mounted) setState(() {});
     _ac.value = 0.0;
     _from = _offset;
     _to = _offset;
   }
 
   Future<void> _nudge({double by = 24}) async {
-    if (!mounted) return;
+    if (_isDisposed || !mounted) return;
     await _animateTo(
       (-by).clamp(-widget.reveal, 0.0),
       d: const Duration(milliseconds: 160),
       curve: Curves.easeOut,
     );
+    if (_isDisposed || !mounted) return;
     await _animateTo(
       0,
       d: const Duration(milliseconds: 260),
@@ -252,7 +274,7 @@ class _SlideHintButtonState extends State<SlideHintButton>
     _hintTimer?.cancel();
     _hintTimer = null;
     _hintAnimating = false;
-    if (_ac.isAnimating) _ac.stop();
+    if (!_isDisposed && mounted && _ac.isAnimating) _ac.stop();
   }
 
   void _scheduleHints() {
@@ -267,12 +289,18 @@ class _SlideHintButtonState extends State<SlideHintButton>
     if (_hintTimer != null) return;
 
     _hintTimer = Timer(widget.firstHintDelay, () async {
+      if (_isDisposed || !mounted) return;
       if (!_userInteracted && _hintCount < 3) await _runOneHint();
       if (_userInteracted || _hintCount >= 3) return;
 
       _hintTimer?.cancel();
       _hintTimer = Timer.periodic(widget.hintInterval, (_) async {
-        if (!mounted || _userInteracted || _closing || _hintCount >= 3) {
+        if (_isDisposed || !mounted) {
+          _hintTimer?.cancel();
+          _hintTimer = null;
+          return;
+        }
+        if (_userInteracted || _closing || _hintCount >= 3) {
           _stopHints();
           return;
         }
@@ -282,7 +310,12 @@ class _SlideHintButtonState extends State<SlideHintButton>
   }
 
   Future<void> _runOneHint() async {
-    if (!mounted || _userInteracted || _closing || _isFrozen || !_canOpen) {
+    if (_isDisposed ||
+        !mounted ||
+        _userInteracted ||
+        _closing ||
+        _isFrozen ||
+        !_canOpen) {
       return;
     }
     if (_hintAnimating) return;
@@ -304,13 +337,14 @@ class _SlideHintButtonState extends State<SlideHintButton>
         curve: widget.hintOutCurve,
       );
 
-      if (!mounted || _userInteracted) return;
+      if (_isDisposed || !mounted || _userInteracted) return;
 
       await _animateTo(
         0,
         d: widget.hintBackDuration,
         curve: widget.hintBackCurve,
       );
+      if (_isDisposed || !mounted) return;
 
       // Zähler erhöhen nach erfolgreichem Hint
       _hintCount++;

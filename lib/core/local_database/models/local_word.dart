@@ -10,6 +10,8 @@ class LocalWord {
     required this.isArchived,
     required this.createdAt,
     required this.updatedAt,
+    this.isDisabledForCategory = false,
+    this.isKnownForCategory = false,
     this.translationStatus = TranslationStatus.translated,
     this.exampleSentence,
     this.notes,
@@ -32,6 +34,8 @@ class LocalWord {
   final String? notes;
   final int sortOrder;
   final bool isArchived;
+  final bool isDisabledForCategory;
+  final bool isKnownForCategory;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

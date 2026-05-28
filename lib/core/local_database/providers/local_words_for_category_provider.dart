@@ -72,7 +72,7 @@ final localWordsForCategoryProvider =
       }
 
       return bootstrapResult.repositoryFactory.wordRepository
-          .loadWordsForWordWorld(categoryId: categoryId);
+          .loadWordsForWordWorld(categoryId: categoryId, includeDisabled: true);
     });
 
 typedef _CategoryWordsLoader =

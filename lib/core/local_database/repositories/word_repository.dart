@@ -155,14 +155,16 @@ class WordRepository {
   Future<List<LocalWord>> loadWordsForWordWorld({
     required String categoryId,
     bool includeArchived = false,
+    bool includeDisabled = false,
   }) async {
     final rows = await _database.rawQuery(
       '''
-SELECT w.*
+SELECT w.*, m.is_disabled AS membership_is_disabled, m.is_known AS membership_is_known
 FROM words w
 JOIN word_world_memberships m ON m.word_id = w.id
 WHERE m.category_id = ?
 ${includeArchived ? '' : 'AND w.is_archived = 0'}
+${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
 ORDER BY w.sort_order ASC, w.term ASC
 ''',
       [categoryId],
@@ -190,6 +192,7 @@ WHERE category_id = ?
   Future<List<String>> loadWordIdsForWordWorld({
     required String categoryId,
     bool includeArchived = false,
+    bool includeDisabled = false,
   }) async {
     final membershipCount = await _countWordWorldMemberships(categoryId);
     if (membershipCount == 0) {
@@ -206,6 +209,7 @@ FROM words w
 JOIN word_world_memberships m ON m.word_id = w.id
 WHERE m.category_id = ?
 ${includeArchived ? '' : 'AND w.is_archived = 0'}
+${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
 ORDER BY w.sort_order ASC, w.term ASC
 ''',
       [categoryId],
@@ -217,6 +221,7 @@ ORDER BY w.sort_order ASC, w.term ASC
   Future<int> countWordsForWordWorld({
     required String categoryId,
     bool includeArchived = false,
+    bool includeDisabled = false,
   }) async {
     final membershipCount = await _countWordWorldMemberships(categoryId);
     if (membershipCount == 0) {
@@ -233,12 +238,14 @@ SELECT COUNT(*) AS count
 FROM words w
 JOIN word_world_memberships m ON m.word_id = w.id
 WHERE m.category_id = ?
+${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
 '''
           : '''
 SELECT COUNT(*) AS count
 FROM words w
 JOIN word_world_memberships m ON m.word_id = w.id
 WHERE m.category_id = ? AND w.is_archived = ?
+${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
 ''',
       includeArchived ? [categoryId] : [categoryId, 0],
     );
@@ -255,7 +262,91 @@ WHERE m.category_id = ? AND w.is_archived = ?
       'word_id': wordId,
       'category_id': categoryId,
       'created_at': _encodeDateTime(createdAt),
+      'is_disabled': 0,
+      'is_known': 0,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<bool> wordWorldMembershipExists({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    final rows = await _database.query(
+      'word_world_memberships',
+      columns: ['word_id'],
+      where: 'word_id = ? AND category_id = ?',
+      whereArgs: [wordId, categoryId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<LocalWord?> findWordByTerm(String term) async {
+    final normalized = _normalizeTerm(term);
+    if (normalized.isEmpty) return null;
+    final rows = await _database.query('words', orderBy: 'created_at ASC');
+    for (final row in rows) {
+      final wordTerm = row['term'] as String?;
+      if (_normalizeTerm(wordTerm ?? '') == normalized) {
+        return _mapWord(row);
+      }
+    }
+    return null;
+  }
+
+  Future<LocalWord> addOrLinkWordToWordWorld({
+    required String categoryId,
+    required String term,
+    required String translation,
+    String? exampleSentence,
+    String? notes,
+    DateTime? now,
+  }) async {
+    final timestamp = now ?? DateTime.now();
+    final existing = await findWordByTerm(term);
+    if (existing != null) {
+      await addWordWorldMembership(
+        wordId: existing.id,
+        categoryId: categoryId,
+        createdAt: timestamp,
+      );
+      return existing;
+    }
+
+    return upsertWord(
+      categoryId: categoryId,
+      term: term.trim(),
+      translation: translation.trim(),
+      exampleSentence: exampleSentence?.trim(),
+      notes: notes?.trim(),
+      now: timestamp,
+    );
+  }
+
+  Future<void> setWordWorldMembershipDisabled({
+    required String wordId,
+    required String categoryId,
+    required bool disabled,
+  }) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_disabled': disabled ? 1 : 0},
+      where: 'word_id = ? AND category_id = ?',
+      whereArgs: [wordId, categoryId],
+    );
+  }
+
+  Future<void> setWordWorldMembershipKnown({
+    required String wordId,
+    required String categoryId,
+    required bool known,
+  }) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_known': known ? 1 : 0},
+      where: 'word_id = ? AND category_id = ?',
+      whereArgs: [wordId, categoryId],
+    );
   }
 
   Future<List<LocalWordWorldMembership>> loadMembershipsForWord(
@@ -489,6 +580,8 @@ WHERE category_id = ? AND is_archived = ?
       notes: row['notes'] as String?,
       sortOrder: row['sort_order']! as int,
       isArchived: (row['is_archived']! as int) == 1,
+      isDisabledForCategory: (row['membership_is_disabled'] as int?) == 1,
+      isKnownForCategory: (row['membership_is_known'] as int?) == 1,
       createdAt: _decodeDateTime(row['created_at']! as String),
       updatedAt: _decodeDateTime(row['updated_at']! as String),
     );
@@ -526,6 +619,10 @@ WHERE category_id = ? AND is_archived = ?
 
   String _encodeDateTime(DateTime value) {
     return value.toIso8601String();
+  }
+
+  String _normalizeTerm(String value) {
+    return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   }
 
   DateTime _decodeDateTime(String value) {

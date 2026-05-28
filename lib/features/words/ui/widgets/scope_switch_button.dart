@@ -14,7 +14,13 @@ class ScopeSwitchButtonController {
     _endResetAnimation = end;
   }
 
-  void startResetAnimation(VoidCallback onComplete) => _startResetAnimation?.call(onComplete);
+  void clearCallbacks(void Function(VoidCallback)? start, VoidCallback? end) {
+    if (identical(_startResetAnimation, start)) _startResetAnimation = null;
+    if (identical(_endResetAnimation, end)) _endResetAnimation = null;
+  }
+
+  void startResetAnimation(VoidCallback onComplete) =>
+      _startResetAnimation?.call(onComplete);
   void endResetAnimation() => _endResetAnimation?.call();
 }
 
@@ -64,24 +70,34 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
   bool _toolResetting = false;
   double _angleTurns = 0.0;
   VoidCallback? _onToolResetComplete;
+  bool _isDisposed = false;
+  late final AnimationStatusListener _toolResetStatusListener;
+  late final AnimationStatusListener _holdStatusListener;
+  late final void Function(VoidCallback) _startToolResetAnimation;
+  late final VoidCallback _endToolResetAnimation;
 
   @override
   void initState() {
     super.initState();
     // Listener für Tool-Reset Animation Completion
-    _toolReset.addStatusListener((status) {
+    _toolResetStatusListener = (status) {
+      if (_isDisposed || !mounted) return;
       if (status == AnimationStatus.completed && _toolResetting) {
         // Animation bei 100% → automatisch Reset ausführen
         _onToolResetComplete?.call();
+        if (_isDisposed || !mounted) return;
         setState(() {
           _toolResetting = false;
         });
+        if (_isDisposed || !mounted) return;
         _toolReset.reset();
       }
-    });
-    
+    };
+    _toolReset.addStatusListener(_toolResetStatusListener);
+
     // Listener für All/One Reset Animation Completion
-    _hold.addStatusListener((status) {
+    _holdStatusListener = (status) {
+      if (_isDisposed || !mounted) return;
       if (status == AnimationStatus.completed && _holding) {
         // Animation bei 100% → automatisch Reset ausführen
         HapticFeedback.heavyImpact();
@@ -91,34 +107,47 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
         setState(() {
           _holding = false;
         });
+        if (_isDisposed || !mounted) return;
         _hold.reset();
       }
-    });
-    
+    };
+    _hold.addStatusListener(_holdStatusListener);
+
     // Verbinde Controller mit internen Methoden
+    _startToolResetAnimation = (onComplete) {
+      if (_isDisposed || !mounted || _toolResetting) return;
+      _onToolResetComplete = onComplete;
+      setState(() {
+        _toolResetting = true;
+      });
+      if (_isDisposed || !mounted) return;
+      _toolReset.forward(from: 0); // Einmalig, nicht wiederholt
+    };
+    _endToolResetAnimation = () {
+      if (_isDisposed || !mounted || !_toolResetting) return;
+      setState(() {
+        _toolResetting = false;
+      });
+      if (_isDisposed || !mounted) return;
+      _toolReset.stop();
+      _toolReset.reset();
+      _onToolResetComplete = null;
+    };
     widget.toolResetController?.setCallbacks(
-      (onComplete) {
-        if (_toolResetting) return;
-        _onToolResetComplete = onComplete;
-        setState(() {
-          _toolResetting = true;
-        });
-        _toolReset.forward(from: 0); // Einmalig, nicht wiederholt
-      },
-      () {
-        if (!_toolResetting) return;
-        setState(() {
-          _toolResetting = false;
-        });
-        _toolReset.stop();
-        _toolReset.reset();
-        _onToolResetComplete = null;
-      },
+      _startToolResetAnimation,
+      _endToolResetAnimation,
     );
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
+    widget.toolResetController?.clearCallbacks(
+      _startToolResetAnimation,
+      _endToolResetAnimation,
+    );
+    _toolReset.removeStatusListener(_toolResetStatusListener);
+    _hold.removeStatusListener(_holdStatusListener);
     _hold.dispose();
     _spin.dispose();
     _toolReset.dispose();
@@ -126,6 +155,7 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
   }
 
   void _startHold(LongPressStartDetails _) {
+    if (_isDisposed || !mounted) return;
     _holding = true;
     _hold.forward(from: 0); // Einmalig, nicht wiederholt
     HapticFeedback.mediumImpact();
@@ -134,24 +164,26 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
   }
 
   Future<void> _endHold([_]) async {
-    if (!_holding) return;
+    if (_isDisposed || !mounted || !_holding) return;
     _holding = false;
     // Wenn Animation noch nicht abgeschlossen, abbrechen
     if (_hold.status != AnimationStatus.completed) {
       await _hold.reverse();
+      if (_isDisposed || !mounted) return;
       widget.onResetAllEnd?.call();
     }
     // Wenn Animation bereits abgeschlossen, wurde Reset bereits automatisch ausgeführt
   }
 
   Future<void> _tap() async {
-    if (_holding) return;
+    if (_isDisposed || !mounted || _holding) return;
     HapticFeedback.selectionClick();
     // 1) Aktuelle Farbe anwenden (z. B. an RotaryColorRing-Callback)
     widget.onConfirmColor?.call();
     // 2) Danach Scope wechseln (ALL/ONE)
     _angleTurns += 0.25;
     await _spin.forward(from: 0);
+    if (_isDisposed || !mounted) return;
     ref.read(radialPaletteProvider.notifier).toggleScope();
   }
 
@@ -181,11 +213,19 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
     );
   }
 
-  Widget _buildVisual(BuildContext context, bool isAll, String label, double d, Color ringColor) {
+  Widget _buildVisual(
+    BuildContext context,
+    bool isAll,
+    String label,
+    double d,
+    Color ringColor,
+  ) {
     // Text-Styles für ALL/ONE
     // Wenn Tool aktiv: aktives Element größer und in Goldfarbe, sonst beide gleich groß
-    const goldColor = Color(0xFFFFC66A); // Gold wie An/Aus Button unter "Alles freischalten"
-    
+    const goldColor = Color(
+      0xFFFFC66A,
+    ); // Gold wie An/Aus Button unter "Alles freischalten"
+
     final children = <Widget>[
       Container(
         width: d,
@@ -223,10 +263,7 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
         child: AnimatedBuilder(
           animation: _hold,
           builder: (_, __) => CustomPaint(
-            painter: _RingPainter(
-              progress: _hold.value,
-              color: ringColor,
-            ),
+            painter: _RingPainter(progress: _hold.value, color: ringColor),
           ),
         ),
       ),
@@ -242,9 +279,7 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
             child: SizedBox(
               width: d * 0.70,
               height: d * 0.70,
-              child: CustomPaint(
-                painter: _SpinnerPainter(color: ringColor),
-              ),
+              child: CustomPaint(painter: _SpinnerPainter(color: ringColor)),
             ),
           );
         },
@@ -308,9 +343,9 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
 
     final allStyle = widget.isInteractive
         ? Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white70,
-              letterSpacing: 1.0,
-            )
+            color: Colors.white70,
+            letterSpacing: 1.0,
+          )
         : TextStyle(
             fontSize: isAll ? 16 : 10, // Größer wenn aktiv
             fontWeight: FontWeight.w600,
@@ -319,9 +354,9 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
           );
     final oneStyle = widget.isInteractive
         ? Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white70,
-              letterSpacing: 1.0,
-            )
+            color: Colors.white70,
+            letterSpacing: 1.0,
+          )
         : TextStyle(
             fontSize: isAll ? 10 : 16, // Größer wenn aktiv
             fontWeight: FontWeight.w600,
@@ -337,26 +372,17 @@ class _ScopeSwitchButtonState extends ConsumerState<ScopeSwitchButton>
     children.add(
       Positioned(
         top: topOffset,
-        child: Text(
-          'ALL',
-          style: allStyle,
-        ),
+        child: Text('ALL', style: allStyle),
       ),
     );
     children.add(
       Positioned(
         bottom: bottomOffset,
-        child: Text(
-          'ONE',
-          style: oneStyle,
-        ),
+        child: Text('ONE', style: oneStyle),
       ),
     );
 
-    return Stack(
-      alignment: Alignment.center,
-      children: children,
-    );
+    return Stack(alignment: Alignment.center, children: children);
   }
 }
 
