@@ -29,27 +29,25 @@ class _GlowSweepRingState extends State<GlowSweepRing>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
-    
+
     // Start animation and repeat
     _startAnimation();
   }
 
   void _startAnimation() {
-    if (!mounted) return;
-    
+    if (_isDisposed || !mounted) return;
+
     _controller.forward().then((_) {
-      if (mounted && widget.loop) {
+      if (!_isDisposed && mounted && widget.loop) {
         Future.delayed(widget.idle, () {
-          if (mounted) {
+          if (!_isDisposed && mounted) {
             _controller.reset();
             _startAnimation();
           }
@@ -60,6 +58,7 @@ class _GlowSweepRingState extends State<GlowSweepRing>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }
@@ -111,19 +110,24 @@ class GlowSweepPainter extends CustomPainter {
     canvas.drawCircle(center, radius, backgroundPaint);
 
     // Subtiler Glow-Effekt: nur 1-2 Layer statt 3
-    final glowLayers = strokeWidth < 3 ? 1 : 2; // Kleinere strokeWidth = weniger Layer
-    
+    final glowLayers = strokeWidth < 3
+        ? 1
+        : 2; // Kleinere strokeWidth = weniger Layer
+
     for (int i = 0; i < glowLayers; i++) {
       final glowRadius = radius + (i * 1.5); // Kleinerer Radius-Offset
       final glowAlpha = (0.5 - (i * 0.15)).clamp(0.1, 1.0); // Subtileres Alpha
-      final glowStrokeWidth = strokeWidth + (i * 1); // Kleinere StrokeWidth-Erweiterung
-      
+      final glowStrokeWidth =
+          strokeWidth + (i * 1); // Kleinere StrokeWidth-Erweiterung
+
       final paint = Paint()
         ..color = color.withValues(alpha: glowAlpha)
         ..strokeWidth = glowStrokeWidth
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
-        ..maskFilter = i == 0 ? const MaskFilter.blur(BlurStyle.normal, 2) : null; // Leichter Blur nur beim ersten Layer
+        ..maskFilter = i == 0
+            ? const MaskFilter.blur(BlurStyle.normal, 2)
+            : null; // Leichter Blur nur beim ersten Layer
 
       final sweepAngle = 2 * math.pi * progress;
       canvas.drawArc(

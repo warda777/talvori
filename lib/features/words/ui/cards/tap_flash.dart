@@ -24,6 +24,7 @@ class _TapFlashState extends State<TapFlash>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -37,12 +38,15 @@ class _TapFlashState extends State<TapFlash>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }
 
   void _handleTap() {
+    if (_isDisposed || !mounted) return;
     _controller.forward().then((_) {
+      if (_isDisposed || !mounted) return;
       _controller.reverse();
       widget.onTapAfter?.call();
     });

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 
 /// Controller für die Rotation des Chrome-Icons
@@ -9,6 +8,7 @@ class RotatingChromeIconController {
   late Animation<double> rotationAnimation;
   late Animation<double> fadeAnimation;
   static final math.Random _random = math.Random();
+  bool _isDisposed = false;
 
   void init({
     required TickerProvider vsync,
@@ -18,6 +18,7 @@ class RotatingChromeIconController {
     Duration pauseDuration = const Duration(seconds: 10),
     bool loop = true,
   }) {
+    _isDisposed = false;
     final totalDuration =
         fadeInDuration + rotationDuration + fadeOutDuration + pauseDuration;
 
@@ -64,14 +65,15 @@ class RotatingChromeIconController {
     if (loop) {
       final randomDelay = Duration(milliseconds: _random.nextInt(5000));
       Future.delayed(randomDelay, () {
-        try {
+        if (!_isDisposed) {
           ctrl.repeat();
-        } catch (_) {}
+        }
       });
     }
   }
 
   void dispose() {
+    _isDisposed = true;
     if (ctrl.isAnimating) ctrl.stop();
     ctrl.dispose();
   }
@@ -107,7 +109,6 @@ class RotatingChromeIcon extends StatefulWidget {
 
 class _RotatingChromeIconState extends State<RotatingChromeIcon>
     with SingleTickerProviderStateMixin {
-  late RotatingChromeIconController _internalController;
   RotatingChromeIconController? _controller;
   bool _ownsController = false; // <— NEU
 

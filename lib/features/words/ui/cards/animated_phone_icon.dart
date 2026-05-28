@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/services.dart';
 
 /// Animiertes Handy-Icon mit beweglichem Pfeil
 /// Der Pfeil wird nur beim Tap animiert und fliegt dann zur Progress Pill
@@ -9,7 +7,8 @@ class AnimatedPhoneIcon extends StatefulWidget {
   final double size;
   final Color? colorFilter;
   final Duration duration;
-  final VoidCallback? onTap; // Callback für Tap (wird die Flug-Animation starten)
+  final VoidCallback?
+  onTap; // Callback für Tap (wird die Flug-Animation starten)
 
   const AnimatedPhoneIcon({
     super.key,
@@ -29,6 +28,7 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
   bool _arrowVisible = true; // Startet sichtbar
   late AnimationController _movementController;
   late Animation<double> _movementAnimation;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -38,22 +38,28 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     // Leichte Bewegung (Bounce-Effekt)
     _movementAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: -4.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(
+          begin: 0.0,
+          end: -4.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 0.3,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: -4.0, end: 2.0)
-            .chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: -4.0,
+          end: 2.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 0.4,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 2.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween: Tween<double>(
+          begin: 2.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 0.3,
       ),
     ]).animate(_movementController);
@@ -61,13 +67,14 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
 
   @override
   void dispose() {
+    _isDisposed = true;
     _movementController.dispose();
     super.dispose();
   }
 
   /// Versteckt den Pfeil (wird beim Start der Flug-Animation aufgerufen)
   void hideArrow() {
-    if (mounted) {
+    if (!_isDisposed && mounted) {
       setState(() {
         _arrowVisible = false;
       });
@@ -76,7 +83,7 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
 
   /// Zeigt den Pfeil wieder an (wird nach der Flug-Animation aufgerufen)
   void showArrow() {
-    if (mounted) {
+    if (!_isDisposed && mounted) {
       setState(() {
         _arrowVisible = true;
       });
@@ -85,7 +92,7 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
 
   /// Triggert eine leichte Bewegung des Icons (wird aufgerufen, wenn sich das Wort im Wheel ändert)
   void triggerMovement() {
-    if (mounted && !_movementController.isAnimating) {
+    if (!_isDisposed && mounted && !_movementController.isAnimating) {
       _movementController.reset();
       _movementController.forward();
     }
@@ -110,14 +117,16 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
                 child: Center(
                   child: Icon(
                     Icons.smartphone,
-                    size: widget.size * 0.77, // ~40px bei size=52, damit es der ursprünglichen Größe entspricht
+                    size:
+                        widget.size *
+                        0.77, // ~40px bei size=52, damit es der ursprünglichen Größe entspricht
                     color: widget.colorFilter ?? Colors.white,
                   ),
                 ),
               );
             },
           ),
-          
+
           // Pfeil (nur wenn sichtbar)
           if (_arrowVisible)
             Positioned(
@@ -149,4 +158,3 @@ class _AnimatedPhoneIconState extends State<AnimatedPhoneIcon>
     );
   }
 }
-

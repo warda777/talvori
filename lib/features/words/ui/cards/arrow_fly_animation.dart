@@ -28,23 +28,19 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
   late Animation<double> _positionAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
-    
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     // Position: Von Start zu Ende
-    _positionAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _positionAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // Fade: Am Anfang sichtbar, am Ende ausblenden
     _fadeAnimation = TweenSequence<double>([
@@ -53,9 +49,10 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
         weight: 0.8, // 80% der Zeit sichtbar
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.0).chain(
-          CurveTween(curve: Curves.easeOut),
-        ),
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 0.2, // 20% der Zeit ausblenden
       ),
     ]).animate(_controller);
@@ -67,20 +64,23 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
         weight: 0.7, // 70% der Zeit normal
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.3).chain(
-          CurveTween(curve: Curves.easeIn),
-        ),
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.3,
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 0.3, // 30% der Zeit kleiner werden
       ),
     ]).animate(_controller);
 
     _controller.forward().then((_) {
+      if (_isDisposed || !mounted) return;
       widget.onComplete?.call();
     });
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _controller.dispose();
     super.dispose();
   }
@@ -95,10 +95,12 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
       ]),
       builder: (context, child) {
         // Berechne die aktuelle Position
-        final currentX = widget.startPosition.dx +
+        final currentX =
+            widget.startPosition.dx +
             (widget.endPosition.dx - widget.startPosition.dx) *
                 _positionAnimation.value;
-        final currentY = widget.startPosition.dy +
+        final currentY =
+            widget.startPosition.dy +
             (widget.endPosition.dy - widget.startPosition.dy) *
                 _positionAnimation.value;
 
@@ -114,10 +116,7 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
             opacity: _fadeAnimation.value,
             child: Transform.scale(
               scale: _scaleAnimation.value,
-              child: Transform.rotate(
-                angle: angle,
-                child: widget.child,
-              ),
+              child: Transform.rotate(angle: angle, child: widget.child),
             ),
           ),
         );
@@ -125,4 +124,3 @@ class _ArrowFlyAnimationState extends State<ArrowFlyAnimation>
     );
   }
 }
-
