@@ -993,22 +993,89 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Fortschritt zurücksetzen?'),
-          content: const Text(
-            'Fortschritt für diese Kategorie und diesen Lernmodus '
-            'zurücksetzen?',
+        builder: (dialogContext) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Abbrechen'),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF121821), Color(0xFF05070B)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFF5BFCB), width: 1.3),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF5BFCB).withValues(alpha: 0.18),
+                  blurRadius: 24,
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  blurRadius: 28,
+                  offset: const Offset(0, 14),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Zurücksetzen'),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Fortschritt zurücksetzen?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Fortschritt für diese Kategorie und diesen Lernmodus '
+                    'zurücksetzen?',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.78),
+                      fontSize: 14.5,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Wrap(
+                    alignment: WrapAlignment.end,
+                    runAlignment: WrapAlignment.end,
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white.withValues(alpha: 0.76),
+                        ),
+                        child: const Text('Abbrechen'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFFF5BFCB),
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        child: const Text('Zurücksetzen'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       );
 

@@ -174,7 +174,7 @@ class CategoryHeaderCapsule extends StatelessWidget {
                                   glowColor: accentColor,
                                   neonStyle: neonStyle,
                                   child: const Icon(
-                                    Icons.add,
+                                    Icons.add_rounded,
                                     color: Colors.white,
                                     size: 28,
                                   ),

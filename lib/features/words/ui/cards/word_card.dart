@@ -39,6 +39,28 @@ const homeBrowserCustomStartUrlStorageKey =
     'talvori_browser_custom_start_url_v1';
 
 @visibleForTesting
+String formatHomeWordCounterCount(int count) {
+  final normalizedCount = count < 0 ? 0 : count;
+  if (normalizedCount < 1000) return '$normalizedCount';
+
+  if (normalizedCount < 1000000) {
+    final thousands = normalizedCount / 1000;
+    if (thousands < 10 && normalizedCount % 1000 != 0) {
+      final label = thousands.toStringAsFixed(1).replaceAll('.', ',');
+      return '${label}k';
+    }
+    return '${thousands.round()}k';
+  }
+
+  final millions = normalizedCount / 1000000;
+  if (millions < 10 && normalizedCount % 1000000 != 0) {
+    final label = millions.toStringAsFixed(1).replaceAll('.', ',');
+    return '${label}M';
+  }
+  return '${millions.round()}M';
+}
+
+@visibleForTesting
 final homeBrowserUrlResolverProvider = Provider<HomeBrowserUrlResolver>((ref) {
   return () => _resolveHomeBrowserUrl(ref);
 });
@@ -269,9 +291,11 @@ class _WordCardState extends ConsumerState<WordCard> {
                       height: 32,
                       child: Align(
                         alignment: Alignment.topCenter,
-                        child: SizedBox(
-                          width: 74,
-                          height: 32,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 74,
+                            maxWidth: 120,
+                          ),
                           child: TapFlash(
                             key: const Key('home-my-words-counter-button'),
                             color: _wheelBlue, // Blau aus Word Wheel
@@ -281,7 +305,9 @@ class _WordCardState extends ConsumerState<WordCard> {
                             child: _CounterPill(
                               label: _total > 0
                                   ? '$_currentIndex/$_total'
-                                  : '${widget.userWordCount}',
+                                  : formatHomeWordCounterCount(
+                                      widget.userWordCount,
+                                    ),
                               textColor: onImageFg,
                             ),
                           ),
@@ -1208,21 +1234,23 @@ class _CounterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(14),
       ),
       alignment: Alignment.center,
-      child: Text(
-        label,
-        maxLines: 1,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          label,
+          maxLines: 1,
+          softWrap: false,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
       ),
     );

@@ -217,9 +217,19 @@ class LevelsCardView extends StatelessWidget {
                   const buttonW = 138.0;
                   const gap = 12.0;
                   const iconBoxW = 60.0;
+                  const trailingControlW = 44.0;
 
                   final stackW = c.maxWidth;
                   final buttonLeft = (stackW - buttonW) / 2;
+                  final minTrailingLeft = buttonLeft + buttonW + gap;
+                  final maxTrailingLeft = stackW - trailingControlW - 28;
+                  final targetTrailingLeft = buttonLeft + buttonW + 30;
+                  final trailingLeft = maxTrailingLeft < minTrailingLeft
+                      ? maxTrailingLeft
+                      : targetTrailingLeft.clamp(
+                          minTrailingLeft,
+                          maxTrailingLeft,
+                        );
 
                   const stackH = 60.0;
                   const buttonH = 48.0;
@@ -274,7 +284,7 @@ class LevelsCardView extends StatelessWidget {
                           ),
                         if (startTrailingControl != null)
                           Positioned(
-                            left: buttonLeft + buttonW + gap,
+                            left: trailingLeft,
                             top: buttonTop + (buttonH - 44) / 2,
                             child: startTrailingControl!,
                           ),

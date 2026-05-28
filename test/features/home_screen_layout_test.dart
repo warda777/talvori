@@ -76,6 +76,13 @@ void main() {
     );
   });
 
+  test('home word counter count formatting stays compact', () {
+    expect(formatHomeWordCounterCount(0), '0');
+    expect(formatHomeWordCounterCount(999), '999');
+    expect(formatHomeWordCounterCount(10000), '10k');
+    expect(formatHomeWordCounterCount(100000), '100k');
+  });
+
   testWidgets('home_screen_renders_on_small_height_without_bottom_overflow', (
     tester,
   ) async {
@@ -109,6 +116,69 @@ void main() {
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
     expect(find.text('Impuls-Vorschau'), findsNothing);
+  });
+
+  testWidgets('home word counter handles large counts without overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    final previousOnError = FlutterError.onError;
+    final overflows = <FlutterErrorDetails>[];
+    FlutterError.onError = (details) {
+      if (details.exceptionAsString().contains('overflowed')) {
+        overflows.add(details);
+        return;
+      }
+      previousOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = previousOnError);
+
+    const cases = <int, String>{
+      0: '0',
+      999: '999',
+      10000: '10k',
+      100000: '100k',
+    };
+
+    for (final entry in cases.entries) {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 360,
+                  height: 570,
+                  child: WordCard(
+                    onSpeak: (_) {},
+                    onMarkWords: () {},
+                    onQuickSend: null,
+                    onGo: () {},
+                    userWordCount: entry.key,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text(entry.value), findsOneWidget);
+      final counterRect = tester.getRect(
+        find.byKey(const Key('home-my-words-counter-button')),
+      );
+      expect(counterRect.width, lessThanOrEqualTo(120));
+    }
+
+    FlutterError.onError = previousOnError;
+    expect(overflows, isEmpty);
   });
 
   testWidgets('home screen shows Talvori companion on regular height', (

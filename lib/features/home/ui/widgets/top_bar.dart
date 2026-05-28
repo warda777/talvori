@@ -457,38 +457,20 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                               // Button ausblenden, wenn Animation läuft
                               return Opacity(
                                 opacity: isAnimating ? 0.0 : 1.0,
-                                child: AnimatedFireballIcon(
-                                  controller: _fireballIconController,
-                                  autoPlay: false,
-                                  size: 38,
-                                  baseColor: gold,
-                                  animationColor: const Color(
-                                    0xFFA05260,
-                                  ), // #A05260
-                                  animationInterval: const Duration(
-                                    seconds: 5,
-                                  ), // 5 Sekunden Abstand
-                                  animationDuration: const Duration(
-                                    seconds: 5,
-                                  ), // 5 Sekunden Einfärbung und Flammen
+                                child: Icon(
+                                  Icons.insights_rounded,
+                                  color: gold,
+                                  size: 30,
                                 ),
                               );
                             },
                           );
                         }
                         // Fallback: Button normal anzeigen wenn fireballKey noch nicht verfügbar
-                        return AnimatedFireballIcon(
-                          controller: _fireballIconController,
-                          autoPlay: false,
-                          size: 38,
-                          baseColor: gold,
-                          animationColor: const Color(0xFFA05260), // #A05260
-                          animationInterval: const Duration(
-                            seconds: 5,
-                          ), // 5 Sekunden Abstand
-                          animationDuration: const Duration(
-                            seconds: 5,
-                          ), // 5 Sekunden Einfärbung und Flammen
+                        return Icon(
+                          Icons.insights_rounded,
+                          color: gold,
+                          size: 30,
                         );
                       },
                     ),
