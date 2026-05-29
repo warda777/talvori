@@ -19,6 +19,7 @@ void main() {
     expect(state.isExpanded, isTrue);
     expect(state.bubbleVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.greeting);
+    expect(state.emotion, TaliEmotion.neutral);
     expect(state.title, 'Talvori');
     expect(state.message, 'Bereit für dein nächstes Wort?');
     expect(state.inputVisible, isFalse);
@@ -35,6 +36,7 @@ void main() {
     expect(state.isExpanded, isFalse);
     expect(state.bubbleVisible, isFalse);
     expect(state.mascotMood, TalvoriMascotMood.idle);
+    expect(state.emotion, TaliEmotion.neutral);
     expect(state.inputVisible, isFalse);
     expect(state.isThinking, isFalse);
   });
@@ -50,6 +52,7 @@ void main() {
     expect(state.isExpanded, isTrue);
     expect(state.bubbleVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.greeting);
+    expect(state.emotion, TaliEmotion.neutral);
   });
 
   test('toggleExpanded switches between expanded and compact states', () {
@@ -85,7 +88,25 @@ void main() {
     expect(state.isExpanded, isTrue);
     expect(state.bubbleVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.proud);
+    expect(state.emotion, TaliEmotion.starEyes);
     expect(state.message, 'Stark, weiter so.');
+  });
+
+  test('showMessage can set an explicit Tali emotion', () {
+    final container = createContainer();
+
+    container
+        .read(companionControllerProvider.notifier)
+        .showMessage(
+          message: 'Kurz cool bleiben.',
+          mood: TalvoriMascotMood.proud,
+          emotion: TaliEmotion.cool,
+        );
+    final state = container.read(companionControllerProvider);
+
+    expect(state.mascotMood, TalvoriMascotMood.proud);
+    expect(state.emotion, TaliEmotion.cool);
+    expect(state.message, 'Kurz cool bleiben.');
   });
 
   test('showDiscoveryTip displays a local discovery tip', () {
@@ -101,6 +122,12 @@ void main() {
     expect(state.title, CompanionDiscoveryTips.wordGames.title);
     expect(state.message, CompanionDiscoveryTips.wordGames.message);
     expect(state.mascotMood, CompanionDiscoveryTips.wordGames.mood);
+    expect(
+      state.emotion,
+      TalvoriMascotAssets.emotionForLegacyMood(
+        CompanionDiscoveryTips.wordGames.mood,
+      ),
+    );
   });
 
   test('hideBubble only hides the bubble', () {
@@ -135,6 +162,7 @@ void main() {
     expect(state.bubbleVisible, isTrue);
     expect(state.inputVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.thinkingChin);
+    expect(state.emotion, TaliEmotion.thinking);
   });
 
   test('closeChatInput only hides the input', () {
@@ -162,6 +190,7 @@ void main() {
     expect(state.lastUserMessage, 'Was soll ich üben?');
     expect(state.message, 'Ich denke kurz nach ...');
     expect(state.mascotMood, TalvoriMascotMood.thinkingChin);
+    expect(state.emotion, TaliEmotion.thinking);
   });
 
   test('showAiResponse displays a short answer and leaves thinking state', () {
@@ -177,6 +206,7 @@ void main() {
     expect(state.bubbleVisible, isTrue);
     expect(state.message, 'Nimm ein kleines Paket.');
     expect(state.mascotMood, TalvoriMascotMood.happy);
+    expect(state.emotion, TaliEmotion.happy);
   });
 
   test('showError displays a friendly error state', () {
@@ -192,5 +222,6 @@ void main() {
     expect(state.errorMessage, 'Gerade klappt es nicht.');
     expect(state.message, 'Gerade klappt es nicht.');
     expect(state.mascotMood, TalvoriMascotMood.sad);
+    expect(state.emotion, TaliEmotion.embarrassed);
   });
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 
 class ProfilePreferences {
   const ProfilePreferences({
@@ -22,6 +23,7 @@ class ProfilePreferences {
     this.learningRemindersEnabled = false,
     this.pendingTranslationRemindersEnabled = false,
     this.marketingAnalyticsEnabled = false,
+    this.mascotStyle = TalvoriMascotStyle.female,
   });
 
   final String displayName;
@@ -41,6 +43,7 @@ class ProfilePreferences {
   final bool learningRemindersEnabled;
   final bool pendingTranslationRemindersEnabled;
   final bool marketingAnalyticsEnabled;
+  final TalvoriMascotStyle mascotStyle;
 
   ProfilePreferences copyWith({
     String? displayName,
@@ -60,6 +63,7 @@ class ProfilePreferences {
     bool? learningRemindersEnabled,
     bool? pendingTranslationRemindersEnabled,
     bool? marketingAnalyticsEnabled,
+    TalvoriMascotStyle? mascotStyle,
   }) {
     return ProfilePreferences(
       displayName: displayName ?? this.displayName,
@@ -83,6 +87,7 @@ class ProfilePreferences {
           this.pendingTranslationRemindersEnabled,
       marketingAnalyticsEnabled:
           marketingAnalyticsEnabled ?? this.marketingAnalyticsEnabled,
+      mascotStyle: mascotStyle ?? this.mascotStyle,
     );
   }
 }
@@ -115,6 +120,7 @@ class SharedPreferencesProfilePreferencesRepository
       'talvori_profile_pending_translation_reminders_enabled_v1';
   static const _marketingAnalyticsKey =
       'talvori_profile_marketing_analytics_enabled_v1';
+  static const _mascotStyleKey = 'talvori_profile_mascot_style_v1';
 
   @override
   Future<ProfilePreferences> load() async {
@@ -138,6 +144,7 @@ class SharedPreferencesProfilePreferencesRepository
       pendingTranslationRemindersEnabled:
           prefs.getBool(_pendingTranslationRemindersKey) ?? false,
       marketingAnalyticsEnabled: prefs.getBool(_marketingAnalyticsKey) ?? false,
+      mascotStyle: _parseMascotStyle(prefs.getString(_mascotStyleKey)),
     );
   }
 
@@ -169,6 +176,14 @@ class SharedPreferencesProfilePreferencesRepository
     await prefs.setBool(
       _marketingAnalyticsKey,
       preferences.marketingAnalyticsEnabled,
+    );
+    await prefs.setString(_mascotStyleKey, preferences.mascotStyle.name);
+  }
+
+  static TalvoriMascotStyle _parseMascotStyle(String? value) {
+    return TalvoriMascotStyle.values.firstWhere(
+      (style) => style.name == value,
+      orElse: () => TalvoriMascotStyle.female,
     );
   }
 }
@@ -273,6 +288,10 @@ class ProfilePreferencesController extends StateNotifier<ProfilePreferences> {
 
   Future<void> setMarketingAnalyticsEnabled(bool value) {
     return _save(state.copyWith(marketingAnalyticsEnabled: value));
+  }
+
+  Future<void> setMascotStyle(TalvoriMascotStyle value) {
+    return _save(state.copyWith(mascotStyle: value));
   }
 
   Future<void> _save(ProfilePreferences preferences) async {

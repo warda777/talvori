@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/features/home/ui/widgets/talvori_spirit_mascot.dart';
 
 enum TalvoriCompanionMood { neutral, happy, streak, tired, proud }
 
@@ -10,10 +11,13 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.mood = TalvoriCompanionMood.neutral,
     this.mascotSize = 156,
     this.mascotMood,
+    this.emotion,
+    this.mascotStyle = TalvoriMascotStyle.female,
     this.title = 'Talvori',
     this.message = 'Bereit für dein nächstes Wort?',
     this.bubbleVisible = true,
     this.isExpanded = true,
+    this.compactMascotScale = 0.62,
     this.inputVisible = false,
     this.isThinking = false,
     this.messageMaxLines = 3,
@@ -24,10 +28,13 @@ class TalvoriCompanionCard extends StatelessWidget {
   final TalvoriCompanionMood mood;
   final double mascotSize;
   final TalvoriMascotMood? mascotMood;
+  final TaliEmotion? emotion;
+  final TalvoriMascotStyle mascotStyle;
   final String title;
   final String message;
   final bool bubbleVisible;
   final bool isExpanded;
+  final double compactMascotScale;
   final bool inputVisible;
   final bool isThinking;
   final int messageMaxLines;
@@ -38,8 +45,12 @@ class TalvoriCompanionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = _accentForMood(mood);
     final effectiveMascotMood = mascotMood ?? _mascotMoodForCompanion(mood);
-    final mascotPath = TalvoriMascotAssets.pathFor(effectiveMascotMood);
-    final effectiveMascotSize = isExpanded ? mascotSize : mascotSize * 0.62;
+    final effectiveEmotion =
+        emotion ??
+        TalvoriMascotAssets.emotionForLegacyMood(effectiveMascotMood);
+    final effectiveMascotSize = isExpanded
+        ? mascotSize
+        : mascotSize * compactMascotScale;
 
     return Semantics(
       label: 'Tali ${effectiveMascotMood.name}',
@@ -68,13 +79,16 @@ class TalvoriCompanionCard extends StatelessWidget {
                     child: SizedBox(
                       width: effectiveMascotSize,
                       height: effectiveMascotSize,
-                      child: Image.asset(
-                        mascotPath,
-                        key: const Key('talvori-companion-mascot-image'),
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.medium,
+                      child: TalvoriSpiritMascot(
+                        assetPath: TalvoriMascotAssets.spiritPathFor(
+                          effectiveEmotion,
+                          style: mascotStyle,
+                        ),
+                        isActive: isExpanded || inputVisible || isThinking,
+                        compactMode: !isExpanded,
+                        glowIntensity: isExpanded ? 0.95 : 0.64,
                         semanticLabel:
-                            'Talvori Maskottchen ${effectiveMascotMood.name}',
+                            'Talvori Lerngeist ${effectiveMascotMood.name}',
                       ),
                     ),
                   ),

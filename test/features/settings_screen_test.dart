@@ -92,6 +92,22 @@ void main() {
     expect(find.text('Fortgeschritten'), findsOneWidget);
   });
 
+  testWidgets('mascot style can be changed locally', (tester) async {
+    await pumpSettings(tester);
+
+    await tester.tap(find.text('Talvori Stil'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Weiblich'), findsOneWidget);
+    expect(find.text('Männlich'), findsOneWidget);
+
+    await tester.tap(find.text('Männlich'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Talvori Stil'), findsOneWidget);
+    expect(find.text('Männlich'), findsOneWidget);
+  });
+
   testWidgets('subscription and muted content screens open', (tester) async {
     await pumpSettings(tester);
 

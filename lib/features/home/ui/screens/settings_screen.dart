@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/supabase_words_local_import_screen.dart';
@@ -114,6 +115,12 @@ class SettingsScreen extends ConsumerWidget {
                     onSelected: controller.setLevel,
                   ),
                 ),
+              ),
+              _SettingsTile(
+                icon: Icons.auto_awesome_rounded,
+                title: 'Talvori Stil',
+                value: _mascotStyleLabel(preferences.mascotStyle),
+                onTap: () => _push(context, const _MascotStyleSettingsScreen()),
               ),
             ],
           ),
@@ -270,6 +277,20 @@ class SettingsScreen extends ConsumerWidget {
 
   static void _preparedSnack(BuildContext context) {
     TalvoriSnackBar.show(context, message: 'Diese Funktion wird vorbereitet.');
+  }
+
+  static String _mascotStyleLabel(TalvoriMascotStyle style) {
+    return switch (style) {
+      TalvoriMascotStyle.female => 'Weiblich',
+      TalvoriMascotStyle.male => 'Männlich',
+    };
+  }
+
+  static TalvoriMascotStyle _mascotStyleFromLabel(String value) {
+    return switch (value) {
+      'Männlich' => TalvoriMascotStyle.male,
+      _ => TalvoriMascotStyle.female,
+    };
   }
 }
 
@@ -740,6 +761,27 @@ class _ChoiceSettingsScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _MascotStyleSettingsScreen extends ConsumerWidget {
+  const _MascotStyleSettingsScreen();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final preferences = ref.watch(profilePreferencesControllerProvider);
+    final controller = ref.read(profilePreferencesControllerProvider.notifier);
+
+    return _ChoiceSettingsScreen(
+      title: 'Talvori Stil',
+      options: const ['Weiblich', 'Männlich'],
+      currentValue: SettingsScreen._mascotStyleLabel(preferences.mascotStyle),
+      onSelected: (value) {
+        return controller.setMascotStyle(
+          SettingsScreen._mascotStyleFromLabel(value),
+        );
+      },
     );
   }
 }

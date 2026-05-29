@@ -5,6 +5,7 @@ class CompanionState {
     required this.isExpanded,
     required this.bubbleVisible,
     required this.mascotMood,
+    required this.emotion,
     required this.title,
     required this.message,
     required this.inputVisible,
@@ -19,6 +20,7 @@ class CompanionState {
       isExpanded: true,
       bubbleVisible: true,
       mascotMood: TalvoriMascotMood.greeting,
+      emotion: TaliEmotion.neutral,
       title: 'Talvori',
       message: 'Bereit für dein nächstes Wort?',
       inputVisible: false,
@@ -29,6 +31,7 @@ class CompanionState {
   final bool isExpanded;
   final bool bubbleVisible;
   final TalvoriMascotMood mascotMood;
+  final TaliEmotion emotion;
   final String title;
   final String message;
   final bool inputVisible;
@@ -41,6 +44,7 @@ class CompanionState {
     bool? isExpanded,
     bool? bubbleVisible,
     TalvoriMascotMood? mascotMood,
+    TaliEmotion? emotion,
     String? title,
     String? message,
     bool? inputVisible,
@@ -55,6 +59,7 @@ class CompanionState {
       isExpanded: isExpanded ?? this.isExpanded,
       bubbleVisible: bubbleVisible ?? this.bubbleVisible,
       mascotMood: mascotMood ?? this.mascotMood,
+      emotion: emotion ?? this.emotion,
       title: title ?? this.title,
       message: message ?? this.message,
       inputVisible: inputVisible ?? this.inputVisible,
