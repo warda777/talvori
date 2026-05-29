@@ -30,6 +30,20 @@ enum TaliEmotion {
   starEyes,
 }
 
+enum TaliEvent {
+  appReady,
+  userIdle,
+  chatOpened,
+  userMessageSent,
+  aiThinking,
+  aiResponseSuccess,
+  aiResponseError,
+  wordCorrect,
+  wordWrong,
+  pointsGained,
+  dailyGoalReached,
+}
+
 enum TalvoriMascotStyle { male, female }
 
 class TalvoriMascotAssets {
@@ -98,6 +112,36 @@ class TalvoriMascotAssets {
   static const taliParty = taliFemaleParty;
   static const taliStarEyes = taliFemaleStarEyes;
 
+  static const Map<TaliEmotion, String> _femaleSpiritAssets = {
+    TaliEmotion.neutral: taliFemaleNeutral,
+    TaliEmotion.happy: taliFemaleLaugh,
+    TaliEmotion.bored: taliFemaleBored,
+    TaliEmotion.surprised: taliFemaleSurprised,
+    TaliEmotion.cool: taliFemaleCool,
+    TaliEmotion.hurra: taliFemaleHurra,
+    TaliEmotion.embarrassed: taliFemaleEmbarrassed,
+    TaliEmotion.sleepy: taliFemaleSleepy,
+    TaliEmotion.loveEyes: taliFemaleLoveEyes,
+    TaliEmotion.wink: taliFemaleWink,
+    TaliEmotion.party: taliFemaleParty,
+    TaliEmotion.starEyes: taliFemaleStarEyes,
+  };
+
+  static const Map<TaliEmotion, String> _maleSpiritAssets = {
+    TaliEmotion.neutral: taliMaleNeutral,
+    TaliEmotion.happy: taliMaleLaugh,
+    TaliEmotion.bored: taliMaleBored,
+    TaliEmotion.surprised: taliMaleSurprised,
+    TaliEmotion.cool: taliMaleCool,
+    TaliEmotion.hurra: taliMaleHurra,
+    TaliEmotion.embarrassed: taliMaleEmbarrassed,
+    TaliEmotion.sleepy: taliMaleSleepy,
+    TaliEmotion.loveEyes: taliMaleLoveEyes,
+    TaliEmotion.wink: taliMaleWink,
+    TaliEmotion.party: taliMaleParty,
+    TaliEmotion.starEyes: taliMaleStarEyes,
+  };
+
   static String pathFor(TalvoriMascotMood mood) {
     return switch (mood) {
       TalvoriMascotMood.greeting => greeting,
@@ -120,38 +164,14 @@ class TalvoriMascotAssets {
     TaliEmotion emotion, {
     TalvoriMascotStyle style = TalvoriMascotStyle.female,
   }) {
-    return switch (style) {
-      TalvoriMascotStyle.female => switch (emotion) {
-        TaliEmotion.neutral => taliFemaleNeutral,
-        TaliEmotion.happy => taliFemaleLaugh,
-        TaliEmotion.thinking => taliFemaleNeutral,
-        TaliEmotion.bored => taliFemaleBored,
-        TaliEmotion.surprised => taliFemaleSurprised,
-        TaliEmotion.cool => taliFemaleCool,
-        TaliEmotion.hurra => taliFemaleHurra,
-        TaliEmotion.embarrassed => taliFemaleEmbarrassed,
-        TaliEmotion.sleepy => taliFemaleSleepy,
-        TaliEmotion.loveEyes => taliFemaleLoveEyes,
-        TaliEmotion.wink => taliFemaleWink,
-        TaliEmotion.party => taliFemaleParty,
-        TaliEmotion.starEyes => taliFemaleStarEyes,
-      },
-      TalvoriMascotStyle.male => switch (emotion) {
-        TaliEmotion.neutral => taliMaleNeutral,
-        TaliEmotion.happy => taliMaleLaugh,
-        TaliEmotion.thinking => taliMaleNeutral,
-        TaliEmotion.bored => taliMaleBored,
-        TaliEmotion.surprised => taliMaleSurprised,
-        TaliEmotion.cool => taliMaleCool,
-        TaliEmotion.hurra => taliMaleHurra,
-        TaliEmotion.embarrassed => taliMaleEmbarrassed,
-        TaliEmotion.sleepy => taliMaleSleepy,
-        TaliEmotion.loveEyes => taliMaleLoveEyes,
-        TaliEmotion.wink => taliMaleWink,
-        TaliEmotion.party => taliMaleParty,
-        TaliEmotion.starEyes => taliMaleStarEyes,
-      },
-    };
+    final assets = _spiritAssetsFor(style);
+    return assets[emotion] ?? neutralSpiritPathFor(style: style);
+  }
+
+  static String neutralSpiritPathFor({
+    TalvoriMascotStyle style = TalvoriMascotStyle.female,
+  }) {
+    return _spiritAssetsFor(style)[TaliEmotion.neutral] ?? spirit;
   }
 
   static TaliEmotion emotionForLegacyMood(TalvoriMascotMood mood) {
@@ -169,6 +189,29 @@ class TalvoriMascotAssets {
       TalvoriMascotMood.surprisedStop => TaliEmotion.surprised,
       TalvoriMascotMood.thinkingChin => TaliEmotion.thinking,
       TalvoriMascotMood.thinkingSkeptical => TaliEmotion.wink,
+    };
+  }
+
+  static TaliEmotion emotionForEvent(TaliEvent event) {
+    return switch (event) {
+      TaliEvent.appReady => TaliEmotion.neutral,
+      TaliEvent.userIdle => TaliEmotion.bored,
+      TaliEvent.chatOpened => TaliEmotion.neutral,
+      TaliEvent.userMessageSent => TaliEmotion.thinking,
+      TaliEvent.aiThinking => TaliEmotion.thinking,
+      TaliEvent.aiResponseSuccess => TaliEmotion.happy,
+      TaliEvent.aiResponseError => TaliEmotion.surprised,
+      TaliEvent.wordCorrect => TaliEmotion.happy,
+      TaliEvent.wordWrong => TaliEmotion.embarrassed,
+      TaliEvent.pointsGained => TaliEmotion.starEyes,
+      TaliEvent.dailyGoalReached => TaliEmotion.party,
+    };
+  }
+
+  static Map<TaliEmotion, String> _spiritAssetsFor(TalvoriMascotStyle style) {
+    return switch (style) {
+      TalvoriMascotStyle.female => _femaleSpiritAssets,
+      TalvoriMascotStyle.male => _maleSpiritAssets,
     };
   }
 }

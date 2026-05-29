@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/companion/application/companion_controller.dart';
+import 'package:talvori/features/companion/application/tali_emotion_controller.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 
 void main() {
@@ -162,7 +163,7 @@ void main() {
     expect(state.bubbleVisible, isTrue);
     expect(state.inputVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.thinkingChin);
-    expect(state.emotion, TaliEmotion.thinking);
+    expect(state.emotion, TaliEmotion.neutral);
   });
 
   test('closeChatInput only hides the input', () {
@@ -191,6 +192,7 @@ void main() {
     expect(state.message, 'Ich denke kurz nach ...');
     expect(state.mascotMood, TalvoriMascotMood.thinkingChin);
     expect(state.emotion, TaliEmotion.thinking);
+    expect(container.read(taliEmotionControllerProvider), TaliEmotion.thinking);
   });
 
   test('showAiResponse displays a short answer and leaves thinking state', () {
@@ -207,6 +209,7 @@ void main() {
     expect(state.message, 'Nimm ein kleines Paket.');
     expect(state.mascotMood, TalvoriMascotMood.happy);
     expect(state.emotion, TaliEmotion.happy);
+    expect(container.read(taliEmotionControllerProvider), TaliEmotion.happy);
   });
 
   test('showError displays a friendly error state', () {
@@ -222,6 +225,10 @@ void main() {
     expect(state.errorMessage, 'Gerade klappt es nicht.');
     expect(state.message, 'Gerade klappt es nicht.');
     expect(state.mascotMood, TalvoriMascotMood.sad);
-    expect(state.emotion, TaliEmotion.embarrassed);
+    expect(state.emotion, TaliEmotion.surprised);
+    expect(
+      container.read(taliEmotionControllerProvider),
+      TaliEmotion.surprised,
+    );
   });
 }

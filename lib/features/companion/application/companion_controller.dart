@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/features/companion/application/tali_emotion_controller.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 import 'package:talvori/features/companion/domain/companion_state.dart';
 
@@ -13,12 +14,18 @@ class CompanionController extends Notifier<CompanionState> {
   @override
   CompanionState build() => CompanionState.initial();
 
+  TaliEmotion _emotionForEvent(TaliEvent event) {
+    ref.read(taliEmotionControllerProvider.notifier).handleEvent(event);
+    return TalvoriMascotAssets.emotionForEvent(event);
+  }
+
   void wakeUp() {
+    final emotion = _emotionForEvent(TaliEvent.appReady);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       mascotMood: TalvoriMascotMood.greeting,
-      emotion: TaliEmotion.neutral,
+      emotion: emotion,
       clearErrorMessage: true,
     );
   }
@@ -82,12 +89,13 @@ class CompanionController extends Notifier<CompanionState> {
   }
 
   void openChatInput() {
+    final emotion = _emotionForEvent(TaliEvent.chatOpened);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
       mascotMood: TalvoriMascotMood.thinkingChin,
-      emotion: TaliEmotion.thinking,
+      emotion: emotion,
       clearErrorMessage: true,
     );
   }
@@ -99,13 +107,14 @@ class CompanionController extends Notifier<CompanionState> {
   void submitUserMessage(String message) {
     final trimmed = message.trim();
     if (trimmed.isEmpty) return;
+    final emotion = _emotionForEvent(TaliEvent.userMessageSent);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
       isThinking: true,
       mascotMood: TalvoriMascotMood.thinkingChin,
-      emotion: TaliEmotion.thinking,
+      emotion: emotion,
       message: 'Ich denke kurz nach ...',
       inputText: '',
       lastUserMessage: trimmed,
@@ -114,13 +123,14 @@ class CompanionController extends Notifier<CompanionState> {
   }
 
   void setThinking() {
+    final emotion = _emotionForEvent(TaliEvent.aiThinking);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
       isThinking: true,
       mascotMood: TalvoriMascotMood.thinkingChin,
-      emotion: TaliEmotion.thinking,
+      emotion: emotion,
       message: 'Ich denke kurz nach ...',
       clearErrorMessage: true,
     );
@@ -128,13 +138,14 @@ class CompanionController extends Notifier<CompanionState> {
 
   void showAiResponse(String response) {
     final trimmed = response.trim();
+    final emotion = _emotionForEvent(TaliEvent.aiResponseSuccess);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
       isThinking: false,
       mascotMood: TalvoriMascotMood.happy,
-      emotion: TaliEmotion.happy,
+      emotion: emotion,
       message: trimmed.isEmpty
           ? 'Ich bin da. Frag mich einfach noch mal kurz.'
           : trimmed,
@@ -144,13 +155,14 @@ class CompanionController extends Notifier<CompanionState> {
 
   void showError(String message) {
     final trimmed = message.trim();
+    final emotion = _emotionForEvent(TaliEvent.aiResponseError);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
       isThinking: false,
       mascotMood: TalvoriMascotMood.sad,
-      emotion: TaliEmotion.embarrassed,
+      emotion: emotion,
       message: trimmed.isEmpty
           ? 'Das hat gerade nicht geklappt. Versuch es gleich noch einmal.'
           : trimmed,
