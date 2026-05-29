@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
-import 'package:talvori/core/srs/models/learning_mode.dart';
-import 'package:talvori/core/srs/models/srs_stage.dart';
 import 'package:talvori/features/favorites/application/local_favorites_provider.dart';
 
 final localWordsForSourceProvider =
@@ -52,28 +50,9 @@ Future<List<LocalWord>> _loadFavoriteWords(Ref ref) async {
 
 Future<List<LocalWord>> _loadKnownWords(Ref ref) async {
   final bootstrap = await ref.watch(localBootstrapProvider.future);
-  final repositories = bootstrap.repositoryFactory;
-  final words = await repositories.wordRepository.loadAllWords();
-  final known = <LocalWord>[];
-
-  for (final word in words) {
-    var isKnown = false;
-    for (final mode in LearningMode.values) {
-      final progress = await repositories.wordProgressRepository.loadProgress(
-        wordId: word.id,
-        categoryId: word.categoryId,
-        mode: mode,
-      );
-      if (progress == null) continue;
-      if (progress.isMastered || progress.stage == SrsStage.s5) {
-        isKnown = true;
-        break;
-      }
-    }
-    if (isKnown) known.add(word);
-  }
-
-  return List<LocalWord>.unmodifiable(known);
+  final words = await bootstrap.repositoryFactory.wordRepository
+      .loadKnownWords();
+  return List<LocalWord>.unmodifiable(words);
 }
 
 Future<List<LocalWord>> _loadMyMixWords(Ref ref) async {

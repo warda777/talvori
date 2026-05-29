@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:talvori/core/local_database/models/local_word.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
 import 'package:talvori/core/local_database/providers/local_practice_cards_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_counts_provider.dart';
 import 'package:talvori/core/local_database/providers/local_stage_inspector_provider.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_category_provider.dart';
+import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'category_word_suggestion.dart';
 import 'category_word_suggestion_service.dart';
 
@@ -182,10 +184,41 @@ class CategoryVocabularyController extends Notifier<CategoryVocabularyState> {
     _invalidateCategory(categoryId);
   }
 
+  Future<void> markKnown({
+    required String categoryId,
+    required LocalWord word,
+  }) async {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    await bootstrap.repositoryFactory.wordRepository
+        .setWordWorldMembershipKnown(
+          wordId: word.id,
+          categoryId: categoryId,
+          known: true,
+        );
+    _invalidateCategory(categoryId);
+  }
+
+  Future<void> restoreKnown({
+    required String categoryId,
+    required LocalWord word,
+  }) async {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    await bootstrap.repositoryFactory.wordRepository.restoreKnownWord(
+      wordId: word.id,
+      categoryId: categoryId,
+    );
+    _invalidateCategory(categoryId);
+  }
+
   void _invalidateCategory(String categoryId) {
     ref
       ..invalidate(localWordsForCategoryProvider(categoryId))
+      ..invalidate(
+        localWordsForCategoryProvider(LocalLearningSource.knownWords.id),
+      )
+      ..invalidate(localWordsForSourceProvider(LocalLearningSource.knownWords))
       ..invalidate(localWordCountProvider(categoryId))
+      ..invalidate(localWordCountProvider(LocalLearningSource.knownWords.id))
       ..invalidate(localStageCountsProvider)
       ..invalidate(localStageInspectorProvider)
       ..invalidate(localPracticeCardsProvider);

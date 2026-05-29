@@ -92,7 +92,7 @@ void main() {
     expect(favorites.map((word) => word.term), ['river']);
   });
 
-  test('known_words_reads_mastered_local_progress_without_writing', () async {
+  test('known_words_reads_membership_known_without_writing_progress', () async {
     final container = await createContainer(
       prefix: 'talvori_local_words_for_source_known_',
     );
@@ -100,18 +100,28 @@ void main() {
     await importWord(container, 'meadow');
 
     final bootstrap = await container.read(localBootstrapProvider.future);
-    final repositories = bootstrap.repositoryFactory;
-    final progress = await repositories.wordProgressRepository
-        .ensureProgressForWord(
+    await bootstrap.repositoryFactory.wordRepository.addWordWorldMembership(
+      wordId: knownWordId,
+      categoryId: localMyWordsCategoryId,
+      createdAt: DateTime(2026, 5, 21, 10, 1),
+    );
+    await bootstrap.repositoryFactory.wordRepository
+        .setWordWorldMembershipKnown(
+          wordId: knownWordId,
+          categoryId: localMyWordsCategoryId,
+          known: true,
+        );
+
+    final progressAfter = await bootstrap
+        .repositoryFactory
+        .wordProgressRepository
+        .loadProgress(
           wordId: knownWordId,
           categoryId: localMyWordsCategoryId,
           mode: LearningMode.time,
-          now: DateTime(2026, 5, 21, 10, 30),
         );
-    await repositories.wordProgressRepository.saveProgress(
-      updatedProgress: progress.copyWith(stage: SrsStage.s5),
-      updatedAt: DateTime(2026, 5, 21, 11),
-    );
+
+    expect(progressAfter, isNull);
 
     final knownWords = await container.read(
       localWordsForSourceProvider(LocalLearningSource.knownWords).future,

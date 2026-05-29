@@ -1113,5 +1113,214 @@ CREATE TABLE words (
         expect(ids, ['word-a', 'word-b']);
       },
     );
+
+    test('known_words_are_loaded_from_word_world_memberships', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-basics',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+        sortOrder: 1,
+      );
+      await seedWord(
+        db,
+        id: 'word-hotel',
+        categoryId: 'category-basics',
+        term: 'hotel',
+        translation: 'Hotel',
+        sortOrder: 2,
+      );
+      final repository = WordRepository(database: db);
+      await repository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await repository.addWordWorldMembership(
+        wordId: 'word-hotel',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await repository.setWordWorldMembershipKnown(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        known: true,
+      );
+
+      final known = await repository.loadKnownWords();
+
+      expect(known.map((word) => word.id), ['word-ticket']);
+      expect(await repository.countKnownWords(), 1);
+    });
+
+    test('known_words_are_distinct_across_multiple_memberships', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedCategory(db, id: 'category-health', name: 'Health');
+      await seedWord(
+        db,
+        id: 'word-water',
+        categoryId: 'category-basics',
+        term: 'water',
+        translation: 'Wasser',
+      );
+      final repository = WordRepository(database: db);
+      for (final categoryId in ['category-travel', 'category-health']) {
+        await repository.addWordWorldMembership(
+          wordId: 'word-water',
+          categoryId: categoryId,
+          createdAt: now,
+        );
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-water',
+          categoryId: categoryId,
+          known: true,
+        );
+      }
+
+      final known = await repository.loadKnownWords();
+
+      expect(known.map((word) => word.id), ['word-water']);
+      expect(await repository.countKnownWords(), 1);
+    });
+
+    test('known_words_for_category_filter_to_one_word_world', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedCategory(db, id: 'category-health', name: 'Health');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-basics',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      await seedWord(
+        db,
+        id: 'word-yoga',
+        categoryId: 'category-basics',
+        term: 'yoga',
+        translation: 'Yoga',
+      );
+      final repository = WordRepository(database: db);
+      await repository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await repository.addWordWorldMembership(
+        wordId: 'word-yoga',
+        categoryId: 'category-health',
+        createdAt: now,
+      );
+      await repository.setWordWorldMembershipKnown(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        known: true,
+      );
+      await repository.setWordWorldMembershipKnown(
+        wordId: 'word-yoga',
+        categoryId: 'category-health',
+        known: true,
+      );
+
+      final travelKnown = await repository.loadKnownWordsForCategory(
+        categoryId: 'category-travel',
+      );
+
+      expect(travelKnown.map((word) => word.id), ['word-ticket']);
+    });
+
+    test(
+      'unknown_review_words_exclude_disabled_and_known_memberships',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        for (final entry in [
+          ('word-active', 'active'),
+          ('word-known', 'known'),
+          ('word-disabled', 'disabled'),
+        ]) {
+          await seedWord(
+            db,
+            id: entry.$1,
+            categoryId: 'category-basics',
+            term: entry.$2,
+            translation: entry.$2,
+          );
+        }
+        final repository = WordRepository(database: db);
+        for (final wordId in ['word-active', 'word-known', 'word-disabled']) {
+          await repository.addWordWorldMembership(
+            wordId: wordId,
+            categoryId: 'category-travel',
+            createdAt: now,
+          );
+        }
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-known',
+          categoryId: 'category-travel',
+          known: true,
+        );
+        await repository.setWordWorldMembershipDisabled(
+          wordId: 'word-disabled',
+          categoryId: 'category-travel',
+          disabled: true,
+        );
+
+        final reviewWords = await repository.loadUnknownWordsForReview(
+          categoryId: 'category-travel',
+        );
+
+        expect(reviewWords.map((word) => word.id), ['word-active']);
+      },
+    );
+
+    test('restore_known_word_makes_membership_unknown_again', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-basics',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+      await repository.addWordWorldMembership(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        createdAt: now,
+      );
+      await repository.setWordWorldMembershipKnown(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+        known: true,
+      );
+
+      await repository.restoreKnownWord(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+      );
+
+      expect(await repository.loadKnownWords(), isEmpty);
+      final reviewWords = await repository.loadUnknownWordsForReview(
+        categoryId: 'category-travel',
+      );
+      expect(reviewWords.map((word) => word.id), ['word-ticket']);
+    });
   });
 }

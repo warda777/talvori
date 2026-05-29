@@ -189,6 +189,48 @@ WHERE category_id = ?
     );
   }
 
+  Future<List<LocalWord>> loadKnownWords({bool includeArchived = false}) async {
+    final rows = await _database.rawQuery('''
+SELECT DISTINCT w.*
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.is_known = 1
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+ORDER BY w.sort_order ASC, w.term ASC
+''');
+
+    return rows.map(_mapWord).toList(growable: false);
+  }
+
+  Future<List<LocalWord>> loadKnownWordsForCategory({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT w.*, m.is_disabled AS membership_is_disabled, m.is_known AS membership_is_known
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ? AND m.is_known = 1
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+ORDER BY w.sort_order ASC, w.term ASC
+''',
+      [categoryId],
+    );
+
+    return rows.map(_mapWord).toList(growable: false);
+  }
+
+  Future<List<LocalWord>> loadUnknownWordsForReview({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    return loadWordsForWordWorld(
+      categoryId: categoryId,
+      includeArchived: includeArchived,
+    );
+  }
+
   Future<List<String>> loadWordIdsForWordWorld({
     required String categoryId,
     bool includeArchived = false,
@@ -249,6 +291,18 @@ ${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
 ''',
       includeArchived ? [categoryId] : [categoryId, 0],
     );
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
+  Future<int> countKnownWords({bool includeArchived = false}) async {
+    final rows = await _database.rawQuery('''
+SELECT COUNT(DISTINCT w.id) AS count
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.is_known = 1
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+''');
 
     return rows.single['count'] as int? ?? 0;
   }
@@ -346,6 +400,17 @@ ${includeDisabled ? '' : 'AND m.is_disabled = 0 AND m.is_known = 0'}
       {'is_known': known ? 1 : 0},
       where: 'word_id = ? AND category_id = ?',
       whereArgs: [wordId, categoryId],
+    );
+  }
+
+  Future<void> restoreKnownWord({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    await setWordWorldMembershipKnown(
+      wordId: wordId,
+      categoryId: categoryId,
+      known: false,
     );
   }
 
