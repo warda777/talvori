@@ -110,6 +110,26 @@ void main() {
     FlutterError.onError = previousOnError;
 
     expect(bottomOverflows, isEmpty);
+    final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
+    expect(counterFinder, findsOneWidget);
+    expect(_homeCounterOpacity(tester), 0);
+    expect(
+      find.descendant(of: find.byType(WordCard), matching: counterFinder),
+      findsNothing,
+    );
+    final portalFinder = find.byKey(const Key('home-portal-frame'));
+    expect(portalFinder, findsOneWidget);
+    expect(find.text('Tali ist bereit.'), findsOneWidget);
+    expect(find.byKey(const Key('home-portal-sound-button')), findsOneWidget);
+    expect(
+      find.descendant(of: portalFinder, matching: counterFinder),
+      findsNothing,
+    );
+    expect(find.byType(Switch), findsNothing);
+    final portalRect = tester.getRect(portalFinder);
+    await tester.tap(portalFinder);
+    await tester.pump();
+    expect(tester.getRect(portalFinder), portalRect);
     expect(find.text('Wortspiele'), findsOneWidget);
     expect(find.text('Meine Wörter'), findsNothing);
     expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
@@ -118,7 +138,7 @@ void main() {
     expect(find.text('Impuls-Vorschau'), findsNothing);
   });
 
-  testWidgets('home word counter handles large counts without overflow', (
+  testWidgets('home word card handles large counts without overflow', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -138,14 +158,9 @@ void main() {
     };
     addTearDown(() => FlutterError.onError = previousOnError);
 
-    const cases = <int, String>{
-      0: '0',
-      999: '999',
-      10000: '10k',
-      100000: '100k',
-    };
+    const cases = <int>[0, 999, 10000, 100000];
 
-    for (final entry in cases.entries) {
+    for (final count in cases) {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -159,7 +174,7 @@ void main() {
                     onMarkWords: () {},
                     onQuickSend: null,
                     onGo: () {},
-                    userWordCount: entry.key,
+                    userWordCount: count,
                   ),
                 ),
               ),
@@ -169,12 +184,6 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text(entry.value), findsOneWidget);
-      final counterRect = tester.getRect(
-        find.byKey(const Key('home-my-words-counter-button')),
-      );
-      expect(counterRect.width, lessThanOrEqualTo(120));
     }
 
     FlutterError.onError = previousOnError;
@@ -204,7 +213,36 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.greeting,
+      TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
+    );
+  });
+
+  testWidgets('home screen uses locally selected male Talvori style', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({
+      'talvori_profile_mascot_style_v1': 'male',
+    });
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final mascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (mascotImage.image as AssetImage).assetName,
+      TalvoriMascotAssets.spiritPathFor(
+        TaliEmotion.neutral,
+        style: TalvoriMascotStyle.male,
+      ),
     );
   });
 
@@ -242,7 +280,7 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.greeting,
+      TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
     );
   });
 
@@ -517,7 +555,16 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.idle,
+      TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
+    );
+    expect(
+      tester
+          .getRect(find.byKey(const Key('talvori-companion-mascot-image')))
+          .height,
+      lessThan(70),
+    );
+    final compactCounterRect = tester.getRect(
+      find.byKey(const Key('home-my-words-counter-button')),
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -530,8 +577,13 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.greeting,
+      TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
     );
+    final activeCounterRect = tester.getRect(
+      find.byKey(const Key('home-my-words-counter-button')),
+    );
+    expect(activeCounterRect.top, compactCounterRect.top);
+    expect(activeCounterRect.left, compactCounterRect.left);
 
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
@@ -547,8 +599,55 @@ void main() {
     );
     expect(
       (mascotImage.image as AssetImage).assetName,
-      TalvoriMascotAssets.idle,
+      TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
     );
+    expect(
+      tester
+          .getRect(find.byKey(const Key('talvori-companion-mascot-image')))
+          .height,
+      lessThan(70),
+    );
+  });
+
+  testWidgets('home wheel counter appears briefly while wheel moves', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.byKey(const Key('home-my-words-counter-button')),
+      findsOneWidget,
+    );
+    expect(_homeCounterOpacity(tester), 0);
+    expect(_homeCounterIgnorePointer(tester).ignoring, isTrue);
+
+    _triggerHomeWheelMove(tester);
+    await tester.pump();
+
+    expect(_homeCounterOpacity(tester), 1);
+    expect(_homeCounterIgnorePointer(tester).ignoring, isFalse);
+
+    await tester.pump(const Duration(seconds: 1));
+    _triggerHomeWheelMove(tester);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(_homeCounterOpacity(tester), 1);
+
+    await tester.pump(const Duration(milliseconds: 850));
+
+    expect(_homeCounterOpacity(tester), 0);
+    expect(_homeCounterIgnorePointer(tester).ignoring, isTrue);
   });
 
   testWidgets('home screen shows impulse inbox entry with unread badge', (
@@ -660,6 +759,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
+    _triggerHomeWheelMove(tester);
+    await tester.pump();
+    expect(_homeCounterOpacity(tester), 1);
     final beforeTapRect = tester.getRect(counterFinder);
 
     await tester.tap(counterFinder);
@@ -1789,4 +1891,31 @@ class _RecordingNavigatorObserver extends NavigatorObserver {
     super.didPop(route, previousRoute);
     poppedRouteNames.add(route.settings.name);
   }
+}
+
+AnimatedOpacity _homeCounterOpacityWidget(WidgetTester tester) {
+  final finder = find.ancestor(
+    of: find.byKey(const Key('home-my-words-counter-button')),
+    matching: find.byType(AnimatedOpacity),
+  );
+  expect(finder, findsOneWidget);
+  return tester.widget<AnimatedOpacity>(finder);
+}
+
+double _homeCounterOpacity(WidgetTester tester) {
+  return _homeCounterOpacityWidget(tester).opacity;
+}
+
+IgnorePointer _homeCounterIgnorePointer(WidgetTester tester) {
+  final finder = find.ancestor(
+    of: find.byKey(const Key('home-my-words-counter-button')),
+    matching: find.byType(IgnorePointer),
+  );
+  expect(finder, findsWidgets);
+  return tester.widget<IgnorePointer>(finder.first);
+}
+
+void _triggerHomeWheelMove(WidgetTester tester) {
+  final card = tester.widget<WordCard>(find.byType(WordCard));
+  card.onWheelMoved?.call();
 }

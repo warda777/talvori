@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
 import 'tap_flash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/local_database/providers/local_bootstrap_provider.dart';
@@ -12,7 +12,6 @@ import 'package:talvori/features/words/ui/cards/animated_phone_icon.dart';
 import 'package:talvori/features/words/ui/cards/arrow_fly_service.dart';
 import 'package:talvori/features/home/application/application.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
-import 'package:talvori/features/home/ui/widgets/glow_switch.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_controller.dart';
 import 'package:talvori/features/words/ui/cards/spinning_chrome_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +37,6 @@ const _homeBrowserStartUrl = 'https://www.bbc.com';
 const homeBrowserCustomStartUrlStorageKey =
     'talvori_browser_custom_start_url_v1';
 
-@visibleForTesting
 String formatHomeWordCounterCount(int count) {
   final normalizedCount = count < 0 ? 0 : count;
   if (normalizedCount < 1000) return '$normalizedCount';
@@ -83,6 +81,8 @@ class WordCard extends ConsumerStatefulWidget {
   // Zähler
   final int userWordCount;
   final VoidCallback? onCountTap;
+  final void Function(int currentIndex, int total)? onWheelCounterChanged;
+  final VoidCallback? onWheelMoved;
 
   // Größe + Wort
   final double? height; // äußere Zielhöhe der Karte (nur als Mindesthöhe)
@@ -116,6 +116,8 @@ class WordCard extends ConsumerStatefulWidget {
     this.onImageLongPress,
     this.userWordCount = 0,
     this.onCountTap,
+    this.onWheelCounterChanged,
+    this.onWheelMoved,
     this.height,
     this.maxWidth,
     this.initialWord,
@@ -144,6 +146,10 @@ class _WordCardState extends ConsumerState<WordCard> {
 
   // Blau-Farbe aus dem Word Wheel
   static const Color _wheelBlue = Color(0xFFB0CCFE);
+  static const Color _neonCyan = Color(0xFF5DDCFF);
+  static const Color _neonViolet = Color(0xFFB36BFF);
+  static const Color _neonPink = Color(0xFFFF7AC8);
+  static const Color _controlSurface = Color(0xFF07101A);
 
   void _startArrowFlyAnimation(BuildContext context) {
     if (widget.progressPillKey == null) return;
@@ -173,11 +179,9 @@ class _WordCardState extends ConsumerState<WordCard> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final cardRadius = BorderRadius.circular(28);
-    final onImageFg = widget.isImageDark
-        ? Colors.white
-        : Colors.black; // helle/dunkle Schrift/Icons
+    final portalRadius = BorderRadius.circular(26);
+    const portalBorderWidth = 1.6;
     final onImageIcon = widget.isImageDark
         ? Colors.white
         : Colors.black87; // Icons minimal kräftiger
@@ -191,425 +195,572 @@ class _WordCardState extends ConsumerState<WordCard> {
             widget.height ?? 500, // du nutzt im Home-Screen 570 – das passt
         maxWidth: widget.maxWidth ?? 360,
       ),
-      child: Container(
-        decoration: (widget.isImageExpanded && glowEnabled)
-            ? BoxDecoration(
-                borderRadius: cardRadius,
-                boxShadow: [
-                  // Durchgehender weißer Glow für das erweiterte Bild
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.55),
-                    blurRadius: 20,
-                    spreadRadius: 1,
-                  ),
-                ],
-              )
-            : null,
-        child: ClipRRect(
-          // sorgt dafür, dass die Rundung auch fürs große Bild gilt
-          borderRadius: cardRadius,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // ───────────────── HINTERGRUND: großes Bild (nur Optik) ─────────────────
-              if (widget.isImageExpanded)
-                // Bild liegt UNTER dem Inhalt und füllt die Karte komplett aus
-                GestureDetector(
-                  onTap: widget.onToggleImage ?? widget.onImageTap,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ), // Weißer Rand
-                      borderRadius: cardRadius,
+      child: ClipRRect(
+        borderRadius: cardRadius,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // ───────────────── VORDERGRUND (alles mit festen Pixelwerten) ─────────────────
+            // Der gesamte Inhalt liegt über dem Bild und hat IMMER dasselbe Padding.
+            Padding(
+              padding: widget.contentPadding,
+              child: Stack(
+                children: [
+                  // ─── TALVORI-PORTAL ───
+                  Positioned(
+                    top: 16,
+                    left: 10,
+                    right: 10,
+                    height: 200,
+                    child: Container(
+                      key: const Key('home-portal-frame'),
+                      padding: const EdgeInsets.all(portalBorderWidth),
+                      decoration: BoxDecoration(
+                        borderRadius: portalRadius,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _neonCyan.withValues(alpha: 0.9),
+                            Colors.white.withValues(alpha: 0.18),
+                            _neonViolet.withValues(alpha: 0.84),
+                            _neonPink.withValues(alpha: 0.42),
+                          ],
+                        ),
+                        boxShadow: glowEnabled
+                            ? [
+                                BoxShadow(
+                                  color: _neonCyan.withValues(alpha: 0.22),
+                                  blurRadius: 22,
+                                  spreadRadius: 1,
+                                ),
+                                BoxShadow(
+                                  color: _neonViolet.withValues(alpha: 0.18),
+                                  blurRadius: 30,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          26 - portalBorderWidth,
+                        ),
+                        child: DecoratedBox(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF02060D),
+                          ),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              _WordImageWithProbe(
+                                provider: widget.wordImage,
+                                fit: BoxFit.cover,
+                                onLuma: widget.onImageBrightnessChanged,
+                              ),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: 0.38),
+                                      Colors.black.withValues(alpha: 0.1),
+                                      Colors.black.withValues(alpha: 0.54),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: const Alignment(-0.72, -0.86),
+                                    radius: 1.08,
+                                    colors: [
+                                      _neonCyan.withValues(alpha: 0.2),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: const Alignment(0.88, 0.9),
+                                    radius: 0.96,
+                                    colors: [
+                                      _neonViolet.withValues(alpha: 0.18),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 18,
+                                bottom: 16,
+                                right: 76,
+                                child: Text(
+                                  'Tali ist bereit.',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 13,
+                                    height: 1,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0,
+                                    shadows: [
+                                      Shadow(
+                                        color: _neonCyan.withValues(
+                                          alpha: 0.38,
+                                        ),
+                                        blurRadius: 10,
+                                      ),
+                                      Shadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 14,
+                                bottom: 12,
+                                child: SizedBox.square(
+                                  key: const Key('home-portal-sound-button'),
+                                  dimension: 42,
+                                  child: TapFlash(
+                                    color: _neonCyan,
+                                    shape: BoxShape.circle,
+                                    onTapAfter: () =>
+                                        widget.onSpeak(_currentWord),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: _controlSurface.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: _neonCyan.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          width: 1.2,
+                                        ),
+                                        boxShadow: glowEnabled
+                                            ? [
+                                                BoxShadow(
+                                                  color: _neonCyan.withValues(
+                                                    alpha: 0.24,
+                                                  ),
+                                                  blurRadius: 14,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Icon(
+                                        Icons.volume_up_rounded,
+                                        size: 22,
+                                        color: widget.isImageExpanded
+                                            ? onImageIcon
+                                            : const Color(0xFFEAFBFF),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                    child: ClipRRect(
-                      borderRadius: cardRadius,
-                      child: _WordImageWithProbe(
-                        provider: widget.wordImage,
-                        fit: BoxFit.cover,
-                        onLuma: widget.onImageBrightnessChanged,
-                      ), // <- meldet true = dunkel, false = hell)
-                    ),
                   ),
-                ),
 
-              // ───────────────── VORDERGRUND (alles mit festen Pixelwerten) ─────────────────
-              // Der gesamte Inhalt liegt über dem Bild und hat IMMER dasselbe Padding.
-              Padding(
-                padding: widget.contentPadding,
-                child: Stack(
-                  children: [
-                    // ─── KLEINES BILD (nur wenn NICHT erweitert) ───
-                    if (!widget.isImageExpanded)
-                      Positioned(
-                        top: 16, // Abstand von oben
-                        left: 10, // seitlicher Rand links
-                        right: 10, // seitlicher Rand rechts
-                        height: 200, // Höhe des kleinen Bildrahmens
+                  // ─── WORT (WordWheelCore) ───
+                  Positioned(
+                    top: 220,
+                    left: 0,
+                    right: 0,
+                    child: WordWheelCore(
+                      onUserScroll: widget.onWheelMoved,
+                      onCenterChange: (index, word) {
+                        // Aktualisiert den Counter synchron mit dem Wheel und speichert das aktuelle Wort
+                        setState(() {
+                          _currentIndex = index + 1;
+                          _currentWord = word;
+                        });
+                        widget.onWheelCounterChanged?.call(
+                          _currentIndex,
+                          _total,
+                        );
+
+                        // Triggert eine leichte Bewegung des Handy-Icons
+                        final phoneIconState =
+                            _animatedPhoneIconKey.currentState;
+                        if (phoneIconState != null &&
+                            phoneIconState is State<AnimatedPhoneIcon>) {
+                          (phoneIconState as dynamic).triggerMovement();
+                        }
+                      },
+                      onTotalLoaded: (total) {
+                        // Setzt die Gesamtanzahl beim ersten Laden
+                        setState(() {
+                          _total = total;
+                        });
+                        widget.onWheelCounterChanged?.call(
+                          _currentIndex,
+                          _total,
+                        );
+                      },
+                    ),
+                  ),
+
+                  // ─── PLAY (unten mittig, fix) ───
+                  Positioned(
+                    bottom: 30,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        key: const Key('home-my-words-play-button'),
+                        onTap: widget
+                            .onGo, // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
+                        behavior: HitTestBehavior
+                            .opaque, // Genau die Größe des SizedBox, keine größere Tapfläche
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                width: 92,
+                                height: 92,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: const RadialGradient(
+                                    center: Alignment(-0.35, -0.45),
+                                    radius: 0.9,
+                                    colors: [
+                                      Color(0xFF162436),
+                                      _controlSurface,
+                                      Color(0xFF02050A),
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: _neonCyan.withValues(alpha: 0.95),
+                                    width: 2,
+                                  ),
+                                  boxShadow: glowEnabled
+                                      ? [
+                                          BoxShadow(
+                                            color: _neonCyan.withValues(
+                                              alpha: 0.34,
+                                            ),
+                                            blurRadius: 24,
+                                            spreadRadius: 2,
+                                          ),
+                                          BoxShadow(
+                                            color: _neonPink.withValues(
+                                              alpha: 0.22,
+                                            ),
+                                            blurRadius: 34,
+                                            spreadRadius: 2,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                              ),
+                              Container(
+                                width: 74,
+                                height: 74,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _neonViolet.withValues(alpha: 0.45),
+                                    width: 1.2,
+                                  ),
+                                ),
+                              ),
+                              CenterGlow(
+                                size: 92,
+                                glowSize: 20,
+                                duration: const Duration(milliseconds: 3000),
+                                color: _neonCyan,
+                              ),
+                              GlowOrb(
+                                size: 100,
+                                radius: 43,
+                                orbSize: 7,
+                                duration: const Duration(milliseconds: 3000),
+                                color: _neonPink,
+                                loop: false,
+                              ),
+                              Icon(
+                                Icons.play_arrow_rounded,
+                                size: 48,
+                                color: widget.isImageExpanded
+                                    ? onImageIcon
+                                    : Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ─── LINKE AKTIONEN (unten links) mit TapFlash ───
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    child: SizedBox.square(
+                      dimension: 52,
+                      child: TapFlash(
+                        color: _wheelBlue, // Blau aus Word Wheel
+                        shape: BoxShape.circle,
+                        onTapAfter: () async {
+                          if (_currentWord != null &&
+                              widget.onQuickSend != null) {
+                            // Führe QuickSend aus und prüfe das Ergebnis
+                            final result = widget.onQuickSend!(_currentWord!);
+
+                            // Starte Flug-Animation nur wenn erfolgreich hinzugefügt
+                            if (await result ==
+                                TagesimpulsSelectionAddResult.ok) {
+                              _startArrowFlyAnimation(context);
+                            }
+                          }
+                        },
                         child: Container(
+                          key: _phoneIconKey,
                           decoration: BoxDecoration(
+                            color: _controlSurface.withValues(alpha: 0.95),
+                            shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ), // Weißer Rand
-                            borderRadius: BorderRadius.circular(22),
+                              color: _neonCyan.withValues(alpha: 0.92),
+                              width: 1.6,
+                            ),
                             boxShadow: glowEnabled
                                 ? [
-                                    // Durchgehender weißer Glow
                                     BoxShadow(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.55,
+                                      color: _neonCyan.withValues(alpha: 0.3),
+                                      blurRadius: 18,
+                                      spreadRadius: 1,
+                                    ),
+                                    BoxShadow(
+                                      color: _neonViolet.withValues(
+                                        alpha: 0.16,
                                       ),
-                                      blurRadius: 20,
+                                      blurRadius: 24,
                                       spreadRadius: 1,
                                     ),
                                   ]
                                 : null,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(22),
-                            child: GestureDetector(
-                              onTap: widget.onToggleImage ?? widget.onImageTap,
-                              child: _WordImageWithProbe(
-                                provider: widget.wordImage,
-                                fit: BoxFit.cover,
-                                onLuma: widget
-                                    .onImageBrightnessChanged, // <- meldet dunkel/hell auch im kleinen Bild
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // ─── COUNTER (mit TapFlash) ───
-                    Positioned(
-                      top: 24,
-                      left: 0,
-                      right: 0,
-                      height: 32,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: 74,
-                            maxWidth: 120,
-                          ),
-                          child: TapFlash(
-                            key: const Key('home-my-words-counter-button'),
-                            color: _wheelBlue, // Blau aus Word Wheel
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(14),
-                            onTapAfter: widget.onCountTap,
-                            child: _CounterPill(
-                              label: _total > 0
-                                  ? '$_currentIndex/$_total'
-                                  : formatHomeWordCounterCount(
-                                      widget.userWordCount,
-                                    ),
-                              textColor: onImageFg,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ─── GLOW SWITCH (rechts oben) ───
-                    Positioned(top: 18, right: 16, child: GlowSwitch()),
-
-                    // ─── SPEAKER ───
-                    Positioned(
-                      top: 110,
-                      left: 0,
-                      right: 0,
-                      child: SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: TapFlash(
-                          color: _wheelBlue, // Blau aus Word Wheel
-                          shape: BoxShape.circle,
-                          onTapAfter: () => widget.onSpeak(_currentWord),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
+                          alignment: Alignment.center,
+                          child: Stack(
                             alignment: Alignment.center,
-                            child: Icon(
-                              Icons.volume_up,
-                              size: 28,
-                              color: widget.isImageExpanded
-                                  ? onImageIcon
-                                  : cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ─── WORT (WordWheelCore) ───
-                    Positioned(
-                      top: 220,
-                      left: 0,
-                      right: 0,
-                      child: WordWheelCore(
-                        onCenterChange: (index, word) {
-                          // Aktualisiert den Counter synchron mit dem Wheel und speichert das aktuelle Wort
-                          setState(() {
-                            _currentIndex = index + 1;
-                            _currentWord = word;
-                          });
-
-                          // Triggert eine leichte Bewegung des Handy-Icons
-                          final phoneIconState =
-                              _animatedPhoneIconKey.currentState;
-                          if (phoneIconState != null &&
-                              phoneIconState is State<AnimatedPhoneIcon>) {
-                            (phoneIconState as dynamic).triggerMovement();
-                          }
-                        },
-                        onTotalLoaded: (total) {
-                          // Setzt die Gesamtanzahl beim ersten Laden
-                          setState(() {
-                            _total = total;
-                          });
-                        },
-                      ),
-                    ),
-
-                    // ─── PLAY (nur Icon, unten mittig, fix) ───
-                    Positioned(
-                      bottom: 30,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: GestureDetector(
-                          key: const Key('home-my-words-play-button'),
-                          onTap: widget
-                              .onGo, // ⬇️ FIX: Play-Button verwendet onGo statt onMarkWords
-                          behavior: HitTestBehavior
-                              .opaque, // Genau die Größe des SizedBox, keine größere Tapfläche
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Glow: Ovales Gold-Licht (rotierend)
-                                GlowOrb(
-                                  size: 100,
-                                  radius: 45, // Abstand vom Zentrum
-                                  orbSize: 8, // Größe der Kugel
-                                  duration: const Duration(
-                                    milliseconds: 3000,
-                                  ), // Langsame Rotation
-                                  color: const Color(0xFFF1C86B), // Gold
-                                  loop:
-                                      false, // Nur eine Umdrehung, dann ausblenden
-                                ),
-
-                                // Center Glow: Statischer Glow im Zentrum (innerhalb des Play-Icons)
-                                CenterGlow(
-                                  size: 100,
-                                  glowSize: 18,
-                                  duration: const Duration(
-                                    milliseconds: 3000,
-                                  ), // Gleiche Dauer wie GlowOrb
-                                  color: const Color(0xFFF1C86B), // Gold
-                                ),
-
-                                // Play-Icon
-                                SvgPicture.asset(
-                                  'assets/icons/circle-play.svg',
-                                  width: 94,
-                                  height: 94,
-                                  colorFilter: ColorFilter.mode(
-                                    widget.isImageExpanded
-                                        ? onImageIcon
-                                        : cs.onSurface,
-                                    BlendMode.srcIn,
+                            children: [
+                              Container(
+                                width: 39,
+                                height: 39,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                    width: 1,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              AnimatedPhoneIcon(
+                                key: _animatedPhoneIconKey,
+                                assetPath:
+                                    'assets/icons/cellphone_arrow_down_icon.svg',
+                                size: 42,
+                                colorFilter: widget.isImageExpanded
+                                    ? onImageIcon
+                                    : const Color(0xFFEAFBFF),
+                                duration: const Duration(milliseconds: 1500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  if (widget.onImpulseInboxTap != null)
+                    Positioned(
+                      bottom: 76,
+                      left: 0,
+                      child: SizedBox.square(
+                        key: const Key('home-impuls-postfach-button'),
+                        dimension: 52,
+                        child: TapFlash(
+                          color: const Color(0xFF59D7FF),
+                          shape: BoxShape.circle,
+                          onTapAfter: widget.onImpulseInboxTap,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF07111A),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFF59D7FF),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x3359D7FF),
+                                      blurRadius: 18,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.mark_unread_chat_alt_rounded,
+                                  color: widget.isImageExpanded
+                                      ? onImageIcon
+                                      : const Color(0xFF7FFFE7),
+                                  size: 28,
+                                ),
+                              ),
+                              if (widget.impulseInboxUnreadCount > 0)
+                                Positioned(
+                                  key: const Key(
+                                    'home-impuls-postfach-unread-badge',
+                                  ),
+                                  right: -2,
+                                  top: -2,
+                                  child: Container(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF59D7FF),
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: const Color(0xFF06101A),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      widget.impulseInboxUnreadCount > 9
+                                          ? '9+'
+                                          : '${widget.impulseInboxUnreadCount}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Color(0xFF041019),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
                     ),
 
-                    // ─── LINKE AKTIONEN (unten links) mit TapFlash ───
-                    Positioned(
-                      bottom: 16,
-                      left: 0,
+                  // ─── RECHTES ICON Chrome Button(unten rechts) mit TapFlash ───
+                  Positioned(
+                    bottom: 16,
+                    right: 8,
+                    child: Semantics(
+                      key: const Key('home-browser-return-button'),
+                      label: 'Browser öffnen',
                       child: SizedBox.square(
                         dimension: 52,
                         child: TapFlash(
                           color: _wheelBlue, // Blau aus Word Wheel
                           shape: BoxShape.circle,
-                          onTapAfter: () async {
-                            if (_currentWord != null &&
-                                widget.onQuickSend != null) {
-                              // Führe QuickSend aus und prüfe das Ergebnis
-                              final result = widget.onQuickSend!(_currentWord!);
-
-                              // Starte Flug-Animation nur wenn erfolgreich hinzugefügt
-                              if (await result ==
-                                  TagesimpulsSelectionAddResult.ok) {
-                                _startArrowFlyAnimation(context);
-                              }
-                            }
-                          },
+                          onTapAfter: () => onChromeButtonTap(context, ref),
                           child: Container(
-                            key: _phoneIconKey,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
+                              color: _controlSurface.withValues(alpha: 0.95),
                               shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: AnimatedPhoneIcon(
-                              key: _animatedPhoneIconKey,
-                              assetPath:
-                                  'assets/icons/cellphone_arrow_down_icon.svg',
-                              size:
-                                  52, // Gleiche Größe wie Container (damit Zentrierung identisch ist)
-                              colorFilter: widget.isImageExpanded
-                                  ? onImageIcon
-                                  : cs.onSurface,
-                              duration: const Duration(milliseconds: 1500),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    if (widget.onImpulseInboxTap != null)
-                      Positioned(
-                        bottom: 76,
-                        left: 0,
-                        child: SizedBox.square(
-                          key: const Key('home-impuls-postfach-button'),
-                          dimension: 52,
-                          child: TapFlash(
-                            color: const Color(0xFF59D7FF),
-                            shape: BoxShape.circle,
-                            onTapAfter: widget.onImpulseInboxTap,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF07111A),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: const Color(0xFF59D7FF),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: const [
+                              border: Border.all(
+                                color: _neonViolet.withValues(alpha: 0.92),
+                                width: 1.6,
+                              ),
+                              boxShadow: glowEnabled
+                                  ? [
                                       BoxShadow(
-                                        color: Color(0x3359D7FF),
+                                        color: _neonViolet.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 18,
                                         spreadRadius: 1,
                                       ),
-                                    ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.mark_unread_chat_alt_rounded,
-                                    color: widget.isImageExpanded
-                                        ? onImageIcon
-                                        : const Color(0xFF7FFFE7),
-                                    size: 28,
+                                      BoxShadow(
+                                        color: _neonCyan.withValues(
+                                          alpha: 0.16,
+                                        ),
+                                        blurRadius: 24,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            alignment: Alignment.center,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 39,
+                                  height: 39,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      width: 1,
+                                    ),
                                   ),
                                 ),
-                                if (widget.impulseInboxUnreadCount > 0)
-                                  Positioned(
-                                    key: const Key(
-                                      'home-impuls-postfach-unread-badge',
-                                    ),
-                                    right: -2,
-                                    top: -2,
-                                    child: Container(
-                                      constraints: const BoxConstraints(
-                                        minWidth: 18,
-                                        minHeight: 18,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 5,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF59D7FF),
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        border: Border.all(
-                                          color: const Color(0xFF06101A),
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        widget.impulseInboxUnreadCount > 9
-                                            ? '9+'
-                                            : '${widget.impulseInboxUnreadCount}',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          color: Color(0xFF041019),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                    ),
+                                SpinningChromeButton(
+                                  svgAsset: 'assets/icons/line_chrome.svg',
+                                  size: 41,
+                                  baseRotationDuration: const Duration(
+                                    milliseconds: 3000,
                                   ),
+                                  loop: false,
+                                  colorFilter: ColorFilter.mode(
+                                    widget.isImageExpanded
+                                        ? onImageIcon
+                                        : const Color(0xFFEAFBFF),
+                                    BlendMode.srcIn,
+                                  ),
+                                  onTap: () => onChromeButtonTap(context, ref),
+                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
-
-                    // ─── RECHTES ICON Chrome Button(unten rechts) mit TapFlash ───
-                    Positioned(
-                      bottom: 16,
-                      right: 8,
-                      child: Semantics(
-                        key: const Key('home-browser-return-button'),
-                        label: 'Browser öffnen',
-                        child: SizedBox.square(
-                          dimension: 52,
-                          child: TapFlash(
-                            color: _wheelBlue, // Blau aus Word Wheel
-                            shape: BoxShape.circle,
-                            onTapAfter: () => onChromeButtonTap(context, ref),
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: SpinningChromeButton(
-                                svgAsset: 'assets/icons/line_chrome.svg',
-                                size: 56,
-                                baseRotationDuration: const Duration(
-                                  milliseconds: 3000,
-                                ),
-                                loop: false,
-                                colorFilter: ColorFilter.mode(
-                                  widget.isImageExpanded
-                                      ? onImageIcon
-                                      : cs.onSurface,
-                                  BlendMode.srcIn,
-                                ),
-                                onTap: () => onChromeButtonTap(context, ref),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ), // <- Schließt den Container
+      ),
     );
   }
 }
@@ -1220,38 +1371,6 @@ class _MyWordsTitle extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: Colors.white,
         shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
-      ),
-    );
-  }
-}
-
-class _CounterPill extends StatelessWidget {
-  const _CounterPill({required this.label, required this.textColor});
-
-  final String label;
-  final Color textColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      alignment: Alignment.center,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          label,
-          maxLines: 1,
-          softWrap: false,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
       ),
     );
   }

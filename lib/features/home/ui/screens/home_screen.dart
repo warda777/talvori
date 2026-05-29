@@ -14,6 +14,7 @@ import 'package:talvori/features/companion/application/companion_discovery_tip_r
 import 'package:talvori/features/companion/domain/companion_ai_context.dart';
 import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_context.dart';
+import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
@@ -44,13 +45,18 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   static const _companionRestDelay = Duration(seconds: 6);
+  static const _wheelCounterVisibleDelay = Duration(milliseconds: 1800);
 
   ProviderSubscription<HomeState>? _homeSub;
   Timer? _companionRestTimer;
+  Timer? _hideWheelCounterTimer;
   final TextEditingController _companionInputController =
       TextEditingController();
   final FocusNode _companionInputFocusNode = FocusNode();
   int _companionInputLineCount = 1;
+  int _homeWheelCurrentIndex = 0;
+  int _homeWheelTotal = 0;
+  bool _showWheelCounter = false;
   bool _didShowInitialCompanionDiscoveryTip = false;
   bool _wasKeyboardVisibleForCompanionChat = false;
   int _companionChatRequestId = 0;
@@ -82,6 +88,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _companionRestTimer?.cancel();
     _companionRestTimer = null;
+    _hideWheelCounterTimer?.cancel();
+    _hideWheelCounterTimer = null;
     // ✅ Subscription ohne ref schließen
     _homeSub?.close();
     _homeSub = null;
@@ -98,6 +106,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : text.split('\n').length.clamp(1, 5).toInt();
     if (nextLineCount == _companionInputLineCount) return;
     setState(() => _companionInputLineCount = nextLineCount);
+  }
+
+  void _syncHomeWheelCounter(int currentIndex, int total) {
+    if (_homeWheelCurrentIndex == currentIndex && _homeWheelTotal == total) {
+      return;
+    }
+    setState(() {
+      _homeWheelCurrentIndex = currentIndex;
+      _homeWheelTotal = total;
+    });
+  }
+
+  void _revealHomeWheelCounter() {
+    _hideWheelCounterTimer?.cancel();
+    if (!_showWheelCounter) {
+      setState(() => _showWheelCounter = true);
+    }
+    _hideWheelCounterTimer = Timer(_wheelCounterVisibleDelay, () {
+      if (!mounted) return;
+      setState(() => _showWheelCounter = false);
+    });
+  }
+
+  Future<void> _openMyWordsList() async {
+    final nav = Navigator.of(context);
+    await nav.push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: 'local-vocabs-my_words'),
+        builder: (_) => const LocalWordListScreen(
+          categoryId: localMyWordsCategoryId,
+          title: localMyWordsCategoryLabel,
+        ),
+      ),
+    );
+    if (!mounted) return;
   }
 
   void _restartCompanionRestTimer() {
@@ -345,6 +388,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       (sum, chat) => sum + chat.unreadCount,
     );
     final companionState = ref.watch(companionControllerProvider);
+    final mascotStyle = ref.watch(
+      profilePreferencesControllerProvider.select(
+        (preferences) => preferences.mascotStyle,
+      ),
+    );
     final mediaQuery = MediaQuery.of(context);
     final keyboardInset = mediaQuery.viewInsets.bottom;
     final chatOverlayOpen =
@@ -417,9 +465,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       24.0,
                       40.0,
                     );
+                    const compactCompanionScale = 0.34;
                     final companionMascotSize = viewport.maxWidth < 380
                         ? 150.0
                         : 164.0;
+                    final compactCompanionMascotSize =
+                        companionMascotSize * compactCompanionScale;
+                    final companionEffectiveMascotSize =
+                        companionState.isExpanded
+                        ? companionMascotSize
+                        : compactCompanionMascotSize;
                     final companionWidth = _safeClampDouble(
                       viewport.maxWidth - companionLeft - 16,
                       280.0,
@@ -427,7 +482,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     );
                     final companionHeight =
                         (companionState.bubbleVisible ? 88.0 : 0.0) +
-                        companionMascotSize +
+                        companionEffectiveMascotSize +
                         18.0;
                     final companionTopBase = companionState.isExpanded
                         ? viewport.maxHeight * 0.37
@@ -436,6 +491,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       companionTopBase,
                       12.0,
                       viewport.maxHeight - companionHeight - 8,
+                    );
+                    final homeCounterLabel =
+                        _homeWheelTotal > 0 && _homeWheelCurrentIndex > 0
+                        ? '$_homeWheelCurrentIndex/$_homeWheelTotal'
+                        : wc.formatHomeWordCounterCount(state.myWordsCount);
+                    final homeCounterTop = _safeClampDouble(
+                      viewport.maxHeight * 0.665,
+                      356.0,
+                      viewport.maxHeight - 150.0,
                     );
 
                     return Stack(
@@ -613,25 +677,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             contentPadding:
                                                 HomeTheme.contentPadding,
                                             userWordCount: state.myWordsCount,
-                                            onCountTap: () async {
-                                              final nav = Navigator.of(context);
-                                              await nav.push(
-                                                MaterialPageRoute(
-                                                  settings: const RouteSettings(
-                                                    name:
-                                                        'local-vocabs-my_words',
-                                                  ),
-                                                  builder: (_) =>
-                                                      const LocalWordListScreen(
-                                                        categoryId:
-                                                            localMyWordsCategoryId,
-                                                        title:
-                                                            localMyWordsCategoryLabel,
-                                                      ),
-                                                ),
-                                              );
-                                              if (!context.mounted) return;
-                                            },
+                                            onCountTap: _openMyWordsList,
+                                            onWheelCounterChanged:
+                                                _syncHomeWheelCounter,
+                                            onWheelMoved:
+                                                _revealHomeWheelCounter,
                                             onSpeak: _speakHomeWord,
                                             onMarkWords: () =>
                                                 _todo('Wörter markieren'),
@@ -647,6 +697,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ),
                         ),
+                        if (!chatOverlayOpen)
+                          Positioned(
+                            top: homeCounterTop,
+                            left: companionLeft + 6,
+                            child: IgnorePointer(
+                              ignoring: !_showWheelCounter,
+                              child: AnimatedOpacity(
+                                opacity: _showWheelCounter ? 1 : 0,
+                                duration: Duration(
+                                  milliseconds: _showWheelCounter ? 150 : 300,
+                                ),
+                                curve: Curves.easeOutCubic,
+                                child: _HomeWordCounterPill(
+                                  label: homeCounterLabel,
+                                  onTap: _openMyWordsList,
+                                ),
+                              ),
+                            ),
+                          ),
                         if (showCompanion && !chatOverlayOpen)
                           Positioned(
                             top: companionTop,
@@ -655,13 +724,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               width: companionWidth,
                               child: TalvoriCompanionCard(
                                 mascotMood: companionState.mascotMood,
+                                emotion: companionState.emotion,
                                 title: companionState.title,
                                 message: companionState.message,
                                 bubbleVisible: companionState.bubbleVisible,
                                 isExpanded: companionState.isExpanded,
                                 inputVisible: companionState.inputVisible,
                                 isThinking: companionState.isThinking,
+                                mascotStyle: mascotStyle,
                                 mascotSize: companionMascotSize,
+                                compactMascotScale: compactCompanionScale,
                                 onMascotTap: _toggleCompanion,
                                 onBubbleTap: _openCompanionChatInput,
                               ),
@@ -730,6 +802,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: chatCompanionWidth,
                         child: TalvoriCompanionCard(
                           mascotMood: companionState.mascotMood,
+                          emotion: companionState.emotion,
                           title: companionState.title,
                           message: companionState.message,
                           bubbleVisible: companionState.bubbleVisible,
@@ -737,6 +810,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           inputVisible: companionState.inputVisible,
                           isThinking: companionState.isThinking,
                           messageMaxLines: 6,
+                          mascotStyle: mascotStyle,
                           mascotSize: chatCompanionMascotSize,
                           onMascotTap: _toggleCompanion,
                           onBubbleTap: _openCompanionChatInput,
@@ -838,6 +912,62 @@ class _HomeCompanionChatInput extends StatelessWidget {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
     onSubmitMessage(trimmed);
+  }
+}
+
+class _HomeWordCounterPill extends StatelessWidget {
+  const _HomeWordCounterPill({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  static const _cyan = Color(0xFF5DDCFF);
+  static const _violet = Color(0xFFB36BFF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Meine Wörter $label',
+      button: true,
+      child: GestureDetector(
+        key: const Key('home-my-words-counter-button'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(
+            minWidth: 44,
+            maxWidth: 72,
+            minHeight: 28,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07101A).withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: _cyan.withValues(alpha: 0.48), width: 1),
+            boxShadow: [
+              BoxShadow(color: _cyan.withValues(alpha: 0.14), blurRadius: 9),
+              BoxShadow(color: _violet.withValues(alpha: 0.08), blurRadius: 12),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              style: const TextStyle(
+                color: Color(0xFFF4FCFF),
+                fontSize: 12.5,
+                height: 1,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

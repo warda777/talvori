@@ -16,8 +16,14 @@ import 'package:talvori/features/words/data/supabase_word_repository.dart';
 class WordWheelCore extends ConsumerStatefulWidget {
   final void Function(int index, WordUserView word)? onCenterChange;
   final void Function(int total)? onTotalLoaded; // Callback für Gesamtanzahl
+  final VoidCallback? onUserScroll;
 
-  const WordWheelCore({super.key, this.onCenterChange, this.onTotalLoaded});
+  const WordWheelCore({
+    super.key,
+    this.onCenterChange,
+    this.onTotalLoaded,
+    this.onUserScroll,
+  });
 
   @override
   ConsumerState<WordWheelCore> createState() => _WordWheelCoreState();
@@ -221,44 +227,54 @@ class _WordWheelCoreState extends ConsumerState<WordWheelCore> {
             stops: [0.00, 0.12, 0.88, 1.00],
           ).createShader(r),
           blendMode: BlendMode.dstIn, // nur Alpha zählt
-          child: ListWheelScrollView.useDelegate(
-            controller: _controller,
-            physics: const FixedExtentScrollPhysics(),
-            itemExtent: 36,
-            diameterRatio: 2.4,
-            perspective: 0.002,
-            overAndUnderCenterOpacity: 1.0, // ← Eigenfading aus
-            onSelectedItemChanged: (i) {
-              HapticFeedback.selectionClick();
-              setState(() => _center = i);
-              widget.onCenterChange?.call(i, _words[i]);
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification ||
+                  notification is ScrollUpdateNotification) {
+                widget.onUserScroll?.call();
+              }
+              return false;
             },
-            childDelegate: ListWheelChildBuilderDelegate(
-              childCount: _words.length,
-              builder: (context, i) {
-                final isCenter = i == _center;
-                final display = _sanitize(_words[i].text);
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 24),
-                    child: Text(
-                      display,
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: isCenter ? 26 : 20,
-                        fontWeight: isCenter
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                        color: isCenter
-                            ? const Color(0xFFB0CCFE)
-                            : Colors.white.withValues(alpha: 0.85),
+            child: ListWheelScrollView.useDelegate(
+              controller: _controller,
+              physics: const FixedExtentScrollPhysics(),
+              itemExtent: 36,
+              diameterRatio: 2.4,
+              perspective: 0.002,
+              overAndUnderCenterOpacity: 1.0, // ← Eigenfading aus
+              onSelectedItemChanged: (i) {
+                HapticFeedback.selectionClick();
+                setState(() => _center = i);
+                widget.onUserScroll?.call();
+                widget.onCenterChange?.call(i, _words[i]);
+              },
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: _words.length,
+                builder: (context, i) {
+                  final isCenter = i == _center;
+                  final display = _sanitize(_words[i].text);
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 24),
+                      child: Text(
+                        display,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: isCenter ? 26 : 20,
+                          fontWeight: isCenter
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                          color: isCenter
+                              ? const Color(0xFFB0CCFE)
+                              : Colors.white.withValues(alpha: 0.85),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),

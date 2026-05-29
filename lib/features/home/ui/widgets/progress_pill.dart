@@ -245,8 +245,11 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
     final glowEnabled = ref.watch(
       homeControllerProvider.select((s) => s.glowEnabled),
     );
-    const buttonColor = Color(0xFF2D2D2E); // Button-Hintergrundfarbe
-    const gold = Color(0xFFF1C86B); // Gold für Progress Pill
+    const pillTop = Color(0xFF101C2A);
+    const pillBottom = Color(0xFF050912);
+    const trackColor = Color(0xFF111927);
+    const cyan = Color(0xFF5DDCFF);
+    const violet = Color(0xFFB36BFF);
     const glowingOrange = Color(0xFFFF9639); // Glühendes Orange
 
     return AnimatedBuilder(
@@ -274,18 +277,26 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
             glowIntensity * 0.9; // Maximal 90% Opacity für starken Glow
 
         final pill = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
           decoration: BoxDecoration(
-            color: buttonColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: gold, width: 2), // Goldener Rand
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [pillTop, pillBottom],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: cyan.withValues(alpha: 0.9), width: 1.6),
             boxShadow: glowEnabled
                 ? [
-                    // Durchgehender goldener Glow
                     BoxShadow(
-                      color: gold.withValues(alpha: 0.55),
-                      blurRadius: 20,
+                      color: cyan.withValues(alpha: 0.28),
+                      blurRadius: 18,
                       spreadRadius: 1,
+                    ),
+                    BoxShadow(
+                      color: violet.withValues(alpha: 0.18),
+                      blurRadius: 26,
+                      spreadRadius: 2,
                     ),
                   ]
                 : null,
@@ -297,7 +308,7 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                   const Icon(
                     Icons.system_update_alt_rounded,
                     size: 16,
-                    color: Colors.white,
+                    color: Color(0xFFEAFBFF),
                   ),
               const SizedBox(width: 6),
               Text(
@@ -305,7 +316,7 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                 '$_displayedSelected/${widget.max}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: Color(0xFFF4FCFF),
                 ),
               ),
               const SizedBox(width: 8),
@@ -317,8 +328,12 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                     // Hintergrund
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
+                        color: trackColor,
                         borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          width: 1,
+                        ),
                       ),
                     ),
                     // Progress-Bar mit abgerundetem vorderem Ende und Glow
@@ -326,7 +341,12 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                       widthFactor: progressValue,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: barColor,
+                          gradient: LinearGradient(
+                            colors: [
+                              barColor,
+                              Color.lerp(barColor, cyan, 0.45) ?? cyan,
+                            ],
+                          ),
                           borderRadius: BorderRadius.only(
                             topLeft: const Radius.circular(5),
                             bottomLeft: const Radius.circular(5),
