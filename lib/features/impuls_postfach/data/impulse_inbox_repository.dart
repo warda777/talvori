@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
@@ -10,7 +11,9 @@ import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 
 abstract class ImpulseInboxRepository {
   Future<ImpulseChat> ensureDailyImpulseChat();
-  Future<ImpulseChat> ensureCompanionChat();
+  Future<ImpulseChat> ensureCompanionChat({
+    TalvoriMascotStyle style = TalvoriMascotStyle.female,
+  });
   Future<ImpulseChat> ensureCategoryChat(String categoryId, String title);
   Future<ImpulseChat> createCustomAiChat(String title);
   Future<void> renameCustomAiChat(String chatId, String title);
@@ -94,22 +97,26 @@ class SharedPreferencesImpulseInboxRepository
   }
 
   @override
-  Future<ImpulseChat> ensureCompanionChat() async {
+  Future<ImpulseChat> ensureCompanionChat({
+    TalvoriMascotStyle style = TalvoriMascotStyle.female,
+  }) async {
     final store = await _loadStore();
-    final existing = store.chats[CompanionChatConstants.chatId];
+    _migrateLegacyCompanionChatIfNeeded(store);
+    final chatId = CompanionChatConstants.chatIdForStyle(style);
+    final existing = store.chats[chatId];
     if (existing != null) {
-      final updated = _normalizeCompanionChat(existing);
+      final updated = _normalizeCompanionChat(existing, style: style);
       store.chats[updated.id] = updated;
       await _saveStore(store);
       return updated;
     }
 
     final chat = ImpulseChat(
-      id: CompanionChatConstants.chatId,
+      id: chatId,
       sourceType: ImpulseChatSourceType.customAi,
-      sourceId: CompanionChatConstants.chatId,
-      title: CompanionChatConstants.title,
-      avatarKey: CompanionChatConstants.avatarKey,
+      sourceId: chatId,
+      title: TalvoriMascotAssets.companionDisplayNameFor(style),
+      avatarKey: CompanionChatConstants.avatarKeyForStyle(style),
       createdAt: _now,
     );
     store.chats[chat.id] = chat;
@@ -607,9 +614,15 @@ class SharedPreferencesImpulseInboxRepository
       for (final rawChat in rawChats.whereType<Map<String, dynamic>>()) {
         final chat = ImpulseChat.fromJson(rawChat);
         if (chat.id.trim().isNotEmpty) {
-          chats[chat.id] = chat.id == CompanionChatConstants.chatId
-              ? _normalizeCompanionChat(chat)
+          final normalized = chat.id == CompanionChatConstants.legacyChatId
+              ? chat
+              : CompanionChatConstants.isCompanionChatId(chat.id)
+              ? _normalizeCompanionChat(
+                  chat,
+                  style: CompanionChatConstants.styleForChatId(chat.id),
+                )
               : chat;
+          chats[normalized.id] = normalized;
         }
       }
     }
@@ -629,11 +642,15 @@ class SharedPreferencesImpulseInboxRepository
       }
     }
 
-    return _ImpulseInboxStore(
+    final store = _ImpulseInboxStore(
       chats: chats,
       messages: messages,
       aiProfile: ImpulseAiProfile.fromJson(decoded['aiProfile']),
     );
+    if (_migrateLegacyCompanionChatIfNeeded(store)) {
+      await _saveStore(store);
+    }
+    return store;
   }
 
   Future<void> _saveStore(_ImpulseInboxStore store) async {
@@ -664,12 +681,54 @@ class SharedPreferencesImpulseInboxRepository
     return 'impulse-chat-custom-${_now.microsecondsSinceEpoch}';
   }
 
-  ImpulseChat _normalizeCompanionChat(ImpulseChat chat) {
+  bool _migrateLegacyCompanionChatIfNeeded(_ImpulseInboxStore store) {
+    final legacy = store.chats.remove(CompanionChatConstants.legacyChatId);
+    if (legacy == null) return false;
+    final existingTali = store.chats[CompanionChatConstants.taliChatId];
+    final legacyMessages =
+        store.messages.remove(CompanionChatConstants.legacyChatId) ??
+        const <ImpulseMessage>[];
+
+    if (existingTali == null) {
+      store.chats[CompanionChatConstants.taliChatId] = _normalizeCompanionChat(
+        legacy.copyWith(id: CompanionChatConstants.taliChatId),
+        style: TalvoriMascotStyle.female,
+      );
+      store.messages[CompanionChatConstants.taliChatId] = legacyMessages
+          .map(
+            (message) =>
+                message.copyWith(chatId: CompanionChatConstants.taliChatId),
+          )
+          .toList(growable: false);
+      return true;
+    }
+
+    if (legacyMessages.isEmpty) return true;
+    store.messages[CompanionChatConstants.taliChatId] = [
+      ...(store.messages[CompanionChatConstants.taliChatId] ??
+          const <ImpulseMessage>[]),
+      ...legacyMessages.map(
+        (message) => message.copyWith(
+          id: '${CompanionChatConstants.taliChatId}-${message.id}',
+          chatId: CompanionChatConstants.taliChatId,
+        ),
+      ),
+    ];
+    _recomputeChatPreview(store, CompanionChatConstants.taliChatId);
+    return true;
+  }
+
+  ImpulseChat _normalizeCompanionChat(
+    ImpulseChat chat, {
+    required TalvoriMascotStyle style,
+  }) {
+    final chatId = CompanionChatConstants.chatIdForStyle(style);
     return chat.copyWith(
+      id: chatId,
       sourceType: ImpulseChatSourceType.customAi,
-      sourceId: CompanionChatConstants.chatId,
-      title: CompanionChatConstants.title,
-      avatarKey: CompanionChatConstants.avatarKey,
+      sourceId: chatId,
+      title: TalvoriMascotAssets.companionDisplayNameFor(style),
+      avatarKey: CompanionChatConstants.avatarKeyForStyle(style),
       enabled: true,
     );
   }

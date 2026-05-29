@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/ai/ai_chat_client.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_chat.dart';
@@ -100,8 +101,10 @@ class ImpulseInboxController extends StateNotifier<ImpulseInboxState> {
     return chat;
   }
 
-  Future<ImpulseChat> ensureCompanionChat() async {
-    final chat = await _repository.ensureCompanionChat();
+  Future<ImpulseChat> ensureCompanionChat({
+    TalvoriMascotStyle style = TalvoriMascotStyle.female,
+  }) async {
+    final chat = await _repository.ensureCompanionChat(style: style);
     await loadChats();
     return chat;
   }

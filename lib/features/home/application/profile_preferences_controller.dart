@@ -24,6 +24,7 @@ class ProfilePreferences {
     this.pendingTranslationRemindersEnabled = false,
     this.marketingAnalyticsEnabled = false,
     this.mascotStyle = TalvoriMascotStyle.female,
+    this.hasSeenHomeChatHint = false,
   });
 
   final String displayName;
@@ -44,6 +45,7 @@ class ProfilePreferences {
   final bool pendingTranslationRemindersEnabled;
   final bool marketingAnalyticsEnabled;
   final TalvoriMascotStyle mascotStyle;
+  final bool hasSeenHomeChatHint;
 
   ProfilePreferences copyWith({
     String? displayName,
@@ -64,6 +66,7 @@ class ProfilePreferences {
     bool? pendingTranslationRemindersEnabled,
     bool? marketingAnalyticsEnabled,
     TalvoriMascotStyle? mascotStyle,
+    bool? hasSeenHomeChatHint,
   }) {
     return ProfilePreferences(
       displayName: displayName ?? this.displayName,
@@ -88,6 +91,7 @@ class ProfilePreferences {
       marketingAnalyticsEnabled:
           marketingAnalyticsEnabled ?? this.marketingAnalyticsEnabled,
       mascotStyle: mascotStyle ?? this.mascotStyle,
+      hasSeenHomeChatHint: hasSeenHomeChatHint ?? this.hasSeenHomeChatHint,
     );
   }
 }
@@ -121,6 +125,8 @@ class SharedPreferencesProfilePreferencesRepository
   static const _marketingAnalyticsKey =
       'talvori_profile_marketing_analytics_enabled_v1';
   static const _mascotStyleKey = 'talvori_profile_mascot_style_v1';
+  static const _hasSeenHomeChatHintKey =
+      'talvori_profile_has_seen_home_chat_hint_v1';
 
   @override
   Future<ProfilePreferences> load() async {
@@ -145,6 +151,7 @@ class SharedPreferencesProfilePreferencesRepository
           prefs.getBool(_pendingTranslationRemindersKey) ?? false,
       marketingAnalyticsEnabled: prefs.getBool(_marketingAnalyticsKey) ?? false,
       mascotStyle: _parseMascotStyle(prefs.getString(_mascotStyleKey)),
+      hasSeenHomeChatHint: prefs.getBool(_hasSeenHomeChatHintKey) ?? false,
     );
   }
 
@@ -178,6 +185,10 @@ class SharedPreferencesProfilePreferencesRepository
       preferences.marketingAnalyticsEnabled,
     );
     await prefs.setString(_mascotStyleKey, preferences.mascotStyle.name);
+    await prefs.setBool(
+      _hasSeenHomeChatHintKey,
+      preferences.hasSeenHomeChatHint,
+    );
   }
 
   static TalvoriMascotStyle _parseMascotStyle(String? value) {
@@ -292,6 +303,11 @@ class ProfilePreferencesController extends StateNotifier<ProfilePreferences> {
 
   Future<void> setMascotStyle(TalvoriMascotStyle value) {
     return _save(state.copyWith(mascotStyle: value));
+  }
+
+  Future<void> markHomeChatHintSeen() {
+    if (state.hasSeenHomeChatHint) return Future<void>.value();
+    return _save(state.copyWith(hasSeenHomeChatHint: true));
   }
 
   Future<void> _save(ProfilePreferences preferences) async {

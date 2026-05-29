@@ -581,7 +581,9 @@ class _ChatHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCategory = chat?.sourceType == ImpulseChatSourceType.category;
     final isCustom = chat?.sourceType == ImpulseChatSourceType.customAi;
-    final isCompanion = chat?.id == CompanionChatConstants.chatId;
+    final isCompanion = CompanionChatConstants.isCompanionChatId(
+      chat?.id ?? '',
+    );
     return Row(
       children: [
         _HeaderAvatar(
@@ -613,7 +615,7 @@ class _ChatHeader extends StatelessWidget {
                 isCategory
                     ? 'Kategorie-Chat'
                     : isCompanion
-                    ? 'Tali'
+                    ? chat?.title ?? 'Tali'
                     : isCustom
                     ? 'Eigener KI-Chat'
                     : 'Talvori Impulse',
@@ -642,7 +644,9 @@ class _HeaderAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = chat?.avatarImagePath?.trim();
-    final isCompanion = chat?.id == CompanionChatConstants.chatId;
+    final chatId = chat?.id ?? '';
+    final isCompanion = CompanionChatConstants.isCompanionChatId(chatId);
+    final companionStyle = CompanionChatConstants.styleForChatId(chatId);
     return Container(
       width: 34,
       height: 34,
@@ -657,7 +661,7 @@ class _HeaderAvatar extends StatelessWidget {
           ? Padding(
               padding: const EdgeInsets.all(3),
               child: Image.asset(
-                TalvoriMascotAssets.idle,
+                TalvoriMascotAssets.neutralSpiritPathFor(style: companionStyle),
                 key: const Key('impulse_chat_detail_companion_avatar_image'),
                 fit: BoxFit.contain,
               ),

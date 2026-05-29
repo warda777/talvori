@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
@@ -1019,7 +1020,9 @@ class _ThrowingImpulseInboxRepository implements ImpulseInboxRepository {
   }
 
   @override
-  Future<ImpulseChat> ensureCompanionChat() {
+  Future<ImpulseChat> ensureCompanionChat({
+    TalvoriMascotStyle style = TalvoriMascotStyle.female,
+  }) {
     throw StateError('inbox failed');
   }
 

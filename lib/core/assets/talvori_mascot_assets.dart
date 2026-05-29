@@ -174,6 +174,13 @@ class TalvoriMascotAssets {
     return _spiritAssetsFor(style)[TaliEmotion.neutral] ?? spirit;
   }
 
+  static String companionDisplayNameFor(TalvoriMascotStyle style) {
+    return switch (style) {
+      TalvoriMascotStyle.female => 'Tali',
+      TalvoriMascotStyle.male => 'Vori',
+    };
+  }
+
   static TaliEmotion emotionForLegacyMood(TalvoriMascotMood mood) {
     return switch (mood) {
       TalvoriMascotMood.greeting => TaliEmotion.neutral,

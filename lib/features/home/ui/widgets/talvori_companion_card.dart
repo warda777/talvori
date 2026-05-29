@@ -20,6 +20,7 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.compactMascotScale = 0.62,
     this.inputVisible = false,
     this.isThinking = false,
+    this.showChatHint = false,
     this.messageMaxLines = 3,
     this.onMascotTap,
     this.onBubbleTap,
@@ -37,6 +38,7 @@ class TalvoriCompanionCard extends StatelessWidget {
   final double compactMascotScale;
   final bool inputVisible;
   final bool isThinking;
+  final bool showChatHint;
   final int messageMaxLines;
   final VoidCallback? onMascotTap;
   final VoidCallback? onBubbleTap;
@@ -48,12 +50,18 @@ class TalvoriCompanionCard extends StatelessWidget {
     final effectiveEmotion =
         emotion ??
         TalvoriMascotAssets.emotionForLegacyMood(effectiveMascotMood);
+    final companionDisplayName = TalvoriMascotAssets.companionDisplayNameFor(
+      mascotStyle,
+    );
+    final effectiveTitle = title.trim().isEmpty || title == 'Talvori'
+        ? companionDisplayName
+        : title;
     final effectiveMascotSize = isExpanded
         ? mascotSize
         : mascotSize * compactMascotScale;
 
     return Semantics(
-      label: 'Tali ${effectiveMascotMood.name}',
+      label: '$companionDisplayName ${effectiveMascotMood.name}',
       child: LayoutBuilder(
         builder: (context, constraints) {
           final bubbleLeft = effectiveMascotSize * 0.68;
@@ -88,7 +96,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                         compactMode: !isExpanded,
                         glowIntensity: isExpanded ? 0.95 : 0.64,
                         semanticLabel:
-                            'Talvori Lerngeist ${effectiveMascotMood.name}',
+                            '$companionDisplayName Lerngeist ${effectiveMascotMood.name}',
                       ),
                     ),
                   ),
@@ -134,7 +142,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      title,
+                                      effectiveTitle,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: Theme.of(context)
@@ -160,43 +168,58 @@ class TalvoriCompanionCard extends StatelessWidget {
                                       ),
                                     )
                                   else
-                                    Tooltip(
-                                      message: 'Chat öffnen',
-                                      key: const Key(
-                                        'talvori-companion-chat-icon',
-                                      ),
-                                      child: InkWell(
-                                        customBorder: const CircleBorder(),
-                                        onTap: onBubbleTap,
-                                        child: Container(
-                                          width: 30,
-                                          height: 30,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: accent.withValues(
-                                              alpha: 0.16,
-                                            ),
-                                            border: Border.all(
-                                              color: accent.withValues(
-                                                alpha: 0.55,
-                                              ),
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: accent.withValues(
-                                                  alpha: 0.2,
-                                                ),
-                                                blurRadius: 12,
-                                              ),
-                                            ],
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (showChatHint) ...[
+                                          _CompanionChatHint(
+                                            accent: accent,
+                                            onTap: onBubbleTap,
                                           ),
-                                          child: Icon(
-                                            Icons.chat_bubble_outline_rounded,
-                                            size: 17,
-                                            color: accent,
+                                          const SizedBox(width: 7),
+                                        ],
+                                        Tooltip(
+                                          message: 'Chat öffnen',
+                                          key: const Key(
+                                            'talvori-companion-chat-icon',
+                                          ),
+                                          child: InkWell(
+                                            customBorder: const CircleBorder(),
+                                            onTap: onBubbleTap,
+                                            child: Container(
+                                              width: 30,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: accent.withValues(
+                                                  alpha: 0.16,
+                                                ),
+                                                border: Border.all(
+                                                  color: accent.withValues(
+                                                    alpha: 0.55,
+                                                  ),
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: accent.withValues(
+                                                      alpha: 0.2,
+                                                    ),
+                                                    blurRadius: 12,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Icon(
+                                                Icons
+                                                    .chat_bubble_outline_rounded,
+                                                size: 17,
+                                                color: accent.withValues(
+                                                  alpha: 1,
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                 ],
                               ),
@@ -246,5 +269,54 @@ class TalvoriCompanionCard extends StatelessWidget {
       TalvoriCompanionMood.tired => TalvoriMascotMood.tired,
       TalvoriCompanionMood.proud => TalvoriMascotMood.proud,
     };
+  }
+}
+
+class _CompanionChatHint extends StatelessWidget {
+  const _CompanionChatHint({required this.accent, this.onTap});
+
+  final Color accent;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Chatten',
+      button: true,
+      child: GestureDetector(
+        key: const Key('home-companion-chat-hint'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07101A).withValues(alpha: 0.82),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: accent.withValues(alpha: 0.42)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.22),
+                blurRadius: 16,
+                offset: const Offset(0, 7),
+              ),
+              BoxShadow(
+                color: accent.withValues(alpha: 0.16),
+                blurRadius: 22,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: Text(
+            'Chatten \u2192',
+            maxLines: 1,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: const Color(0xFFF4FCFF),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

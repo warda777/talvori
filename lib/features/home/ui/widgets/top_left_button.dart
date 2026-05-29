@@ -60,9 +60,19 @@ class _TopLeftButtonState extends ConsumerState<TopLeftButton>
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: TopLeftButton.gold.withValues(alpha: 0.42),
-                      blurRadius: 20,
-                      spreadRadius: 1,
+                      color: TopLeftButton.gold.withValues(alpha: 0.3),
+                      blurRadius: 38,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: TopLeftButton.gold.withValues(alpha: 0.12),
+                      blurRadius: 68,
+                      spreadRadius: -8,
+                    ),
+                    BoxShadow(
+                      color: TopLeftButton.gold.withValues(alpha: 0.05),
+                      blurRadius: 88,
+                      spreadRadius: -14,
                     ),
                   ]
                 : null,

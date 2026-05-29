@@ -289,14 +289,19 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: cyan.withValues(alpha: 0.28),
-                      blurRadius: 18,
-                      spreadRadius: 1,
+                      color: cyan.withValues(alpha: 0.26),
+                      blurRadius: 38,
+                      spreadRadius: -2,
                     ),
                     BoxShadow(
-                      color: violet.withValues(alpha: 0.18),
-                      blurRadius: 26,
-                      spreadRadius: 2,
+                      color: violet.withValues(alpha: 0.12),
+                      blurRadius: 68,
+                      spreadRadius: -8,
+                    ),
+                    BoxShadow(
+                      color: cyan.withValues(alpha: 0.05),
+                      blurRadius: 90,
+                      spreadRadius: -14,
                     ),
                   ]
                 : null,

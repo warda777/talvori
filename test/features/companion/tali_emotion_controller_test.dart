@@ -123,6 +123,17 @@ void main() {
     );
   });
 
+  test('companion display name follows selected mascot style', () {
+    expect(
+      TalvoriMascotAssets.companionDisplayNameFor(TalvoriMascotStyle.female),
+      'Tali',
+    );
+    expect(
+      TalvoriMascotAssets.companionDisplayNameFor(TalvoriMascotStyle.male),
+      'Vori',
+    );
+  });
+
   test('asset resolver falls back to neutral for unmapped emotions', () {
     expect(
       TalvoriMascotAssets.spiritPathFor(

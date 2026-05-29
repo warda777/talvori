@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
 import 'package:talvori/features/impuls_postfach/models/impulse_ai_profile.dart';
@@ -82,6 +83,57 @@ void main() {
           CompanionChatConstants.chatId,
         )).single.text,
         'Hallo Tali',
+      );
+    });
+
+    test('keeps Tali and Vori companion chats separated', () async {
+      final repository = SharedPreferencesImpulseInboxRepository(
+        clock: () => DateTime(2026, 5, 20, 12),
+      );
+
+      final tali = await repository.ensureCompanionChat(
+        style: TalvoriMascotStyle.female,
+      );
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: tali.id,
+          text: 'Hallo Tali',
+          createdAt: DateTime(2026, 5, 20, 12),
+          source: ImpulseMessageSource.user,
+          readAt: DateTime(2026, 5, 20, 12),
+        ),
+        incrementUnread: false,
+      );
+
+      final vori = await repository.ensureCompanionChat(
+        style: TalvoriMascotStyle.male,
+      );
+      await repository.addMessage(
+        ImpulseMessage(
+          id: '',
+          chatId: vori.id,
+          text: 'Hallo Vori',
+          createdAt: DateTime(2026, 5, 20, 12, 1),
+          source: ImpulseMessageSource.user,
+          readAt: DateTime(2026, 5, 20, 12, 1),
+        ),
+        incrementUnread: false,
+      );
+
+      expect(tali.id, CompanionChatConstants.taliChatId);
+      expect(tali.title, 'Tali');
+      expect(tali.avatarKey, 'companion:tali');
+      expect(vori.id, CompanionChatConstants.voriChatId);
+      expect(vori.title, 'Vori');
+      expect(vori.avatarKey, 'companion:vori');
+      expect(
+        (await repository.listMessages(tali.id)).single.text,
+        'Hallo Tali',
+      );
+      expect(
+        (await repository.listMessages(vori.id)).single.text,
+        'Hallo Vori',
       );
     });
 

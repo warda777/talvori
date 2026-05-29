@@ -240,9 +240,9 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
             color: gold,
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(20),
-            maxOpacity: 1.0,
-            blur: 28,
-            spread: 6,
+            maxOpacity: 0.72,
+            blur: 36,
+            spread: -2,
             duration: const Duration(milliseconds: 220),
             onTapAfter: widget.onProgressTap,
             child: ProgressPill(
@@ -407,9 +407,9 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                   key: _tapFlashKey,
                   color: gold,
                   shape: BoxShape.circle,
-                  maxOpacity: 1.0,
-                  blur: 28,
-                  spread: 6,
+                  maxOpacity: 0.72,
+                  blur: 36,
+                  spread: -2,
                   duration: const Duration(milliseconds: 220),
                   onTapAfter: () {
                     // Trigger Flash-Effekt
@@ -436,9 +436,19 @@ class _HomeTopBarState extends ConsumerState<HomeTopBar> {
                       boxShadow: glowEnabled
                           ? [
                               BoxShadow(
-                                color: gold.withValues(alpha: 0.42),
-                                blurRadius: 20,
-                                spreadRadius: 1,
+                                color: gold.withValues(alpha: 0.3),
+                                blurRadius: 38,
+                                spreadRadius: -2,
+                              ),
+                              BoxShadow(
+                                color: gold.withValues(alpha: 0.12),
+                                blurRadius: 68,
+                                spreadRadius: -8,
+                              ),
+                              BoxShadow(
+                                color: gold.withValues(alpha: 0.05),
+                                blurRadius: 88,
+                                spreadRadius: -14,
                               ),
                             ]
                           : null,

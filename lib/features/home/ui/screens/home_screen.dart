@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:talvori/core/assets/talvori_mascot_assets.dart';
 import 'package:talvori/core/pronunciation/word_pronunciation_provider.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
@@ -12,8 +13,8 @@ import 'package:talvori/features/companion/application/companion_ai_service.dart
 import 'package:talvori/features/companion/application/companion_controller.dart';
 import 'package:talvori/features/companion/application/companion_discovery_tip_resolver.dart';
 import 'package:talvori/features/companion/domain/companion_ai_context.dart';
-import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_context.dart';
+import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/words/data/supabase_word_repository.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
@@ -35,6 +36,14 @@ import 'package:talvori/features/tagesimpuls/models/tagesimpuls_selection_item.d
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
 import 'package:talvori/features/local_learning_debug/ui/local_debug_hub_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+const _homeSystemUiOverlayStyle = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: HomeTheme.background,
+  systemNavigationBarIconBrightness: Brightness.light,
+);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -177,6 +186,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _openCompanionChatInput() {
+    unawaited(
+      ref
+          .read(profilePreferencesControllerProvider.notifier)
+          .markHomeChatHintSeen(),
+    );
     ref.read(companionControllerProvider.notifier).openChatInput();
     _cancelCompanionRestTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -229,10 +243,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _refocusCompanionInput();
 
     var shouldPersistAiResponse = false;
+    String? persistedCompanionChatId;
     try {
       final inboxController = ref.read(impulseInboxControllerProvider.notifier);
-      final chat = await inboxController.ensureCompanionChat();
+      final mascotStyle = _currentMascotStyle();
+      final chat = await inboxController.ensureCompanionChat(
+        style: mascotStyle,
+      );
       await inboxController.addUserMessage(chat.id, trimmed);
+      persistedCompanionChatId = chat.id;
       shouldPersistAiResponse = true;
     } catch (error) {
       debugPrint('Companion chat persistence failed for user message: $error');
@@ -258,11 +277,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           );
       if (!mounted || requestId != _companionChatRequestId) return;
       companionController.showAiResponse(response);
-      if (shouldPersistAiResponse) {
+      final responseChatId = persistedCompanionChatId;
+      if (shouldPersistAiResponse && responseChatId != null) {
         try {
           await ref
               .read(impulseInboxControllerProvider.notifier)
-              .addAiMessage(CompanionChatConstants.chatId, response);
+              .addAiMessage(responseChatId, response);
         } catch (error) {
           debugPrint(
             'Companion chat persistence failed for AI response: $error',
@@ -288,6 +308,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  TalvoriMascotStyle _currentMascotStyle() {
+    return ref.read(profilePreferencesControllerProvider).mascotStyle;
+  }
+
   Future<void> _showInitialCompanionDiscoveryTip() async {
     if (_didShowInitialCompanionDiscoveryTip) return;
     _didShowInitialCompanionDiscoveryTip = true;
@@ -310,7 +334,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         discoveryContext,
       );
       if (tip == null) return;
-      ref.read(companionControllerProvider.notifier).showDiscoveryTip(tip);
+      final companionName = TalvoriMascotAssets.companionDisplayNameFor(
+        _currentMascotStyle(),
+      );
+      ref
+          .read(companionControllerProvider.notifier)
+          .showDiscoveryTip(
+            CompanionDiscoveryTip(
+              type: tip.type,
+              title: companionName,
+              message: tip.message.replaceAll('Talvori', companionName),
+              mood: tip.mood,
+              priority: tip.priority,
+            ),
+          );
       _restartCompanionRestTimer();
     } catch (error, stackTrace) {
       debugPrint('Companion discovery tip skipped: $error');
@@ -388,10 +425,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       (sum, chat) => sum + chat.unreadCount,
     );
     final companionState = ref.watch(companionControllerProvider);
+    final showHomeChatHint = ref.watch(
+      profilePreferencesControllerProvider.select(
+        (preferences) => !preferences.hasSeenHomeChatHint,
+      ),
+    );
     final mascotStyle = ref.watch(
       profilePreferencesControllerProvider.select(
         (preferences) => preferences.mascotStyle,
       ),
+    );
+    final companionDisplayName = TalvoriMascotAssets.companionDisplayNameFor(
+      mascotStyle,
     );
     final mediaQuery = MediaQuery.of(context);
     final keyboardInset = mediaQuery.viewInsets.bottom;
@@ -412,426 +457,445 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       keyboardInset: keyboardInset,
     );
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: HomeTheme.background,
-          extendBody: true,
-          resizeToAvoidBottomInset: false,
-          body: SafeArea(
-            child: Stack(
-              fit: StackFit.expand, // wichtig: voller Bereich für die Animation
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _homeSystemUiOverlayStyle,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: HomeTheme.background,
+            extendBody: true,
+            extendBodyBehindAppBar: true,
+            resizeToAvoidBottomInset: false,
+            body: Stack(
+              fit: StackFit.expand,
               children: [
-                const Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF07101A),
-                          Color(0xFF02050A),
-                          Color(0xFF000000),
-                        ],
+                SafeArea(
+                  child: Stack(
+                    fit: StackFit
+                        .expand, // wichtig: voller Bereich für die Animation
+                    children: [
+                      // 🔥 Fireball HINTER dem Button
+                      FireballBounceAnimation(
+                        key: _fireballKey,
+                        anchorKey: _crownButtonKey,
+                        practiceKey:
+                            _practiceButtonKey, // <-- NEU: Practice-Button Key
+                        forceColor: const Color(0xFFA05260), // deine Farbe
+                        iconSize: 48,
+                        anchorOffset: const Offset(
+                          0,
+                          0,
+                        ), // Feintuning: falls 1-2px links, dann Offset(2, 0)
+                        child: SvgPicture.asset(
+                          'assets/icons/fireball_black.svg',
+                          width: 48,
+                          height: 48,
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                // 🔥 Fireball HINTER dem Button
-                FireballBounceAnimation(
-                  key: _fireballKey,
-                  anchorKey: _crownButtonKey,
-                  practiceKey:
-                      _practiceButtonKey, // <-- NEU: Practice-Button Key
-                  forceColor: const Color(0xFFA05260), // deine Farbe
-                  iconSize: 48,
-                  anchorOffset: const Offset(
-                    0,
-                    0,
-                  ), // Feintuning: falls 1-2px links, dann Offset(2, 0)
-                  child: SvgPicture.asset(
-                    'assets/icons/fireball_black.svg',
-                    width: 48,
-                    height: 48,
-                  ),
-                ),
-                LayoutBuilder(
-                  builder: (context, viewport) {
-                    final showCompanion =
-                        viewport.maxHeight >= 640 || chatOverlayOpen;
-                    final disableHomeScroll = viewport.maxHeight >= 640;
-                    final companionLeft = _safeClampDouble(
-                      viewport.maxWidth * 0.08,
-                      24.0,
-                      40.0,
-                    );
-                    const compactCompanionScale = 0.34;
-                    final companionMascotSize = viewport.maxWidth < 380
-                        ? 150.0
-                        : 164.0;
-                    final compactCompanionMascotSize =
-                        companionMascotSize * compactCompanionScale;
-                    final companionEffectiveMascotSize =
-                        companionState.isExpanded
-                        ? companionMascotSize
-                        : compactCompanionMascotSize;
-                    final companionWidth = _safeClampDouble(
-                      viewport.maxWidth - companionLeft - 16,
-                      280.0,
-                      560.0,
-                    );
-                    final companionHeight =
-                        (companionState.bubbleVisible ? 88.0 : 0.0) +
-                        companionEffectiveMascotSize +
-                        18.0;
-                    final companionTopBase = companionState.isExpanded
-                        ? viewport.maxHeight * 0.37
-                        : viewport.maxHeight * 0.49;
-                    final companionTop = _safeClampDouble(
-                      companionTopBase,
-                      12.0,
-                      viewport.maxHeight - companionHeight - 8,
-                    );
-                    final homeCounterLabel =
-                        _homeWheelTotal > 0 && _homeWheelCurrentIndex > 0
-                        ? '$_homeWheelCurrentIndex/$_homeWheelTotal'
-                        : wc.formatHomeWordCounterCount(state.myWordsCount);
-                    final homeCounterTop = _safeClampDouble(
-                      viewport.maxHeight * 0.665,
-                      356.0,
-                      viewport.maxHeight - 150.0,
-                    );
+                      LayoutBuilder(
+                        builder: (context, viewport) {
+                          final showCompanion =
+                              viewport.maxHeight >= 640 || chatOverlayOpen;
+                          final disableHomeScroll = viewport.maxHeight >= 640;
+                          final companionLeft = _safeClampDouble(
+                            viewport.maxWidth * 0.08,
+                            24.0,
+                            40.0,
+                          );
+                          const compactCompanionScale = 0.34;
+                          final companionMascotSize = viewport.maxWidth < 380
+                              ? 150.0
+                              : 164.0;
+                          final compactCompanionMascotSize =
+                              companionMascotSize * compactCompanionScale;
+                          final companionEffectiveMascotSize =
+                              companionState.isExpanded
+                              ? companionMascotSize
+                              : compactCompanionMascotSize;
+                          final companionWidth = _safeClampDouble(
+                            viewport.maxWidth - companionLeft - 16,
+                            280.0,
+                            560.0,
+                          );
+                          final companionHeight =
+                              (companionState.bubbleVisible ? 88.0 : 0.0) +
+                              companionEffectiveMascotSize +
+                              18.0;
+                          final companionTopBase = companionState.isExpanded
+                              ? viewport.maxHeight * 0.37
+                              : viewport.maxHeight * 0.49;
+                          final companionTop = _safeClampDouble(
+                            companionTopBase,
+                            12.0,
+                            viewport.maxHeight - companionHeight - 8,
+                          );
+                          final homeCounterLabel =
+                              _homeWheelTotal > 0 && _homeWheelCurrentIndex > 0
+                              ? '$_homeWheelCurrentIndex/$_homeWheelTotal'
+                              : wc.formatHomeWordCounterCount(
+                                  state.myWordsCount,
+                                );
+                          final homeCounterTop = _safeClampDouble(
+                            viewport.maxHeight * 0.665,
+                            356.0,
+                            viewport.maxHeight - 150.0,
+                          );
 
-                    return Stack(
-                      children: [
-                        Padding(
-                          padding: HomeTheme.horizontal,
-                          child: SingleChildScrollView(
-                            physics: disableHomeScroll
-                                ? const NeverScrollableScrollPhysics()
-                                : null,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                HomeTopBar(
-                                  buttonKey: _rightButtonKey,
-                                  progressPillKey: _progressPillKey,
-                                  counterKey:
-                                      _counterKey, // <-- NEU: Counter Key
-                                  crownButtonKey: _crownButtonKey,
-                                  fireballKey: _fireballKey,
-                                  onAllWords: () {
-                                    // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                                  },
-                                  onRewards: () =>
-                                      _todo('Rewards/Leaderboard/Stats'),
-                                  onProgressTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const CourseScreen(),
+                          return Stack(
+                            children: [
+                              Padding(
+                                padding: HomeTheme.horizontal,
+                                child: SingleChildScrollView(
+                                  clipBehavior: Clip.none,
+                                  physics: disableHomeScroll
+                                      ? const NeverScrollableScrollPhysics()
+                                      : null,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      HomeTopBar(
+                                        buttonKey: _rightButtonKey,
+                                        progressPillKey: _progressPillKey,
+                                        counterKey:
+                                            _counterKey, // <-- NEU: Counter Key
+                                        crownButtonKey: _crownButtonKey,
+                                        fireballKey: _fireballKey,
+                                        onAllWords: () {
+                                          // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                                        },
+                                        onRewards: () =>
+                                            _todo('Rewards/Leaderboard/Stats'),
+                                        onProgressTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const CourseScreen(),
+                                            ),
+                                          );
+                                        },
+                                        selected: tagesimpulsSelection.count,
+                                        max: tagesimpulsSelection.maxCount,
+                                        showProgress:
+                                            tagesimpulsSelection.count <
+                                                tagesimpulsSelection.maxCount ||
+                                            _progressAnimationRunning,
+                                        onProgressAnimationStart: () {
+                                          // Animation gestartet - verzögere setState
+                                          if (mounted) {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _progressAnimationRunning =
+                                                          true;
+                                                    });
+                                                  }
+                                                });
+                                          }
+                                        },
+                                        onProgressAnimationComplete: () {
+                                          // Animation fertig - jetzt kann die Pill ausgeblendet werden
+                                          // Verzögere setState, damit es nicht während des Builds aufgerufen wird
+                                          if (mounted) {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _progressAnimationRunning =
+                                                          false;
+                                                    });
+                                                  }
+                                                });
+                                          }
+                                        },
                                       ),
-                                    );
-                                  },
-                                  selected: tagesimpulsSelection.count,
-                                  max: tagesimpulsSelection.maxCount,
-                                  showProgress:
-                                      tagesimpulsSelection.count <
-                                          tagesimpulsSelection.maxCount ||
-                                      _progressAnimationRunning,
-                                  onProgressAnimationStart: () {
-                                    // Animation gestartet - verzögere setState
-                                    if (mounted) {
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            if (mounted) {
-                                              setState(() {
-                                                _progressAnimationRunning =
-                                                    true;
-                                              });
-                                            }
-                                          });
-                                    }
-                                  },
-                                  onProgressAnimationComplete: () {
-                                    // Animation fertig - jetzt kann die Pill ausgeblendet werden
-                                    // Verzögere setState, damit es nicht während des Builds aufgerufen wird
-                                    if (mounted) {
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            if (mounted) {
-                                              setState(() {
-                                                _progressAnimationRunning =
-                                                    false;
-                                              });
-                                            }
-                                          });
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                Center(
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 360,
-                                    ),
-                                    child: LayoutBuilder(
-                                      builder: (ctx, box) {
-                                        final w = box.maxWidth;
-                                        final h = w * (570 / 360);
-
-                                        return SizedBox(
-                                          width: w,
-                                          height: h,
-                                          child: wc.WordCard(
-                                            key: ValueKey((
-                                              state.imageIsDark,
-                                              state.imageExpanded,
-                                            )),
-                                            progressPillKey: _progressPillKey,
-                                            counterKey:
-                                                _counterKey, // <-- NEU: Counter Key
-                                            initialWord:
-                                                null, // lastSharedWordProvider regelt das
-                                            onQuickSend: (word) async {
-                                              // Füge nur das aktuell ausgewählte Wort hinzu
-                                              final res = await ref
-                                                  .read(
-                                                    tagesimpulsSelectionControllerProvider
-                                                        .notifier,
-                                                  )
-                                                  .add(
-                                                    TagesimpulsSelectionItem(
-                                                      wordId: word.id,
-                                                      text: word.text,
-                                                      translation:
-                                                          word.translation,
-                                                      addedAt: DateTime.now(),
-                                                    ),
-                                                  );
-
-                                              if (!context.mounted) return res;
-
-                                              switch (res) {
-                                                case TagesimpulsSelectionAddResult
-                                                    .ok:
-                                                  TalvoriSnackBar.show(
-                                                    context,
-                                                    message:
-                                                        'Wort wurde zum Tagesimpuls hinzugefügt.',
-                                                    type: TalvoriSnackBarType
-                                                        .success,
-                                                  );
-                                                  break;
-                                                case TagesimpulsSelectionAddResult
-                                                    .duplicate:
-                                                  TalvoriSnackBar.show(
-                                                    context,
-                                                    message:
-                                                        'Wort ist bereits im Tagesimpuls.',
-                                                    type: TalvoriSnackBarType
-                                                        .warning,
-                                                  );
-                                                  break;
-                                                case TagesimpulsSelectionAddResult
-                                                    .full:
-                                                  TalvoriSnackBar.show(
-                                                    context,
-                                                    message:
-                                                        'Tagesimpuls ist voll.',
-                                                    type: TalvoriSnackBarType
-                                                        .warning,
-                                                  );
-                                                  break;
-                                                case TagesimpulsSelectionAddResult
-                                                    .invalid:
-                                                  TalvoriSnackBar.show(
-                                                    context,
-                                                    message: 'Ungültiges Wort',
-                                                    type: TalvoriSnackBarType
-                                                        .error,
-                                                  );
-                                                  break;
-                                              }
-
-                                              return res; // Gib das Ergebnis zurück
-                                            },
-                                            onImpulseInboxTap: null,
-                                            impulseInboxUnreadCount:
-                                                impulseUnreadCount,
-                                            isImageExpanded:
-                                                state.imageExpanded,
-                                            onToggleImage: () => ref
-                                                .read(
-                                                  homeControllerProvider
-                                                      .notifier,
-                                                )
-                                                .toggleImage(),
-                                            isImageDark: state.imageIsDark,
-                                            onImageBrightnessChanged:
-                                                (isDark) => ref
-                                                    .read(
-                                                      homeControllerProvider
-                                                          .notifier,
-                                                    )
-                                                    .setImageDark(isDark),
-                                            contentPadding:
-                                                HomeTheme.contentPadding,
-                                            userWordCount: state.myWordsCount,
-                                            onCountTap: _openMyWordsList,
-                                            onWheelCounterChanged:
-                                                _syncHomeWheelCounter,
-                                            onWheelMoved:
-                                                _revealHomeWheelCounter,
-                                            onSpeak: _speakHomeWord,
-                                            onMarkWords: () =>
-                                                _todo('Wörter markieren'),
-                                            onGo: _showLearningSourcesPopup,
+                                      const SizedBox(height: 16),
+                                      Center(
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 360,
                                           ),
-                                        );
-                                      },
+                                          child: LayoutBuilder(
+                                            builder: (ctx, box) {
+                                              final w = box.maxWidth;
+                                              final h = w * (570 / 360);
+
+                                              return SizedBox(
+                                                width: w,
+                                                height: h,
+                                                child: wc.WordCard(
+                                                  key: ValueKey((
+                                                    state.imageIsDark,
+                                                    state.imageExpanded,
+                                                  )),
+                                                  progressPillKey:
+                                                      _progressPillKey,
+                                                  counterKey:
+                                                      _counterKey, // <-- NEU: Counter Key
+                                                  initialWord:
+                                                      null, // lastSharedWordProvider regelt das
+                                                  onQuickSend: (word) async {
+                                                    // Füge nur das aktuell ausgewählte Wort hinzu
+                                                    final res = await ref
+                                                        .read(
+                                                          tagesimpulsSelectionControllerProvider
+                                                              .notifier,
+                                                        )
+                                                        .add(
+                                                          TagesimpulsSelectionItem(
+                                                            wordId: word.id,
+                                                            text: word.text,
+                                                            translation: word
+                                                                .translation,
+                                                            addedAt:
+                                                                DateTime.now(),
+                                                          ),
+                                                        );
+
+                                                    if (!context.mounted) {
+                                                      return res;
+                                                    }
+
+                                                    switch (res) {
+                                                      case TagesimpulsSelectionAddResult
+                                                          .ok:
+                                                        TalvoriSnackBar.show(
+                                                          context,
+                                                          message:
+                                                              'Wort wurde zum Tagesimpuls hinzugefügt.',
+                                                          type:
+                                                              TalvoriSnackBarType
+                                                                  .success,
+                                                        );
+                                                        break;
+                                                      case TagesimpulsSelectionAddResult
+                                                          .duplicate:
+                                                        TalvoriSnackBar.show(
+                                                          context,
+                                                          message:
+                                                              'Wort ist bereits im Tagesimpuls.',
+                                                          type:
+                                                              TalvoriSnackBarType
+                                                                  .warning,
+                                                        );
+                                                        break;
+                                                      case TagesimpulsSelectionAddResult
+                                                          .full:
+                                                        TalvoriSnackBar.show(
+                                                          context,
+                                                          message:
+                                                              'Tagesimpuls ist voll.',
+                                                          type:
+                                                              TalvoriSnackBarType
+                                                                  .warning,
+                                                        );
+                                                        break;
+                                                      case TagesimpulsSelectionAddResult
+                                                          .invalid:
+                                                        TalvoriSnackBar.show(
+                                                          context,
+                                                          message:
+                                                              'Ungültiges Wort',
+                                                          type:
+                                                              TalvoriSnackBarType
+                                                                  .error,
+                                                        );
+                                                        break;
+                                                    }
+
+                                                    return res; // Gib das Ergebnis zurück
+                                                  },
+                                                  onImpulseInboxTap: null,
+                                                  impulseInboxUnreadCount:
+                                                      impulseUnreadCount,
+                                                  isImageExpanded:
+                                                      state.imageExpanded,
+                                                  onToggleImage: () => ref
+                                                      .read(
+                                                        homeControllerProvider
+                                                            .notifier,
+                                                      )
+                                                      .toggleImage(),
+                                                  isImageDark:
+                                                      state.imageIsDark,
+                                                  onImageBrightnessChanged:
+                                                      (isDark) => ref
+                                                          .read(
+                                                            homeControllerProvider
+                                                                .notifier,
+                                                          )
+                                                          .setImageDark(isDark),
+                                                  contentPadding:
+                                                      HomeTheme.contentPadding,
+                                                  userWordCount:
+                                                      state.myWordsCount,
+                                                  onCountTap: _openMyWordsList,
+                                                  onWheelCounterChanged:
+                                                      _syncHomeWheelCounter,
+                                                  onWheelMoved:
+                                                      _revealHomeWheelCounter,
+                                                  onSpeak: _speakHomeWord,
+                                                  onMarkWords: () =>
+                                                      _todo('Wörter markieren'),
+                                                  onGo:
+                                                      _showLearningSourcesPopup,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 96),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (!chatOverlayOpen)
+                                Positioned(
+                                  top: homeCounterTop,
+                                  left: companionLeft + 6,
+                                  child: IgnorePointer(
+                                    ignoring: !_showWheelCounter,
+                                    child: AnimatedOpacity(
+                                      opacity: _showWheelCounter ? 1 : 0,
+                                      duration: Duration(
+                                        milliseconds: _showWheelCounter
+                                            ? 150
+                                            : 300,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                      child: _HomeWordCounterPill(
+                                        label: homeCounterLabel,
+                                        onTap: _openMyWordsList,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 96),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (!chatOverlayOpen)
-                          Positioned(
-                            top: homeCounterTop,
-                            left: companionLeft + 6,
-                            child: IgnorePointer(
-                              ignoring: !_showWheelCounter,
-                              child: AnimatedOpacity(
-                                opacity: _showWheelCounter ? 1 : 0,
-                                duration: Duration(
-                                  milliseconds: _showWheelCounter ? 150 : 300,
+                              if (showCompanion && !chatOverlayOpen)
+                                Positioned(
+                                  top: companionTop,
+                                  left: companionLeft,
+                                  child: SizedBox(
+                                    width: companionWidth,
+                                    child: TalvoriCompanionCard(
+                                      mascotMood: companionState.mascotMood,
+                                      emotion: companionState.emotion,
+                                      title: companionDisplayName,
+                                      message: companionState.message,
+                                      bubbleVisible:
+                                          companionState.bubbleVisible,
+                                      isExpanded: companionState.isExpanded,
+                                      inputVisible: companionState.inputVisible,
+                                      isThinking: companionState.isThinking,
+                                      showChatHint:
+                                          showHomeChatHint &&
+                                          companionState.bubbleVisible,
+                                      mascotStyle: mascotStyle,
+                                      mascotSize: companionMascotSize,
+                                      compactMascotScale: compactCompanionScale,
+                                      onMascotTap: _toggleCompanion,
+                                      onBubbleTap: _openCompanionChatInput,
+                                    ),
+                                  ),
                                 ),
-                                curve: Curves.easeOutCubic,
-                                child: _HomeWordCounterPill(
-                                  label: homeCounterLabel,
-                                  onTap: _openMyWordsList,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (showCompanion && !chatOverlayOpen)
-                          Positioned(
-                            top: companionTop,
-                            left: companionLeft,
-                            child: SizedBox(
-                              width: companionWidth,
-                              child: TalvoriCompanionCard(
-                                mascotMood: companionState.mascotMood,
-                                emotion: companionState.emotion,
-                                title: companionState.title,
-                                message: companionState.message,
-                                bubbleVisible: companionState.bubbleVisible,
-                                isExpanded: companionState.isExpanded,
-                                inputVisible: companionState.inputVisible,
-                                isThinking: companionState.isThinking,
-                                mascotStyle: mascotStyle,
-                                mascotSize: companionMascotSize,
-                                compactMascotScale: compactCompanionScale,
-                                onMascotTap: _toggleCompanion,
-                                onBubbleTap: _openCompanionChatInput,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          bottomNavigationBar: SafeArea(
-            child: Padding(
-              padding: HomeTheme.bottomPadding,
-              child: HomeBottomNav(
-                onImpulseInbox: _openImpulseInbox,
-                onPractice: () => Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const VocabScreen())),
-                onProfile: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            bottomNavigationBar: SafeArea(
+              child: Padding(
+                padding: HomeTheme.bottomPadding,
+                child: HomeBottomNav(
+                  onImpulseInbox: _openImpulseInbox,
+                  onPractice: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const VocabScreen()),
+                  ),
+                  onProfile: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  ),
+                  impulseUnreadCount: impulseUnreadCount,
+                  practiceButtonKey:
+                      _practiceButtonKey, // <-- NEU: Practice-Button Key
                 ),
-                impulseUnreadCount: impulseUnreadCount,
-                practiceButtonKey:
-                    _practiceButtonKey, // <-- NEU: Practice-Button Key
               ),
             ),
-          ),
-          floatingActionButton: kDebugMode
-              ? FloatingActionButton.small(
-                  tooltip: 'Local Learning Debug',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const LocalDebugHubScreen(),
+            floatingActionButton: kDebugMode
+                ? FloatingActionButton.small(
+                    tooltip: 'Local Learning Debug',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const LocalDebugHubScreen(),
+                      ),
                     ),
-                  ),
-                  child: const Icon(Icons.bug_report_outlined),
-                )
-              : null,
-        ),
-        if (companionState.inputVisible)
-          Positioned.fill(
-            key: const Key('talvori-companion-chat-dismiss-layer'),
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _closeCompanionChatInput,
-            ),
+                    child: const Icon(Icons.bug_report_outlined),
+                  )
+                : null,
           ),
-        if (chatOverlayOpen)
-          Positioned(
-            key: const Key('talvori-companion-chat-cluster'),
-            left: 0,
-            right: 0,
-            bottom: chatClusterBottom,
-            child: Material(
-              type: MaterialType.transparency,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: chatCompanionWidth,
-                        child: TalvoriCompanionCard(
-                          mascotMood: companionState.mascotMood,
-                          emotion: companionState.emotion,
-                          title: companionState.title,
-                          message: companionState.message,
-                          bubbleVisible: companionState.bubbleVisible,
-                          isExpanded: true,
-                          inputVisible: companionState.inputVisible,
-                          isThinking: companionState.isThinking,
-                          messageMaxLines: 6,
-                          mascotStyle: mascotStyle,
-                          mascotSize: chatCompanionMascotSize,
-                          onMascotTap: _toggleCompanion,
-                          onBubbleTap: _openCompanionChatInput,
+          if (companionState.inputVisible)
+            Positioned.fill(
+              key: const Key('talvori-companion-chat-dismiss-layer'),
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: _closeCompanionChatInput,
+              ),
+            ),
+          if (chatOverlayOpen)
+            Positioned(
+              key: const Key('talvori-companion-chat-cluster'),
+              left: 0,
+              right: 0,
+              bottom: chatClusterBottom,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          width: chatCompanionWidth,
+                          child: TalvoriCompanionCard(
+                            mascotMood: companionState.mascotMood,
+                            emotion: companionState.emotion,
+                            title: companionDisplayName,
+                            message: companionState.message,
+                            bubbleVisible: companionState.bubbleVisible,
+                            isExpanded: true,
+                            inputVisible: companionState.inputVisible,
+                            isThinking: companionState.isThinking,
+                            messageMaxLines: 6,
+                            mascotStyle: mascotStyle,
+                            mascotSize: chatCompanionMascotSize,
+                            onMascotTap: _toggleCompanion,
+                            onBubbleTap: _openCompanionChatInput,
+                          ),
                         ),
                       ),
-                    ),
-                    if (companionState.inputVisible) ...[
-                      const SizedBox(height: 8),
-                      _HomeCompanionChatInput(
-                        key: const Key('talvori-companion-chat-input'),
-                        controller: _companionInputController,
-                        focusNode: _companionInputFocusNode,
-                        onSubmitMessage: _submitCompanionMessage,
-                      ),
+                      if (companionState.inputVisible) ...[
+                        const SizedBox(height: 8),
+                        _HomeCompanionChatInput(
+                          key: const Key('talvori-companion-chat-input'),
+                          controller: _companionInputController,
+                          focusNode: _companionInputFocusNode,
+                          companionDisplayName: companionDisplayName,
+                          onSubmitMessage: _submitCompanionMessage,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -841,6 +905,7 @@ class _HomeCompanionChatInput extends StatelessWidget {
     super.key,
     required this.controller,
     required this.focusNode,
+    required this.companionDisplayName,
     required this.onSubmitMessage,
   });
 
@@ -848,6 +913,7 @@ class _HomeCompanionChatInput extends StatelessWidget {
 
   final TextEditingController controller;
   final FocusNode focusNode;
+  final String companionDisplayName;
   final ValueChanged<String> onSubmitMessage;
 
   @override
@@ -883,7 +949,7 @@ class _HomeCompanionChatInput extends StatelessWidget {
                 cursorColor: _accent,
                 decoration: InputDecoration(
                   isDense: true,
-                  hintText: 'Frag Talvori kurz ...',
+                  hintText: 'Frag $companionDisplayName kurz ...',
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 14,

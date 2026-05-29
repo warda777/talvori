@@ -2264,7 +2264,8 @@ class _ChatAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final path = chat.avatarImagePath?.trim();
-    final isCompanion = chat.id == CompanionChatConstants.chatId;
+    final isCompanion = CompanionChatConstants.isCompanionChatId(chat.id);
+    final companionStyle = CompanionChatConstants.styleForChatId(chat.id);
     final icon = switch (chat.sourceType) {
       ImpulseChatSourceType.dailyImpulse => Icons.auto_awesome_rounded,
       ImpulseChatSourceType.category => Icons.bubble_chart_rounded,
@@ -2295,7 +2296,7 @@ class _ChatAvatar extends StatelessWidget {
           ? Padding(
               padding: EdgeInsets.all(size * 0.08),
               child: Image.asset(
-                TalvoriMascotAssets.idle,
+                TalvoriMascotAssets.neutralSpiritPathFor(style: companionStyle),
                 key: const Key('impulse_chat_companion_avatar_image'),
                 fit: BoxFit.contain,
               ),

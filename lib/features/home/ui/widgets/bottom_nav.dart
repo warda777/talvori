@@ -52,9 +52,9 @@ class HomeBottomNav extends ConsumerWidget {
                   TapFlash(
                     color: wheelBlue,
                     shape: BoxShape.circle,
-                    maxOpacity: 1.0,
-                    blur: 28,
-                    spread: 6,
+                    maxOpacity: 0.72,
+                    blur: 36,
+                    spread: -2,
                     duration: const Duration(milliseconds: 220),
                     onTapAfter: onImpulseInbox,
                     child: DecoratedBox(
@@ -65,9 +65,19 @@ class HomeBottomNav extends ConsumerWidget {
                         boxShadow: glowEnabled
                             ? [
                                 BoxShadow(
-                                  color: wheelBlue.withValues(alpha: 0.38),
-                                  blurRadius: 20,
-                                  spreadRadius: 1,
+                                  color: wheelBlue.withValues(alpha: 0.29),
+                                  blurRadius: 38,
+                                  spreadRadius: -2,
+                                ),
+                                BoxShadow(
+                                  color: wheelBlue.withValues(alpha: 0.11),
+                                  blurRadius: 68,
+                                  spreadRadius: -8,
+                                ),
+                                BoxShadow(
+                                  color: wheelBlue.withValues(alpha: 0.05),
+                                  blurRadius: 88,
+                                  spreadRadius: -14,
                                 ),
                               ]
                             : null,
@@ -136,9 +146,9 @@ class HomeBottomNav extends ConsumerWidget {
                 color: violet,
                 shape: BoxShape.rectangle,
                 borderRadius: const BorderRadius.all(Radius.circular(999)),
-                maxOpacity: 1.0,
-                blur: 28,
-                spread: 6,
+                maxOpacity: 0.72,
+                blur: 36,
+                spread: -2,
                 duration: const Duration(milliseconds: 220),
                 onTapAfter: onPractice,
                 child: Container(
@@ -150,9 +160,19 @@ class HomeBottomNav extends ConsumerWidget {
                     boxShadow: glowEnabled
                         ? [
                             BoxShadow(
-                              color: violet.withValues(alpha: 0.34),
-                              blurRadius: 20,
-                              spreadRadius: 1,
+                              color: violet.withValues(alpha: 0.27),
+                              blurRadius: 38,
+                              spreadRadius: -2,
+                            ),
+                            BoxShadow(
+                              color: violet.withValues(alpha: 0.11),
+                              blurRadius: 68,
+                              spreadRadius: -8,
+                            ),
+                            BoxShadow(
+                              color: violet.withValues(alpha: 0.05),
+                              blurRadius: 88,
+                              spreadRadius: -14,
                             ),
                           ]
                         : null,
@@ -193,9 +213,9 @@ class HomeBottomNav extends ConsumerWidget {
             child: TapFlash(
               color: wheelBlue,
               shape: BoxShape.circle,
-              maxOpacity: 1.0,
-              blur: 28,
-              spread: 6,
+              maxOpacity: 0.72,
+              blur: 36,
+              spread: -2,
               duration: const Duration(milliseconds: 220),
               onTapAfter: onProfile,
               child: Container(
@@ -206,9 +226,19 @@ class HomeBottomNav extends ConsumerWidget {
                   boxShadow: glowEnabled
                       ? [
                           BoxShadow(
-                            color: wheelBlue.withValues(alpha: 0.38),
-                            blurRadius: 20,
-                            spreadRadius: 1,
+                            color: wheelBlue.withValues(alpha: 0.29),
+                            blurRadius: 38,
+                            spreadRadius: -2,
+                          ),
+                          BoxShadow(
+                            color: wheelBlue.withValues(alpha: 0.11),
+                            blurRadius: 68,
+                            spreadRadius: -8,
+                          ),
+                          BoxShadow(
+                            color: wheelBlue.withValues(alpha: 0.05),
+                            blurRadius: 88,
+                            spreadRadius: -14,
                           ),
                         ]
                       : null,

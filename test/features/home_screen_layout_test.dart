@@ -207,7 +207,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
-    expect(find.text('Talvori'), findsOneWidget);
+    expect(find.text('Tali'), findsOneWidget);
     expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
     final mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
@@ -245,6 +245,38 @@ void main() {
         style: TalvoriMascotStyle.male,
       ),
     );
+    expect(find.text('Vori'), findsOneWidget);
+  });
+
+  testWidgets('home chat hint disappears permanently after opening chat', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const Key('home-companion-chat-hint')), findsOneWidget);
+    expect(find.text('Chatten \u2192'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('home-companion-chat-hint')), findsNothing);
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool('talvori_profile_has_seen_home_chat_hint_v1'), isTrue);
   });
 
   testWidgets('home empty my words state lets companion show browser hint', (
@@ -268,11 +300,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
-      find.text('Markiere ein Wort im Browser und teile es mit Talvori.'),
+      find.text('Markiere ein Wort im Browser und teile es mit Tali.'),
       findsOneWidget,
     );
     final browserHint = tester.widget<Text>(
-      find.text('Markiere ein Wort im Browser und teile es mit Talvori.'),
+      find.text('Markiere ein Wort im Browser und teile es mit Tali.'),
     );
     expect(browserHint.maxLines, 3);
     expect(browserHint.overflow, TextOverflow.clip);
