@@ -30,6 +30,7 @@ const double kWheelArrowNudge = 0.0;
 /// `onChanged(index, label)` wird bei Auswahl aufgerufen.
 class CategoryWheel extends StatefulWidget {
   final List<String> categories;
+  final List<bool>? completed;
   final int initialIndex;
   final void Function(int index, String label) onChanged;
   final Color? activeStrokeColor;
@@ -41,6 +42,7 @@ class CategoryWheel extends StatefulWidget {
   const CategoryWheel({
     super.key,
     required this.categories,
+    this.completed,
     required this.initialIndex,
     required this.onChanged,
     this.activeStrokeColor,
@@ -159,6 +161,7 @@ class _CategoryWheelState extends State<CategoryWheel>
                   child: _CategoryWheelScrollView(
                     controller: _ctrl,
                     cats: cats,
+                    completed: widget.completed,
                     current: _current,
                     activeStrokeColor: widget.activeStrokeColor,
                     activeFillColor: widget.activeFillColor,
@@ -169,6 +172,7 @@ class _CategoryWheelState extends State<CategoryWheel>
               : _CategoryWheelScrollView(
                   controller: _ctrl,
                   cats: cats,
+                  completed: widget.completed,
                   current: _current,
                   activeStrokeColor: widget.activeStrokeColor,
                   activeFillColor: widget.activeFillColor,
@@ -231,6 +235,7 @@ class _CategoryWheelScrollView extends StatelessWidget {
   const _CategoryWheelScrollView({
     required this.controller,
     required this.cats,
+    required this.completed,
     required this.current,
     required this.activeStrokeColor,
     required this.activeFillColor,
@@ -240,6 +245,7 @@ class _CategoryWheelScrollView extends StatelessWidget {
 
   final FixedExtentScrollController controller;
   final List<String> cats;
+  final List<bool>? completed;
   final int current;
   final Color? activeStrokeColor;
   final Color? activeFillColor;
@@ -260,6 +266,10 @@ class _CategoryWheelScrollView extends StatelessWidget {
         childCount: cats.length,
         builder: (context, index) {
           final dist = (index - current).abs();
+          final isCompleted =
+              completed != null &&
+              index < completed!.length &&
+              completed![index];
 
           final opacity = dist == 0
               ? kWheelActiveOpacity
@@ -269,7 +279,9 @@ class _CategoryWheelScrollView extends StatelessWidget {
               ? kWheelActiveScale
               : (dist == 1 ? kWheelNeighborScale : kWheelFarScale);
 
-          final strokeColor = dist == 0 && activeStrokeColor != null
+          final strokeColor = isCompleted
+              ? const Color(0xFF5A6070)
+              : dist == 0 && activeStrokeColor != null
               ? activeStrokeColor!
               : CategoryStrokeColors.getWheelStrokeColor(cats[index]);
 
@@ -285,6 +297,7 @@ class _CategoryWheelScrollView extends StatelessWidget {
                   height: kWheelItemExtent - 6,
                   radius: kWheelPillRadius,
                   active: dist == 0,
+                  completed: isCompleted,
                   strokeColor: strokeColor,
                   fillColor: dist == 0 ? activeFillColor : null,
                   textColor: dist == 0 ? activeTextColor : null,
@@ -304,6 +317,7 @@ class _AdaptivePill extends StatelessWidget {
   final double height;
   final double radius;
   final bool active;
+  final bool completed;
   final Color strokeColor;
   final Color? fillColor;
   final Color? textColor;
@@ -314,6 +328,7 @@ class _AdaptivePill extends StatelessWidget {
     required this.height,
     required this.radius,
     required this.active,
+    required this.completed,
     required this.strokeColor,
     this.fillColor,
     this.textColor,
@@ -325,7 +340,9 @@ class _AdaptivePill extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: fillColor ?? const Color(0xFF2D2C2C),
+        color: completed
+            ? const Color(0xFF171A22)
+            : fillColor ?? const Color(0xFF2D2C2C),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: strokeColor, width: 1.5),
         boxShadow: active && kWheelGlowBlur > 0
@@ -346,7 +363,9 @@ class _AdaptivePill extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.visible,
             style: TextStyle(
-              color: textColor ?? Colors.white,
+              color: completed
+                  ? const Color(0xFF7F8798)
+                  : textColor ?? Colors.white,
               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               fontSize: 15,
               letterSpacing: 0.2,

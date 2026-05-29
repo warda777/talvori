@@ -4,6 +4,7 @@ import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/application/word_list_controller.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 final localLearningSourceItems = <LocalCategoryDetailGroupItem>[
   LocalCategoryDetailGroupItem(
@@ -25,6 +26,11 @@ final localLearningSourceItems = <LocalCategoryDetailGroupItem>[
     wordHubKey: 'known_words',
     displayLabel: 'Wörter, die ich kenne',
     localCategoryId: LocalLearningSource.knownWords.id,
+  ),
+  LocalCategoryDetailGroupItem(
+    wordHubKey: 'reviewed_for_learning',
+    displayLabel: 'Noch zu lernen',
+    localCategoryId: LocalLearningSource.reviewedForLearning.id,
   ),
   LocalCategoryDetailGroupItem(
     wordHubKey: 'my_mix',
@@ -50,6 +56,14 @@ class LocalLearningSourceDetailScreen extends StatelessWidget {
     final selectedLearningSource =
         LocalLearningSource.fromWordHubKey(selectedSource.wordHubKey) ??
         LocalLearningSource.myWords;
+
+    if (selectedLearningSource == LocalLearningSource.knownWords ||
+        selectedLearningSource == LocalLearningSource.reviewedForLearning) {
+      return LocalWordListScreen(
+        categoryId: selectedLearningSource.id,
+        title: selectedLearningSource.label,
+      );
+    }
 
     return CategoryDetailScreen(
       title: selectedSource.displayLabel,

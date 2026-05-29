@@ -21,6 +21,8 @@ final localWordsForSourceProvider =
           return _loadFavoriteWords(ref);
         case LocalLearningSource.knownWords:
           return _loadKnownWords(ref);
+        case LocalLearningSource.reviewedForLearning:
+          return _loadReviewedForLearningWords(ref);
         case LocalLearningSource.myMix:
           return _loadMyMixWords(ref);
       }
@@ -52,6 +54,13 @@ Future<List<LocalWord>> _loadKnownWords(Ref ref) async {
   final bootstrap = await ref.watch(localBootstrapProvider.future);
   final words = await bootstrap.repositoryFactory.wordRepository
       .loadKnownWords();
+  return List<LocalWord>.unmodifiable(words);
+}
+
+Future<List<LocalWord>> _loadReviewedForLearningWords(Ref ref) async {
+  final bootstrap = await ref.watch(localBootstrapProvider.future);
+  final words = await bootstrap.repositoryFactory.wordRepository
+      .loadReviewedForLearningWords();
   return List<LocalWord>.unmodifiable(words);
 }
 

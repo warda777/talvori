@@ -130,6 +130,48 @@ void main() {
     expect(knownWords.map((word) => word.term), ['lantern']);
   });
 
+  test('reviewed_for_learning_source_reads_reviewed_non_known_words', () async {
+    final container = await createContainer(
+      prefix: 'talvori_local_words_for_source_reviewed_',
+    );
+    final reviewedWordId = await importWord(container, 'street');
+    final knownReviewedWordId = await importWord(container, 'heart');
+
+    final bootstrap = await container.read(localBootstrapProvider.future);
+    await bootstrap.repositoryFactory.wordRepository.addWordWorldMembership(
+      wordId: reviewedWordId,
+      categoryId: localMyWordsCategoryId,
+      createdAt: DateTime(2026, 5, 21, 10, 1),
+    );
+    await bootstrap.repositoryFactory.wordRepository.addWordWorldMembership(
+      wordId: knownReviewedWordId,
+      categoryId: localMyWordsCategoryId,
+      createdAt: DateTime(2026, 5, 21, 10, 2),
+    );
+    await bootstrap.repositoryFactory.wordRepository.markReviewedForLearning(
+      wordId: reviewedWordId,
+      categoryId: localMyWordsCategoryId,
+    );
+    await bootstrap.repositoryFactory.wordRepository.markReviewedForLearning(
+      wordId: knownReviewedWordId,
+      categoryId: localMyWordsCategoryId,
+    );
+    await bootstrap.repositoryFactory.wordRepository
+        .setWordWorldMembershipKnown(
+          wordId: knownReviewedWordId,
+          categoryId: localMyWordsCategoryId,
+          known: true,
+        );
+
+    final reviewedWords = await container.read(
+      localWordsForSourceProvider(
+        LocalLearningSource.reviewedForLearning,
+      ).future,
+    );
+
+    expect(reviewedWords.map((word) => word.term), ['street']);
+  });
+
   test('my_mix_uses_a_distinct_local_mix_instead_of_my_words_clone', () async {
     final container = await createContainer(
       prefix: 'talvori_local_words_for_source_mix_',

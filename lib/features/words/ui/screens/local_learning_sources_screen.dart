@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 class LocalLearningSourcesScreen extends ConsumerWidget {
   const LocalLearningSourcesScreen({super.key});
@@ -75,6 +77,13 @@ class LocalLearningSourcesScreen extends ConsumerWidget {
                   onTap: () => _openSource(context, 'known_words'),
                 ),
                 _SourceTile(
+                  key: const Key('local-source-reviewed-for-learning-tile'),
+                  label: 'Noch zu lernen',
+                  icon: Icons.trending_up_rounded,
+                  accent: const Color(0xFF82EAFF),
+                  onTap: () => _openSource(context, 'reviewed_for_learning'),
+                ),
+                _SourceTile(
                   key: const Key('local-source-my-mix-tile'),
                   label: 'Mein Mix',
                   subtitle: 'Lokal vorbereitet',
@@ -96,11 +105,20 @@ class LocalLearningSourcesScreen extends ConsumerWidget {
   }
 
   static void _openSource(BuildContext context, String sourceKey) {
+    final source = LocalLearningSource.fromWordHubKey(sourceKey);
     Navigator.of(context).push(
       MaterialPageRoute(
         settings: RouteSettings(name: 'local-source-detail-$sourceKey'),
-        builder: (_) =>
-            LocalLearningSourceDetailScreen(initialSourceKey: sourceKey),
+        builder: (_) {
+          if (source == LocalLearningSource.knownWords ||
+              source == LocalLearningSource.reviewedForLearning) {
+            return LocalWordListScreen(
+              categoryId: source!.id,
+              title: source.label,
+            );
+          }
+          return LocalLearningSourceDetailScreen(initialSourceKey: sourceKey);
+        },
       ),
     );
   }

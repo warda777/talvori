@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/features/home/application/v_icon_controller.dart';
 import 'package:talvori/features/home/application/application.dart';
-import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
 class TopLeftButton extends ConsumerStatefulWidget {
   final Widget icon;
@@ -50,37 +49,30 @@ class _TopLeftButtonState extends ConsumerState<TopLeftButton>
     return SizedBox.square(
       dimension: dim,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
         onVerticalDragEnd: (d) => _c.handleVerticalDragEnd(d, context),
-        child: TapFlash(
-          color: TopLeftButton.gold,
-          shape: BoxShape.circle,
-          maxOpacity: 1.0,
-          blur: 28,
-          spread: 6,
-          duration: const Duration(milliseconds: 220),
-          onTapAfter: widget.onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              color: TopLeftButton.buttonColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: TopLeftButton.gold, width: 2),
-              boxShadow: glowEnabled
-                  ? [
-                      BoxShadow(
-                        color: TopLeftButton.gold.withValues(alpha: 0.42),
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
-            ),
-            alignment: Alignment.center,
-            child: AnimatedBuilder(
-              animation: _c.rotation,
-              builder: (_, child) =>
-                  Transform.rotate(angle: _c.angleRad, child: child),
-              child: widget.icon,
-            ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: TopLeftButton.buttonColor,
+            shape: BoxShape.circle,
+            border: Border.all(color: TopLeftButton.gold, width: 2),
+            boxShadow: glowEnabled
+                ? [
+                    BoxShadow(
+                      color: TopLeftButton.gold.withValues(alpha: 0.42),
+                      blurRadius: 20,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
+          ),
+          alignment: Alignment.center,
+          child: AnimatedBuilder(
+            animation: _c.rotation,
+            builder: (_, child) =>
+                Transform.rotate(angle: _c.angleRad, child: child),
+            child: widget.icon,
           ),
         ),
       ),

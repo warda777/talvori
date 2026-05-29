@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalDatabaseSchema {
   const LocalDatabaseSchema._();
 
-  static const int version = 5;
+  static const int version = 6;
 
   static Future<void> createV1(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
@@ -225,6 +225,11 @@ END
     await ensureWordWorldMembershipStatusSchema(db);
   }
 
+  static Future<void> migrateV5ToV6(Database db) async {
+    await ensureWordWorldMembershipsSchema(db);
+    await ensureWordWorldMembershipReviewSchema(db);
+  }
+
   static Future<void> createWordSourcesTable(Database db) async {
     await db.execute('''
 CREATE TABLE IF NOT EXISTS word_sources (
@@ -252,6 +257,7 @@ CREATE TABLE IF NOT EXISTS word_world_memberships (
   created_at TEXT NOT NULL,
   is_disabled INTEGER NOT NULL DEFAULT 0,
   is_known INTEGER NOT NULL DEFAULT 0,
+  is_reviewed_for_learning INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (word_id, category_id),
   FOREIGN KEY (word_id) REFERENCES words (id),
   FOREIGN KEY (category_id) REFERENCES categories (id)
@@ -276,6 +282,15 @@ CREATE TABLE IF NOT EXISTS word_world_memberships (
       db,
       'word_world_memberships',
       'is_known',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+  }
+
+  static Future<void> ensureWordWorldMembershipReviewSchema(Database db) async {
+    await _addColumnIfMissing(
+      db,
+      'word_world_memberships',
+      'is_reviewed_for_learning',
       'INTEGER NOT NULL DEFAULT 0',
     );
   }

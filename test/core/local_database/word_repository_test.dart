@@ -1158,6 +1158,113 @@ CREATE TABLE words (
       expect(await repository.countKnownWords(), 1);
     });
 
+    test(
+      'reviewed_for_learning_words_are_persistent_and_exclude_known_words',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+          sortOrder: 1,
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+          sortOrder: 2,
+        );
+        final repository = WordRepository(database: db);
+        await repository.addWordWorldMembership(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+        await repository.addWordWorldMembership(
+          wordId: 'word-hotel',
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+
+        await repository.markReviewedForLearning(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+        );
+        await repository.markReviewedForLearning(
+          wordId: 'word-hotel',
+          categoryId: 'category-travel',
+        );
+
+        expect(await repository.countReviewedForLearningWords(), 2);
+        expect(
+          (await repository.loadReviewedForLearningWords()).map(
+            (word) => word.id,
+          ),
+          ['word-ticket', 'word-hotel'],
+        );
+
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-ticket',
+          categoryId: 'category-travel',
+          known: true,
+        );
+
+        expect(await repository.countKnownWords(), 1);
+        expect(await repository.countReviewedForLearningWords(), 1);
+        expect(
+          (await repository.loadReviewedForLearningWords()).map(
+            (word) => word.id,
+          ),
+          ['word-hotel'],
+        );
+      },
+    );
+
+    test(
+      'reviewed_for_learning_words_are_distinct_across_memberships',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedCategory(db, id: 'category-travel', name: 'Travel');
+        await seedCategory(db, id: 'category-health', name: 'Health');
+        await seedWord(
+          db,
+          id: 'word-water',
+          categoryId: 'category-basics',
+          term: 'water',
+          translation: 'Wasser',
+        );
+        final repository = WordRepository(database: db);
+        for (final categoryId in ['category-travel', 'category-health']) {
+          await repository.addWordWorldMembership(
+            wordId: 'word-water',
+            categoryId: categoryId,
+            createdAt: now,
+          );
+          await repository.markReviewedForLearning(
+            wordId: 'word-water',
+            categoryId: categoryId,
+          );
+        }
+
+        expect(await repository.countReviewedForLearningWords(), 1);
+        expect(
+          (await repository.loadReviewedForLearningWords()).map(
+            (word) => word.id,
+          ),
+          ['word-water'],
+        );
+      },
+    );
+
     test('known_words_are_distinct_across_multiple_memberships', () async {
       final db = await openSchemaDatabase();
       addTearDown(db.close);
@@ -1251,6 +1358,7 @@ CREATE TABLE words (
           ('word-active', 'active'),
           ('word-known', 'known'),
           ('word-disabled', 'disabled'),
+          ('word-reviewed', 'reviewed'),
         ]) {
           await seedWord(
             db,
@@ -1261,7 +1369,12 @@ CREATE TABLE words (
           );
         }
         final repository = WordRepository(database: db);
-        for (final wordId in ['word-active', 'word-known', 'word-disabled']) {
+        for (final wordId in [
+          'word-active',
+          'word-known',
+          'word-disabled',
+          'word-reviewed',
+        ]) {
           await repository.addWordWorldMembership(
             wordId: wordId,
             categoryId: 'category-travel',
@@ -1278,12 +1391,174 @@ CREATE TABLE words (
           categoryId: 'category-travel',
           disabled: true,
         );
+        await repository.markReviewedForLearning(
+          wordId: 'word-reviewed',
+          categoryId: 'category-travel',
+        );
 
         final reviewWords = await repository.loadUnknownWordsForReview(
           categoryId: 'category-travel',
         );
 
         expect(reviewWords.map((word) => word.id), ['word-active']);
+        final stats = await repository.loadWordWorldReviewStats(
+          categoryId: 'category-travel',
+        );
+        expect(stats.totalCount, 4);
+        expect(stats.unknownCount, 1);
+        expect(stats.reviewedCount, 1);
+        expect(stats.knownCount, 1);
+        expect(stats.disabledCount, 1);
+        expect(stats.isCompleted, isFalse);
+      },
+    );
+
+    test('category_review_reset_and_restart_update_membership_flags', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedCategory(db, id: 'category-travel', name: 'Travel');
+      for (final entry in [
+        ('word-ticket', 'ticket'),
+        ('word-hotel', 'hotel'),
+      ]) {
+        await seedWord(
+          db,
+          id: entry.$1,
+          categoryId: 'category-basics',
+          term: entry.$2,
+          translation: entry.$2,
+        );
+      }
+      final repository = WordRepository(database: db);
+      for (final wordId in ['word-ticket', 'word-hotel']) {
+        await repository.addWordWorldMembership(
+          wordId: wordId,
+          categoryId: 'category-travel',
+          createdAt: now,
+        );
+      }
+      await repository.markReviewedForLearning(
+        wordId: 'word-ticket',
+        categoryId: 'category-travel',
+      );
+      await repository.setWordWorldMembershipKnown(
+        wordId: 'word-hotel',
+        categoryId: 'category-travel',
+        known: true,
+      );
+      var stats = await repository.loadWordWorldReviewStats(
+        categoryId: 'category-travel',
+      );
+      expect(stats.isCompleted, isTrue);
+
+      await repository.restartCategoryReview(categoryId: 'category-travel');
+
+      expect(await repository.countKnownWords(), 1);
+      expect(await repository.countReviewedForLearningWords(), 0);
+      expect(
+        (await repository.loadUnknownWordsForReview(
+          categoryId: 'category-travel',
+        )).map((word) => word.id),
+        ['word-ticket'],
+      );
+
+      await repository.resetCategoryReview(categoryId: 'category-travel');
+
+      expect(await repository.countKnownWords(), 0);
+      expect(await repository.countReviewedForLearningWords(), 0);
+      expect(
+        (await repository.loadUnknownWordsForReview(
+          categoryId: 'category-travel',
+        )).map((word) => word.id),
+        ['word-hotel', 'word-ticket'],
+      );
+    });
+
+    test(
+      'membership actions create missing membership rows before updating flags',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+        );
+        final repository = WordRepository(database: db);
+
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-ticket',
+          categoryId: 'category-basics',
+          known: true,
+        );
+        await repository.markReviewedForLearning(
+          wordId: 'word-hotel',
+          categoryId: 'category-basics',
+        );
+
+        expect(await repository.countKnownWords(), 1);
+        expect(await repository.countReviewedForLearningWords(), 1);
+        expect((await repository.loadKnownWords()).map((word) => word.id), [
+          'word-ticket',
+        ]);
+        expect(
+          (await repository.loadReviewedForLearningWords()).map(
+            (word) => word.id,
+          ),
+          ['word-hotel'],
+        );
+      },
+    );
+
+    test(
+      'ensuring category memberships keeps fallback review words filterable',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+          sortOrder: 1,
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+          sortOrder: 2,
+        );
+        final repository = WordRepository(database: db);
+
+        await repository.ensureWordWorldMembershipsForCategory(
+          categoryId: 'category-basics',
+        );
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-ticket',
+          categoryId: 'category-basics',
+          known: true,
+        );
+
+        final reviewWords = await repository.loadUnknownWordsForReview(
+          categoryId: 'category-basics',
+        );
+
+        expect(reviewWords.map((word) => word.id), ['word-hotel']);
       },
     );
 
@@ -1319,6 +1594,84 @@ CREATE TABLE words (
       expect(await repository.loadKnownWords(), isEmpty);
       final reviewWords = await repository.loadUnknownWordsForReview(
         categoryId: 'category-travel',
+      );
+      expect(reviewWords.map((word) => word.id), ['word-ticket']);
+    });
+
+    test(
+      'reviewed_for_learning_filter_loads_reviewed_active_words_only',
+      () async {
+        final db = await openSchemaDatabase();
+        addTearDown(db.close);
+        await seedCategory(db, id: 'category-basics', name: 'Basics');
+        await seedWord(
+          db,
+          id: 'word-ticket',
+          categoryId: 'category-basics',
+          term: 'ticket',
+          translation: 'Fahrkarte',
+          sortOrder: 1,
+        );
+        await seedWord(
+          db,
+          id: 'word-hotel',
+          categoryId: 'category-basics',
+          term: 'hotel',
+          translation: 'Hotel',
+          sortOrder: 2,
+        );
+        final repository = WordRepository(database: db);
+        await repository.ensureWordWorldMembershipsForCategory(
+          categoryId: 'category-basics',
+        );
+        await repository.markReviewedForLearning(
+          wordId: 'word-ticket',
+          categoryId: 'category-basics',
+        );
+        await repository.markReviewedForLearning(
+          wordId: 'word-hotel',
+          categoryId: 'category-basics',
+        );
+        await repository.setWordWorldMembershipKnown(
+          wordId: 'word-hotel',
+          categoryId: 'category-basics',
+          known: true,
+        );
+
+        final reviewedWords = await repository.loadReviewedForLearningWords();
+
+        expect(reviewedWords.map((word) => word.id), ['word-ticket']);
+        expect(await repository.countReviewedForLearningWords(), 1);
+      },
+    );
+
+    test('restore_reviewed_for_learning_everywhere_reopens_review_word', () async {
+      final db = await openSchemaDatabase();
+      addTearDown(db.close);
+      await seedCategory(db, id: 'category-basics', name: 'Basics');
+      await seedWord(
+        db,
+        id: 'word-ticket',
+        categoryId: 'category-basics',
+        term: 'ticket',
+        translation: 'Fahrkarte',
+      );
+      final repository = WordRepository(database: db);
+      await repository.ensureWordWorldMembershipsForCategory(
+        categoryId: 'category-basics',
+      );
+      await repository.markReviewedForLearning(
+        wordId: 'word-ticket',
+        categoryId: 'category-basics',
+      );
+
+      await repository.restoreReviewedForLearningEverywhere(
+        wordId: 'word-ticket',
+      );
+
+      expect(await repository.loadReviewedForLearningWords(), isEmpty);
+      final reviewWords = await repository.loadUnknownWordsForReview(
+        categoryId: 'category-basics',
       );
       expect(reviewWords.map((word) => word.id), ['word-ticket']);
     });

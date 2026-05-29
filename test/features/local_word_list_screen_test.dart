@@ -84,6 +84,7 @@ void main() {
     TranslationStatus translationStatus = TranslationStatus.translated,
     String? translationError,
     bool isDisabledForCategory = false,
+    bool isKnownForCategory = false,
   }) {
     final now = DateTime(2026, 1, 1);
     return LocalWord(
@@ -98,6 +99,7 @@ void main() {
       sortOrder: 0,
       isArchived: false,
       isDisabledForCategory: isDisabledForCategory,
+      isKnownForCategory: isKnownForCategory,
       createdAt: now,
       updatedAt: now,
     );
@@ -495,6 +497,68 @@ void main() {
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('local_word_list_screen_shows_known_word_status', (tester) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-known',
+          term: 'street',
+          translation: 'Straße',
+          isKnownForCategory: true,
+        ),
+      ],
+    );
+
+    expect(find.text('street'), findsOneWidget);
+    expect(find.text('Straße'), findsOneWidget);
+    expect(find.text('Kenn ich'), findsOneWidget);
+    expect(find.text('Pausiert'), findsNothing);
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(
+                const ValueKey('local-word-list-active-toggle-word-known'),
+              ),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
+      Icons.school_rounded,
+    );
+  });
+
+  testWidgets('known status has visual priority over paused status', (
+    tester,
+  ) async {
+    await pumpLocalWordList(
+      tester,
+      words: [
+        localWord(
+          id: 'word-known-paused',
+          term: 'rest',
+          translation: 'Ruhe',
+          isKnownForCategory: true,
+          isDisabledForCategory: true,
+        ),
+      ],
+    );
+
+    expect(find.text('rest'), findsOneWidget);
+    expect(find.text('Kenn ich'), findsOneWidget);
+    expect(find.text('Pausiert'), findsNothing);
+    final icon = tester.widget<Icon>(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey('local-word-list-active-toggle-word-known-paused'),
+        ),
+        matching: find.byType(Icon),
+      ),
+    );
+    expect(icon.icon, Icons.school_rounded);
   });
 
   testWidgets('local_word_list_screen_shows_empty_state', (tester) async {

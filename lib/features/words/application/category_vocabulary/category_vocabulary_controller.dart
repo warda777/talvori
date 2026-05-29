@@ -210,15 +210,81 @@ class CategoryVocabularyController extends Notifier<CategoryVocabularyState> {
     _invalidateCategory(categoryId);
   }
 
+  Future<void> restoreKnownEverywhere({required LocalWord word}) async {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    final repository = bootstrap.repositoryFactory.wordRepository;
+    final categoryIds = await repository.loadKnownCategoryIdsForWord(
+      wordId: word.id,
+    );
+    await repository.restoreKnownWordEverywhere(wordId: word.id);
+    if (categoryIds.isEmpty) {
+      _invalidateKnownSources();
+      return;
+    }
+    for (final categoryId in categoryIds) {
+      _invalidateCategory(categoryId);
+    }
+  }
+
+  Future<void> restoreReviewedForLearningEverywhere({
+    required LocalWord word,
+  }) async {
+    final bootstrap = await ref.read(localBootstrapProvider.future);
+    await bootstrap.repositoryFactory.wordRepository
+        .restoreReviewedForLearningEverywhere(wordId: word.id);
+    _invalidateReviewedForLearningSources();
+  }
+
   void _invalidateCategory(String categoryId) {
     ref
       ..invalidate(localWordsForCategoryProvider(categoryId))
       ..invalidate(
         localWordsForCategoryProvider(LocalLearningSource.knownWords.id),
       )
+      ..invalidate(
+        localWordsForCategoryProvider(
+          LocalLearningSource.reviewedForLearning.id,
+        ),
+      )
       ..invalidate(localWordsForSourceProvider(LocalLearningSource.knownWords))
+      ..invalidate(
+        localWordsForSourceProvider(LocalLearningSource.reviewedForLearning),
+      )
       ..invalidate(localWordCountProvider(categoryId))
       ..invalidate(localWordCountProvider(LocalLearningSource.knownWords.id))
+      ..invalidate(
+        localWordCountProvider(LocalLearningSource.reviewedForLearning.id),
+      )
+      ..invalidate(localStageCountsProvider)
+      ..invalidate(localStageInspectorProvider)
+      ..invalidate(localPracticeCardsProvider);
+  }
+
+  void _invalidateKnownSources() {
+    ref
+      ..invalidate(
+        localWordsForCategoryProvider(LocalLearningSource.knownWords.id),
+      )
+      ..invalidate(localWordsForSourceProvider(LocalLearningSource.knownWords))
+      ..invalidate(localWordCountProvider(LocalLearningSource.knownWords.id))
+      ..invalidate(localStageCountsProvider)
+      ..invalidate(localStageInspectorProvider)
+      ..invalidate(localPracticeCardsProvider);
+  }
+
+  void _invalidateReviewedForLearningSources() {
+    ref
+      ..invalidate(
+        localWordsForCategoryProvider(
+          LocalLearningSource.reviewedForLearning.id,
+        ),
+      )
+      ..invalidate(
+        localWordsForSourceProvider(LocalLearningSource.reviewedForLearning),
+      )
+      ..invalidate(
+        localWordCountProvider(LocalLearningSource.reviewedForLearning.id),
+      )
       ..invalidate(localStageCountsProvider)
       ..invalidate(localStageInspectorProvider)
       ..invalidate(localPracticeCardsProvider);

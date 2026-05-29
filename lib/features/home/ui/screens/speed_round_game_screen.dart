@@ -420,6 +420,7 @@ class GameWordSource {
         LocalLearningSource.favorites => 'Favoriten',
         LocalLearningSource.myMix => 'Mix',
         LocalLearningSource.knownWords => 'Bekannte',
+        LocalLearningSource.reviewedForLearning => 'Weiter',
       },
       source: source,
       categoryId: null,

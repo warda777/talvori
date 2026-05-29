@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talvori/core/local_database/models/local_learning_source.dart';
 import 'package:talvori/core/local_database/models/local_word_package_definition.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/screens/mix_builder_screen.dart';
 import 'package:talvori/features/words/ui/screens/word_hub_screen.dart';
 import 'package:talvori/features/words/ui/screens/category_detail_screen.dart';
@@ -26,8 +28,19 @@ void _openLocalSource(
         .push(
           MaterialPageRoute(
             settings: RouteSettings(name: 'local-source-detail-$sourceKey'),
-            builder: (_) =>
-                LocalLearningSourceDetailScreen(initialSourceKey: sourceKey),
+            builder: (_) {
+              final source = LocalLearningSource.fromWordHubKey(sourceKey);
+              if (source == LocalLearningSource.knownWords ||
+                  source == LocalLearningSource.reviewedForLearning) {
+                return LocalWordListScreen(
+                  categoryId: source!.id,
+                  title: source.label,
+                );
+              }
+              return LocalLearningSourceDetailScreen(
+                initialSourceKey: sourceKey,
+              );
+            },
           ),
         )
         .then((_) => onReturn?.call()),
@@ -464,10 +477,25 @@ Future<void> showCategoryPopup({
             onTapBefore: () => _openLocalSource(context, 'known_words'),
             onTapAfter: () async {},
             title: 'Wörter, die ich kenne',
-            subtitle: 'Gemeisterte Wörter aus deinem Fortschritt',
+            subtitle: 'Deine bekannte Wörter als Filterliste',
             icon: Icons.verified_rounded,
             accentColor: CategoryStrokeColors.colorForMainWordSource(
               'known_words',
+            ),
+          ),
+          const SizedBox(height: 12),
+          countedTile(
+            key: const Key('category-popup-reviewed-for-learning-tile'),
+            context: context,
+            countId: 'local-source-reviewed-for-learning',
+            onTapBefore: () =>
+                _openLocalSource(context, 'reviewed_for_learning'),
+            onTapAfter: () async {},
+            title: 'Noch zu lernen',
+            subtitle: 'Geprüfte Wörter, die weiter aktiv bleiben',
+            icon: Icons.trending_up_rounded,
+            accentColor: CategoryStrokeColors.colorForMainWordSource(
+              'reviewed_for_learning',
             ),
           ),
           const SizedBox(height: 12),

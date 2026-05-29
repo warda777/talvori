@@ -50,6 +50,7 @@ void main() {
               LocalLearningSource.myWords => words,
               LocalLearningSource.favorites => [words.first],
               LocalLearningSource.knownWords => [words.first, words.last],
+              LocalLearningSource.reviewedForLearning => [words.last],
               LocalLearningSource.myMix => [words.first],
             };
           }),

@@ -138,7 +138,9 @@ const _englishWordHubGroupNames = <String, String>{
 
 const _germanWordHubItemNames = <String, String>{
   'health_fitness': 'Gesundheit & Fitness',
+  'health_and_fitness': 'Gesundheit & Fitness',
   'home_living': 'Zuhause & Alltag',
+  'home_and_living': 'Zuhause & Alltag',
   'food_cooking': 'Essen & Kochen',
   'style_fashion': 'Stil & Mode',
   'money_shopping': 'Geld & Einkaufen',
@@ -165,6 +167,7 @@ const _germanWordHubItemNames = <String, String>{
   'work_careers': 'Arbeit & Karriere',
   'top_500': 'Top 500 Wörter',
   'top 500 words': 'Top 500 Wörter',
+  'basics': 'Grundlagen',
   'phrases_idioms': 'Redewendung',
   'phrases & idioms': 'Redewendung',
   'irregular_verbs': 'Unregelmäßige Verben',
@@ -181,7 +184,9 @@ const _germanWordHubItemNames = <String, String>{
 
 const _englishWordHubItemNames = <String, String>{
   'health_fitness': 'Health & Fitness',
+  'health_and_fitness': 'Health & Fitness',
   'home_living': 'Home & Living',
+  'home_and_living': 'Home & Living',
   'food_cooking': 'Food & Cooking',
   'style_fashion': 'Style & Fashion',
   'money_shopping': 'Money & Shopping',
@@ -208,6 +213,7 @@ const _englishWordHubItemNames = <String, String>{
   'work_careers': 'Work & Careers',
   'top_500': 'Top 500 Words',
   'top 500 words': 'Top 500 Words',
+  'basics': 'Basics',
   'phrases_idioms': 'Phrases & Idioms',
   'phrases & idioms': 'Phrases & Idioms',
   'irregular_verbs': 'Irregular Verbs',

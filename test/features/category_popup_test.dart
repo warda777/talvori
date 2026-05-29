@@ -9,6 +9,7 @@ import 'package:talvori/features/home/ui/widgets/category_popup.dart';
 import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 import 'package:talvori/features/words/application/sort/category_stroke_colors.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 
 void main() {
@@ -87,6 +88,7 @@ void main() {
       const Key('category-popup-my-words-tile'),
       const Key('category-popup-favorites-tile'),
       const Key('category-popup-known-words-tile'),
+      const Key('category-popup-reviewed-for-learning-tile'),
       const Key('category-popup-my-mix-tile'),
       const Key('category-popup-language-tools-tile'),
       const Key('category-popup-all-words-tile'),
@@ -104,6 +106,7 @@ void main() {
       Key('category-popup-my-words-tile'),
       Key('category-popup-favorites-tile'),
       Key('category-popup-known-words-tile'),
+      Key('category-popup-reviewed-for-learning-tile'),
       Key('category-popup-my-mix-tile'),
       Key('category-popup-language-tools-tile'),
       Key('category-popup-all-words-tile'),
@@ -120,9 +123,9 @@ void main() {
       CategoryStrokeColors.colorForMainWordSource('my_words'),
       CategoryStrokeColors.colorForMainWordSource('favorites'),
       CategoryStrokeColors.colorForMainWordSource('known_words'),
+      CategoryStrokeColors.colorForMainWordSource('reviewed_for_learning'),
       CategoryStrokeColors.colorForMainWordSource('my_mix'),
       CategoryStrokeColors.colorForMainWordSource('language_tools'),
-      CategoryStrokeColors.colorForMainWordSource('all_words'),
     ]);
     expect(mainTileColors.toSet(), hasLength(mainTileColors.length));
   });
@@ -395,6 +398,7 @@ void main() {
       'Favoriten',
       'Meine Wörter',
       'Wörter, die ich kenne',
+      'Noch zu lernen',
       'Mein Mix',
     ]);
     expect(wheel.initialIndex, 2);
@@ -423,6 +427,7 @@ void main() {
       (Key('category-popup-all-words-tile'), 'Alle Wörter'),
       (Key('category-popup-favorites-tile'), 'Favoriten'),
       (Key('category-popup-known-words-tile'), 'Wörter, die ich kenne'),
+      (Key('category-popup-reviewed-for-learning-tile'), 'Noch zu lernen'),
       (Key('category-popup-my-mix-tile'), 'Mein Mix'),
     ]) {
       await tester.pumpWidget(const SizedBox.shrink());
@@ -466,7 +471,18 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
 
-      expect(find.byType(LocalLearningSourceDetailScreen), findsOneWidget);
+      final opensFilterList =
+          entry.$1 == const Key('category-popup-known-words-tile') ||
+          entry.$1 ==
+              const Key('category-popup-reviewed-for-learning-tile');
+      expect(
+        find.byType(LocalLearningSourceDetailScreen),
+        opensFilterList ? findsNothing : findsOneWidget,
+      );
+      expect(
+        find.byType(LocalWordListScreen),
+        opensFilterList ? findsOneWidget : findsNothing,
+      );
       expect(find.text(entry.$2), findsWidgets);
       expect(find.text('All Words'), findsNothing);
       expect(find.text('My words'), findsNothing);

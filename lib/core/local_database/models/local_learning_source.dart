@@ -19,6 +19,11 @@ enum LocalLearningSource {
     wordHubKey: 'known_words',
     label: 'Wörter, die ich kenne',
   ),
+  reviewedForLearning(
+    id: 'local-source-reviewed-for-learning',
+    wordHubKey: 'reviewed_for_learning',
+    label: 'Noch zu lernen',
+  ),
   myMix(id: 'local-source-my-mix', wordHubKey: 'my_mix', label: 'Mein Mix');
 
   const LocalLearningSource({

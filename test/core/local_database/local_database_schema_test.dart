@@ -89,9 +89,66 @@ void main() {
       );
       expect(
         membershipColumns.map((row) => row['name']),
-        containsAll({'is_disabled', 'is_known'}),
+        containsAll({'is_disabled', 'is_known', 'is_reviewed_for_learning'}),
       );
     });
+
+    test(
+      'migration_v5_to_v6_adds_reviewed_for_learning_default_column',
+      () async {
+        final db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
+        addTearDown(db.close);
+        await db.execute('''
+CREATE TABLE categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+)
+''');
+        await db.execute('''
+CREATE TABLE words (
+  id TEXT PRIMARY KEY,
+  category_id TEXT NOT NULL,
+  term TEXT NOT NULL,
+  translation TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+)
+''');
+        await db.execute('''
+CREATE TABLE word_world_memberships (
+  word_id TEXT NOT NULL,
+  category_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  is_disabled INTEGER NOT NULL DEFAULT 0,
+  is_known INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (word_id, category_id)
+)
+''');
+        await LocalDatabaseSchema.migrateV5ToV6(db);
+        await LocalDatabaseSchema.migrateV5ToV6(db);
+
+        final membershipColumns = await db.rawQuery(
+          'PRAGMA table_info(word_world_memberships)',
+        );
+        expect(
+          membershipColumns.map((row) => row['name']),
+          contains('is_reviewed_for_learning'),
+        );
+
+        await insertCategory(db);
+        await insertWord(db);
+        await db.insert('word_world_memberships', {
+          'word_id': 'word-1',
+          'category_id': 'category-1',
+          'created_at': '2026-05-13T10:00:00.000',
+        });
+
+        final rows = await db.query('word_world_memberships');
+        expect(rows.single['is_reviewed_for_learning'], 0);
+      },
+    );
 
     test('word_world_memberships_is_unique_per_word_and_category', () async {
       final db = await openSchemaDatabase();

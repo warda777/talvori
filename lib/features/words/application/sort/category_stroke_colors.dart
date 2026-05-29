@@ -9,6 +9,7 @@ class CategoryStrokeColors {
   static const myWords = Color(0xFFB36BFF);
   static const favorites = Color(0xFFFF4B9A);
   static const knownWords = Color(0xFF36F58A);
+  static const reviewedForLearning = Color(0xFF82EAFF);
   static const myMix = Color(0xFFFFD45D);
   static const languageTools = Color(0xFFFF9A4D);
   static const allWords = Color(0xFFE7F3FF);
@@ -91,6 +92,7 @@ class CategoryStrokeColors {
       'my_words' => myWords,
       'favorites' => favorites,
       'known_words' => knownWords,
+      'reviewed_for_learning' => reviewedForLearning,
       'my_mix' => myMix,
       'language_tools' => languageTools,
       'all_words' => allWords,

@@ -438,6 +438,10 @@ class _LocalWordCard extends ConsumerWidget {
       word.translationStatus,
     );
     final isDisabled = word.isDisabledForCategory;
+    final isKnown = word.isKnownForCategory;
+    final isReviewedForLearning =
+        categoryId == LocalLearningSource.reviewedForLearning.id;
+    final isInactive = isDisabled || isKnown;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -449,12 +453,14 @@ class _LocalWordCard extends ConsumerWidget {
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             decoration: BoxDecoration(
-              color: isDisabled
+              color: isInactive
                   ? const Color(0xFF0A0A0D)
                   : const Color(0xFF0E0F14),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: isDisabled
+                color: isKnown
+                    ? const Color(0xFF91F7B5)
+                    : isDisabled
                     ? const Color(0xFF555A66)
                     : const Color(0xFF2F557D),
                 width: 1,
@@ -506,7 +512,11 @@ class _LocalWordCard extends ConsumerWidget {
                         const SizedBox(height: 10),
                         _TranslationStatusBadge(data: statusBadge),
                       ],
-                      if (isDisabled) ...[
+                      if (isKnown) ...[
+                        const SizedBox(height: 10),
+                        const _WordKnownBadge(),
+                      ],
+                      if (isDisabled && !isKnown) ...[
                         const SizedBox(height: 10),
                         const _WordDisabledBadge(),
                       ],
@@ -540,15 +550,27 @@ class _LocalWordCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     IconButton(
                       key: ValueKey('local-word-list-active-toggle-${word.id}'),
-                      tooltip: isDisabled
+                      tooltip: isKnown
+                          ? 'Wieder lernen'
+                          : isReviewedForLearning
+                          ? 'Wieder prüfen'
+                          : isDisabled
                           ? 'Für Lernmodus aktivieren'
                           : 'Im Lernmodus pausieren',
                       onPressed: () => _toggleActive(context, ref),
                       icon: Icon(
-                        isDisabled
+                        isKnown
+                            ? Icons.school_rounded
+                            : isReviewedForLearning
+                            ? Icons.restart_alt_rounded
+                            : isDisabled
                             ? Icons.visibility_off_rounded
                             : Icons.visibility_rounded,
-                        color: isDisabled
+                        color: isKnown
+                            ? const Color(0xFF91F7B5)
+                            : isReviewedForLearning
+                            ? const Color(0xFF82EAFF)
+                            : isDisabled
                             ? const Color(0xFFFFD166)
                             : const Color(0xFF91F7B5),
                         size: 22,
@@ -557,7 +579,11 @@ class _LocalWordCard extends ConsumerWidget {
                         fixedSize: const Size(38, 38),
                         backgroundColor: const Color(0xFF0B1820),
                         side: BorderSide(
-                          color: isDisabled
+                          color: isKnown
+                              ? const Color(0xFF91F7B5)
+                              : isReviewedForLearning
+                              ? const Color(0xFF82EAFF)
+                              : isDisabled
                               ? const Color(0xFFFFD166)
                               : const Color(0xFF91F7B5),
                           width: 1,
@@ -594,15 +620,34 @@ class _LocalWordCard extends ConsumerWidget {
   }
 
   Future<void> _toggleActive(BuildContext context, WidgetRef ref) async {
-    final disabled = !word.isDisabledForCategory;
     try {
-      await ref
-          .read(categoryVocabularyControllerProvider.notifier)
-          .setDisabled(categoryId: categoryId, word: word, disabled: disabled);
+      final controller = ref.read(
+        categoryVocabularyControllerProvider.notifier,
+      );
+      if (word.isKnownForCategory) {
+        if (categoryId == LocalLearningSource.knownWords.id) {
+          await controller.restoreKnownEverywhere(word: word);
+        } else {
+          await controller.restoreKnown(categoryId: categoryId, word: word);
+        }
+      } else if (categoryId == LocalLearningSource.reviewedForLearning.id) {
+        await controller.restoreReviewedForLearningEverywhere(word: word);
+      } else {
+        final disabled = !word.isDisabledForCategory;
+        await controller.setDisabled(
+          categoryId: categoryId,
+          word: word,
+          disabled: disabled,
+        );
+      }
       if (!context.mounted) return;
       TalvoriSnackBar.show(
         context,
-        message: disabled
+        message: categoryId == LocalLearningSource.reviewedForLearning.id
+            ? 'Wort ist wieder im Prüfmodus offen.'
+            : word.isKnownForCategory
+            ? 'Wort ist wieder im Lernmodus aktiv.'
+            : !word.isDisabledForCategory
             ? 'Wort im Lernmodus pausiert.'
             : 'Wort ist wieder im Lernmodus aktiv.',
         type: TalvoriSnackBarType.success,
@@ -631,6 +676,52 @@ class _LocalWordCard extends ConsumerWidget {
       context,
       message: result.message ?? 'Aussprache nicht verfügbar.',
       type: TalvoriSnackBarType.warning,
+    );
+  }
+}
+
+class _WordKnownBadge extends StatelessWidget {
+  const _WordKnownBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 120.0;
+        return SizedBox(
+          width: maxWidth,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF91F7B5).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: const Color(0xFF91F7B5).withValues(alpha: 0.55),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.school_rounded, color: Color(0xFF91F7B5), size: 14),
+                SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Kenn ich',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Color(0xFF91F7B5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -756,6 +847,8 @@ String _emptyTitleForSource(LocalLearningSource? source) {
       return 'Noch keine Favoriten';
     case LocalLearningSource.knownWords:
       return 'Noch keine bekannten Wörter';
+    case LocalLearningSource.reviewedForLearning:
+      return 'Noch keine Wörter zum Weiterlernen';
     case LocalLearningSource.myMix:
       return 'Noch kein Mix verfügbar';
     case LocalLearningSource.allWords:
@@ -771,6 +864,8 @@ String _emptySubtitleForSource(LocalLearningSource? source) {
       return 'Markiere lokale Wörter als Favorit, damit sie hier erscheinen.';
     case LocalLearningSource.knownWords:
       return 'Bekannte Wörter erscheinen hier, sobald sie lokal gelernt sind.';
+    case LocalLearningSource.reviewedForLearning:
+      return 'Wörter erscheinen hier, sobald du sie in „Wörter prüfen“ weiterlernen lässt.';
     case LocalLearningSource.myMix:
       return 'Füge Favoriten hinzu oder importiere weitere Wörter.';
     case LocalLearningSource.allWords:

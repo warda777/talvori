@@ -39,6 +39,7 @@ import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_sources_screen.dart';
+import 'package:talvori/features/words/ui/screens/local_known_review_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 import 'package:talvori/features/words/ui/widgets/category_wheel.dart';
 
@@ -1201,6 +1202,28 @@ void main() {
     expect(find.text('Statistik'), findsOneWidget);
   });
 
+  testWidgets('home top left V button opens local known review screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-known-review-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(find.byType(LocalKnownReviewScreen), findsOneWidget);
+  });
+
   testWidgets('bottom word games button opens word games directly', (
     tester,
   ) async {
@@ -1828,21 +1851,42 @@ void main() {
       (Key('local-source-favorites-tile'), 'Favoriten'),
       (Key('local-source-my-words-tile'), 'Meine Wörter'),
       (Key('local-source-known-words-tile'), 'Wörter, die ich kenne'),
+      (Key('local-source-reviewed-for-learning-tile'), 'Noch zu lernen'),
       (Key('local-source-my-mix-tile'), 'Mein Mix'),
     ]) {
       await tester.tap(find.byKey(entry.$1));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump();
 
-      expect(find.byType(LocalLearningSourceDetailScreen), findsOneWidget);
+      final opensFilterList =
+          entry.$1 == const Key('local-source-known-words-tile') ||
+          entry.$1 == const Key('local-source-reviewed-for-learning-tile');
+      expect(
+        find.byType(LocalLearningSourceDetailScreen),
+        opensFilterList ? findsNothing : findsOneWidget,
+      );
+      expect(
+        find.byType(LocalWordListScreen),
+        opensFilterList ? findsOneWidget : findsNothing,
+      );
       expect(find.text(entry.$2), findsWidgets);
-      final wheel = tester.widget<CategoryWheel>(find.byType(CategoryWheel));
-      expect(wheel.categories, const [
-        'Alle Wörter',
-        'Favoriten',
-        'Meine Wörter',
-        'Wörter, die ich kenne',
-        'Mein Mix',
-      ]);
+      if (!opensFilterList) {
+        final wheel = tester.widget<CategoryWheel>(find.byType(CategoryWheel));
+        expect(wheel.categories, const [
+          'Alle Wörter',
+          'Favoriten',
+          'Meine Wörter',
+          'Wörter, die ich kenne',
+          'Noch zu lernen',
+          'Mein Mix',
+        ]);
+        wheel.onChanged(1, 'Favoriten');
+        await tester.pump();
+        final updatedWheel = tester.widget<CategoryWheel>(
+          find.byType(CategoryWheel),
+        );
+        expect(updatedWheel.initialIndex, 1);
+      }
       expect(find.text('Übungsmodus'), findsNothing);
       expect(find.text('All Words'), findsNothing);
       expect(find.text('My words'), findsNothing);
@@ -1850,15 +1894,12 @@ void main() {
       expect(find.text('Words I know'), findsNothing);
       expect(find.text('My mix'), findsNothing);
 
-      wheel.onChanged(1, 'Favoriten');
-      await tester.pump();
-      final updatedWheel = tester.widget<CategoryWheel>(
-        find.byType(CategoryWheel),
-      );
-      expect(updatedWheel.initialIndex, 1);
-
       Navigator.of(
-        tester.element(find.byType(LocalLearningSourceDetailScreen)),
+        tester.element(
+          opensFilterList
+              ? find.byType(LocalWordListScreen)
+              : find.byType(LocalLearningSourceDetailScreen),
+        ),
       ).pop();
       await tester.pumpAndSettle();
       expect(find.byType(LocalLearningSourcesScreen), findsOneWidget);

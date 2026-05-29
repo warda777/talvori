@@ -191,7 +191,7 @@ WHERE category_id = ?
 
   Future<List<LocalWord>> loadKnownWords({bool includeArchived = false}) async {
     final rows = await _database.rawQuery('''
-SELECT DISTINCT w.*
+SELECT DISTINCT w.*, 0 AS membership_is_disabled, 1 AS membership_is_known
 FROM words w
 JOIN word_world_memberships m ON m.word_id = w.id
 WHERE m.is_known = 1
@@ -200,6 +200,22 @@ ORDER BY w.sort_order ASC, w.term ASC
 ''');
 
     return rows.map(_mapWord).toList(growable: false);
+  }
+
+  Future<List<String>> loadKnownCategoryIdsForWord({
+    required String wordId,
+  }) async {
+    final rows = await _database.query(
+      'word_world_memberships',
+      columns: ['category_id'],
+      where: 'word_id = ? AND is_known = ?',
+      whereArgs: [wordId, 1],
+      orderBy: 'created_at ASC, category_id ASC',
+    );
+
+    return rows
+        .map((row) => row['category_id']! as String)
+        .toList(growable: false);
   }
 
   Future<List<LocalWord>> loadKnownWordsForCategory({
@@ -225,10 +241,22 @@ ORDER BY w.sort_order ASC, w.term ASC
     required String categoryId,
     bool includeArchived = false,
   }) async {
-    return loadWordsForWordWorld(
-      categoryId: categoryId,
-      includeArchived: includeArchived,
+    final rows = await _database.rawQuery(
+      '''
+SELECT w.*, m.is_disabled AS membership_is_disabled, m.is_known AS membership_is_known
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ?
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+AND m.is_disabled = 0
+AND m.is_known = 0
+AND m.is_reviewed_for_learning = 0
+ORDER BY w.sort_order ASC, w.term ASC
+''',
+      [categoryId],
     );
+
+    return rows.map(_mapWord).toList(growable: false);
   }
 
   Future<List<String>> loadWordIdsForWordWorld({
@@ -307,6 +335,76 @@ ${includeArchived ? '' : 'AND w.is_archived = 0'}
     return rows.single['count'] as int? ?? 0;
   }
 
+  Future<List<LocalWord>> loadReviewedForLearningWords({
+    bool includeArchived = false,
+  }) async {
+    final rows = await _database.rawQuery('''
+SELECT DISTINCT w.*
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.is_reviewed_for_learning = 1 AND m.is_known = 0
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+ORDER BY w.sort_order ASC, w.term ASC
+''');
+
+    return rows.map(_mapWord).toList(growable: false);
+  }
+
+  Future<int> countReviewedForLearningWords({
+    bool includeArchived = false,
+  }) async {
+    final rows = await _database.rawQuery('''
+SELECT COUNT(DISTINCT w.id) AS count
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.is_reviewed_for_learning = 1 AND m.is_known = 0
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+''');
+
+    return rows.single['count'] as int? ?? 0;
+  }
+
+  Future<WordWorldReviewStats> loadWordWorldReviewStats({
+    required String categoryId,
+    bool includeArchived = false,
+  }) async {
+    final rows = await _database.rawQuery(
+      '''
+SELECT
+  COUNT(DISTINCT w.id) AS total_count,
+  COUNT(DISTINCT CASE
+    WHEN m.is_disabled = 0 AND m.is_known = 0 AND m.is_reviewed_for_learning = 0
+    THEN w.id
+  END) AS unknown_count,
+  COUNT(DISTINCT CASE
+    WHEN m.is_reviewed_for_learning = 1 AND m.is_known = 0
+    THEN w.id
+  END) AS reviewed_count,
+  COUNT(DISTINCT CASE
+    WHEN m.is_known = 1
+    THEN w.id
+  END) AS known_count,
+  COUNT(DISTINCT CASE
+    WHEN m.is_disabled = 1
+    THEN w.id
+  END) AS disabled_count
+FROM words w
+JOIN word_world_memberships m ON m.word_id = w.id
+WHERE m.category_id = ?
+${includeArchived ? '' : 'AND w.is_archived = 0'}
+''',
+      [categoryId],
+    );
+    final row = rows.single;
+    return WordWorldReviewStats(
+      totalCount: row['total_count'] as int? ?? 0,
+      unknownCount: row['unknown_count'] as int? ?? 0,
+      reviewedCount: row['reviewed_count'] as int? ?? 0,
+      knownCount: row['known_count'] as int? ?? 0,
+      disabledCount: row['disabled_count'] as int? ?? 0,
+    );
+  }
+
   Future<void> addWordWorldMembership({
     required String wordId,
     required String categoryId,
@@ -318,7 +416,30 @@ ${includeArchived ? '' : 'AND w.is_archived = 0'}
       'created_at': _encodeDateTime(createdAt),
       'is_disabled': 0,
       'is_known': 0,
+      'is_reviewed_for_learning': 0,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<void> ensureWordWorldMembershipsForCategory({
+    required String categoryId,
+    DateTime? createdAt,
+  }) async {
+    final wordIds = await loadWordIdsForCategory(categoryId: categoryId);
+    if (wordIds.isEmpty) return;
+
+    final timestamp = createdAt ?? DateTime.now();
+    final batch = _database.batch();
+    for (final wordId in wordIds) {
+      batch.insert('word_world_memberships', {
+        'word_id': wordId,
+        'category_id': categoryId,
+        'created_at': _encodeDateTime(timestamp),
+        'is_disabled': 0,
+        'is_known': 0,
+        'is_reviewed_for_learning': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<bool> wordWorldMembershipExists({
@@ -382,6 +503,7 @@ ${includeArchived ? '' : 'AND w.is_archived = 0'}
     required String categoryId,
     required bool disabled,
   }) async {
+    await _ensureWordWorldMembership(wordId: wordId, categoryId: categoryId);
     await _database.update(
       'word_world_memberships',
       {'is_disabled': disabled ? 1 : 0},
@@ -395,11 +517,82 @@ ${includeArchived ? '' : 'AND w.is_archived = 0'}
     required String categoryId,
     required bool known,
   }) async {
+    await _ensureWordWorldMembership(wordId: wordId, categoryId: categoryId);
     await _database.update(
       'word_world_memberships',
-      {'is_known': known ? 1 : 0},
+      {'is_known': known ? 1 : 0, if (known) 'is_reviewed_for_learning': 0},
       where: 'word_id = ? AND category_id = ?',
       whereArgs: [wordId, categoryId],
+    );
+  }
+
+  Future<void> markReviewedForLearning({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    await _ensureWordWorldMembership(wordId: wordId, categoryId: categoryId);
+    await _database.update(
+      'word_world_memberships',
+      {'is_reviewed_for_learning': 1},
+      where: 'word_id = ? AND category_id = ? AND is_known = 0',
+      whereArgs: [wordId, categoryId],
+    );
+  }
+
+  Future<bool> isReviewedForLearning({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    final rows = await _database.query(
+      'word_world_memberships',
+      columns: ['is_reviewed_for_learning'],
+      where: 'word_id = ? AND category_id = ?',
+      whereArgs: [wordId, categoryId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return false;
+    return (rows.single['is_reviewed_for_learning'] as int? ?? 0) == 1;
+  }
+
+  Future<void> restoreReviewedForLearning({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    await _ensureWordWorldMembership(wordId: wordId, categoryId: categoryId);
+    await _database.update(
+      'word_world_memberships',
+      {'is_reviewed_for_learning': 0},
+      where: 'word_id = ? AND category_id = ?',
+      whereArgs: [wordId, categoryId],
+    );
+  }
+
+  Future<void> restoreReviewedForLearningEverywhere({
+    required String wordId,
+  }) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_reviewed_for_learning': 0},
+      where: 'word_id = ? AND is_reviewed_for_learning = ?',
+      whereArgs: [wordId, 1],
+    );
+  }
+
+  Future<void> resetCategoryReview({required String categoryId}) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_reviewed_for_learning': 0, 'is_known': 0},
+      where: 'category_id = ?',
+      whereArgs: [categoryId],
+    );
+  }
+
+  Future<void> restartCategoryReview({required String categoryId}) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_reviewed_for_learning': 0},
+      where: 'category_id = ?',
+      whereArgs: [categoryId],
     );
   }
 
@@ -411,6 +604,15 @@ ${includeArchived ? '' : 'AND w.is_archived = 0'}
       wordId: wordId,
       categoryId: categoryId,
       known: false,
+    );
+  }
+
+  Future<void> restoreKnownWordEverywhere({required String wordId}) async {
+    await _database.update(
+      'word_world_memberships',
+      {'is_known': 0},
+      where: 'word_id = ? AND is_known = ?',
+      whereArgs: [wordId, 1],
     );
   }
 
@@ -682,6 +884,23 @@ WHERE category_id = ? AND is_archived = ?
     );
   }
 
+  Future<void> _ensureWordWorldMembership({
+    required String wordId,
+    required String categoryId,
+  }) async {
+    if (await wordWorldMembershipExists(
+      wordId: wordId,
+      categoryId: categoryId,
+    )) {
+      return;
+    }
+    await addWordWorldMembership(
+      wordId: wordId,
+      categoryId: categoryId,
+      createdAt: DateTime.now(),
+    );
+  }
+
   String _encodeDateTime(DateTime value) {
     return value.toIso8601String();
   }
@@ -699,4 +918,22 @@ WHERE category_id = ? AND is_archived = ?
         ? TranslationStatus.pending
         : TranslationStatus.translated;
   }
+}
+
+class WordWorldReviewStats {
+  const WordWorldReviewStats({
+    required this.totalCount,
+    required this.unknownCount,
+    required this.reviewedCount,
+    required this.knownCount,
+    required this.disabledCount,
+  });
+
+  final int totalCount;
+  final int unknownCount;
+  final int reviewedCount;
+  final int knownCount;
+  final int disabledCount;
+
+  bool get isCompleted => totalCount > 0 && unknownCount == 0;
 }
