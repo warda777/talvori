@@ -7,10 +7,10 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 ## 1. App-Identitaet
 
 - [ ] App-Name final: `Talvori`
-- [ ] Untertitel / Kurzbeschreibung final
-- [ ] Langbeschreibung final
-- [ ] Kategorie festgelegt
-- [ ] Keywords / Suchbegriffe vorbereitet
+- [x] Untertitel-/Kurzbeschreibungsentwuerfe vorbereitet
+- [x] Langbeschreibung als Entwurf vorbereitet
+- [x] Kategorie-Empfehlung vorbereitet: primaer Bildung
+- [x] Keywords / Suchbegriffe vorbereitet
 - [ ] App-Icon final geprueft
 - [ ] Bundle ID / Package Name geprueft
 - [ ] Version und Build Number gesetzt
@@ -82,10 +82,12 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Screenshots iPad vorbereitet, falls iPad unterstuetzt
 - [ ] Screenshots Android Phone vorbereitet, falls Android MVP
 - [ ] Feature-Grafik vorbereitet, falls Google Play
-- [ ] Beschreibungstexte konsistent mit tatsaechlichem MVP-Scope
-- [ ] Nicht enthaltene Features nicht als verfuegbar bewerben
+- [x] Store-Metadaten-Draft erstellt: `docs/store_metadata_draft.md`
+- [x] Beschreibungstexte als MVP-Entwurf vorbereitet
+- [x] Nicht-bewerben-Liste erstellt
 - [ ] Preview-/geplante Bereiche in Texten vorsichtig formulieren
-- [ ] Store-Testhinweise fuer Review vorbereitet
+- [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
+- [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori
 
@@ -115,5 +117,6 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Debug-Sichtbarkeit manuell im finalen Release-Build geprueft
 - [ ] Datenschutz-/Support-Links im Store erreichbar und auf echtem Geraet getestet
 - [ ] App-Beschreibung passt zum Build
-- [ ] Testhinweise fuer Store Reviewer ergaenzt
+- [x] Testhinweise fuer Store Reviewer als Entwurf ergaenzt
+- [ ] Store-Metadaten final eingereicht
 - [ ] finale Entscheidung: lokaler Seed oder kontrollierter Content-Paket-Stand

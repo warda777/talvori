@@ -417,6 +417,11 @@ Priorität: hoch, aber nicht weiter Architektur vertiefen
 Ziel:
 
 - Store-Auftritt vorbereiten.
+- Store-Metadaten sind als Entwurf vorbereitet:
+  `docs/store_metadata_draft.md`.
+- Store-Review-Hinweise sind als Entwurf vorbereitet:
+  `docs/store_review_notes_draft.md`.
+- Screenshots und finale Store-Einreichung bleiben offen.
 
 Enthält:
 
