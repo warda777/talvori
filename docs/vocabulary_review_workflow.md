@@ -219,10 +219,39 @@ Empfohlene Zieltrennung:
 
 - Wortwelten: thematische Nutzeransichten
 - Level: Schwierigkeitsgrad
-- Pakete: kuratierte Content-Sammlungen, z. B. Top 500
-- Speziallisten: Grammatik, unregelmäßige Verben, Redewendungen
+- Pakete: kuratierte Content-Sammlungen, z. B. Top 500, Top 100,
+  Prüfungspakete oder Lernsammlungen
+- Speziallisten: Grammatik, unregelmäßige Verben, Redewendungen,
+  Phrasen und Idioms
 
 Ein Wort kann mehreren fachlichen Sichten angehören, aber die Begriffe dürfen im Datenmodell nicht vermischt werden.
+
+Die Paketstruktur soll erweiterbar bleiben. `Top 500 Words` ist fachlich kein
+Thema, sondern eine Paketfamilie. Sie kann später in kleinere Etappen
+unterteilt werden:
+
+- `Top 100`
+- `Top 200`
+- `Top 300`
+- `Top 400`
+- `Top 500`
+
+Für die Datenpflege ist ein Bereichsmodell besonders robust, z. B.
+`Top 1-100`, `Top 101-200`, `Top 201-300`, `Top 301-400` und `Top 401-500`.
+Die UI kann daraus trotzdem kumulative Ziele wie `Top 200` oder `Top 500`
+bilden. So bleibt die Content-Pipeline versionierbar, ohne Nutzer mit einem
+zu großen Paket zu überfordern.
+
+Prüfungspakete und Spezialpakete wie `TOEFL`, `IELTS`, `Cambridge English`,
+`Business English`, `Exam Preparation`, `Irregular Verbs`,
+`Phrases & Idioms` oder `Grammar & Syntax` sollen ebenfalls als
+Content-Pakete geprüft werden, nicht als Wortwelten. Eine Wortwelt wird nur
+gesetzt, wenn ein echtes Thema wie `Travel`, `Work & Careers` oder
+`Food & Cooking` vorhanden ist.
+
+Paketzugehörigkeiten werden getrennt von Level und Wortwelt geprüft. Es wird
+keine TOEFL-/IELTS-/Cambridge-Zuordnung automatisch erzeugt und keine
+Top-500-Aufteilung produktiv vorgenommen.
 
 ## 10. Mehrsprachige Vorbereitung
 
@@ -527,9 +556,11 @@ Nicht releasefähig:
 7. A1-C2 und Top 500 fachlich von Wortwelten trennen.
 8. Struktur-Overlay zu Level/Paket/Wortwelt fachlich prüfen.
 9. Weitere Struktur-Batches gezielt erzeugen, besonders für `top_500_only` und `top_500_topic`.
-10. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
-11. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
-12. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
+10. Entscheiden, ob Top-Wortschatz intern als Bereichspakete oder kumulative Pakete modelliert wird.
+11. Paketmetadaten für Spezialpakete wie TOEFL, IELTS, Cambridge und Business English planen.
+12. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
+13. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
+14. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
 
 ## 17. Nicht-Ziele dieses Schritts
 
