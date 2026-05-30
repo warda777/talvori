@@ -322,6 +322,8 @@ Konkrete Richtung:
 Ziel:
 
 - MVP-relevante rechtliche und Store-Grundlagen releasefähig machen.
+- Der Block ist jetzt als Planungs- und Checklistenbasis vorbereitet.
+- Finale juristische Inhalte, echte URLs und Support-Kontakt bleiben offen.
 
 Enthält:
 
@@ -331,6 +333,8 @@ Enthält:
 - Hilfe/FAQ
 - Feedback/Kontakt
 - Store-Metadaten-Checkliste
+- Detaildokument: `docs/release_legal_support_store_plan.md`
+- Arbeitscheckliste: `docs/store_release_checklist.md`
 
 Priorität: zuerst
 
