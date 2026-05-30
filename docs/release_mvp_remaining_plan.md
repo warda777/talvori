@@ -387,6 +387,10 @@ Priorität: hoch
 Ziel:
 
 - festlegen, welche Spiele wirklich MVP-Scope sind.
+- Der Release-Scope ist dokumentiert:
+  `docs/word_games_release_scope.md`.
+- Spielbare Wortspiele werden im Hub als `spielbar` markiert; Wort-Duell ist
+  als `Vorschau` eingeordnet.
 
 Enthält:
 
@@ -395,7 +399,7 @@ Enthält:
 - kleine Wortbestände prüfen
 - Preview-Bereiche sauber benennen
 
-Priorität: mittel bis hoch
+Priorität: erledigt fuer MVP-Planung, vor Screenshots nochmals visuell pruefen
 
 ### Block E: Content-Review weiterführen
 

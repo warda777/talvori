@@ -1329,6 +1329,9 @@ void main() {
     for (final text in visibleTexts) {
       expect(find.text(text), findsOneWidget);
     }
+    expect(find.text('spielbar'), findsWidgets);
+    expect(find.text('Vorschau'), findsOneWidget);
+    expect(find.text('bald spielbar'), findsNothing);
     expect(
       tester.getTopLeft(find.text('Wort-Duell')).dy,
       lessThan(tester.getTopLeft(find.text('Wörter bauen')).dy),

@@ -51,7 +51,7 @@ class VocabTile extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: _StatusPill(
-                          label: item.badgeLabel ?? 'bald spielbar',
+                          label: item.badgeLabel ?? 'spielbar',
                           color: item.accent,
                         ),
                       ),

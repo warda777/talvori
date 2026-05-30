@@ -102,6 +102,7 @@ Empfehlung:
 
 - App Store / Play Store primaer als Bildung positionieren.
 - Wortspiele als motivierende Lernform beschreiben, nicht als reines Game-Produkt.
+- Wort-Duell nicht als fertigen Multiplayer-Modus bewerben; es ist im MVP nur als Vorschau sichtbar.
 
 ## 7. Datenschutz-/Support-Links
 
@@ -124,6 +125,7 @@ Diese Hinweise koennen spaeter fuer Apple/Google Reviewer angepasst werden:
 - Debug-/Developer-Funktionen sollen im Release nicht sichtbar sein.
 - Sichtbare vorbereitete Bereiche sind nicht als fertige Premiumleistung zu verstehen.
 - Premium, Spezialpakete und umfassender Cloud-Sync duerfen nur beworben werden, wenn sie im eingereichten Build tatsaechlich verfuegbar sind.
+- Wort-Duell ist nur als vorbereiteter Ausblick sichtbar und darf nicht als fertiger Mehrspieler-Modus beschrieben werden.
 
 ## 9. Nicht Bewerben
 
@@ -142,6 +144,7 @@ Folgende Funktionen duerfen fuer den MVP nicht als verfuegbar beworben werden:
 - perfekte oder fehlerfreie KI-Antworten
 - vollstaendig gepruefte automatische Uebersetzungen fuer alle Inhalte
 - produktiver Content-Package-Sync aus Supabase
+- fertiger Multiplayer oder Wort-Duell als aktive Online-Funktion
 
 ## 10. Screenshot-Plan
 
@@ -163,6 +166,7 @@ Geplante Screenshot-Motive:
 
 5. Wortspiele
    - Ziel: spielerische Uebungen als Lernabwechslung zeigen.
+   - Nur stabile, spielbare Modi zeigen; keine Vorschau-Karte als Hauptmotiv.
 
 6. Settings mit Legal/Support
    - Ziel: Transparenz, Datenschutz und Support-Erreichbarkeit zeigen.

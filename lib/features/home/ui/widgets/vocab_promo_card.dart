@@ -51,7 +51,7 @@ class VocabPromoCard extends StatelessWidget {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Bald kannst du hier XP sammeln, schnelle Runden spielen und dich in Challenges messen.',
+                  'Wähle kurze Runden für deine Wörter. Einige Modi nutzen KI oder sind als Ausblick klar gekennzeichnet.',
                   style: TextStyle(
                     color: Color(0xFFB8C7D9),
                     fontSize: 13.5,

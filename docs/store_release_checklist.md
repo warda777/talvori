@@ -85,7 +85,9 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Store-Metadaten-Draft erstellt: `docs/store_metadata_draft.md`
 - [x] Beschreibungstexte als MVP-Entwurf vorbereitet
 - [x] Nicht-bewerben-Liste erstellt
+- [x] Wortspiele-Release-Scope dokumentiert: `docs/word_games_release_scope.md`
 - [ ] Preview-/geplante Bereiche in Texten vorsichtig formulieren
+- [x] Wort-Duell als Vorschau eingeordnet, nicht als fertiger Multiplayer
 - [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
 - [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
 

@@ -52,9 +52,10 @@ class VocabState {
       VocabPracticeItem(
         id: 'word_duel',
         title: 'Wort-Duell',
-        subtitle: 'Tritt später gegen andere an',
+        subtitle: 'Mehrspieler-Modus als Ausblick',
         icon: Icons.sports_esports_rounded,
         accent: Color(0xFFB36BFF),
+        badgeLabel: 'Vorschau',
       ),
       VocabPracticeItem(
         id: 'audio_catch',
