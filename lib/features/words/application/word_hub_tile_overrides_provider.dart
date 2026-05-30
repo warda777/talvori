@@ -1,9 +1,32 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+
+import '../ui/widgets/icon_picker_dialog.dart' show IconPickerDialog;
 import 'radial_palette_controller.dart' show PaletteTool;
+
+final Map<int, IconData> _wordHubIconsByCodePoint = {
+  for (final icon in IconPickerDialog.icons) icon.codePoint: icon,
+};
+
+IconData? _wordHubIconFromStoredValue(Object? value) {
+  if (value == null) {
+    return null;
+  }
+
+  final codePoint = int.tryParse(value.toString());
+  if (codePoint == null) {
+    return Icons.auto_stories;
+  }
+
+  return _wordHubIconsByCodePoint[codePoint] ?? Icons.auto_stories;
+}
+
+@visibleForTesting
+IconData? wordHubIconFromStoredValueForTest(Object? value) =>
+    _wordHubIconFromStoredValue(value);
 
 /// Override-Farben für eine einzelne Kachel
 class TileColorOverrides {
@@ -57,16 +80,12 @@ class TileColorOverrides {
 class WordHubTileOverridesState {
   final Map<String, TileColorOverrides> overrides;
 
-  const WordHubTileOverridesState({
-    this.overrides = const {},
-  });
+  const WordHubTileOverridesState({this.overrides = const {}});
 
   WordHubTileOverridesState copyWith({
     Map<String, TileColorOverrides>? overrides,
   }) {
-    return WordHubTileOverridesState(
-      overrides: overrides ?? this.overrides,
-    );
+    return WordHubTileOverridesState(overrides: overrides ?? this.overrides);
   }
 
   TileColorOverrides? operator [](String paletteId) => overrides[paletteId];
@@ -75,8 +94,7 @@ class WordHubTileOverridesState {
 /// Controller für Tile-Overrides
 class WordHubTileOverridesController
     extends StateNotifier<WordHubTileOverridesState> {
-  WordHubTileOverridesController()
-      : super(const WordHubTileOverridesState()) {
+  WordHubTileOverridesController() : super(const WordHubTileOverridesState()) {
     _loadOverrides();
   }
 
@@ -87,15 +105,15 @@ class WordHubTileOverridesController
     try {
       final prefs = await SharedPreferences.getInstance();
       final overridesJson = prefs.getString(_overridesKey);
-      
+
       if (overridesJson != null) {
         final Map<String, dynamic> overridesMap = json.decode(overridesJson);
         final Map<String, TileColorOverrides> loadedOverrides = {};
-        
+
         overridesMap.forEach((paletteId, value) {
           if (value is Map<String, dynamic>) {
             loadedOverrides[paletteId] = TileColorOverrides(
-              titleColor: value['titleColor'] != null 
+              titleColor: value['titleColor'] != null
                   ? Color(int.parse(value['titleColor'] as String))
                   : null,
               countColor: value['countColor'] != null
@@ -107,17 +125,17 @@ class WordHubTileOverridesController
               fillColor: value['fillColor'] != null
                   ? Color(int.parse(value['fillColor'] as String))
                   : null,
-              icon: value['icon'] != null
-                  ? IconData(int.parse(value['icon'] as String))
-                  : null,
+              icon: _wordHubIconFromStoredValue(value['icon']),
               emoji: value['emoji'] as String?,
-              iconColor: value['iconColor'] != null // NEU
+              iconColor:
+                  value['iconColor'] !=
+                      null // NEU
                   ? Color(int.parse(value['iconColor'] as String))
                   : null,
             );
           }
         });
-        
+
         if (loadedOverrides.isNotEmpty) {
           state = WordHubTileOverridesState(overrides: loadedOverrides);
         }
@@ -132,20 +150,26 @@ class WordHubTileOverridesController
     try {
       final prefs = await SharedPreferences.getInstance();
       final Map<String, dynamic> overridesMap = {};
-      
+
       state.overrides.forEach((paletteId, overrides) {
         final Map<String, dynamic> overrideMap = {};
         if (overrides.titleColor != null) {
-          overrideMap['titleColor'] = overrides.titleColor!.value.toString();
+          overrideMap['titleColor'] = overrides.titleColor!
+              .toARGB32()
+              .toString();
         }
         if (overrides.countColor != null) {
-          overrideMap['countColor'] = overrides.countColor!.value.toString();
+          overrideMap['countColor'] = overrides.countColor!
+              .toARGB32()
+              .toString();
         }
         if (overrides.strokeColor != null) {
-          overrideMap['strokeColor'] = overrides.strokeColor!.value.toString();
+          overrideMap['strokeColor'] = overrides.strokeColor!
+              .toARGB32()
+              .toString();
         }
         if (overrides.fillColor != null) {
-          overrideMap['fillColor'] = overrides.fillColor!.value.toString();
+          overrideMap['fillColor'] = overrides.fillColor!.toARGB32().toString();
         }
         if (overrides.icon != null) {
           overrideMap['icon'] = overrides.icon!.codePoint.toString();
@@ -153,12 +177,13 @@ class WordHubTileOverridesController
         if (overrides.emoji != null) {
           overrideMap['emoji'] = overrides.emoji!;
         }
-        if (overrides.iconColor != null) { // NEU
-          overrideMap['iconColor'] = overrides.iconColor!.value.toString();
+        if (overrides.iconColor != null) {
+          // NEU
+          overrideMap['iconColor'] = overrides.iconColor!.toARGB32().toString();
         }
         overridesMap[paletteId] = overrideMap;
       });
-      
+
       final overridesJson = json.encode(overridesMap);
       await prefs.setString(_overridesKey, overridesJson);
     } catch (e) {
@@ -169,28 +194,15 @@ class WordHubTileOverridesController
   /// Setzt Text-Farben für eine Kachel
   void setTextColors(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
-    final updated = current.copyWith(
-      titleColor: color,
-      countColor: color,
-    );
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    final updated = current.copyWith(titleColor: color, countColor: color);
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
   }
 
   /// Setzt nur Titel-Farbe
   void setTitleColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(titleColor: color);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -198,12 +210,7 @@ class WordHubTileOverridesController
   void setCountColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(countColor: color);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -211,12 +218,7 @@ class WordHubTileOverridesController
   void setStrokeColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(strokeColor: color);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -224,12 +226,7 @@ class WordHubTileOverridesController
   void setFillColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(fillColor: color);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -237,12 +234,7 @@ class WordHubTileOverridesController
   void setIcon(String paletteId, IconData icon) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(icon: icon, clearEmoji: true);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -250,12 +242,7 @@ class WordHubTileOverridesController
   void setEmoji(String paletteId, String emoji) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(emoji: emoji, clearIcon: true);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -263,12 +250,7 @@ class WordHubTileOverridesController
   void setIconColor(String paletteId, Color color) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(iconColor: color);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -276,12 +258,7 @@ class WordHubTileOverridesController
   void clearIconEmoji(String paletteId) {
     final current = state.overrides[paletteId] ?? const TileColorOverrides();
     final updated = current.copyWith(clearIcon: true, clearEmoji: true);
-    state = state.copyWith(
-      overrides: {
-        ...state.overrides,
-        paletteId: updated,
-      },
-    );
+    state = state.copyWith(overrides: {...state.overrides, paletteId: updated});
     _saveOverrides();
   }
 
@@ -297,7 +274,10 @@ class WordHubTileOverridesController
   void clearAllIconsEmojis() {
     final updated = <String, TileColorOverrides>{};
     for (final entry in state.overrides.entries) {
-      updated[entry.key] = entry.value.copyWith(clearIcon: true, clearEmoji: true);
+      updated[entry.key] = entry.value.copyWith(
+        clearIcon: true,
+        clearEmoji: true,
+      );
     }
     state = state.copyWith(overrides: updated);
   }
@@ -315,10 +295,17 @@ class WordHubTileOverridesController
           cleared = cleared.copyWith(clearFillColor: true);
           break;
         case PaletteTool.text:
-          cleared = cleared.copyWith(clearTitleColor: true, clearCountColor: true);
+          cleared = cleared.copyWith(
+            clearTitleColor: true,
+            clearCountColor: true,
+          );
           break;
         case PaletteTool.icon:
-          cleared = cleared.copyWith(clearIcon: true, clearEmoji: true, clearIconColor: true);
+          cleared = cleared.copyWith(
+            clearIcon: true,
+            clearEmoji: true,
+            clearIconColor: true,
+          );
           break;
         case PaletteTool.hubBackground:
         case PaletteTool.paint:
@@ -327,13 +314,14 @@ class WordHubTileOverridesController
           break;
       }
       // Nur hinzufügen, wenn noch andere Overrides vorhanden sind
-      if (cleared.titleColor != null || 
-          cleared.countColor != null || 
-          cleared.strokeColor != null || 
+      if (cleared.titleColor != null ||
+          cleared.countColor != null ||
+          cleared.strokeColor != null ||
           cleared.fillColor != null ||
           cleared.icon != null ||
           cleared.emoji != null ||
-          cleared.iconColor != null) { // NEU
+          cleared.iconColor != null) {
+        // NEU
         updated[entry.key] = cleared;
       }
     }
@@ -350,8 +338,7 @@ class WordHubTileOverridesController
 
 /// Provider für Tile-Overrides
 final wordHubTileOverridesProvider =
-    StateNotifierProvider<WordHubTileOverridesController,
-        WordHubTileOverridesState>(
-  (ref) => WordHubTileOverridesController(),
-);
-
+    StateNotifierProvider<
+      WordHubTileOverridesController,
+      WordHubTileOverridesState
+    >((ref) => WordHubTileOverridesController());
