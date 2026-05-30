@@ -18,6 +18,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [ ] Apple Developer App ID und App Group `group.eu.talvori.app` angelegt/bestaetigt
 - [ ] Google Play Application ID `eu.talvori.app` im Play Console Setup bestaetigt
 - [x] Signing-Setup-Plan erstellt: `docs/store_signing_setup_plan.md`
+- [x] Android Release-Build-Check dokumentiert: `docs/android_release_build_check.md`
 
 ## 2. Rechtliches
 
@@ -46,10 +47,11 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 
 ## 4. App-Funktionalitaet Fuer Review
 
-- [ ] Release-Build erstellt
-- [ ] Android Release Signing fuer Store konfiguriert
+- [x] Android Release-Appbundle lokal erfolgreich erstellt: `build/app/outputs/bundle/release/app-release.aab`
+- [x] Android Release Signing lokal vorbereitet und erfolgreich fuer AppBundle-Build genutzt
 - [x] Android Release Signing Template vorbereitet: `android/key.properties.example`
 - [x] Keystore-/Secret-Dateien in `.gitignore` geschuetzt
+- [x] `android/key.properties` und lokaler `.jks`-Keystore bleiben ignored
 - [ ] Release-Build auf echtem iOS-Geraet geprueft
 - [ ] Release-Build auf echtem Android-Geraet geprueft, falls Android MVP
 - [x] Frischer App-Start manuell geprueft
@@ -69,7 +71,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [x] Offline-Start manuell geprueft
 - [ ] App killen und neu starten geprueft
 
-Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ ist nicht dokumentiert. Ein finaler Release-Build-Test direkt vor Store-Einreichung bleibt offen. Details: `docs/release_device_smoke_test.md`.
+Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ ist nicht dokumentiert. Ein Android Release-Appbundle wurde erfolgreich lokal gebaut, aber ein finaler installierter Release-Build-Test direkt vor Store-Einreichung bleibt offen. Details: `docs/release_device_smoke_test.md` und `docs/android_release_build_check.md`.
 
 ## 5. Release-Sicherheit
 
@@ -123,6 +125,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] `flutter test` gruen
 - [ ] `git diff --check` sauber
 - [x] Manueller Smoke-Test fuer zentrale MVP-Pfade dokumentiert
+- [x] Android Release-Appbundle-Build erfolgreich dokumentiert
 - [x] Aktuelle MVP-Blocker priorisiert: `docs/final_mvp_blocker_review.md`
 - [ ] Finaler Release-Build installiert und Smoke-Test bestanden
 - [ ] Debug-Sichtbarkeit manuell im finalen Release-Build geprueft

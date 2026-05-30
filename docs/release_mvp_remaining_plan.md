@@ -26,6 +26,8 @@ Verbessert wurde:
 - Der erste manuelle Review-Batch ist abgeschlossen.
 - Die Trennung von Level, Top-Wortschatz und Wortwelten ist strukturell
   vorbereitet.
+- Android Release Signing ist lokal vorbereitet; ein Release-Appbundle fuer
+  `eu.talvori.app` wurde erfolgreich gebaut und dokumentiert.
 
 Entschärfte Risiken:
 
@@ -149,6 +151,8 @@ Risiko: hoch
 Konkrete Richtung:
 
 - Release-Build installieren
+- Android AAB aus `build/app/outputs/bundle/release/app-release.aab` fuer
+  Play Console/Internal Testing vorbereiten
 - App frisch starten
 - Onboarding durchlaufen
 - lokale Wörter prüfen
@@ -196,6 +200,7 @@ Konkrete Richtung:
 - Privacy Nutrition / Data Safety Angaben
 - Support-URL und Datenschutz-URL
 - Altersfreigabe
+- Google Play Application ID `eu.talvori.app` bestaetigen
 
 ### 5. Vokabelqualität: mindestens MVP-Bestand prüfen
 

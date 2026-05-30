@@ -18,6 +18,7 @@ Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Su
 - Debug-/Developer-Zugaenge sind technisch auf `kDebugMode` ausgerichtet und dokumentiert.
 - Der Legacy-Supabase-Woerter-Auto-Sync ist im Release ueber `ReleaseSyncPolicy` gegated.
 - Der manuelle Smoke-Test fuer zentrale MVP-Pfade ist dokumentiert.
+- Der Android Release-Appbundle-Build mit Application ID `eu.talvori.app` ist lokal erfolgreich durchgelaufen und dokumentiert: `docs/android_release_build_check.md`.
 - Store-Metadaten, Store-Review-Hinweise und Nicht-bewerben-Liste liegen als Entwurf vor.
 - Der Wortspiele-Scope ist geklaert: nutzbare Modi sind als spielbar eingeordnet, Wort-Duell bleibt Vorschau.
 - Content-Package-, Supabase- und Vokabelreview-Strategie sind vorbereitet, ohne produktive Daten zu veraendern.
@@ -25,7 +26,7 @@ Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Su
 ### Noch nicht releasefaehig
 
 - Datenschutz, AGB/Nutzungsbedingungen und Impressum muessen final fachkundig/juristisch geprueft werden.
-- Ein echter finaler Release-Build-Test direkt vor Store-Einreichung steht noch aus.
+- Ein echter finaler installierter Release-Build-Test direkt vor Store-Einreichung steht noch aus.
 - Store-Account-/Store-Konfiguration, Bundle ID, Version/Build Number, Altersfreigabe, Datenverwendungsangaben und Screenshots sind noch offen.
 - App-Icon und finale Store-Screenshots muessen gegen den tatsaechlichen Release-Build geprueft werden.
 - Debug-Sichtbarkeit muss im finalen Release-Build manuell gegengeprueft werden.
@@ -34,7 +35,7 @@ Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Su
 ### Wirkliche Store-/MVP-Blocker
 
 1. Finale Legal-Seiten und Datenschutz-/Datenverwendungsangaben.
-2. Finaler Release-Build-Test auf den Zielplattformen.
+2. Finaler installierter Release-Build-Test auf den Zielplattformen.
 3. Store-Konfiguration inklusive Bundle ID, Version, App-Icon, Screenshots und Altersfreigabe.
 4. Debug-/Developer-Sichtbarkeit im finalen Release-Build.
 5. MVP-Contentqualitaet fuer den sichtbaren Wortbestand.
@@ -58,6 +59,7 @@ Naechste Aktion:
 Warum Blocker:
 
 - Der dokumentierte Smoke-Test war manuell bestanden, aber der Build-Typ ist nicht dokumentiert.
+- Android hat zusaetzlich einen erfolgreichen lokalen Release-Appbundle-Build: `build/app/outputs/bundle/release/app-release.aab`.
 - Widget-Tests ersetzen keinen echten Release-Build auf Geraet.
 
 Naechste Aktion:
@@ -83,7 +85,8 @@ Naechste Aktion:
 - Version `1.0.0+1` als MVP-Startwert bestaetigen.
 - Store-Metadaten aus `docs/store_metadata_draft.md` an Plattformlimits anpassen.
 - Android Release Signing fuer Play Store konfigurieren, falls Android MVP ist.
-- Signing-Setup-Plan nutzen: `docs/store_signing_setup_plan.md`. Keystore, Passwoerter, Zertifikate und Provisioning Profiles duerfen nicht committed werden.
+- Android Release Signing ist lokal vorbereitet und erfolgreich fuer den AppBundle-Build genutzt. Signing-Setup-Plan nutzen: `docs/store_signing_setup_plan.md`. Keystore, Passwoerter, Zertifikate und Provisioning Profiles duerfen nicht committed werden.
+- Google Play Application ID `eu.talvori.app` bleibt in der Play Console zu bestaetigen.
 
 ### D. App-Icon und Screenshots aus finalem Build
 

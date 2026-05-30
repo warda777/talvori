@@ -20,7 +20,8 @@ Dieser Plan bereitet Apple Developer Signing/App Groups und Android Release Sign
 
 - `android/app/build.gradle.kts` war bisher fuer Release-Builds auf Debug-Signing gesetzt.
 - `flutter_local_notifications` benoetigt Core Library Desugaring; das ist bereits in der Android-Build-Konfiguration aktiviert.
-- Release Signing ist jetzt vorbereitet, aber noch nicht mit echten Secrets befuellt.
+- Release Signing ist lokal vorbereitet. Ein lokaler Release-Appbundle-Build wurde erfolgreich ausgefuehrt und dokumentiert: `docs/android_release_build_check.md`.
+- Der Release-Build-Blocker durch dynamische `IconData(...)`-Erzeugung wurde behoben; der AppBundle-Build laeuft erfolgreich durch.
 
 ### Vorbereitete Struktur
 
@@ -29,6 +30,14 @@ Die Android-Build-Konfiguration liest optional:
 - `android/key.properties`
 
 Wenn diese Datei existiert, nutzt der Release-Build die darin angegebenen Werte fuer den Release-Keystore. Wenn sie fehlt, bleibt der lokale Release-Build weiterhin mit Debug-Signing baubar. Fuer einen Store-Release muss `android/key.properties` lokal korrekt gesetzt sein.
+
+Aktueller lokaler Build-Status:
+
+- Build-Befehl: `flutter build appbundle --release`
+- Ergebnis: erfolgreich
+- AAB: `build/app/outputs/bundle/release/app-release.aab`
+- Signing: lokal mit vorbereitetem Release-Keystore
+- `android/key.properties` und `android/app/talvori-release-key.jks` bleiben ignored und duerfen nicht committed werden.
 
 Sichere Beispiel-Datei:
 
@@ -59,7 +68,7 @@ Diese Muster sind in `.gitignore` abgesichert.
 1. Release-Keystore lokal erzeugen und sicher verwahren.
 2. `android/key.properties` lokal aus `android/key.properties.example` ableiten.
 3. Passwoerter nicht in Git, Chat, Doku oder Tickets schreiben.
-4. `flutter build appbundle --release` spaeter lokal mit echter Signing-Konfiguration testen.
+4. `flutter build appbundle --release` vor Store-Upload erneut lokal mit echter Signing-Konfiguration testen.
 5. Google Play Application ID `eu.talvori.app` bestaetigen.
 6. Play App Signing / Upload Key Strategie festlegen.
 
@@ -109,8 +118,8 @@ Die iOS-Projektdateien nutzen:
 ## 6. Naechste Schritte
 
 1. Apple Developer App IDs und App Group anlegen/bestaetigen.
-2. Android Keystore lokal erzeugen, aber nicht committen.
-3. `android/key.properties` lokal befuellen.
-4. `flutter build appbundle --release` mit echter Signing-Konfiguration testen.
+2. Android Keystore lokal sichern und nicht committen.
+3. `android/key.properties` lokal befuellt halten und nicht committen.
+4. Erfolgreich erzeugtes AppBundle im Play Console Internal Testing Track pruefen.
 5. iOS Build mit echtem Codesigning auf Geraet testen.
 6. Store-Checkliste nach erfolgreichem Signing-Test aktualisieren.
