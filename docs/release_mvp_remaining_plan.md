@@ -429,6 +429,8 @@ Ziel:
   `docs/final_mvp_blocker_review.md`.
 - Die Store-/Build-Identitaet ist geprueft:
   `docs/store_build_identity_check.md`.
+- Der sichere Signing-Setup-Plan ist vorbereitet:
+  `docs/store_signing_setup_plan.md`.
 - Screenshots und finale Store-Einreichung bleiben offen.
 
 Enthält:

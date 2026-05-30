@@ -83,6 +83,7 @@ Naechste Aktion:
 - Version `1.0.0+1` als MVP-Startwert bestaetigen.
 - Store-Metadaten aus `docs/store_metadata_draft.md` an Plattformlimits anpassen.
 - Android Release Signing fuer Play Store konfigurieren, falls Android MVP ist.
+- Signing-Setup-Plan nutzen: `docs/store_signing_setup_plan.md`. Keystore, Passwoerter, Zertifikate und Provisioning Profiles duerfen nicht committed werden.
 
 ### D. App-Icon und Screenshots aus finalem Build
 

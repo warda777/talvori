@@ -110,6 +110,7 @@ Abweichungen / Hinweise:
 
 - Finale Ziel-ID fuer den MVP: `eu.talvori.app`.
 - Android Release Signing ist noch nicht store-ready.
+- Android Release Signing ist vorbereitet, aber noch nicht mit echten lokalen Secrets konfiguriert. Details: `docs/store_signing_setup_plan.md`.
 - Web-Metadaten sind lowercase `talvori`.
 - iOS `CFBundleName` ist lowercase `talvori`, waehrend `CFBundleDisplayName` korrekt `Talvori` ist. Fuer den sichtbaren App-Namen ist `CFBundleDisplayName` entscheidend.
 
@@ -151,6 +152,7 @@ Aktueller Stand:
 - Beide Plattformen sind technisch vorbereitet.
 - iOS hat zusaetzliche Share-Extension-/App-Group-Abhaengigkeiten.
 - Android braucht vor Store-Release zwingend eine echte Release-Signing-Konfiguration.
+- Der sichere Signing-Plan liegt in `docs/store_signing_setup_plan.md`.
 
 ## 9. Risiken / Abweichungen
 
@@ -158,6 +160,7 @@ Aktueller Stand:
 - Apple Developer App ID und App Group `group.eu.talvori.app` muessen im Developer Portal passend angelegt bzw. bestaetigt werden.
 - Eine spaetere Identifier-Aenderung sollte vermieden werden, weil Share Extension, App Group und Native Packages betroffen sind.
 - Android Release Signing nutzt aktuell Debug-Signing im Release-Build.
+- Android Release Signing liest spaeter optional `android/key.properties`, die Datei darf nicht committed werden.
 - Store-Reservierung, App Store Connect / Play Console, Altersfreigabe und Datenschutzangaben bleiben offen.
 - App-Icon wurde in diesem Check nicht visuell geprueft.
 - Screenshots wurden nicht erstellt.

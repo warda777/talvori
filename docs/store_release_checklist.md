@@ -17,6 +17,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [x] Version und Build Number geprueft: `1.0.0+1`
 - [ ] Apple Developer App ID und App Group `group.eu.talvori.app` angelegt/bestaetigt
 - [ ] Google Play Application ID `eu.talvori.app` im Play Console Setup bestaetigt
+- [x] Signing-Setup-Plan erstellt: `docs/store_signing_setup_plan.md`
 
 ## 2. Rechtliches
 
@@ -47,6 +48,8 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 
 - [ ] Release-Build erstellt
 - [ ] Android Release Signing fuer Store konfiguriert
+- [x] Android Release Signing Template vorbereitet: `android/key.properties.example`
+- [x] Keystore-/Secret-Dateien in `.gitignore` geschuetzt
 - [ ] Release-Build auf echtem iOS-Geraet geprueft
 - [ ] Release-Build auf echtem Android-Geraet geprueft, falls Android MVP
 - [x] Frischer App-Start manuell geprueft
