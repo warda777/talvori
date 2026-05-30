@@ -435,6 +435,34 @@ Sicherheitsverhalten:
 - Spanisch und Französisch bleiben initial leer.
 - Der Output ist weiterhin Review-Material und nicht releasefähig.
 
+### `tool/analyze_vocabulary_review_seed.dart`
+
+Zweck:
+
+- liest den lokal erzeugten `vocabulary_review_seed.csv`
+- erzeugt `vocabulary_review_seed_quality_report.md`
+- erzeugt kleine Kandidatenlisten für Problemfälle
+- prüft Grundzahlen, Sicherheitsstatus, Sprachcodes, Übersetzungen, Dubletten und Strukturfragen
+
+Eignung:
+
+- Read-only Analyse des Master-Seeds.
+- Nutzt nur lokale CSV-Dateien.
+- Öffnet keine Supabase-Verbindung.
+- Öffnet keine SQLite-Verbindung.
+- Führt keinen Import aus.
+- Korrigiert keine Vokabeln und vergibt keine Freigaben.
+
+Aktuelle Kandidatenlisten:
+
+- `seed_empty_translation_candidates.csv`
+- `seed_duplicate_candidates.csv`
+- `seed_meaning_variant_candidates.csv`
+- `seed_structure_issue_candidates.csv`
+
+Die große Seed-Datei bleibt durch `.gitignore` lokal. Report und kleine
+Kandidatenlisten können als Review-Arbeitsmaterial versioniert werden.
+
 ### `tool/extract_word_review_cleanup_candidates.dart`
 
 Zweck:
@@ -610,6 +638,10 @@ Priorität 1:
   - `review_status = needs_review`
   - `release_ready = false`
   - nächster Schritt: Output nach manueller Erzeugung als Arbeitskopie prüfen, nicht produktiv importieren
+- `analyze_vocabulary_review_seed.dart`
+  - ist als read-only Qualitätsanalyse vorhanden
+  - erzeugt Report und kleine Kandidatenlisten
+  - keine Korrekturen, keine Imports, keine Freigaben
 
 Priorität 2:
 
@@ -643,16 +675,17 @@ Diese Tools können später nach manueller Freigabe relevant werden, sind aber n
 
 1. `supabase_words_review.csv` als Rohbasis behalten.
 2. `tool/export_vocabulary_review_seed.dart` nutzen, um bei Bedarf eine Master-Seed-Arbeitskopie zu erzeugen.
-3. Die neue Datei nicht automatisch produktiv nutzen.
-4. Hilfsdateien als Overlays einlesen:
+3. `tool/analyze_vocabulary_review_seed.dart` nutzen, um Report und Kandidatenlisten zu erzeugen.
+4. Die neue Datei nicht automatisch produktiv nutzen.
+5. Hilfsdateien als Overlays einlesen:
    - Dubletten
    - Sprachcode-Konflikte
    - URL-Kandidaten
    - fehlende Kategorien
    - Paket-/Level-Fragen
-5. Bedeutungsvarianten manuell modellieren, bevor `meaning_id` final gesetzt wird.
-6. Spanisch und Französisch initial leer lassen.
-7. Erst nach menschlichem Review `review_status = approved` und `release_ready = true` setzen.
+6. Bedeutungsvarianten manuell modellieren, bevor `meaning_id` final gesetzt wird.
+7. Spanisch und Französisch initial leer lassen.
+8. Erst nach menschlichem Review `review_status = approved` und `release_ready = true` setzen.
 
 ## 11. Ergebnis
 
@@ -661,3 +694,4 @@ Diese Tools können später nach manueller Freigabe relevant werden, sind aber n
 - Alle anderen CSV-Dateien sind Hilfs-/Kandidatenlisten oder Konflikt-Overlays.
 - Die Markdown-Dateien enthalten wertvolle Entscheidungslogik, sind aber keine strukturierten Master-Datenquellen.
 - Der Master-Seed-Exporter ist read-only vorbereitet und verändert keine Produktivdaten.
+- Die Master-Seed-Analyse ist read-only vorbereitet und erzeugt einen Qualitätsreport plus kleine Kandidatenlisten.

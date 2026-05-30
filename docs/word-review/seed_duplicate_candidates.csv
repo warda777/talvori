@@ -1,0 +1,33 @@
+issue_type,word_key,base_language,base_term,de_translation,level,category,word_world,detail
+exact_duplicate,969a31a5-c475-4ec9-b62f-b55829f5b669,en,adjective,adjektiv,A2,Grammar & Syntax,Grammar & Syntax,duplicate_key=en|adjective|adjektiv; group_size=2
+exact_duplicate,f91f2280-02de-4ffa-82dc-bd442443a67a,en,ADJECTIVE,ADJEKTIV,C2,C2,C2,duplicate_key=en|adjective|adjektiv; group_size=2
+exact_duplicate,8f1acc1f-759c-4615-9110-73304615a149,en,adverb,adverb,A2,Grammar & Syntax,Grammar & Syntax,duplicate_key=en|adverb|adverb; group_size=2
+exact_duplicate,a74186e3-cf89-421c-8837-e900c568932b,en,ADVERB,ADVERB,C2,C2,C2,duplicate_key=en|adverb|adverb; group_size=2
+exact_duplicate,3d018bfe-bd5d-4ba2-a448-6a92f54eb7bb,en,behind,hinter,,Productivity,Productivity,duplicate_key=en|behind|hinter; group_size=2
+exact_duplicate,857507cd-ca70-4a7d-bc5f-66dc09e7f648,en,behind,hinter,A1,A1,A1,duplicate_key=en|behind|hinter; group_size=2
+exact_duplicate,0a29d3d0-ad57-4c78-94b7-ad6d603915c0,en,dash,Bindestrich,,Productivity,Productivity,duplicate_key=en|dash|bindestrich; group_size=2
+exact_duplicate,e09286d3-351c-4f04-a14a-b7d851c25713,en,dash,bindestrich,C2,C2,C2,duplicate_key=en|dash|bindestrich; group_size=2
+exact_duplicate,37a99d9c-9192-44ce-83b9-08eee8bca169,en,entire,gesamte,,Productivity,Productivity,duplicate_key=en|entire|gesamte; group_size=2
+exact_duplicate,2a5d060a-cddf-4a67-8ce7-a21367c00fe1,en,entire,gesamte,B2,B2,B2,duplicate_key=en|entire|gesamte; group_size=2
+exact_duplicate,b55a6414-ed80-41ad-b963-f409eeb457d4,en,friday,freitag,A1,Top 500 Words,Top 500 Words,duplicate_key=en|friday|freitag; group_size=2
+exact_duplicate,e7f53ea2-1273-4091-923d-74b4b9b7ab53,en,Friday,Freitag,A1,A1,A1,duplicate_key=en|friday|freitag; group_size=2
+exact_duplicate,1aff8ead-820c-447c-9dc9-fe5981d91412,en,interview,Interview,,Productivity,Productivity,duplicate_key=en|interview|interview; group_size=2
+exact_duplicate,b07abd1a-d672-4f35-a12c-86c0ff47062d,en,interview,Interview,A1,A1; Media & News,Media & News,duplicate_key=en|interview|interview; group_size=2
+exact_duplicate,580cb159-f590-48a8-8097-5f071ae3910b,en,march,märz,C1,C1,C1,duplicate_key=en|march|märz; group_size=2
+exact_duplicate,4b25bc9e-6b24-4365-94a7-eafc643f3478,en,March,März,A1,A1,A1,duplicate_key=en|march|märz; group_size=2
+exact_duplicate,7e13f364-e57a-4b02-a693-dbfd6b82dbc9,en,may,mai,A2,A2; Grammar & Syntax,A2; Grammar & Syntax,duplicate_key=en|may|mai; group_size=2
+exact_duplicate,1258ac7f-a1cf-4272-89fd-133da42d97be,en,May,Mai,A1,A1,A1,duplicate_key=en|may|mai; group_size=2
+exact_duplicate,f46d6361-092b-43f9-89d1-c38e629a1188,en,monday,montag,B1,Top 500 Words,Top 500 Words,duplicate_key=en|monday|montag; group_size=2
+exact_duplicate,d0690e47-e51b-4378-a132-9f2947af74d0,en,Monday,Montag,A1,A1,A1,duplicate_key=en|monday|montag; group_size=2
+exact_duplicate,31b9fd7e-fbbf-44fa-af67-40c66144f843,en,report,Bericht,,Productivity,Productivity,duplicate_key=en|report|bericht; group_size=2
+exact_duplicate,70fbac34-dad7-4af5-986a-19942af4baf5,en,report,bericht,A2,A1; A2,A1; A2,duplicate_key=en|report|bericht; group_size=2
+exact_duplicate,32464b29-fec5-4fd3-ba25-a873e3b0f8eb,en,satellite,Satellit,,,,duplicate_key=en|satellite|satellit; group_size=2
+exact_duplicate,e0d7acc3-7b01-48b4-a6e8-2f0cb06ad422,en,satellite,satellit,B2,B2; Space,Space,duplicate_key=en|satellite|satellit; group_size=2
+exact_duplicate,56ceb18d-3262-4031-9884-2d96fce9ea6c,en,saturday,samstag,A2,Top 500 Words,Top 500 Words,duplicate_key=en|saturday|samstag; group_size=2
+exact_duplicate,f7fc6762-bd28-4bc5-97f5-97402cce62a4,en,Saturday,Samstag,A1,A1,A1,duplicate_key=en|saturday|samstag; group_size=2
+exact_duplicate,9a8d6592-71d2-4cdb-91dc-e9654eb84307,en,thursday,donnerstag,B1,Top 500 Words,Top 500 Words,duplicate_key=en|thursday|donnerstag; group_size=2
+exact_duplicate,ceda131e-81c9-4b26-8435-31d0b8dbc09a,en,Thursday,Donnerstag,A1,A1,A1,duplicate_key=en|thursday|donnerstag; group_size=2
+exact_duplicate,fa3902de-3324-4c19-9e27-cdd8e2df6bd6,en,tuesday,dienstag,A2,Top 500 Words,Top 500 Words,duplicate_key=en|tuesday|dienstag; group_size=2
+exact_duplicate,fe0f12d5-4818-4a01-ab40-4c7301106525,en,Tuesday,Dienstag,A1,A1,A1,duplicate_key=en|tuesday|dienstag; group_size=2
+exact_duplicate,bba73cb7-263e-4c75-8d55-9c869e8af29f,en,verb,verb,A1,Grammar & Syntax,Grammar & Syntax,duplicate_key=en|verb|verb; group_size=2
+exact_duplicate,b89c2920-f157-43ce-8313-00318b189057,en,VERB,VERB,C2,C2,C2,duplicate_key=en|verb|verb; group_size=2

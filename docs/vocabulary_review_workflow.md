@@ -354,6 +354,30 @@ dart tool/export_vocabulary_review_seed.dart \
 
 Bestehende Output-Dateien werden nur mit `--force` überschrieben.
 
+Der generierte Seed kann anschließend lokal analysiert werden:
+
+- `tool/analyze_vocabulary_review_seed.dart`
+  - liest standardmäßig `docs/word-review/vocabulary_review_seed.csv`
+  - schreibt `docs/word-review/vocabulary_review_seed_quality_report.md`
+  - schreibt kleine, gezielte Kandidatenlisten für Problemfälle
+  - verbindet sich nicht mit Supabase
+  - öffnet keine SQLite-Datenbank
+  - führt keinen Import aus
+  - korrigiert keine Vokabeldaten
+  - erzeugt keine KI-Vorschläge
+
+Beispiel:
+
+```bash
+dart tool/analyze_vocabulary_review_seed.dart \
+  --input docs/word-review/vocabulary_review_seed.csv \
+  --report docs/word-review/vocabulary_review_seed_quality_report.md
+```
+
+Die große Datei `docs/word-review/vocabulary_review_seed.csv` bleibt in
+`.gitignore` ignoriert. Commit-fähig sind nur der Qualitätsreport und kleine
+Kandidatenlisten, sofern sie gezielt Problemfälle dokumentieren.
+
 Grund:
 
 - Es existiert bereits ein read-only Supabase-Review-Export.

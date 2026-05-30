@@ -1,0 +1,17 @@
+issue_type,word_key,base_language,base_term,de_translation,level,category,word_world,detail
+same_base_different_translation,8b48b271-2a4e-472e-a0d1-99c142cdc1ab,en,incident,Vorfall,,,,needs meaning_note; normalized_base_term=incident
+same_base_different_translation,f054cac4-7825-4d46-975e-ca008040a3ee,en,incident,Störung/Vorfall,B1,B2; Work & Careers,Work & Careers,needs meaning_note; normalized_base_term=incident
+same_base_different_translation,2c4d89ae-cfd7-4927-a5ac-585855bf0191,en,it,es,A1,A1; Top 500 Words,A1; Top 500 Words,needs meaning_note; normalized_base_term=it
+same_base_different_translation,cfcfbb0d-c9ee-4401-8ff4-1f9967def679,en,IT,IT,B1,B1,B1,needs meaning_note; normalized_base_term=it
+same_base_different_translation,ba6b854f-c6af-4751-b9e8-61d8374272a2,en,move,bewegen,B1,A1; B1; Top 500 Words,A1; B1; Top 500 Words,needs meaning_note; normalized_base_term=move
+same_base_different_translation,0c165b4c-2afb-4861-ac60-75bf59a8611b,en,move,umziehen,,,,needs meaning_note; normalized_base_term=move
+same_base_different_translation,04bec203-a957-492b-80ae-3daeda5a8cb3,en,noun,substantiv,B2,Grammar & Syntax,Grammar & Syntax,needs meaning_note; normalized_base_term=noun
+same_base_different_translation,d2b0a941-bc29-4b99-a1c6-0b117d905a42,en,NOUN,NOUN,C2,C2,C2,needs meaning_note; normalized_base_term=noun
+same_base_different_translation,fed1826a-4021-4a7e-9df7-26741afc9b29,en,pin,stift,B1,B1,B1,needs meaning_note; normalized_base_term=pin
+same_base_different_translation,dd592b58-277e-421f-ae9c-7bd20a8806db,en,PIN,PIN,A2,Money & Shopping,Money & Shopping,needs meaning_note; normalized_base_term=pin
+same_base_different_translation,5a8e0e08-2488-4b37-99a0-9c01edde2c47,en,preposition,präposition,B2,Grammar & Syntax,Grammar & Syntax,needs meaning_note; normalized_base_term=preposition
+same_base_different_translation,4ccd9745-b256-40b4-b93b-5289af9b1709,en,PREPOSITION,PREPOSITION,C2,C2,C2,needs meaning_note; normalized_base_term=preposition
+same_base_different_translation,25f3eb07-223e-4ce4-ae32-3501a3daa0a7,en,sunday,sonntags,B1,Top 500 Words,Top 500 Words,needs meaning_note; normalized_base_term=sunday
+same_base_different_translation,78aeddcd-d89e-4110-b59b-a4dd72cde9e7,en,Sunday,Sonntag,A1,A1,A1,needs meaning_note; normalized_base_term=sunday
+same_base_different_translation,6a6e9ac6-ddc4-4ee0-a6a6-51d8ad8edf3f,en,throughout,durchgehend,,,,needs meaning_note; normalized_base_term=throughout
+same_base_different_translation,8aae50ac-dadb-49ad-8ce6-89f6c501ecac,en,throughout,in ganz,B1,B1,B1,needs meaning_note; normalized_base_term=throughout
