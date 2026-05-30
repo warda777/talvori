@@ -205,8 +205,10 @@ class _InitGateState extends State<_InitGate> {
       debugPrint('⚠️ Notification-Tap-Handler nicht bereit: $e');
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
+    if (kDebugMode) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_shared_word', 'umbrella'); // TEST-Wort
+    }
 
     // Logging hilft beim Teilen-Debug:
     try {
