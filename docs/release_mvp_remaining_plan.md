@@ -427,6 +427,8 @@ Ziel:
   `docs/store_review_notes_draft.md`.
 - Die aktuellen MVP-Blocker sind priorisiert:
   `docs/final_mvp_blocker_review.md`.
+- Die Store-/Build-Identitaet ist geprueft:
+  `docs/store_build_identity_check.md`.
 - Screenshots und finale Store-Einreichung bleiben offen.
 
 Enthält:

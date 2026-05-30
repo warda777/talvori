@@ -7,13 +7,15 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 ## 1. App-Identitaet
 
 - [ ] App-Name final: `Talvori`
+- [x] Store-/Build-Identitaet geprueft: `docs/store_build_identity_check.md`
 - [x] Untertitel-/Kurzbeschreibungsentwuerfe vorbereitet
 - [x] Langbeschreibung als Entwurf vorbereitet
 - [x] Kategorie-Empfehlung vorbereitet: primaer Bildung
 - [x] Keywords / Suchbegriffe vorbereitet
 - [ ] App-Icon final geprueft
-- [ ] Bundle ID / Package Name geprueft
-- [ ] Version und Build Number gesetzt
+- [x] Bundle ID / Package Name technisch geprueft
+- [x] Version und Build Number geprueft: `1.0.0+1`
+- [ ] finale Entscheidung: `com.talvori.talvori` behalten oder vor Store-Reservierung auf `eu.talvori.app` / `com.talvori.app` umstellen
 
 ## 2. Rechtliches
 
@@ -43,6 +45,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 ## 4. App-Funktionalitaet Fuer Review
 
 - [ ] Release-Build erstellt
+- [ ] Android Release Signing fuer Store konfiguriert
 - [ ] Release-Build auf echtem iOS-Geraet geprueft
 - [ ] Release-Build auf echtem Android-Geraet geprueft, falls Android MVP
 - [x] Frischer App-Start manuell geprueft

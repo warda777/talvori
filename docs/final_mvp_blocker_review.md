@@ -72,13 +72,15 @@ Warum Blocker:
 
 - Ohne Store-Konfiguration kann keine Einreichung erfolgen.
 - Bundle ID, Version/Build Number, Kategorie, Altersfreigabe und Datenverwendungsangaben muessen konsistent sein.
+- Die technische Identitaet wurde in `docs/store_build_identity_check.md` geprueft: aktuell nutzen iOS und Android `com.talvori.talvori`, Version `1.0.0+1`, sichtbarer App-Name `Talvori`.
 
 Naechste Aktion:
 
 - Store-App-Datensatz anlegen oder pruefen.
-- Bundle ID / Package Name final pruefen.
-- Version und Build Number setzen.
+- Entscheiden, ob `com.talvori.talvori` fuer den MVP behalten wird oder vor Store-Reservierung auf `eu.talvori.app` / `com.talvori.app` umgestellt wird.
+- Version `1.0.0+1` als MVP-Startwert bestaetigen.
 - Store-Metadaten aus `docs/store_metadata_draft.md` an Plattformlimits anpassen.
+- Android Release Signing fuer Play Store konfigurieren, falls Android MVP ist.
 
 ### D. App-Icon und Screenshots aus finalem Build
 
