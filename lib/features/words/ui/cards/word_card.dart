@@ -945,74 +945,168 @@ class _HomeBrowserOpenSheet extends StatelessWidget {
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 18),
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF061018),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF10243A),
+                  Color(0xFF07111D),
+                  Color(0xFF120D22),
+                ],
+                stops: [0, 0.58, 1],
+              ),
+              border: Border.all(
+                color: const Color(0xFF5DDCFF).withValues(alpha: 0.5),
+                width: 1.2,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF5DDCFF).withValues(alpha: 0.22),
-                  blurRadius: 28,
-                  spreadRadius: -8,
+                  blurRadius: 34,
+                  spreadRadius: -10,
+                ),
+                BoxShadow(
+                  color: const Color(0xFFB36BFF).withValues(alpha: 0.18),
+                  blurRadius: 40,
+                  spreadRadius: -14,
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                const Text(
-                  'Browser öffnen',
-                  style: TextStyle(
-                    color: Color(0xFFF4F8FF),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
+                Positioned(
+                  right: -34,
+                  top: -36,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFF5DDCFF).withValues(alpha: 0.22),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Wähle, womit Talvori deine hinterlegte Webseite öffnet. Es wird keine letzte Seite gesucht.',
-                  style: TextStyle(
-                    color: Color(0xFF93A2B8),
-                    fontSize: 12.5,
-                    height: 1.3,
-                    fontWeight: FontWeight.w700,
+                Positioned(
+                  left: -42,
+                  bottom: 10,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 108,
+                      height: 108,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFFB36BFF).withValues(alpha: 0.14),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                _HomeBrowserOptionTile(
-                  key: const Key('home-browser-option-system'),
-                  icon: Icons.travel_explore_rounded,
-                  title: 'Standardbrowser',
-                  subtitle: 'Öffnet deinen Standardbrowser',
-                  onTap: () => onSelect(HomeBrowserChoice.system),
-                ),
-                const SizedBox(height: 8),
-                _HomeBrowserOptionTile(
-                  key: const Key('home-browser-option-chrome'),
-                  icon: Icons.public_rounded,
-                  title: 'Chrome',
-                  subtitle: 'Direkt in Chrome öffnen',
-                  onTap: () => onSelect(HomeBrowserChoice.chrome),
-                ),
-                const SizedBox(height: 8),
-                _HomeBrowserOptionTile(
-                  key: const Key('home-browser-option-brave'),
-                  icon: Icons.shield_rounded,
-                  title: 'Brave',
-                  subtitle: 'Direkt in Brave öffnen',
-                  onTap: () => onSelect(HomeBrowserChoice.brave),
-                ),
-                const SizedBox(height: 10),
-                _HomeBrowserStartPageAction(onTap: onSetStartPage),
-                const SizedBox(height: 10),
-                const Text(
-                  'Safari öffnet sich über Standardbrowser, wenn Safari auf deinem Gerät als Standardbrowser eingestellt ist.',
-                  style: TextStyle(
-                    color: Color(0xFF93A2B8),
-                    fontSize: 11.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFF5DDCFF).withValues(alpha: 0.28),
+                                const Color(0xFFB36BFF).withValues(alpha: 0.22),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.14),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.open_in_browser_rounded,
+                            color: Color(0xFFBFFFF2),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Browser öffnen',
+                            style: TextStyle(
+                              color: Color(0xFFF4F8FF),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Wähle, womit Talvori deine hinterlegte Webseite öffnet. Es wird keine letzte Seite gesucht.',
+                      style: TextStyle(
+                        color: Color(0xFFB7C4D8),
+                        fontSize: 12.5,
+                        height: 1.3,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _HomeBrowserOptionTile(
+                      key: const Key('home-browser-option-system'),
+                      icon: Icons.travel_explore_rounded,
+                      title: 'Standardbrowser',
+                      subtitle: 'Öffnet deinen Standardbrowser',
+                      accent: const Color(0xFF7DFFE3),
+                      glow: const Color(0xFF5DDCFF),
+                      onTap: () => onSelect(HomeBrowserChoice.system),
+                    ),
+                    const SizedBox(height: 8),
+                    _HomeBrowserOptionTile(
+                      key: const Key('home-browser-option-chrome'),
+                      icon: Icons.public_rounded,
+                      title: 'Chrome',
+                      subtitle: 'Direkt in Chrome öffnen',
+                      accent: const Color(0xFF78E6FF),
+                      glow: const Color(0xFFB36BFF),
+                      onTap: () => onSelect(HomeBrowserChoice.chrome),
+                    ),
+                    const SizedBox(height: 8),
+                    _HomeBrowserOptionTile(
+                      key: const Key('home-browser-option-brave'),
+                      icon: Icons.shield_rounded,
+                      title: 'Brave',
+                      subtitle: 'Direkt in Brave öffnen',
+                      accent: const Color(0xFFB36BFF),
+                      glow: const Color(0xFFFF7AC8),
+                      onTap: () => onSelect(HomeBrowserChoice.brave),
+                    ),
+                    const SizedBox(height: 10),
+                    _HomeBrowserStartPageAction(onTap: onSetStartPage),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Safari öffnet sich über Standardbrowser, wenn Safari auf deinem Gerät als Standardbrowser eingestellt ist.',
+                      style: TextStyle(
+                        color: Color(0xFF9EADC4),
+                        fontSize: 11.5,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1031,7 +1125,7 @@ class _HomeBrowserStartPageAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF061018),
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         key: const Key('home-browser-set-start-url'),
@@ -1041,9 +1135,24 @@ class _HomeBrowserStartPageAction extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFF5DDCFF).withValues(alpha: 0.24),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF0F2A34).withValues(alpha: 0.92),
+                const Color(0xFF0A1320).withValues(alpha: 0.96),
+              ],
             ),
+            border: Border.all(
+              color: const Color(0xFF5DDCFF).withValues(alpha: 0.38),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF5DDCFF).withValues(alpha: 0.14),
+                blurRadius: 18,
+                spreadRadius: -8,
+              ),
+            ],
           ),
           child: const Row(
             children: [
@@ -1150,14 +1259,27 @@ class _HomeBrowserStartPageSheetState
           key: const Key('home-browser-start-url-sheet'),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
           decoration: BoxDecoration(
-            color: const Color(0xFF061018),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF5DDCFF), width: 1.2),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF10243A), Color(0xFF07111D), Color(0xFF120D22)],
+              stops: [0, 0.58, 1],
+            ),
+            border: Border.all(
+              color: const Color(0xFF5DDCFF).withValues(alpha: 0.5),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF5DDCFF).withValues(alpha: 0.22),
-                blurRadius: 28,
-                spreadRadius: -8,
+                blurRadius: 34,
+                spreadRadius: -10,
+              ),
+              BoxShadow(
+                color: const Color(0xFFB36BFF).withValues(alpha: 0.18),
+                blurRadius: 40,
+                spreadRadius: -14,
               ),
             ],
           ),
@@ -1198,11 +1320,11 @@ class _HomeBrowserStartPageSheetState
                   hintText: 'z. B. $_homeBrowserStartUrl',
                   hintStyle: const TextStyle(color: Color(0xFF5F6E83)),
                   filled: true,
-                  fillColor: const Color(0xFF0B1823),
+                  fillColor: const Color(0xFF0A1624),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: const Color(0xFF7DFFE3).withValues(alpha: 0.28),
+                      color: const Color(0xFF7DFFE3).withValues(alpha: 0.34),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
@@ -1240,6 +1362,10 @@ class _HomeBrowserStartPageSheetState
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF7DFFE3),
                         foregroundColor: const Color(0xFF061018),
+                        shadowColor: const Color(
+                          0xFF5DDCFF,
+                        ).withValues(alpha: 0.45),
+                        elevation: 4,
                       ),
                       onPressed: () => _save(context),
                       child: const Text('Speichern'),
@@ -1284,18 +1410,22 @@ class _HomeBrowserOptionTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.accent,
+    required this.glow,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final Color accent;
+  final Color glow;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF0B1823),
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -1304,9 +1434,22 @@ class _HomeBrowserOptionTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFF7DFFE3).withValues(alpha: 0.28),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                accent.withValues(alpha: 0.13),
+                const Color(0xFF0B1823).withValues(alpha: 0.96),
+              ],
             ),
+            border: Border.all(color: accent.withValues(alpha: 0.34)),
+            boxShadow: [
+              BoxShadow(
+                color: glow.withValues(alpha: 0.12),
+                blurRadius: 20,
+                spreadRadius: -10,
+              ),
+            ],
           ),
           child: Row(
             children: [
@@ -1314,13 +1457,18 @@ class _HomeBrowserOptionTile extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF78E6FF).withValues(alpha: 0.12),
+                  color: accent.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFF78E6FF).withValues(alpha: 0.42),
-                  ),
+                  border: Border.all(color: accent.withValues(alpha: 0.46)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: glow.withValues(alpha: 0.18),
+                      blurRadius: 16,
+                      spreadRadius: -8,
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: const Color(0xFF7DFFE3), size: 20),
+                child: Icon(icon, color: accent, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1349,7 +1497,7 @@ class _HomeBrowserOptionTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFF78E6FF)),
+              Icon(Icons.chevron_right_rounded, color: accent),
             ],
           ),
         ),
