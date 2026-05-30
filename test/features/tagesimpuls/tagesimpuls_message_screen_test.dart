@@ -97,7 +97,7 @@ void main() {
     expect(find.text('Füge mindestens 3 Wörter hinzu.'), findsOneWidget);
     expect(
       find.text(
-        'Füge mindestens 3 Wörter hinzu. Automatische Wortauswahl folgt später.',
+        'Füge mindestens 3 Wörter hinzu. Wähle vorerst bewusst Wörter aus deiner Liste aus.',
       ),
       findsNothing,
     );
@@ -122,7 +122,7 @@ void main() {
     );
     expect(
       find.text(
-        'Füge mindestens 3 Wörter hinzu. Automatische Wortauswahl folgt später.',
+        'Füge mindestens 3 Wörter hinzu. Wähle vorerst bewusst Wörter aus deiner Liste aus.',
       ),
       findsNothing,
     );
@@ -452,7 +452,7 @@ void main() {
     await tester.tap(find.byKey(const Key('real_tagesimpuls_10s_test_button')));
     await tester.pump();
 
-    expect(find.text('Tagesimpuls-Test wird vorbereitet...'), findsOneWidget);
+    expect(find.text('Tagesimpuls-Test wird geplant...'), findsOneWidget);
     final button = tester.widget<OutlinedButton>(
       find.byKey(const Key('real_tagesimpuls_10s_test_button')),
     );

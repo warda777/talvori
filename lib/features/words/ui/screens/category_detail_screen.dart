@@ -610,7 +610,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
               );
             },
             onAdd: () {
-              TalvoriSnackBar.show(context, message: 'Add tapped');
+              TalvoriSnackBar.show(
+                context,
+                message:
+                    'Eigene Wörter ergänzt du aktuell über „Meine Wörter“ und den Browser-Import.',
+              );
             },
             onSettings: () {
               showCategorySettingsSheet(

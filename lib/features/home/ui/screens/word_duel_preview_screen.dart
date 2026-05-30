@@ -53,7 +53,7 @@ class WordDuelPreviewScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Dieser Modus wird später ein echtes Duell gegen andere Talvori-Spieler. Ihr erkennt dieselben Wörter. Wer schneller und richtiger antwortet, gewinnt.',
+                    'Ein vorbereiteter Mehrspieler-Modus für schnelle Worterkennung. Im MVP bleibt das Duell als Ausblick sichtbar, ohne Punkte oder Lernfortschritt zu verändern.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFFB8C7D9),

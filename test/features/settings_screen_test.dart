@@ -113,8 +113,8 @@ void main() {
 
     await tester.tap(find.text('Abonnement verwalten'));
     await tester.pumpAndSettle();
-    expect(find.text('Premium ist vorbereitet.'), findsOneWidget);
-    expect(find.text('Premium-Mitglied werden'), findsOneWidget);
+    expect(find.text('Premium-Erweiterung'), findsOneWidget);
+    expect(find.text('Premium-Plan ansehen'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
     await tester.pumpAndSettle();
 
@@ -175,7 +175,9 @@ void main() {
     await tester.tap(find.text('Datenschutzrichtlinie'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Datenschutzinformationen werden hier angezeigt.'),
+      find.text(
+        'Die finale Datenschutzrichtlinie wird vor dem Marktstart hinterlegt. Bis dahin nutzt Talvori lokale Lernstände und getrennte Freigaben für optionale Online-Funktionen.',
+      ),
       findsOneWidget,
     );
 

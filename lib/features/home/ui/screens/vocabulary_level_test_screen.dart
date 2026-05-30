@@ -150,7 +150,7 @@ class VocabularyLevelTestScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Der Einstufungstest wird vorbereitet.',
+                    'Einstufungstest in Vorbereitung',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 21,
@@ -160,7 +160,7 @@ class VocabularyLevelTestScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Wir binden ihn erst an, wenn die Testlogik stabil ist. Es werden keine Level geschätzt und kein Lernfortschritt verändert.',
+                    'Wir schalten ihn frei, sobald die Auswertung stabil genug ist. Bis dahin wird kein Level geschätzt und dein Lernfortschritt bleibt unverändert.',
                     style: TextStyle(color: _muted, fontSize: 15, height: 1.35),
                   ),
                   const SizedBox(height: 22),

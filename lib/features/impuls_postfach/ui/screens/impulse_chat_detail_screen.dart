@@ -388,7 +388,7 @@ class _ImpulseChatDetailScreenState
         },
         onForward: () {
           Navigator.of(context).pop();
-          _showSnack('Weiterleiten folgt später.');
+          _showSnack('Weiterleiten ist als nächste Chat-Erweiterung geplant.');
         },
         onCopy: () async {
           Navigator.of(context).pop();
@@ -410,6 +410,10 @@ class _ImpulseChatDetailScreenState
         onMore: () {
           Navigator.of(context).pop();
           _openMoreActions(message);
+        },
+        onMoreReactions: () {
+          Navigator.of(context).pop();
+          _showSnack('Weitere Reaktionen sind als Chat-Erweiterung geplant.');
         },
       ),
     );
@@ -433,11 +437,13 @@ class _ImpulseChatDetailScreenState
         },
         onSpeak: () {
           Navigator.of(context).pop();
-          _showSnack('Vorlesen folgt später.');
+          _showSnack('Vorlesen ist für eine spätere Sprachausgabe geplant.');
         },
         onTranslate: () {
           Navigator.of(context).pop();
-          _showSnack('Übersetzen folgt später.');
+          _showSnack(
+            'Übersetzen wird mit der Mehrsprachigkeitsstrategie geplant.',
+          );
         },
       ),
     );
@@ -1784,6 +1790,7 @@ class _MessageActionSheet extends StatelessWidget {
     required this.onToggleStar,
     required this.onDelete,
     required this.onMore,
+    required this.onMoreReactions,
   });
 
   final ImpulseMessage message;
@@ -1794,6 +1801,7 @@ class _MessageActionSheet extends StatelessWidget {
   final VoidCallback onToggleStar;
   final VoidCallback onDelete;
   final VoidCallback onMore;
+  final VoidCallback onMoreReactions;
 
   static const _reactions = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🥰'];
 
@@ -1827,7 +1835,7 @@ class _MessageActionSheet extends StatelessWidget {
                     height: 36,
                   ),
                   padding: EdgeInsets.zero,
-                  onPressed: () {},
+                  onPressed: onMoreReactions,
                   icon: const Icon(
                     Icons.add_rounded,
                     color: Color(0xFFB8C4D9),

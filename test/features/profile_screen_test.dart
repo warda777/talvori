@@ -90,9 +90,9 @@ void main() {
 
     expect(find.text('Profil'), findsOneWidget);
     expect(find.byKey(const Key('profile-settings-button')), findsOneWidget);
-    expect(find.text('Auf Premium upgraden'), findsOneWidget);
+    expect(find.text('Premium-Erweiterung'), findsOneWidget);
     expect(find.text('Mach einen Test'), findsOneWidget);
-    expect(find.text('um dein aktuelles Level zu sehen'), findsOneWidget);
+    expect(find.text('Einstufung wird vorbereitet'), findsOneWidget);
     expect(find.text('Dein Fortschritt'), findsOneWidget);
     expect(find.text('Taler'), findsOneWidget);
     expect(find.text('Wochenserie'), findsOneWidget);
@@ -251,7 +251,7 @@ void main() {
     await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Der Einstufungstest wird vorbereitet.'), findsOneWidget);
+    expect(find.text('Einstufungstest in Vorbereitung'), findsOneWidget);
 
     await tester.tap(find.text('Verstanden'));
     await tester.pumpAndSettle();
@@ -289,9 +289,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sammlungen'), findsOneWidget);
-    expect(
-      find.textContaining('Sammlungen werden vorbereitet'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Sammlungen bündeln künftig'), findsOneWidget);
   });
 }

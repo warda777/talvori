@@ -816,9 +816,7 @@ class _CourseScreenState extends ConsumerState<CourseScreen>
     }
 
     setState(() => _isApplyingTagesimpulsSettings = true);
-    settingsController.setNextPlannedInfo(
-      'Tagesimpuls-Test wird vorbereitet...',
-    );
+    settingsController.setNextPlannedInfo('Tagesimpuls-Test wird geplant...');
     try {
       debugPrint(
         'Tagesimpuls real 10s start selectionCount=${selectedItems.length}',
@@ -1215,7 +1213,7 @@ class _TagesimpulsStatusViewModel {
     if (selectionCount < 3) {
       return const _TagesimpulsStatusViewModel(
         statusText: 'Füge mindestens 3 Wörter hinzu.',
-        secondaryText: 'Automatische Wortauswahl folgt später.',
+        secondaryText: 'Wähle vorerst bewusst Wörter aus deiner Liste aus.',
         severity: _TagesimpulsStatusSeverity.warning,
         canRunRealTenSecondTest: false,
       );

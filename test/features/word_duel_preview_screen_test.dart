@@ -10,10 +10,13 @@ void main() {
 
     expect(find.text('Wort-Duell'), findsWidgets);
     expect(
-      find.textContaining('echtes Duell gegen andere Talvori-Spieler'),
+      find.textContaining('vorbereiteter Mehrspieler-Modus'),
       findsOneWidget,
     );
-    expect(find.textContaining('Ihr erkennt dieselben Wörter'), findsOneWidget);
+    expect(
+      find.textContaining('ohne Punkte oder Lernfortschritt'),
+      findsOneWidget,
+    );
     expect(find.text('Bedeutungs-Duell'), findsNothing);
     expect(find.text('Spieler einladen'), findsOneWidget);
     expect(find.text('Duell-Anfrage'), findsOneWidget);

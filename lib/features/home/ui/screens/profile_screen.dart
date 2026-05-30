@@ -50,8 +50,8 @@ class ProfileScreen extends ConsumerWidget {
                 icon: Icons.workspace_premium_rounded,
                 accent: _gold,
                 body:
-                    'Premium ist vorbereitet. Später erhältst du hier Zugriff auf KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken.',
-                actionLabel: 'Premium-Mitglied werden',
+                    'Premium wird als Erweiterung für zusätzliche KI-Spiele, Wortwelten und tiefere Statistiken vorbereitet. Der aktuelle MVP bleibt ohne Abo nutzbar.',
+                actionLabel: 'Premium-Plan ansehen',
               ),
             ),
             const SizedBox(height: 16),
@@ -136,7 +136,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.folder_rounded,
                     accent: _violet,
                     body:
-                        'Sammlungen werden vorbereitet. Hier findest du später eigene Wortgruppen und gespeicherte Themen.',
+                        'Sammlungen bündeln künftig eigene Wortgruppen und gespeicherte Themen. Bis dahin findest du deine aktiven Listen unter Favoriten, Meine Wörter und Wortwelten.',
                   ),
                 ),
                 _ProfileQuickCard(
@@ -150,7 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.history_rounded,
                     accent: _cyan,
                     body:
-                        'Verlauf wird vorbereitet. Dein Lern- und Spielverlauf bleibt getrennt vom SRS-Fortschritt.',
+                        'Der Verlauf wird als lesbare Chronik vorbereitet. Dein SRS-Fortschritt und deine Wortspiel-Belohnungen bleiben schon jetzt getrennt gespeichert.',
                   ),
                 ),
               ],
@@ -182,7 +182,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.record_voice_over_rounded,
                     accent: _cyan,
                     body:
-                        'Stimmen werden vorbereitet. Aussprache und TTS bleiben lokal über die vorhandene App-Logik steuerbar.',
+                        'Stimmen werden als eigener Einstellungsbereich vorbereitet. Aussprache nutzt bereits die vorhandene Sprachlogik der Lernkarten.',
                   ),
                 ),
                 _ProfileQuickCard(
@@ -207,7 +207,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.widgets_rounded,
                     accent: _violet,
                     body:
-                        'Widgets werden vorbereitet. Sobald eine stabile Widget-Integration vorhanden ist, findest du hier die Einrichtung.',
+                        'Widgets sind als späterer Schnellzugriff auf Wörter und Tagesimpulse geplant. Sobald die Integration stabil ist, erscheint hier die Einrichtung.',
                     actionLabel: 'Verstanden',
                   ),
                 ),
@@ -228,7 +228,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.help_outline_rounded,
                     accent: _mint,
                     body:
-                        'Wie können wir helfen? Support und Feedback werden hier gebündelt, ohne dass im Profil technische Einstellungen landen.',
+                        'Hilfe und Feedback werden hier gebündelt. Für den MVP bleibt das Profil ruhig und trennt Support klar von technischen Einstellungen.',
                   ),
                 ),
               ],
@@ -427,7 +427,7 @@ class _LevelTestCard extends StatelessWidget {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'um dein aktuelles Level zu sehen',
+                      'Einstufung wird vorbereitet',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -510,7 +510,7 @@ class _PremiumCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Auf Premium upgraden',
+                      'Premium-Erweiterung',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -522,7 +522,7 @@ class _PremiumCard extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken freischalten.',
+                      'Geplant für KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken.',
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -765,7 +765,7 @@ class _PreparedProfileScreen extends StatelessWidget {
                 label: actionLabel!,
                 onTap: () => TalvoriSnackBar.show(
                   context,
-                  message: 'Diese Funktion wird vorbereitet.',
+                  message: 'Dieser Bereich ist für den Marktstart vorbereitet.',
                 ),
               ),
             ],

@@ -1587,7 +1587,7 @@ void main() {
     expect(find.byType(WordDuelPreviewScreen), findsOneWidget);
     expect(find.text('Wort-Duell'), findsWidgets);
     expect(
-      find.textContaining('echtes Duell gegen andere Talvori-Spieler'),
+      find.textContaining('vorbereiteter Mehrspieler-Modus'),
       findsOneWidget,
     );
     expect(find.text('Bedeutungs-Duell'), findsNothing);

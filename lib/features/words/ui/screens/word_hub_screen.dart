@@ -439,7 +439,11 @@ class _WordHubScreenState extends ConsumerState<WordHubScreen> {
       height: 36,
       child: TextButton(
         key: key,
-        onPressed: () {},
+        onPressed: () => TalvoriSnackBar.show(
+          context,
+          message:
+              'Weitere Wortwelten werden schrittweise freigeschaltet, sobald ihre Inhalte geprüft sind.',
+        ),
         style: TextButton.styleFrom(
           backgroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

@@ -164,7 +164,7 @@ class SettingsScreen extends ConsumerWidget {
                   const _PlaceholderSettingsScreen(
                     title: 'Anmelden',
                     body:
-                        'Die Anmeldung wird vorbereitet. Du kannst Talvori aktuell vollständig lokal nutzen.',
+                        'Talvori speichert deinen Lernstand aktuell lokal auf diesem Gerät. Ein Konto für Synchronisation und Gerätewechsel ist als nächster Ausbauschritt vorbereitet.',
                   ),
                 ),
               ),
@@ -180,7 +180,8 @@ class SettingsScreen extends ConsumerWidget {
                   context,
                   const _PlaceholderSettingsScreen(
                     title: 'Hilfe',
-                    body: 'Wie können wir helfen?',
+                    body:
+                        'Hier entsteht die zentrale Hilfe für Lernen, Wörter prüfen, Import und Konto. Bis der Support-Kanal freigeschaltet ist, bleiben deine Daten lokal und unverändert.',
                   ),
                 ),
               ),
@@ -196,7 +197,8 @@ class SettingsScreen extends ConsumerWidget {
                   context,
                   const _PlaceholderSettingsScreen(
                     title: 'Feedback zu neuen Funktionen',
-                    body: 'Diese Funktion wird vorbereitet.',
+                    body:
+                        'Feedback wird hier künftig direkt gebündelt. Für den MVP bleibt dieser Bereich als vorbereiteter Kontaktpunkt sichtbar, ohne Daten automatisch zu versenden.',
                   ),
                 ),
               ),
@@ -212,7 +214,8 @@ class SettingsScreen extends ConsumerWidget {
                   context,
                   const _PlaceholderSettingsScreen(
                     title: 'Datenschutzrichtlinie',
-                    body: 'Datenschutzinformationen werden hier angezeigt.',
+                    body:
+                        'Die finale Datenschutzrichtlinie wird vor dem Marktstart hinterlegt. Bis dahin nutzt Talvori lokale Lernstände und getrennte Freigaben für optionale Online-Funktionen.',
                   ),
                 ),
               ),
@@ -224,7 +227,7 @@ class SettingsScreen extends ConsumerWidget {
                   const _PlaceholderSettingsScreen(
                     title: 'AGB',
                     body:
-                        'Die Allgemeinen Geschäftsbedingungen werden hier angezeigt.',
+                        'Die finalen Nutzungsbedingungen werden vor dem Marktstart ergänzt. Dieser Bereich ist als feste Stelle für die rechtlichen Informationen vorbereitet.',
                   ),
                 ),
               ),
@@ -276,7 +279,10 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   static void _preparedSnack(BuildContext context) {
-    TalvoriSnackBar.show(context, message: 'Diese Funktion wird vorbereitet.');
+    TalvoriSnackBar.show(
+      context,
+      message: 'Dieser Bereich ist für den Marktstart vorbereitet.',
+    );
   }
 
   static String _mascotStyleLabel(TalvoriMascotStyle style) {
@@ -1114,7 +1120,7 @@ class _SubscriptionScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 18),
                 Text(
-                  'Premium ist vorbereitet.',
+                  'Premium-Erweiterung',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25,
@@ -1124,7 +1130,7 @@ class _SubscriptionScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Später erhältst du hier Zugriff auf KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken.',
+                  'Geplant für KI-Spiele, zusätzliche Wortwelten und erweiterte Statistiken. Der MVP bleibt ohne Abo nutzbar.',
                   style: TextStyle(
                     color: SettingsScreen._muted,
                     fontSize: 16,
@@ -1136,7 +1142,7 @@ class _SubscriptionScreen extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           _PrimaryButton(
-            label: 'Premium-Mitglied werden',
+            label: 'Premium-Plan ansehen',
             onTap: () => SettingsScreen._preparedSnack(context),
           ),
         ],
