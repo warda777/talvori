@@ -362,3 +362,24 @@ Noch nicht bauen:
 - Wie werden `meaning_id` und `meaning_note` später in lokale Daten und Supabase-Pakete übernommen?
 - Soll SRS langfristig pro Wort oder pro Bedeutung laufen?
 - Welche Rolle bekommen vorhandene Kategorien, wenn sie nur technische Level/Paketmarker waren?
+
+## 9. Abschluss erster Batch und nächster Strukturblock
+
+Der erste manuelle Batch ist abgeschlossen:
+
+- `manual_review_first_batch_overlay.csv`
+- `manual_review_first_batch_report.md`
+- `manual_review_first_batch_summary.md`
+
+Alle 103 Zeilen enthalten eine Review-Entscheidung, aber keine produktive
+Korrektur oder Freigabe.
+
+Der nächste große Review-Block trennt A1-C2 und `Top 500 Words` fachlich von
+Wortwelten. Dafür wurden vorbereitet:
+
+- `level_and_package_structure_review_plan.md`
+- `level_package_structure_first_batch.csv`
+- `tool/export_level_package_structure_batch.dart`
+
+Die Struktur-Batch-Datei ist nur eine kleine Arbeitsliste. Sie verändert keine
+App-Daten und setzt keine `approved`- oder `release_ready`-Werte.

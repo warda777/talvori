@@ -437,6 +437,23 @@ Review-Entscheidungen und verändert keine App-, Supabase-, SQLite-, SRS- oder
 `word_progress`-Daten. Spätere Prozesse müssen Overlays erneut prüfen, bevor
 daraus echte Content-Änderungen oder Release-Pakete entstehen.
 
+Der erste manuelle Batch ist abgeschlossen und dokumentiert:
+
+- `docs/word-review/manual_review_first_batch_summary.md`
+- `docs/word-review/manual_review_first_batch_overlay.csv`
+- `docs/word-review/manual_review_first_batch_report.md`
+
+Der nächste Struktur-Fokus ist die Trennung von A1-C2-Leveln, `Top 500 Words`
+als Paket und echten thematischen Wortwelten. Dafür gibt es eine eigene
+Planung und eine kleine read-only Arbeitsliste:
+
+- `docs/word-review/level_and_package_structure_review_plan.md`
+- `docs/word-review/level_package_structure_first_batch.csv`
+- `tool/export_level_package_structure_batch.dart`
+
+Die Struktur-Batch-Datei ist nur eine Review-Arbeitsliste. Sie setzt keine
+Level, keine Wortwelten und keine Pakete produktiv.
+
 Grund:
 
 - Es existiert bereits ein read-only Supabase-Review-Export.
@@ -492,9 +509,10 @@ Nicht releasefähig:
 5. Dubletten-Kandidaten nach `exact_duplicate`, `case_variant` und `meaning_variant` sortieren.
 6. Bedeutungsschlüssel für häufige Mehrdeutigkeiten definieren.
 7. A1-C2 und Top 500 fachlich von Wortwelten trennen.
-8. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
-9. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
-10. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
+8. Struktur-Batch zu Level/Paket/Wortwelt manuell prüfen.
+9. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
+10. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
+11. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
 
 ## 17. Nicht-Ziele dieses Schritts
 
