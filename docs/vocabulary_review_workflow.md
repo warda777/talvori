@@ -450,9 +450,25 @@ Planung und eine kleine read-only Arbeitsliste:
 - `docs/word-review/level_and_package_structure_review_plan.md`
 - `docs/word-review/level_package_structure_first_batch.csv`
 - `tool/export_level_package_structure_batch.dart`
+- `tool/validate_level_package_structure_batch.dart`
+- `tool/export_level_package_structure_overlay.dart`
 
 Die Struktur-Batch-Datei ist nur eine Review-Arbeitsliste. Sie setzt keine
 Level, keine Wortwelten und keine Pakete produktiv.
+
+Der erste repräsentative Struktur-Batch wurde in einer lokalen Working-Copy
+bearbeitet und validiert:
+
+- 57 Strukturzeilen
+- 57 gefüllte Entscheidungen
+- 0 Validierungsprobleme
+- Overlay: `docs/word-review/level_package_structure_first_batch_overlay.csv`
+- Report: `docs/word-review/level_package_structure_first_batch_report.md`
+
+Die Entscheidungen bleiben Overlay-/Review-Daten. Sie ändern keine App-Daten,
+keine Supabase-Daten, keine SQLite-Daten, keine SRS-Daten und kein
+`word_progress`. Größere Struktur-Batches sollen erst nach fachlicher Prüfung
+dieses repräsentativen Batches folgen.
 
 Grund:
 
@@ -509,10 +525,11 @@ Nicht releasefähig:
 5. Dubletten-Kandidaten nach `exact_duplicate`, `case_variant` und `meaning_variant` sortieren.
 6. Bedeutungsschlüssel für häufige Mehrdeutigkeiten definieren.
 7. A1-C2 und Top 500 fachlich von Wortwelten trennen.
-8. Struktur-Batch zu Level/Paket/Wortwelt manuell prüfen.
-9. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
-10. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
-11. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
+8. Struktur-Overlay zu Level/Paket/Wortwelt fachlich prüfen.
+9. Weitere Struktur-Batches gezielt erzeugen, besonders für `top_500_only` und `top_500_topic`.
+10. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
+11. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
+12. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.
 
 ## 17. Nicht-Ziele dieses Schritts
 

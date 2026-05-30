@@ -107,7 +107,7 @@ Strukturissue-Bestand vorkommen.
 
 ## 8. Review-Ziel für den Batch
 
-Für jede Zeile soll später nur eine Entscheidung vorbereitet werden:
+Für jede Zeile wird nur eine Entscheidung vorbereitet:
 
 - `map_level`
 - `map_package`
@@ -117,13 +117,53 @@ Für jede Zeile soll später nur eine Entscheidung vorbereitet werden:
 - `reject`
 
 Dabei gilt: keine produktiven Vokabeldaten ändern, kein Import, keine
-Freigabe, keine automatische Korrektur. Erst nach dem manuellen Review kann
-ein separates Overlay-Format für Strukturentscheidungen geplant werden.
+Freigabe, keine automatische Korrektur.
 
-## 9. Nächste technische Schritte
+Der erste Struktur-Batch wurde in einer lokalen Working-Copy bearbeitet:
 
-1. Struktur-Batch manuell prüfen.
-2. Mapping-Regeln für Level, Paket und Wortwelt bestätigen.
-3. Ein separates Struktur-Overlay-Format definieren.
-4. Validator für Struktur-Overlays ergänzen.
-5. Erst danach größere Struktur-Batches erzeugen.
+- Working-Copy: `docs/word-review/level_package_structure_first_batch_working.csv`
+- Report: `docs/word-review/level_package_structure_first_batch_report.md`
+- Overlay: `docs/word-review/level_package_structure_first_batch_overlay.csv`
+
+Die Working-Copy bleibt lokal/ignored. Das Overlay enthält nur
+Review-Entscheidungen und ist kein Import, kein Merge und keine produktive
+Korrektur.
+
+Aktuelle Entscheidungssumme:
+
+| Entscheidung | Anzahl |
+|---|---:|
+| `map_level` | 25 |
+| `map_package` | 15 |
+| `map_word_world` | 17 |
+
+## 9. Struktur-Validator und Overlay-Exporter
+
+Für den Struktur-Batch existieren zwei read-only Werkzeuge:
+
+- `tool/validate_level_package_structure_batch.dart`
+- `tool/export_level_package_structure_overlay.dart`
+
+Der Validator prüft:
+
+- erwartetes Schema
+- Pflichtfelder
+- erlaubte `review_decision` Werte
+- Notizpflicht bei `needs_context` und `reject`
+- Zielstruktur-Hinweis bei `map_level`, `map_package` und `map_word_world`
+- Zeilen pro Strukturfall
+- Entscheidungen nach Typ
+
+Der Overlay-Exporter schreibt nur Zeilen mit gefüllter Entscheidung. Er
+verbindet sich nicht mit Supabase, öffnet keine SQLite-Datenbank, führt keinen
+Import aus und setzt keine Freigabe.
+
+## 10. Nächste technische Schritte
+
+1. Struktur-Overlay fachlich gegen die Planung gegenlesen.
+2. Gezielt weitere `top_500_only` und `top_500_topic` Fälle suchen, falls sie
+   im vollständigen Kandidatenbestand vorkommen.
+3. Größere Struktur-Batches erst nach Auswertung dieses repräsentativen
+   Batches erzeugen.
+4. Später ein getrenntes Import-/Migrationskonzept bauen, das Level, Paket und
+   Wortwelt produktiv trennt.

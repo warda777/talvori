@@ -1,0 +1,58 @@
+word_key,structure_case,base_term,de_translation,detected_level,detected_package,detected_topic,review_decision,review_note,reviewer,reviewed_at
+f91f2280-02de-4ffa-82dc-bd442443a67a,level_only,ADJECTIVE,ADJEKTIV,C2,,,map_level,level=C2; word_world=needs_context,Andreas,2026-05-30
+a74186e3-cf89-421c-8837-e900c568932b,level_only,ADVERB,ADVERB,C2,,,map_level,level=C2; word_world=needs_context,Andreas,2026-05-30
+4ad508cb-54f0-4254-a427-550a40cac0c0,level_only,AIDS,AIDS,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+781d8145-7493-4714-99e5-862aaf081d93,level_only,abandon,aufgeben,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+8deb1c50-23df-4689-bce5-297920656ff7,level_only,ability,fähigkeit,A2,,,map_level,level=A2; word_world=needs_context,Andreas,2026-05-30
+4a338581-4090-478c-97d9-31e046ca92e4,level_only,able,fähig,A2,,,map_level,level=A2; word_world=needs_context,Andreas,2026-05-30
+b5601c77-d701-414c-b432-79d259decca6,level_only,abolish,abschaffen,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+2fe52404-3319-4a8b-b724-4a660b225568,level_only,abortion,abtreibung,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+d861a970-1c9d-416c-8770-93cd2ca563be,level_only,above,über,A1,,,map_level,level=A1; word_world=needs_context,Andreas,2026-05-30
+4688084e-c215-4f23-9127-e7a2fdd66a61,level_only,abroad,im Ausland,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+1bfc1462-e340-40cb-a5dc-1af89ad78352,level_only,abrupt,abrupt,C2,,,map_level,level=C2; word_world=needs_context,Andreas,2026-05-30
+79228f78-960f-4863-8ba8-a584a5af8e89,level_only,abruptly,abrupt,C2,,,map_level,level=C2; word_world=needs_context,Andreas,2026-05-30
+5f8504df-595f-4b05-853e-4c6ba36f0bc7,level_only,absence,abwesenheit,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+61bac0ef-373e-46a0-9807-2af08b0bb562,level_only,absent,abwesend,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+28988cfb-ee73-42f1-8ed3-e1d594160d3b,level_only,absolute,absolut,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+eac9f278-2161-47c8-8ded-fe352704834e,level_only,absolutely,absolut,B1,,,map_level,level=B1; word_world=needs_context,Andreas,2026-05-30
+ce323487-4f52-4bb1-94c3-f0d74cbf66da,level_only,absorb,absorbieren,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+a930a245-301c-4dc8-b58b-b44518719196,level_only,abstract,abstrakt,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+9266cd27-a56d-4f9f-9c7e-7193819c7fe2,level_only,absurd,absurd,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+933fa0e4-98c9-4b38-869f-bb3f916ac83d,level_only,abuse,missbrauchen,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+8eec5fd2-2c84-4765-863d-feca5eaeb526,level_only,abusive,missbräuchlich,C2,,,map_level,level=C2; word_world=needs_context,Andreas,2026-05-30
+e977d0d0-3643-47c6-bc9a-3256770fbeb2,level_only,academic,akademisch,B1,,,map_level,level=B1; word_world=needs_context,Andreas,2026-05-30
+4b54e06d-a4b2-42b7-8770-08ef15d9425b,level_only,academy,akademie,C1,,,map_level,level=C1; word_world=needs_context,Andreas,2026-05-30
+08da39ae-8393-4e5b-8636-87ec83c03524,level_only,accent,akzent,B2,,,map_level,level=B2; word_world=needs_context,Andreas,2026-05-30
+306f9305-ba80-4ae0-b87a-ffcee5dbc11b,level_only,accept,akzeptieren,A2,,,map_level,level=A2; word_world=needs_context,Andreas,2026-05-30
+72d380f8-7264-4164-981a-71c7204300f7,level_top_500,a,a,A2,Top 500 Words,,map_package,level=A2; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+533c33ba-fe78-44a7-a195-9ecdc2162e52,level_top_500,about,über,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+004e283b-efdf-4b34-8f2c-160334f577a5,level_top_500,after,nach,A1; A2,Top 500 Words,,map_package,level=A1; A2; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+4932c77e-8fda-41ab-a211-49ff3dd36dcc,level_top_500,afternoon,nachmittag,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+ccb6a299-be0d-49cd-b1e6-bcee98bf7eec,level_top_500,again,wieder,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+da97a037-fc18-4a8b-9cab-412c018a44dc,level_top_500,age,alter,A1; B1,Top 500 Words,,map_package,level=A1; B1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+3dadc66d-6fd9-42a5-9949-8a99a8ad0045,level_top_500,agree,zustimmen,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+931d4c05-6076-4fb1-96a2-25da99cf65c0,level_top_500,allow,erlauben,C2,Top 500 Words,,map_package,level=C2; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+fcc46733-aef5-4d9d-ad91-93cc259a3f0c,level_top_500,alone,allein,A2,Top 500 Words,,map_package,level=A2; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+22439712-19ad-4cbb-abf0-c079473b6197,level_top_500,already,bereits,A2,Top 500 Words,,map_package,level=A2; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+af35a638-4c68-426a-a843-c04bfe35da08,level_top_500,alright,in Ordnung,B1,Top 500 Words,,map_package,level=B1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+bc9a0c8a-1a59-45ce-80da-71f2236c00e1,level_top_500,always,immer,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+28d41214-889f-42ea-af4d-8ac633dfec85,level_top_500,amazing,erstaunlich,A1,Top 500 Words,,map_package,level=A1; package=Top 500 Words; word_world=needs_context,Andreas,2026-05-30
+af48d112-12ab-4c23-a889-297668951b6e,level_topic,accomplish,erreichen,B2,,Productivity,map_word_world,level=B2; word_world=Productivity,Andreas,2026-05-30
+28a979ad-771f-4d71-8b66-705648aac246,level_topic,account,Konto,B1; B2,,Money & Shopping,map_word_world,level=B1; B2; word_world=Money & Shopping,Andreas,2026-05-30
+6bcf5843-588d-48c6-8803-a76a479daab8,level_topic,accountability,Verantwortungsübernahme,C1,,Relationships,map_word_world,level=C1; word_world=Relationships,Andreas,2026-05-30
+9e1e69c8-6b9a-4c64-a6ac-96d0268a809a,level_topic,accountant,Buchhalter/in,A2; B2,,Work & Careers,map_word_world,level=A2; B2; word_world=Work & Careers,Andreas,2026-05-30
+c35fd476-c405-447c-9084-cff1fb7d203c,level_topic,achieve,erreichen,A2,,Productivity,map_word_world,level=A2; word_world=Productivity,Andreas,2026-05-30
+3463aaf1-8b4d-4cd9-a3e0-77d037bf1e29,level_topic,acid,säure,B2; C1,,Science,map_word_world,level=B2; C1; word_world=Science,Andreas,2026-05-30
+e14579d5-300c-4845-9603-d3b27ccf345f,level_topic,ad,Anzeige/Werbung,B1,,Media & News,map_word_world,level=B1; word_world=Media & News,Andreas,2026-05-30
+88389ee6-0548-482a-b591-a0337bd489f5,level_topic,adaptation,Anpassung,C1,,Environment,map_word_world,level=C1; word_world=Environment,Andreas,2026-05-30
+3363a26e-ae4d-43c7-a5f4-9f2aaff0a7c0,level_topic,aesthetic,ästhetik,C1,,Art & Literature,map_word_world,level=C1; word_world=Art & Literature,Andreas,2026-05-30
+1bde0f83-6f61-442d-be8f-5d28274f86af,level_topic,affordable,erschwinglich,B2,,Money & Shopping,map_word_world,level=B2; word_world=Money & Shopping,Andreas,2026-05-30
+1e8579bc-cadf-42ed-9553-e1a7a5627bc6,level_topic,agenda,Tagesordnung,B1; B2,,Work & Careers,map_word_world,level=B1; B2; word_world=Work & Careers,Andreas,2026-05-30
+1680ec4f-5390-43b4-8418-07714be3f269,level_topic,aggressive,aggressiv,B2; C1,,Animals,map_word_world,level=B2; C1; word_world=Animals,Andreas,2026-05-30
+754df01a-debe-4314-9936-24a2a0bf3ee8,level_topic,agreement,Vereinbarung,B1,,Relationships,map_word_world,level=B1; word_world=Relationships,Andreas,2026-05-30
+7d416fbd-f2b3-4f44-b8db-09cf8076a500,level_topic,alcohol,alkohol,B1,,Science,map_word_world,level=B1; word_world=Science,Andreas,2026-05-30
+028f098f-a545-4ab0-bedb-5596cdb23ec0,level_topic,allowance,Freibetrag,C1,,Money & Shopping,map_word_world,level=C1; word_world=Money & Shopping,Andreas,2026-05-30
+68bce87a-021c-471e-bf8b-f3b88c439530,level_top_500_topic,air,Luft,A1,Top 500 Words,Environment,map_package,level=A1; package=Top 500 Words; word_world=Environment,Andreas,2026-05-30
+c1015783-60e2-4059-b052-e60e5b855c40,level_top_500_topic,airport,Flughafen,A1,Top 500 Words,Travel,map_package,level=A1; package=Top 500 Words; word_world=Travel,Andreas,2026-05-30
+f34f5630-5a16-4a78-a317-e0f55986adab,multi_topic,accelerate,beschleunigen,C1,,Productivity; Transport,map_word_world,level=C1; word_world=Productivity; Transport; mehrere Wortwelten fachlich später einzeln prüfen,Andreas,2026-05-30
+814c3af3-9af0-47ff-ac0a-753095db1ec2,multi_topic,accountable,rechenschaftspflichtig,C1,,Law & Politics; Media & News,map_word_world,level=C1; word_world=Law & Politics; Media & News; mehrere Wortwelten fachlich später einzeln prüfen,Andreas,2026-05-30
