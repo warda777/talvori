@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:talvori/core/sync/release_sync_policy.dart';
 import 'package:talvori/core/theme/app_theme.dart';
 import 'package:talvori/core/local_database/providers/supabase_words_local_import_controller_provider.dart';
 import 'package:talvori/features/home/ui/screens/home_screen.dart';
@@ -92,6 +93,8 @@ class _SupabaseWordsLocalAutoSyncBootstrapState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _didStartAutoSync) return;
       _didStartAutoSync = true;
+      final syncPolicy = ref.read(releaseSyncPolicyProvider);
+      if (!syncPolicy.allowLegacySupabaseWordsAutoSync) return;
       unawaited(
         ref
             .read(supabaseWordsLocalAutoSyncServiceProvider)
