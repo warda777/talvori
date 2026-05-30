@@ -1,4 +1,4 @@
-import 'content_package_metadata.dart';
+import 'package:talvori/core/language/language_code.dart';
 
 class ContentPackageImportMarker {
   ContentPackageImportMarker({
@@ -11,10 +11,10 @@ class ContentPackageImportMarker {
     required this.wordCount,
     required this.categoryCount,
   }) : contentPackageId = contentPackageId.trim(),
-       languagePair = normalizeSyncToken(languagePair),
+       languagePair = TalvoriLanguages.normalizeLanguagePair(languagePair),
        version = version.trim(),
        checksum = _normalizeOptional(checksum),
-       source = normalizeSyncToken(source);
+       source = normalizeLanguageToken(source);
 
   final String contentPackageId;
   final String languagePair;

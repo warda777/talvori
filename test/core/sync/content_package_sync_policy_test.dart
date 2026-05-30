@@ -167,13 +167,13 @@ void main() {
 
     test('language codes and statuses are normalized', () {
       final package = remote(
-        languagePair: 'EN_DE',
+        languagePair: 'Englisch-Deutsch',
         baseLanguage: 'EN',
         learningLanguage: 'EN',
         translationLanguage: 'DE',
         status: 'APPROVED',
       );
-      final decision = decide(package, desiredLanguagePair: 'en-de');
+      final decision = decide(package, desiredLanguagePair: 'EN-DE');
 
       expect(package.languagePair, 'en-de');
       expect(package.baseLanguage, 'en');

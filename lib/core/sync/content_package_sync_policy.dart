@@ -1,5 +1,6 @@
 import 'content_package_import_marker.dart';
 import 'content_package_metadata.dart';
+import 'package:talvori/core/language/language_code.dart';
 import 'version_compare.dart';
 
 enum ContentPackageSyncDecisionType { shouldImport, skip, blocked }
@@ -41,9 +42,8 @@ class ContentPackageSyncPolicy {
     required String currentAppVersion,
     ContentPackageImportMarker? localMarker,
   }) {
-    final normalizedDesiredLanguagePair = normalizeSyncToken(
-      desiredLanguagePair,
-    );
+    final normalizedDesiredLanguagePair =
+        TalvoriLanguages.normalizeLanguagePair(desiredLanguagePair);
     if (!remotePackage.hasRequiredFields ||
         normalizedDesiredLanguagePair.isEmpty ||
         VersionCompare.compare(remotePackage.version, '0.0.0') ==

@@ -213,6 +213,7 @@ Minimaler Release-Guard:
 - Zusätzlich Paketversion/Marker prüfen, nicht nur Wortanzahl.
 - Remote-Pakete nur mit `approved`/freigegebenem Status laden.
 - Die vorbereitende Content-Paket-Entscheidungsschicht existiert inzwischen als reines In-Memory-Modell (`ContentPackageMetadata`, `ContentPackageImportMarker`, `ContentPackageSyncPolicy`, `VersionCompare`), ist aber noch nicht an Supabase, SQLite-Migration oder Importlogik angeschlossen.
+- Stabile Sprachcodes sind zentral über `TalvoriLanguages` vorbereitet. Bestehende UI-Labels bleiben kompatibel, Content-Paket-Entscheidungen sollen aber Codes und normalisierte Sprachpaare nutzen.
 
 ## 7. Langfristige Supabase-Rolle
 
@@ -335,6 +336,7 @@ Aktuell existieren:
 - `ProfilePreferences.appLanguage`
 - `ProfilePreferences.nativeLanguage`
 - `ProfilePreferences.learningLanguage`
+- `TalvoriLanguages` als zentrale Übergangsschicht von UI-Labels zu Codes
 
 Noch problematisch:
 

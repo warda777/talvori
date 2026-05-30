@@ -256,7 +256,7 @@ Aktuelle Profileinstellungen:
 - `ProfilePreferences.nativeLanguage`
 - `ProfilePreferences.learningLanguage`
 
-Diese sind noch als sichtbare Sprachlabels gespeichert, z. B. `Deutsch`, `Englisch`. Für Content-Pakete sollte später zusätzlich mit stabilen Sprachcodes gearbeitet werden:
+Diese sind weiterhin kompatibel zu sichtbaren Sprachlabels, z. B. `Deutsch`, `Englisch`. Zusätzlich gibt es jetzt eine zentrale Sprachcode-Grundlage in `lib/core/language/language_code.dart`. Sie leitet aus bestehenden Labels stabile Codes ab und hält die UI damit rückwärtskompatibel:
 
 - `app_language_code`, z. B. `de`
 - `native_language_code`, z. B. `de`
@@ -270,6 +270,15 @@ Der Paketmarker sollte keine UI-Labels speichern, sondern normalisierte Codes:
 - `language_pair = en-de`
 
 So kann Talvori später auch Pakete wie `en-es`, `en-fr`, `es-en`, `fr-en`, `en-ja`, `en-zh`, `en-hi`, `en-ru` sauber unterscheiden.
+
+Aktueller Stand:
+
+- `TalvoriLanguages` kennt stabile Codes für `de`, `en`, `es`, `fr`.
+- Weitere große Zielsprachen sind intern vorbereitet: `zh`, `hi`, `ja`, `ru`, `ar`.
+- Produktiv sichtbar bleiben im MVP weiterhin die bestehenden Sprachen Deutsch, Englisch, Spanisch und Französisch.
+- `ProfilePreferences` speichert noch keine migrierten Codes, bietet aber kompatible Getter wie `appLanguageCode`, `nativeLanguageCode`, `learningLanguageCode` und `contentLanguagePair`.
+- `ContentPackageMetadata`, `ContentPackageImportMarker` und `ContentPackageSyncPolicy` normalisieren Sprachcodes und Sprachpaare über diese zentrale Grundlage.
+- Eine echte Migration bestehender gespeicherter Labels auf Codes ist später möglich, aber in diesem Schritt bewusst nicht umgesetzt.
 
 ## 11. Offline-first-Verhalten
 
@@ -401,11 +410,14 @@ Umgesetzt wurden:
 
 - `lib/core/sync/content_package_metadata.dart`
   - reines Value-Object für Remote-Paketmetadaten
-  - normalisiert Sprachcodes und Statuswerte
+  - normalisiert Sprachcodes und Statuswerte über die zentrale Sprachcode-Grundlage
   - enthält Pflichtfelder wie `contentPackageId`, `languagePair`, `baseLanguage`, `learningLanguage`, `translationLanguage`, `version`, `status`, `checksum`, `source`, `minAppVersion`, `wordCount`, `categoryCount`, `publishedAt`
 - `lib/core/sync/content_package_import_marker.dart`
   - reines Value-Object für lokal bereits importierte Pakete
   - entspricht dem späteren SQLite-Marker, aber ohne Repository und ohne Migration
+- `lib/core/language/language_code.dart`
+  - zentrale Mapping-/Normalisierungsschicht für UI-Labels und stabile Sprachcodes
+  - unterstützt vorhandene Labels wie `Deutsch`, `Englisch`, `Spanisch`, `Französisch` und Codes wie `DE`, `EN`, `ES`, `FR`
 - `lib/core/sync/version_compare.dart`
   - kleiner semantischer Versionsvergleich für Werte wie `1.0.0`, `1.2.0`, `2.0.0`
   - ungültige Versionen führen zu `invalid` statt zu Crashes

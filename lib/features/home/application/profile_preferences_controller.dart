@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/core/language/language_code.dart';
 
 class ProfilePreferences {
   const ProfilePreferences({
@@ -46,6 +47,16 @@ class ProfilePreferences {
   final bool marketingAnalyticsEnabled;
   final TalvoriMascotStyle mascotStyle;
   final bool hasSeenHomeChatHint;
+
+  String get appLanguageCode => TalvoriLanguages.normalizeCode(appLanguage);
+
+  String get nativeLanguageCode =>
+      TalvoriLanguages.normalizeCode(nativeLanguage);
+
+  String get learningLanguageCode =>
+      TalvoriLanguages.normalizeCode(learningLanguage);
+
+  String get contentLanguagePair => '$learningLanguageCode-$nativeLanguageCode';
 
   ProfilePreferences copyWith({
     String? displayName,

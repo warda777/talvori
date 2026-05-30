@@ -1,3 +1,5 @@
+import 'package:talvori/core/language/language_code.dart';
+
 class ContentPackageMetadata {
   ContentPackageMetadata({
     required String contentPackageId,
@@ -14,14 +16,16 @@ class ContentPackageMetadata {
     required this.categoryCount,
     this.publishedAt,
   }) : contentPackageId = contentPackageId.trim(),
-       languagePair = normalizeSyncToken(languagePair),
-       baseLanguage = normalizeSyncToken(baseLanguage),
-       learningLanguage = normalizeSyncToken(learningLanguage),
-       translationLanguage = normalizeSyncToken(translationLanguage),
+       languagePair = TalvoriLanguages.normalizeLanguagePair(languagePair),
+       baseLanguage = TalvoriLanguages.normalizeCode(baseLanguage),
+       learningLanguage = TalvoriLanguages.normalizeCode(learningLanguage),
+       translationLanguage = TalvoriLanguages.normalizeCode(
+         translationLanguage,
+       ),
        version = version.trim(),
-       status = normalizeSyncToken(status),
+       status = normalizeLanguageToken(status),
        checksum = _normalizeOptional(checksum),
-       source = normalizeSyncToken(source),
+       source = normalizeLanguageToken(source),
        minAppVersion = _normalizeOptional(minAppVersion);
 
   final String contentPackageId;
@@ -52,10 +56,6 @@ class ContentPackageMetadata {
         wordCount >= 0 &&
         categoryCount >= 0;
   }
-}
-
-String normalizeSyncToken(String value) {
-  return value.trim().toLowerCase().replaceAll('_', '-');
 }
 
 String? _normalizeOptional(String? value) {
