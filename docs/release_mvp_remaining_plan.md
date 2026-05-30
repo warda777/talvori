@@ -347,6 +347,10 @@ Priorität: zuerst
 Ziel:
 
 - echten Release-Build auf Gerät prüfen.
+- Ein manueller Smoke-Test fuer zentrale MVP-Pfade wurde dokumentiert:
+  `docs/release_device_smoke_test.md`.
+- Der getestete Build-Typ ist nicht dokumentiert; ein finaler Release-Build-Test
+  direkt vor Store-Einreichung bleibt offen.
 
 Enthält:
 

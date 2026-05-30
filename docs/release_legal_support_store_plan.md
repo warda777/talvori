@@ -248,7 +248,6 @@ Die konkreten Store-Anforderungen muessen kurz vor Einreichung gegen die aktuell
   `talvori.eu/imprint/` final juristisch geprueft?
 - Sind `support@talvori.eu` und `legal@talvori.eu` technisch eingerichtet und
   werden sie regelmaessig gelesen?
-- Soll Onboarding vor Abschluss auf Datenschutz/AGB verweisen?
 - Wird der erste Release nur in Deutschland/EU oder auch international geplant?
 - Sind AI-/Companion-Funktionen im MVP so aktiv, dass besondere Hinweise noetig sind?
 - Sind Notifications/Tagesimpuls im MVP aktiv oder optional vorbereitet?

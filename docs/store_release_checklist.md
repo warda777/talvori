@@ -45,26 +45,31 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [ ] Release-Build erstellt
 - [ ] Release-Build auf echtem iOS-Geraet geprueft
 - [ ] Release-Build auf echtem Android-Geraet geprueft, falls Android MVP
-- [ ] Frischer App-Start geprueft
-- [ ] Onboarding durchlaufen
-- [ ] HomeScreen geprueft
+- [x] Frischer App-Start manuell geprueft
+- [x] Onboarding manuell durchlaufen
+- [x] HomeScreen manuell geprueft
 - [ ] Settings geprueft
-- [ ] Profile geprueft
-- [ ] Lernmodus geprueft
+- [x] Settings Legal Links manuell geprueft
+- [x] Profile Support Link manuell geprueft
+- [x] Feedback-Mail-Link manuell geprueft
+- [x] Lernmodus manuell geprueft
 - [ ] Woerter pruefen geprueft
 - [ ] Wortwelten geprueft
-- [ ] Wortspiele geprueft
-- [ ] Browser-oeffnen geprueft
+- [x] Wortspiele manuell geprueft
+- [x] Browser-oeffnen manuell geprueft
 - [ ] Share-/Import-Pfade geprueft, falls im MVP sichtbar
 - [ ] Tagesimpuls/Notifications geprueft, falls im MVP sichtbar
-- [ ] Offline-Start geprueft
+- [x] Offline-Start manuell geprueft
 - [ ] App killen und neu starten geprueft
+
+Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ ist nicht dokumentiert. Ein finaler Release-Build-Test direkt vor Store-Einreichung bleibt offen. Details: `docs/release_device_smoke_test.md`.
 
 ## 5. Release-Sicherheit
 
-- [ ] Debug-Routen im Release nicht erreichbar
-- [ ] Entwicklerbereich in Settings im Release nicht sichtbar
-- [ ] Supabase-Importscreen im Release nicht normal erreichbar
+- [x] Debug-Sichtbarkeit manuell geprueft
+- [ ] Debug-Routen im finalen Release-Build nicht erreichbar
+- [ ] Entwicklerbereich in Settings im finalen Release-Build nicht sichtbar
+- [ ] Supabase-Importscreen im finalen Release-Build nicht normal erreichbar
 - [ ] Legacy Supabase Auto-Sync im Release gegated
 - [ ] Keine ungeprueften Remote-Imports beim App-Start
 - [ ] Keine SRS-/word_progress-Daten werden durch Content-Sync ueberschrieben
@@ -105,8 +110,9 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 
 - [ ] `flutter test` gruen
 - [ ] `git diff --check` sauber
-- [ ] Release-Build installiert und Smoke-Test bestanden
-- [ ] Debug-Sichtbarkeit manuell im Release geprueft
+- [x] Manueller Smoke-Test fuer zentrale MVP-Pfade dokumentiert
+- [ ] Finaler Release-Build installiert und Smoke-Test bestanden
+- [ ] Debug-Sichtbarkeit manuell im finalen Release-Build geprueft
 - [ ] Datenschutz-/Support-Links im Store erreichbar und auf echtem Geraet getestet
 - [ ] App-Beschreibung passt zum Build
 - [ ] Testhinweise fuer Store Reviewer ergaenzt
