@@ -5,7 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talvori/features/home/ui/screens/settings_screen.dart';
 
 void main() {
-  Future<void> pumpSettings(WidgetTester tester) async {
+  Future<void> pumpSettings(
+    WidgetTester tester, {
+    SettingsExternalLinkLauncher? linkLauncher,
+  }) async {
     SharedPreferences.setMockInitialValues({});
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -13,7 +16,15 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: SettingsScreen())),
+      ProviderScope(
+        overrides: [
+          if (linkLauncher != null)
+            settingsExternalLinkLauncherProvider.overrideWithValue(
+              linkLauncher,
+            ),
+        ],
+        child: const MaterialApp(home: SettingsScreen()),
+      ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
@@ -40,8 +51,13 @@ void main() {
     expect(find.text('KONTO'), findsOneWidget);
     await scrollTo(tester, 'UNTERSTÜTZUNG');
     expect(find.text('UNTERSTÜTZUNG'), findsOneWidget);
+    expect(find.text('Hilfe & Support'), findsOneWidget);
+    expect(find.text('Feedback & Kontakt'), findsOneWidget);
     await scrollTo(tester, 'RECHTLICHES');
     expect(find.text('RECHTLICHES'), findsOneWidget);
+    expect(find.text('Datenschutzrichtlinie'), findsOneWidget);
+    expect(find.text('Nutzungsbedingungen / AGB'), findsOneWidget);
+    expect(find.text('Impressum / Anbieterinformationen'), findsOneWidget);
     await scrollTo(tester, 'ENTWICKLER');
     expect(find.text('ENTWICKLER'), findsOneWidget);
     expect(find.text('Supabase-Wörter lokal importieren'), findsOneWidget);
@@ -191,6 +207,48 @@ void main() {
     expect(tester.widget<Switch>(toggle).value, isTrue);
   });
 
+  testWidgets('legal and support entries open Talvori links', (tester) async {
+    final opened = <Uri>[];
+    await pumpSettings(
+      tester,
+      linkLauncher: (uri) async {
+        opened.add(uri);
+        return true;
+      },
+    );
+
+    await scrollTo(tester, 'Hilfe & Support');
+    await tester.tap(find.text('Hilfe & Support'));
+    await tester.pump();
+
+    await scrollTo(tester, 'Feedback & Kontakt');
+    await tester.tap(find.text('Feedback & Kontakt'));
+    await tester.pump();
+
+    await scrollTo(tester, 'Datenschutzrichtlinie');
+    await tester.tap(find.text('Datenschutzrichtlinie'));
+    await tester.pump();
+
+    await scrollTo(tester, 'Nutzungsbedingungen / AGB');
+    await tester.tap(find.text('Nutzungsbedingungen / AGB'));
+    await tester.pump();
+
+    await scrollTo(tester, 'Impressum / Anbieterinformationen');
+    await tester.tap(find.text('Impressum / Anbieterinformationen'));
+    await tester.pump();
+
+    expect(
+      opened,
+      containsAllInOrder([
+        SettingsScreen.supportUri,
+        SettingsScreen.supportMailUri,
+        SettingsScreen.privacyUri,
+        SettingsScreen.termsUri,
+        SettingsScreen.imprintUri,
+      ]),
+    );
+  });
+
   testWidgets('settings screens render on phone size without flex overflow', (
     tester,
   ) async {
@@ -206,16 +264,18 @@ void main() {
     };
     addTearDown(() => FlutterError.onError = previousOnError);
 
-    await pumpSettings(tester);
+    final opened = <Uri>[];
+    await pumpSettings(
+      tester,
+      linkLauncher: (uri) async {
+        opened.add(uri);
+        return true;
+      },
+    );
     await scrollTo(tester, 'RECHTLICHES');
     await tester.tap(find.text('Datenschutzrichtlinie'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Die finale Datenschutzrichtlinie wird vor dem Marktstart hinterlegt. Bis dahin nutzt Talvori lokale Lernstände und getrennte Freigaben für optionale Online-Funktionen.',
-      ),
-      findsOneWidget,
-    );
+    await tester.pump();
+    expect(opened, [SettingsScreen.privacyUri]);
 
     expect(flexOverflows, isEmpty);
   });

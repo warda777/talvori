@@ -26,21 +26,22 @@ Datei: `lib/features/home/ui/screens/settings_screen.dart`
 Vorhanden:
 
 - Bereich `Unterstuetzung`
-- Eintrag `Hilfe`
+- Eintrag `Hilfe & Support`
 - Eintrag `Eine Bewertung schreiben`
-- Eintrag `Feedback zu neuen Funktionen`
+- Eintrag `Feedback & Kontakt`
 - Bereich `Rechtliches`
 - Eintrag `Datenschutzrichtlinie`
-- Eintrag `AGB`
+- Eintrag `Nutzungsbedingungen / AGB`
+- Eintrag `Impressum / Anbieterinformationen`
 - Toggle `Marketing & Analysen`
 - Debug-only Entwicklerbereich hinter `kDebugMode`
 
 Bewertung:
 
-- Die Stellen fuer Hilfe, Feedback, Datenschutz und AGB existieren bereits.
-- Die Texte sind klar als vorbereitet beschrieben und behaupten noch keine finalen Rechtstexte.
-- Ein echter Kontaktkanal fehlt noch.
-- Ein Impressum oder Anbieterinformationen fehlen als sichtbarer eigener Eintrag.
+- Die Stellen fuer Hilfe, Feedback, Datenschutz, AGB und Impressum existieren.
+- Hilfe und Support verweisen auf `https://talvori.eu/support/`.
+- Feedback/Kontakt nutzt `support@talvori.eu` als Mail-Kontakt.
+- Rechtliches verweist auf Web-Links statt Rechtstexte in der App zu duplizieren.
 - Die Bewertungsfunktion ist vorbereitet, aber noch kein echter Store-Link.
 
 ### Profil
@@ -56,7 +57,7 @@ Vorhanden:
 Bewertung:
 
 - Das Profil bleibt bewusst ruhiger als Settings.
-- Hilfe ist sichtbar, aber noch kein echter Kontaktpunkt.
+- `Hilfe & Support` fuehrt ebenfalls zur Support-Seite.
 - Rechtliches liegt aktuell eher in Settings, was fuer MVP ausreichend sein kann.
 
 ### Onboarding
@@ -92,6 +93,10 @@ Bewertung:
 
 MVP braucht eine finale Datenschutzseite oder Datenschutz-URL.
 
+Festgelegter Link:
+
+- `https://talvori.eu/privacy/`
+
 Zu klaeren:
 
 - Welche Daten werden lokal gespeichert?
@@ -115,6 +120,10 @@ Wichtig fuer Talvori:
 
 MVP braucht entweder AGB, Nutzungsbedingungen oder eine klare Entscheidung, welche rechtliche Form fuer Zielmarkt und Store genutzt wird.
 
+Festgelegter Link:
+
+- `https://talvori.eu/terms/`
+
 Zu klaeren:
 
 - Nutzungsumfang der App
@@ -129,6 +138,10 @@ Zu klaeren:
 
 MVP braucht einen sichtbaren Ort fuer Anbieterinformationen, wenn fuer den Zielmarkt erforderlich.
 
+Festgelegter Link:
+
+- `https://talvori.eu/imprint/`
+
 Zu klaeren:
 
 - Anbietername
@@ -138,9 +151,9 @@ Zu klaeren:
 - Steuer-/Registerangaben, falls relevant
 - Zielmarkt: Deutschland/EU, USA oder mehrere Stores
 
-Aktuelle Luecke:
+Aktueller Stand:
 
-- Settings hat Datenschutz und AGB, aber keinen eigenen Impressum-/Anbieterinfo-Eintrag.
+- Settings hat einen eigenen Impressum-/Anbieterinfo-Eintrag.
 
 ### Hilfe / FAQ
 
@@ -159,9 +172,11 @@ MVP braucht mindestens eine kleine Hilfe-Struktur fuer haeufige erste Fragen:
 
 MVP braucht einen echten Kontaktpunkt.
 
-Mindestoption:
+Festgelegte Kontakte:
 
-- Support-E-Mail oder Support-URL
+- Support-Seite: `https://talvori.eu/support/`
+- Support-E-Mail: `support@talvori.eu`
+- Legal-E-Mail: `legal@talvori.eu`
 
 Nicht ausreichend fuer Release:
 
@@ -195,18 +210,19 @@ Die konkreten Store-Anforderungen muessen kurz vor Einreichung gegen die aktuell
 
 ### Phase 1: Inhalte und Kontakt finalisieren
 
-1. echten Support-Kontakt festlegen
-2. Datenschutz-Entwurf erstellen und juristisch pruefen lassen
-3. Nutzungsbedingungen/AGB-Entwurf erstellen und juristisch pruefen lassen
-4. Anbieterinformationen/Impressum klaeren
-5. Store-Support-URL und Datenschutz-URL bereitstellen
+1. Datenschutz-/AGB-/Impressum-Inhalte auf `talvori.eu` final pruefen
+2. Datenschutz-Entwurf juristisch pruefen lassen
+3. Nutzungsbedingungen/AGB-Entwurf juristisch pruefen lassen
+4. Anbieterinformationen/Impressum juristisch pruefen lassen
+5. Support- und Legal-Mailpostfaecher pruefen
 
 ### Phase 2: App-Stellen anbinden
 
-1. Settings um Impressum/Anbieterinformationen ergaenzen
-2. Datenschutz und AGB auf finale Inhalte oder echte URLs fuehren
-3. Hilfe und Feedback auf echte Kontakt-/Hilfeseite fuehren
-4. Bewertung erst mit echtem Store-Link aktivieren oder weiter klar als vorbereitet kennzeichnen
+1. Settings-Links auf echtem Geraet testen
+2. Datenschutz, Nutzungsbedingungen und Impressum im Browser pruefen
+3. Hilfe/Support im Browser pruefen
+4. Feedback-Mail-Link auf iOS/Android pruefen
+5. Bewertung erst mit echtem Store-Link aktivieren oder weiter klar als vorbereitet kennzeichnen
 
 ### Phase 3: Release-Pruefung
 
@@ -221,16 +237,18 @@ Die konkreten Store-Anforderungen muessen kurz vor Einreichung gegen die aktuell
 - keine App-Logik geaendert
 - keine UI-Screens neu gebaut
 - keine finalen juristischen Texte erfunden
-- keine externen URLs erfunden
+- echte Talvori-Domainlinks wurden als Web-Verweise genutzt
 - keine Supabase-Daten geaendert
 - keine lokalen Vokabeldaten geaendert
 - keine Store-Funktion aktiv geschaltet
 
 ## 7. Offene Fragen
 
-- Welche Support-E-Mail oder Support-URL soll fuer MVP genutzt werden?
-- Gibt es bereits eine Website fuer Datenschutz, AGB und Impressum?
-- Soll Rechtliches innerhalb der App angezeigt oder per Web-Link geoeffnet werden?
+- Sind die Inhalte unter `talvori.eu/privacy/`, `talvori.eu/terms/` und
+  `talvori.eu/imprint/` final juristisch geprueft?
+- Sind `support@talvori.eu` und `legal@talvori.eu` technisch eingerichtet und
+  werden sie regelmaessig gelesen?
+- Soll Onboarding vor Abschluss auf Datenschutz/AGB verweisen?
 - Wird der erste Release nur in Deutschland/EU oder auch international geplant?
 - Sind AI-/Companion-Funktionen im MVP so aktiv, dass besondere Hinweise noetig sind?
 - Sind Notifications/Tagesimpuls im MVP aktiv oder optional vorbereitet?
@@ -241,10 +259,10 @@ Die konkreten Store-Anforderungen muessen kurz vor Einreichung gegen die aktuell
 
 ## 8. Naechster Empfohlener Schritt
 
-Als naechstes sollte ein echter Support-/Legal-Entscheidungsblock folgen:
+Als naechstes sollte ein echter Support-/Legal-Pruefblock folgen:
 
-1. Support-Kontakt festlegen
+1. Talvori-Domainlinks auf echtem Geraet testen
 2. Zielmarkt fuer MVP festlegen
-3. Datenschutz-/AGB-/Impressum-Quelle festlegen
-4. entscheiden, ob finale Inhalte als Web-Links oder In-App-Seiten erscheinen
-5. danach erst kleine Settings-Anpassungen bauen
+3. Datenschutz-/AGB-/Impressum-Inhalte final pruefen lassen
+4. Support- und Legal-Mailpostfaecher pruefen
+5. danach Store-Metadaten und Device-Smoke-Test anschliessen

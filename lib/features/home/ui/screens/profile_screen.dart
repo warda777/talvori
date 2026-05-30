@@ -219,16 +219,15 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 _ProfileQuickCard(
                   icon: Icons.help_outline_rounded,
-                  title: 'Hilfe',
+                  title: 'Hilfe & Support',
                   value: 'Kontakt',
                   accent: _mint,
-                  onTap: () => _openPreparedScreen(
+                  onTap: () => SettingsScreen.openExternalLink(
                     context,
-                    title: 'Hilfe',
-                    icon: Icons.help_outline_rounded,
-                    accent: _mint,
-                    body:
-                        'Hilfe und Feedback werden hier gebündelt. Für den MVP bleibt das Profil ruhig und trennt Support klar von technischen Einstellungen.',
+                    ref,
+                    SettingsScreen.supportUri,
+                    failureMessage:
+                        'Support-Seite konnte nicht geöffnet werden.',
                   ),
                 ),
               ],

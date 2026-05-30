@@ -19,20 +19,24 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 
 - [ ] Datenschutztext final erstellt
 - [ ] Datenschutztext juristisch/fachkundig geprueft
-- [ ] Datenschutz-URL verfuegbar
+- [x] Datenschutz-URL in App vorbereitet: `https://talvori.eu/privacy/`
 - [ ] AGB oder Nutzungsbedingungen final erstellt
 - [ ] AGB/Nutzungsbedingungen juristisch/fachkundig geprueft
-- [ ] Impressum oder Anbieterinformationen final
+- [x] Nutzungsbedingungen-URL in App vorbereitet: `https://talvori.eu/terms/`
+- [ ] Impressum oder Anbieterinformationen final geprueft
+- [x] Impressum-URL in App vorbereitet: `https://talvori.eu/imprint/`
 - [ ] Anbieter/Kontakt im Store korrekt hinterlegt
 - [ ] Altersfreigabe geprueft
 - [ ] Datenverwendungsangaben im Store konsistent mit App-Verhalten
 
 ## 3. Support Und Feedback
 
-- [ ] Support-E-Mail oder Support-URL festgelegt
-- [ ] Support-Kontakt in App erreichbar
+- [x] Support-E-Mail festgelegt: `support@talvori.eu`
+- [x] Legal-E-Mail festgelegt: `legal@talvori.eu`
+- [x] Support-URL in App vorbereitet: `https://talvori.eu/support/`
+- [x] Support-Kontakt in App erreichbar
 - [ ] Hilfe/FAQ fuer MVP-Fragen vorbereitet
-- [ ] Feedback-Kanal klar beschrieben
+- [x] Feedback-Kanal in App vorbereitet: `support@talvori.eu`
 - [ ] Bewertungslink erst aktiv, wenn Store-Ziel bekannt ist
 - [ ] Keine Fake-Kontaktfunktion sichtbar
 
@@ -103,7 +107,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [ ] `git diff --check` sauber
 - [ ] Release-Build installiert und Smoke-Test bestanden
 - [ ] Debug-Sichtbarkeit manuell im Release geprueft
-- [ ] Datenschutz-/Support-Links im Store erreichbar
+- [ ] Datenschutz-/Support-Links im Store erreichbar und auf echtem Geraet getestet
 - [ ] App-Beschreibung passt zum Build
 - [ ] Testhinweise fuer Store Reviewer ergaenzt
 - [ ] finale Entscheidung: lokaler Seed oder kontrollierter Content-Paket-Stand

@@ -6,11 +6,30 @@ import 'package:talvori/core/language/language_code.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/supabase_words_local_import_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers.dart';
 
+typedef SettingsExternalLinkLauncher = Future<bool> Function(Uri uri);
+
+@visibleForTesting
+final settingsExternalLinkLauncherProvider =
+    Provider<SettingsExternalLinkLauncher>((ref) {
+      return (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
+    });
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  static final privacyUri = Uri.parse('https://talvori.eu/privacy/');
+  static final termsUri = Uri.parse('https://talvori.eu/terms/');
+  static final imprintUri = Uri.parse('https://talvori.eu/imprint/');
+  static final supportUri = Uri.parse('https://talvori.eu/support/');
+  static final supportMailUri = Uri(
+    scheme: 'mailto',
+    path: 'support@talvori.eu',
+    queryParameters: {'subject': 'Talvori Feedback'},
+  );
 
   static const _background = Color(0xFF05070D);
   static const _panel = Color(0xFF0B121C);
@@ -177,14 +196,13 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _SettingsTile(
                 icon: Icons.help_outline_rounded,
-                title: 'Hilfe',
-                onTap: () => _push(
+                title: 'Hilfe & Support',
+                value: 'talvori.eu/support',
+                onTap: () => openExternalLink(
                   context,
-                  const _PlaceholderSettingsScreen(
-                    title: 'Hilfe',
-                    body:
-                        'Hier entsteht die zentrale Hilfe für Lernen, Wörter prüfen, Import und Konto. Bis der Support-Kanal freigeschaltet ist, bleiben deine Daten lokal und unverändert.',
-                  ),
+                  ref,
+                  supportUri,
+                  failureMessage: 'Support-Seite konnte nicht geöffnet werden.',
                 ),
               ),
               _SettingsTile(
@@ -194,14 +212,13 @@ class SettingsScreen extends ConsumerWidget {
               ),
               _SettingsTile(
                 icon: Icons.auto_awesome_rounded,
-                title: 'Feedback zu neuen Funktionen',
-                onTap: () => _push(
+                title: 'Feedback & Kontakt',
+                value: 'support@talvori.eu',
+                onTap: () => openExternalLink(
                   context,
-                  const _PlaceholderSettingsScreen(
-                    title: 'Feedback zu neuen Funktionen',
-                    body:
-                        'Feedback wird hier künftig direkt gebündelt. Für den MVP bleibt dieser Bereich als vorbereiteter Kontaktpunkt sichtbar, ohne Daten automatisch zu versenden.',
-                  ),
+                  ref,
+                  supportMailUri,
+                  failureMessage: 'Mail-App konnte nicht geöffnet werden.',
                 ),
               ),
             ],
@@ -212,25 +229,36 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.privacy_tip_rounded,
                 title: 'Datenschutzrichtlinie',
-                onTap: () => _push(
+                value: 'talvori.eu/privacy',
+                onTap: () => openExternalLink(
                   context,
-                  const _PlaceholderSettingsScreen(
-                    title: 'Datenschutzrichtlinie',
-                    body:
-                        'Die finale Datenschutzrichtlinie wird vor dem Marktstart hinterlegt. Bis dahin nutzt Talvori lokale Lernstände und getrennte Freigaben für optionale Online-Funktionen.',
-                  ),
+                  ref,
+                  privacyUri,
+                  failureMessage:
+                      'Datenschutzseite konnte nicht geöffnet werden.',
                 ),
               ),
               _SettingsTile(
                 icon: Icons.description_rounded,
-                title: 'AGB',
-                onTap: () => _push(
+                title: 'Nutzungsbedingungen / AGB',
+                value: 'talvori.eu/terms',
+                onTap: () => openExternalLink(
                   context,
-                  const _PlaceholderSettingsScreen(
-                    title: 'AGB',
-                    body:
-                        'Die finalen Nutzungsbedingungen werden vor dem Marktstart ergänzt. Dieser Bereich ist als feste Stelle für die rechtlichen Informationen vorbereitet.',
-                  ),
+                  ref,
+                  termsUri,
+                  failureMessage:
+                      'Nutzungsbedingungen konnten nicht geöffnet werden.',
+                ),
+              ),
+              _SettingsTile(
+                icon: Icons.business_rounded,
+                title: 'Impressum / Anbieterinformationen',
+                value: 'talvori.eu/imprint',
+                onTap: () => openExternalLink(
+                  context,
+                  ref,
+                  imprintUri,
+                  failureMessage: 'Impressum konnte nicht geöffnet werden.',
                 ),
               ),
               _SwitchSettingsTile(
@@ -278,6 +306,26 @@ class SettingsScreen extends ConsumerWidget {
 
   static void _push(BuildContext context, Widget screen) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+  }
+
+  static Future<void> openExternalLink(
+    BuildContext context,
+    WidgetRef ref,
+    Uri uri, {
+    required String failureMessage,
+  }) async {
+    var opened = false;
+    try {
+      opened = await ref.read(settingsExternalLinkLauncherProvider)(uri);
+    } catch (_) {
+      opened = false;
+    }
+    if (!context.mounted || opened) return;
+    TalvoriSnackBar.show(
+      context,
+      message: failureMessage,
+      type: TalvoriSnackBarType.warning,
+    );
   }
 
   static void _preparedSnack(BuildContext context) {

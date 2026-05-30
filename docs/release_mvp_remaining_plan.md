@@ -323,7 +323,11 @@ Ziel:
 
 - MVP-relevante rechtliche und Store-Grundlagen releasefähig machen.
 - Der Block ist jetzt als Planungs- und Checklistenbasis vorbereitet.
-- Finale juristische Inhalte, echte URLs und Support-Kontakt bleiben offen.
+- Talvori-Domainlinks sind in der App vorbereitet:
+  `https://talvori.eu/privacy/`, `https://talvori.eu/terms/`,
+  `https://talvori.eu/imprint/` und `https://talvori.eu/support/`.
+- Support-Mail ist `support@talvori.eu`; Legal-Mail ist `legal@talvori.eu`.
+- Finale juristische Pruefung der Web-Inhalte bleibt offen.
 
 Enthält:
 
