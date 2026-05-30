@@ -395,13 +395,46 @@ Offline-/Fehler-Tests:
 
 ## 17. Aktuelle Entscheidung
 
-Für den jetzigen Schritt wird nur geplant und dokumentiert.
+Der erste vorbereitende Code-Schritt ist jetzt umgesetzt, ohne den Import produktiv anzuschließen.
 
-Keine Codeänderung ist nötig, weil:
+Umgesetzt wurden:
 
-- noch keine Remote-Paketmetadaten existieren
-- keine produktive Migration ohne konkreten Importpfad eingeführt werden soll
-- der Release bereits durch `ReleaseSyncPolicy` vor dem Legacy-Auto-Sync geschützt ist
-- die bestehende Importlogik weiter testbar und debug-nutzbar bleibt
+- `lib/core/sync/content_package_metadata.dart`
+  - reines Value-Object für Remote-Paketmetadaten
+  - normalisiert Sprachcodes und Statuswerte
+  - enthält Pflichtfelder wie `contentPackageId`, `languagePair`, `baseLanguage`, `learningLanguage`, `translationLanguage`, `version`, `status`, `checksum`, `source`, `minAppVersion`, `wordCount`, `categoryCount`, `publishedAt`
+- `lib/core/sync/content_package_import_marker.dart`
+  - reines Value-Object für lokal bereits importierte Pakete
+  - entspricht dem späteren SQLite-Marker, aber ohne Repository und ohne Migration
+- `lib/core/sync/version_compare.dart`
+  - kleiner semantischer Versionsvergleich für Werte wie `1.0.0`, `1.2.0`, `2.0.0`
+  - ungültige Versionen führen zu `invalid` statt zu Crashes
+- `lib/core/sync/content_package_sync_policy.dart`
+  - entscheidet rein in Memory, ob ein Remote-Paket importierbar, zu überspringen oder blockiert ist
+  - prüft `approved`, Sprachpaar, `minAppVersion`, Version und Checksum
+  - berührt keine User-Daten und startet keinen Import
 
-Die nächste sinnvolle kleine Code-Ergänzung wäre ein reines Value-Object samt Policy-Tests für Paketentscheidungen. Die SQLite-Migration sollte erst folgen, wenn das Remote-Paketformat fachlich feststeht.
+Die Policy kennt folgende Reason-Codes:
+
+- `approvedPackageMissingLocally`
+- `newerApprovedVersionAvailable`
+- `alreadyImported`
+- `notApproved`
+- `languagePairMismatch`
+- `minAppVersionTooHigh`
+- `checksumChangedForSameVersion`
+- `olderVersion`
+- `invalidPackageMetadata`
+
+Wichtig: Es gibt weiterhin keine SQLite-Migration für `content_package_imports`, keinen Supabase-Paketreader und keine aktive Content-Paket-Synchronisation. Der bestehende Legacy-Auto-Sync bleibt separat über `ReleaseSyncPolicy` geschützt.
+
+## 18. Aktualisierte nächste Schritte
+
+1. Remote-Paketformat finalisieren.
+2. Supabase-Metadaten nur konzeptionell abstimmen, noch nicht produktiv migrieren.
+3. SQLite-Migration `content_package_imports` ergänzen, sobald das Paketformat stabil ist.
+4. Repository für lokale Content-Paket-Marker bauen.
+5. Supabase-Reader für Paketmetadaten ergänzen.
+6. Paketentscheidung mit `ContentPackageSyncPolicy` vor den Import schalten.
+7. `SupabaseWordsLocalImportService` paketbewusst erweitern.
+8. Legacy-Auto-Sync durch kontrollierten Content-Paket-Sync ablösen.

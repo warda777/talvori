@@ -212,6 +212,7 @@ Minimaler Release-Guard:
 - Eine spätere Aktivierung braucht Paketversion/Marker, nicht nur Wortanzahl.
 - Zusätzlich Paketversion/Marker prüfen, nicht nur Wortanzahl.
 - Remote-Pakete nur mit `approved`/freigegebenem Status laden.
+- Die vorbereitende Content-Paket-Entscheidungsschicht existiert inzwischen als reines In-Memory-Modell (`ContentPackageMetadata`, `ContentPackageImportMarker`, `ContentPackageSyncPolicy`, `VersionCompare`), ist aber noch nicht an Supabase, SQLite-Migration oder Importlogik angeschlossen.
 
 ## 7. Langfristige Supabase-Rolle
 
