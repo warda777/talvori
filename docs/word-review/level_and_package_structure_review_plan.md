@@ -330,3 +330,35 @@ Import aus und setzt keine Freigabe.
    Batches erzeugen.
 6. Später ein getrenntes Import-/Migrationskonzept bauen, das Level, Paket und
    Wortwelt produktiv trennt.
+
+## 14. Technischer Vorbereitungsstand
+
+Die Paketstruktur ist jetzt auch im reinen In-Memory-Sync-Modell vorbereitet,
+ohne produktive Daten oder Importlogik zu verändern.
+
+Vorhandene technische Bausteine:
+
+- `ContentPackageMetadata`
+  - unterstützt optionale Felder für `packageFamily`, `packageStage`,
+    `packageType`, `levelRange`, `displayName` und `description`
+  - bleibt ein Value-Object ohne Supabase-Reader und ohne SQLite-Anbindung
+- `ContentPackageTaxonomy`
+  - normalisiert Paketfamilien und Pakettypen
+  - ordnet `Top 500 Words`, `Top 100`, `Top 1-100` und `Top 101-200`
+    der Familie `top_words` zu
+  - ordnet `TOEFL`, `IELTS`, `Cambridge English`, `Business English`,
+    `Grammar & Syntax` und `Phrases & Idioms` stabilen technischen Keys zu
+- `ContentPackageSyncPolicy`
+  - bleibt streng: Spezialpakete und Top-Wortschatzpakete brauchen weiterhin
+    `approved`, passendes Sprachpaar, kompatible `minAppVersion` und valide
+    Version/Checksum
+  - enthält keine Sonderfreigabe für TOEFL, Top 500 oder Business-Pakete
+
+Bewusst nicht umgesetzt:
+
+- keine SQLite-Migration
+- kein Supabase-Paketreader
+- kein Importservice-Umbau
+- keine produktive Zuordnung echter Wörter zu Top-, TOEFL-, IELTS-,
+  Cambridge- oder Business-Paketen
+- keine Änderung an SRS, `word_progress` oder Vokabeldaten

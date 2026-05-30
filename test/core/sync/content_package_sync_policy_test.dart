@@ -19,6 +19,10 @@ void main() {
       String? checksum = 'abc123',
       String source = 'supabase',
       String? minAppVersion = '1.0.0',
+      String? packageFamily,
+      String? packageStage,
+      String? packageType,
+      String? levelRange,
       int wordCount = 1200,
       int categoryCount = 24,
     }) {
@@ -33,6 +37,10 @@ void main() {
         checksum: checksum,
         source: source,
         minAppVersion: minAppVersion,
+        packageFamily: packageFamily,
+        packageStage: packageStage,
+        packageType: packageType,
+        levelRange: levelRange,
         wordCount: wordCount,
         categoryCount: categoryCount,
       );
@@ -205,5 +213,78 @@ void main() {
         expect(decision.message, isNotEmpty);
       },
     );
+
+    test('top words package still requires approved status', () {
+      final decision = decide(
+        remote(
+          contentPackageId: 'top-500-en-de-v1',
+          status: 'review',
+          packageFamily: 'Top 500 Words',
+          packageStage: 'Top 500',
+          packageType: 'frequency',
+          levelRange: 'A1-B2',
+        ),
+      );
+
+      expect(decision.blocked, isTrue);
+      expect(decision.reasonCode, ContentPackageSyncReasonCode.notApproved);
+    });
+
+    test('TOEFL package still requires approved status', () {
+      final decision = decide(
+        remote(
+          contentPackageId: 'toefl-academic-en-de-v1',
+          status: 'draft',
+          packageFamily: 'TOEFL',
+          packageStage: 'academic',
+          packageType: 'exam',
+          levelRange: 'B2-C1',
+        ),
+      );
+
+      expect(decision.blocked, isTrue);
+      expect(decision.reasonCode, ContentPackageSyncReasonCode.notApproved);
+    });
+
+    test('approved top words package can be imported when missing locally', () {
+      final package = remote(
+        contentPackageId: 'top-100-en-de-v1',
+        packageFamily: 'Top 500 Words',
+        packageStage: 'Top 1-100',
+        packageType: 'frequency',
+        levelRange: 'A1-B1',
+      );
+      final decision = decide(package);
+
+      expect(package.packageFamily, 'top_words');
+      expect(package.packageStage, '1-100');
+      expect(package.packageType, 'frequency');
+      expect(decision.shouldImport, isTrue);
+      expect(
+        decision.reasonCode,
+        ContentPackageSyncReasonCode.approvedPackageMissingLocally,
+      );
+    });
+
+    test('approved special package with wrong language pair is blocked', () {
+      final decision = decide(
+        remote(
+          contentPackageId: 'business-english-b1-b2-en-es-v1',
+          languagePair: 'en-es',
+          translationLanguage: 'es',
+          packageFamily: 'Business English',
+          packageStage: 'B1-B2',
+          packageType: 'business',
+          levelRange: 'B1-B2',
+        ),
+        desiredLanguagePair: 'en-de',
+      );
+
+      expect(decision.blocked, isTrue);
+      expect(
+        decision.reasonCode,
+        ContentPackageSyncReasonCode.languagePairMismatch,
+      );
+    });
   });
 }

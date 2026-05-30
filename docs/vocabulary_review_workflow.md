@@ -137,6 +137,13 @@ Optionale spätere Spalten:
 - `frequency_rank`
 - `content_package_id`
 - `content_package_version`
+- `package_family`
+- `package_stage`
+- `package_type`
+- `level_range`
+- `package_membership_note`
+
+Diese Paketspalten sind bewusst noch nicht Teil der einfachen Master-CSV-Vorlage. Sie werden erst ergänzt, wenn die Review-Tools und das spätere Paketmodell stabil genug sind, damit keine bestehende Arbeitskopie oder Kandidatenliste unnötig bricht.
 
 ## 6. Bedeutungsvarianten
 
@@ -252,6 +259,15 @@ gesetzt, wenn ein echtes Thema wie `Travel`, `Work & Careers` oder
 Paketzugehörigkeiten werden getrennt von Level und Wortwelt geprüft. Es wird
 keine TOEFL-/IELTS-/Cambridge-Zuordnung automatisch erzeugt und keine
 Top-500-Aufteilung produktiv vorgenommen.
+
+Technisch ist die Paket-Taxonomie vorbereitend als reines Value-Object
+angelegt. `Top 500 Words`, `Top 100` und Bereichsstufen wie `Top 1-100`
+werden auf die Paketfamilie `top_words` normalisiert. Spezialpakete wie
+`TOEFL`, `IELTS`, `Cambridge English`, `Business English`, `Grammar & Syntax`
+und `Phrases & Idioms` werden ebenfalls auf stabile technische Keys
+normalisiert. Diese Normalisierung dient nur der späteren Review- und
+Sync-Entscheidung; sie erzeugt keine echten Pakete und ordnet keine
+produktiven Wörter zu.
 
 ## 10. Mehrsprachige Vorbereitung
 
@@ -557,7 +573,8 @@ Nicht releasefähig:
 8. Struktur-Overlay zu Level/Paket/Wortwelt fachlich prüfen.
 9. Weitere Struktur-Batches gezielt erzeugen, besonders für `top_500_only` und `top_500_topic`.
 10. Entscheiden, ob Top-Wortschatz intern als Bereichspakete oder kumulative Pakete modelliert wird.
-11. Paketmetadaten für Spezialpakete wie TOEFL, IELTS, Cambridge und Business English planen.
+11. Paketmetadaten für Spezialpakete wie TOEFL, IELTS, Cambridge und Business English gegen die vorbereitete Taxonomie prüfen.
+12. Master-Review-Template erst dann um Paketspalten erweitern, wenn die Tool-Kette für Paket-Memberships ebenfalls angepasst ist.
 12. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
 13. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
 14. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.

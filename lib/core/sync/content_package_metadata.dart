@@ -1,5 +1,7 @@
 import 'package:talvori/core/language/language_code.dart';
 
+import 'content_package_taxonomy.dart';
+
 class ContentPackageMetadata {
   ContentPackageMetadata({
     required String contentPackageId,
@@ -12,6 +14,12 @@ class ContentPackageMetadata {
     String? checksum,
     required String source,
     String? minAppVersion,
+    String? packageFamily,
+    String? packageStage,
+    String? packageType,
+    String? levelRange,
+    String? displayName,
+    String? description,
     required this.wordCount,
     required this.categoryCount,
     this.publishedAt,
@@ -26,7 +34,13 @@ class ContentPackageMetadata {
        status = normalizeLanguageToken(status),
        checksum = _normalizeOptional(checksum),
        source = normalizeLanguageToken(source),
-       minAppVersion = _normalizeOptional(minAppVersion);
+       minAppVersion = _normalizeOptional(minAppVersion),
+       packageFamily = _normalizePackageFamily(packageFamily),
+       packageStage = _normalizePackageStage(packageStage),
+       packageType = _normalizePackageType(packageType),
+       levelRange = _normalizeLevelRange(levelRange),
+       displayName = _normalizeOptional(displayName),
+       description = _normalizeOptional(description);
 
   final String contentPackageId;
   final String languagePair;
@@ -38,6 +52,12 @@ class ContentPackageMetadata {
   final String? checksum;
   final String source;
   final String? minAppVersion;
+  final String? packageFamily;
+  final String? packageStage;
+  final String? packageType;
+  final String? levelRange;
+  final String? displayName;
+  final String? description;
   final int wordCount;
   final int categoryCount;
   final DateTime? publishedAt;
@@ -62,4 +82,29 @@ String? _normalizeOptional(String? value) {
   final normalized = value?.trim();
   if (normalized == null || normalized.isEmpty) return null;
   return normalized;
+}
+
+String? _normalizePackageFamily(String? value) {
+  final normalized = ContentPackageTaxonomy.normalizePackageFamily(value ?? '');
+  if (normalized.isEmpty) return null;
+  return normalized;
+}
+
+String? _normalizePackageStage(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  return ContentPackageTaxonomy.detectTopWordsStage(trimmed) ??
+      normalizeLanguageToken(trimmed);
+}
+
+String? _normalizePackageType(String? value) {
+  final normalized = ContentPackageTaxonomy.normalizePackageType(value ?? '');
+  if (normalized.isEmpty) return null;
+  return normalized;
+}
+
+String? _normalizeLevelRange(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  return trimmed.toUpperCase().replaceAll(' ', '');
 }

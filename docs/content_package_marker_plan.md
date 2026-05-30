@@ -83,11 +83,17 @@ CREATE TABLE content_package_imports (
   base_language TEXT NOT NULL,
   learning_language TEXT NOT NULL,
   translation_language TEXT NOT NULL,
+  package_family TEXT,
+  package_stage TEXT,
+  package_type TEXT,
+  level_range TEXT,
   version TEXT NOT NULL,
   status TEXT NOT NULL,
   checksum TEXT,
   source TEXT NOT NULL,
   min_app_version TEXT,
+  display_name TEXT,
+  description TEXT,
   word_count INTEGER NOT NULL DEFAULT 0,
   category_count INTEGER NOT NULL DEFAULT 0,
   imported_at TEXT NOT NULL,
@@ -132,6 +138,22 @@ ON content_package_imports (learning_language, translation_language);
   - Muttersprache oder Übersetzungssprache, z. B. `de`, `es`, `fr`
   - muss von `appLanguage` getrennt bleiben
 
+- `package_family`
+  - normalisierte Paketfamilie, z. B. `top_words`, `toefl`, `business_english`
+  - hilft, mehrere Versionen oder Stufen derselben Familie zusammenzufassen
+
+- `package_stage`
+  - Stufe innerhalb der Paketfamilie, z. B. `1-100`, `101-200`, `academic`
+  - bei Top-Wortschatz intern bevorzugt als Bereichspaket statt als riesiger Block
+
+- `package_type`
+  - fachlicher Pakettyp, z. B. `frequency`, `exam`, `topic_pack`, `grammar`, `phrase_pack`, `business`, `travel`, `custom`
+  - verhindert, dass Speziallisten wie TOEFL oder Grammatik als normale Wortwelten behandelt werden
+
+- `level_range`
+  - optionale Level-Spanne, z. B. `A1-B2` oder `B2-C1`
+  - ersetzt nicht das einzelne Wort-Level, sondern beschreibt die Paketausrichtung
+
 - `version`
   - Paketversion, z. B. `1.0.0`
   - sollte später semantisch oder über einen monotonen `version_code` vergleichbar sein
@@ -150,6 +172,10 @@ ON content_package_imports (learning_language, translation_language);
 - `min_app_version`
   - kleinste App-Version, für die das Paket gedacht ist
   - verhindert Import neuer Paketstrukturen durch alte Apps
+
+- `display_name`, `description`
+  - optionale sichtbare Metadaten für spätere Paketübersichten
+  - dürfen nicht als technische Schlüssel verwendet werden
 
 - `word_count`, `category_count`
   - Plausibilitätswerte für Readback, Tests und Diagnose
@@ -313,6 +339,10 @@ Remote-Paketmetadaten sollten mindestens enthalten:
 - `base_language`
 - `learning_language`
 - `translation_language`
+- `package_family`, z. B. `top_words`, `toefl`, `business_english`
+- `package_stage`, z. B. `1-100`, `101-200`, `academic`
+- `package_type`, z. B. `frequency`, `exam`, `topic_pack`, `grammar`, `phrase_pack`
+- `level_range`, z. B. `A1-B2`
 - `version`
 - `checksum`
 - `min_app_version`
@@ -414,6 +444,11 @@ Umgesetzt wurden:
   - reines Value-Object für Remote-Paketmetadaten
   - normalisiert Sprachcodes und Statuswerte über die zentrale Sprachcode-Grundlage
   - enthält Pflichtfelder wie `contentPackageId`, `languagePair`, `baseLanguage`, `learningLanguage`, `translationLanguage`, `version`, `status`, `checksum`, `source`, `minAppVersion`, `wordCount`, `categoryCount`, `publishedAt`
+  - unterstützt optionale Paketstrukturfelder wie `packageFamily`, `packageStage`, `packageType`, `levelRange`, `displayName` und `description`
+- `lib/core/sync/content_package_taxonomy.dart`
+  - normalisiert Paketfamilien und Pakettypen ohne Supabase- oder SQLite-Anbindung
+  - ordnet `Top 500 Words`, `Top 100` und Bereichsstufen wie `Top 1-100` der Paketfamilie `top_words` zu
+  - ordnet Spezialpakete wie `TOEFL`, `IELTS`, `Cambridge English`, `Business English`, `Grammar & Syntax` und `Phrases & Idioms` stabilen technischen Schlüsseln zu
 - `lib/core/sync/content_package_import_marker.dart`
   - reines Value-Object für lokal bereits importierte Pakete
   - entspricht dem späteren SQLite-Marker, aber ohne Repository und ohne Migration
@@ -427,6 +462,7 @@ Umgesetzt wurden:
   - entscheidet rein in Memory, ob ein Remote-Paket importierbar, zu überspringen oder blockiert ist
   - prüft `approved`, Sprachpaar, `minAppVersion`, Version und Checksum
   - berührt keine User-Daten und startet keinen Import
+  - gibt Top-Wortschatz-, TOEFL- oder Business-Pakete nicht gesondert frei; auch diese Pakete brauchen weiterhin `approved`, passendes Sprachpaar und kompatible Version
 
 Die Policy kennt folgende Reason-Codes:
 
@@ -441,6 +477,8 @@ Die Policy kennt folgende Reason-Codes:
 - `invalidPackageMetadata`
 
 Wichtig: Es gibt weiterhin keine SQLite-Migration für `content_package_imports`, keinen Supabase-Paketreader und keine aktive Content-Paket-Synchronisation. Der bestehende Legacy-Auto-Sync bleibt separat über `ReleaseSyncPolicy` geschützt.
+
+Top-Wortschatz wird intern bevorzugt als Bereichspaket vorbereitet, z. B. `Top 1-100` und `Top 101-200`. Die UI kann daraus später kumulative Ziele wie `Top 100`, `Top 200` oder `Top 500` bilden, ohne dass dieselbe technische Paketstruktur mehrfach gepflegt werden muss.
 
 ## 18. Aktualisierte nächste Schritte
 

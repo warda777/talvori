@@ -213,6 +213,10 @@ Minimaler Release-Guard:
 - Zusätzlich Paketversion/Marker prüfen, nicht nur Wortanzahl.
 - Remote-Pakete nur mit `approved`/freigegebenem Status laden.
 - Die vorbereitende Content-Paket-Entscheidungsschicht existiert inzwischen als reines In-Memory-Modell (`ContentPackageMetadata`, `ContentPackageImportMarker`, `ContentPackageSyncPolicy`, `VersionCompare`), ist aber noch nicht an Supabase, SQLite-Migration oder Importlogik angeschlossen.
+- `ContentPackageMetadata` unterstützt vorbereitend optionale Paketfelder wie `packageFamily`, `packageStage`, `packageType`, `levelRange`, `displayName` und `description`.
+- `ContentPackageTaxonomy` normalisiert Paketfamilien und Spezialpakete, z. B. `Top 500 Words` zu `top_words`, `TOEFL` zu `toefl` und `Business English` zu `business_english`.
+- Top-Wortschatz wird intern bevorzugt als Bereichspaket vorbereitet, während die UI später kumulative Ziele wie `Top 100`, `Top 200` oder `Top 500` zeigen kann.
+- Spezialpakete wie TOEFL, IELTS, Cambridge, Business, Grammar oder Phrases bleiben trotzdem normale Content-Pakete im Sinne der Policy: ohne `approved`, passendes Sprachpaar und kompatible Version werden sie nicht importierbar.
 - Stabile Sprachcodes sind zentral über `TalvoriLanguages` vorbereitet. Bestehende UI-Labels bleiben kompatibel, Content-Paket-Entscheidungen sollen aber Codes und normalisierte Sprachpaare nutzen.
 - Die Settings-UI erklärt App-Sprache, Muttersprache und Lernsprache nun getrennt. Sichtbar bleiben im MVP nur Deutsch, Englisch, Spanisch und Französisch; weitere Sprachen sind intern vorbereitet, aber nicht freigeschaltet.
 
@@ -314,6 +318,10 @@ Empfohlenes Paketmodell:
 - `native_language` oder `translation_language`
 - `version`
 - `status`: `draft`, `ai_suggested`, `human_reviewed`, `approved`, `deprecated`
+- `package_family`, z. B. `top_words`, `toefl`, `business_english`
+- `package_stage`, z. B. `1-100`, `101-200`, `academic`
+- `package_type`, z. B. `frequency`, `exam`, `topic_pack`, `grammar`, `phrase_pack`, `business`, `travel`, `custom`
+- `level_range`, z. B. `A1-B2`
 - `min_app_version`
 - `released_at`
 - `checksum`
@@ -327,6 +335,8 @@ Lokale Marker:
 - Prüfsumme
 
 Dadurch ersetzt eine Paketprüfung die aktuelle reine Wortanzahl-Schwelle.
+
+Wichtig: Diese Felder sind nur vorbereitende Metadaten. Sie aktivieren keinen Supabase-Reader, keine SQLite-Migration und keinen produktiven Paketimport.
 
 ## 11. Mehrsprachigkeits- und Sprachpaket-Konzept
 
