@@ -123,3 +123,4 @@ app.*.symbols
 
 supabase/.temp/.DS_Store
 supabase/.temp/
+.DS_Store
