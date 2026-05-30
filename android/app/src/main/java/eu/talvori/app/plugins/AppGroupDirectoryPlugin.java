@@ -1,4 +1,4 @@
-package com.talvori.talvori.plugins;
+package eu.talvori.app.plugins;
 
 import android.content.Context;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;

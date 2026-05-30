@@ -1,11 +1,11 @@
-package com.talvori.talvori
+package eu.talvori.app
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import com.talvori.talvori.plugins.AppGroupDirectoryPlugin
+import eu.talvori.app.plugins.AppGroupDirectoryPlugin
 import java.util.UUID
 
 class MainActivity : FlutterActivity() {

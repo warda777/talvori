@@ -14,8 +14,8 @@ Dieser Check dokumentiert die technische Store-Identitaet der Talvori-App fuer d
 - `ios/ShareExtension/ShareExtension.entitlements`
 - `android/app/build.gradle.kts`
 - `android/app/src/main/AndroidManifest.xml`
-- `android/app/src/main/kotlin/com/talvori/talvori/MainActivity.kt`
-- `android/app/src/main/java/com/talvori/talvori/plugins/AppGroupDirectoryPlugin.java`
+- `android/app/src/main/kotlin/eu/talvori/app/MainActivity.kt`
+- `android/app/src/main/java/eu/talvori/app/plugins/AppGroupDirectoryPlugin.java`
 - `web/manifest.json`
 - `web/index.html`
 
@@ -38,39 +38,39 @@ Bewertung:
 
 Aktueller iOS App Bundle Identifier:
 
-- `com.talvori.talvori`
+- `eu.talvori.app`
 
 Zugehoerige iOS Identitaeten:
 
-- Share Extension: `com.talvori.talvori.ShareExtension`
-- RunnerTests: `com.talvori.talvori.RunnerTests`
-- App Group: `group.com.talvori.talvori`
+- Share Extension: `eu.talvori.app.ShareExtension`
+- RunnerTests: `eu.talvori.app.RunnerTests`
+- App Group: `group.eu.talvori.app`
 - URL Scheme: `talvori`
-- Share URL Name: `com.talvori.talvori.share`
+- Share URL Name: `eu.talvori.app.share`
 
 Bewertung:
 
 - iOS App, Share Extension und App Group sind intern konsistent.
 - Eine spaetere Bundle-ID-Aenderung muss App Group, Share Extension, Entitlements und ggf. Store-/Signing-Konfiguration gemeinsam beruecksichtigen.
-- Keine automatische Aenderung wurde vorgenommen, weil unklar ist, ob `com.talvori.talvori` bereits fuer Apple Developer / App Store Connect reserviert oder verwendet wird.
+- Die finale MVP-ID ist auf `eu.talvori.app` umgestellt. Die passende App ID und App Group muessen im Apple Developer Portal noch angelegt bzw. bestaetigt werden.
 
 ## 4. Android Package Name
 
 Aktueller Android Package Name / Application ID:
 
-- `com.talvori.talvori`
+- `eu.talvori.app`
 
 Weitere Android-Werte:
 
-- `namespace = "com.talvori.talvori"`
-- Kotlin MainActivity package: `com.talvori.talvori`
-- Java Plugin package: `com.talvori.talvori.plugins`
+- `namespace = "eu.talvori.app"`
+- Kotlin MainActivity package: `eu.talvori.app`
+- Java Plugin package: `eu.talvori.app.plugins`
 - App Label: `Talvori`
 
 Bewertung:
 
 - Android `applicationId`, `namespace` und Native Packages sind konsistent.
-- In `android/app/build.gradle.kts` steht noch der Flutter-Template-Kommentar zur eigenen Application ID. Das ist nur Kommentartext, aber vor Store-Release sollte final entschieden werden, ob die aktuelle ID bleibt.
+- In `android/app/build.gradle.kts` steht noch der Flutter-Template-Kommentar zur eigenen Application ID. Das ist nur Kommentartext; die aktive ID ist final auf `eu.talvori.app` gesetzt.
 - Android Release Signing ist noch auf Debug-Signing gesetzt. Das ist fuer lokale Release-Laeufe praktisch, aber fuer Play Store Release nicht ausreichend.
 
 ## 5. Version / Build Number
@@ -102,13 +102,13 @@ Bewertung:
 Konsistent:
 
 - Produktname sichtbar: `Talvori`
-- Haupt-App-Identifier: `com.talvori.talvori`
+- Haupt-App-Identifier: `eu.talvori.app`
 - Version/Build: `1.0.0+1`
 - Share-/Deep-Link-Schema: `talvori`
 
 Abweichungen / Hinweise:
 
-- Empfohlene Ziel-ID ist noch nicht entschieden: `com.talvori.talvori`, `com.talvori.app` oder `eu.talvori.app`.
+- Finale Ziel-ID fuer den MVP: `eu.talvori.app`.
 - Android Release Signing ist noch nicht store-ready.
 - Web-Metadaten sind lowercase `talvori`.
 - iOS `CFBundleName` ist lowercase `talvori`, waehrend `CFBundleDisplayName` korrekt `Talvori` ist. Fuer den sichtbaren App-Namen ist `CFBundleDisplayName` entscheidend.
@@ -121,51 +121,21 @@ Empfohlen:
 - Version: `1.0.0+1`
 - URL Scheme: `talvori`
 
-Bundle-/Package-ID-Optionen:
+Finale Bundle-/Package-ID:
 
-### Option A: `com.talvori.talvori` beibehalten
-
-Vorteile:
-
-- Bereits in iOS, Android, Share Extension, App Group und Native Packages konsistent verdrahtet.
-- Weniger Risiko kurz vor MVP.
-- Keine Paket-/Entitlements-/Native-Package-Umstellung noetig.
-
-Nachteile:
-
-- Redundant im Namen.
-- Weniger elegant als `eu.talvori.app` oder `com.talvori.app`.
-
-### Option B: `com.talvori.app`
-
-Vorteile:
-
-- International ueblich und klar.
-- Weniger redundant.
-
-Nachteile:
-
-- Muss in iOS, Android, App Group, Share Extension, Native Packages, Signing und Store-Konfiguration sauber umgestellt werden.
-- Kann von Store-/Developer-Account-Verfuegbarkeit abhaengen.
-
-### Option C: `eu.talvori.app`
+### `eu.talvori.app`
 
 Vorteile:
 
 - Passt sehr gut zur Domain `talvori.eu`.
 - Wirkt fuer eine europaeische Marke konsistent.
-- Ebenfalls weniger redundant.
-
-Nachteile:
-
-- Muss vollstaendig umgestellt werden.
-- Etwas weniger klassisch als `com.*`, aber technisch voellig gueltig.
+- Ist in iOS, Android, Share Extension, App Group und Native Packages konsistent verdrahtet.
+- Vermeidet die alte redundante `com.talvori.talvori`-Struktur.
 
 Empfehlung:
 
-- Fuer den schnellsten MVP: `com.talvori.talvori` beibehalten, wenn diese ID im Apple/Google-Setup verfuegbar und gewollt ist.
-- Fuer einen sauberen Marken-Neustart vor der ersten Store-Reservierung: `eu.talvori.app` bevorzugen, weil Domain und Marke zusammenpassen.
-- Nicht ohne Store-/Developer-Account-Entscheidung automatisch aendern.
+- `eu.talvori.app` als finale MVP-ID beibehalten.
+- Vor Store-Einreichung die ID in Apple Developer / App Store Connect und Google Play Console passend reservieren bzw. bestaetigen.
 
 ## 8. Plattformempfehlung
 
@@ -174,7 +144,7 @@ Empfohlenes Vorgehen:
 1. Zuerst die Plattform priorisieren, die zuerst eingereicht werden soll.
 2. Wenn iOS zuerst kommt: Apple Developer Team, Bundle ID, App Group, Share Extension und Signing final pruefen.
 3. Wenn Android zuerst kommt: Application ID, Release Signing, Play Console App-Datensatz und Data Safety final pruefen.
-4. Wenn beide kommen: zuerst eine gemeinsame finale Identifier-Entscheidung treffen, dann beide Plattformen konsistent setzen.
+4. Wenn beide kommen: `eu.talvori.app` auf beiden Plattformen als gemeinsame finale Identifier-Struktur verwenden.
 
 Aktueller Stand:
 
@@ -184,18 +154,33 @@ Aktueller Stand:
 
 ## 9. Risiken / Abweichungen
 
-- Bundle ID / Package Name ist aktuell konsistent, aber noch nicht als finale Store-Entscheidung dokumentiert.
-- Eine spaetere Identifier-Aenderung ist moeglich, aber wegen Share Extension und Native Packages nicht trivial.
+- Bundle ID / Package Name sind technisch auf `eu.talvori.app` umgestellt.
+- Apple Developer App ID und App Group `group.eu.talvori.app` muessen im Developer Portal passend angelegt bzw. bestaetigt werden.
+- Eine spaetere Identifier-Aenderung sollte vermieden werden, weil Share Extension, App Group und Native Packages betroffen sind.
 - Android Release Signing nutzt aktuell Debug-Signing im Release-Build.
 - Store-Reservierung, App Store Connect / Play Console, Altersfreigabe und Datenschutzangaben bleiben offen.
 - App-Icon wurde in diesem Check nicht visuell geprueft.
 - Screenshots wurden nicht erstellt.
 
-## 10. Konkrete naechste Schritte
+## 10. Build-Check
 
-1. Entscheiden: `com.talvori.talvori` behalten oder vor Store-Reservierung auf `eu.talvori.app` / `com.talvori.app` umstellen.
-2. Store-App-Datensatz fuer die erste Zielplattform anlegen oder pruefen.
-3. iOS Signing/App Group/Share Extension gegen die finale Bundle ID pruefen.
+Ausgefuehrte technische Checks:
+
+- `flutter test`: bestanden
+- `flutter build apk --debug`: bestanden
+- `flutter build ios --debug --no-codesign`: bestanden
+- `git diff --check`: sauber
+
+Hinweis:
+
+- Der erste Android-Buildlauf hat Core Library Desugaring fuer `flutter_local_notifications` verlangt. Die Android-Build-Konfiguration wurde entsprechend ergaenzt. Das ist eine Build-Konfigurationskorrektur und keine App-Logikaenderung.
+- iOS wurde ohne Codesigning gebaut. Signing, Provisioning Profile, App ID und App Group muessen vor Geraete-/Store-Release im Apple Developer Portal final konfiguriert werden.
+
+## 11. Konkrete naechste Schritte
+
+1. Store-App-Datensatz fuer die erste Zielplattform mit `eu.talvori.app` anlegen oder pruefen.
+2. iOS Signing/App Group/Share Extension gegen `eu.talvori.app` und `group.eu.talvori.app` pruefen.
+3. Google Play Application ID `eu.talvori.app` bestaetigen.
 4. Android Release Signing konfigurieren.
 5. App-Icon final pruefen.
 6. Danach finalen Release-Build erstellen und Device-Smoke-Test wiederholen.

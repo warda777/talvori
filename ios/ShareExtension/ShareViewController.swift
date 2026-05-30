@@ -2,7 +2,7 @@ import UIKit
 import MobileCoreServices
 
 final class ShareViewController: UIViewController {
-  private let appGroupId = "group.com.talvori.talvori"
+  private let appGroupId = "group.eu.talvori.app"
   private let pendingTextKey = "pendingSharedText"
   private let pendingIdKey = "pendingSharedTextId"
   private let pendingCreatedAtKey = "pendingSharedTextCreatedAt"
