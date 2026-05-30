@@ -230,6 +230,16 @@ dart tool/validate_manual_review_batch.dart \
   --report docs/word-review/manual_review_first_batch_report.md
 ```
 
+Overlay-Export:
+
+```bash
+dart tool/export_manual_review_overlay.dart \
+  --input docs/word-review/manual_review_first_batch_working.csv \
+  --output docs/word-review/manual_review_first_batch_overlay.csv \
+  --reviewer Andreas \
+  --reviewed-at 2026-05-30
+```
+
 Erlaubte Werte für `review_decision`:
 
 - leer
@@ -246,6 +256,25 @@ Erlaubte Werte für `review_decision`:
 Für `needs_context`, `reject` und `split_meaning` sollte `review_note` gefüllt sein.
 Der Validator setzt keine Entscheidung automatisch, vergibt kein `approved` und schreibt keine Produktivdaten.
 
+Das Overlay-Tool exportiert nur Zeilen mit gefüllter `review_decision`.
+Leere Entscheidungen werden übersprungen. Ein Overlay enthält ausschließlich:
+
+- `word_key`
+- `review_block`
+- `base_term`
+- `de_translation`
+- `conflict_type`
+- `review_decision`
+- `review_note`
+- `reviewer`
+- `reviewed_at`
+
+Das Overlay ist kein Produktivimport. Es enthält keine Korrekturen, kein
+`approved`, kein `release_ready` und verändert keine App-, SQLite- oder
+Supabase-Daten. Es dient nur dazu, abgestimmte menschliche Entscheidungen
+klein und prüfbar zu versionieren. Persönliche Working-Copies bleiben ignored;
+validierte Overlays können später separat reviewed und committed werden.
+
 ## 6. Erste manuelle Review-Etappe
 
 Die erste Etappe ist bewusst klein:
@@ -260,6 +289,7 @@ Arbeitsdatei:
 - `manual_review_first_batch.csv`
 - lokale persönliche Kopie: `manual_review_first_batch_working.csv`
 - Validierungsreport: `manual_review_first_batch_report.md`
+- spätere Overlay-Datei: `manual_review_first_batch_overlay.csv`
 
 Umfang:
 
@@ -294,9 +324,12 @@ Sinnvolle spätere Tools:
    - schreibt nur einen Markdown-Report
    - keine Supabase-/SQLite-Verbindung, keine Imports, keine Korrekturen
 
-2. **Overlay-Tool für Review-Entscheidungen**
+2. **Vorhandenes Overlay-Tool für Review-Entscheidungen**
+   - `tool/export_manual_review_overlay.dart`
    - liest eine Review-Arbeitskopie
-   - erzeugt ein Overlay aus `word_key`, `review_decision`, `review_note`
+   - erzeugt ein Overlay aus gefüllten Review-Entscheidungen
+   - schreibt keine leeren Entscheidungen
+   - verlangt `--force`, wenn eine Output-Datei überschrieben würde
    - verändert keine Produktivdaten
 
 3. **Kandidatenlisten-Merge-Tool**

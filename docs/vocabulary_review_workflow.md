@@ -391,6 +391,52 @@ Persönliche Arbeitskopien sollen nicht direkt versioniert werden. Dafür ist
 `docs/word-review/*_working.csv` in `.gitignore` ignoriert. Abgestimmte
 Review-Ergebnisse sollen später als separates Overlay entstehen.
 
+Für diesen Overlay-Schritt gibt es ein separates read-only Tool:
+
+- `tool/export_manual_review_overlay.dart`
+  - liest standardmäßig `docs/word-review/manual_review_first_batch_working.csv`
+  - schreibt standardmäßig `docs/word-review/manual_review_first_batch_overlay.csv`
+  - exportiert nur Zeilen mit gefüllter `review_decision`
+  - überspringt leere Entscheidungen
+  - blockiert unbekannte Entscheidungen
+  - verlangt bei `needs_context`, `reject` und `split_meaning` eine `review_note`
+  - verlangt `--force`, wenn die Output-Datei bereits existiert
+  - erzeugt kein `approved` und kein `release_ready`
+
+Beispiel:
+
+```bash
+cp docs/word-review/manual_review_first_batch.csv \
+  docs/word-review/manual_review_first_batch_working.csv
+
+dart tool/validate_manual_review_batch.dart \
+  --input docs/word-review/manual_review_first_batch_working.csv \
+  --report docs/word-review/manual_review_first_batch_report.md
+
+dart tool/export_manual_review_overlay.dart \
+  --input docs/word-review/manual_review_first_batch_working.csv \
+  --output docs/word-review/manual_review_first_batch_overlay.csv \
+  --reviewer Andreas \
+  --reviewed-at 2026-05-30
+```
+
+Das Overlay-Format ist bewusst klein:
+
+- `word_key`
+- `review_block`
+- `base_term`
+- `de_translation`
+- `conflict_type`
+- `review_decision`
+- `review_note`
+- `reviewer`
+- `reviewed_at`
+
+Ein Overlay ist kein Produktivimport. Es enthält nur menschliche
+Review-Entscheidungen und verändert keine App-, Supabase-, SQLite-, SRS- oder
+`word_progress`-Daten. Spätere Prozesse müssen Overlays erneut prüfen, bevor
+daraus echte Content-Änderungen oder Release-Pakete entstehen.
+
 Grund:
 
 - Es existiert bereits ein read-only Supabase-Review-Export.
