@@ -6,6 +6,11 @@ Talvori soll später geprüfte, versionierte Content-Pakete aus Supabase laden k
 
 Dieser Plan ist bewusst vorbereitend: Es wird noch keine produktive Migration eingeführt, keine Supabase-Tabelle erstellt und kein Import ausgeführt.
 
+Das detaillierte Migrationsdesign liegt separat in
+`docs/content_package_migration_design.md`. Dort werden Paketdefinition,
+Paketmitgliedschaft und lokaler Importmarker als getrennte Zieltabellen
+geplant. Auch dieses Design führt noch keine Migration aus.
+
 ## 2. Geprüfte lokale Struktur
 
 Relevante Dateien und Bereiche:
@@ -66,6 +71,11 @@ Nicht geeignet ist es für:
 
 Empfehlung: Die `settings`-Marker bleiben für lokale App-/Asset-Importe bestehen. Für Supabase-Content-Pakete sollte später eine eigene SQLite-Tabelle eingeführt werden.
 
+Wichtig für die spätere Migration: `content_package_imports` ist nur der
+lokale Importmarker. Die eigentliche Paketdefinition gehört in eine getrennte
+Tabelle `content_packages`; die Zuordnung von Wörtern zu Paketen gehört in
+`content_package_memberships`.
+
 ## 4. Empfohlenes lokales Marker-Modell
 
 Tabellenname:
@@ -73,6 +83,10 @@ Tabellenname:
 ```sql
 content_package_imports
 ```
+
+Dieses Modell beschreibt nur den Importmarker. Das größere Zielmodell mit
+`content_packages` und `content_package_memberships` ist in
+`docs/content_package_migration_design.md` beschrieben.
 
 Empfohlene Felder:
 
@@ -484,9 +498,11 @@ Top-Wortschatz wird intern bevorzugt als Bereichspaket vorbereitet, z. B. `Top 1
 
 1. Remote-Paketformat finalisieren.
 2. Supabase-Metadaten nur konzeptionell abstimmen, noch nicht produktiv migrieren.
-3. SQLite-Migration `content_package_imports` ergänzen, sobald das Paketformat stabil ist.
-4. Repository für lokale Content-Paket-Marker bauen.
-5. Supabase-Reader für Paketmetadaten ergänzen.
-6. Paketentscheidung mit `ContentPackageSyncPolicy` vor den Import schalten.
-7. `SupabaseWordsLocalImportService` paketbewusst erweitern.
-8. Legacy-Auto-Sync durch kontrollierten Content-Paket-Sync ablösen.
+3. Zieltabellen aus `docs/content_package_migration_design.md` gegen den Review-Stand prüfen:
+   `content_packages`, `content_package_memberships`, `content_package_imports`.
+4. SQLite-Migration erst ergänzen, sobald Paketdefinition und Membership-Regeln stabil sind.
+5. Repository für lokale Content-Paket-Marker und Paketdefinitionen bauen.
+6. Supabase-Reader für Paketmetadaten ergänzen.
+7. Paketentscheidung mit `ContentPackageSyncPolicy` vor den Import schalten.
+8. `SupabaseWordsLocalImportService` paketbewusst erweitern.
+9. Legacy-Auto-Sync durch kontrollierten Content-Paket-Sync ablösen.

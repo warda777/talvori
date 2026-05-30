@@ -45,6 +45,14 @@ verwenden:
 Diese Trennung muss später sowohl lokal als auch in Supabase-/Content-Paketen
 konsistent gelten.
 
+Das spätere lokale und Supabase-seitige Tabellenziel ist in
+`docs/content_package_migration_design.md` geplant. Dort werden
+Paketdefinitionen, Paketmitgliedschaften und lokale Importmarker getrennt:
+
+- `content_packages`
+- `content_package_memberships`
+- `content_package_imports`
+
 ## 3. Warum das wichtig ist
 
 - Die UI wird klarer, weil Lernlevel nicht wie Themen wirken.
@@ -323,12 +331,14 @@ Import aus und setzt keine Freigabe.
    im vollständigen Kandidatenbestand vorkommen.
 3. Entscheiden, ob Top-Wortschatz intern als Bereichspakete oder kumulativ
    gespeichert wird.
-4. Paket-Metadatenmodell mit `package_family`, `package_stage`,
+4. Migrationsdesign in `docs/content_package_migration_design.md` gegen den
+   Review-Stand prüfen.
+5. Paket-Metadatenmodell mit `package_family`, `package_stage`,
    `package_type`, `language_pair`, `level_range`, `version` und `status`
    finalisieren.
-5. Größere Struktur-Batches erst nach Auswertung dieses repräsentativen
+6. Größere Struktur-Batches erst nach Auswertung dieses repräsentativen
    Batches erzeugen.
-6. Später ein getrenntes Import-/Migrationskonzept bauen, das Level, Paket und
+7. Später ein getrenntes Import-/Migrationskonzept bauen, das Level, Paket und
    Wortwelt produktiv trennt.
 
 ## 14. Technischer Vorbereitungsstand
@@ -357,6 +367,7 @@ Vorhandene technische Bausteine:
 Bewusst nicht umgesetzt:
 
 - keine SQLite-Migration
+- keine DB-Versionserhöhung
 - kein Supabase-Paketreader
 - kein Importservice-Umbau
 - keine produktive Zuordnung echter Wörter zu Top-, TOEFL-, IELTS-,

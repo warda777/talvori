@@ -295,10 +295,22 @@ Langfristig kann das Master-Schema in ein normalisiertes Modell übergehen:
 - `translations`
 - `examples`
 - `content_packages`
-- `content_package_items`
+- `content_package_memberships`
+- `content_package_imports`
 - `review_events`
 
 Für den manuellen MVP-Review ist eine Sheet-/CSV-Struktur pragmatischer.
+
+Das spätere Migrationsziel für die Content-Paket-Tabellen ist in
+`docs/content_package_migration_design.md` beschrieben. Die Trennung ist:
+
+- Paketdefinition: `content_packages`
+- Paketmitgliedschaft: `content_package_memberships`
+- lokaler Importmarker: `content_package_imports`
+
+Diese Struktur bleibt Planung. Der Review-Workflow erzeugt weiterhin nur
+Review-Dateien, Reports und Overlays; er führt keine Migration und keinen
+produktiven Import aus.
 
 ## 11. KI-Nutzung
 
@@ -574,7 +586,8 @@ Nicht releasefähig:
 9. Weitere Struktur-Batches gezielt erzeugen, besonders für `top_500_only` und `top_500_topic`.
 10. Entscheiden, ob Top-Wortschatz intern als Bereichspakete oder kumulative Pakete modelliert wird.
 11. Paketmetadaten für Spezialpakete wie TOEFL, IELTS, Cambridge und Business English gegen die vorbereitete Taxonomie prüfen.
-12. Master-Review-Template erst dann um Paketspalten erweitern, wenn die Tool-Kette für Paket-Memberships ebenfalls angepasst ist.
+12. Migrationsdesign aus `docs/content_package_migration_design.md` gegen Review-Overlays prüfen.
+13. Master-Review-Template erst dann um Paketspalten erweitern, wenn die Tool-Kette für Paket-Memberships ebenfalls angepasst ist.
 12. Wort-für-Wort-Review des englisch-deutschen Basisbestands starten.
 13. Spanisch-/Französisch-Spalten zunächst vorbereiten, aber nur manuell geprüfte Werte auf `approved` setzen.
 14. Erst danach Content-Paket-Import/Export für Release-Pakete bauen.

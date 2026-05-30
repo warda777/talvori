@@ -217,6 +217,7 @@ Minimaler Release-Guard:
 - `ContentPackageTaxonomy` normalisiert Paketfamilien und Spezialpakete, z. B. `Top 500 Words` zu `top_words`, `TOEFL` zu `toefl` und `Business English` zu `business_english`.
 - Top-Wortschatz wird intern bevorzugt als Bereichspaket vorbereitet, während die UI später kumulative Ziele wie `Top 100`, `Top 200` oder `Top 500` zeigen kann.
 - Spezialpakete wie TOEFL, IELTS, Cambridge, Business, Grammar oder Phrases bleiben trotzdem normale Content-Pakete im Sinne der Policy: ohne `approved`, passendes Sprachpaar und kompatible Version werden sie nicht importierbar.
+- Das spätere Migrationdesign ist in `docs/content_package_migration_design.md` dokumentiert. Es trennt Paketdefinition (`content_packages`), Paketmitgliedschaft (`content_package_memberships`) und lokalen Importmarker (`content_package_imports`), führt aber noch keine Migration aus.
 - Stabile Sprachcodes sind zentral über `TalvoriLanguages` vorbereitet. Bestehende UI-Labels bleiben kompatibel, Content-Paket-Entscheidungen sollen aber Codes und normalisierte Sprachpaare nutzen.
 - Die Settings-UI erklärt App-Sprache, Muttersprache und Lernsprache nun getrennt. Sichtbar bleiben im MVP nur Deutsch, Englisch, Spanisch und Französisch; weitere Sprachen sind intern vorbereitet, aber nicht freigeschaltet.
 
@@ -338,6 +339,14 @@ Dadurch ersetzt eine Paketprüfung die aktuelle reine Wortanzahl-Schwelle.
 
 Wichtig: Diese Felder sind nur vorbereitende Metadaten. Sie aktivieren keinen Supabase-Reader, keine SQLite-Migration und keinen produktiven Paketimport.
 
+Das Zielmodell unterscheidet künftig:
+
+- `content_packages`: freigegebene Paketdefinitionen und Metadaten
+- `content_package_memberships`: Many-to-many-Zuordnung zwischen Paketen und Wörtern, inklusive optionalem `rank`
+- `content_package_imports`: lokaler Marker, welche Paketversion bereits erfolgreich importiert wurde
+
+Diese Trennung ist in `docs/content_package_migration_design.md` ausführlich geplant.
+
 ## 11. Mehrsprachigkeits- und Sprachpaket-Konzept
 
 Aktuell existieren:
@@ -383,10 +392,11 @@ Später sinnvoll:
 1. Release-Entscheidung für `SupabaseWordsLocalAutoSyncService` treffen.
 2. Current Auto-Sync nicht unverändert als finalen Release-Pfad verwenden.
 3. Feature-Flag oder Paket-Guard ergänzen.
-4. Content-Paket-Marker lokal speichern.
-5. Remote Content nur mit geprüftem Status importieren.
-6. Sprachpaarfilter einführen.
-7. Tests für Offline, Fehler, Wiederholung, Neuinstallation und Konflikte ergänzen.
+4. Content-Paket-Migrationdesign gegen Review-Ergebnisse prüfen.
+5. Content-Paket-Marker lokal speichern.
+6. Remote Content nur mit geprüftem Status importieren.
+7. Sprachpaarfilter einführen.
+8. Tests für Offline, Fehler, Wiederholung, Neuinstallation und Konflikte ergänzen.
 
 ### Sollte vor Release
 
