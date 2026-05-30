@@ -378,6 +378,19 @@ Die große Datei `docs/word-review/vocabulary_review_seed.csv` bleibt in
 `.gitignore` ignoriert. Commit-fähig sind nur der Qualitätsreport und kleine
 Kandidatenlisten, sofern sie gezielt Problemfälle dokumentieren.
 
+Für den ersten manuellen Batch gibt es zusätzlich einen lokalen Validator:
+
+- `tool/validate_manual_review_batch.dart`
+  - liest standardmäßig `docs/word-review/manual_review_first_batch.csv`
+  - schreibt `docs/word-review/manual_review_first_batch_report.md`
+  - prüft Header, Pflichtfelder, erlaubte `review_decision`-Werte und nötige Notizen
+  - setzt keine Entscheidungen automatisch
+  - vergibt kein `approved` und kein `release_ready`
+
+Persönliche Arbeitskopien sollen nicht direkt versioniert werden. Dafür ist
+`docs/word-review/*_working.csv` in `.gitignore` ignoriert. Abgestimmte
+Review-Ergebnisse sollen später als separates Overlay entstehen.
+
 Grund:
 
 - Es existiert bereits ein read-only Supabase-Review-Export.

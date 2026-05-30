@@ -214,10 +214,37 @@ Parallel betrachten:
 Empfehlung:
 
 - Eine separate Arbeitskopie von `manual_review_first_batch.csv` für Review-Entscheidungen verwenden, falls mehrere Personen prüfen.
+- Empfohlener Name für lokale persönliche Bearbeitung: `manual_review_first_batch_working.csv`.
+- Dateien nach Muster `docs/word-review/*_working.csv` sind in `.gitignore` ignoriert.
+- Die Arbeitskopie mit `tool/validate_manual_review_batch.dart` prüfen, bevor Ergebnisse weitergegeben werden.
 - `review_decision` und `review_note` zunächst nur in der Arbeitskopie füllen.
 - Die große `vocabulary_review_seed.csv` nicht direkt bearbeiten und nicht committen.
 - `supabase_words_review.csv` als Rohbasis nicht überschreiben.
 - Kandidatenlisten nicht als Korrekturdateien missverstehen; sie markieren nur Problemfälle.
+
+Validator:
+
+```bash
+dart tool/validate_manual_review_batch.dart \
+  --input docs/word-review/manual_review_first_batch_working.csv \
+  --report docs/word-review/manual_review_first_batch_report.md
+```
+
+Erlaubte Werte für `review_decision`:
+
+- leer
+- `keep`
+- `merge_later`
+- `split_meaning`
+- `canonical_case`
+- `set_level`
+- `set_word_world`
+- `reject`
+- `needs_context`
+- `add_note`
+
+Für `needs_context`, `reject` und `split_meaning` sollte `review_note` gefüllt sein.
+Der Validator setzt keine Entscheidung automatisch, vergibt kein `approved` und schreibt keine Produktivdaten.
 
 ## 6. Erste manuelle Review-Etappe
 
@@ -231,6 +258,8 @@ Die erste Etappe ist bewusst klein:
 Arbeitsdatei:
 
 - `manual_review_first_batch.csv`
+- lokale persönliche Kopie: `manual_review_first_batch_working.csv`
+- Validierungsreport: `manual_review_first_batch_report.md`
 
 Umfang:
 
@@ -259,24 +288,30 @@ Nicht Teil der ersten Etappe:
 
 Sinnvolle spätere Tools:
 
-1. **Overlay-Tool für Review-Entscheidungen**
+1. **Vorhandener Validator**
+   - `tool/validate_manual_review_batch.dart`
+   - prüft Header, Pflichtfelder, erlaubte Entscheidungen und nötige Notizen
+   - schreibt nur einen Markdown-Report
+   - keine Supabase-/SQLite-Verbindung, keine Imports, keine Korrekturen
+
+2. **Overlay-Tool für Review-Entscheidungen**
    - liest eine Review-Arbeitskopie
    - erzeugt ein Overlay aus `word_key`, `review_decision`, `review_note`
    - verändert keine Produktivdaten
 
-2. **Kandidatenlisten-Merge-Tool**
+3. **Kandidatenlisten-Merge-Tool**
    - verbindet Dubletten-, Case-, Bedeutungs- und Strukturkandidaten mit dem Master-Seed
    - erzeugt kleine, priorisierte Arbeitskopien
 
-3. **Review-Batch-Exporter**
+4. **Review-Batch-Exporter**
    - erzeugt handliche Batches, z. B. 200 bis 500 Zeilen
    - filtert nach Risiko, Kategorie, Level oder Konflikttyp
 
-4. **Release-Validator**
+5. **Release-Validator**
    - prüft, dass nur `approved` + `release_ready = true` in Release-Exports gelangen
    - blockiert `ai_suggested`, `needs_review`, leere Bedeutungsnotizen bei Varianten und Strukturkonflikte
 
-5. **Content-Paket-Preview**
+6. **Content-Paket-Preview**
    - zeigt vor einem späteren Import, welche Wörter in welches Paket kämen
    - rein read-only, ohne Supabase- oder SQLite-Write
 
