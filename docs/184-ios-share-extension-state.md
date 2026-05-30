@@ -26,7 +26,7 @@ Android nutzt weiterhin die bestehende native `MainActivity`:
 iOS ist daran angeglichen:
 
 - neues Share Extension Target `TalvoriShareExtension`
-- App Group `group.com.talvori.talvori`
+- App Group `group.eu.talvori.app`
 - Share Extension nimmt Plain Text und URLs an
 - Extension schreibt eine Payload in App-Group-`UserDefaults`
 - Payload enthält `id`, `text`, `createdAt`, `source` und `type`
@@ -51,7 +51,7 @@ Neue iOS-Dateien:
 Runner und Share Extension teilen dieselbe App Group:
 
 ```text
-group.com.talvori.talvori
+group.eu.talvori.app
 ```
 
 Der Runner registriert zusätzlich das URL-Scheme:
