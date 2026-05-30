@@ -108,6 +108,42 @@ void main() {
     expect(find.text('Männlich'), findsOneWidget);
   });
 
+  testWidgets('language settings explain app native and learning language', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+
+    await tester.tap(find.text('Sprache'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('App-Sprache'), findsOneWidget);
+    expect(find.text('Sprache der App-Oberfläche'), findsOneWidget);
+    expect(find.text('Muttersprache'), findsOneWidget);
+    expect(
+      find.text('Sprache für Übersetzungen und Erklärungen'),
+      findsOneWidget,
+    );
+    expect(find.text('Lernsprache'), findsOneWidget);
+    expect(find.text('Sprache, die du lernen möchtest'), findsOneWidget);
+    expect(
+      find.textContaining('Aktuelles Lernpaar: Englisch → Deutsch'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('App-Sprache'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Deutsch'), findsWidgets);
+    expect(find.text('Englisch'), findsOneWidget);
+    expect(find.text('Spanisch'), findsOneWidget);
+    expect(find.text('Französisch'), findsOneWidget);
+    expect(find.text('Chinesisch'), findsNothing);
+    expect(find.text('Hindi'), findsNothing);
+    expect(find.text('Japanisch'), findsNothing);
+    expect(find.text('Russisch'), findsNothing);
+    expect(find.text('Arabisch'), findsNothing);
+  });
+
   testWidgets('subscription and muted content screens open', (tester) async {
     await pumpSettings(tester);
 

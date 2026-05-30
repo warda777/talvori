@@ -276,6 +276,8 @@ Aktueller Stand:
 - `TalvoriLanguages` kennt stabile Codes für `de`, `en`, `es`, `fr`.
 - Weitere große Zielsprachen sind intern vorbereitet: `zh`, `hi`, `ja`, `ru`, `ar`.
 - Produktiv sichtbar bleiben im MVP weiterhin die bestehenden Sprachen Deutsch, Englisch, Spanisch und Französisch.
+- Die Settings-UI trennt die Begriffe jetzt sichtbarer: App-Sprache steuert die Oberfläche, Muttersprache steht für Übersetzungen und Erklärungen, Lernsprache ist die Sprache, die gelernt wird.
+- Nutzer sehen weiterhin lesbare Labels, nicht technische Codes wie `de` oder `en`.
 - `ProfilePreferences` speichert noch keine migrierten Codes, bietet aber kompatible Getter wie `appLanguageCode`, `nativeLanguageCode`, `learningLanguageCode` und `contentLanguagePair`.
 - `ContentPackageMetadata`, `ContentPackageImportMarker` und `ContentPackageSyncPolicy` normalisieren Sprachcodes und Sprachpaare über diese zentrale Grundlage.
 - Eine echte Migration bestehender gespeicherter Labels auf Codes ist später möglich, aber in diesem Schritt bewusst nicht umgesetzt.

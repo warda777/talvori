@@ -214,6 +214,7 @@ Minimaler Release-Guard:
 - Remote-Pakete nur mit `approved`/freigegebenem Status laden.
 - Die vorbereitende Content-Paket-Entscheidungsschicht existiert inzwischen als reines In-Memory-Modell (`ContentPackageMetadata`, `ContentPackageImportMarker`, `ContentPackageSyncPolicy`, `VersionCompare`), ist aber noch nicht an Supabase, SQLite-Migration oder Importlogik angeschlossen.
 - Stabile Sprachcodes sind zentral über `TalvoriLanguages` vorbereitet. Bestehende UI-Labels bleiben kompatibel, Content-Paket-Entscheidungen sollen aber Codes und normalisierte Sprachpaare nutzen.
+- Die Settings-UI erklärt App-Sprache, Muttersprache und Lernsprache nun getrennt. Sichtbar bleiben im MVP nur Deutsch, Englisch, Spanisch und Französisch; weitere Sprachen sind intern vorbereitet, aber nicht freigeschaltet.
 
 ## 7. Langfristige Supabase-Rolle
 
@@ -350,6 +351,7 @@ Release-Leitlinie:
 - Content-Pakete müssen nach Sprachpaar geladen werden.
 - Ein deutsches UI darf nicht bedeuten, dass der Nutzer Deutsch als Muttersprache oder Lernsprache nutzt.
 - Neue Sprachen sollten über Paketdaten ergänzt werden, nicht über hartcodierte Sonderfälle.
+- Eine vollständige ARB/l10n-Umstellung und eine Migration gespeicherter Sprachlabels auf Codes bleiben separate spätere Schritte.
 
 ## 12. Chat-/Companion-Sync
 

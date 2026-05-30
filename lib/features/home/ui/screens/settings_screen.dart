@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:talvori/core/assets/talvori_mascot_assets.dart';
+import 'package:talvori/core/language/language_code.dart';
 import 'package:talvori/core/ui/talvori_snackbar.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/supabase_words_local_import_screen.dart';
@@ -131,7 +132,8 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.language_rounded,
                 title: 'Sprache',
                 value:
-                    '${preferences.nativeLanguage} -> ${preferences.learningLanguage}',
+                    '${TalvoriLanguages.germanLabelFor(preferences.learningLanguage)} → ${TalvoriLanguages.germanLabelFor(preferences.nativeLanguage)}',
+                subtitle: 'App, Übersetzungen und Lernsprache',
                 onTap: () => _push(context, const _LanguageSettingsScreen()),
               ),
               _SettingsTile(
@@ -450,12 +452,14 @@ class _SettingsTile extends StatelessWidget {
     required this.icon,
     required this.title,
     this.value,
+    this.subtitle,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String? value;
+  final String? subtitle;
   final VoidCallback onTap;
 
   @override
@@ -495,6 +499,19 @@ class _SettingsTile extends StatelessWidget {
                           color: SettingsScreen._muted,
                           fontSize: 13,
                           height: 1.2,
+                        ),
+                      ),
+                    ],
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        subtitle!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: SettingsScreen._muted.withValues(alpha: 0.82),
+                          fontSize: 12.5,
+                          height: 1.25,
                         ),
                       ),
                     ],
@@ -902,7 +919,9 @@ class _SoundSettingsScreen extends ConsumerWidget {
 class _LanguageSettingsScreen extends ConsumerWidget {
   const _LanguageSettingsScreen();
 
-  static const _languages = ['Deutsch', 'Englisch', 'Spanisch', 'Französisch'];
+  static final _languages = TalvoriLanguages.visibleMvpLanguages
+      .map((language) => language.germanLabel)
+      .toList(growable: false);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -919,10 +938,11 @@ class _LanguageSettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.phone_iphone_rounded,
                 title: 'App-Sprache',
-                value: preferences.appLanguage,
+                value: TalvoriLanguages.germanLabelFor(preferences.appLanguage),
+                subtitle: 'Sprache der App-Oberfläche',
                 onTap: () => _openLanguageChoice(
                   context,
-                  title: 'App-Sprache',
+                  title: 'Sprache der App-Oberfläche',
                   current: preferences.appLanguage,
                   onSelected: controller.setAppLanguage,
                 ),
@@ -930,10 +950,13 @@ class _LanguageSettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.home_rounded,
                 title: 'Muttersprache',
-                value: preferences.nativeLanguage,
+                value: TalvoriLanguages.germanLabelFor(
+                  preferences.nativeLanguage,
+                ),
+                subtitle: 'Sprache für Übersetzungen und Erklärungen',
                 onTap: () => _openLanguageChoice(
                   context,
-                  title: 'Muttersprache',
+                  title: 'Sprache für Übersetzungen',
                   current: preferences.nativeLanguage,
                   onSelected: controller.setNativeLanguage,
                 ),
@@ -941,19 +964,22 @@ class _LanguageSettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.school_rounded,
                 title: 'Lernsprache',
-                value: preferences.learningLanguage,
+                value: TalvoriLanguages.germanLabelFor(
+                  preferences.learningLanguage,
+                ),
+                subtitle: 'Sprache, die du lernen möchtest',
                 onTap: () => _openLanguageChoice(
                   context,
-                  title: 'Lernsprache',
+                  title: 'Sprache, die du lernst',
                   current: preferences.learningLanguage,
                   onSelected: controller.setLearningLanguage,
                 ),
               ),
             ],
           ),
-          const _InfoCard(
+          _InfoCard(
             text:
-                'Die Sprachwerte bleiben lokal und sind so vorbereitet, dass KI-Spiele später konsistent damit arbeiten können.',
+                'Aktuelles Lernpaar: ${TalvoriLanguages.germanLabelFor(preferences.learningLanguage)} → ${TalvoriLanguages.germanLabelFor(preferences.nativeLanguage)}. Die App-Sprache steuert die Oberfläche, deine Muttersprache hilft bei Übersetzungen und Erklärungen, und die Lernsprache bestimmt, welche Sprache du übst.',
           ),
         ],
       ),
@@ -971,7 +997,7 @@ class _LanguageSettingsScreen extends ConsumerWidget {
         builder: (_) => _ChoiceSettingsScreen(
           title: title,
           options: _languages,
-          currentValue: current,
+          currentValue: TalvoriLanguages.germanLabelFor(current),
           onSelected: onSelected,
         ),
       ),
