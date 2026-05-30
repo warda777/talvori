@@ -7,8 +7,8 @@ Dieser Report validiert eine lokale manuelle Review-Arbeitsdatei. Er verändert 
 ## Zusammenfassung
 
 - Gesamtzeilen: 103
-- Leere Entscheidungen: 41
-- Gefüllte Entscheidungen: 62
+- Leere Entscheidungen: 0
+- Gefüllte Entscheidungen: 103
 - Validierungsprobleme: 0
 
 ## Zeilen pro Review-Block
