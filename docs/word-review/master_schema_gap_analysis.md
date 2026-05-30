@@ -409,6 +409,32 @@ Nötige Anpassungen:
 - `release_ready = false`
 - optional `conflict_type` aus eingebauten Prüfregeln setzen
 
+### `tool/export_vocabulary_review_seed.dart`
+
+Zweck:
+
+- liest `docs/word-review/supabase_words_review.csv`
+- erzeugt daraus bei explizitem Aufruf `docs/word-review/vocabulary_review_seed.csv`
+- verwendet das neue Master-Schema
+- setzt alle Zeilen sicher auf `review_status = needs_review`
+- setzt alle Zeilen sicher auf `release_ready = false`
+
+Eignung:
+
+- Aktueller read-only Master-Seed-Exporter.
+- Nutzt nur lokale CSV-Dateien.
+- Öffnet keine Supabase-Verbindung.
+- Öffnet keine SQLite-Verbindung.
+- Führt keinen Import aus.
+- Erzeugt keine KI-Übersetzungen und keine ES-/FR-Produktivdaten.
+
+Sicherheitsverhalten:
+
+- Bestehende Output-Dateien werden nur mit `--force` überschrieben.
+- Fehlende Pflichtspalten brechen mit verständlicher Fehlermeldung ab.
+- Spanisch und Französisch bleiben initial leer.
+- Der Output ist weiterhin Review-Material und nicht releasefähig.
+
 ### `tool/extract_word_review_cleanup_candidates.dart`
 
 Zweck:
@@ -577,11 +603,13 @@ Mittlere Lücken:
 
 Priorität 1:
 
-- `export_supabase_words_review.dart`
-  - optional um einen Master-Seed-Export ergänzen, z. B. `--master-template`
+- `export_vocabulary_review_seed.dart`
+  - ist als separater read-only Master-Seed-Exporter vorhanden
   - keine Supabase-Writes
+  - keine SQLite-Writes
   - `review_status = needs_review`
   - `release_ready = false`
+  - nächster Schritt: Output nach manueller Erzeugung als Arbeitskopie prüfen, nicht produktiv importieren
 
 Priorität 2:
 
@@ -614,7 +642,7 @@ Diese Tools können später nach manueller Freigabe relevant werden, sind aber n
 ## 10. Empfehlung für das weitere Vorgehen
 
 1. `supabase_words_review.csv` als Rohbasis behalten.
-2. Ein neues read-only Tool oder einen neuen Modus vorbereiten, der daraus eine Master-Seed-Datei erzeugt.
+2. `tool/export_vocabulary_review_seed.dart` nutzen, um bei Bedarf eine Master-Seed-Arbeitskopie zu erzeugen.
 3. Die neue Datei nicht automatisch produktiv nutzen.
 4. Hilfsdateien als Overlays einlesen:
    - Dubletten
@@ -632,4 +660,4 @@ Diese Tools können später nach manueller Freigabe relevant werden, sind aber n
 - `supabase_words_review.csv` ist die beste Ausgangsbasis.
 - Alle anderen CSV-Dateien sind Hilfs-/Kandidatenlisten oder Konflikt-Overlays.
 - Die Markdown-Dateien enthalten wertvolle Entscheidungslogik, sind aber keine strukturierten Master-Datenquellen.
-- Ein späterer Master-Seed-Exporter sollte read-only sein und keine Produktivdaten verändern.
+- Der Master-Seed-Exporter ist read-only vorbereitet und verändert keine Produktivdaten.

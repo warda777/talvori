@@ -330,16 +330,38 @@ Beispiel-`conflict_type`-Werte:
 
 ## 14. Tool-Strategie
 
-Für diesen Schritt wird kein neues Export-Tool aktiviert.
+Der sichere Master-Seed-Export ist als lokales read-only Tool vorbereitet:
+
+- `tool/export_vocabulary_review_seed.dart`
+  - liest standardmäßig `docs/word-review/supabase_words_review.csv`
+  - schreibt bei explizitem Aufruf `docs/word-review/vocabulary_review_seed.csv`
+  - verbindet sich nicht mit Supabase
+  - öffnet keine SQLite-Datenbank
+  - führt keinen Import aus
+  - erzeugt keine KI-Vorschläge
+  - lässt Spanisch und Französisch leer
+  - setzt jede Zeile auf `review_status = needs_review`
+  - setzt jede Zeile auf `release_ready = false`
+
+Beispiel:
+
+```bash
+dart tool/export_vocabulary_review_seed.dart \
+  --input docs/word-review/supabase_words_review.csv \
+  --output docs/word-review/vocabulary_review_seed.csv \
+  --force
+```
+
+Bestehende Output-Dateien werden nur mit `--force` überschrieben.
 
 Grund:
 
 - Es existiert bereits ein read-only Supabase-Review-Export.
 - Es existieren bereits Cleanup- und Konflikt-Extraktoren.
-- Ein neuer Export gegen Supabase oder SQLite würde ohne finalisiertes Master-Schema zusätzliche Redundanz erzeugen.
-- Produktive Vokabeldaten sollen in diesem Schritt nicht berührt werden.
+- Der neue Seed-Exporter arbeitet nur auf lokalen CSV-Dateien.
+- Produktive Vokabeldaten werden dadurch nicht berührt.
 
-Wenn später ein neues Tool ergänzt wird, sollte es:
+Weitere Tools sollten weiterhin:
 
 - standardmäßig read-only sein
 - keine Supabase-Writes enthalten
@@ -348,16 +370,11 @@ Wenn später ein neues Tool ergänzt wird, sollte es:
 - kleine Fixture-Tests haben
 - Review-CSV oder JSONL erzeugen
 - problematische Einträge nur markieren
-- `--input` und `--output` explizit verlangen
+- `--input` und `--output` unterstützen
 - niemals ohne Review-Datei produktive Daten ändern
-
-Möglicher späterer Name:
-
-- `tool/export_vocabulary_review.dart`
 
 Mögliche spätere Ausgabe:
 
-- `docs/word-review/vocabulary_review_seed.csv`
 - `docs/word-review/vocabulary_review_seed.jsonl`
 
 ## 15. Release-Freigabe
