@@ -85,6 +85,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Store-Metadaten-Draft erstellt: `docs/store_metadata_draft.md`
 - [x] Beschreibungstexte als MVP-Entwurf vorbereitet
 - [x] Nicht-bewerben-Liste erstellt
+- [x] Finaler MVP-Blocker-Review erstellt: `docs/final_mvp_blocker_review.md`
 - [x] Wortspiele-Release-Scope dokumentiert: `docs/word_games_release_scope.md`
 - [ ] Preview-/geplante Bereiche in Texten vorsichtig formulieren
 - [x] Wort-Duell als Vorschau eingeordnet, nicht als fertiger Multiplayer
@@ -115,6 +116,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] `flutter test` gruen
 - [ ] `git diff --check` sauber
 - [x] Manueller Smoke-Test fuer zentrale MVP-Pfade dokumentiert
+- [x] Aktuelle MVP-Blocker priorisiert: `docs/final_mvp_blocker_review.md`
 - [ ] Finaler Release-Build installiert und Smoke-Test bestanden
 - [ ] Debug-Sichtbarkeit manuell im finalen Release-Build geprueft
 - [ ] Datenschutz-/Support-Links im Store erreichbar und auf echtem Geraet getestet

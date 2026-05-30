@@ -425,6 +425,8 @@ Ziel:
   `docs/store_metadata_draft.md`.
 - Store-Review-Hinweise sind als Entwurf vorbereitet:
   `docs/store_review_notes_draft.md`.
+- Die aktuellen MVP-Blocker sind priorisiert:
+  `docs/final_mvp_blocker_review.md`.
 - Screenshots und finale Store-Einreichung bleiben offen.
 
 Enthält:
@@ -488,9 +490,9 @@ Begründung:
 
 Empfohlene Reihenfolge ab jetzt:
 
-1. Rechtliches/Hilfe/Feedback/Store-Basics
-2. Release-Build und Device-Smoke-Test
-3. Onboarding und erste Nutzerreise
-4. Wortspiel-Release-Scope
-5. MVP-Content-Review weiterführen
-6. Store-Screenshots und finale Release-Unterlagen
+1. Juristische Pruefung und finale Legal-Seiten
+2. Store-Account, Metadaten, Bundle ID, Version und Datenverwendungsangaben
+3. Finaler Release-Build-Test mit Debug-Sichtbarkeitspruefung
+4. Screenshots aus finalem Release-Build
+5. MVP-Minimalcontent fachlich pruefen
+6. Store-Einreichung vorbereiten
