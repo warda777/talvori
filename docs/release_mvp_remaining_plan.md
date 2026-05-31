@@ -224,6 +224,8 @@ Konkrete Richtung:
 - priorisierte Wortwelten: Travel, Food & Cooking, Home & Living
 - erste Review-Arbeitsliste: `docs/word-review/mvp_content_first_review_batch.csv`
 - Umfang der Arbeitsliste: 150 Zeilen, je 50 Travel, Food & Cooking und Home & Living
+- erstes MVP-Content-Review-Overlay: `docs/word-review/mvp_content_first_review_overlay.csv`
+- Ergebnis: 150 Entscheidungen, davon 115 `approved_for_mvp`; problematische Entscheidungen vor Screenshots aussortieren
 - Groessenordnung: 100 bis 200 gepruefte Woerter oder 30 bis 50 Woerter je priorisierter Wortwelt
 - keine ungeprüften Pakete als releasefähig markieren
 - Review-Overlays weiterführen

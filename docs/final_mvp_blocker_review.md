@@ -126,9 +126,9 @@ Naechste Aktion:
 
 - MVP-Content-Scope aus `docs/mvp_content_scope.md` nutzen.
 - Erste Review-Arbeitsliste nutzen: `docs/word-review/mvp_content_first_review_batch.csv`.
-- Travel und Food & Cooking sind in der lokalen Working-Copy vorgeprueft.
-- Home & Living bleibt offen; Overlay erst nach vollstaendigen 150 Entscheidungen erzeugen.
-- Die 150 Zeilen vor Release intensiv finalisieren: 50 Travel, 50 Food & Cooking, 50 Home & Living als Screenshot-/Startkandidaten.
+- Travel, Food & Cooking und Home & Living sind in der lokalen Working-Copy geprueft.
+- MVP-Content-Review-Overlay nutzen: `docs/word-review/mvp_content_first_review_overlay.csv`.
+- Fuer Screenshots nur `approved_for_mvp`-Zeilen verwenden; `fix_translation_later`, `needs_context`, `reject_for_mvp` und `move_out_of_mvp` vorher nicht sichtbar einsetzen.
 - Weitere Review-Batches nach Risiko priorisieren: gleiche `base_term`/`de_translation`, Strukturissues, kleine/auffaellige Wortwelten.
 
 ### G. Debug-Sichtbarkeit im finalen Release-Build

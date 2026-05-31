@@ -1,0 +1,151 @@
+word_key,base_term,de_translation,level,category,word_world,mvp_reason,risk_type,review_decision,review_note,reviewer,reviewed_at
+c1015783-60e2-4059-b052-e60e5b855c40,airport,Flughafen,A1,A1; Top 500 Words; Travel,Travel,mvp_start_word_world:Travel,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+450e2469-1a1f-45f1-bb13-c1ede8f0c262,bag,Tasche,A1,A1; Top 500 Words; Travel,Travel,mvp_start_word_world:Travel,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+3035e121-b85a-4a70-940d-20cef841f116,book the boarding pass,buchen Sie die Bordkarte,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Uebersetzung wirkt wie Imperativ; spaeter neutral als ""Bordkarte buchen"" oder aehnlich pruefen.",Andreas,2026-05-31
+1034f55a-120c-4baf-8eaa-668683196504,book travel insurance,reiseversicherung buchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Grossschreibung/Form pruefen: ""Reiseversicherung buchen"".",Andreas,2026-05-31
+d2d9bc2e-dd94-4385-ba28-a6023f5a5945,bus,Bus,A1,A1; Top 500 Words; Travel,Travel,mvp_start_word_world:Travel,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+82eb38dc-4e1c-4f76-bbcb-aeee3fdce576,Can you help me find the gate?,"Können Sie mir helfen, das Tor zu finden?",A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Airport-Kontext: ""gate"" besser als ""Gate"" oder ""Flugsteig"" statt ""Tor"" pruefen.",Andreas,2026-05-31
+bb020815-2d8c-45a7-b023-1bb128574e9a,cancel the boarding pass,die Bordkarte stornieren,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+b3f4aa62-1cd1-4a44-89a0-88390a4453cb,change a seat,einen Sitzplatz wechseln,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+a6ea1432-9a7b-422f-b9a6-daabad4269e6,check a seat,einen Sitzplatz überprüfen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,needs_context,"""check a seat"" ist ohne Kontext unklar; moeglich Sitzplatz pruefen/auswaehlen.",Andreas,2026-05-31
+1e8cec39-b84e-451c-a432-9ec21b16bdfa,check the itinerary,prüfen Sie die Reiseroute,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Imperativform vermeiden; neutral als ""Reiseroute pruefen"" pruefen.",Andreas,2026-05-31
+4af7b6e1-0b0d-4785-b5f4-bbf742cae670,check the reservation,prüfen Sie die Reservierung,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Imperativform vermeiden; neutral als ""Reservierung pruefen"" pruefen.",Andreas,2026-05-31
+fa366f1b-19be-483b-800a-a093695b08de,city break,städtereise,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Staedtereise"".",Andreas,2026-05-31
+14fc705a-4140-436e-9dd8-3013cbb54111,city tax,kurtaxe,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Kurtaxe"".",Andreas,2026-05-31
+a36270c6-0441-4ca4-a30e-28886c265de2,confirm a seat,einen Sitzplatz bestätigen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+29506d0a-3c16-46a1-ac5b-053d26be274e,confirm the reservation,bestätigen Sie die Reservierung,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Imperativform vermeiden; neutral als ""Reservierung bestaetigen"" pruefen.",Andreas,2026-05-31
+b7a02828-d918-4f13-bbbc-3f33070aac47,Could you check the opening hours?,Könnten Sie die Öffnungszeiten überprüfen?,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+1618d521-ab39-4faf-8e77-df2f805ddcbe,digital boarding pass,digitale Bordkarte,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+b42444f1-4c93-4324-bb34-7c9396a9d0ea,domestic tour,inlandstournee,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"""domestic tour"" besser als ""Inlandsreise""/""Inlandstour"" pruefen; ""Inlandstournee"" wirkt speziell.",Andreas,2026-05-31
+fb304c63-4881-4852-9101-85451eaeee63,download a seat,einen Sitzplatz herunterladen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,"""download a seat"" wirkt fachlich unnatuerlich und ist nicht screenshot-tauglich.",Andreas,2026-05-31
+31ac3273-108a-466f-bef8-3139002ba965,download the boarding pass,laden Sie die Bordkarte herunter,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Imperativform vermeiden; neutral als ""Bordkarte herunterladen"" pruefen.",Andreas,2026-05-31
+092b1414-3283-4586-b134-a2e0e7a4ba16,download the itinerary,download der Reiseroute,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Formulierung pruefen: besser ""Reiseroute herunterladen"" als ""Download der Reiseroute"".",Andreas,2026-05-31
+da1885d1-7e54-4007-a54a-39a3ed6632ae,emergency number,notfallnummer,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Notfallnummer"".",Andreas,2026-05-31
+34d8c2c8-5493-4bad-a6d8-59edd3f310ec,family booking,familie buchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Uebersetzung wirkt falsch; eher ""Familienbuchung"" pruefen.",Andreas,2026-05-31
+555b2b3f-58ab-4c2b-bc39-a0da31cb8a01,family fare,familienkost,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Uebersetzung wirkt falsch; eher ""Familientarif"" pruefen.",Andreas,2026-05-31
+1317b4bd-4b88-43cf-9df1-fad89ceb903c,family transfer,familiennachzug,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,"""family transfer""/""Familiennachzug"" ist zu speziell bzw. migrationsbezogen fuer MVP-Travel-Screenshot.",Andreas,2026-05-31
+66469e9b-46fe-4323-b640-89658112bf20,ferry,fähre,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Faehre"".",Andreas,2026-05-31
+3f52898b-a9eb-4ebf-b5d9-625d894514f3,hotel,Hotel,A1,A1; Top 500 Words; Travel,Travel,mvp_start_word_world:Travel,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+4a3fa40a-7baa-4b94-920a-c47bb852123a,international flight,internationaler Flug,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+2cabcd7e-dfb9-427a-8cc6-d005fb7c69f2,international transfer,internationaler Transfer,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+eb4c585d-bb73-41d0-87ba-a73c27a99d6d,Is it possible to tell me where to change trains?,"Können Sie mir sagen, wo ich den Zug wechseln kann?",A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+98e2255e-90bf-442c-bda6-2ba749a8397c,long-haul booking,langstreckenbuchung,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Langstreckenbuchung"".",Andreas,2026-05-31
+ee84c64b-482c-4aa9-be5b-fc0c57ede9b4,luggage,Gepäck,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+3982dc6c-5bf5-4941-a540-2b3a4d0e9bc7,May I tell me where to change trains?,"Darf ich Ihnen sagen, wo Sie umsteigen müssen?",A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,Englischer Satz ist grammatisch fehlerhaft und nicht MVP-tauglich.,Andreas,2026-05-31
+2faead6c-5af9-4f27-82ee-d745847374aa,mobile check-in,mobiles Einchecken,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+9bc9e019-897e-498d-bccc-c8fa6568d619,one-way flight,einwegflug,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"""Einwegflug"" wirkt unnatuerlich; bessere Reiseformulierung pruefen.",Andreas,2026-05-31
+6c81d3e1-03aa-44f9-b2de-543b0b0d2995,one-way ticket,einfache Fahrkarte,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+0067bc81-9a48-47c0-b55d-637508b87c7c,one-way transfer,einfacher Transfer,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+5de5bfd1-1cfa-4cb0-897a-359c7580bc60,passport,Reisepass,A1,A1; Travel,Travel,mvp_start_word_world:Travel,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+f6883fcc-ce87-4d2d-bcb9-95f87e7b1d44,pickpocket,taschendieb,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Taschendieb"".",Andreas,2026-05-31
+8c5fbc2d-57c0-416f-b4a7-0bffe823b6b6,plane,Flugzeug,A1,A1; Travel,Travel,mvp_start_word_world:Travel,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+f3d9b884-ec4e-4ba0-8457-2ccbb00c5a4f,print a refund,eine Erstattung drucken,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,"""print a refund"" wirkt fachlich unnatuerlich und nicht screenshot-tauglich.",Andreas,2026-05-31
+839772e4-7652-413f-9c59-f04c5d39f24d,rail pass,bahnkarte,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben/Begriff pruefen: ""Bahnkarte"" oder ""Bahnpass"".",Andreas,2026-05-31
+a55ebcbb-a122-4097-866b-3e808e49b46d,rebook a seat,einen Platz umbuchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+e2350576-f23a-4d9a-b0a5-8d4ed4ed62aa,rebook a ticket,ein Ticket umbuchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,approved_for_mvp,,Andreas,2026-05-31
+431c28db-3e31-4f6a-998d-ecedd0f89dcb,rebook the boarding pass,die Bordkarte umbuchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,"""Bordkarte umbuchen"" wirkt fachlich unnatuerlich; besser aus MVP entfernen.",Andreas,2026-05-31
+7416a28d-5982-48d6-94f9-df53709e57f8,rebook the itinerary,die Reiseroute umbuchen,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,reject_for_mvp,"""Reiseroute umbuchen"" wirkt fachlich unnatuerlich; Kontext fehlt.",Andreas,2026-05-31
+7ba404b8-f2e3-45dc-8edd-ed57bb4959dc,ride sharing,mitfahrgelegenheit,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Deutsches Nomen grossschreiben: ""Mitfahrgelegenheit"".",Andreas,2026-05-31
+91d5a2e0-9e4e-44ac-a8f0-0dd557a92e29,room,Zimmer,A1,A1; Top 500 Words; Travel,Travel,mvp_start_word_world:Travel,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+8f387089-088d-4ce9-85b7-36d110aa7f0b,scan the itinerary,scannen Sie die Reiseroute,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Imperativform vermeiden; neutral als ""Reiseroute scannen"" pruefen.",Andreas,2026-05-31
+7ee169af-b693-4f78-b54d-2d91456d0907,scan your baggage,scannen Sie Ihr Gepäck,A1,Travel,Travel,mvp_start_word_world:Travel,standard_review,fix_translation_later,"Formulierung pruefen; ""Gepaeck scannen"" ist moeglich, aber fuer MVP etwas technisch.",Andreas,2026-05-31
+9a428aaa-698e-438a-8f0b-a2ab16416124,apple,Apfel,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+9d907689-20dc-4960-8b81-5ce06a4069b6,bottle,Flasche,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+0f985769-272e-4c37-b264-0a1a7e654480,bread,Brot,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+27035405-60ba-4e2a-9c59-78f049ffc112,breakfast,Frühstück,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+f816f26f-35ae-410a-b0c3-43f0b9694d02,butter,Butter,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+b36bb48f-cf6e-4ca4-8085-531be47eaff7,cake,Torte,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,fix_translation_later,"""cake"" besser als ""Kuchen"" pruefen; ""Torte"" ist enger.",Andreas,2026-05-31
+b9a50940-79e0-422d-b171-14dfc0245a36,carrot,Karotte,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+2f191114-7bb2-432d-b15f-20cf6896043f,cheese,Käse,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+29c3adef-28bf-49e5-a656-40ca0411b888,chicken,Hähnchen,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+5bc09c6e-88ed-4418-8c01-9e11ed89bdc9,chocolate,Schokolade,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+99b7ecbe-3fc5-4651-9725-b6e848088499,coffee,Kaffee,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+dc3ce695-e4f6-4c53-a762-8b33ed616135,cold,kalt,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+2fe0efde-b24a-456f-a0d3-b708cd470254,cup,Tasse,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+0de6fd96-1f5a-4612-ac07-681afb6e0753,delicious,köstlich,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+b1f9f5e5-e73e-4fd0-8a93-db3fa1e8d2c0,dinner,Abendessen,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+eaa6c9c8-c282-43bb-8f1e-37251e98176b,egg,Ei,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+46ee08cc-b007-404d-a880-17d86428ab79,fruit,Obst,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+c324bc2a-f4e4-4b71-944b-d519ab4f877c,glass,Glas,A1,A1; Environment; Food & Cooking; Top 500 Words,Environment; Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+baa270cd-9fe4-4fc5-a416-22c8fb4f0a01,hot,heiß,A1,Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+d3291469-a1a2-4725-86b7-093efdafa794,hungry,hungrig,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+2d803036-fec8-46ac-af36-cabbe8e79d69,juice,Saft,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+986da472-f49d-45b4-86cf-7ef98a17df5f,kitchen,Küche,A1,A1; Food & Cooking; Home & Living; Top 500 Words,Food & Cooking; Home & Living,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+52513427-0b4c-4386-a231-df4262eb9165,lunch,Mittagessen,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+18eaa98c-b958-4320-8aee-b28d41101365,meat,Fleisch,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+14cf1770-fdb2-40bb-bb8b-0b39af1f0688,menu,Speisekarte,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+e324a914-1fa4-4d8e-9072-8c719c25b8fa,milk,Milch,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+1746b948-fb3f-4bde-bd61-c111530cdaff,napkin,Serviette,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+f90823fd-9461-4d66-b1bc-c52eac50b179,onion,Zwiebel,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+3cb10303-af56-400f-b8f9-da6e811037ed,orange,Orange,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+b1af1b73-af92-4d77-a255-204b1526a384,order,Bestellung,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,needs_context,"""order"" ist mehrdeutig: Bestellung, Reihenfolge oder bestellen; fuer MVP Kontext klaeren.",Andreas,2026-05-31
+9cd0dbcf-c8a2-4f33-9605-c79f6cb06285,pasta,Nudeln,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+102a7478-45de-4b92-9b5c-4a06d68abe3b,pepper,Pfeffer,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+8107c183-e509-4ff9-bf0a-4c973e6bfb4b,pepper shaker,Pfefferstreuer,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+f146371d-c5c3-4c9b-947c-3bad037d1577,piece,Stück,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,move_out_of_mvp,"""piece"" ist zu generisch fuer Food-Screenshot ohne Kontext.",Andreas,2026-05-31
+9bc53b97-5b33-4d42-b084-d93930e3d186,potato,Kartoffel,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+df2654df-c5a0-476f-8e13-d317e44cd417,restaurant,Restaurant,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+90f4ac3d-fa66-49db-b635-eea64c9bc33a,rice,Reis,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+01c65477-8504-4e4d-9d65-9b8ce69c095e,salad,Salat,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+2bd6f45d-87e3-49c0-8d31-4afe7d29dd15,salt,Salz,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+a9562214-069d-4a85-b3db-e461a827d377,salt shaker,Salzstreuer,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+51c9fc7c-ee5e-4587-8060-560df8aa6dfc,salty,salzig,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+dcf1411b-5c23-4f19-80df-ce82c5d81a94,sandwich,Sandwich,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+1427fe6e-1ecb-4d2b-ab64-8a7df52ca5be,soup,Suppe,A1,A1; Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+aba5d471-cdb2-4733-a4c8-c14b301ec3e8,sugar,Zucker,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+100b70a8-0b38-44ec-8fb8-89dbfc04cbc9,table,Tisch,A1,A1; Food & Cooking; Home & Living; Top 500 Words,Food & Cooking; Home & Living,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+a24d9af9-6c06-4325-8e52-bfa82dc5eb41,tea,Tee,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+f83832a8-22c7-4148-8f8d-95a55305cb69,thirsty,durstig,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,mvp_start_word_world:Food & Cooking,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+d44128ba-4f0f-4d99-bd82-f8a18f3a880d,to choose,wählen,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,move_out_of_mvp,"""to choose"" ist zu generisch und nicht klar Food-spezifisch.",Andreas,2026-05-31
+798d6f26-ee0f-4c29-9065-b6e76493c6bb,to cook,kochen,A1,Food & Cooking; Home & Living,Food & Cooking; Home & Living,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+c194acb8-eff0-40ce-a2e9-b1c47ae25cf0,to cut,schneiden,A1,Food & Cooking,Food & Cooking,mvp_start_word_world:Food & Cooking,standard_review,approved_for_mvp,,Andreas,2026-05-31
+dce552a8-0a09-4254-b576-75f883c17bc0,apartment,Wohnung,A1,A1; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+851247c5-7f99-4435-b2d9-aca31e81c7d4,bathroom,Badezimmer,A1,A1; Home & Living; Top 500 Words,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+564bc29e-732d-4b0d-ab1a-d5416b03baa4,bed,Bett,A1,A1; Home & Living; Top 500 Words,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+1eab70e4-eef8-48c8-8b93-fce8d668017a,bedroom,Schlafzimmer,A1,A1; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+c2c3b45e-5453-47ae-9aab-559b287ee902,chair,Stuhl,A1,A1; B2; Home & Living; Top 500 Words; Work & Careers,Home & Living; Work & Careers,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+64929b7c-d80e-4404-a204-2509aee51faf,dish towel,Geschirrtuch,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+038a83f0-9059-44c2-b2e8-ddaf393a9da7,drawer,Schublade,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+667cffa1-0ec2-405a-9ab6-ffda4b3c3f0a,garden,Garten,A1,A1; Home & Living; Top 500 Words,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+b63d2ba1-404a-4f43-81cd-d01bf1865755,hallway,Flur,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+383d4b4f-5ccc-45cb-835b-fc78fb82e91f,internet,Internet,A1,A1; Home & Living,Home & Living,mvp_start_word_world:Home & Living,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+0748c031-4b3e-4527-9435-57039e3aad66,living room,Wohnzimmer,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+93c22093-1920-4aa8-b45d-f09f2c5ecbfd,paint,Farbe (zum Streichen),A1,A1; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+aa4a31ab-d374-4e00-81a5-39a28f5badd2,quiet,leise,A1,A1; Home & Living; Music & Entertainment; Top 500 Words,Home & Living; Music & Entertainment,mvp_start_word_world:Home & Living,structure_issue,move_out_of_mvp,"""quiet"" ist sehr allgemein und wegen Music-Zuordnung nicht ideal fuer Home-&-Living-Screenshot.",Andreas,2026-05-31
+0c1671b7-f95d-4b62-851e-939c333e49c1,sofa,Sofa,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+59b4db44-22b7-4f1d-a0d8-6dcc7652227b,to brush teeth,Zähne putzen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+00976e70-07ad-4c7a-948e-3488f13e8999,to clean,putzen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+be279b26-1835-432a-9a8d-5716d766cca0,to eat at home,zu Hause essen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+c4cb61e9-0061-494e-97ae-a4b1f6395f29,to open the window,das Fenster öffnen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+04ef8acc-ec27-48a0-adeb-b6067717de5c,to shower,duschen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+5cf2477a-1afb-46f5-bb3b-c45ab8ae8d12,to sit,sitzen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+06acc538-05bc-49a0-bf8c-430b3e329bc2,to sleep,schlafen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+2d20dcc4-19de-4d4d-81f2-d6f2a2373d05,to wash the dishes,abwaschen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+3dab5cbf-5140-412f-af0a-e94900321565,to water plants,Pflanzen gießen,A1,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+cce228f9-33be-4aaa-b71e-140f535d5db4,air fryer,Heißluftfritteuse,A2,Food & Cooking; Home & Living,Food & Cooking; Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+67261b83-a5f7-4555-9c7c-46c2b459bfaf,air purifier,Luftreiniger,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+3e3360ec-0977-46b1-a858-703126197fb8,baking tray,Backblech,A2,Food & Cooking; Home & Living,Food & Cooking; Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+1e944253-dfb6-415e-a139-f11903179d07,bright,hell,A2,A2; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+dc8600c5-5b42-448f-9585-d970dbfb4645,broom,Besen,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+9404caf7-a1b6-40e6-92b2-094089c02571,carpet,Teppich,A2,A2; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+c6004840-8093-422b-831b-0ee58c3a4693,closet,Schrank,A2,A2; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+4c380eef-1ec3-4918-a155-5e48972a52bb,coat hook,Garderobenhaken,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+ea0923ec-9982-4de6-b6e2-8fb39c117386,coffee maker,Kaffeemaschine,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+8da127fc-c717-42c3-ba46-e41ab874e42c,cushion cover,Kissenbezug,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+d7205e24-aeed-4a9d-8b2d-6c576220b0ff,cutlery drawer,Besteckschublade,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+014bd344-934a-4b03-806c-da49af6a0055,detergent,Waschmittel,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+074263be-688b-42ed-b91e-801a031f2e62,dish rack,Abtropfgestell,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+95fc52db-8ee1-40c9-b53d-7bf385ff0e48,dish soap,Spülmittel,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+84377fc9-f656-400c-9a78-9b86bc28051a,dishwasher,Geschirrspüler,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+84c00e03-945e-4983-90f6-4353711a7408,dryer,Trockner,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+7424b315-c819-4b49-bcfc-a2724a56393f,dustpan,Kehrblech,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+e91816e8-5034-404e-92ab-edb0e167ce2d,electricity,Strom,A2,A2; Home & Living,Home & Living,mvp_start_word_world:Home & Living,structure_issue,approved_for_mvp,,Andreas,2026-05-31
+6a03c0f4-c1cb-4c7d-903b-347be6093d5f,extension cord,Verlängerungskabel,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+a2abb2f1-ee45-4374-89d3-54d44f07c707,fan,Fan,A2,A2; Home & Living; Music & Entertainment,Home & Living; Music & Entertainment,mvp_start_word_world:Home & Living,same_base_and_translation,fix_translation_later,"""fan"" im Home-Kontext sollte vermutlich ""Ventilator"" statt ""Fan"" sein.",Andreas,2026-05-31
+5b6466a6-656b-4365-b16e-c49f70ae5ca8,flat share,Wohngemeinschaft (WG),A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+7a779e43-63e1-409e-a6e3-13d14b1e20de,folding table,Klapptisch,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+29a0c367-5c5e-4f74-9231-ff6233ccdda4,freezer,Gefrierschrank,A2,Food & Cooking; Home & Living,Food & Cooking; Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+530c9a7d-899a-444d-91a3-1a810985b572,fridge,Kühlschrank,A2,Food & Cooking; Home & Living,Food & Cooking; Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+76e2f62b-7f94-4669-aff6-1243d7cc8228,furnished,möbliert,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31
+83352e4f-1136-4db1-852f-4c4471c9cbb7,gas,Gas,A2,A2; Home & Living,Home & Living,mvp_start_word_world:Home & Living,same_base_and_translation,approved_for_mvp,,Andreas,2026-05-31
+cd3546c8-de97-4192-b071-d25f3dae5ffd,guest room,Gästezimmer,A2,Home & Living,Home & Living,mvp_start_word_world:Home & Living,standard_review,approved_for_mvp,,Andreas,2026-05-31

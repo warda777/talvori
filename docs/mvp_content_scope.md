@@ -229,20 +229,29 @@ Markierte Risikotypen im Batch:
 - `structure_issue`: 55
 - `same_base_and_translation`: 10
 
-Naechster Schritt:
+Manueller Review-Abschluss:
 
-- Arbeitskopie fuer den manuellen Review wurde erstellt:
-  `docs/word-review/mvp_content_first_review_batch_working.csv`.
-- Travel und Food & Cooking wurden in der lokalen Working-Copy geprueft.
-- Home & Living bleibt offen.
-- Erst nach menschlicher Pruefung ein separates Overlay erzeugen.
-- Store-Screenshots erst nach abgeschlossenem Review dieser sichtbaren Inhalte erstellen.
-
-Zwischenstand des Validators:
-
+- Arbeitskopie: `docs/word-review/mvp_content_first_review_batch_working.csv`
 - Report: `docs/word-review/mvp_content_first_review_batch_report.md`
+- Overlay: `docs/word-review/mvp_content_first_review_overlay.csv`
 - Gesamtzeilen: 150
-- Gefuellte Entscheidungen: 100
-- Leere Entscheidungen: 50
+- Gefuellte Entscheidungen: 150
+- Leere Entscheidungen: 0
 - Validierungsprobleme: 0
-- Noch kein Overlay, keine Produktivdatenaenderung, keine Freigabe.
+- Overlay-Zeilen: 150 plus Header
+
+Entscheidungen im Overlay:
+
+- `approved_for_mvp`: 115
+- `fix_translation_later`: 24
+- `reject_for_mvp`: 6
+- `move_out_of_mvp`: 3
+- `needs_context`: 2
+
+Das Overlay ist nur eine Review-Entscheidungsliste. Es ist kein Import, keine Produktivdatenkorrektur, keine Freigabe in App-/SQLite-/Supabase-Daten und kein `release_ready=true`.
+
+Offene Risiken:
+
+- `fix_translation_later`, `needs_context`, `reject_for_mvp` und `move_out_of_mvp` muessen vor Store-Screenshots beachtet werden.
+- Screenshot-Woerter sollten aus den `approved_for_mvp`-Zeilen gewaehlt werden.
+- Strukturissues bleiben Review-Hinweise; A1-C2 und Top 500 duerfen weiterhin nicht als normale Wortwelten behandelt werden.

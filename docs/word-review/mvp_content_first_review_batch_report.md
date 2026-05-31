@@ -7,18 +7,18 @@ Dieser Report validiert eine lokale MVP-Content-Review-Arbeitsdatei. Er verände
 ## Zusammenfassung
 
 - Gesamtzeilen: 150
-- Leere Entscheidungen: 50
-- Gefüllte Entscheidungen: 100
+- Leere Entscheidungen: 0
+- Gefüllte Entscheidungen: 150
 - Validierungsprobleme: 0
 
 ## Entscheidungen je Typ
 
 | Wert | Anzahl |
 |---|---:|
-| approved_for_mvp | 67 |
-| fix_translation_later | 23 |
+| approved_for_mvp | 115 |
+| fix_translation_later | 24 |
 | reject_for_mvp | 6 |
-| move_out_of_mvp | 2 |
+| move_out_of_mvp | 3 |
 | needs_context | 2 |
 
 ## Zeilen je Wortwelt
