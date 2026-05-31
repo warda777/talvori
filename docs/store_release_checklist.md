@@ -84,6 +84,9 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Keine SRS-/word_progress-Daten werden durch Content-Sync ueberschrieben
 - [x] MVP-Content-Scope als Entwurf festgelegt: `docs/mvp_content_scope.md`
 - [x] Erster MVP-Content-Review-Batch erzeugt: `docs/word-review/mvp_content_first_review_batch.csv`
+- [x] Travel und Food & Cooking in lokaler Working-Copy vorgeprueft
+- [ ] Home & Living im MVP-Content-Review-Batch pruefen
+- [ ] MVP-Content-Review-Overlay nach 150/150 Entscheidungen erzeugen
 - [ ] Erster MVP-Content-Review-Batch manuell geprueft
 - [ ] Englisch-Deutsch-MVP-Kernbestand fachlich geprueft
 - [ ] Lokaler Datenbestand startet stabil

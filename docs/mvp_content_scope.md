@@ -231,7 +231,18 @@ Markierte Risikotypen im Batch:
 
 Naechster Schritt:
 
-- Arbeitskopie fuer den manuellen Review erstellen.
-- Travel, Food & Cooking und Home & Living Wort fuer Wort pruefen.
+- Arbeitskopie fuer den manuellen Review wurde erstellt:
+  `docs/word-review/mvp_content_first_review_batch_working.csv`.
+- Travel und Food & Cooking wurden in der lokalen Working-Copy geprueft.
+- Home & Living bleibt offen.
 - Erst nach menschlicher Pruefung ein separates Overlay erzeugen.
 - Store-Screenshots erst nach abgeschlossenem Review dieser sichtbaren Inhalte erstellen.
+
+Zwischenstand des Validators:
+
+- Report: `docs/word-review/mvp_content_first_review_batch_report.md`
+- Gesamtzeilen: 150
+- Gefuellte Entscheidungen: 100
+- Leere Entscheidungen: 50
+- Validierungsprobleme: 0
+- Noch kein Overlay, keine Produktivdatenaenderung, keine Freigabe.
