@@ -1,0 +1,32 @@
+screenshot_name,screen,word_key,base_term,de_translation,word_world,use_case,note
+Willkommen In Talvori,Onboarding / Startscreen,ee84c64b-482c-4aa9-be5b-fc0c57ede9b4,luggage,Gepäck,Travel,onboarding,approved_for_mvp from screenshot selection
+Willkommen In Talvori,Onboarding / Startscreen,6c81d3e1-03aa-44f9-b2de-543b0b0d2995,one-way ticket,einfache Fahrkarte,Travel,onboarding,approved_for_mvp from screenshot selection
+Willkommen In Talvori,Onboarding / Startscreen,c1015783-60e2-4059-b052-e60e5b855c40,airport,Flughafen,Travel,onboarding,approved_for_mvp from screenshot selection
+Willkommen In Talvori,Onboarding / Startscreen,1746b948-fb3f-4bde-bd61-c111530cdaff,napkin,Serviette,Food & Cooking,onboarding,approved_for_mvp from screenshot selection
+Willkommen In Talvori,Onboarding / Startscreen,9cd0dbcf-c8a2-4f33-9605-c79f6cb06285,pasta,Nudeln,Food & Cooking,onboarding,approved_for_mvp from screenshot selection
+Willkommen In Talvori,Onboarding / Startscreen,038a83f0-9059-44c2-b2e8-ddaf393a9da7,drawer,Schublade,Home & Living,onboarding,approved_for_mvp from screenshot selection
+Dein Home Zum Lernen,Home,450e2469-1a1f-45f1-bb13-c1ede8f0c262,bag,Tasche,Travel,home_word_world,only if words are visible on Home
+Dein Home Zum Lernen,Home,9a428aaa-698e-438a-8f0b-a2ab16416124,apple,Apfel,Food & Cooking,home_word_world,only if words are visible on Home
+Dein Home Zum Lernen,Home,0748c031-4b3e-4527-9435-57039e3aad66,living room,Wohnzimmer,Home & Living,home_word_world,only if words are visible on Home
+Wortwelten Entdecken,WordHub / Wortwelten,c1015783-60e2-4059-b052-e60e5b855c40,airport,Flughafen,Travel,home_word_world,show Travel as theme
+Wortwelten Entdecken,WordHub / Wortwelten,5de5bfd1-1cfa-4cb0-897a-359c7580bc60,passport,Reisepass,Travel,home_word_world,show Travel as theme
+Wortwelten Entdecken,WordHub / Wortwelten,8c5fbc2d-57c0-416f-b4a7-0bffe823b6b6,plane,Flugzeug,Travel,home_word_world,show Travel as theme
+Wortwelten Entdecken,WordHub / Wortwelten,9a428aaa-698e-438a-8f0b-a2ab16416124,apple,Apfel,Food & Cooking,home_word_world,show Food & Cooking as theme
+Wortwelten Entdecken,WordHub / Wortwelten,0f985769-272e-4c37-b264-0a1a7e654480,bread,Brot,Food & Cooking,word_game,show Food & Cooking as theme
+Wortwelten Entdecken,WordHub / Wortwelten,2f191114-7bb2-432d-b15f-20cf6896043f,cheese,Käse,Food & Cooking,word_game,show Food & Cooking as theme
+Wortwelten Entdecken,WordHub / Wortwelten,851247c5-7f99-4435-b2d9-aca31e81c7d4,bathroom,Badezimmer,Home & Living,word_game,show Home & Living as theme
+Wortwelten Entdecken,WordHub / Wortwelten,564bc29e-732d-4b0d-ab1a-d5416b03baa4,bed,Bett,Home & Living,word_game,show Home & Living as theme
+Wortwelten Entdecken,WordHub / Wortwelten,1eab70e4-eef8-48c8-8b93-fce8d668017a,bedroom,Schlafzimmer,Home & Living,word_game,show Home & Living as theme
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,5cf2477a-1afb-46f5-bb3b-c45ab8ae8d12,to sit,sitzen,Home & Living,learn_mode,simple action
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,06acc538-05bc-49a0-bf8c-430b3e329bc2,to sleep,schlafen,Home & Living,learn_mode,simple action
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,c4cb61e9-0061-494e-97ae-a4b1f6395f29,to open the window,das Fenster öffnen,Home & Living,learn_mode,simple action
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,2d20dcc4-19de-4d4d-81f2-d6f2a2373d05,to wash the dishes,abwaschen,Home & Living,learn_mode,simple action
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,3dab5cbf-5140-412f-af0a-e94900321565,to water plants,Pflanzen gießen,Home & Living,learn_mode,simple action
+Schritt Fuer Schritt Wiederholen,Lernmodus / Wiederholen,798d6f26-ee0f-4c29-9065-b6e76493c6bb,to cook,kochen,Food & Cooking,home_word_world,simple action
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,0f985769-272e-4c37-b264-0a1a7e654480,bread,Brot,Food & Cooking,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,b9a50940-79e0-422d-b171-14dfc0245a36,carrot,Karotte,Food & Cooking,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,2f191114-7bb2-432d-b15f-20cf6896043f,cheese,Käse,Food & Cooking,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,99b7ecbe-3fc5-4651-9725-b6e848088499,coffee,Kaffee,Food & Cooking,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,2fe0efde-b24a-456f-a0d3-b708cd470254,cup,Tasse,Food & Cooking,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,564bc29e-732d-4b0d-ab1a-d5416b03baa4,bed,Bett,Home & Living,word_game,short game-friendly word
+Kurze Wortspiel-Runden,Wortspiele / stabiler Spielmodus,c2c3b45e-5453-47ae-9aab-559b287ee902,chair,Stuhl,Home & Living,word_game,short game-friendly word

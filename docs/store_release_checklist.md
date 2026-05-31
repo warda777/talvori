@@ -107,9 +107,12 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Preview-/geplante Bereiche in Texten vorsichtig formulieren
 - [x] Wort-Duell als Vorschau eingeordnet, nicht als fertiger Multiplayer
 - [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
+- [x] Store-Screenshot-Shotlist vorbereitet: `docs/store_screenshot_shotlist.md`
+- [x] Screenshot-Wortzuordnung je Screen vorbereitet: `docs/word-review/mvp_screenshot_words_by_screen.csv`
 - [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
 - [ ] Screenshots nur mit manuell geprueften Englisch-Deutsch-Woertern aus dem MVP-Review-Batch erstellen
 - [ ] Screenshots bevorzugt mit `docs/word-review/mvp_screenshot_content_selection.csv` planen
+- [ ] Keine Wort-Duell-/Premium-/Cloud-/TOEFL-/Debug-Screenshots verwenden
 - [ ] Keine vollstaendige Spanisch-/Franzoesisch-Abdeckung oder 13k-Freigabe bewerben
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori

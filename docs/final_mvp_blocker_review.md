@@ -132,6 +132,8 @@ Naechste Aktion:
 - Screenshot-/Startcontent-Auswahl nutzen: `docs/word-review/mvp_screenshot_content_selection.csv`.
 - Auswahlstatus: 51 gepruefte A1-Zeilen, davon 11 Travel, 20 Food & Cooking und 20 Home & Living.
 - Travel-Auswahl ist bewusst kleiner, weil spezialisierte Boarding-Pass-/Transfer-/Rebook-Faelle nicht als Primaer-Screenshot-Content empfohlen werden.
+- Store-Screenshot-Shotlist nutzen: `docs/store_screenshot_shotlist.md`.
+- Wortzuordnung je Screen nutzen: `docs/word-review/mvp_screenshot_words_by_screen.csv`.
 - Weitere Review-Batches nach Risiko priorisieren: gleiche `base_term`/`de_translation`, Strukturissues, kleine/auffaellige Wortwelten.
 
 ### G. Debug-Sichtbarkeit im finalen Release-Build

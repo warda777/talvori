@@ -152,6 +152,11 @@ Folgende Funktionen duerfen fuer den MVP nicht als verfuegbar beworben werden:
 
 Noch keine Screenshots erstellen. Fuer den Store sollten spaeter nur Screens aus dem tatsaechlichen Release-Build verwendet werden.
 
+Konkrete Shotlist:
+
+- `docs/store_screenshot_shotlist.md`
+- Wortzuordnung je Screen: `docs/word-review/mvp_screenshot_words_by_screen.csv`
+
 Geplante Screenshot-Motive:
 
 1. Onboarding oder Start
@@ -186,6 +191,7 @@ Geplante Screenshot-Motive:
 - Store-Texte an Zielplattform anpassen
 - keine unfertigen Features bewerben
 - Screenshots aus finalem Release-Build erstellen
+- Shotlist gegen finalen Release-Build pruefen
 - Screenshot-Content-Auswahl gegen den finalen Build pruefen
 - Datenschutz-/AGB-/Impressum-Inhalte final juristisch pruefen
 - Datenverwendungsangaben gegen tatsaechliches App-Verhalten pruefen

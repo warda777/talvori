@@ -450,6 +450,12 @@ Ziel:
   `docs/store_build_identity_check.md`.
 - Der sichere Signing-Setup-Plan ist vorbereitet:
   `docs/store_signing_setup_plan.md`.
+- Die Screenshot-Content-Auswahl ist vorbereitet:
+  `docs/word-review/mvp_screenshot_content_selection.csv`.
+- Die konkrete Store-Screenshot-Shotlist ist vorbereitet:
+  `docs/store_screenshot_shotlist.md`.
+- Die Wortzuordnung je Screenshot ist vorbereitet:
+  `docs/word-review/mvp_screenshot_words_by_screen.csv`.
 - Screenshots und finale Store-Einreichung bleiben offen.
 
 Enthält:
