@@ -115,6 +115,11 @@ Wichtig fuer Talvori:
 - Companion-/Chat-Sync ist spaeterer Ausbau und darf nicht stillschweigend wie schon produktiv behandelt werden.
 - AI-/Companion-Funktionen brauchen klare Hinweise, falls Inhalte an Server oder Drittanbieter gehen.
 - Notifications/Tagesimpuls brauchen transparente Beschreibung, besonders bei generierten Inhalten und Berechtigungen.
+- Fuer Google Play liegt ein Data-Safety-Draft vor:
+  `docs/google_play_data_safety_draft.md`.
+- Final zu pruefen bleiben Supabase-Startcalls, AI/Companion, KI-Wortspiele,
+  Uebersetzung, Tagesimpuls/Notifications, Voice/Audio, Fotozugriff und
+  Marketing/Analytics gegen den tatsaechlichen Release-Build.
 
 ### AGB / Nutzungsbedingungen
 

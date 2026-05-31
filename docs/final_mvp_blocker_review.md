@@ -109,10 +109,12 @@ Warum Blocker:
 
 - App Store und Google Play verlangen konkrete Angaben zu erfassten/verarbeiteten Daten.
 - AI-/Companion-, Notification-, Support- und Supabase-Vorbereitung muessen korrekt eingeordnet werden.
+- Der Google-Play-Data-Safety-Draft liegt vor: `docs/google_play_data_safety_draft.md`.
 
 Naechste Aktion:
 
 - Angaben fuer lokale Lernstaende, Praeferenzen, Favoriten/bekannte Woerter, AI-/Companion-Daten, Notifications und Supportkontakt final beschreiben.
+- Final gegen den tatsaechlichen Release-Build pruefen: Supabase-Startcalls, AI/Companion, KI-Wortspiele, Uebersetzung, Tagesimpuls/Notifications, Voice/Audio, Fotozugriff und Marketing/Analytics.
 - Nicht als aktiv darstellen: Cloud-Backup, Account-Sync, Chat-Sync, produktiver Content-Package-Sync.
 
 ### F. MVP-Contentqualitaet / sichtbarer Wortbestand

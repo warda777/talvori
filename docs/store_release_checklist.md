@@ -33,6 +33,8 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [ ] Anbieter/Kontakt im Store korrekt hinterlegt
 - [ ] Altersfreigabe geprueft
 - [ ] Datenverwendungsangaben im Store konsistent mit App-Verhalten
+- [x] Google-Play-Data-Safety-Draft vorbereitet: `docs/google_play_data_safety_draft.md`
+- [ ] Google-Play-Data-Safety-Angaben final gegen Release-Build geprueft
 
 ## 3. Support Und Feedback
 
@@ -117,12 +119,14 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori
 
-- [ ] lokale Lernstaende beschrieben
-- [ ] Favoriten, bekannte Woerter und eigene Woerter beschrieben
-- [ ] Settings/Profile-Praeferenzen beschrieben
-- [ ] Supabase-Rolle korrekt beschrieben
-- [ ] AI-/Companion-Datenfluesse beschrieben, falls aktiv
-- [ ] Tagesimpuls/Notification-Daten beschrieben, falls aktiv
+- [x] lokale Lernstaende im Data-Safety-Draft beschrieben
+- [x] Favoriten, bekannte Woerter und eigene Woerter im Data-Safety-Draft beschrieben
+- [x] Settings/Profile-Praeferenzen im Data-Safety-Draft beschrieben
+- [x] Supabase-Rolle im Data-Safety-Draft vorlaeufig beschrieben
+- [x] AI-/Companion-Datenfluesse im Data-Safety-Draft als final zu pruefen beschrieben
+- [x] Tagesimpuls/Notification-Daten im Data-Safety-Draft als final zu pruefen beschrieben
+- [ ] Marketing/Analytics-Toggle final gegen tatsaechliches Tracking pruefen
+- [ ] Voice/Audio, Spracherkennung und Fotozugriff final gegen sichtbaren MVP-Scope pruefen
 - [ ] spaetere Accounts/Backups nicht als aktuell aktiv darstellen
 - [ ] spaetere Chat-/Companion-Synchronisation nicht als aktuell aktiv darstellen
 

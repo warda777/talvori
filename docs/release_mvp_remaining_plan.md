@@ -201,6 +201,8 @@ Konkrete Richtung:
 - App-Name, Kurzbeschreibung, Langbeschreibung
 - Screenshots
 - Privacy Nutrition / Data Safety Angaben
+- Google-Play-Data-Safety-Draft nutzen:
+  `docs/google_play_data_safety_draft.md`
 - Support-URL und Datenschutz-URL
 - Altersfreigabe
 - Google Play Application ID `eu.talvori.app` bestaetigen
@@ -296,6 +298,8 @@ Konkrete Richtung:
 - fehlende Supabase-Verbindung
 - leere lokale DB
 - fehlerhafte AI/Notification-Fälle
+- unklare Data-Safety-Angaben zu Supabase, AI/Companion, Voice, Fotozugriff,
+  Notifications und Marketing/Analytics
 - App-Neustart nach lokaler Nutzung
 
 ## 4. Offene Sollte-vor-Release Punkte
