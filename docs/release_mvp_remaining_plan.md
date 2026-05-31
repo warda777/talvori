@@ -28,6 +28,9 @@ Verbessert wurde:
   vorbereitet.
 - Android Release Signing ist lokal vorbereitet; ein Release-Appbundle fuer
   `eu.talvori.app` wurde erfolgreich gebaut und dokumentiert.
+- Der MVP-Content-Scope ist auf einen kleinen sichtbaren Englisch-Deutsch-Kern
+  ausgerichtet; vollstaendige 13k-Freigabe und vollstaendige Spanisch-/
+  Franzoesisch-Inhalte werden nicht als MVP-Ziel beworben.
 
 Entschärfte Risiken:
 
@@ -216,8 +219,10 @@ Risiko: hoch
 
 Konkrete Richtung:
 
-- klaren MVP-Wortumfang festlegen
-- ersten geprüften Basisbestand definieren
+- MVP-Content-Scope aus `docs/mvp_content_scope.md` nutzen
+- ersten geprueften Englisch-Deutsch-Basisbestand definieren
+- priorisierte Wortwelten: Travel, Food & Cooking, Home & Living
+- Groessenordnung: 100 bis 200 gepruefte Woerter oder 30 bis 50 Woerter je priorisierter Wortwelt
 - keine ungeprüften Pakete als releasefähig markieren
 - Review-Overlays weiterführen
 
@@ -294,6 +299,7 @@ Konkrete Richtung:
 - größere Content-Package-Migration noch nicht bauen, aber Review-Ergebnisse
   weiter gegen das Design prüfen
 - weitere Vokabelreview-Batches durchführen
+- MVP-Wortwelt-Batch fuer Travel, Food & Cooking und Home & Living erstellen
 - 992 gleiche `base_term`/`de_translation`-Fälle prüfen
 - 6.096 Strukturissues in sinnvolle größere Batches aufteilen
 - Hilfe/Feedback als echten Kontaktpunkt ausbauen
@@ -414,6 +420,9 @@ Ziel:
 
 Enthält:
 
+- MVP-Content-Scope: `docs/mvp_content_scope.md`
+- Travel, Food & Cooking und Home & Living als erster sichtbarer Kern
+- Screenshot-Content-Batch
 - gleiche base/de-Fälle
 - nächste Strukturissue-Batches
 - MVP-Minimalwortbestand
@@ -459,6 +468,9 @@ Empfehlung:
 - keine vollständige Content-Package-Migration für den ersten MVP
 - keine vollständige Mehrsprachigkeits-/Content-Offensive für den ersten MVP
 - lokale geprüfte Inhalte bevorzugen
+- Englisch -> Deutsch als erster Content-Fokus
+- keine Bewerbung vollstaendiger Spanisch-/Franzoesisch-Inhalte
+- keine Behauptung, dass alle 13k Woerter geprueft sind
 - Supabase vorbereitet lassen, aber kontrollierter Paket-Sync erst später
 - kein ungeprüfter Remote-Content im Release-Autostart
 - Fokus auf stabile lokale App, geprüften Minimalcontent,
@@ -503,5 +515,5 @@ Empfohlene Reihenfolge ab jetzt:
 2. Store-Account, Metadaten, Bundle ID, Version und Datenverwendungsangaben
 3. Finaler Release-Build-Test mit Debug-Sichtbarkeitspruefung
 4. Screenshots aus finalem Release-Build
-5. MVP-Minimalcontent fachlich pruefen
+5. MVP-Minimalcontent fachlich pruefen: Travel, Food & Cooking, Home & Living
 6. Store-Einreichung vorbereiten

@@ -36,7 +36,7 @@ Talvori hilft dir, deinen Wortschatz strukturiert und alltagstauglich auszubauen
 
 Im Mittelpunkt steht ein klarer Lernfluss: Woerter sammeln, pruefen, wiederholen und in kurzen Uebungen festigen. Wortwelten helfen dir, Vokabeln nach Themen zu entdecken. Der Lernmodus unterstuetzt dich beim Wiederholen, waehrend Wortspiele fuer Abwechslung sorgen.
 
-Du kannst App-Sprache, Muttersprache und Lernsprache einstellen, damit Talvori besser zu deinem Lernkontext passt. Der MVP ist bewusst auf eine stabile lokale Nutzung ausgerichtet: Viele Kernfunktionen funktionieren ohne Account. Datenschutz-, Support- und rechtliche Informationen sind direkt in den Einstellungen erreichbar.
+Der erste MVP fokussiert sich auf Englisch-Deutsch-Inhalte und einen bewusst kleinen, geprueften sichtbaren Wortschatz. Du kannst App-Sprache, Muttersprache und Lernsprache einstellen, damit Talvori besser zu deinem Lernkontext passt. Der MVP ist bewusst auf eine stabile lokale Nutzung ausgerichtet: Viele Kernfunktionen funktionieren ohne Account. Datenschutz-, Support- und rechtliche Informationen sind direkt in den Einstellungen erreichbar.
 
 Talvori ist fuer alle gedacht, die ihren Wortschatz regelmaessig erweitern moechten, ohne sich in langen Menues oder komplizierten Lernplaenen zu verlieren.
 
@@ -126,6 +126,7 @@ Diese Hinweise koennen spaeter fuer Apple/Google Reviewer angepasst werden:
 - Sichtbare vorbereitete Bereiche sind nicht als fertige Premiumleistung zu verstehen.
 - Premium, Spezialpakete und umfassender Cloud-Sync duerfen nur beworben werden, wenn sie im eingereichten Build tatsaechlich verfuegbar sind.
 - Wort-Duell ist nur als vorbereiteter Ausblick sichtbar und darf nicht als fertiger Mehrspieler-Modus beschrieben werden.
+- Der sichtbare MVP-Content-Scope ist Englisch -> Deutsch. Spanisch/Franzoesisch und weitere Sprachen duerfen nicht als vollstaendig verfuegbar beschrieben werden.
 
 ## 9. Nicht Bewerben
 
@@ -143,6 +144,7 @@ Folgende Funktionen duerfen fuer den MVP nicht als verfuegbar beworben werden:
 - Chat-Sync
 - perfekte oder fehlerfreie KI-Antworten
 - vollstaendig gepruefte automatische Uebersetzungen fuer alle Inhalte
+- vollstaendig gepruefter 13k-Wortbestand
 - produktiver Content-Package-Sync aus Supabase
 - fertiger Multiplayer oder Wort-Duell als aktive Online-Funktion
 
@@ -160,9 +162,11 @@ Geplante Screenshot-Motive:
 
 3. Wortwelten
    - Ziel: thematisches Lernen sichtbar machen.
+   - Nur gepruefte MVP-Wortwelten zeigen, bevorzugt Travel, Food & Cooking oder Home & Living.
 
 4. Lernmodus
    - Ziel: Wiederholen und Lernfortschritt zeigen.
+   - Nur mit geprueften Englisch-Deutsch-Woertern aufnehmen.
 
 5. Wortspiele
    - Ziel: spielerische Uebungen als Lernabwechslung zeigen.

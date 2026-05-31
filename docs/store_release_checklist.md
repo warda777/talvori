@@ -82,6 +82,8 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Legacy Supabase Auto-Sync im Release gegated
 - [ ] Keine ungeprueften Remote-Imports beim App-Start
 - [ ] Keine SRS-/word_progress-Daten werden durch Content-Sync ueberschrieben
+- [x] MVP-Content-Scope als Entwurf festgelegt: `docs/mvp_content_scope.md`
+- [ ] Englisch-Deutsch-MVP-Kernbestand fachlich geprueft
 - [ ] Lokaler Datenbestand startet stabil
 - [ ] Fehlerfaelle zeigen keine Entwicklertexte fuer Nutzer
 
@@ -100,6 +102,8 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Wort-Duell als Vorschau eingeordnet, nicht als fertiger Multiplayer
 - [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
 - [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
+- [ ] Screenshots nur mit geprueften Englisch-Deutsch-Woertern aus MVP-Wortwelten erstellen
+- [ ] Keine vollstaendige Spanisch-/Franzoesisch-Abdeckung oder 13k-Freigabe bewerben
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori
 
@@ -117,6 +121,8 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] kein produktiver Cloud-Backup-/Account-Sync im MVP, falls nicht fertig
 - [ ] kein vollstaendiger Content-Package-Sync im MVP, falls nicht fertig
 - [ ] keine vollstaendige Mehrsprachigkeitsabdeckung fuer alle Zielsprachen
+- [ ] kein vollstaendig gepruefter 13k-Wortbestand behaupten
+- [ ] keine vollstaendigen Spanisch-/Franzoesisch-Inhalte bewerben
 - [ ] keine TOEFL-/IELTS-/Cambridge-Pakete als verfuegbar bewerben, solange nicht produktiv
 - [ ] Premium/Abo nur bewerben, wenn Store/Payment wirklich fertig ist
 
@@ -133,4 +139,5 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] App-Beschreibung passt zum Build
 - [x] Testhinweise fuer Store Reviewer als Entwurf ergaenzt
 - [ ] Store-Metadaten final eingereicht
-- [ ] finale Entscheidung: lokaler Seed oder kontrollierter Content-Paket-Stand
+- [x] finale MVP-Content-Richtung festgelegt: Englisch -> Deutsch, kleiner gepruefter sichtbarer Kern
+- [ ] Review-Batch fuer sichtbare MVP-Wortwelten abgeschlossen

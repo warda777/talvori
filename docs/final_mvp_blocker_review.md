@@ -19,6 +19,7 @@ Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Su
 - Der Legacy-Supabase-Woerter-Auto-Sync ist im Release ueber `ReleaseSyncPolicy` gegated.
 - Der manuelle Smoke-Test fuer zentrale MVP-Pfade ist dokumentiert.
 - Der Android Release-Appbundle-Build mit Application ID `eu.talvori.app` ist lokal erfolgreich durchgelaufen und dokumentiert: `docs/android_release_build_check.md`.
+- Der MVP-Content-Scope ist als Entwurf festgelegt: erster Content-Fokus Englisch -> Deutsch, kleiner gepruefter sichtbarer Kernbestand, keine Bewerbung vollstaendiger Mehrsprachigkeit.
 - Store-Metadaten, Store-Review-Hinweise und Nicht-bewerben-Liste liegen als Entwurf vor.
 - Der Wortspiele-Scope ist geklaert: nutzbare Modi sind als spielbar eingeordnet, Wort-Duell bleibt Vorschau.
 - Content-Package-, Supabase- und Vokabelreview-Strategie sind vorbereitet, ohne produktive Daten zu veraendern.
@@ -30,7 +31,7 @@ Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Su
 - Store-Account-/Store-Konfiguration, Bundle ID, Version/Build Number, Altersfreigabe, Datenverwendungsangaben und Screenshots sind noch offen.
 - App-Icon und finale Store-Screenshots muessen gegen den tatsaechlichen Release-Build geprueft werden.
 - Debug-Sichtbarkeit muss im finalen Release-Build manuell gegengeprueft werden.
-- Der sichtbare MVP-Wortbestand braucht eine klare Qualitaetsentscheidung: welcher minimale Content darf wirklich in den ersten Release?
+- Der sichtbare MVP-Wortbestand braucht noch konkrete Review-Arbeitsbatches fuer die priorisierten Start-Wortwelten.
 
 ### Wirkliche Store-/MVP-Blocker
 
@@ -123,8 +124,8 @@ Warum Blocker:
 
 Naechste Aktion:
 
-- Minimalen MVP-Content-Scope festlegen.
-- Nur diesen sichtbaren Kernbestand vor Release intensiv pruefen.
+- MVP-Content-Scope aus `docs/mvp_content_scope.md` nutzen.
+- Ersten sichtbaren Kernbestand vor Release intensiv pruefen: Travel, Food & Cooking, Home & Living als Screenshot-/Startkandidaten.
 - Weitere Review-Batches nach Risiko priorisieren: gleiche `base_term`/`de_translation`, Strukturissues, kleine/auffaellige Wortwelten.
 
 ### G. Debug-Sichtbarkeit im finalen Release-Build
@@ -210,9 +211,12 @@ Diese Punkte sind strategisch wichtig, blockieren aber den ersten MVP nicht, sol
 Empfehlung:
 
 - Nicht den kompletten 13k-Bestand als perfekt darstellen.
-- Fuer den MVP einen kleinen, gut pruefbaren Kernbestand definieren.
+- Fuer den MVP einen kleinen, gut pruefbaren Englisch-Deutsch-Kernbestand definieren.
+- Groessenordnung: 100 bis 200 gepruefte Woerter oder 30 bis 50 Woerter je priorisierter Wortwelt.
 - Fokus auf sichtbare erste Nutzerreise:
-  - erste Wortwelten
+  - Travel / Reisen
+  - Food & Cooking / Essen & Kochen
+  - Home & Living / Zuhause & Alltag
   - erste Lernlevel
   - Lernmodus-Beispiele
   - Wortspiele mit stabilen Beispiel-/Lokaldaten
@@ -220,7 +224,7 @@ Empfehlung:
 
 ### Ist weiterer Content-Review vor Store zwingend?
 
-Ja, aber gezielt. Nicht die gesamte Content-Architektur muss weitergebaut werden. Zwingend ist eine klare Qualitaetsentscheidung fuer den sichtbaren MVP-Minimalbestand. Weitere Review-Batches sind vor Store sinnvoll, wenn sie direkt den sichtbaren Startbestand betreffen.
+Ja, aber gezielt. Nicht die gesamte Content-Architektur muss weitergebaut werden. Zwingend ist die fachliche Pruefung des sichtbaren MVP-Minimalbestands nach `docs/mvp_content_scope.md`. Weitere Review-Batches sind vor Store sinnvoll, wenn sie direkt den sichtbaren Startbestand betreffen.
 
 ## 7. Konkrete naechste Reihenfolge
 
