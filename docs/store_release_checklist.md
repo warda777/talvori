@@ -83,6 +83,8 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [ ] Keine ungeprueften Remote-Imports beim App-Start
 - [ ] Keine SRS-/word_progress-Daten werden durch Content-Sync ueberschrieben
 - [x] MVP-Content-Scope als Entwurf festgelegt: `docs/mvp_content_scope.md`
+- [x] Erster MVP-Content-Review-Batch erzeugt: `docs/word-review/mvp_content_first_review_batch.csv`
+- [ ] Erster MVP-Content-Review-Batch manuell geprueft
 - [ ] Englisch-Deutsch-MVP-Kernbestand fachlich geprueft
 - [ ] Lokaler Datenbestand startet stabil
 - [ ] Fehlerfaelle zeigen keine Entwicklertexte fuer Nutzer
@@ -102,7 +104,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Wort-Duell als Vorschau eingeordnet, nicht als fertiger Multiplayer
 - [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
 - [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
-- [ ] Screenshots nur mit geprueften Englisch-Deutsch-Woertern aus MVP-Wortwelten erstellen
+- [ ] Screenshots nur mit manuell geprueften Englisch-Deutsch-Woertern aus dem MVP-Review-Batch erstellen
 - [ ] Keine vollstaendige Spanisch-/Franzoesisch-Abdeckung oder 13k-Freigabe bewerben
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori

@@ -125,7 +125,8 @@ Warum Blocker:
 Naechste Aktion:
 
 - MVP-Content-Scope aus `docs/mvp_content_scope.md` nutzen.
-- Ersten sichtbaren Kernbestand vor Release intensiv pruefen: Travel, Food & Cooking, Home & Living als Screenshot-/Startkandidaten.
+- Erste Review-Arbeitsliste nutzen: `docs/word-review/mvp_content_first_review_batch.csv`.
+- Die 150 Zeilen vor Release intensiv pruefen: 50 Travel, 50 Food & Cooking, 50 Home & Living als Screenshot-/Startkandidaten.
 - Weitere Review-Batches nach Risiko priorisieren: gleiche `base_term`/`de_translation`, Strukturissues, kleine/auffaellige Wortwelten.
 
 ### G. Debug-Sichtbarkeit im finalen Release-Build

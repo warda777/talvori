@@ -210,19 +210,28 @@ Empfohlene Reihenfolge:
    - erst nach stabiler englischer Bedeutungsbasis;
    - keine ungeprueften KI-Uebersetzungen produktiv uebernehmen.
 
-## 9. Arbeitslisten-Entscheidung
+## 9. Erste MVP-Review-Arbeitsliste
 
-In diesem Schritt wurde bewusst keine neue `mvp_content_first_review_batch.csv` erzeugt.
+Die erste gezielte Arbeitsliste wurde erzeugt:
 
-Grund:
+- Datei: `docs/word-review/mvp_content_first_review_batch.csv`
+- Tool: `tool/export_mvp_content_review_batch.dart`
+- Quelle: `docs/word-review/supabase_words_review.csv`
+- Filter: `from_lang=en`, `to_lang=de`, Wortwelten Travel, Food & Cooking, Home & Living
+- Umfang: 150 Review-Zeilen plus Header
+- Verteilung: 50 Travel, 50 Food & Cooking, 50 Home & Living
 
-- Die sichtbaren Store-/Screenshot-Woerter sind noch nicht final festgelegt.
-- Eine automatisch erzeugte 200-Zeilen-Liste koennte faelschlich wie eine fachliche Freigabe wirken.
-- Der naechste sichere Schritt ist, den Screenshot-/Startpfad zu definieren und daraus gezielt eine kleine Review-Arbeitsliste zu exportieren.
+Die Datei ist nur eine Review-Arbeitsliste. Sie enthaelt keine Freigabe, kein `approved`, kein `release_ready=true` und keine produktive Datenkorrektur. `review_decision` und `review_note` bleiben leer, bis der manuelle Review durchgefuehrt wird.
 
-Empfohlener naechster Tool-Schritt:
+Markierte Risikotypen im Batch:
 
-- read-only Export fuer `mvp_content_first_review_batch.csv`
-- Filter: `from_lang=en`, `to_lang=de`, Wortwelten Travel/Food/Home, maximal 150 Zeilen
-- Review-Felder leer
-- keine Produktivdaten, keine Supabase-Verbindung, kein Import
+- `standard_review`: 85
+- `structure_issue`: 55
+- `same_base_and_translation`: 10
+
+Naechster Schritt:
+
+- Arbeitskopie fuer den manuellen Review erstellen.
+- Travel, Food & Cooking und Home & Living Wort fuer Wort pruefen.
+- Erst nach menschlicher Pruefung ein separates Overlay erzeugen.
+- Store-Screenshots erst nach abgeschlossenem Review dieser sichtbaren Inhalte erstellen.

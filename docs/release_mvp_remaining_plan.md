@@ -222,6 +222,8 @@ Konkrete Richtung:
 - MVP-Content-Scope aus `docs/mvp_content_scope.md` nutzen
 - ersten geprueften Englisch-Deutsch-Basisbestand definieren
 - priorisierte Wortwelten: Travel, Food & Cooking, Home & Living
+- erste Review-Arbeitsliste: `docs/word-review/mvp_content_first_review_batch.csv`
+- Umfang der Arbeitsliste: 150 Zeilen, je 50 Travel, Food & Cooking und Home & Living
 - Groessenordnung: 100 bis 200 gepruefte Woerter oder 30 bis 50 Woerter je priorisierter Wortwelt
 - keine ungeprüften Pakete als releasefähig markieren
 - Review-Overlays weiterführen
@@ -422,6 +424,7 @@ Enthält:
 
 - MVP-Content-Scope: `docs/mvp_content_scope.md`
 - Travel, Food & Cooking und Home & Living als erster sichtbarer Kern
+- erste Arbeitsliste: `docs/word-review/mvp_content_first_review_batch.csv`
 - Screenshot-Content-Batch
 - gleiche base/de-Fälle
 - nächste Strukturissue-Batches
