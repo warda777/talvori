@@ -255,3 +255,24 @@ Offene Risiken:
 - `fix_translation_later`, `needs_context`, `reject_for_mvp` und `move_out_of_mvp` muessen vor Store-Screenshots beachtet werden.
 - Screenshot-Woerter sollten aus den `approved_for_mvp`-Zeilen gewaehlt werden.
 - Strukturissues bleiben Review-Hinweise; A1-C2 und Top 500 duerfen weiterhin nicht als normale Wortwelten behandelt werden.
+
+## 10. Screenshot-Content-Auswahl
+
+Die erste sichere Screenshot-/Startcontent-Auswahl wurde vorbereitet:
+
+- Dokumentation: `docs/mvp_screenshot_content_selection.md`
+- CSV: `docs/word-review/mvp_screenshot_content_selection.csv`
+- Tool: `tool/export_mvp_screenshot_content_selection.dart`
+- Quelle: `docs/word-review/mvp_content_first_review_overlay.csv`
+- Regel: nur `approved_for_mvp`
+- Umfang: 51 Zeilen plus Header
+- Verteilung: 11 Travel, 20 Food & Cooking, 20 Home & Living
+
+Die Auswahl enthaelt keine Produktivfreigabe, kein `approved`, kein `release_ready=true` und keine App-/SQLite-/Supabase-Datenaenderung. Travel ist bewusst kleiner, weil spezialisierte Travel-Operationen wie Boarding-Pass-, Transfer- und Rebook-Faelle nicht fuer Primaer-Screenshots empfohlen werden.
+
+Fuer Screenshots gilt weiterhin:
+
+- nur Begriffe aus `docs/word-review/mvp_screenshot_content_selection.csv` oder spaeter gleichwertig gepruefte Begriffe zeigen;
+- `fix_translation_later`, `needs_context`, `reject_for_mvp` und `move_out_of_mvp` nicht zeigen;
+- Internationalismen wie `bus`, `hotel` oder `internet` nicht als alleinigen Beweis fuer Uebersetzungsqualitaet verwenden;
+- keine Screenshots erstellen, bevor der finale Release-Build visuell geprueft wurde.

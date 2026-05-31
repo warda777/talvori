@@ -1,0 +1,52 @@
+screenshot_priority,word_key,base_term,de_translation,level,category,word_world,suggested_use,selection_note
+travel-01,ee84c64b-482c-4aa9-be5b-fc0c57ede9b4,luggage,Gepäck,A1,Travel,Travel,onboarding,approved_for_mvp; short everyday term
+travel-02,6c81d3e1-03aa-44f9-b2de-543b0b0d2995,one-way ticket,einfache Fahrkarte,A1,Travel,Travel,onboarding,approved_for_mvp; short everyday term
+travel-03,c1015783-60e2-4059-b052-e60e5b855c40,airport,Flughafen,A1,A1; Top 500 Words; Travel,Travel,onboarding,approved_for_mvp; structure metadata still needs later cleanup
+travel-04,450e2469-1a1f-45f1-bb13-c1ede8f0c262,bag,Tasche,A1,A1; Top 500 Words; Travel,Travel,home_word_world,approved_for_mvp; structure metadata still needs later cleanup
+travel-05,4a3fa40a-7baa-4b94-920a-c47bb852123a,international flight,internationaler Flug,A1,Travel,Travel,home_word_world,approved_for_mvp; short everyday term
+travel-06,2faead6c-5af9-4f27-82ee-d745847374aa,mobile check-in,mobiles Einchecken,A1,Travel,Travel,home_word_world,approved_for_mvp; short everyday term
+travel-07,5de5bfd1-1cfa-4cb0-897a-359c7580bc60,passport,Reisepass,A1,A1; Travel,Travel,home_word_world,approved_for_mvp; structure metadata still needs later cleanup
+travel-08,8c5fbc2d-57c0-416f-b4a7-0bffe823b6b6,plane,Flugzeug,A1,A1; Travel,Travel,home_word_world,approved_for_mvp; structure metadata still needs later cleanup
+travel-09,91d5a2e0-9e4e-44ac-a8f0-0dd557a92e29,room,Zimmer,A1,A1; Top 500 Words; Travel,Travel,word_game,approved_for_mvp; structure metadata still needs later cleanup
+travel-10,d2d9bc2e-dd94-4385-ba28-a6023f5a5945,bus,Bus,A1,A1; Top 500 Words; Travel,Travel,word_game,approved_for_mvp; internationalism; avoid as sole translation example
+travel-11,3f52898b-a9eb-4ebf-b5d9-625d894514f3,hotel,Hotel,A1,A1; Top 500 Words; Travel,Travel,word_game,approved_for_mvp; internationalism; avoid as sole translation example
+food-01,1746b948-fb3f-4bde-bd61-c111530cdaff,napkin,Serviette,A1,Food & Cooking,Food & Cooking,onboarding,approved_for_mvp; short everyday term
+food-02,9cd0dbcf-c8a2-4f33-9605-c79f6cb06285,pasta,Nudeln,A1,Food & Cooking,Food & Cooking,onboarding,approved_for_mvp; short everyday term
+food-03,51c9fc7c-ee5e-4587-8060-560df8aa6dfc,salty,salzig,A1,Food & Cooking,Food & Cooking,onboarding,approved_for_mvp; short everyday term
+food-04,8107c183-e509-4ff9-bf0a-4c973e6bfb4b,pepper shaker,Pfefferstreuer,A1,Food & Cooking,Food & Cooking,home_word_world,approved_for_mvp; short everyday term
+food-05,a9562214-069d-4a85-b3db-e461a827d377,salt shaker,Salzstreuer,A1,Food & Cooking,Food & Cooking,home_word_world,approved_for_mvp; short everyday term
+food-06,798d6f26-ee0f-4c29-9065-b6e76493c6bb,to cook,kochen,A1,Food & Cooking; Home & Living,Food & Cooking; Home & Living,home_word_world,approved_for_mvp; short everyday term
+food-07,c194acb8-eff0-40ce-a2e9-b1c47ae25cf0,to cut,schneiden,A1,Food & Cooking,Food & Cooking,home_word_world,approved_for_mvp; short everyday term
+food-08,9a428aaa-698e-438a-8f0b-a2ab16416124,apple,Apfel,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,home_word_world,approved_for_mvp; structure metadata still needs later cleanup
+food-09,9d907689-20dc-4960-8b81-5ce06a4069b6,bottle,Flasche,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-10,0f985769-272e-4c37-b264-0a1a7e654480,bread,Brot,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-11,27035405-60ba-4e2a-9c59-78f049ffc112,breakfast,Frühstück,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-12,b9a50940-79e0-422d-b171-14dfc0245a36,carrot,Karotte,A1,A1; Food & Cooking,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-13,2f191114-7bb2-432d-b15f-20cf6896043f,cheese,Käse,A1,A1; Food & Cooking,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-14,29c3adef-28bf-49e5-a656-40ca0411b888,chicken,Hähnchen,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-15,5bc09c6e-88ed-4418-8c01-9e11ed89bdc9,chocolate,Schokolade,A1,A1; Food & Cooking,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-16,99b7ecbe-3fc5-4651-9725-b6e848088499,coffee,Kaffee,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-17,dc3ce695-e4f6-4c53-a762-8b33ed616135,cold,kalt,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-18,2fe0efde-b24a-456f-a0d3-b708cd470254,cup,Tasse,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-19,0de6fd96-1f5a-4612-ac07-681afb6e0753,delicious,köstlich,A1,A1; Food & Cooking,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+food-20,b1f9f5e5-e73e-4fd0-8a93-db3fa1e8d2c0,dinner,Abendessen,A1,A1; Food & Cooking; Top 500 Words,Food & Cooking,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-01,038a83f0-9059-44c2-b2e8-ddaf393a9da7,drawer,Schublade,A1,Home & Living,Home & Living,onboarding,approved_for_mvp; short everyday term
+home-02,b63d2ba1-404a-4f43-81cd-d01bf1865755,hallway,Flur,A1,Home & Living,Home & Living,onboarding,approved_for_mvp; short everyday term
+home-03,64929b7c-d80e-4404-a204-2509aee51faf,dish towel,Geschirrtuch,A1,Home & Living,Home & Living,onboarding,approved_for_mvp; short everyday term
+home-04,0748c031-4b3e-4527-9435-57039e3aad66,living room,Wohnzimmer,A1,Home & Living,Home & Living,home_word_world,approved_for_mvp; short everyday term
+home-05,59b4db44-22b7-4f1d-a0d8-6dcc7652227b,to brush teeth,Zähne putzen,A1,Home & Living,Home & Living,home_word_world,approved_for_mvp; short everyday term
+home-06,00976e70-07ad-4c7a-948e-3488f13e8999,to clean,putzen,A1,Home & Living,Home & Living,home_word_world,approved_for_mvp; short everyday term
+home-07,be279b26-1835-432a-9a8d-5716d766cca0,to eat at home,zu Hause essen,A1,Home & Living,Home & Living,home_word_world,approved_for_mvp; short everyday term
+home-08,04ef8acc-ec27-48a0-adeb-b6067717de5c,to shower,duschen,A1,Home & Living,Home & Living,home_word_world,approved_for_mvp; short everyday term
+home-09,5cf2477a-1afb-46f5-bb3b-c45ab8ae8d12,to sit,sitzen,A1,Home & Living,Home & Living,learn_mode,approved_for_mvp; short everyday term
+home-10,06acc538-05bc-49a0-bf8c-430b3e329bc2,to sleep,schlafen,A1,Home & Living,Home & Living,learn_mode,approved_for_mvp; short everyday term
+home-11,dce552a8-0a09-4254-b576-75f883c17bc0,apartment,Wohnung,A1,A1; Home & Living,Home & Living,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-12,851247c5-7f99-4435-b2d9-aca31e81c7d4,bathroom,Badezimmer,A1,A1; Home & Living; Top 500 Words,Home & Living,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-13,564bc29e-732d-4b0d-ab1a-d5416b03baa4,bed,Bett,A1,A1; Home & Living; Top 500 Words,Home & Living,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-14,1eab70e4-eef8-48c8-8b93-fce8d668017a,bedroom,Schlafzimmer,A1,A1; Home & Living,Home & Living,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-15,c2c3b45e-5453-47ae-9aab-559b287ee902,chair,Stuhl,A1,A1; B2; Home & Living; Top 500 Words; Work & Careers,Home & Living; Work & Careers,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-16,667cffa1-0ec2-405a-9ab6-ffda4b3c3f0a,garden,Garten,A1,A1; Home & Living; Top 500 Words,Home & Living,word_game,approved_for_mvp; structure metadata still needs later cleanup
+home-17,c4cb61e9-0061-494e-97ae-a4b1f6395f29,to open the window,das Fenster öffnen,A1,Home & Living,Home & Living,learn_mode,approved_for_mvp; short everyday term
+home-18,2d20dcc4-19de-4d4d-81f2-d6f2a2373d05,to wash the dishes,abwaschen,A1,Home & Living,Home & Living,learn_mode,approved_for_mvp; short everyday term
+home-19,3dab5cbf-5140-412f-af0a-e94900321565,to water plants,Pflanzen gießen,A1,Home & Living,Home & Living,learn_mode,approved_for_mvp; short everyday term
+home-20,383d4b4f-5ccc-45cb-835b-fc78fb82e91f,internet,Internet,A1,A1; Home & Living,Home & Living,word_game,approved_for_mvp; internationalism; avoid as sole translation example

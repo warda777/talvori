@@ -163,14 +163,16 @@ Geplante Screenshot-Motive:
 3. Wortwelten
    - Ziel: thematisches Lernen sichtbar machen.
    - Nur gepruefte MVP-Wortwelten zeigen, bevorzugt Travel, Food & Cooking oder Home & Living.
+   - Screenshot-Content-Auswahl nutzen: `docs/word-review/mvp_screenshot_content_selection.csv`.
 
 4. Lernmodus
    - Ziel: Wiederholen und Lernfortschritt zeigen.
-   - Nur mit geprueften Englisch-Deutsch-Woertern aufnehmen.
+   - Nur mit geprueften Englisch-Deutsch-Woertern aufnehmen, bevorzugt aus der Screenshot-Auswahl.
 
 5. Wortspiele
    - Ziel: spielerische Uebungen als Lernabwechslung zeigen.
    - Nur stabile, spielbare Modi zeigen; keine Vorschau-Karte als Hauptmotiv.
+   - Kurze Begriffe aus der Screenshot-Auswahl verwenden; keine `fix_translation_later`-, `needs_context`-, `reject_for_mvp`- oder `move_out_of_mvp`-Zeilen zeigen.
 
 6. Settings mit Legal/Support
    - Ziel: Transparenz, Datenschutz und Support-Erreichbarkeit zeigen.
@@ -184,6 +186,7 @@ Geplante Screenshot-Motive:
 - Store-Texte an Zielplattform anpassen
 - keine unfertigen Features bewerben
 - Screenshots aus finalem Release-Build erstellen
+- Screenshot-Content-Auswahl gegen den finalen Build pruefen
 - Datenschutz-/AGB-/Impressum-Inhalte final juristisch pruefen
 - Datenverwendungsangaben gegen tatsaechliches App-Verhalten pruefen
 - finalen Release-Build-Smoke-Test wiederholen

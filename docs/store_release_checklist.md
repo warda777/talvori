@@ -88,6 +88,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Home & Living im MVP-Content-Review-Batch geprueft
 - [x] MVP-Content-Review-Overlay nach 150/150 Entscheidungen erzeugt: `docs/word-review/mvp_content_first_review_overlay.csv`
 - [x] Erster MVP-Content-Review-Batch manuell geprueft
+- [x] Screenshot-/Startcontent-Auswahl aus `approved_for_mvp` vorbereitet: `docs/word-review/mvp_screenshot_content_selection.csv`
 - [ ] Englisch-Deutsch-MVP-Kernbestand fachlich geprueft
 - [ ] Lokaler Datenbestand startet stabil
 - [ ] Fehlerfaelle zeigen keine Entwicklertexte fuer Nutzer
@@ -108,6 +109,7 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Store-Testhinweise als Entwurf vorbereitet: `docs/store_review_notes_draft.md`
 - [ ] Store-Texte final gegen tatsaechlichen Release-Build pruefen
 - [ ] Screenshots nur mit manuell geprueften Englisch-Deutsch-Woertern aus dem MVP-Review-Batch erstellen
+- [ ] Screenshots bevorzugt mit `docs/word-review/mvp_screenshot_content_selection.csv` planen
 - [ ] Keine vollstaendige Spanisch-/Franzoesisch-Abdeckung oder 13k-Freigabe bewerben
 
 ## 7. Datenschutzangaben Speziell Fuer Talvori
