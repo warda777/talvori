@@ -585,8 +585,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           companionDisplayName:
                                               companionDisplayName,
                                           mascotStyle: mascotStyle,
-                                          showCompanion: showCompanion,
-                                          companionVisible: !chatOverlayOpen,
+                                          showCompanion: false,
+                                          companionVisible: false,
                                           showHomeChatHint: showHomeChatHint,
                                           onGlobeTap: _openWorldRegion,
                                           onCompanionTap: _toggleCompanion,
@@ -602,6 +602,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                               ),
+                              if (showCompanion && !chatOverlayOpen)
+                                _HomeCompanionOverlay(
+                                  viewportHeight: viewport.maxHeight,
+                                  compact: compactHome,
+                                  companionState: companionState,
+                                  companionDisplayName: companionDisplayName,
+                                  mascotStyle: mascotStyle,
+                                  showHomeChatHint: showHomeChatHint,
+                                  onCompanionTap: _toggleCompanion,
+                                  onCompanionBubbleTap: _openCompanionChatInput,
+                                  onLearnTap: _showLearningSourcesPopup,
+                                  onSentenceSparksTap: _openSentenceSparks,
+                                  onGlobeTap: _openWorldRegion,
+                                ),
                             ],
                           );
                         },
@@ -624,10 +638,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           if (chatOverlayOpen)
-            AnimatedPositioned(
+            Positioned(
               key: const Key('talvori-companion-chat-cluster'),
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
               left: 0,
               right: 0,
               bottom: chatClusterBottom,
@@ -680,6 +692,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+class _HomeCompanionOverlay extends StatelessWidget {
+  const _HomeCompanionOverlay({
+    required this.viewportHeight,
+    required this.compact,
+    required this.companionState,
+    required this.companionDisplayName,
+    required this.mascotStyle,
+    required this.showHomeChatHint,
+    required this.onCompanionTap,
+    required this.onCompanionBubbleTap,
+    required this.onLearnTap,
+    required this.onSentenceSparksTap,
+    required this.onGlobeTap,
+  });
+
+  final double viewportHeight;
+  final bool compact;
+  final CompanionState companionState;
+  final String companionDisplayName;
+  final TalvoriMascotStyle mascotStyle;
+  final bool showHomeChatHint;
+  final VoidCallback onCompanionTap;
+  final VoidCallback onCompanionBubbleTap;
+  final VoidCallback onLearnTap;
+  final VoidCallback onSentenceSparksTap;
+  final VoidCallback onGlobeTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final mascotSize = companionState.isExpanded
+        ? (compact ? 116.0 : 136.0)
+        : (compact ? 110.0 : 128.0);
+    const compactMascotScale = 0.84;
+    final effectiveMascotSize = companionState.isExpanded
+        ? mascotSize
+        : mascotSize * compactMascotScale;
+    final cardHeight =
+        (companionState.bubbleVisible ? 152.0 : 0.0) +
+        effectiveMascotSize +
+        18.0;
+    final anchorBottom = (viewportHeight * (compact ? 0.72 : 0.74)).clamp(
+      compact ? 500.0 : 620.0,
+      viewportHeight - (compact ? 132.0 : 164.0),
+    );
+    final top = (anchorBottom - cardHeight)
+        .clamp(0.0, viewportHeight - effectiveMascotSize - 24.0)
+        .toDouble();
+    final width = companionState.isExpanded
+        ? (compact ? 336.0 : 460.0)
+        : mascotSize + 10.0;
+
+    return Positioned(
+      left: 16,
+      top: top,
+      child: SizedBox(
+        width: width,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: onCompanionBubbleTap,
+          child: Material(
+            type: MaterialType.transparency,
+            child: TalvoriCompanionCard(
+              mascotMood: companionState.mascotMood,
+              emotion: companionState.emotion,
+              title: companionDisplayName,
+              message: _HomeWorldHero._companionMessage(companionState.message),
+              bubbleVisible: companionState.bubbleVisible,
+              isExpanded: companionState.isExpanded,
+              inputVisible: companionState.inputVisible,
+              isThinking: companionState.isThinking,
+              showChatHint: showHomeChatHint && companionState.bubbleVisible,
+              mascotStyle: mascotStyle,
+              mascotSize: mascotSize,
+              compactMascotScale: compactMascotScale,
+              messageMaxLines: compact ? 2 : 3,
+              quickActions: [
+                TalvoriCompanionQuickAction(
+                  key: const Key('home-companion-sentence-sparks'),
+                  label: 'Satzfunken',
+                  icon: Icons.auto_awesome_rounded,
+                  onTap: onSentenceSparksTap,
+                ),
+                TalvoriCompanionQuickAction(
+                  key: const Key('home-companion-learn'),
+                  label: 'Lernen',
+                  icon: Icons.psychology_rounded,
+                  onTap: onLearnTap,
+                ),
+                TalvoriCompanionQuickAction(
+                  key: const Key('home-companion-world'),
+                  label: 'Welt',
+                  icon: Icons.public_rounded,
+                  onTap: onGlobeTap,
+                ),
+              ],
+              onMascotTap: onCompanionTap,
+              onBubbleTap: onCompanionBubbleTap,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HomeWorldHero extends StatelessWidget {
   const _HomeWorldHero({
     required this.wordCount,
@@ -723,11 +840,13 @@ class _HomeWorldHero extends StatelessWidget {
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
     final companionSize = companionState.isExpanded
-        ? (compact ? 104.0 : 124.0)
-        : (compact ? 82.0 : 96.0);
+        ? (compact ? 116.0 : 136.0)
+        : (compact ? 110.0 : 128.0);
     final companionWidth = companionState.isExpanded
         ? (compact ? 336.0 : 460.0)
         : companionSize + 10;
+    final companionSlotHeight = compact ? 280.0 : 310.0;
+    final companionLift = compact ? -24.0 : -36.0;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 590),
@@ -782,15 +901,17 @@ class _HomeWorldHero extends StatelessWidget {
               ),
             ),
           ),
-          if (showCompanion) SizedBox(height: compact ? 4 : 20),
+          if (showCompanion) SizedBox(height: compact ? 0 : 2),
           if (showCompanion)
             SizedBox(
-              height: companionState.isExpanded
-                  ? (compact ? 250 : 276)
-                  : (compact ? 62 : 72),
-              child: companionVisible
-                  ? Align(
-                      alignment: Alignment.topLeft,
+              height: companionSlotHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  if (companionVisible)
+                    Positioned(
+                      left: 0,
+                      top: companionLift,
                       child: SizedBox(
                         width: companionWidth,
                         child: GestureDetector(
@@ -814,7 +935,7 @@ class _HomeWorldHero extends StatelessWidget {
                                   companionState.bubbleVisible,
                               mascotStyle: mascotStyle,
                               mascotSize: companionSize,
-                              compactMascotScale: 0.68,
+                              compactMascotScale: 0.84,
                               messageMaxLines: compact ? 2 : 3,
                               quickActions: [
                                 TalvoriCompanionQuickAction(
@@ -844,8 +965,9 @@ class _HomeWorldHero extends StatelessWidget {
                           ),
                         ),
                       ),
-                    )
-                  : const SizedBox.shrink(),
+                    ),
+                ],
+              ),
             )
           else
             SizedBox(height: globeGap),

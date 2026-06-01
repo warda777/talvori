@@ -627,10 +627,13 @@ void main() {
       tester
           .getRect(find.byKey(const Key('talvori-companion-mascot-image')))
           .height,
-      lessThan(70),
+      greaterThan(96),
     );
     final compactGlobeRect = tester.getRect(
       find.byKey(const Key('talvori-world-globe-button')),
+    );
+    final compactMascotRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-mascot-image')),
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -650,6 +653,12 @@ void main() {
     );
     expect(activeGlobeRect.top, compactGlobeRect.top);
     expect(activeGlobeRect.left, compactGlobeRect.left);
+    expect(activeGlobeRect.size, compactGlobeRect.size);
+    final activeMascotRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(activeMascotRect.left, closeTo(compactMascotRect.left, 8));
+    expect(activeMascotRect.bottom, closeTo(compactMascotRect.bottom, 3));
 
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
@@ -671,7 +680,7 @@ void main() {
       tester
           .getRect(find.byKey(const Key('talvori-companion-mascot-image')))
           .height,
-      lessThan(70),
+      greaterThan(96),
     );
   });
 
