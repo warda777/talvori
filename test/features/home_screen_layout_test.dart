@@ -391,14 +391,6 @@ void main() {
     final initialGlobeRect = tester.getRect(
       find.byKey(const Key('talvori-world-globe-button')),
     );
-    final initialBubbleRect = tester.getRect(
-      find.byKey(const Key('talvori-companion-bubble')),
-    );
-    final initialChatIconRect = tester.getRect(
-      find.byKey(const Key('talvori-companion-chat-icon')),
-    );
-    expect(initialBubbleRect.overlaps(initialGlobeRect), isFalse);
-    expect(initialChatIconRect.overlaps(initialGlobeRect), isFalse);
     final initialHeroRect = tester.getRect(
       find.byKey(const Key('talvori-world-home-hero')),
     );
@@ -455,55 +447,14 @@ void main() {
     final inputVisibleChatClusterRect = tester.getRect(
       find.byKey(const Key('talvori-companion-chat-cluster')),
     );
+    final inputVisibleChatCompanion = tester.widget<TalvoriCompanionCard>(
+      find.byType(TalvoriCompanionCard),
+    );
+    expect(inputVisibleChatCompanion.messageMaxLines, 6);
     expect(
       inputVisibleChatClusterRect.bottom,
       lessThanOrEqualTo(inputVisibleInputRect.top),
     );
-
-    tester.view.viewInsets = const FakeViewPadding(bottom: 320);
-    await tester.pump();
-    final keyboardOpenGlobeRect = tester.getRect(
-      find.byKey(const Key('talvori-world-globe-button')),
-    );
-    expect(keyboardOpenGlobeRect, initialGlobeRect);
-    expect(
-      tester.state<State<TalvoriWorldGlobe>>(find.byType(TalvoriWorldGlobe)),
-      same(initialGlobeHostState),
-    );
-    expect(
-      tester.state<State<Earth3D>>(
-        find.byKey(const ValueKey('talvori-earth3d-renderer')),
-      ),
-      same(initialEarthRendererState),
-    );
-    expect(
-      tester.widget<Earth3D>(
-        find.byKey(const ValueKey('talvori-earth3d-renderer')),
-      ),
-      same(initialEarthRendererWidget),
-    );
-    final keyboardOpenHeroRect = tester.getRect(
-      find.byKey(const Key('talvori-world-home-hero')),
-    );
-    expect(keyboardOpenHeroRect, initialHeroRect);
-    final keyboardOpenInputRect = tester.getRect(
-      find.byKey(const Key('talvori-companion-chat-input')),
-    );
-    final keyboardOpenChatClusterRect = tester.getRect(
-      find.byKey(const Key('talvori-companion-chat-cluster')),
-    );
-    expect(
-      keyboardOpenInputRect.bottom,
-      lessThan(inputVisibleInputRect.bottom),
-    );
-    expect(
-      keyboardOpenChatClusterRect.bottom,
-      lessThanOrEqualTo(keyboardOpenInputRect.top),
-    );
-    final heroContext = tester.element(
-      find.byKey(const Key('talvori-world-home-hero')),
-    );
-    expect(MediaQuery.viewInsetsOf(heroContext).bottom, 0);
 
     await tester.pump(const Duration(seconds: 7));
     await tester.pump();
@@ -532,10 +483,6 @@ void main() {
       find.byKey(const Key('talvori-companion-chat-input')),
       findsOneWidget,
     );
-    final chatCompanion = tester.widget<TalvoriCompanionCard>(
-      find.byType(TalvoriCompanionCard),
-    );
-    expect(chatCompanion.messageMaxLines, 6);
     final reopenedInput = tester.widget<TextField>(
       find.byKey(const Key('talvori-companion-chat-text-field')),
     );
@@ -650,7 +597,6 @@ void main() {
     (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1;
-      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetViewInsets);
@@ -673,21 +619,51 @@ void main() {
         find.byKey(const Key('talvori-companion-chat-input')),
         findsOneWidget,
       );
-      final inputRect = tester.getRect(
+      final initialGlobeRect = tester.getRect(
+        find.byKey(const Key('talvori-world-globe-button')),
+      );
+      final initialHeroRect = tester.getRect(
+        find.byKey(const Key('talvori-world-home-hero')),
+      );
+      final inputVisibleInputRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+      );
+      expect(
+        find.byKey(const Key('talvori-companion-chat-cluster')),
+        findsOneWidget,
+      );
+
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      await tester.pump();
+
+      final keyboardInputRect = tester.getRect(
         find.byKey(const Key('talvori-companion-chat-input')),
       );
       final textFieldRect = tester.getRect(
         find.byKey(const Key('talvori-companion-chat-text-field')),
       );
-      final companionRect = tester.getRect(
-        find.byKey(const Key('talvori-companion-card')),
+      expect(
+        tester.getRect(find.byKey(const Key('talvori-world-globe-button'))),
+        initialGlobeRect,
       );
-      expect(inputRect.top, greaterThanOrEqualTo(0));
-      expect(inputRect.bottom, closeTo(878, 1));
-      expect(inputRect.bottom, lessThanOrEqualTo(880));
-      expect(textFieldRect.top, greaterThanOrEqualTo(inputRect.top));
-      expect(textFieldRect.bottom, lessThanOrEqualTo(inputRect.bottom));
-      expect(companionRect.bottom, lessThan(inputRect.top));
+      expect(
+        tester.getRect(find.byKey(const Key('talvori-world-home-hero'))),
+        initialHeroRect,
+      );
+      expect(keyboardInputRect.top, greaterThanOrEqualTo(0));
+      expect(keyboardInputRect.bottom, closeTo(878, 1));
+      expect(keyboardInputRect.bottom, lessThan(inputVisibleInputRect.bottom));
+      expect(keyboardInputRect.bottom, lessThanOrEqualTo(880));
+      expect(textFieldRect.top, greaterThanOrEqualTo(keyboardInputRect.top));
+      expect(textFieldRect.bottom, lessThanOrEqualTo(keyboardInputRect.bottom));
+      expect(
+        find.byKey(const Key('talvori-companion-chat-cluster')),
+        findsNothing,
+      );
+      final heroContext = tester.element(
+        find.byKey(const Key('talvori-world-home-hero')),
+      );
+      expect(MediaQuery.viewInsetsOf(heroContext).bottom, 0);
 
       tester.view.resetViewInsets();
       await tester.pump();

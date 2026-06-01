@@ -419,6 +419,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final chatCardBottom = inputAwareChatCardBottom > baseChatCardBottom
         ? inputAwareChatCardBottom
         : baseChatCardBottom;
+    final showCompanionChatCluster = chatOverlayOpen && keyboardInset <= 0;
     final chatCompanionMascotSize = mediaQuery.size.width < 380 ? 112.0 : 124.0;
     final chatCompanionWidth = _safeClampDouble(
       mediaQuery.size.width - 32,
@@ -638,7 +639,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onTap: _closeCompanionChatInput,
               ),
             ),
-          if (chatOverlayOpen)
+          if (showCompanionChatCluster)
             Positioned(
               key: const Key('talvori-companion-chat-cluster'),
               left: 0,
@@ -733,7 +734,10 @@ class _HomeCompanionOverlay extends StatelessWidget {
     final effectiveMascotSize = companionState.isExpanded
         ? mascotSize
         : mascotSize * compactMascotScale;
-    final cardHeight = effectiveMascotSize;
+    final cardHeight =
+        (companionState.bubbleVisible ? 152.0 : 0.0) +
+        effectiveMascotSize +
+        18.0;
     final anchorBottom = _safeClampDouble(
       viewportHeight * (compact ? 0.72 : 0.74),
       compact ? 500.0 : 620.0,
@@ -771,7 +775,6 @@ class _HomeCompanionOverlay extends StatelessWidget {
               mascotStyle: mascotStyle,
               mascotSize: mascotSize,
               compactMascotScale: compactMascotScale,
-              bubblePlacement: TalvoriCompanionBubblePlacement.belowMascot,
               messageMaxLines: compact ? 2 : 3,
               quickActions: [
                 TalvoriCompanionQuickAction(
