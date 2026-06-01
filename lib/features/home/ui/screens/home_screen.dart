@@ -732,13 +732,16 @@ class _HomeCompanionOverlay extends StatelessWidget {
         (companionState.bubbleVisible ? 152.0 : 0.0) +
         effectiveMascotSize +
         18.0;
-    final anchorBottom = (viewportHeight * (compact ? 0.72 : 0.74)).clamp(
+    final anchorBottom = _safeClampDouble(
+      viewportHeight * (compact ? 0.72 : 0.74),
       compact ? 500.0 : 620.0,
       viewportHeight - (compact ? 132.0 : 164.0),
     );
-    final top = (anchorBottom - cardHeight)
-        .clamp(0.0, viewportHeight - effectiveMascotSize - 24.0)
-        .toDouble();
+    final top = _safeClampDouble(
+      anchorBottom - cardHeight,
+      0.0,
+      viewportHeight - effectiveMascotSize - 24.0,
+    );
     final width = companionState.isExpanded
         ? (compact ? 336.0 : 460.0)
         : mascotSize + 10.0;
@@ -1158,6 +1161,9 @@ class _HomeCompanionChatInput extends StatelessWidget {
 }
 
 double _safeClampDouble(double value, double lowerLimit, double upperLimit) {
+  if (value.isNaN || lowerLimit.isNaN || upperLimit.isNaN) {
+    return lowerLimit.isNaN ? 0.0 : lowerLimit;
+  }
   final safeUpperLimit = upperLimit < lowerLimit ? lowerLimit : upperLimit;
   return value.clamp(lowerLimit, safeUpperLimit).toDouble();
 }
