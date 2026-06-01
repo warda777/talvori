@@ -34,9 +34,8 @@ class HomeSmartHubMenu extends StatefulWidget {
 
 class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     with SingleTickerProviderStateMixin {
-  static const _wheelWidth = 430.0;
-  static const _wheelHeight = 318.0;
-  static const _wheelCenter = Offset(_wheelWidth / 2, 246);
+  static const _wheelHeight = 290.0;
+  static const _wheelCenterY = 246.0;
   static const _wheelRadius = 154.0;
 
   late final AnimationController _controller;
@@ -85,12 +84,14 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final wheelWidth = MediaQuery.sizeOf(context).width;
+    final wheelCenter = Offset(wheelWidth / 2, _wheelCenterY);
     return Semantics(
       label: 'Talvori Welt Hub',
       child: Padding(
         padding: EdgeInsets.only(bottom: math.max(0, bottomInset * 0.12)),
         child: SizedBox(
-          width: _wheelWidth,
+          width: wheelWidth,
           height: _wheelHeight,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -102,15 +103,17 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
                 _RotatingActionWheel(
                   actions: widget.actions,
                   animation: _controller,
-                  center: _wheelCenter,
+                  width: wheelWidth,
+                  height: _wheelHeight,
+                  center: wheelCenter,
                   radius: _wheelRadius,
                   rotation: _rotation,
                   open: _open,
                   onActionTap: _run,
                 ),
                 Positioned(
-                  left: _wheelCenter.dx - 43,
-                  top: _wheelCenter.dy - 43,
+                  left: wheelCenter.dx - 43,
+                  top: wheelCenter.dy - 43,
                   child: _HubCenterButton(open: _open, onTap: _toggle),
                 ),
               ],
@@ -126,6 +129,8 @@ class _RotatingActionWheel extends StatelessWidget {
   const _RotatingActionWheel({
     required this.actions,
     required this.animation,
+    required this.width,
+    required this.height,
     required this.center,
     required this.radius,
     required this.rotation,
@@ -135,6 +140,8 @@ class _RotatingActionWheel extends StatelessWidget {
 
   final List<HomeSmartHubAction> actions;
   final Animation<double> animation;
+  final double width;
+  final double height;
   final Offset center;
   final double radius;
   final double rotation;
@@ -145,14 +152,14 @@ class _RotatingActionWheel extends StatelessWidget {
   Widget build(BuildContext context) {
     final visibleActions = actions.take(8).toList(growable: false);
     if (!open && animation.value == 0) {
-      return const SizedBox(width: 430, height: 318);
+      return SizedBox(width: width, height: height);
     }
 
     return IgnorePointer(
       ignoring: !open,
       child: SizedBox(
-        width: 430,
-        height: 318,
+        width: width,
+        height: height,
         child: AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
