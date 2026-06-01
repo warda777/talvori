@@ -321,19 +321,6 @@ class _GlobeAtmospherePainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
 
-    canvas.drawArc(
-      rect.inflate(radius * 0.03),
-      -0.94,
-      1.62,
-      false,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.032
-        ..strokeCap = StrokeCap.round
-        ..color = const Color(0xFFFFBE73).withValues(alpha: 0.5)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7.5),
-    );
-
     canvas.drawCircle(
       center + Offset(-radius * 0.28, -radius * 0.22),
       radius * 0.82,
