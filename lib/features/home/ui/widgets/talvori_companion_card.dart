@@ -81,11 +81,17 @@ class TalvoriCompanionCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final bubbleWidth = constraints.maxWidth.clamp(160.0, 260.0);
-          final bubbleLeft = (constraints.maxWidth - bubbleWidth)
-              .clamp(0.0, 18.0)
+          final bubbleLeft = (effectiveMascotSize * 0.58).clamp(
+            20.0,
+            (constraints.maxWidth - bubbleWidth).clamp(20.0, 112.0),
+          );
+          final bubbleBottom = (effectiveMascotSize * 0.98).clamp(
+            effectiveMascotSize + 8.0,
+            effectiveMascotSize + 24.0,
+          );
+          final topInset = (bubbleVisible ? 152.0 : 0.0)
+              .clamp(0.0, bubbleVisible ? 170.0 : 0.0)
               .toDouble();
-          final bubbleBottom = effectiveMascotSize * 0.78;
-          final topInset = bubbleVisible ? 122.0 : 0.0;
 
           return SizedBox(
             key: const Key('talvori-companion-card'),

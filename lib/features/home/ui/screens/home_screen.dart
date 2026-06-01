@@ -410,8 +410,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         companionState.inputVisible || companionState.isThinking;
     final chatClusterBottom = keyboardInset > 0
         ? keyboardInset + 2.0
-        : mediaQuery.padding.bottom + 96.0;
-    final chatCompanionMascotSize = mediaQuery.size.width < 380 ? 104.0 : 116.0;
+        : mediaQuery.padding.bottom + 150.0;
+    final chatCompanionMascotSize = mediaQuery.size.width < 380 ? 112.0 : 124.0;
     final chatCompanionWidth = _safeClampDouble(
       mediaQuery.size.width - 32,
       280.0,
@@ -585,8 +585,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           companionDisplayName:
                                               companionDisplayName,
                                           mascotStyle: mascotStyle,
-                                          showCompanion:
-                                              showCompanion && !chatOverlayOpen,
+                                          showCompanion: showCompanion,
+                                          companionVisible: !chatOverlayOpen,
                                           showHomeChatHint: showHomeChatHint,
                                           onGlobeTap: _openWorldRegion,
                                           onCompanionTap: _toggleCompanion,
@@ -624,8 +624,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           if (chatOverlayOpen)
-            Positioned(
+            AnimatedPositioned(
               key: const Key('talvori-companion-chat-cluster'),
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
               left: 0,
               right: 0,
               bottom: chatClusterBottom,
@@ -686,6 +688,7 @@ class _HomeWorldHero extends StatelessWidget {
     required this.companionDisplayName,
     required this.mascotStyle,
     required this.showCompanion,
+    required this.companionVisible,
     required this.showHomeChatHint,
     required this.onGlobeTap,
     required this.onCompanionTap,
@@ -700,6 +703,7 @@ class _HomeWorldHero extends StatelessWidget {
   final String companionDisplayName;
   final TalvoriMascotStyle mascotStyle;
   final bool showCompanion;
+  final bool companionVisible;
   final bool showHomeChatHint;
   final VoidCallback onGlobeTap;
   final VoidCallback onCompanionTap;
@@ -719,8 +723,8 @@ class _HomeWorldHero extends StatelessWidget {
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
     final companionSize = companionState.isExpanded
-        ? (compact ? 96.0 : 118.0)
-        : (compact ? 72.0 : 84.0);
+        ? (compact ? 104.0 : 124.0)
+        : (compact ? 82.0 : 96.0);
     final companionWidth = companionState.isExpanded
         ? (compact ? 336.0 : 460.0)
         : companionSize + 10;
@@ -778,63 +782,70 @@ class _HomeWorldHero extends StatelessWidget {
               ),
             ),
           ),
-          if (showCompanion) SizedBox(height: compact ? 10 : 54),
+          if (showCompanion) SizedBox(height: compact ? 4 : 20),
           if (showCompanion)
             SizedBox(
               height: companionState.isExpanded
-                  ? (compact ? 238 : 264)
-                  : (compact ? 52 : 60),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: companionWidth,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: onCompanionBubbleTap,
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: TalvoriCompanionCard(
-                        mascotMood: companionState.mascotMood,
-                        emotion: companionState.emotion,
-                        title: companionDisplayName,
-                        message: _companionMessage(companionState.message),
-                        bubbleVisible: companionState.bubbleVisible,
-                        isExpanded: companionState.isExpanded,
-                        inputVisible: companionState.inputVisible,
-                        isThinking: companionState.isThinking,
-                        showChatHint:
-                            showHomeChatHint && companionState.bubbleVisible,
-                        mascotStyle: mascotStyle,
-                        mascotSize: companionSize,
-                        compactMascotScale: 0.68,
-                        messageMaxLines: compact ? 2 : 3,
-                        quickActions: [
-                          TalvoriCompanionQuickAction(
-                            key: const Key('home-companion-sentence-sparks'),
-                            label: 'Satzfunken',
-                            icon: Icons.auto_awesome_rounded,
-                            onTap: onSentenceSparksTap,
+                  ? (compact ? 250 : 276)
+                  : (compact ? 62 : 72),
+              child: companionVisible
+                  ? Align(
+                      alignment: Alignment.topLeft,
+                      child: SizedBox(
+                        width: companionWidth,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: onCompanionBubbleTap,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: TalvoriCompanionCard(
+                              mascotMood: companionState.mascotMood,
+                              emotion: companionState.emotion,
+                              title: companionDisplayName,
+                              message: _companionMessage(
+                                companionState.message,
+                              ),
+                              bubbleVisible: companionState.bubbleVisible,
+                              isExpanded: companionState.isExpanded,
+                              inputVisible: companionState.inputVisible,
+                              isThinking: companionState.isThinking,
+                              showChatHint:
+                                  showHomeChatHint &&
+                                  companionState.bubbleVisible,
+                              mascotStyle: mascotStyle,
+                              mascotSize: companionSize,
+                              compactMascotScale: 0.68,
+                              messageMaxLines: compact ? 2 : 3,
+                              quickActions: [
+                                TalvoriCompanionQuickAction(
+                                  key: const Key(
+                                    'home-companion-sentence-sparks',
+                                  ),
+                                  label: 'Satzfunken',
+                                  icon: Icons.auto_awesome_rounded,
+                                  onTap: onSentenceSparksTap,
+                                ),
+                                TalvoriCompanionQuickAction(
+                                  key: const Key('home-companion-learn'),
+                                  label: 'Lernen',
+                                  icon: Icons.psychology_rounded,
+                                  onTap: onLearnTap,
+                                ),
+                                TalvoriCompanionQuickAction(
+                                  key: const Key('home-companion-world'),
+                                  label: 'Welt',
+                                  icon: Icons.public_rounded,
+                                  onTap: onGlobeTap,
+                                ),
+                              ],
+                              onMascotTap: onCompanionTap,
+                              onBubbleTap: onCompanionBubbleTap,
+                            ),
                           ),
-                          TalvoriCompanionQuickAction(
-                            key: const Key('home-companion-learn'),
-                            label: 'Lernen',
-                            icon: Icons.psychology_rounded,
-                            onTap: onLearnTap,
-                          ),
-                          TalvoriCompanionQuickAction(
-                            key: const Key('home-companion-world'),
-                            label: 'Welt',
-                            icon: Icons.public_rounded,
-                            onTap: onGlobeTap,
-                          ),
-                        ],
-                        onMascotTap: onCompanionTap,
-                        onBubbleTap: onCompanionBubbleTap,
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              ),
+                    )
+                  : const SizedBox.shrink(),
             )
           else
             SizedBox(height: globeGap),
