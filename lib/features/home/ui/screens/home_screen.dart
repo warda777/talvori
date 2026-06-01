@@ -17,7 +17,6 @@ import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
-import 'package:talvori/features/words/ui/screens/local_word_list_screen.dart';
 
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/home/application/application.dart';
@@ -105,20 +104,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : text.split('\n').length.clamp(1, 5).toInt();
     if (nextLineCount == _companionInputLineCount) return;
     setState(() => _companionInputLineCount = nextLineCount);
-  }
-
-  Future<void> _openMyWordsList() async {
-    final nav = Navigator.of(context);
-    await nav.push(
-      MaterialPageRoute(
-        settings: const RouteSettings(name: 'local-vocabs-my_words'),
-        builder: (_) => const LocalWordListScreen(
-          categoryId: localMyWordsCategoryId,
-          title: localMyWordsCategoryLabel,
-        ),
-      ),
-    );
-    if (!mounted) return;
   }
 
   void _restartCompanionRestTimer() {
@@ -359,6 +344,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return wc.onChromeButtonTap(context, ref);
   }
 
+  void _openSentenceSparks() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: 'sentence-sparks-course'),
+        builder: (_) => const CourseScreen(),
+      ),
+    );
+  }
+
   // GlobalKey für Progress Pill (für Flug-Animation)
   final GlobalKey _progressPillKey = GlobalKey();
   final GlobalKey _counterKey =
@@ -453,7 +447,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         builder: (context, viewport) {
                           final compactHome = viewport.maxHeight < 760;
                           final showCompanion =
-                              viewport.maxHeight >= 820 || chatOverlayOpen;
+                              viewport.maxHeight >= 640 || chatOverlayOpen;
                           final disableHomeScroll = viewport.maxHeight >= 820;
                           final companionLeft = _safeClampDouble(
                             viewport.maxWidth * 0.08,
@@ -480,8 +474,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               companionEffectiveMascotSize +
                               18.0;
                           final companionTopBase = companionState.isExpanded
-                              ? viewport.maxHeight * 0.68
-                              : viewport.maxHeight * 0.72;
+                              ? viewport.maxHeight * 0.43
+                              : viewport.maxHeight * 0.51;
                           final companionTop = _safeClampDouble(
                             companionTopBase,
                             12.0,
@@ -565,7 +559,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           onGlobeTap: _openWorldRegion,
                                           onLearnTap: _showLearningSourcesPopup,
                                           onImportTap: _openExternalWordImport,
-                                          onWordsTap: _openMyWordsList,
+                                          onSentenceSparksTap:
+                                              _openSentenceSparks,
+                                          onGamesTap: () =>
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const VocabScreen(),
+                                                ),
+                                              ),
                                         ),
                                       ),
                                       const SizedBox(height: 96),
@@ -709,7 +711,8 @@ class _HomeWorldHero extends StatelessWidget {
     required this.onGlobeTap,
     required this.onLearnTap,
     required this.onImportTap,
-    required this.onWordsTap,
+    required this.onSentenceSparksTap,
+    required this.onGamesTap,
   });
 
   final int wordCount;
@@ -717,7 +720,8 @@ class _HomeWorldHero extends StatelessWidget {
   final VoidCallback onGlobeTap;
   final VoidCallback onLearnTap;
   final VoidCallback onImportTap;
-  final VoidCallback onWordsTap;
+  final VoidCallback onSentenceSparksTap;
+  final VoidCallback onGamesTap;
 
   static const _cyan = Color(0xFF5DDCFF);
   static const _violet = Color(0xFFB36BFF);
@@ -725,11 +729,47 @@ class _HomeWorldHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final globeSize = compact ? 210.0 : 286.0;
-    final haloSize = compact ? 228.0 : 306.0;
-    final actionHeight = compact ? 64.0 : 68.0;
-    final topGap = compact ? 6.0 : 8.0;
-    final globeGap = compact ? 10.0 : 16.0;
+    final globeSize = compact ? 250.0 : 350.0;
+    final haloSize = compact ? 274.0 : 382.0;
+    final topGap = compact ? 4.0 : 6.0;
+    final globeGap = compact ? 8.0 : 12.0;
+    final actions = [
+      HomeOrbitAction(
+        key: const Key('home-world-open-action'),
+        icon: Icons.public_rounded,
+        label: 'Welt öffnen',
+        subtitle: 'Betritt deine Startregion.',
+        onTap: onGlobeTap,
+      ),
+      HomeOrbitAction(
+        key: const Key('home-my-words-play-button'),
+        icon: Icons.psychology_rounded,
+        label: 'Lernen',
+        subtitle: 'Übe Wörter und bereite Weltfortschritt vor.',
+        onTap: onLearnTap,
+      ),
+      HomeOrbitAction(
+        key: const Key('home-browser-return-button'),
+        icon: Icons.travel_explore_rounded,
+        label: 'Wörter sammeln',
+        subtitle: 'Importiere Wörter aus der echten Welt.',
+        onTap: onImportTap,
+      ),
+      HomeOrbitAction(
+        key: const Key('home-sentence-sparks-button'),
+        icon: Icons.auto_awesome_rounded,
+        label: 'Satzfunken',
+        subtitle: 'Öffnet Tagesimpuls und Kontext-Sätze.',
+        onTap: onSentenceSparksTap,
+      ),
+      HomeOrbitAction(
+        key: const Key('home-word-games-action'),
+        icon: Icons.sports_esports_rounded,
+        label: 'Wortspiele',
+        subtitle: 'Starte kurze Challenges.',
+        onTap: onGamesTap,
+      ),
+    ];
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 430),
@@ -738,7 +778,7 @@ class _HomeWorldHero extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Talvori-Welt-Zentrale',
+            'Deine Welt wartet.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: _cyan,
@@ -748,9 +788,9 @@ class _HomeWorldHero extends StatelessWidget {
           ),
           SizedBox(height: topGap),
           Text(
-            'Meine Wörter bauen eine Welt.',
+            'Meine Wörter bauen eine Welt',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w900,
               letterSpacing: 0,
@@ -759,11 +799,11 @@ class _HomeWorldHero extends StatelessWidget {
           ),
           SizedBox(height: topGap),
           Text(
-            'Sammle Wörter aus der echten Welt. Lerne sie im Kontext.',
+            '${_compactWordCount(wordCount)} Wörter · Talvori-Welt-Zentrale',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.68),
-              height: 1.28,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.52),
+              height: 1.18,
             ),
           ),
           SizedBox(height: globeGap),
@@ -823,65 +863,8 @@ class _HomeWorldHero extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: compact ? 8 : 12),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _WorldStatusPill(
-                icon: Icons.auto_stories_rounded,
-                label: 'Wörter',
-                value: _compactWordCount(wordCount),
-                onTap: onWordsTap,
-                key: const Key('home-my-words-counter-button'),
-              ),
-              const _WorldStatusPill(
-                icon: Icons.landscape_rounded,
-                label: 'Startregion',
-                value: 'Prototyp',
-              ),
-              const _WorldStatusPill(
-                icon: Icons.bolt_rounded,
-                label: 'Rohstoffe',
-                value: 'bald',
-              ),
-            ],
-          ),
-          SizedBox(height: compact ? 10 : 14),
-          Row(
-            children: [
-              Expanded(
-                child: _WorldHeroAction(
-                  height: actionHeight,
-                  actionKey: const Key('home-my-words-play-button'),
-                  icon: Icons.psychology_rounded,
-                  label: 'Lernen',
-                  subtitle: 'Wörter werden später Rohstoffe',
-                  onTap: onLearnTap,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _WorldHeroAction(
-                  height: actionHeight,
-                  icon: Icons.public_rounded,
-                  label: 'Region',
-                  subtitle: 'Startregion ansehen',
-                  onTap: onGlobeTap,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: compact ? 8 : 10),
-          _WorldHeroAction(
-            height: actionHeight,
-            actionKey: const Key('home-browser-return-button'),
-            icon: Icons.travel_explore_rounded,
-            label: 'Wörter aus der Welt sammeln',
-            subtitle: 'Browser öffnen und echte Wörter importieren',
-            onTap: onImportTap,
-          ),
+          SizedBox(height: compact ? 12 : 16),
+          HomeOrbitActionSelector(actions: actions, compact: compact),
         ],
       ),
     );
@@ -891,147 +874,6 @@ class _HomeWorldHero extends StatelessWidget {
     if (count >= 100000) return '${count ~/ 1000}k';
     if (count >= 10000) return '${count ~/ 1000}k';
     return '$count';
-  }
-}
-
-class _WorldStatusPill extends StatelessWidget {
-  const _WorldStatusPill({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final VoidCallback? onTap;
-
-  static const _cyan = Color(0xFF5DDCFF);
-
-  @override
-  Widget build(BuildContext context) {
-    final child = Container(
-      constraints: const BoxConstraints(minHeight: 34),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: const Color(0xFF07101A).withValues(alpha: 0.82),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: _cyan.withValues(alpha: 0.24)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: _cyan),
-          const SizedBox(width: 6),
-          Text(
-            '$label: ',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.62),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (onTap == null) return child;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: child,
-    );
-  }
-}
-
-class _WorldHeroAction extends StatelessWidget {
-  const _WorldHeroAction({
-    required this.height,
-    this.actionKey,
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final double height;
-  final Key? actionKey;
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  static const _violet = Color(0xFFB36BFF);
-
-  @override
-  Widget build(BuildContext context) {
-    final compact = height < 66;
-    return GestureDetector(
-      key: actionKey,
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        height: height,
-        padding: EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: compact ? 8 : 10,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF07101A).withValues(alpha: 0.84),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _violet.withValues(alpha: 0.22)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 22),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: compact ? 1 : 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.58),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10.5,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

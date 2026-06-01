@@ -82,19 +82,28 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide * 0.36;
-    final glowRadius = radius * (1.55 + pulse * 0.08);
+    final radius = size.shortestSide * 0.39;
+    final glowRadius = radius * (1.62 + pulse * 0.1);
     final sphereRect = Rect.fromCircle(center: center, radius: radius);
 
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          _cyan.withValues(alpha: 0.24 + pulse * 0.08),
-          _violet.withValues(alpha: 0.12),
+          _cyan.withValues(alpha: 0.26 + pulse * 0.1),
+          _violet.withValues(alpha: 0.14),
+          _mint.withValues(alpha: 0.05),
           Colors.transparent,
         ],
+        stops: const [0, 0.42, 0.72, 1],
       ).createShader(Rect.fromCircle(center: center, radius: glowRadius));
     canvas.drawCircle(center, glowRadius, glowPaint);
+
+    final outerAtmospherePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.16
+      ..color = _cyan.withValues(alpha: 0.05 + pulse * 0.03)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+    canvas.drawCircle(center, radius * 1.03, outerAtmospherePaint);
 
     final orbitPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -134,7 +143,7 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
     final longitudePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8
-      ..color = _cyan.withValues(alpha: 0.22);
+      ..color = _cyan.withValues(alpha: 0.13);
     for (final offset in const [-0.55, -0.25, 0.0, 0.25, 0.55]) {
       final shifted =
           math.sin((rotation + offset) * math.pi * 2) * radius * 0.2;
@@ -162,16 +171,21 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
 
     final landPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = _mint.withValues(alpha: 0.58);
+      ..color = _mint.withValues(alpha: 0.62);
     final shadowLandPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = _violet.withValues(alpha: 0.28);
+      ..color = _violet.withValues(alpha: 0.3);
+    final coastPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = _cyan.withValues(alpha: 0.18);
     final xShift = math.sin(rotation * math.pi * 2) * radius * 0.32;
     _drawLandMass(
       canvas,
       center + Offset(-radius * 0.38 + xShift, -radius * 0.2),
       radius,
       landPaint,
+      coastPaint: coastPaint,
       scale: 0.72,
     );
     _drawLandMass(
@@ -179,15 +193,58 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       center + Offset(radius * 0.36 + xShift * 0.7, radius * 0.18),
       radius,
       shadowLandPaint,
+      coastPaint: coastPaint,
       scale: 0.56,
     );
     _drawLandMass(
       canvas,
       center + Offset(-radius * 0.05 - xShift * 0.55, radius * 0.42),
       radius,
-      landPaint..color = _cyan.withValues(alpha: 0.34),
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = _cyan.withValues(alpha: 0.36),
+      coastPaint: coastPaint,
       scale: 0.36,
     );
+
+    _drawCloudBand(
+      canvas,
+      center,
+      radius,
+      rotation,
+      yOffset: -0.3,
+      widthFactor: 1.55,
+    );
+    _drawCloudBand(
+      canvas,
+      center,
+      radius,
+      rotation + 0.38,
+      yOffset: 0.18,
+      widthFactor: 1.35,
+    );
+
+    final cityPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = const Color(0xFFFFF3B0).withValues(alpha: 0.74 + pulse * 0.12);
+    for (final marker in const [
+      Offset(-0.34, -0.12),
+      Offset(-0.2, -0.26),
+      Offset(0.16, 0.12),
+      Offset(0.42, 0.26),
+      Offset(-0.06, 0.46),
+    ]) {
+      final drift = math.sin((rotation + marker.dx) * math.pi * 2) * 0.035;
+      final pos = center + Offset(marker.dx + drift, marker.dy) * radius;
+      canvas.drawCircle(pos, radius * 0.018, cityPaint);
+      canvas.drawCircle(
+        pos,
+        radius * 0.034,
+        Paint()
+          ..style = PaintingStyle.fill
+          ..color = cityPaint.color.withValues(alpha: 0.14),
+      );
+    }
 
     canvas.restore();
 
@@ -236,6 +293,7 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
     Offset anchor,
     double radius,
     Paint paint, {
+    Paint? coastPaint,
     required double scale,
   }) {
     final path = Path()
@@ -269,6 +327,45 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       )
       ..close();
     canvas.drawPath(path, paint);
+    if (coastPaint != null) {
+      canvas.drawPath(path, coastPaint);
+    }
+  }
+
+  void _drawCloudBand(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    double phase, {
+    required double yOffset,
+    required double widthFactor,
+  }) {
+    final cloudPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.035
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.white.withValues(alpha: 0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2);
+    final path = Path();
+    final start = -radius * widthFactor * 0.52;
+    final end = radius * widthFactor * 0.52;
+    final drift = math.sin(phase * math.pi * 2) * radius * 0.22;
+    path.moveTo(center.dx + start + drift, center.dy + yOffset * radius);
+    for (var i = 0; i < 4; i++) {
+      final x1 = center.dx + start + (end - start) * (i + 0.25) / 4 + drift;
+      final x2 = center.dx + start + (end - start) * (i + 0.5) / 4 + drift;
+      final x3 = center.dx + start + (end - start) * (i + 0.75) / 4 + drift;
+      final wave = (i.isEven ? -0.035 : 0.035) * radius;
+      path.cubicTo(
+        x1,
+        center.dy + yOffset * radius + wave,
+        x2,
+        center.dy + yOffset * radius - wave,
+        x3,
+        center.dy + yOffset * radius,
+      );
+    }
+    canvas.drawPath(path, cloudPaint);
   }
 
   @override

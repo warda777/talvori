@@ -6,6 +6,7 @@ export 'glow_sweep_ring.dart';
 export 'glow_switch.dart';
 export 'health_pulse_bg.dart';
 export 'home_silhouette_bg.dart';
+export 'home_orbit_action_selector.dart';
 export 'progress_pill.dart';
 export 'settings_button.dart';
 export 'settings_footer_card.dart';

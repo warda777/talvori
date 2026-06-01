@@ -20,6 +20,7 @@ import 'package:talvori/features/impuls_postfach/models/impulse_message.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/home/ui/screens/boss_fight_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/context_challenge_game_screen.dart';
+import 'package:talvori/features/home/ui/screens/course_screen.dart';
 import 'package:talvori/features/home/ui/screens/daily_word_quest_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/gap_word_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/hangman_game_screen.dart';
@@ -112,12 +113,15 @@ void main() {
     FlutterError.onError = previousOnError;
 
     expect(bottomOverflows, isEmpty);
-    final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
-    expect(counterFinder, findsOneWidget);
     expect(find.byKey(const Key('talvori-world-home-hero')), findsOneWidget);
     expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
-    expect(find.text('Talvori-Welt-Zentrale'), findsOneWidget);
-    expect(find.text('Meine Wörter bauen eine Welt.'), findsOneWidget);
+    expect(find.byKey(const Key('home-orbit-action-selector')), findsOneWidget);
+    expect(
+      find.byKey(const Key('home-sentence-sparks-button')),
+      findsOneWidget,
+    );
+    expect(find.text('Deine Welt wartet.'), findsOneWidget);
+    expect(find.text('Meine Wörter bauen eine Welt'), findsOneWidget);
     expect(find.byType(WordCard), findsNothing);
     expect(find.byType(Switch), findsNothing);
     final globeRect = tester.getRect(
@@ -594,8 +598,8 @@ void main() {
           .height,
       lessThan(70),
     );
-    final compactCounterRect = tester.getRect(
-      find.byKey(const Key('home-my-words-counter-button')),
+    final compactGlobeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
     );
 
     await tester.pump(const Duration(seconds: 3));
@@ -610,11 +614,11 @@ void main() {
       (mascotImage.image as AssetImage).assetName,
       TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
     );
-    final activeCounterRect = tester.getRect(
-      find.byKey(const Key('home-my-words-counter-button')),
+    final activeGlobeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
     );
-    expect(activeCounterRect.top, compactCounterRect.top);
-    expect(activeCounterRect.left, compactCounterRect.left);
+    expect(activeGlobeRect.top, compactGlobeRect.top);
+    expect(activeGlobeRect.left, compactGlobeRect.left);
 
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
@@ -754,7 +758,7 @@ void main() {
     expect(find.text('Noch keine Chats'), findsOneWidget);
   });
 
-  testWidgets('home counter opens Vocabs directly', (tester) async {
+  testWidgets('home words dock opens category popup', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -773,28 +777,23 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
-    final beforeTapRect = tester.getRect(counterFinder);
-
-    await tester.tap(counterFinder);
-    await tester.pump(const Duration(milliseconds: 100));
-    final duringTapRect = tester.getRect(counterFinder);
-    expect(duringTapRect.center.dx, beforeTapRect.center.dx);
-    await tester.pump(const Duration(milliseconds: 260));
-    await tester.pump(const Duration(milliseconds: 400));
+    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onWords();
+    await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
-    expect(find.byType(LocalWordListScreen), findsOneWidget);
+    expect(find.byType(LocalWordListScreen), findsNothing);
     expect(find.byType(LocalLearningSourceDetailScreen), findsNothing);
     expect(find.byType(LocalLearningSourcesScreen), findsNothing);
-    expect(find.text('Wortquellen'), findsNothing);
-    expect(find.text('Meine Wörter'), findsWidgets);
+    expect(find.text('Kategorie'), findsOneWidget);
+    expect(
+      find.byKey(const Key('category-popup-my-words-tile')),
+      findsOneWidget,
+    );
     expect(find.text('All words'), findsNothing);
     expect(find.text('My words'), findsNothing);
     expect(find.text('Favorites'), findsNothing);
     expect(find.text('Words I know'), findsNothing);
     expect(find.text('My mix'), findsNothing);
-    expect(observer.pushedRouteNames, contains('local-vocabs-my_words'));
     expect(
       observer.pushedRouteNames,
       isNot(contains('local-source-detail-my_words')),
@@ -802,11 +801,6 @@ void main() {
     expect(
       observer.pushedRouteNames,
       isNot(contains(LocalLearningSourcesScreen.routeName)),
-    );
-
-    expect(
-      observer.pushedRouteNames.whereType<String>().last,
-      'local-vocabs-my_words',
     );
   });
 
@@ -853,6 +847,27 @@ void main() {
     expect(find.text('Favorites'), findsNothing);
     expect(find.text('Words I know'), findsNothing);
     expect(find.text('My mix'), findsNothing);
+  });
+
+  testWidgets('home sentence sparks opens Tagesimpuls area', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('home-sentence-sparks-button')));
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump();
+
+    expect(find.byType(CourseScreen), findsOneWidget);
+    expect(find.textContaining('Tagesimpuls'), findsWidgets);
   });
 
   testWidgets(
