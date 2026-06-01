@@ -89,13 +89,10 @@ class CompanionController extends Notifier<CompanionState> {
   }
 
   void openChatInput() {
-    final emotion = _emotionForEvent(TaliEvent.chatOpened);
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
-      mascotMood: TalvoriMascotMood.thinkingChin,
-      emotion: emotion,
       clearErrorMessage: true,
     );
   }

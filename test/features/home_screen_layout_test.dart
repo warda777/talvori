@@ -397,6 +397,10 @@ void main() {
     final focusMascotRect = tester.getRect(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
+    final focusMascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    final focusMascotAsset = (focusMascotImage.image as AssetImage).assetName;
     final initialGlobeHostState = tester.state<State<TalvoriWorldGlobe>>(
       find.byType(TalvoriWorldGlobe),
     );
@@ -454,6 +458,13 @@ void main() {
     expect(
       tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
       focusMascotRect,
+    );
+    final inputVisibleMascotImage = tester.widget<Image>(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    expect(
+      (inputVisibleMascotImage.image as AssetImage).assetName,
+      focusMascotAsset,
     );
     expect(inputVisibleInputRect.top, greaterThan(initialGlobeRect.bottom));
 
@@ -629,6 +640,11 @@ void main() {
       final inputVisibleMascotRect = tester.getRect(
         find.byKey(const Key('talvori-companion-mascot-image')),
       );
+      final inputVisibleMascotImage = tester.widget<Image>(
+        find.byKey(const Key('talvori-companion-mascot-image')),
+      );
+      final inputVisibleMascotAsset =
+          (inputVisibleMascotImage.image as AssetImage).assetName;
       final inputVisibleInputRect = tester.getRect(
         find.byKey(const Key('talvori-companion-chat-input')),
       );
@@ -654,6 +670,13 @@ void main() {
       expect(
         tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
         inputVisibleMascotRect,
+      );
+      final keyboardMascotImage = tester.widget<Image>(
+        find.byKey(const Key('talvori-companion-mascot-image')),
+      );
+      expect(
+        (keyboardMascotImage.image as AssetImage).assetName,
+        inputVisibleMascotAsset,
       );
       expect(keyboardInputRect.top, greaterThanOrEqualTo(0));
       expect(keyboardInputRect.bottom, closeTo(878, 1));
