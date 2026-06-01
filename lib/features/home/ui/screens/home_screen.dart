@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -887,68 +886,56 @@ class _GlobeBackgroundGlowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.shortestSide * 0.44;
-    final rimRect = Rect.fromCircle(center: center, radius: radius);
 
     void drawAura({
       required Offset offset,
-      required double radius,
+      required Size radii,
       required Color color,
       required double alpha,
     }) {
+      final rect = Rect.fromCenter(
+        center: offset,
+        width: radii.width,
+        height: radii.height,
+      );
       final paint = Paint()
         ..shader = RadialGradient(
           colors: [
             color.withValues(alpha: alpha),
-            color.withValues(alpha: alpha * 0.34),
+            color.withValues(alpha: alpha * 0.42),
+            color.withValues(alpha: alpha * 0.12),
             Colors.transparent,
           ],
-          stops: const [0.0, 0.32, 1.0],
-        ).createShader(Rect.fromCircle(center: offset, radius: radius));
-      canvas.drawCircle(offset, radius, paint);
+          stops: const [0.0, 0.36, 0.66, 1.0],
+        ).createShader(rect);
+      canvas.drawOval(rect, paint);
     }
 
     drawAura(
-      offset: center.translate(-radius * 0.52, -radius * 0.02),
-      radius: radius * 0.66,
+      offset: center.translate(-radius * 0.62, -radius * 0.02),
+      radii: Size(radius * 0.82, radius * 1.38),
       color: _blue,
-      alpha: 0.18,
+      alpha: 0.2,
     );
     drawAura(
-      offset: center.translate(radius * 0.54, -radius * 0.01),
-      radius: radius * 0.64,
+      offset: center.translate(radius * 0.62, -radius * 0.01),
+      radii: Size(radius * 0.82, radius * 1.36),
       color: _violet,
-      alpha: 0.17,
+      alpha: 0.19,
     );
 
-    final cyanGlow = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.075
-      ..strokeCap = StrokeCap.round
-      ..color = _cyan.withValues(alpha: 0.34)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawArc(rimRect, math.pi * 0.58, math.pi * 0.9, false, cyanGlow);
-
-    final violetGlow = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.07
-      ..strokeCap = StrokeCap.round
-      ..color = _purple.withValues(alpha: 0.28)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11);
-    canvas.drawArc(rimRect, -math.pi * 0.42, math.pi * 0.84, false, violetGlow);
-
-    final cyanRim = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.018
-      ..strokeCap = StrokeCap.round
-      ..color = _cyan.withValues(alpha: 0.4);
-    canvas.drawArc(rimRect, math.pi * 0.63, math.pi * 0.78, false, cyanRim);
-
-    final violetRim = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.017
-      ..strokeCap = StrokeCap.round
-      ..color = _purple.withValues(alpha: 0.34);
-    canvas.drawArc(rimRect, -math.pi * 0.33, math.pi * 0.66, false, violetRim);
+    drawAura(
+      offset: center.translate(-radius * 0.72, radius * 0.06),
+      radii: Size(radius * 0.36, radius * 0.84),
+      color: _cyan,
+      alpha: 0.23,
+    );
+    drawAura(
+      offset: center.translate(radius * 0.72, radius * 0.04),
+      radii: Size(radius * 0.34, radius * 0.82),
+      color: _purple,
+      alpha: 0.21,
+    );
   }
 
   @override
