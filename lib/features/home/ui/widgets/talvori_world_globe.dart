@@ -26,6 +26,8 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
   static const _nightTexture = AssetImage(
     'packages/flutter_globe_3d/assets/images/earth_night.jpg',
   );
+  static const _premiumEarthShader =
+      'assets/shaders/talvori_premium_earth.frag';
 
   @override
   void initState() {
@@ -110,38 +112,15 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                 Positioned.fill(
                   child: Padding(
                     padding: EdgeInsets.all(widget.size * 0.015),
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.matrix([
-                        0.68,
-                        0.12,
-                        0.03,
-                        0,
-                        -7,
-                        0.1,
-                        0.58,
-                        0.05,
-                        0,
-                        -8,
-                        0.04,
-                        0.12,
-                        0.48,
-                        0,
-                        -16,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                      ]),
-                      child: Earth3D(
-                        controller: _controller,
-                        texture: _dayTexture,
-                        nightTexture: _nightTexture,
-                        initialScale: 3.18,
-                        initialLatitude: 28,
-                        initialLongitude: 18,
-                        size: Size.square(widget.size),
-                      ),
+                    child: Earth3D(
+                      controller: _controller,
+                      shaderAsset: _premiumEarthShader,
+                      texture: _dayTexture,
+                      nightTexture: _nightTexture,
+                      initialScale: 3.18,
+                      initialLatitude: 28,
+                      initialLongitude: 18,
+                      size: Size.square(widget.size),
                     ),
                   ),
                 ),
@@ -254,21 +233,6 @@ class _GlobeAtmospherePainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7.5),
     );
 
-    for (final coastArc in _warmCoastEdgeArcs) {
-      canvas.drawArc(
-        rect.deflate(radius * coastArc.inset),
-        coastArc.start,
-        coastArc.sweep,
-        false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius * coastArc.width
-          ..strokeCap = StrokeCap.round
-          ..color = const Color(0xFFFFC47A).withValues(alpha: coastArc.alpha)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, coastArc.blur),
-      );
-    }
-
     canvas.drawCircle(
       center,
       radius * 1.01,
@@ -371,65 +335,4 @@ const _talvoriConnections = [
   _TalvoriConnection('rio', 'capetown', width: 0.62),
   _TalvoriConnection('lagos', 'capetown'),
   _TalvoriConnection('reykjavik', 'london', color: Color(0x66E8A85F)),
-];
-
-class _WarmCoastEdgeArc {
-  const _WarmCoastEdgeArc({
-    required this.start,
-    required this.sweep,
-    required this.inset,
-    required this.width,
-    required this.alpha,
-    required this.blur,
-  });
-
-  final double start;
-  final double sweep;
-  final double inset;
-  final double width;
-  final double alpha;
-  final double blur;
-}
-
-const _warmCoastEdgeArcs = [
-  _WarmCoastEdgeArc(
-    start: -2.72,
-    sweep: 0.52,
-    inset: 0.3,
-    width: 0.009,
-    alpha: 0.2,
-    blur: 3,
-  ),
-  _WarmCoastEdgeArc(
-    start: -1.92,
-    sweep: 0.64,
-    inset: 0.22,
-    width: 0.01,
-    alpha: 0.22,
-    blur: 4,
-  ),
-  _WarmCoastEdgeArc(
-    start: -0.66,
-    sweep: 0.42,
-    inset: 0.18,
-    width: 0.008,
-    alpha: 0.18,
-    blur: 3,
-  ),
-  _WarmCoastEdgeArc(
-    start: 0.34,
-    sweep: 0.58,
-    inset: 0.25,
-    width: 0.011,
-    alpha: 0.23,
-    blur: 4,
-  ),
-  _WarmCoastEdgeArc(
-    start: 1.58,
-    sweep: 0.5,
-    inset: 0.16,
-    width: 0.008,
-    alpha: 0.17,
-    blur: 3,
-  ),
 ];
