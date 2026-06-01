@@ -394,6 +394,9 @@ void main() {
     final initialHeroRect = tester.getRect(
       find.byKey(const Key('talvori-world-home-hero')),
     );
+    final focusMascotRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-mascot-image')),
+    );
     final initialGlobeHostState = tester.state<State<TalvoriWorldGlobe>>(
       find.byType(TalvoriWorldGlobe),
     );
@@ -444,17 +447,15 @@ void main() {
     final inputVisibleInputRect = tester.getRect(
       find.byKey(const Key('talvori-companion-chat-input')),
     );
-    final inputVisibleChatClusterRect = tester.getRect(
-      find.byKey(const Key('talvori-companion-chat-cluster')),
-    );
     final inputVisibleChatCompanion = tester.widget<TalvoriCompanionCard>(
       find.byType(TalvoriCompanionCard),
     );
-    expect(inputVisibleChatCompanion.messageMaxLines, 6);
+    expect(inputVisibleChatCompanion.inputVisible, isTrue);
     expect(
-      inputVisibleChatClusterRect.bottom,
-      lessThanOrEqualTo(inputVisibleInputRect.top),
+      tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
+      focusMascotRect,
     );
+    expect(inputVisibleInputRect.top, greaterThan(initialGlobeRect.bottom));
 
     await tester.pump(const Duration(seconds: 7));
     await tester.pump();
@@ -625,13 +626,13 @@ void main() {
       final initialHeroRect = tester.getRect(
         find.byKey(const Key('talvori-world-home-hero')),
       );
+      final inputVisibleMascotRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-mascot-image')),
+      );
       final inputVisibleInputRect = tester.getRect(
         find.byKey(const Key('talvori-companion-chat-input')),
       );
-      expect(
-        find.byKey(const Key('talvori-companion-chat-cluster')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
 
       tester.view.viewInsets = const FakeViewPadding(bottom: 320);
       await tester.pump();
@@ -650,16 +651,17 @@ void main() {
         tester.getRect(find.byKey(const Key('talvori-world-home-hero'))),
         initialHeroRect,
       );
+      expect(
+        tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
+        inputVisibleMascotRect,
+      );
       expect(keyboardInputRect.top, greaterThanOrEqualTo(0));
       expect(keyboardInputRect.bottom, closeTo(878, 1));
       expect(keyboardInputRect.bottom, lessThan(inputVisibleInputRect.bottom));
       expect(keyboardInputRect.bottom, lessThanOrEqualTo(880));
       expect(textFieldRect.top, greaterThanOrEqualTo(keyboardInputRect.top));
       expect(textFieldRect.bottom, lessThanOrEqualTo(keyboardInputRect.bottom));
-      expect(
-        find.byKey(const Key('talvori-companion-chat-cluster')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
       final heroContext = tester.element(
         find.byKey(const Key('talvori-world-home-hero')),
       );
