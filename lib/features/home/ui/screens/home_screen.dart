@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +13,7 @@ import 'package:talvori/features/companion/application/companion_discovery_tip_r
 import 'package:talvori/features/companion/domain/companion_ai_context.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_context.dart';
 import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
+import 'package:talvori/features/companion/domain/companion_state.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
@@ -30,7 +30,6 @@ import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provi
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
-import 'package:talvori/features/local_learning_debug/ui/local_debug_hub_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 const _homeSystemUiOverlayStyle = SystemUiOverlayStyle(
@@ -408,9 +407,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       keyboardInset: keyboardInset,
     );
 
+    final homeHubActions = [
+      HomeSmartHubAction(
+        key: const Key('home-world-open-action'),
+        icon: Icons.public_rounded,
+        label: 'Welt öffnen',
+        subtitle: 'Startregion',
+        onTap: _openWorldRegion,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-my-words-play-button'),
+        icon: Icons.psychology_rounded,
+        label: 'Lernen',
+        subtitle: 'Review',
+        onTap: _showLearningSourcesPopup,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-browser-return-button'),
+        icon: Icons.travel_explore_rounded,
+        label: 'Wörter sammeln',
+        subtitle: 'Import',
+        onTap: _openExternalWordImport,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-sentence-sparks-button'),
+        icon: Icons.auto_awesome_rounded,
+        label: 'Satzfunken',
+        subtitle: 'Tagesimpuls',
+        onTap: _openSentenceSparks,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-practice-button'),
+        icon: Icons.sports_esports_rounded,
+        label: 'Wortspiele',
+        subtitle: 'Challenges',
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const VocabScreen())),
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-impuls-postfach-button'),
+        icon: Icons.forum_rounded,
+        label: 'Freunde',
+        subtitle: 'Chat',
+        badgeCount: impulseUnreadCount,
+        onTap: _openImpulseInbox,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-profile-button'),
+        icon: Icons.person_rounded,
+        label: 'Profil',
+        subtitle: 'Du',
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+      ),
+    ];
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _homeSystemUiOverlayStyle,
       child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
         children: [
           Scaffold(
             backgroundColor: HomeTheme.background,
@@ -449,38 +507,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final showCompanion =
                               viewport.maxHeight >= 640 || chatOverlayOpen;
                           final disableHomeScroll = viewport.maxHeight >= 820;
-                          final companionLeft = _safeClampDouble(
-                            viewport.maxWidth * 0.08,
-                            24.0,
-                            40.0,
-                          );
-                          const compactCompanionScale = 0.34;
-                          final companionMascotSize = viewport.maxWidth < 380
-                              ? 150.0
-                              : 164.0;
-                          final compactCompanionMascotSize =
-                              companionMascotSize * compactCompanionScale;
-                          final companionEffectiveMascotSize =
-                              companionState.isExpanded
-                              ? companionMascotSize
-                              : compactCompanionMascotSize;
-                          final companionWidth = _safeClampDouble(
-                            viewport.maxWidth - companionLeft - 16,
-                            280.0,
-                            560.0,
-                          );
-                          final companionHeight =
-                              (companionState.bubbleVisible ? 88.0 : 0.0) +
-                              companionEffectiveMascotSize +
-                              18.0;
-                          final companionTopBase = companionState.isExpanded
-                              ? viewport.maxHeight * 0.43
-                              : viewport.maxHeight * 0.51;
-                          final companionTop = _safeClampDouble(
-                            companionTopBase,
-                            12.0,
-                            viewport.maxHeight - companionHeight - 8,
-                          );
 
                           return Stack(
                             children: [
@@ -556,52 +582,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: _HomeWorldHero(
                                           wordCount: state.myWordsCount,
                                           compact: compactHome,
+                                          companionState: companionState,
+                                          companionDisplayName:
+                                              companionDisplayName,
+                                          mascotStyle: mascotStyle,
+                                          showCompanion:
+                                              showCompanion && !chatOverlayOpen,
+                                          showHomeChatHint: showHomeChatHint,
                                           onGlobeTap: _openWorldRegion,
+                                          onCompanionTap: _toggleCompanion,
+                                          onCompanionBubbleTap:
+                                              _openCompanionChatInput,
                                           onLearnTap: _showLearningSourcesPopup,
-                                          onImportTap: _openExternalWordImport,
                                           onSentenceSparksTap:
                                               _openSentenceSparks,
-                                          onGamesTap: () =>
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const VocabScreen(),
-                                                ),
-                                              ),
                                         ),
                                       ),
-                                      const SizedBox(height: 96),
+                                      const SizedBox(height: 120),
                                     ],
                                   ),
                                 ),
                               ),
-                              if (showCompanion && !chatOverlayOpen)
-                                Positioned(
-                                  top: companionTop,
-                                  left: companionLeft,
-                                  child: SizedBox(
-                                    width: companionWidth,
-                                    child: TalvoriCompanionCard(
-                                      mascotMood: companionState.mascotMood,
-                                      emotion: companionState.emotion,
-                                      title: companionDisplayName,
-                                      message: companionState.message,
-                                      bubbleVisible:
-                                          companionState.bubbleVisible,
-                                      isExpanded: companionState.isExpanded,
-                                      inputVisible: companionState.inputVisible,
-                                      isThinking: companionState.isThinking,
-                                      showChatHint:
-                                          showHomeChatHint &&
-                                          companionState.bubbleVisible,
-                                      mascotStyle: mascotStyle,
-                                      mascotSize: companionMascotSize,
-                                      compactMascotScale: compactCompanionScale,
-                                      onMascotTap: _toggleCompanion,
-                                      onBubbleTap: _openCompanionChatInput,
-                                    ),
-                                  ),
-                                ),
                             ],
                           );
                         },
@@ -611,35 +612,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
-            bottomNavigationBar: SafeArea(
-              child: Padding(
-                padding: HomeTheme.bottomPadding,
-                child: HomeBottomNav(
-                  onImpulseInbox: _openImpulseInbox,
-                  onWords: _showLearningSourcesPopup,
-                  onPractice: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const VocabScreen()),
-                  ),
-                  onProfile: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                  ),
-                  impulseUnreadCount: impulseUnreadCount,
-                  practiceButtonKey:
-                      _practiceButtonKey, // <-- NEU: Practice-Button Key
-                ),
-              ),
-            ),
-            floatingActionButton: kDebugMode
-                ? FloatingActionButton.small(
-                    tooltip: 'Local Learning Debug',
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const LocalDebugHubScreen(),
-                      ),
-                    ),
-                    child: const Icon(Icons.bug_report_outlined),
-                  )
-                : null,
+            floatingActionButton: HomeSmartHubMenu(actions: homeHubActions),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
           ),
           if (companionState.inputVisible)
             Positioned.fill(
@@ -708,20 +683,30 @@ class _HomeWorldHero extends StatelessWidget {
   const _HomeWorldHero({
     required this.wordCount,
     required this.compact,
+    required this.companionState,
+    required this.companionDisplayName,
+    required this.mascotStyle,
+    required this.showCompanion,
+    required this.showHomeChatHint,
     required this.onGlobeTap,
+    required this.onCompanionTap,
+    required this.onCompanionBubbleTap,
     required this.onLearnTap,
-    required this.onImportTap,
     required this.onSentenceSparksTap,
-    required this.onGamesTap,
   });
 
   final int wordCount;
   final bool compact;
+  final CompanionState companionState;
+  final String companionDisplayName;
+  final TalvoriMascotStyle mascotStyle;
+  final bool showCompanion;
+  final bool showHomeChatHint;
   final VoidCallback onGlobeTap;
+  final VoidCallback onCompanionTap;
+  final VoidCallback onCompanionBubbleTap;
   final VoidCallback onLearnTap;
-  final VoidCallback onImportTap;
   final VoidCallback onSentenceSparksTap;
-  final VoidCallback onGamesTap;
 
   static const _cyan = Color(0xFF5DDCFF);
   static const _violet = Color(0xFFB36BFF);
@@ -729,50 +714,19 @@ class _HomeWorldHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final globeSize = compact ? 250.0 : 350.0;
-    final haloSize = compact ? 274.0 : 382.0;
+    final globeSize = compact ? 310.0 : 430.0;
+    final haloSize = compact ? 338.0 : 472.0;
     final topGap = compact ? 4.0 : 6.0;
-    final globeGap = compact ? 8.0 : 12.0;
-    final actions = [
-      HomeOrbitAction(
-        key: const Key('home-world-open-action'),
-        icon: Icons.public_rounded,
-        label: 'Welt öffnen',
-        subtitle: 'Betritt deine Startregion.',
-        onTap: onGlobeTap,
-      ),
-      HomeOrbitAction(
-        key: const Key('home-my-words-play-button'),
-        icon: Icons.psychology_rounded,
-        label: 'Lernen',
-        subtitle: 'Übe Wörter und bereite Weltfortschritt vor.',
-        onTap: onLearnTap,
-      ),
-      HomeOrbitAction(
-        key: const Key('home-browser-return-button'),
-        icon: Icons.travel_explore_rounded,
-        label: 'Wörter sammeln',
-        subtitle: 'Importiere Wörter aus der echten Welt.',
-        onTap: onImportTap,
-      ),
-      HomeOrbitAction(
-        key: const Key('home-sentence-sparks-button'),
-        icon: Icons.auto_awesome_rounded,
-        label: 'Satzfunken',
-        subtitle: 'Öffnet Tagesimpuls und Kontext-Sätze.',
-        onTap: onSentenceSparksTap,
-      ),
-      HomeOrbitAction(
-        key: const Key('home-word-games-action'),
-        icon: Icons.sports_esports_rounded,
-        label: 'Wortspiele',
-        subtitle: 'Starte kurze Challenges.',
-        onTap: onGamesTap,
-      ),
-    ];
+    final globeGap = compact ? 10.0 : 14.0;
+    final companionSize = companionState.isExpanded
+        ? (compact ? 116.0 : 134.0)
+        : (compact ? 86.0 : 96.0);
+    final companionWidth = companionState.isExpanded
+        ? (compact ? 280.0 : 312.0)
+        : companionSize + 10;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 430),
+      constraints: const BoxConstraints(maxWidth: 520),
       child: Column(
         key: const Key('talvori-world-home-hero'),
         mainAxisSize: MainAxisSize.min,
@@ -788,17 +742,6 @@ class _HomeWorldHero extends StatelessWidget {
           ),
           SizedBox(height: topGap),
           Text(
-            'Meine Wörter bauen eine Welt',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
-              height: 1.04,
-            ),
-          ),
-          SizedBox(height: topGap),
-          Text(
             '${_compactWordCount(wordCount)} Wörter · Talvori-Welt-Zentrale',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -809,6 +752,7 @@ class _HomeWorldHero extends StatelessWidget {
           SizedBox(height: globeGap),
           Stack(
             alignment: Alignment.center,
+            clipBehavior: Clip.none,
             children: [
               Container(
                 width: haloSize,
@@ -826,7 +770,7 @@ class _HomeWorldHero extends StatelessWidget {
               ),
               TalvoriWorldGlobe(onTap: onGlobeTap, size: globeSize),
               Positioned(
-                bottom: compact ? 10 : 16,
+                bottom: compact ? 22 : 28,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 13,
@@ -863,11 +807,71 @@ class _HomeWorldHero extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: compact ? 12 : 16),
-          HomeOrbitActionSelector(actions: actions, compact: compact),
+          if (showCompanion)
+            SizedBox(
+              height: companionState.isExpanded
+                  ? (compact ? 206 : 228)
+                  : (compact ? 92 : 104),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: companionWidth,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: TalvoriCompanionCard(
+                      mascotMood: companionState.mascotMood,
+                      emotion: companionState.emotion,
+                      title: companionDisplayName,
+                      message: _companionMessage(companionState.message),
+                      bubbleVisible: companionState.bubbleVisible,
+                      isExpanded: companionState.isExpanded,
+                      inputVisible: companionState.inputVisible,
+                      isThinking: companionState.isThinking,
+                      showChatHint:
+                          showHomeChatHint && companionState.bubbleVisible,
+                      mascotStyle: mascotStyle,
+                      mascotSize: companionSize,
+                      compactMascotScale: 0.68,
+                      messageMaxLines: compact ? 2 : 3,
+                      quickActions: [
+                        TalvoriCompanionQuickAction(
+                          key: const Key('home-companion-sentence-sparks'),
+                          label: 'Satzfunken',
+                          icon: Icons.auto_awesome_rounded,
+                          onTap: onSentenceSparksTap,
+                        ),
+                        TalvoriCompanionQuickAction(
+                          key: const Key('home-companion-learn'),
+                          label: 'Lernen',
+                          icon: Icons.psychology_rounded,
+                          onTap: onLearnTap,
+                        ),
+                        TalvoriCompanionQuickAction(
+                          key: const Key('home-companion-world'),
+                          label: 'Welt',
+                          icon: Icons.public_rounded,
+                          onTap: onGlobeTap,
+                        ),
+                      ],
+                      onMascotTap: onCompanionTap,
+                      onBubbleTap: onCompanionBubbleTap,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          SizedBox(height: compact ? 10 : 12),
         ],
       ),
     );
+  }
+
+  static String _companionMessage(String current) {
+    final trimmed = current.trim();
+    if (trimmed.isEmpty || trimmed == 'Bereit für dein nächstes Wort?') {
+      return 'Wollen wir deine Welt weiterbauen?';
+    }
+    return trimmed;
   }
 
   static String _compactWordCount(int count) {

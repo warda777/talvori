@@ -5,6 +5,20 @@ import 'package:talvori/features/home/ui/widgets/talvori_spirit_mascot.dart';
 
 enum TalvoriCompanionMood { neutral, happy, streak, tired, proud }
 
+class TalvoriCompanionQuickAction {
+  const TalvoriCompanionQuickAction({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.key,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final Key? key;
+}
+
 class TalvoriCompanionCard extends StatelessWidget {
   const TalvoriCompanionCard({
     super.key,
@@ -22,6 +36,7 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.isThinking = false,
     this.showChatHint = false,
     this.messageMaxLines = 3,
+    this.quickActions = const [],
     this.onMascotTap,
     this.onBubbleTap,
   });
@@ -40,6 +55,7 @@ class TalvoriCompanionCard extends StatelessWidget {
   final bool isThinking;
   final bool showChatHint;
   final int messageMaxLines;
+  final List<TalvoriCompanionQuickAction> quickActions;
   final VoidCallback? onMascotTap;
   final VoidCallback? onBubbleTap;
 
@@ -178,43 +194,39 @@ class TalvoriCompanionCard extends StatelessWidget {
                                           ),
                                           const SizedBox(width: 7),
                                         ],
-                                        Tooltip(
-                                          message: 'Chat öffnen',
+                                        InkWell(
                                           key: const Key(
                                             'talvori-companion-chat-icon',
                                           ),
-                                          child: InkWell(
-                                            customBorder: const CircleBorder(),
-                                            onTap: onBubbleTap,
-                                            child: Container(
-                                              width: 30,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: accent.withValues(
-                                                  alpha: 0.16,
-                                                ),
-                                                border: Border.all(
-                                                  color: accent.withValues(
-                                                    alpha: 0.55,
-                                                  ),
-                                                ),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: accent.withValues(
-                                                      alpha: 0.2,
-                                                    ),
-                                                    blurRadius: 12,
-                                                  ),
-                                                ],
+                                          customBorder: const CircleBorder(),
+                                          onTap: onBubbleTap,
+                                          child: Container(
+                                            width: 30,
+                                            height: 30,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: accent.withValues(
+                                                alpha: 0.16,
                                               ),
-                                              child: Icon(
-                                                Icons
-                                                    .chat_bubble_outline_rounded,
-                                                size: 17,
+                                              border: Border.all(
                                                 color: accent.withValues(
-                                                  alpha: 1,
+                                                  alpha: 0.55,
                                                 ),
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: accent.withValues(
+                                                    alpha: 0.2,
+                                                  ),
+                                                  blurRadius: 12,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              Icons.chat_bubble_outline_rounded,
+                                              size: 17,
+                                              color: accent.withValues(
+                                                alpha: 1,
                                               ),
                                             ),
                                           ),
@@ -237,6 +249,20 @@ class TalvoriCompanionCard extends StatelessWidget {
                                       letterSpacing: 0,
                                     ),
                               ),
+                              if (quickActions.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    for (final action in quickActions)
+                                      _CompanionQuickActionChip(
+                                        action: action,
+                                        accent: accent,
+                                      ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -269,6 +295,49 @@ class TalvoriCompanionCard extends StatelessWidget {
       TalvoriCompanionMood.tired => TalvoriMascotMood.tired,
       TalvoriCompanionMood.proud => TalvoriMascotMood.proud,
     };
+  }
+}
+
+class _CompanionQuickActionChip extends StatelessWidget {
+  const _CompanionQuickActionChip({required this.action, required this.accent});
+
+  final TalvoriCompanionQuickAction action;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: action.key,
+      borderRadius: BorderRadius.circular(999),
+      onTap: action.onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: accent.withValues(alpha: 0.28)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (action.icon != null) ...[
+              Icon(action.icon, size: 13, color: accent),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              action.label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0,
+                height: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

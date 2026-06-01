@@ -32,13 +32,19 @@ Elemente:
   - Ressourcen-Kurzstand
   - Companion-Zustand
   - Weltfortschritt
-- Bottom Dock:
+- Zentraler Smart-Hub statt dauerhaftem Bottom Dock:
   - Lernen
-  - Woerter
+  - Woerter / Import
   - Spiele
   - Welt
-  - Profil/Settings
+  - Satzfunken / Tagesimpuls
+  - Profil/Freunde, wenn sinnvoll
 - Companion sichtbar, aber nicht dominant ueber dem Globe
+
+Designentscheidung:
+
+- Die Home-Zentrale nutzt vorerst einen zentralen Smart-Hub statt eines
+  permanenten Bottom-Docks, damit der Globus der visuelle Hero bleibt.
 
 Nicht-Ziele:
 

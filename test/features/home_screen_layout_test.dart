@@ -33,7 +33,6 @@ import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
-import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/home/ui/widgets/talvori_companion_card.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
@@ -64,6 +63,15 @@ void main() {
       createdAt: now,
       updatedAt: now,
     );
+  }
+
+  Future<void> openHomeHub(WidgetTester tester) async {
+    await tester.tap(
+      find.byKey(const Key('home-smart-hub-button')),
+      warnIfMissed: false,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
   }
 
   setUpAll(() async {
@@ -115,13 +123,8 @@ void main() {
     expect(bottomOverflows, isEmpty);
     expect(find.byKey(const Key('talvori-world-home-hero')), findsOneWidget);
     expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
-    expect(find.byKey(const Key('home-orbit-action-selector')), findsOneWidget);
-    expect(
-      find.byKey(const Key('home-sentence-sparks-button')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('home-smart-hub-button')), findsOneWidget);
     expect(find.text('Deine Welt wartet.'), findsOneWidget);
-    expect(find.text('Meine Wörter bauen eine Welt'), findsOneWidget);
     expect(find.byType(WordCard), findsNothing);
     expect(find.byType(Switch), findsNothing);
     final globeRect = tester.getRect(
@@ -130,8 +133,9 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
     await tester.pump();
     expect(globeRect.width, greaterThan(180));
+    await openHomeHub(tester);
     expect(find.text('Wortspiele'), findsOneWidget);
-    expect(find.text('Wörter'), findsWidgets);
+    expect(find.text('Wörter sammeln'), findsOneWidget);
     expect(
       find.byKey(const Key('home-impuls-postfach-button')),
       findsOneWidget,
@@ -210,7 +214,7 @@ void main() {
 
     expect(find.byKey(const Key('talvori-companion-card')), findsOneWidget);
     expect(find.text('Tali'), findsOneWidget);
-    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
     final mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -350,12 +354,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(
-      find.byKey(const Key('talvori-companion-chat-icon')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
     await tester.pump();
 
     expect(
@@ -450,7 +451,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
     await tester.pump();
     expect(
       find.byKey(const Key('talvori-companion-chat-input')),
@@ -491,7 +492,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
     await tester.pump();
     expect(
       find.byKey(const Key('talvori-companion-chat-input')),
@@ -531,7 +532,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+      await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
       await tester.pump();
       expect(
         find.byKey(const Key('talvori-companion-chat-input')),
@@ -579,12 +580,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
 
-    expect(find.text('Bereit für dein nächstes Wort?'), findsNothing);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsNothing);
     var mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -606,7 +607,7 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
 
-    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
     mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -623,12 +624,12 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
 
-    expect(find.text('Bereit für dein nächstes Wort?'), findsOneWidget);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
 
-    expect(find.text('Bereit für dein nächstes Wort?'), findsNothing);
+    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsNothing);
     mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -707,6 +708,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     expect(
       find.byKey(const Key('home-impuls-postfach-button')),
       findsOneWidget,
@@ -750,7 +752,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onImpulseInbox();
+    await openHomeHub(tester);
+    await tester.tap(find.byKey(const Key('home-impuls-postfach-button')));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -758,7 +761,7 @@ void main() {
     expect(find.text('Noch keine Chats'), findsOneWidget);
   });
 
-  testWidgets('home words dock opens category popup', (tester) async {
+  testWidgets('home hub learning opens category popup', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -777,7 +780,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    tester.widget<HomeBottomNav>(find.byType(HomeBottomNav)).onWords();
+    await openHomeHub(tester);
+    await tester.tap(find.byKey(const Key('home-my-words-play-button')));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -817,6 +821,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     await tester.tap(find.byKey(const Key('home-my-words-play-button')));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
@@ -862,6 +867,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     await tester.tap(find.byKey(const Key('home-sentence-sparks-button')));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
@@ -894,6 +900,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
+      await openHomeHub(tester);
       await tester.tap(find.byKey(const Key('home-browser-return-button')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
@@ -935,13 +942,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.scrollUntilVisible(
-      browserButton,
-      120,
-      scrollable: find.byType(Scrollable),
-    );
-    await tester.pump();
     await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -989,9 +991,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.ensureVisible(browserButton);
-    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -1055,11 +1056,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.ensureVisible(browserButton);
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
-    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -1100,11 +1098,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.ensureVisible(browserButton);
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
-    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -1152,6 +1147,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     await tester.tap(find.byKey(const Key('home-browser-return-button')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -1202,11 +1198,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.ensureVisible(browserButton);
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
-    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -1268,7 +1261,7 @@ void main() {
     expect(find.byType(LocalKnownReviewScreen), findsOneWidget);
   });
 
-  testWidgets('bottom word games button opens word games directly', (
+  testWidgets('home hub word games button opens word games directly', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -1283,6 +1276,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await openHomeHub(tester);
     expect(find.text('Wortspiele'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('home-practice-button')));

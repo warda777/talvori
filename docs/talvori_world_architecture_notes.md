@@ -32,14 +32,20 @@ Moegliche Dateien:
 - `world_home_screen.dart`
 - `talvori_world_globe.dart`
 - `home_top_status_bar.dart`
-- `home_bottom_dock.dart`
+- `home_smart_hub_menu.dart`
 
 Aufgabe:
 
 - Talvori-Welt-Zentrale
 - Globe als Hauptaktion
-- Status- und Dock-Navigation
+- Status- und Smart-Hub-Navigation
 - Companion-Entry
+
+Aktuelle Home-Entscheidung:
+
+- Der Smart-Hub ersetzt im ersten Talvori-Welt-Home das permanente Bottom-Dock.
+- Ziel ist ein ruhiger Hero-Screen: ein Planet, ein Companion, ein
+  ausklappbarer Hub.
 
 ### `features/companion`
 

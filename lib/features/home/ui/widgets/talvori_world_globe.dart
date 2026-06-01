@@ -46,19 +46,21 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe>
         key: const Key('talvori-world-globe-button'),
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final t = _controller.value;
-            final pulse = (math.sin(t * math.pi * 2) + 1) / 2;
-            return SizedBox.square(
-              dimension: widget.size,
-              child: CustomPaint(
-                key: const Key('talvori-world-globe'),
-                painter: _TalvoriWorldGlobePainter(rotation: t, pulse: pulse),
-              ),
-            );
-          },
+        child: RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final t = _controller.value;
+              final pulse = (math.sin(t * math.pi * 2) + 1) / 2;
+              return SizedBox.square(
+                dimension: widget.size,
+                child: CustomPaint(
+                  key: const Key('talvori-world-globe'),
+                  painter: _TalvoriWorldGlobePainter(rotation: t, pulse: pulse),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -78,20 +80,23 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
   static const _violet = Color(0xFFB36BFF);
   static const _mint = Color(0xFF9FF7D5);
   static const _deep = Color(0xFF081321);
+  static const _gold = Color(0xFFFFC96B);
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide * 0.39;
-    final glowRadius = radius * (1.62 + pulse * 0.1);
+    final radius = size.shortestSide * 0.405;
+    final glowRadius = radius * (1.72 + pulse * 0.1);
     final sphereRect = Rect.fromCircle(center: center, radius: radius);
+
+    _drawSpace(canvas, size, center, radius);
 
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          _cyan.withValues(alpha: 0.26 + pulse * 0.1),
-          _violet.withValues(alpha: 0.14),
-          _mint.withValues(alpha: 0.05),
+          _cyan.withValues(alpha: 0.34 + pulse * 0.1),
+          _violet.withValues(alpha: 0.18),
+          _mint.withValues(alpha: 0.08),
           Colors.transparent,
         ],
         stops: const [0, 0.42, 0.72, 1],
@@ -100,15 +105,29 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
 
     final outerAtmospherePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.16
-      ..color = _cyan.withValues(alpha: 0.05 + pulse * 0.03)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+      ..strokeWidth = radius * 0.22
+      ..color = _cyan.withValues(alpha: 0.06 + pulse * 0.035)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
     canvas.drawCircle(center, radius * 1.03, outerAtmospherePaint);
+
+    final sunCenter = center + Offset(-radius * 1.15, -radius * 0.62);
+    canvas.drawCircle(
+      sunCenter,
+      radius * 0.42,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.4),
+            _gold.withValues(alpha: 0.22),
+            Colors.transparent,
+          ],
+        ).createShader(Rect.fromCircle(center: sunCenter, radius: radius)),
+    );
 
     final orbitPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = _cyan.withValues(alpha: 0.22 + pulse * 0.12);
+      ..strokeWidth = 1
+      ..color = _cyan.withValues(alpha: 0.12 + pulse * 0.06);
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(-0.42);
@@ -123,16 +142,16 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
     canvas.restore();
 
     final spherePaint = Paint()
-      ..shader = const RadialGradient(
+      ..shader = RadialGradient(
         center: Alignment(-0.42, -0.54),
-        radius: 1.05,
+        radius: 1.08,
         colors: [
-          Color(0xFF153D55),
-          Color(0xFF0B2036),
+          const Color(0xFF185A72),
+          const Color(0xFF0B2945),
           _deep,
-          Color(0xFF030712),
+          const Color(0xFF02050E),
         ],
-        stops: [0, 0.42, 0.76, 1],
+        stops: const [0, 0.38, 0.74, 1],
       ).createShader(sphereRect);
     canvas.drawCircle(center, radius, spherePaint);
 
@@ -143,7 +162,7 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
     final longitudePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8
-      ..color = _cyan.withValues(alpha: 0.13);
+      ..color = _cyan.withValues(alpha: 0.055);
     for (final offset in const [-0.55, -0.25, 0.0, 0.25, 0.55]) {
       final shifted =
           math.sin((rotation + offset) * math.pi * 2) * radius * 0.2;
@@ -171,14 +190,14 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
 
     final landPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = _mint.withValues(alpha: 0.62);
+      ..color = const Color(0xFF72D8A3).withValues(alpha: 0.58);
     final shadowLandPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = _violet.withValues(alpha: 0.3);
+      ..color = const Color(0xFF776CFF).withValues(alpha: 0.22);
     final coastPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = _cyan.withValues(alpha: 0.18);
+      ..strokeWidth = 1.5
+      ..color = _cyan.withValues(alpha: 0.28);
     final xShift = math.sin(rotation * math.pi * 2) * radius * 0.32;
     _drawLandMass(
       canvas,
@@ -207,6 +226,7 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       scale: 0.36,
     );
 
+    _drawNetworkArcs(canvas, center, radius, rotation, pulse);
     _drawCloudBand(
       canvas,
       center,
@@ -233,6 +253,8 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       Offset(0.16, 0.12),
       Offset(0.42, 0.26),
       Offset(-0.06, 0.46),
+      Offset(0.04, -0.44),
+      Offset(0.31, -0.19),
     ]) {
       final drift = math.sin((rotation + marker.dx) * math.pi * 2) * 0.035;
       final pos = center + Offset(marker.dx + drift, marker.dy) * radius;
@@ -246,17 +268,32 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       );
     }
 
+    final terminatorPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.transparent,
+          Colors.black.withValues(alpha: 0.08),
+          Colors.black.withValues(alpha: 0.46),
+        ],
+        stops: const [0, 0.48, 1],
+      ).createShader(sphereRect);
+    canvas.drawCircle(center, radius, terminatorPaint);
+
     canvas.restore();
 
     final rimPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
+      ..strokeWidth = 3.4
       ..shader = SweepGradient(
         colors: [
-          _cyan.withValues(alpha: 0.2),
-          _mint.withValues(alpha: 0.82),
+          _cyan.withValues(alpha: 0.22),
+          Colors.white.withValues(alpha: 0.88),
+          _mint.withValues(alpha: 0.84),
+          _gold.withValues(alpha: 0.42),
           _violet.withValues(alpha: 0.64),
-          _cyan.withValues(alpha: 0.2),
+          _cyan.withValues(alpha: 0.22),
         ],
         transform: GradientRotation(rotation * math.pi * 2),
       ).createShader(sphereRect);
@@ -285,6 +322,93 @@ class _TalvoriWorldGlobePainter extends CustomPainter {
       final pos =
           center + Offset(math.cos(angle), math.sin(angle)) * sparkRadius;
       canvas.drawCircle(pos, i.isEven ? 1.7 : 1.1, sparkPaint);
+    }
+  }
+
+  void _drawSpace(Canvas canvas, Size size, Offset center, double radius) {
+    final bgRect = Offset.zero & size;
+    canvas.drawRect(
+      bgRect,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0.18, -0.2),
+          radius: 0.95,
+          colors: [
+            _cyan.withValues(alpha: 0.1),
+            _violet.withValues(alpha: 0.05),
+            Colors.transparent,
+          ],
+        ).createShader(bgRect),
+    );
+    final starPaint = Paint()..color = Colors.white.withValues(alpha: 0.45);
+    for (var i = 0; i < 18; i++) {
+      final angle = (i * 137.5 + rotation * 18) * math.pi / 180;
+      final distance = radius * (1.12 + (i % 5) * 0.15);
+      final pos = center + Offset(math.cos(angle), math.sin(angle)) * distance;
+      if (pos.dx < 0 ||
+          pos.dx > size.width ||
+          pos.dy < 0 ||
+          pos.dy > size.height) {
+        continue;
+      }
+      final alpha = 0.16 + ((i % 4) * 0.06) + pulse * 0.06;
+      canvas.drawCircle(
+        pos,
+        i % 3 == 0 ? 1.6 : 1.0,
+        starPaint..color = Colors.white.withValues(alpha: alpha),
+      );
+    }
+  }
+
+  void _drawNetworkArcs(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    double phase,
+    double pulse,
+  ) {
+    final points = <Offset>[
+      center + Offset(-0.42, -0.12) * radius,
+      center + Offset(-0.18, -0.32) * radius,
+      center + Offset(0.1, -0.2) * radius,
+      center + Offset(0.36, 0.1) * radius,
+      center + Offset(0.12, 0.38) * radius,
+      center + Offset(-0.22, 0.28) * radius,
+    ];
+    final arcPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.05
+      ..strokeCap = StrokeCap.round
+      ..color = _gold.withValues(alpha: 0.28 + pulse * 0.08);
+    for (var i = 0; i < points.length; i++) {
+      final start = points[i];
+      final end = points[(i + 2) % points.length];
+      final control =
+          center +
+          Offset(
+                math.sin(phase * math.pi * 2 + i) * 0.28,
+                math.cos(phase * math.pi * 2 + i * 0.7) * 0.18,
+              ) *
+              radius;
+      final path = Path()
+        ..moveTo(start.dx, start.dy)
+        ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
+      canvas.drawPath(path, arcPaint);
+    }
+
+    for (final point in points) {
+      canvas.drawCircle(
+        point,
+        radius * 0.022,
+        Paint()..color = Colors.white.withValues(alpha: 0.72),
+      );
+      canvas.drawCircle(
+        point,
+        radius * 0.048,
+        Paint()
+          ..color = _cyan.withValues(alpha: 0.13)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
     }
   }
 

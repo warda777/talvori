@@ -53,6 +53,8 @@ Core direction:
 - The old Play button must no longer be the main action.
 - A large rotating/pulsing globe becomes the central action.
 - Tapping the globe should later lead to a region/city/world prototype.
+- The Home-Zentrale currently uses one central Smart-Hub button instead of a
+  permanent Bottom Dock so the globe stays the visual hero.
 - Tali or Vori is the selected active Companion, not two permanent parallel
   systems.
 - Companion tap flow: small avatar -> focus/bubble -> Companion chat sheet.
@@ -100,7 +102,8 @@ Core direction:
 - Build the Talvori-Welt-Zentrale.
 - Add rotating/pulsing globe as main action.
 - Keep top status where useful.
-- Add bottom dock for Learn, Words, Games, World, Profile/Settings as needed.
+- Use one central Smart-Hub for Learn, Words/Import, Games, World,
+  Satzfunken/Tagesimpuls and Profile/Friends as needed.
 - Add selected Companion states and tap flow.
 
 ### Phase 2: Local World Entry
