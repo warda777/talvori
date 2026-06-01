@@ -733,10 +733,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
     final effectiveMascotSize = companionState.isExpanded
         ? mascotSize
         : mascotSize * compactMascotScale;
-    final cardHeight =
-        (companionState.bubbleVisible ? 152.0 : 0.0) +
-        effectiveMascotSize +
-        18.0;
+    final cardHeight = effectiveMascotSize;
     final anchorBottom = _safeClampDouble(
       viewportHeight * (compact ? 0.72 : 0.74),
       compact ? 500.0 : 620.0,
@@ -774,6 +771,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
               mascotStyle: mascotStyle,
               mascotSize: mascotSize,
               compactMascotScale: compactMascotScale,
+              bubblePlacement: TalvoriCompanionBubblePlacement.belowMascot,
               messageMaxLines: compact ? 2 : 3,
               quickActions: [
                 TalvoriCompanionQuickAction(

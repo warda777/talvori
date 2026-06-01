@@ -391,6 +391,14 @@ void main() {
     final initialGlobeRect = tester.getRect(
       find.byKey(const Key('talvori-world-globe-button')),
     );
+    final initialBubbleRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-bubble')),
+    );
+    final initialChatIconRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-chat-icon')),
+    );
+    expect(initialBubbleRect.overlaps(initialGlobeRect), isFalse);
+    expect(initialChatIconRect.overlaps(initialGlobeRect), isFalse);
     final initialHeroRect = tester.getRect(
       find.byKey(const Key('talvori-world-home-hero')),
     );

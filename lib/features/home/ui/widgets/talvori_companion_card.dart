@@ -5,6 +5,8 @@ import 'package:talvori/features/home/ui/widgets/talvori_spirit_mascot.dart';
 
 enum TalvoriCompanionMood { neutral, happy, streak, tired, proud }
 
+enum TalvoriCompanionBubblePlacement { aboveMascot, belowMascot }
+
 class TalvoriCompanionQuickAction {
   const TalvoriCompanionQuickAction({
     required this.label,
@@ -37,6 +39,7 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.showChatHint = false,
     this.messageMaxLines = 3,
     this.quickActions = const [],
+    this.bubblePlacement = TalvoriCompanionBubblePlacement.aboveMascot,
     this.onMascotTap,
     this.onBubbleTap,
   });
@@ -56,6 +59,7 @@ class TalvoriCompanionCard extends StatelessWidget {
   final bool showChatHint;
   final int messageMaxLines;
   final List<TalvoriCompanionQuickAction> quickActions;
+  final TalvoriCompanionBubblePlacement bubblePlacement;
   final VoidCallback? onMascotTap;
   final VoidCallback? onBubbleTap;
 
@@ -92,17 +96,24 @@ class TalvoriCompanionCard extends StatelessWidget {
           final topInset = (bubbleVisible ? 152.0 : 0.0)
               .clamp(0.0, bubbleVisible ? 170.0 : 0.0)
               .toDouble();
+          final bubbleBelowMascot =
+              bubblePlacement == TalvoriCompanionBubblePlacement.belowMascot;
+          final bubbleGap = bubbleBelowMascot ? 10.0 : 0.0;
+          final cardHeight = bubbleBelowMascot
+              ? effectiveMascotSize + bubbleGap + topInset + 18.0
+              : topInset + effectiveMascotSize + 18.0;
 
           return SizedBox(
             key: const Key('talvori-companion-card'),
             width: double.infinity,
-            height: topInset + effectiveMascotSize + 18,
+            height: cardHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Positioned(
                   left: 0,
-                  bottom: 0,
+                  top: bubbleBelowMascot ? 0 : null,
+                  bottom: bubbleBelowMascot ? null : 0,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: onMascotTap,
@@ -126,7 +137,10 @@ class TalvoriCompanionCard extends StatelessWidget {
                 if (bubbleVisible)
                   Positioned(
                     left: bubbleLeft,
-                    bottom: bubbleBottom,
+                    top: bubbleBelowMascot
+                        ? effectiveMascotSize + bubbleGap
+                        : null,
+                    bottom: bubbleBelowMascot ? null : bubbleBottom,
                     child: SizedBox(
                       width: bubbleWidth,
                       child: GestureDetector(
