@@ -66,9 +66,15 @@ void main() {
   }
 
   Future<void> openHomeHub(WidgetTester tester) async {
-    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
-    await tester.tapAt(Offset(size.width / 2, size.height - 99));
+    await tester.tap(find.byKey(const Key('home-smart-hub-button')));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+  }
+
+  Future<void> tapOpenWheelAction(WidgetTester tester, Key actionKey) async {
+    final action = find.byKey(actionKey);
+    expect(action, findsOneWidget);
+    await tester.tap(action, warnIfMissed: false);
     await tester.pump();
   }
 
@@ -131,10 +137,7 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
     await tester.pump();
     expect(globeRect.width, greaterThan(180));
-    expect(
-      find.byKey(const Key('home-impuls-postfach-button')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('home-impuls-postfach-button')), findsNothing);
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
     expect(find.text('Impuls-Vorschau'), findsNothing);
@@ -658,7 +661,8 @@ void main() {
     expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
 
     expect(find.byType(WorldRegionScreen), findsOneWidget);
     expect(find.text('Talvori Welt'), findsOneWidget);
@@ -748,7 +752,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    await tester.tap(find.byKey(const Key('home-impuls-postfach-button')));
+    await tapOpenWheelAction(tester, const Key('home-impuls-postfach-button'));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -776,7 +780,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    await tester.tap(find.byKey(const Key('home-my-words-play-button')));
+    await tapOpenWheelAction(tester, const Key('home-my-words-play-button'));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -817,7 +821,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    await tester.tap(find.byKey(const Key('home-my-words-play-button')));
+    await tapOpenWheelAction(tester, const Key('home-my-words-play-button'));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -863,7 +867,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    await tester.tap(find.byKey(const Key('home-sentence-sparks-button')));
+    await tapOpenWheelAction(tester, const Key('home-sentence-sparks-button'));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
 
@@ -896,7 +900,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       await openHomeHub(tester);
-      await tester.tap(find.byKey(const Key('home-browser-return-button')));
+      await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -938,8 +942,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.tap(browserButton);
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-set-start-url')));
@@ -987,8 +990,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.tap(browserButton);
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-set-start-url')));
@@ -1052,8 +1054,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.tap(browserButton);
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-option-system')));
@@ -1094,8 +1095,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.tap(browserButton);
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-option-brave')));
@@ -1143,7 +1143,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-option-chrome')));
@@ -1194,8 +1194,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final browserButton = find.byKey(const Key('home-browser-return-button'));
-    await tester.tap(browserButton);
+    await tapOpenWheelAction(tester, const Key('home-browser-return-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -1211,7 +1210,7 @@ void main() {
     expect(overflows, isEmpty);
   });
 
-  testWidgets('home top right button opens progress hub', (tester) async {
+  testWidgets('home wheel progress button opens progress hub', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -1224,8 +1223,17 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-progress-hub-button')));
-    await tester.pumpAndSettle();
+    await openHomeHub(tester);
+    final hubCenter = tester.getCenter(
+      find.byKey(const Key('home-smart-hub-button')),
+    );
+    await tester.dragFrom(
+      hubCenter + const Offset(0, -100),
+      const Offset(-300, 0),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tapOpenWheelAction(tester, const Key('home-progress-hub-button'));
+    await tester.pump(const Duration(milliseconds: 1000));
 
     expect(find.byType(RewardsCenterScreen), findsOneWidget);
     expect(find.text('Fortschritt'), findsOneWidget);
@@ -1234,7 +1242,7 @@ void main() {
     expect(find.text('Statistik'), findsOneWidget);
   });
 
-  testWidgets('home top left V button opens local known review screen', (
+  testWidgets('home wheel world hub button opens local known review screen', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -1249,7 +1257,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-known-review-button')));
+    await openHomeHub(tester);
+    final hubCenter = tester.getCenter(
+      find.byKey(const Key('home-smart-hub-button')),
+    );
+    await tester.dragFrom(
+      hubCenter + const Offset(0, -100),
+      const Offset(-300, 0),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tapOpenWheelAction(tester, const Key('home-known-review-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
@@ -1274,7 +1291,7 @@ void main() {
     await openHomeHub(tester);
     expect(find.byKey(const Key('home-practice-button')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('home-practice-button')));
+    await tapOpenWheelAction(tester, const Key('home-practice-button'));
     await tester.pumpAndSettle();
 
     expect(find.byType(VocabScreen), findsOneWidget);

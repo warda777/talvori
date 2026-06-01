@@ -1,39 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
-import 'package:talvori/features/home/ui/widgets/animated_fireball_icon.dart';
-import 'package:talvori/features/home/ui/widgets/top_left_button.dart';
-import 'package:talvori/features/home/application/application.dart';
-import 'progress_pill.dart';
-import 'package:talvori/features/home/ui/widgets/glitch_disappear_effect.dart';
-import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
-import 'package:talvori/features/words/ui/screens/local_known_review_screen.dart';
+import 'package:talvori/features/home/ui/widgets/glitch_disappear_effect.dart';
+import 'package:talvori/features/home/ui/widgets/progress_pill.dart';
+import 'package:talvori/features/home/ui/widgets/tap_flash.dart';
 
-class HomeTopBar extends ConsumerStatefulWidget {
-  final VoidCallback onAllWords;
-  final VoidCallback
-  onRewards; // bleibt für Kompatibilität, wird für Tap genutzt
-  final VoidCallback? onProgressTap;
-  final int selected;
-  final int max;
-  final bool showProgress;
-  final GlobalKey?
-  progressPillKey; // GlobalKey für Progress Pill (für Flug-Animation)
-  final GlobalKey?
-  counterKey; // <-- NEU: GlobalKey für Counter in Progress Pill
-  final GlobalKey? crownButtonKey; // GlobalKey für Crown Button
-  final GlobalKey<FireballBounceAnimationState>?
-  fireballKey; // GlobalKey für Fireball Bounce Animation
-  final GlobalKey buttonKey; // GlobalKey für den rechten Button
-  final VoidCallback?
-  onProgressAnimationStart; // Callback wenn Animation startet
-  final VoidCallback?
-  onProgressAnimationComplete; // Callback wenn Animation fertig ist
-
+class HomeTopBar extends StatefulWidget {
   const HomeTopBar({
     super.key,
     required this.onAllWords,
@@ -44,635 +16,88 @@ class HomeTopBar extends ConsumerStatefulWidget {
     this.max = 5,
     this.showProgress = true,
     this.progressPillKey,
-    this.counterKey, // <-- NEU: Counter Key
+    this.counterKey,
     this.crownButtonKey,
     this.fireballKey,
     this.onProgressAnimationStart,
     this.onProgressAnimationComplete,
   });
 
+  final VoidCallback onAllWords;
+  final VoidCallback onRewards;
+  final VoidCallback? onProgressTap;
+  final int selected;
+  final int max;
+  final bool showProgress;
+  final GlobalKey? progressPillKey;
+  final GlobalKey? counterKey;
+  final GlobalKey? crownButtonKey;
+  final GlobalKey<FireballBounceAnimationState>? fireballKey;
+  final GlobalKey buttonKey;
+  final VoidCallback? onProgressAnimationStart;
+  final VoidCallback? onProgressAnimationComplete;
+
   @override
-  ConsumerState<HomeTopBar> createState() => _HomeTopBarState();
+  State<HomeTopBar> createState() => _HomeTopBarState();
 }
 
-class _HomeTopBarState extends ConsumerState<HomeTopBar> {
-  // Größen / Layout
-  static const double _dim = 52.0; // Durchmesser deiner Topbar-Buttons
-  static const double _quickBtnSize =
-      52.0; // Größe der Quick-Select-Buttons (gleich wie Fireball-Button)
-  static const double _gap = 16.0; // Abstand zwischen Krone und Quick-Buttons
-  static const Color gold = Color(0xFF5DDCFF);
+class _HomeTopBarState extends State<HomeTopBar> {
+  bool _glitchEffectActive = false;
 
-  final GlobalKey _crownKey = GlobalKey();
-  final GlobalKey<_TapFlashWithoutGestureState> _tapFlashKey = GlobalKey();
-  OverlayEntry? _rewardsOverlay;
-  bool _quickOpen = false;
-  bool _glitchEffectActive = false; // Verfolgt ob Glitch-Effekt aktiv ist
-  final AnimatedFireballIconController _fireballIconController =
-      AnimatedFireballIconController();
-
-  void _showRewardsQuick(BuildContext context) {
-    debugPrint('🔥 _showRewardsQuick aufgerufen!');
-    if (_quickOpen) {
-      debugPrint('🔥 _quickOpen ist bereits true, überspringe');
-      return;
-    }
-    _fireballIconController.play();
-    final overlay = Overlay.of(context);
-
-    // Verwende entweder widget.crownButtonKey oder _crownKey
-    final keyToUse = widget.crownButtonKey ?? _crownKey;
-    final rb = keyToUse.currentContext?.findRenderObject() as RenderBox?;
-    if (rb == null) {
-      debugPrint('🔥 RenderBox ist null - Key nicht gefunden');
-      return;
-    }
-    debugPrint('🔥 RenderBox gefunden: ${rb.size}');
-
-    final crownTopLeft = rb.localToGlobal(Offset.zero);
-    final crownSize = rb.size;
-    final screenW = MediaQuery.of(context).size.width;
-
-    _quickOpen = true;
-    HapticFeedback.mediumImpact();
-
-    _rewardsOverlay = OverlayEntry(
-      builder: (ctx) {
-        // Basis-Positionen
-        double redLeft =
-            crownTopLeft.dx - _gap - _quickBtnSize; // Leaderboard (rot) links
-        double blueLeft =
-            crownTopLeft.dx + crownSize.width + _gap; // Stats (blau) rechts
-        final top = crownTopLeft.dy + (crownSize.height - _quickBtnSize) / 2;
-
-        // Sichtbarkeits-Checks
-        final roomRightForBlue = blueLeft + _quickBtnSize <= screenW - 8;
-        final roomLeftForRed = redLeft >= 8;
-
-        if (!roomRightForBlue && roomLeftForRed) {
-          // Kein Platz rechts -> beide auf die linke Seite
-          blueLeft = crownTopLeft.dx - (_gap * 2) - (_quickBtnSize * 2);
-        } else if (!roomLeftForRed && roomRightForBlue) {
-          // Kein Platz links -> beide auf die rechte Seite
-          redLeft = crownTopLeft.dx + crownSize.width + _gap;
-          blueLeft = redLeft + _gap + _quickBtnSize;
-        } else if (!roomLeftForRed && !roomRightForBlue) {
-          // Extrem eng (sehr kleiner Screen) -> packe Buttons rechts an den Rand
-          redLeft = screenW - _quickBtnSize - 8 - _gap - _quickBtnSize;
-          blueLeft = screenW - _quickBtnSize - 8;
-        }
-
-        return Stack(
-          children: [
-            // Tap-Outside: schließt & aktiviert ProgressPill wieder
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _hideRewardsQuick,
-                child: const SizedBox.expand(),
-              ),
-            ),
-
-            // Leaderboard (Rot)
-            Positioned(
-              left: redLeft,
-              top: top,
-              child: _quickBtn(
-                color: const Color(0xFFFE9393),
-                icon: Icons.emoji_events_rounded,
-                onTap: () {
-                  _hideRewardsQuick();
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const RewardsCenterScreen(
-                        initialTab: RewardsTab.leaderboard,
-                      ),
-                      transitionsBuilder: (_, a, __, child) =>
-                          FadeTransition(opacity: a, child: child),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Stats (Blau)
-            Positioned(
-              left: blueLeft,
-              top: top,
-              child: _quickBtn(
-                color: const Color(0xFFB0CCFE),
-                icon: Icons.bar_chart_rounded,
-                onTap: () {
-                  _hideRewardsQuick();
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const RewardsCenterScreen(
-                        initialTab: RewardsTab.stats,
-                      ),
-                      transitionsBuilder: (_, a, __, child) =>
-                          FadeTransition(opacity: a, child: child),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
+  Widget _buildProgressPill() {
+    final useKey = !_glitchEffectActive;
+    final pill = ProgressPill(
+      key: useKey ? widget.progressPillKey : null,
+      counterKey: useKey ? widget.counterKey : null,
+      selected: widget.selected,
+      max: widget.max,
+      barWidth: 120,
+      onAnimationStart: widget.onProgressAnimationStart,
+      onAnimationComplete: () {
+        widget.onProgressAnimationComplete?.call();
+        if (widget.selected < widget.max || !mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() => _glitchEffectActive = true);
+        });
       },
     );
 
-    overlay.insert(_rewardsOverlay!);
-    setState(() {}); // ProgressPill ausblenden
-  }
-
-  void _hideRewardsQuick() {
-    _rewardsOverlay?.remove();
-    _rewardsOverlay = null;
-    _quickOpen = false;
-    setState(() {}); // Progressbar einblenden
-  }
-
-  // Baut die Progress Pill mit optionalem Glitch-Effekt
-  Widget _buildProgressPillWithGlitch() {
-    // Wenn Glitch-Effekt aktiv, verwende keinen Key (wird mehrfach gerendert)
-    final useKey = !_glitchEffectActive;
-
-    final progressPill = (widget.onProgressTap == null)
-        ? ProgressPill(
-            key: useKey ? widget.progressPillKey : null,
-            counterKey: useKey ? widget.counterKey : null,
-            selected: widget.selected,
-            max: widget.max,
-            barWidth: 120,
-            onAnimationStart: widget.onProgressAnimationStart,
-            onAnimationComplete: () {
-              debugPrint(
-                '📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})',
-              );
-              widget.onProgressAnimationComplete?.call();
-              // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
-              if (widget.selected >= widget.max) {
-                debugPrint(
-                  '🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback',
-                );
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    debugPrint(
-                      '🚀 PROGRESS-PILL: Setze _glitchEffectActive = true',
-                    );
-                    setState(() {
-                      _glitchEffectActive = true;
-                    });
-                  } else {
-                    debugPrint(
-                      '⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten',
-                    );
-                  }
-                });
-              } else {
-                debugPrint(
-                  'ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt',
-                );
-              }
-            },
-          )
+    final tappablePill = widget.onProgressTap == null
+        ? pill
         : TapFlash(
-            color: gold,
+            color: const Color(0xFFFFC96B),
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(20),
-            maxOpacity: 0.72,
-            blur: 36,
-            spread: -2,
+            maxOpacity: 0.56,
+            blur: 30,
+            spread: -4,
             duration: const Duration(milliseconds: 220),
             onTapAfter: widget.onProgressTap,
-            child: ProgressPill(
-              key: useKey ? widget.progressPillKey : null,
-              counterKey: useKey ? widget.counterKey : null,
-              selected: widget.selected,
-              max: widget.max,
-              barWidth: 120,
-              onAnimationStart: widget.onProgressAnimationStart,
-              onAnimationComplete: () {
-                debugPrint(
-                  '📊 PROGRESS-PILL: onAnimationComplete aufgerufen (selected: ${widget.selected}, max: ${widget.max})',
-                );
-                widget.onProgressAnimationComplete?.call();
-                // Wenn Animation fertig und count >= max, starte Glitch-Effekt verzögert
-                if (widget.selected >= widget.max) {
-                  debugPrint(
-                    '🎯 PROGRESS-PILL: selected >= max, starte Glitch-Effekt in PostFrameCallback',
-                  );
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      debugPrint(
-                        '🚀 PROGRESS-PILL: Setze _glitchEffectActive = true',
-                      );
-                      setState(() {
-                        _glitchEffectActive = true;
-                      });
-                    } else {
-                      debugPrint(
-                        '⚠️ PROGRESS-PILL: Widget nicht mehr mounted, kann Glitch-Effekt nicht starten',
-                      );
-                    }
-                  });
-                } else {
-                  debugPrint(
-                    'ℹ️ PROGRESS-PILL: selected (${widget.selected}) < max (${widget.max}), kein Glitch-Effekt',
-                  );
-                }
-              },
-            ),
+            child: pill,
           );
 
-    // Wenn Glitch-Effekt aktiv, wrappe die Pill mit dem Effekt
-    if (_glitchEffectActive) {
-      debugPrint(
-        '🔥 GLITCH-EFFEKT: Starte Glitch-Effekt für Pill (selected: ${widget.selected}, max: ${widget.max})',
-      );
-      return GlitchDisappearEffect(
-        duration: const Duration(milliseconds: 800),
-        onComplete: () {
-          debugPrint(
-            '🏁 GLITCH-EFFEKT: Glitch-Effekt abgeschlossen, Pill wird ausgeblendet',
-          );
-          setState(() {
-            _glitchEffectActive = false;
-          });
-        },
-        child: progressPill,
-      );
-    }
+    if (!_glitchEffectActive) return tappablePill;
 
-    return progressPill;
-  }
-
-  // runder Quick-Select-Button
-  Widget _quickBtn({
-    required Color color,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: _quickBtnSize,
-        height: _quickBtnSize,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          shape: BoxShape.circle,
-          border: Border.all(color: color, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: color, size: 24),
-      ),
+    return GlitchDisappearEffect(
+      duration: const Duration(milliseconds: 800),
+      onComplete: () {
+        if (!mounted) return;
+        setState(() => _glitchEffectActive = false);
+      },
+      child: tappablePill,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final glowEnabled = ref.watch(
-      homeControllerProvider.select((s) => s.glowEnabled),
-    );
-    const buttonColor = Color(0xFF07101A);
-    const gold = Color(0xFFB36BFF);
-
     return SizedBox(
-      height: _dim,
-      child: Row(
-        children: [
-          // ───────── links: V-Button (rund) ─────────
-          TopLeftButton(
-            key: const Key('home-known-review-button'),
-            size: _dim,
-            onTap: () {
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const LocalKnownReviewScreen(),
-                  transitionsBuilder: (_, animation, __, child) =>
-                      FadeTransition(opacity: animation, child: child),
-                ),
-              );
-            },
-            icon: SvgPicture.asset(
-              'assets/icons/v.svg',
-              width: _dim * 0.55,
-              height: _dim * 0.55,
-              colorFilter: ColorFilter.mode(
-                TopLeftButton.gold,
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
-
-          // ───────── Mitte: Progress-Pill (blendet aus, wenn Quick-Select offen) ─────────
-          Expanded(
-            child: Center(
-              child: (widget.showProgress || _glitchEffectActive)
-                  ? AnimatedOpacity(
-                      duration: const Duration(milliseconds: 120),
-                      opacity: _quickOpen ? 0.0 : 1.0,
-                      child: IgnorePointer(
-                        ignoring: _quickOpen || _glitchEffectActive,
-                        child: _buildProgressPillWithGlitch(),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ),
-
-          // ───────── rechts: Krone (Tap = wie bisher, Long-Press = Quick-Select, SwipeDown = Fireball) ─────────
-          Align(
-            alignment: Alignment.topRight,
-            child: _RightButtonWithDragAndLongPress(
-              key: const Key('home-progress-hub-button'),
-              onLongPress: () {
-                _fireballIconController.play();
-                _showRewardsQuick(context);
-              },
-              onDragDown: () {
-                _fireballIconController.play();
-                widget.fireballKey?.currentState?.triggerFromAnchor();
-              },
-              child: SizedBox.square(
-                dimension: _dim,
-                child: _TapFlashWithoutGesture(
-                  key: _tapFlashKey,
-                  color: gold,
-                  shape: BoxShape.circle,
-                  maxOpacity: 0.72,
-                  blur: 36,
-                  spread: -2,
-                  duration: const Duration(milliseconds: 220),
-                  onTapAfter: () {
-                    // Trigger Flash-Effekt
-                    final flashState = _tapFlashKey.currentState;
-                    flashState?.triggerFlash();
-                    _fireballIconController.play();
-                    // Kurzer Tap: wie bisher (Standard-Rewards öffnen)
-                    HapticFeedback.selectionClick();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (_, __, ___) =>
-                            const RewardsCenterScreen(),
-                        transitionsBuilder: (_, a, __, child) =>
-                            FadeTransition(opacity: a, child: child),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    key: widget.crownButtonKey ?? widget.buttonKey,
-                    decoration: BoxDecoration(
-                      color: buttonColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: gold, width: 2),
-                      boxShadow: glowEnabled
-                          ? [
-                              BoxShadow(
-                                color: gold.withValues(alpha: 0.3),
-                                blurRadius: 38,
-                                spreadRadius: -2,
-                              ),
-                              BoxShadow(
-                                color: gold.withValues(alpha: 0.12),
-                                blurRadius: 68,
-                                spreadRadius: -8,
-                              ),
-                              BoxShadow(
-                                color: gold.withValues(alpha: 0.05),
-                                blurRadius: 88,
-                                spreadRadius: -14,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Builder(
-                      builder: (context) {
-                        final fireballState = widget.fireballKey?.currentState;
-                        if (fireballState != null) {
-                          return ValueListenableBuilder<bool>(
-                            valueListenable: fireballState.animatingNotifier,
-                            builder: (context, isAnimating, child) {
-                              // Button ausblenden, wenn Animation läuft
-                              return Opacity(
-                                opacity: isAnimating ? 0.0 : 1.0,
-                                child: Icon(
-                                  Icons.insights_rounded,
-                                  color: gold,
-                                  size: 30,
-                                ),
-                              );
-                            },
-                          );
-                        }
-                        // Fallback: Button normal anzeigen wenn fireballKey noch nicht verfügbar
-                        return Icon(
-                          Icons.insights_rounded,
-                          color: gold,
-                          size: 30,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _rewardsOverlay?.remove();
-    _rewardsOverlay = null;
-    _quickOpen = false;
-    super.dispose();
-  }
-}
-
-/// Button mit Drag-Down und Long-Press Support
-class _RightButtonWithDragAndLongPress extends StatefulWidget {
-  const _RightButtonWithDragAndLongPress({
-    super.key,
-    required this.child,
-    required this.onDragDown,
-    required this.onLongPress,
-  });
-
-  final Widget child;
-  final VoidCallback onDragDown;
-  final VoidCallback onLongPress;
-
-  @override
-  State<_RightButtonWithDragAndLongPress> createState() =>
-      _RightButtonWithDragAndLongPressState();
-}
-
-class _RightButtonWithDragAndLongPressState
-    extends State<_RightButtonWithDragAndLongPress> {
-  bool _longPressActive = false;
-  Offset? _dragStart;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onLongPressStart: (_) {
-        _longPressActive = true;
-        widget.onLongPress(); // 🔔 dein Long-Press bleibt erhalten
-      },
-      onLongPressEnd: (_) {
-        // kleine Entsperr-Verzögerung, damit Drag nicht sofort feuert
-        Future.delayed(const Duration(milliseconds: 150), () {
-          if (mounted) _longPressActive = false;
-        });
-      },
-      onVerticalDragStart: (d) => _dragStart = d.localPosition,
-      onVerticalDragUpdate: (d) {
-        if (_longPressActive) return; // ❌ Drag während Long-Press blocken
-        if (_dragStart == null) return;
-        final dy = d.localPosition.dy - _dragStart!.dy;
-        if (dy > 20) {
-          // mehr Distanz, damit Long-Press nicht gestört wird
-          widget.onDragDown();
-          _dragStart = null; // nur einmal auslösen
-        }
-      },
-      onVerticalDragEnd: (d) {
-        if (_longPressActive) return;
-        if ((d.primaryVelocity ?? 0) > 500) {
-          widget.onDragDown(); // schneller Wisch nach unten
-        }
-        _dragStart = null;
-      },
-      child: widget.child,
-    );
-  }
-}
-
-/// TapFlash ohne GestureDetector - nur visueller Effekt
-class _TapFlashWithoutGesture extends StatefulWidget {
-  final Widget child;
-  final Color color;
-  final Duration duration;
-  final double maxOpacity;
-  final double blur;
-  final double spread;
-  final BoxShape shape;
-  final VoidCallback? onTapAfter;
-
-  const _TapFlashWithoutGesture({
-    super.key,
-    required this.child,
-    required this.color,
-    this.duration = const Duration(milliseconds: 240),
-    this.maxOpacity = 0.85,
-    this.blur = 18,
-    this.spread = 6,
-    this.shape = BoxShape.circle,
-    this.onTapAfter,
-  });
-
-  @override
-  State<_TapFlashWithoutGesture> createState() =>
-      _TapFlashWithoutGestureState();
-}
-
-class _TapFlashWithoutGestureState extends State<_TapFlashWithoutGesture>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: widget.duration,
-  );
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeOutCubic,
-    reverseCurve: Curves.easeInCubic,
-  );
-
-  bool _running = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void triggerFlash() {
-    if (_running) return;
-    _running = true;
-    _controller.forward().then((_) {
-      if (mounted) {
-        _controller.reverse().then((_) {
-          if (mounted) {
-            _running = false;
-          }
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(20);
-
-    final glow = AnimatedBuilder(
-      animation: _animation,
-      builder: (_, __) {
-        final opacity = _animation.value * widget.maxOpacity;
-        final color = widget.color.withValues(alpha: opacity);
-
-        final decoration = widget.shape == BoxShape.circle
-            ? BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color,
-                    blurRadius: widget.blur,
-                    spreadRadius: widget.spread,
-                  ),
-                ],
-              )
-            : BoxDecoration(
-                borderRadius: borderRadius,
-                boxShadow: [
-                  BoxShadow(
-                    color: color,
-                    blurRadius: widget.blur,
-                    spreadRadius: widget.spread,
-                  ),
-                ],
-              );
-
-        return IgnorePointer(
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 1),
-            opacity: opacity > 0 ? 1 : 0,
-            child: Container(decoration: decoration),
-          ),
-        );
-      },
-    );
-
-    return GestureDetector(
-      onTap: widget.onTapAfter,
-      child: Stack(
-        fit: StackFit.passthrough,
-        alignment: Alignment.center,
-        children: [
-          widget.child,
-          Positioned.fill(child: glow),
-        ],
+      height: 44,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: (widget.showProgress || _glitchEffectActive)
+            ? _buildProgressPill()
+            : const SizedBox.shrink(),
       ),
     );
   }

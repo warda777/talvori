@@ -16,7 +16,9 @@ import 'package:talvori/features/companion/domain/companion_discovery_tip.dart';
 import 'package:talvori/features/companion/domain/companion_state.dart';
 import 'package:talvori/features/home/application/profile_preferences_controller.dart';
 import 'package:talvori/features/home/ui/screens/profile_screen.dart';
+import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart' as wc;
+import 'package:talvori/features/words/ui/screens/local_known_review_screen.dart';
 
 import 'package:talvori/core/local_database/services/shared_text_import_service.dart';
 import 'package:talvori/features/home/application/application.dart';
@@ -339,6 +341,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ).push(MaterialPageRoute(builder: (_) => const WorldRegionScreen()));
   }
 
+  void _openWorldHub() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const LocalKnownReviewScreen(),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
+  }
+
+  void _openProgressHub() {
+    HapticFeedback.selectionClick();
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const RewardsCenterScreen(),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
+  }
+
   Future<void> _openExternalWordImport() {
     return wc.onChromeButtonTap(context, ref);
   }
@@ -409,16 +432,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final homeHubActions = [
       HomeSmartHubAction(
-        key: const Key('home-my-words-play-button'),
-        icon: Icons.psychology_rounded,
-        label: 'Lernen',
-        onTap: _showLearningSourcesPopup,
+        key: const Key('home-impuls-postfach-button'),
+        icon: Icons.forum_rounded,
+        label: 'Chat und Freunde',
+        badgeCount: impulseUnreadCount,
+        onTap: _openImpulseInbox,
       ),
       HomeSmartHubAction(
         key: const Key('home-browser-return-button'),
         icon: Icons.travel_explore_rounded,
         label: 'Wörter sammeln',
         onTap: _openExternalWordImport,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-my-words-play-button'),
+        icon: Icons.menu_book_rounded,
+        label: 'Lernen',
+        onTap: _showLearningSourcesPopup,
       ),
       HomeSmartHubAction(
         key: const Key('home-sentence-sparks-button'),
@@ -433,6 +463,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => const VocabScreen())),
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-profile-button'),
+        icon: Icons.person_rounded,
+        label: 'Profil',
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-progress-hub-button'),
+        icon: Icons.insights_rounded,
+        label: 'Statistik und Fortschritt',
+        onTap: _openProgressHub,
+      ),
+      HomeSmartHubAction(
+        key: const Key('home-known-review-button'),
+        icon: Icons.public_rounded,
+        label: 'Welt Hub',
+        onTap: _openWorldHub,
       ),
     ];
 
@@ -585,14 +635,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
-            floatingActionButton: HomeSmartHubMenu(
-              actions: homeHubActions,
-              chatBadgeCount: impulseUnreadCount,
-              onChatTap: _openImpulseInbox,
-              onProfileTap: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
-            ),
+            floatingActionButton: HomeSmartHubMenu(actions: homeHubActions),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
           ),

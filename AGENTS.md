@@ -53,9 +53,10 @@ Core direction:
 - The old Play button must no longer be the main action.
 - A large rotating/pulsing globe becomes the central action.
 - Tapping the globe should later lead to a region/city/world prototype.
-- The Home-Zentrale currently uses a reduced bottom bar with Chat/Friends on
-  the left, Profile on the right and one central Plus-Hub. Extra actions appear
-  as floating icon-only quick actions so the globe stays the visual hero.
+- The Home-Zentrale currently uses one central Plus-Hub at the bottom. Closed
+  state shows only the Plus. Open state reveals an icon-only rotating wheel with
+  Chat/Friends, Profile, Learn, Words/Import, Satzfunken/Tagesimpuls, Games,
+  World/Hub and Progress/Stats so the globe stays the visual hero.
 - Tali or Vori is the selected active Companion, not two permanent parallel
   systems.
 - Companion tap flow: small avatar -> focus/bubble -> Companion chat sheet.
@@ -104,9 +105,10 @@ Core direction:
 - Add rotating/pulsing globe as main action.
 - Keep top status where useful.
 - Use the globe itself for World entry.
-- Use the bottom Plus-Hub for Learn, Words/Import, Games and
-  Satzfunken/Tagesimpuls.
-- Keep Chat/Friends and Profile as quiet side actions in the bottom bar.
+- Use the bottom Plus-Hub wheel for Learn, Words/Import, Games,
+  Satzfunken/Tagesimpuls, Chat/Friends, Profile, World/Hub and Progress/Stats.
+- Avoid a permanent bottom bar in the current Home direction; closed state
+  should stay visually quiet with the central Plus only.
 - Add selected Companion states and tap flow.
 
 ### Phase 2: Local World Entry

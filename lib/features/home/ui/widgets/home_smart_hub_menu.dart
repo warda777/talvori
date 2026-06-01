@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class HomeSmartHubAction {
@@ -20,14 +22,10 @@ class HomeSmartHubMenu extends StatefulWidget {
   const HomeSmartHubMenu({
     super.key,
     required this.actions,
-    required this.onChatTap,
-    required this.onProfileTap,
     this.chatBadgeCount = 0,
   });
 
   final List<HomeSmartHubAction> actions;
-  final VoidCallback onChatTap;
-  final VoidCallback onProfileTap;
   final int chatBadgeCount;
 
   @override
@@ -36,7 +34,13 @@ class HomeSmartHubMenu extends StatefulWidget {
 
 class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     with SingleTickerProviderStateMixin {
+  static const _wheelWidth = 430.0;
+  static const _wheelHeight = 318.0;
+  static const _wheelCenter = Offset(_wheelWidth / 2, 246);
+  static const _wheelRadius = 154.0;
+
   late final AnimationController _controller;
+  double _rotation = math.pi;
   bool _open = false;
 
   @override
@@ -44,7 +48,7 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 240),
+      duration: const Duration(milliseconds: 360),
     );
   }
 
@@ -71,33 +75,46 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     action.onTap();
   }
 
+  void _rotateWheel(DragUpdateDetails details) {
+    if (!_open) return;
+    setState(() {
+      _rotation += details.delta.dx * 0.011;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Semantics(
       label: 'Talvori Welt Hub',
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        padding: EdgeInsets.only(bottom: math.max(0, bottomInset * 0.12)),
         child: SizedBox(
-          width: 370,
-          height: 236,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              _FloatingActionFan(
-                actions: widget.actions,
-                animation: _controller,
-                open: _open,
-                onActionTap: _run,
-              ),
-              _HomeBottomHubBar(
-                open: _open,
-                chatBadgeCount: widget.chatBadgeCount,
-                onChatTap: widget.onChatTap,
-                onProfileTap: widget.onProfileTap,
-                onHubTap: _toggle,
-              ),
-            ],
+          width: _wheelWidth,
+          height: _wheelHeight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: _rotateWheel,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              clipBehavior: Clip.none,
+              children: [
+                _RotatingActionWheel(
+                  actions: widget.actions,
+                  animation: _controller,
+                  center: _wheelCenter,
+                  radius: _wheelRadius,
+                  rotation: _rotation,
+                  open: _open,
+                  onActionTap: _run,
+                ),
+                Positioned(
+                  left: _wheelCenter.dx - 43,
+                  top: _wheelCenter.dy - 43,
+                  child: _HubCenterButton(open: _open, onTap: _toggle),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -105,82 +122,60 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
   }
 }
 
-class _FloatingActionFan extends StatelessWidget {
-  const _FloatingActionFan({
+class _RotatingActionWheel extends StatelessWidget {
+  const _RotatingActionWheel({
     required this.actions,
     required this.animation,
+    required this.center,
+    required this.radius,
+    required this.rotation,
     required this.open,
     required this.onActionTap,
   });
 
   final List<HomeSmartHubAction> actions;
   final Animation<double> animation;
+  final Offset center;
+  final double radius;
+  final double rotation;
   final bool open;
   final ValueChanged<HomeSmartHubAction> onActionTap;
 
   @override
   Widget build(BuildContext context) {
-    final visibleActions = actions.take(4).toList(growable: false);
-    const positions = [
-      (left: 66.0, bottom: 116.0),
-      (left: 136.0, bottom: 168.0),
-      (left: 234.0, bottom: 168.0),
-      (left: 304.0, bottom: 116.0),
-    ];
-
+    final visibleActions = actions.take(8).toList(growable: false);
     if (!open && animation.value == 0) {
-      return const SizedBox(width: 370, height: 236);
+      return const SizedBox(width: 430, height: 318);
     }
 
     return IgnorePointer(
       ignoring: !open,
       child: SizedBox(
-        width: 370,
-        height: 236,
+        width: 430,
+        height: 318,
         child: AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
             final value = animation.value.clamp(0.0, 1.0);
-            final curved = Curves.easeOutBack.transform(value);
-            final fade = Curves.easeOut.transform(value);
-            final iconSize = 66.0 * (0.46 + 0.54 * value);
+            final fly = Curves.easeOutBack.transform(value);
+            final fade = Curves.easeOutCubic.transform(value);
+            final baseSize = 66.0;
             return Stack(
               key: const Key('home-smart-hub-tray'),
               clipBehavior: Clip.none,
               children: [
                 for (var i = 0; i < visibleActions.length; i++)
-                  Positioned(
-                    left: positions[i].left - 33,
-                    bottom: positions[i].bottom,
-                    child: Semantics(
-                      button: true,
-                      label: visibleActions[i].label,
-                      child: GestureDetector(
-                        key: visibleActions[i].key,
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => onActionTap(visibleActions[i]),
-                        child: SizedBox.square(
-                          dimension: 66,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Opacity(
-                              opacity: fade,
-                              child: Transform.translate(
-                                offset: Offset(
-                                  (185 - positions[i].left) * (1 - curved),
-                                  (positions[i].bottom - 50) * (1 - curved),
-                                ),
-                                child: _HubFloatingIcon(
-                                  action: visibleActions[i],
-                                  accent: _accentFor(visibleActions[i].label),
-                                  size: iconSize,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  _WheelActionButton(
+                    action: visibleActions[i],
+                    accent: _accentFor(i, visibleActions[i].label),
+                    center: center,
+                    angle:
+                        rotation + ((math.pi * 2) / visibleActions.length) * i,
+                    radius: radius,
+                    fly: fly,
+                    fade: fade,
+                    size: baseSize,
+                    onTap: () => onActionTap(visibleActions[i]),
                   ),
               ],
             );
@@ -190,20 +185,75 @@ class _FloatingActionFan extends StatelessWidget {
     );
   }
 
-  static Color _accentFor(String label) {
-    if (label.contains('Satz')) return _violet;
-    if (label.contains('Wörter')) return _mint;
-    if (label.contains('Spiel')) return _gold;
-    return Colors.white;
+  static Color _accentFor(int index, String label) {
+    if (label.contains('Satz')) return const Color(0xFFFFC96B);
+    if (label.contains('Stat')) return const Color(0xFFFFC96B);
+    if (label.contains('Welt')) return const Color(0xFF5DDCFF);
+    if (label.contains('Profil')) return const Color(0xFFB36BFF);
+    if (label.contains('Spiel')) return const Color(0xFFFFB15F);
+    return index.isEven ? const Color(0xFF5DDCFF) : const Color(0xFFB36BFF);
   }
-
-  static const _violet = Color(0xFFB36BFF);
-  static const _mint = Color(0xFF9FF7D5);
-  static const _gold = Color(0xFFFFC96B);
 }
 
-class _HubFloatingIcon extends StatelessWidget {
-  const _HubFloatingIcon({
+class _WheelActionButton extends StatelessWidget {
+  const _WheelActionButton({
+    required this.action,
+    required this.accent,
+    required this.center,
+    required this.angle,
+    required this.radius,
+    required this.fly,
+    required this.fade,
+    required this.size,
+    required this.onTap,
+  });
+
+  final HomeSmartHubAction action;
+  final Color accent;
+  final Offset center;
+  final double angle;
+  final double radius;
+  final double fly;
+  final double fade;
+  final double size;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final target = Offset(
+      center.dx + math.cos(angle) * radius,
+      center.dy + math.sin(angle) * radius,
+    );
+    final position = Offset.lerp(center, target, fly)!;
+    return Positioned(
+      left: position.dx - size / 2,
+      top: position.dy - size / 2,
+      child: Opacity(
+        opacity: fade,
+        child: Semantics(
+          button: true,
+          label: action.label,
+          child: GestureDetector(
+            key: action.key,
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: SizedBox.square(
+              dimension: size,
+              child: _WheelIconShell(
+                action: action,
+                accent: accent,
+                size: size * (0.72 + 0.28 * fly),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WheelIconShell extends StatelessWidget {
+  const _WheelIconShell({
     required this.action,
     required this.accent,
     required this.size,
@@ -215,66 +265,66 @@ class _HubFloatingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  accent.withValues(alpha: 0.26),
-                  const Color(0xFF060A12).withValues(alpha: 0.98),
+    return Center(
+      child: SizedBox.square(
+        dimension: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    accent.withValues(alpha: 0.24),
+                    const Color(0xFF080B14).withValues(alpha: 0.96),
+                    const Color(0xFF03050A).withValues(alpha: 0.99),
+                  ],
+                ),
+                border: Border.all(
+                  color: accent.withValues(alpha: 0.68),
+                  width: 1.35,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.5),
+                    blurRadius: 28,
+                    spreadRadius: -8,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.56),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
                 ],
               ),
-              border: Border.all(
-                color: accent.withValues(alpha: 0.58),
-                width: 1.35,
+              child: Center(
+                child: Icon(
+                  action.icon,
+                  color: Colors.white,
+                  size: size * 0.43,
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.42),
-                  blurRadius: 22,
-                  offset: const Offset(0, 10),
-                ),
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.42),
-                  blurRadius: 28,
-                  spreadRadius: -4,
-                ),
-              ],
             ),
-            child: Icon(action.icon, color: Colors.white, size: size * 0.44),
-          ),
-          if (action.badgeCount > 0)
-            Positioned(
-              key: const Key('home-impuls-postfach-unread-badge'),
-              right: -2,
-              top: -3,
-              child: _Badge(count: action.badgeCount),
-            ),
-        ],
+            if (action.badgeCount > 0)
+              Positioned(
+                key: const Key('home-impuls-postfach-unread-badge'),
+                right: -1,
+                top: -2,
+                child: _Badge(count: action.badgeCount),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _HomeBottomHubBar extends StatelessWidget {
-  const _HomeBottomHubBar({
-    required this.open,
-    required this.chatBadgeCount,
-    required this.onChatTap,
-    required this.onProfileTap,
-    required this.onHubTap,
-  });
+class _HubCenterButton extends StatelessWidget {
+  const _HubCenterButton({required this.open, required this.onTap});
 
   final bool open;
-  final int chatBadgeCount;
-  final VoidCallback onChatTap;
-  final VoidCallback onProfileTap;
-  final VoidCallback onHubTap;
+  final VoidCallback onTap;
 
   static const _cyan = Color(0xFF5DDCFF);
   static const _violet = Color(0xFFB36BFF);
@@ -282,153 +332,73 @@ class _HomeBottomHubBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 370,
-      height: 112,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            bottom: 0,
-            child: CustomPaint(
-              size: const Size(360, 82),
-              painter: _BottomBarShapePainter(open: open),
-            ),
+    return GestureDetector(
+      key: const Key('home-smart-hub-button'),
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+        width: 86,
+        height: 86,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: open
+                ? const [Color(0xFF151823), Color(0xFF05070D)]
+                : const [Color(0xFF283147), Color(0xFF070911)],
           ),
-          Positioned(
-            left: 68,
-            bottom: 14,
-            child: _BarIconButton(
-              key: const Key('home-impuls-postfach-button'),
-              icon: Icons.forum_rounded,
-              semanticLabel: 'Freunde und Chat',
-              badgeCount: chatBadgeCount,
-              onTap: onChatTap,
+          border: Border.all(color: _gold.withValues(alpha: 0.82), width: 1.6),
+          boxShadow: [
+            BoxShadow(
+              color: _gold.withValues(alpha: open ? 0.34 : 0.5),
+              blurRadius: open ? 34 : 42,
+              spreadRadius: -8,
             ),
-          ),
-          Positioned(
-            right: 68,
-            bottom: 14,
-            child: _BarIconButton(
-              key: const Key('home-profile-button'),
-              icon: Icons.person_rounded,
-              semanticLabel: 'Profil',
-              onTap: onProfileTap,
+            BoxShadow(
+              color: _cyan.withValues(alpha: 0.28),
+              blurRadius: 58,
+              spreadRadius: -18,
+              offset: const Offset(-16, 0),
             ),
-          ),
-          Positioned(
-            bottom: 48,
-            child: GestureDetector(
-              key: const Key('home-smart-hub-button'),
-              behavior: HitTestBehavior.opaque,
-              onTap: onHubTap,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOutCubic,
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: open
-                        ? const [Color(0xFF202433), Color(0xFF090C14)]
-                        : const [Color(0xFF46D9FF), Color(0xFF8A5CFF)],
-                  ),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: open ? 0.2 : 0.46),
-                    width: 1.4,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _cyan.withValues(alpha: open ? 0.18 : 0.38),
-                      blurRadius: open ? 26 : 34,
-                      spreadRadius: -8,
-                      offset: const Offset(0, 14),
-                    ),
-                    BoxShadow(
-                      color: _violet.withValues(alpha: 0.28),
-                      blurRadius: 44,
-                      spreadRadius: -12,
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (!open)
-                      Container(
-                        width: 37,
-                        height: 37,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _gold.withValues(alpha: 0.15),
-                          border: Border.all(
-                            color: _gold.withValues(alpha: 0.24),
-                          ),
-                        ),
-                      ),
-                    AnimatedRotation(
-                      duration: const Duration(milliseconds: 420),
-                      curve: Curves.easeOutBack,
-                      turns: open ? 1.125 : 0,
-                      child: Icon(
-                        open ? Icons.close_rounded : Icons.add_rounded,
-                        color: Colors.white,
-                        size: open ? 32 : 38,
-                      ),
-                    ),
+            BoxShadow(
+              color: _violet.withValues(alpha: 0.3),
+              blurRadius: 58,
+              spreadRadius: -18,
+              offset: const Offset(16, 0),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: _cyan.withValues(alpha: 0.34)),
+                gradient: SweepGradient(
+                  colors: [
+                    _cyan.withValues(alpha: 0.78),
+                    _violet.withValues(alpha: 0.78),
+                    _gold.withValues(alpha: 0.82),
+                    _cyan.withValues(alpha: 0.78),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BarIconButton extends StatelessWidget {
-  const _BarIconButton({
-    super.key,
-    required this.icon,
-    required this.semanticLabel,
-    required this.onTap,
-    this.badgeCount = 0,
-  });
-
-  final IconData icon;
-  final String semanticLabel;
-  final VoidCallback onTap;
-  final int badgeCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: SizedBox.square(
-          dimension: 54,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              Icon(icon, color: Colors.white.withValues(alpha: 0.84), size: 30),
-              if (badgeCount > 0)
-                Positioned(
-                  key: const Key('home-impuls-postfach-unread-badge'),
-                  right: -2,
-                  top: -3,
-                  child: _Badge(count: badgeCount),
-                ),
-            ],
-          ),
+            AnimatedRotation(
+              duration: const Duration(milliseconds: 520),
+              curve: Curves.easeOutBack,
+              turns: open ? 1.125 : 0,
+              child: Icon(
+                open ? Icons.close_rounded : Icons.add_rounded,
+                color: _gold,
+                size: open ? 36 : 44,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -461,106 +431,5 @@ class _Badge extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _BottomBarShapePainter extends CustomPainter {
-  const _BottomBarShapePainter({required this.open});
-
-  final bool open;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 10, size.width, size.height - 10);
-    final center = rect.center.dx;
-    final path = Path()
-      ..moveTo(rect.left + 34, rect.top)
-      ..lineTo(center - 66, rect.top)
-      ..cubicTo(
-        center - 48,
-        rect.top,
-        center - 45,
-        rect.top + 36,
-        center - 20,
-        rect.top + 42,
-      )
-      ..cubicTo(
-        center,
-        rect.top + 47,
-        center + 20,
-        rect.top + 42,
-        center + 45,
-        rect.top + 36,
-      )
-      ..cubicTo(
-        center + 48,
-        rect.top,
-        center + 48,
-        rect.top,
-        center + 66,
-        rect.top,
-      )
-      ..lineTo(rect.right - 34, rect.top)
-      ..quadraticBezierTo(rect.right, rect.top, rect.right, rect.top + 34)
-      ..lineTo(rect.right, rect.bottom - 30)
-      ..quadraticBezierTo(rect.right, rect.bottom, rect.right - 34, rect.bottom)
-      ..lineTo(rect.left + 34, rect.bottom)
-      ..quadraticBezierTo(rect.left, rect.bottom, rect.left, rect.bottom - 30)
-      ..lineTo(rect.left, rect.top + 34)
-      ..quadraticBezierTo(rect.left, rect.top, rect.left + 34, rect.top)
-      ..close();
-
-    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.52), 20, false);
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF07111B).withValues(alpha: 0.94),
-            const Color(0xFF03060E).withValues(alpha: 0.97),
-            const Color(0xFF0A0715).withValues(alpha: 0.94),
-          ],
-        ).createShader(rect)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.2),
-    );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.2
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
-        ..shader = LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            const Color(0xFF5DDCFF).withValues(alpha: open ? 0.42 : 0.3),
-            Colors.white.withValues(alpha: 0.08),
-            const Color(0xFFB36BFF).withValues(alpha: open ? 0.42 : 0.3),
-          ],
-        ).createShader(rect),
-    );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.35
-        ..shader = LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            const Color(0xFF5DDCFF).withValues(alpha: open ? 0.78 : 0.62),
-            Colors.white.withValues(alpha: 0.16),
-            const Color(0xFFB36BFF).withValues(alpha: open ? 0.78 : 0.62),
-          ],
-        ).createShader(rect),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _BottomBarShapePainter oldDelegate) {
-    return oldDelegate.open != open;
   }
 }
