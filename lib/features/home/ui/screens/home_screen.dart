@@ -881,60 +881,54 @@ class _GlobeBackgroundGlowPainter extends CustomPainter {
   static const _blue = Color(0xFF2E78FF);
   static const _violet = Color(0xFF9B4DFF);
   static const _purple = Color(0xFFD35BFF);
+  static const _transparent = Color(0x00000000);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide * 0.44;
+    final coreBand = Rect.fromLTWH(
+      0,
+      size.height * 0.14,
+      size.width,
+      size.height * 0.72,
+    );
 
-    void drawAura({
-      required Offset offset,
-      required Size radii,
-      required Color color,
-      required double alpha,
+    void drawSideLight({
+      required Alignment begin,
+      required Alignment end,
+      required List<Color> colors,
+      required List<double> stops,
     }) {
-      final rect = Rect.fromCenter(
-        center: offset,
-        width: radii.width,
-        height: radii.height,
-      );
       final paint = Paint()
-        ..shader = RadialGradient(
-          colors: [
-            color.withValues(alpha: alpha),
-            color.withValues(alpha: alpha * 0.42),
-            color.withValues(alpha: alpha * 0.12),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.36, 0.66, 1.0],
-        ).createShader(rect);
-      canvas.drawOval(rect, paint);
+        ..shader = LinearGradient(
+          begin: begin,
+          end: end,
+          colors: colors,
+          stops: stops,
+        ).createShader(coreBand);
+      canvas.drawRect(coreBand, paint);
     }
 
-    drawAura(
-      offset: center.translate(-radius * 0.62, -radius * 0.02),
-      radii: Size(radius * 0.82, radius * 1.38),
-      color: _blue,
-      alpha: 0.2,
+    drawSideLight(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        _cyan.withValues(alpha: 0.24),
+        _blue.withValues(alpha: 0.15),
+        _blue.withValues(alpha: 0.04),
+        _transparent,
+      ],
+      stops: const [0.0, 0.16, 0.34, 0.58],
     );
-    drawAura(
-      offset: center.translate(radius * 0.62, -radius * 0.01),
-      radii: Size(radius * 0.82, radius * 1.36),
-      color: _violet,
-      alpha: 0.19,
-    );
-
-    drawAura(
-      offset: center.translate(-radius * 0.72, radius * 0.06),
-      radii: Size(radius * 0.36, radius * 0.84),
-      color: _cyan,
-      alpha: 0.23,
-    );
-    drawAura(
-      offset: center.translate(radius * 0.72, radius * 0.04),
-      radii: Size(radius * 0.34, radius * 0.82),
-      color: _purple,
-      alpha: 0.21,
+    drawSideLight(
+      begin: Alignment.centerRight,
+      end: Alignment.centerLeft,
+      colors: [
+        _purple.withValues(alpha: 0.22),
+        _violet.withValues(alpha: 0.14),
+        _violet.withValues(alpha: 0.04),
+        _transparent,
+      ],
+      stops: const [0.0, 0.16, 0.34, 0.58],
     );
   }
 
