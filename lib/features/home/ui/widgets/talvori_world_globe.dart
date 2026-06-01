@@ -20,9 +20,6 @@ class TalvoriWorldGlobe extends StatefulWidget {
 class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
   late final EarthController _controller;
 
-  static const _dayTexture = AssetImage(
-    'packages/flutter_globe_3d/assets/images/earth.jpg',
-  );
   static const _nightTexture = AssetImage(
     'packages/flutter_globe_3d/assets/images/earth_night.jpg',
   );
@@ -39,7 +36,7 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
       ..maxZoom = 1;
     _controller
       ..setLightMode(EarthLightMode.fixedCoordinates)
-      ..setFixedLightCoordinates(36, -34)
+      ..setFixedLightCoordinates(28, -54)
       ..setCameraFocus(28, 18);
     _seedTalvoriLights();
   }
@@ -98,11 +95,11 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          const Color(0xFFFFC56B).withValues(alpha: 0.2),
-                          const Color(0xFF53D7FF).withValues(alpha: 0.12),
+                          const Color(0xFFFFB45F).withValues(alpha: 0.18),
+                          const Color(0xFF22334A).withValues(alpha: 0.14),
                           Colors.transparent,
                         ],
-                        stops: const [0.1, 0.48, 1],
+                        stops: const [0.12, 0.5, 1],
                       ),
                     ),
                   ),
@@ -110,14 +107,38 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                 Positioned.fill(
                   child: Padding(
                     padding: EdgeInsets.all(widget.size * 0.015),
-                    child: Earth3D(
-                      controller: _controller,
-                      texture: _dayTexture,
-                      nightTexture: _nightTexture,
-                      initialScale: 3.18,
-                      initialLatitude: 28,
-                      initialLongitude: 18,
-                      size: Size.square(widget.size),
+                    child: ColorFiltered(
+                      colorFilter: const ColorFilter.matrix([
+                        0.94,
+                        0.07,
+                        0.02,
+                        0,
+                        -10,
+                        0.05,
+                        0.77,
+                        0.02,
+                        0,
+                        -9,
+                        0.02,
+                        0.05,
+                        0.55,
+                        0,
+                        -8,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                      ]),
+                      child: Earth3D(
+                        controller: _controller,
+                        texture: _nightTexture,
+                        nightTexture: _nightTexture,
+                        initialScale: 3.18,
+                        initialLatitude: 28,
+                        initialLongitude: 18,
+                        size: Size.square(widget.size),
+                      ),
                     ),
                   ),
                 ),
@@ -139,14 +160,14 @@ class _GlobeLightNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = switch (kind) {
-      _TalvoriNodeKind.hub => 9.0,
-      _TalvoriNodeKind.city => 6.0,
-      _TalvoriNodeKind.spark => 4.0,
+      _TalvoriNodeKind.hub => 7.4,
+      _TalvoriNodeKind.city => 5.2,
+      _TalvoriNodeKind.spark => 3.8,
     };
     final color = switch (kind) {
-      _TalvoriNodeKind.hub => const Color(0xFFFFD48A),
-      _TalvoriNodeKind.city => const Color(0xFFFFB75F),
-      _TalvoriNodeKind.spark => const Color(0xFF8EEBFF),
+      _TalvoriNodeKind.hub => const Color(0xFFFFD9A0),
+      _TalvoriNodeKind.city => const Color(0xFFFFB86A),
+      _TalvoriNodeKind.spark => const Color(0xFFE8A85F),
     };
 
     return IgnorePointer(
@@ -160,15 +181,15 @@ class _GlobeLightNode extends StatelessWidget {
               height: size * 2.4,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withValues(alpha: 0.16),
+                color: color.withValues(alpha: 0.1),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.6),
-                    blurRadius: 16,
+                    color: color.withValues(alpha: 0.58),
+                    blurRadius: 14,
                   ),
                   BoxShadow(
-                    color: color.withValues(alpha: 0.25),
-                    blurRadius: 28,
+                    color: color.withValues(alpha: 0.18),
+                    blurRadius: 30,
                   ),
                 ],
               ),
@@ -212,8 +233,8 @@ class _GlobeAtmospherePainter extends CustomPainter {
       radius * 1.03,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.11
-        ..color = const Color(0xFF6BDEFF).withValues(alpha: 0.1)
+        ..strokeWidth = radius * 0.085
+        ..color = const Color(0xFF7FB7C9).withValues(alpha: 0.055)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
 
@@ -224,10 +245,34 @@ class _GlobeAtmospherePainter extends CustomPainter {
       false,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.035
+        ..strokeWidth = radius * 0.032
         ..strokeCap = StrokeCap.round
-        ..color = const Color(0xFFFFD08A).withValues(alpha: 0.5)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+        ..color = const Color(0xFFFFB45F).withValues(alpha: 0.42)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
+    );
+
+    for (final coastArc in _warmCoastEdgeArcs) {
+      canvas.drawArc(
+        rect.deflate(radius * coastArc.inset),
+        coastArc.start,
+        coastArc.sweep,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = radius * coastArc.width
+          ..strokeCap = StrokeCap.round
+          ..color = const Color(0xFFFFC47A).withValues(alpha: coastArc.alpha)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, coastArc.blur),
+      );
+    }
+
+    canvas.drawCircle(
+      center,
+      radius * 1.01,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = radius * 0.01
+        ..color = const Color(0xFFFFC47A).withValues(alpha: 0.3),
     );
 
     canvas.drawCircle(
@@ -240,9 +285,9 @@ class _GlobeAtmospherePainter extends CustomPainter {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.46),
+            Colors.black.withValues(alpha: 0.62),
           ],
-          stops: const [0, 0.58, 1],
+          stops: const [0, 0.5, 1],
         ).createShader(rect),
     );
   }
@@ -266,8 +311,8 @@ class _TalvoriConnection {
   const _TalvoriConnection(
     this.fromId,
     this.toId, {
-    this.color = const Color(0xFFFFC56B),
-    this.width = 1.35,
+    this.color = const Color(0x99FFD08A),
+    this.width = 0.72,
   });
 
   final String fromId;
@@ -295,16 +340,77 @@ const _talvoriNodes = [
 
 const _talvoriConnections = [
   _TalvoriConnection('london', 'newyork'),
-  _TalvoriConnection('london', 'paris', width: 1.1),
+  _TalvoriConnection('london', 'paris', width: 0.55),
   _TalvoriConnection('paris', 'cairo'),
   _TalvoriConnection('cairo', 'dubai'),
   _TalvoriConnection('dubai', 'delhi'),
-  _TalvoriConnection('dubai', 'singapore', width: 1.7),
+  _TalvoriConnection('dubai', 'singapore', width: 0.92),
   _TalvoriConnection('singapore', 'tokyo'),
-  _TalvoriConnection('singapore', 'sydney', color: Color(0xFF86E7FF)),
-  _TalvoriConnection('newyork', 'mexico', color: Color(0xFF86E7FF)),
+  _TalvoriConnection('singapore', 'sydney', color: Color(0x78FFD08A)),
+  _TalvoriConnection('newyork', 'mexico', color: Color(0x70F0B36B)),
   _TalvoriConnection('mexico', 'rio'),
-  _TalvoriConnection('rio', 'capetown', width: 1.2),
+  _TalvoriConnection('rio', 'capetown', width: 0.62),
   _TalvoriConnection('lagos', 'capetown'),
-  _TalvoriConnection('reykjavik', 'london', color: Color(0xFF86E7FF)),
+  _TalvoriConnection('reykjavik', 'london', color: Color(0x66E8A85F)),
+];
+
+class _WarmCoastEdgeArc {
+  const _WarmCoastEdgeArc({
+    required this.start,
+    required this.sweep,
+    required this.inset,
+    required this.width,
+    required this.alpha,
+    required this.blur,
+  });
+
+  final double start;
+  final double sweep;
+  final double inset;
+  final double width;
+  final double alpha;
+  final double blur;
+}
+
+const _warmCoastEdgeArcs = [
+  _WarmCoastEdgeArc(
+    start: -2.72,
+    sweep: 0.52,
+    inset: 0.3,
+    width: 0.009,
+    alpha: 0.16,
+    blur: 3,
+  ),
+  _WarmCoastEdgeArc(
+    start: -1.92,
+    sweep: 0.64,
+    inset: 0.22,
+    width: 0.01,
+    alpha: 0.18,
+    blur: 4,
+  ),
+  _WarmCoastEdgeArc(
+    start: -0.66,
+    sweep: 0.42,
+    inset: 0.18,
+    width: 0.008,
+    alpha: 0.14,
+    blur: 3,
+  ),
+  _WarmCoastEdgeArc(
+    start: 0.34,
+    sweep: 0.58,
+    inset: 0.25,
+    width: 0.011,
+    alpha: 0.18,
+    blur: 4,
+  ),
+  _WarmCoastEdgeArc(
+    start: 1.58,
+    sweep: 0.5,
+    inset: 0.16,
+    width: 0.008,
+    alpha: 0.13,
+    blur: 3,
+  ),
 ];
