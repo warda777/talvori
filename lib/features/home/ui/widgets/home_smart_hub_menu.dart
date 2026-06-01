@@ -380,60 +380,135 @@ class _HubCenterButton extends StatelessWidget {
         curve: Curves.easeOutCubic,
         width: 86,
         height: 86,
+        padding: const EdgeInsets.all(2.2),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: open
-                ? const [Color(0xFF151823), Color(0xFF05070D)]
-                : const [Color(0xFF283147), Color(0xFF070911)],
-          ),
-          border: Border.all(
-            color: (open ? _violet : _cyan).withValues(alpha: 0.82),
-            width: 1.6,
+          gradient: SweepGradient(
+            startAngle: -math.pi * 0.85,
+            endAngle: math.pi * 1.15,
+            colors: [
+              _cyan,
+              _cyan.withValues(alpha: 0.78),
+              _violet,
+              _violet.withValues(alpha: 0.82),
+              _cyan,
+            ],
           ),
           boxShadow: [
             BoxShadow(
-              color: _cyan.withValues(alpha: open ? 0.28 : 0.38),
-              blurRadius: open ? 34 : 42,
+              color: _cyan.withValues(alpha: open ? 0.28 : 0.34),
+              blurRadius: 30,
               spreadRadius: -8,
-              offset: const Offset(-12, 0),
+              offset: const Offset(-10, 7),
             ),
             BoxShadow(
-              color: _violet.withValues(alpha: open ? 0.32 : 0.28),
-              blurRadius: 58,
-              spreadRadius: -18,
-              offset: const Offset(12, 0),
+              color: _violet.withValues(alpha: open ? 0.34 : 0.3),
+              blurRadius: 36,
+              spreadRadius: -9,
+              offset: const Offset(10, 8),
+            ),
+            BoxShadow(
+              color: _violet.withValues(alpha: 0.24),
+              blurRadius: 54,
+              spreadRadius: -20,
+              offset: const Offset(0, 18),
             ),
           ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: _cyan.withValues(alpha: 0.34)),
-                gradient: SweepGradient(
-                  colors: [
-                    _cyan.withValues(alpha: 0.78),
-                    _violet.withValues(alpha: 0.78),
-                    _cyan.withValues(alpha: 0.64),
-                    _cyan.withValues(alpha: 0.78),
-                  ],
-                ),
-              ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              center: const Alignment(-0.2, -0.25),
+              radius: 0.9,
+              colors: [
+                const Color(0xFF131A29).withValues(alpha: open ? 0.98 : 1),
+                const Color(0xFF070B15),
+                const Color(0xFF02040A),
+              ],
             ),
-            AnimatedRotation(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.62),
+                blurRadius: 24,
+                spreadRadius: -10,
+                offset: const Offset(0, 9),
+              ),
+            ],
+          ),
+          child: Center(
+            child: AnimatedRotation(
               duration: const Duration(milliseconds: 520),
               curve: Curves.easeOutBack,
               turns: open ? 1.125 : 0,
-              child: Icon(
-                open ? Icons.close_rounded : Icons.add_rounded,
-                color: Colors.white,
-                size: open ? 36 : 44,
-              ),
+              child: _GradientHubGlyph(open: open),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GradientHubGlyph extends StatelessWidget {
+  const _GradientHubGlyph({required this.open});
+
+  final bool open;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: open ? 0 : 1, end: open ? 1 : 0),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final firstAngle = value * math.pi / 4;
+        final secondAngle = math.pi / 2 - value * math.pi * 3 / 4;
+        return SizedBox.square(
+          dimension: 42,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              _GradientHubGlyphBar(angle: firstAngle),
+              _GradientHubGlyphBar(angle: secondAngle),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _GradientHubGlyphBar extends StatelessWidget {
+  const _GradientHubGlyphBar({required this.angle});
+
+  final double angle;
+
+  static const _cyan = Color(0xFF5DDCFF);
+  static const _violet = Color(0xFFB36BFF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: angle,
+      child: Container(
+        width: 38,
+        height: 4.2,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: const LinearGradient(colors: [_cyan, _violet]),
+          boxShadow: [
+            BoxShadow(
+              color: _cyan.withValues(alpha: 0.34),
+              blurRadius: 11,
+              spreadRadius: -2,
+              offset: const Offset(-4, 0),
+            ),
+            BoxShadow(
+              color: _violet.withValues(alpha: 0.34),
+              blurRadius: 11,
+              spreadRadius: -2,
+              offset: const Offset(4, 0),
             ),
           ],
         ),
