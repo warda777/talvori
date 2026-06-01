@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_globe_3d/flutter_globe_3d.dart';
 
@@ -71,7 +73,7 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
           toId: connection.toId,
           color: connection.color,
           width: connection.width,
-          isDashed: true,
+          isDashed: false,
         ),
       );
     }
@@ -142,36 +144,40 @@ class _GlobeLightNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = switch (kind) {
-      _TalvoriNodeKind.hub => 7.4,
-      _TalvoriNodeKind.city => 5.2,
-      _TalvoriNodeKind.spark => 3.8,
+      _TalvoriNodeKind.hub => 8.2,
+      _TalvoriNodeKind.city => 5.8,
+      _TalvoriNodeKind.spark => 4.2,
     };
     final color = switch (kind) {
-      _TalvoriNodeKind.hub => const Color(0xFFFFD9A0),
-      _TalvoriNodeKind.city => const Color(0xFFFFB86A),
-      _TalvoriNodeKind.spark => const Color(0xFFE8A85F),
+      _TalvoriNodeKind.hub => const Color(0xFFFFD9A3),
+      _TalvoriNodeKind.city => const Color(0xFFFFBF78),
+      _TalvoriNodeKind.spark => const Color(0xFFF0A95D),
     };
 
     return IgnorePointer(
       child: SizedBox.square(
-        dimension: size * 2.6,
+        dimension: size * 4.2,
         child: Stack(
           alignment: Alignment.center,
           children: [
+            CustomPaint(
+              size: Size.square(size * 4),
+              painter: _GlobeLightStarPainter(color: color, intensity: size),
+            ),
             Container(
-              width: size * 2.4,
-              height: size * 2.4,
+              width: size * 2.7,
+              height: size * 2.7,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withValues(alpha: 0.1),
+                color: color.withValues(alpha: 0.08),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.58),
-                    blurRadius: 14,
+                    color: color.withValues(alpha: 0.5),
+                    blurRadius: 16,
                   ),
                   BoxShadow(
-                    color: color.withValues(alpha: 0.18),
-                    blurRadius: 30,
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 34,
                   ),
                 ],
               ),
@@ -182,13 +188,81 @@ class _GlobeLightNode extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: color,
-                boxShadow: [BoxShadow(color: color, blurRadius: 10)],
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.96),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: size * 0.42,
+              height: size * 0.42,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFFFF6DF),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFF3C4).withValues(alpha: 0.8),
+                    blurRadius: 8,
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _GlobeLightStarPainter extends CustomPainter {
+  const _GlobeLightStarPainter({required this.color, required this.intensity});
+
+  final Color color;
+  final double intensity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final longRay = intensity * 1.75;
+    final shortRay = intensity * 1.05;
+
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1.45
+      ..color = color.withValues(alpha: 0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    final corePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 0.72
+      ..color = color.withValues(alpha: 0.58);
+
+    void drawRay(double angle, double length, Paint paint) {
+      final direction = Offset(math.cos(angle), math.sin(angle));
+      canvas.drawLine(
+        center - direction * (length * 0.36),
+        center + direction * length,
+        paint,
+      );
+    }
+
+    for (final angle in const [0.0, math.pi / 2]) {
+      drawRay(angle, longRay, glowPaint);
+      drawRay(angle, longRay, corePaint);
+    }
+    for (final angle in const [math.pi / 4, -math.pi / 4]) {
+      drawRay(angle, shortRay, glowPaint);
+      drawRay(angle, shortRay, corePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlobeLightStarPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.intensity != intensity;
   }
 }
 
@@ -313,17 +387,69 @@ const _talvoriNodes = [
 ];
 
 const _talvoriConnections = [
-  _TalvoriConnection('london', 'newyork'),
-  _TalvoriConnection('london', 'paris', width: 0.55),
-  _TalvoriConnection('paris', 'cairo'),
-  _TalvoriConnection('cairo', 'dubai'),
-  _TalvoriConnection('dubai', 'delhi'),
-  _TalvoriConnection('dubai', 'singapore', width: 0.92),
-  _TalvoriConnection('singapore', 'tokyo'),
-  _TalvoriConnection('singapore', 'sydney', color: Color(0x78FFD08A)),
-  _TalvoriConnection('newyork', 'mexico', color: Color(0x70F0B36B)),
-  _TalvoriConnection('mexico', 'rio'),
-  _TalvoriConnection('rio', 'capetown', width: 0.62),
-  _TalvoriConnection('lagos', 'capetown'),
-  _TalvoriConnection('reykjavik', 'london', color: Color(0x66E8A85F)),
+  _TalvoriConnection('london', 'newyork', color: Color(0x2CFFD28D), width: 2.4),
+  _TalvoriConnection(
+    'london',
+    'newyork',
+    color: Color(0xB8FFD28D),
+    width: 0.82,
+  ),
+  _TalvoriConnection('london', 'paris', color: Color(0x88FFD99F), width: 0.58),
+  _TalvoriConnection('london', 'cairo', color: Color(0x90FFC87A), width: 0.66),
+  _TalvoriConnection('cairo', 'dubai', color: Color(0x30FFD28D), width: 2.1),
+  _TalvoriConnection('cairo', 'dubai', color: Color(0xB4FFD28D), width: 0.76),
+  _TalvoriConnection('dubai', 'delhi', color: Color(0x92FFC170), width: 0.62),
+  _TalvoriConnection(
+    'dubai',
+    'singapore',
+    color: Color(0x32FFD28D),
+    width: 2.5,
+  ),
+  _TalvoriConnection(
+    'dubai',
+    'singapore',
+    color: Color(0xC0FFD28D),
+    width: 0.9,
+  ),
+  _TalvoriConnection('dubai', 'tokyo', color: Color(0x7EFFC170), width: 0.58),
+  _TalvoriConnection(
+    'singapore',
+    'tokyo',
+    color: Color(0xA8FFD99F),
+    width: 0.72,
+  ),
+  _TalvoriConnection(
+    'singapore',
+    'sydney',
+    color: Color(0x7CFFC170),
+    width: 0.64,
+  ),
+  _TalvoriConnection(
+    'singapore',
+    'delhi',
+    color: Color(0x74FFD99F),
+    width: 0.54,
+  ),
+  _TalvoriConnection(
+    'newyork',
+    'mexico',
+    color: Color(0x88F0B36B),
+    width: 0.64,
+  ),
+  _TalvoriConnection('newyork', 'rio', color: Color(0x2AFFC170), width: 2),
+  _TalvoriConnection('newyork', 'rio', color: Color(0x92FFC170), width: 0.7),
+  _TalvoriConnection('mexico', 'rio', color: Color(0x82FFD28D), width: 0.58),
+  _TalvoriConnection('rio', 'capetown', color: Color(0x78FFD99F), width: 0.56),
+  _TalvoriConnection(
+    'lagos',
+    'capetown',
+    color: Color(0x84FFC170),
+    width: 0.62,
+  ),
+  _TalvoriConnection(
+    'reykjavik',
+    'london',
+    color: Color(0x72E8A85F),
+    width: 0.54,
+  ),
 ];
