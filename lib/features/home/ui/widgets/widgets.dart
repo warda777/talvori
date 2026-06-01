@@ -13,4 +13,5 @@ export 'settings_section.dart';
 export 'settings_tile.dart';
 export 'tap_flash.dart';
 export 'talvori_companion_card.dart';
+export 'talvori_world_globe.dart';
 export 'top_bar.dart';

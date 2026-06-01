@@ -36,6 +36,7 @@ import 'package:talvori/features/home/ui/widgets/bottom_nav.dart';
 import 'package:talvori/features/home/ui/widgets/talvori_companion_card.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
+import 'package:talvori/features/world/ui/screens/world_region_screen.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_sources_screen.dart';
@@ -113,27 +114,24 @@ void main() {
     expect(bottomOverflows, isEmpty);
     final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
     expect(counterFinder, findsOneWidget);
-    expect(_homeCounterOpacity(tester), 0);
-    expect(
-      find.descendant(of: find.byType(WordCard), matching: counterFinder),
-      findsNothing,
-    );
-    final portalFinder = find.byKey(const Key('home-portal-frame'));
-    expect(portalFinder, findsOneWidget);
-    expect(find.text('Tali ist bereit.'), findsOneWidget);
-    expect(find.byKey(const Key('home-portal-sound-button')), findsOneWidget);
-    expect(
-      find.descendant(of: portalFinder, matching: counterFinder),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('talvori-world-home-hero')), findsOneWidget);
+    expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
+    expect(find.text('Talvori-Welt-Zentrale'), findsOneWidget);
+    expect(find.text('Meine Wörter bauen eine Welt.'), findsOneWidget);
+    expect(find.byType(WordCard), findsNothing);
     expect(find.byType(Switch), findsNothing);
-    final portalRect = tester.getRect(portalFinder);
-    await tester.tap(portalFinder);
+    final globeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
+    );
+    await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
     await tester.pump();
-    expect(tester.getRect(portalFinder), portalRect);
+    expect(globeRect.width, greaterThan(180));
     expect(find.text('Wortspiele'), findsOneWidget);
-    expect(find.text('Meine Wörter'), findsNothing);
-    expect(find.byIcon(Icons.chat_bubble_rounded), findsOneWidget);
+    expect(find.text('Wörter'), findsWidgets);
+    expect(
+      find.byKey(const Key('home-impuls-postfach-button')),
+      findsOneWidget,
+    );
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
     expect(find.text('Impuls-Vorschau'), findsNothing);
@@ -642,7 +640,7 @@ void main() {
     );
   });
 
-  testWidgets('home wheel counter appears briefly while wheel moves', (
+  testWidgets('home globe opens Talvori Welt placeholder region', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -657,30 +655,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(
-      find.byKey(const Key('home-my-words-counter-button')),
-      findsOneWidget,
-    );
-    expect(_homeCounterOpacity(tester), 0);
-    expect(_homeCounterIgnorePointer(tester).ignoring, isTrue);
+    expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
 
-    _triggerHomeWheelMove(tester);
-    await tester.pump();
+    await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
+    await tester.pumpAndSettle();
 
-    expect(_homeCounterOpacity(tester), 1);
-    expect(_homeCounterIgnorePointer(tester).ignoring, isFalse);
-
-    await tester.pump(const Duration(seconds: 1));
-    _triggerHomeWheelMove(tester);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
-
-    expect(_homeCounterOpacity(tester), 1);
-
-    await tester.pump(const Duration(milliseconds: 850));
-
-    expect(_homeCounterOpacity(tester), 0);
-    expect(_homeCounterIgnorePointer(tester).ignoring, isTrue);
+    expect(find.byType(WorldRegionScreen), findsOneWidget);
+    expect(find.text('Talvori Welt'), findsOneWidget);
+    expect(find.text('Deine Welt entsteht hier.'), findsOneWidget);
   });
 
   testWidgets('home screen shows impulse inbox entry with unread badge', (
@@ -792,9 +774,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     final counterFinder = find.byKey(const Key('home-my-words-counter-button'));
-    _triggerHomeWheelMove(tester);
-    await tester.pump();
-    expect(_homeCounterOpacity(tester), 1);
     final beforeTapRect = tester.getRect(counterFinder);
 
     await tester.tap(counterFinder);
@@ -995,7 +974,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    final browserButton = find.byKey(const Key('home-browser-return-button'));
+    await tester.ensureVisible(browserButton);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-set-start-url')));
@@ -1058,7 +1040,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    final browserButton = find.byKey(const Key('home-browser-return-button'));
+    await tester.ensureVisible(browserButton);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-option-system')));
@@ -1098,7 +1085,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    final browserButton = find.byKey(const Key('home-browser-return-button'));
+    await tester.ensureVisible(browserButton);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byKey(const Key('home-browser-option-brave')));
@@ -1195,7 +1187,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('home-browser-return-button')));
+    final browserButton = find.byKey(const Key('home-browser-return-button'));
+    await tester.ensureVisible(browserButton);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -96));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(browserButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -1967,31 +1964,4 @@ class _RecordingNavigatorObserver extends NavigatorObserver {
     super.didPop(route, previousRoute);
     poppedRouteNames.add(route.settings.name);
   }
-}
-
-AnimatedOpacity _homeCounterOpacityWidget(WidgetTester tester) {
-  final finder = find.ancestor(
-    of: find.byKey(const Key('home-my-words-counter-button')),
-    matching: find.byType(AnimatedOpacity),
-  );
-  expect(finder, findsOneWidget);
-  return tester.widget<AnimatedOpacity>(finder);
-}
-
-double _homeCounterOpacity(WidgetTester tester) {
-  return _homeCounterOpacityWidget(tester).opacity;
-}
-
-IgnorePointer _homeCounterIgnorePointer(WidgetTester tester) {
-  final finder = find.ancestor(
-    of: find.byKey(const Key('home-my-words-counter-button')),
-    matching: find.byType(IgnorePointer),
-  );
-  expect(finder, findsWidgets);
-  return tester.widget<IgnorePointer>(finder.first);
-}
-
-void _triggerHomeWheelMove(WidgetTester tester) {
-  final card = tester.widget<WordCard>(find.byType(WordCard));
-  card.onWheelMoved?.call();
 }

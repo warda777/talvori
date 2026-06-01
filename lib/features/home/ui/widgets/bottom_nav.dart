@@ -8,6 +8,7 @@ const double kTopBtnSize = 52; // oder 52 – nimm deinen Zielwert
 
 class HomeBottomNav extends ConsumerWidget {
   final VoidCallback onImpulseInbox;
+  final VoidCallback onWords;
   final VoidCallback onPractice;
   final VoidCallback onProfile;
   final bool impulseActive;
@@ -18,6 +19,7 @@ class HomeBottomNav extends ConsumerWidget {
   const HomeBottomNav({
     super.key,
     required this.onImpulseInbox,
+    required this.onWords,
     required this.onPractice,
     required this.onProfile,
     this.impulseActive = false,
@@ -33,222 +35,182 @@ class HomeBottomNav extends ConsumerWidget {
     );
     const wheelBlue = Color(0xFF5DDCFF);
     const violet = Color(0xFFB36BFF);
+    const mint = Color(0xFF9FF7D5);
     const buttonColor = Color(0xFF07101A);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox.square(
-            dimension: kTopBtnSize,
-            child: GestureDetector(
-              key: const Key('home-impuls-postfach-button'),
-              behavior: HitTestBehavior.opaque,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+      child: Container(
+        height: 64,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        decoration: BoxDecoration(
+          color: buttonColor.withValues(alpha: 0.86),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: wheelBlue.withValues(alpha: 0.22)),
+          boxShadow: glowEnabled
+              ? [
+                  BoxShadow(
+                    color: wheelBlue.withValues(alpha: 0.14),
+                    blurRadius: 34,
+                    spreadRadius: -8,
+                  ),
+                  BoxShadow(
+                    color: violet.withValues(alpha: 0.1),
+                    blurRadius: 44,
+                    spreadRadius: -12,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _DockItem(
+              itemKey: const Key('home-impuls-postfach-button'),
+              icon: Icons.forum_rounded,
+              label: 'Chat',
+              accent: wheelBlue,
               onTap: onImpulseInbox,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  TapFlash(
-                    color: wheelBlue,
-                    shape: BoxShape.circle,
-                    maxOpacity: 0.72,
-                    blur: 36,
-                    spread: -2,
-                    duration: const Duration(milliseconds: 220),
-                    onTapAfter: onImpulseInbox,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: buttonColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: wheelBlue, width: 1.5),
-                        boxShadow: glowEnabled
-                            ? [
-                                BoxShadow(
-                                  color: wheelBlue.withValues(alpha: 0.29),
-                                  blurRadius: 38,
-                                  spreadRadius: -2,
-                                ),
-                                BoxShadow(
-                                  color: wheelBlue.withValues(alpha: 0.11),
-                                  blurRadius: 68,
-                                  spreadRadius: -8,
-                                ),
-                                BoxShadow(
-                                  color: wheelBlue.withValues(alpha: 0.05),
-                                  blurRadius: 88,
-                                  spreadRadius: -14,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.chat_bubble_rounded,
-                          size: 24,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (impulseActive)
-                    IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: wheelBlue, width: 1.5),
-                        ),
-                      ),
-                    ),
-                  if (impulseUnreadCount > 0)
-                    Positioned(
-                      key: const Key('home-impuls-postfach-unread-badge'),
-                      right: 2,
-                      top: 1,
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF5F7A),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: buttonColor, width: 2),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          impulseUnreadCount > 9
-                              ? '9+'
-                              : impulseUnreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            height: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              active: impulseActive,
+              badgeCount: impulseUnreadCount,
             ),
-          ),
-
-          SizedBox(
-            width: 168,
-            height: 52,
-            child: GestureDetector(
-              key: const Key('home-practice-button'),
-              behavior: HitTestBehavior.opaque,
+            _DockItem(
+              itemKey: const Key('home-words-import-button'),
+              icon: Icons.auto_stories_rounded,
+              label: 'Wörter',
+              accent: mint,
+              onTap: onWords,
+            ),
+            _DockItem(
+              itemKey: const Key('home-practice-button'),
+              icon: Icons.sports_esports_rounded,
+              label: 'Wortspiele',
+              accent: violet,
               onTap: onPractice,
-              child: TapFlash(
-                color: violet,
-                shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(999)),
-                maxOpacity: 0.72,
-                blur: 36,
-                spread: -2,
-                duration: const Duration(milliseconds: 220),
-                onTapAfter: onPractice,
-                child: Container(
-                  key: practiceButtonKey,
-                  decoration: BoxDecoration(
-                    color: buttonColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(999)),
-                    border: Border.all(color: violet, width: 1.5),
-                    boxShadow: glowEnabled
-                        ? [
-                            BoxShadow(
-                              color: violet.withValues(alpha: 0.27),
-                              blurRadius: 38,
-                              spreadRadius: -2,
-                            ),
-                            BoxShadow(
-                              color: violet.withValues(alpha: 0.11),
-                              blurRadius: 68,
-                              spreadRadius: -8,
-                            ),
-                            BoxShadow(
-                              color: violet.withValues(alpha: 0.05),
-                              blurRadius: 88,
-                              spreadRadius: -14,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.sports_esports_rounded,
-                        size: 22,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'Wortspiele',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              active: practiceActive,
+              childKey: practiceButtonKey,
             ),
-          ),
+            _DockItem(
+              icon: Icons.person_rounded,
+              label: 'Profil',
+              accent: wheelBlue,
+              onTap: onProfile,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-          SizedBox.square(
-            dimension: 52,
-            child: TapFlash(
-              color: wheelBlue,
-              shape: BoxShape.circle,
-              maxOpacity: 0.72,
-              blur: 36,
-              spread: -2,
-              duration: const Duration(milliseconds: 220),
-              onTapAfter: onProfile,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: buttonColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: wheelBlue, width: 1.5),
-                  boxShadow: glowEnabled
-                      ? [
-                          BoxShadow(
-                            color: wheelBlue.withValues(alpha: 0.29),
-                            blurRadius: 38,
-                            spreadRadius: -2,
-                          ),
-                          BoxShadow(
-                            color: wheelBlue.withValues(alpha: 0.11),
-                            blurRadius: 68,
-                            spreadRadius: -8,
-                          ),
-                          BoxShadow(
-                            color: wheelBlue.withValues(alpha: 0.05),
-                            blurRadius: 88,
-                            spreadRadius: -14,
-                          ),
-                        ]
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: const Icon(Icons.person_rounded, color: Colors.white),
-              ),
+class _DockItem extends StatelessWidget {
+  const _DockItem({
+    required this.icon,
+    required this.label,
+    required this.accent,
+    required this.onTap,
+    this.itemKey,
+    this.childKey,
+    this.active = false,
+    this.badgeCount = 0,
+  });
+
+  final Key? itemKey;
+  final Key? childKey;
+  final IconData icon;
+  final String label;
+  final Color accent;
+  final VoidCallback onTap;
+  final bool active;
+  final int badgeCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: TapFlash(
+        key: itemKey,
+        color: accent,
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.circular(20),
+        maxOpacity: 0.58,
+        blur: 28,
+        spread: -6,
+        duration: const Duration(milliseconds: 220),
+        onTapAfter: onTap,
+        child: Container(
+          key: childKey,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          decoration: BoxDecoration(
+            color: active
+                ? accent.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: active
+                  ? accent.withValues(alpha: 0.52)
+                  : Colors.white.withValues(alpha: 0.07),
             ),
           ),
-        ],
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 20, color: Colors.white),
+                    const SizedBox(height: 3),
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (badgeCount > 0)
+                Positioned(
+                  key: const Key('home-impuls-postfach-unread-badge'),
+                  right: 4,
+                  top: 1,
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 17,
+                      minHeight: 17,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF5F7A),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: const Color(0xFF07101A),
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      badgeCount > 9 ? '9+' : badgeCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
