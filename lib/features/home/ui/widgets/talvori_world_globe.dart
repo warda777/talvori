@@ -156,61 +156,9 @@ class _GlobeLightNode extends StatelessWidget {
 
     return IgnorePointer(
       child: SizedBox.square(
-        dimension: size * 4.2,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            CustomPaint(
-              size: Size.square(size * 4),
-              painter: _GlobeLightStarPainter(color: color, intensity: size),
-            ),
-            Container(
-              width: size * 2.7,
-              height: size * 2.7,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withValues(alpha: 0.08),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.5),
-                    blurRadius: 16,
-                  ),
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.2),
-                    blurRadius: 34,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.96),
-                    blurRadius: 12,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: size * 0.42,
-              height: size * 0.42,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFFFF6DF),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFFFF3C4).withValues(alpha: 0.8),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-          ],
+        dimension: size * 5.6,
+        child: CustomPaint(
+          painter: _GlobeLightStarPainter(color: color, intensity: size),
         ),
       ),
     );
@@ -226,38 +174,117 @@ class _GlobeLightStarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final longRay = intensity * 1.75;
-    final shortRay = intensity * 1.05;
+    final warm = color;
+    final hotCore = const Color(0xFFFFF7D8);
+    final amberEdge = const Color(0xFFFF8F2C);
 
-    final glowPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 1.45
-      ..color = color.withValues(alpha: 0.22)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
-    final corePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 0.72
-      ..color = color.withValues(alpha: 0.58);
-
-    void drawRay(double angle, double length, Paint paint) {
-      final direction = Offset(math.cos(angle), math.sin(angle));
-      canvas.drawLine(
-        center - direction * (length * 0.36),
-        center + direction * length,
-        paint,
+    void drawGlowCircle(double radius, double alpha, double blur) {
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              hotCore.withValues(alpha: alpha * 0.82),
+              warm.withValues(alpha: alpha * 0.58),
+              amberEdge.withValues(alpha: alpha * 0.18),
+              Colors.transparent,
+            ],
+            stops: const [0, 0.22, 0.58, 1],
+          ).createShader(Rect.fromCircle(center: center, radius: radius))
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur),
       );
     }
 
+    void drawLensRay({
+      required double angle,
+      required double length,
+      required double thickness,
+      required double alpha,
+      required double blur,
+    }) {
+      final rect = Rect.fromCenter(
+        center: Offset.zero,
+        width: length,
+        height: thickness,
+      );
+      final shader = LinearGradient(
+        colors: [
+          Colors.transparent,
+          amberEdge.withValues(alpha: alpha * 0.18),
+          warm.withValues(alpha: alpha * 0.68),
+          hotCore.withValues(alpha: alpha),
+          warm.withValues(alpha: alpha * 0.68),
+          amberEdge.withValues(alpha: alpha * 0.18),
+          Colors.transparent,
+        ],
+        stops: const [0, 0.22, 0.42, 0.5, 0.58, 0.78, 1],
+      ).createShader(rect);
+
+      canvas
+        ..save()
+        ..translate(center.dx, center.dy)
+        ..rotate(angle);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(thickness)),
+        Paint()
+          ..shader = shader
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur),
+      );
+      canvas.restore();
+    }
+
+    drawGlowCircle(intensity * 3.2, 0.22, 8);
+    drawGlowCircle(intensity * 1.72, 0.5, 5);
+
     for (final angle in const [0.0, math.pi / 2]) {
-      drawRay(angle, longRay, glowPaint);
-      drawRay(angle, longRay, corePaint);
+      drawLensRay(
+        angle: angle,
+        length: intensity * 5.0,
+        thickness: intensity * 0.34,
+        alpha: 0.62,
+        blur: 3.4,
+      );
+      drawLensRay(
+        angle: angle,
+        length: intensity * 4.45,
+        thickness: intensity * 0.12,
+        alpha: 0.9,
+        blur: 1.25,
+      );
     }
     for (final angle in const [math.pi / 4, -math.pi / 4]) {
-      drawRay(angle, shortRay, glowPaint);
-      drawRay(angle, shortRay, corePaint);
+      drawLensRay(
+        angle: angle,
+        length: intensity * 3.35,
+        thickness: intensity * 0.13,
+        alpha: 0.26,
+        blur: 2.2,
+      );
     }
+
+    canvas.drawCircle(
+      center,
+      intensity * 0.88,
+      Paint()
+        ..shader =
+            RadialGradient(
+              colors: [
+                hotCore,
+                const Color(0xFFFFD178).withValues(alpha: 0.92),
+                amberEdge.withValues(alpha: 0.34),
+                Colors.transparent,
+              ],
+              stops: const [0, 0.38, 0.72, 1],
+            ).createShader(
+              Rect.fromCircle(center: center, radius: intensity * 0.88),
+            ),
+    );
+    canvas.drawCircle(
+      center,
+      intensity * 0.26,
+      Paint()..color = const Color(0xFFFFFBEC).withValues(alpha: 0.96),
+    );
   }
 
   @override
