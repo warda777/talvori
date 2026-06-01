@@ -441,7 +441,18 @@ class _HubCenterButton extends StatelessWidget {
               duration: const Duration(milliseconds: 520),
               curve: Curves.easeOutBack,
               turns: open ? 1.125 : 0,
-              child: _GradientHubGlyph(open: open),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(scale: animation, child: child),
+                  );
+                },
+                child: _GradientHubGlyph(open: open, key: ValueKey(open)),
+              ),
             ),
           ),
         ),
@@ -451,30 +462,21 @@ class _HubCenterButton extends StatelessWidget {
 }
 
 class _GradientHubGlyph extends StatelessWidget {
-  const _GradientHubGlyph({required this.open});
+  const _GradientHubGlyph({required this.open, super.key});
 
   final bool open;
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: open ? 0 : 1, end: open ? 1 : 0),
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        final firstAngle = value * math.pi / 4;
-        final secondAngle = math.pi / 2 - value * math.pi * 3 / 4;
-        return SizedBox.square(
-          dimension: 42,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              _GradientHubGlyphBar(angle: firstAngle),
-              _GradientHubGlyphBar(angle: secondAngle),
-            ],
-          ),
-        );
-      },
+    return SizedBox.square(
+      dimension: 42,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _GradientHubGlyphBar(angle: open ? math.pi / 4 : 0),
+          _GradientHubGlyphBar(angle: open ? -math.pi / 4 : math.pi / 2),
+        ],
+      ),
     );
   }
 }

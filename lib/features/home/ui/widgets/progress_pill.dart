@@ -247,10 +247,8 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
     );
     const pillTop = Color(0xFF101C2A);
     const pillBottom = Color(0xFF050912);
-    const trackColor = Color(0xFF111927);
     const cyan = Color(0xFF5DDCFF);
     const violet = Color(0xFFB36BFF);
-    const glowingOrange = Color(0xFFFF9639); // Glühendes Orange
 
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -259,144 +257,73 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
         _colorController,
       ]),
       builder: (context, _) {
-        final progressValue = _progressAnimation.value;
-        final barColor = _colorAnimation.value ?? glowingOrange;
-
-        // Berechne Glow-Intensität: synchron mit Farb-Animation
-        // Wenn Farbe von Blau zu Orange wechselt (reverse), Glow wird stärker
-        // Wenn Farbe von Orange zu Blau wechselt (forward), Glow wird schwächer
-        // Glow nur anzeigen, wenn Counter > 0
-        final shouldShowGlow = widget.selected > 0;
-        final colorProgress =
-            _colorController.value; // 0.0 = Orange, 1.0 = Blau
-        // Glow-Intensität basiert auf Farb-Progress: bei Orange (0.0) maximal, bei Blau (1.0) minimal
-        final glowIntensity = shouldShowGlow
-            ? (1.0 - colorProgress)
-            : 0.0; // 1.0 = maximaler Glow bei Orange, 0.0 = kein Glow bei Blau
-        final glowOpacity =
-            glowIntensity * 0.9; // Maximal 90% Opacity für starken Glow
-
         final pill = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.all(1.1),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [pillTop, pillBottom],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [cyan, violet],
             ),
-            borderRadius: BorderRadius.circular(17),
-            border: Border.all(color: cyan.withValues(alpha: 0.82), width: 1.2),
+            borderRadius: BorderRadius.circular(18),
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: cyan.withValues(alpha: 0.2),
-                      blurRadius: 24,
-                      spreadRadius: -6,
+                      color: cyan.withValues(alpha: 0.22),
+                      blurRadius: 20,
+                      spreadRadius: -7,
+                      offset: const Offset(-4, 2),
                     ),
                     BoxShadow(
-                      color: violet.withValues(alpha: 0.1),
-                      blurRadius: 42,
-                      spreadRadius: -12,
+                      color: violet.withValues(alpha: 0.18),
+                      blurRadius: 26,
+                      spreadRadius: -10,
+                      offset: const Offset(5, 3),
                     ),
                   ]
                 : null,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              widget.leading ??
-                  const Icon(
-                    Icons.system_update_alt_rounded,
-                    size: 14,
-                    color: Color(0xFFEAFBFF),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [pillTop, pillBottom],
+              ),
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.leading ??
+                      const Icon(
+                        Icons.system_update_alt_rounded,
+                        size: 13,
+                        color: Color(0xFFEAFBFF),
+                      ),
+                  const SizedBox(width: 5),
+                  Text(
+                    key: widget.counterKey, // <-- NEU: Key für den Counter
+                    '$_displayedSelected/${widget.max}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: Color(0xFFF4FCFF),
+                      height: 1,
+                    ),
                   ),
-              const SizedBox(width: 5),
-              Text(
-                key: widget.counterKey, // <-- NEU: Key für den Counter
-                '$_displayedSelected/${widget.max}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: Color(0xFFF4FCFF),
-                ),
+                ],
               ),
-              const SizedBox(width: 7),
-              SizedBox(
-                width: widget.barWidth,
-                height: 7,
-                child: Stack(
-                  children: [
-                    // Hintergrund
-                    Container(
-                      decoration: BoxDecoration(
-                        color: trackColor,
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          width: 0.8,
-                        ),
-                      ),
-                    ),
-                    // Progress-Bar mit abgerundetem vorderem Ende und Glow
-                    FractionallySizedBox(
-                      widthFactor: progressValue,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              barColor,
-                              Color.lerp(barColor, cyan, 0.45) ?? cyan,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(5),
-                            bottomLeft: const Radius.circular(5),
-                            topRight: const Radius.circular(
-                              5,
-                            ), // Immer abgerundet vorne
-                            bottomRight: const Radius.circular(
-                              5,
-                            ), // Immer abgerundet vorne
-                          ),
-                          // Starker Glow, synchron mit Farb-Animation
-                          boxShadow: glowIntensity > 0.01
-                              ? [
-                                  BoxShadow(
-                                    color: glowingOrange.withValues(
-                                      alpha: glowOpacity,
-                                    ),
-                                    blurRadius:
-                                        14 *
-                                        glowIntensity, // Starker Blur bei maximalem Glow
-                                    spreadRadius:
-                                        2 *
-                                        glowIntensity, // Spread für mehr Intensität
-                                  ),
-                                  BoxShadow(
-                                    color: glowingOrange.withValues(
-                                      alpha: glowOpacity * 0.6,
-                                    ),
-                                    blurRadius:
-                                        28 *
-                                        glowIntensity, // Zusätzlicher äußerer Glow
-                                    spreadRadius: glowIntensity,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         );
 
         return widget.onTap == null
             ? pill
             : InkWell(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 onTap: widget.onTap,
                 child: pill,
               );
