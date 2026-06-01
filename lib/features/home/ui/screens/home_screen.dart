@@ -692,8 +692,15 @@ class _HomeWorldHero extends StatelessWidget {
   static const _violet = Color(0xFFB36BFF);
   @override
   Widget build(BuildContext context) {
-    final globeSize = compact ? 292.0 : 500.0;
-    final haloSize = compact ? 316.0 : 542.0;
+    final availableWidth = (MediaQuery.sizeOf(context).width - 32)
+        .clamp(280.0, 620.0)
+        .toDouble();
+    final globeSize = (availableWidth * (compact ? 0.93 : 0.96))
+        .clamp(compact ? 304.0 : 340.0, compact ? 348.0 : 560.0)
+        .toDouble();
+    final haloSize = (globeSize + (compact ? 28.0 : 40.0))
+        .clamp(globeSize, availableWidth)
+        .toDouble();
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
     final companionSize = companionState.isExpanded

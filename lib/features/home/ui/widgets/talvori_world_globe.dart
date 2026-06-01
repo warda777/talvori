@@ -234,15 +234,6 @@ class _GlobeAtmospherePainter extends CustomPainter {
     );
 
     canvas.drawCircle(
-      center,
-      radius * 1.01,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.01
-        ..color = const Color(0xFFFFC47A).withValues(alpha: 0.3),
-    );
-
-    canvas.drawCircle(
       center + Offset(-radius * 0.28, -radius * 0.22),
       radius * 0.82,
       Paint()
