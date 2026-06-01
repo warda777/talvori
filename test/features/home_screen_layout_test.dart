@@ -66,11 +66,9 @@ void main() {
   }
 
   Future<void> openHomeHub(WidgetTester tester) async {
-    await tester.tap(
-      find.byKey(const Key('home-smart-hub-button')),
-      warnIfMissed: false,
-    );
-    await tester.pump(const Duration(milliseconds: 300));
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    await tester.tapAt(Offset(size.width / 2, size.height - 99));
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.pump();
   }
 
@@ -133,9 +131,6 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
     await tester.pump();
     expect(globeRect.width, greaterThan(180));
-    await openHomeHub(tester);
-    expect(find.text('Wortspiele'), findsOneWidget);
-    expect(find.text('Wörter sammeln'), findsOneWidget);
     expect(
       find.byKey(const Key('home-impuls-postfach-button')),
       findsOneWidget,
@@ -272,7 +267,7 @@ void main() {
     expect(find.byKey(const Key('home-companion-chat-hint')), findsOneWidget);
     expect(find.text('Chatten \u2192'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
 
     expect(find.byKey(const Key('home-companion-chat-hint')), findsNothing);
@@ -356,7 +351,7 @@ void main() {
 
     expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
 
     expect(
@@ -451,7 +446,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
     expect(
       find.byKey(const Key('talvori-companion-chat-input')),
@@ -492,7 +487,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
     expect(
       find.byKey(const Key('talvori-companion-chat-input')),
@@ -532,7 +527,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      await tester.tap(find.byKey(const Key('talvori-companion-bubble')));
+      await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
       await tester.pump();
       expect(
         find.byKey(const Key('talvori-companion-chat-input')),
@@ -1277,7 +1272,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    expect(find.text('Wortspiele'), findsOneWidget);
+    expect(find.byKey(const Key('home-practice-button')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('home-practice-button')));
     await tester.pumpAndSettle();

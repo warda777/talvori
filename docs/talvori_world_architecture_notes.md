@@ -38,14 +38,16 @@ Aufgabe:
 
 - Talvori-Welt-Zentrale
 - Globe als Hauptaktion
-- Status- und Smart-Hub-Navigation
+- Status- und Plus-Hub-Navigation
 - Companion-Entry
 
 Aktuelle Home-Entscheidung:
 
-- Der Smart-Hub ersetzt im ersten Talvori-Welt-Home das permanente Bottom-Dock.
-- Ziel ist ein ruhiger Hero-Screen: ein Planet, ein Companion, ein
-  ausklappbarer Hub.
+- Die Home-Zentrale nutzt vorerst eine reduzierte Bottom-Bar mit Chat links,
+  Profil rechts und zentralem Plus-Hub.
+- Zusaetzliche Funktionen erscheinen als schwebende Icon-Quick-Actions ohne
+  sichtbare Textlabels.
+- Welt oeffnen bleibt direkt am Globe, damit der Planet die Hauptaktion bleibt.
 
 ### `features/companion`
 

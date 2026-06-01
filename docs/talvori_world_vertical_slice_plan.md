@@ -32,19 +32,20 @@ Elemente:
   - Ressourcen-Kurzstand
   - Companion-Zustand
   - Weltfortschritt
-- Zentraler Smart-Hub statt dauerhaftem Bottom Dock:
+- Reduzierte Bottom-Bar mit Chat links, Profil rechts und zentralem Plus-Hub:
   - Lernen
   - Woerter / Import
   - Spiele
-  - Welt
   - Satzfunken / Tagesimpuls
-  - Profil/Freunde, wenn sinnvoll
 - Companion sichtbar, aber nicht dominant ueber dem Globe
 
 Designentscheidung:
 
-- Die Home-Zentrale nutzt vorerst einen zentralen Smart-Hub statt eines
-  permanenten Bottom-Docks, damit der Globus der visuelle Hero bleibt.
+- Die Home-Zentrale nutzt vorerst eine reduzierte Bottom-Bar mit Chat links,
+  Profil rechts und zentralem Plus-Hub. Zusaetzliche Funktionen erscheinen als
+  schwebende Icon-Quick-Actions, damit der Globus der visuelle Hero bleibt.
+- Welt oeffnen ist keine separate Hub-Aktion: Der Globus selbst ist der
+  Welt-Einstieg.
 
 Nicht-Ziele:
 
@@ -244,7 +245,8 @@ Ein erfolgreicher Slice:
 
 ## 11. Empfohlene Erste Implementierungsbloecke
 
-1. Home-Zentrale UI-Prototyp mit Globe, Top Bar, Bottom Dock und Companion.
+1. Home-Zentrale UI-Prototyp mit Globe, reduzierter Top Bar, Plus-Hub und
+   Companion.
 2. Lokale World-State-Models und Demo-Region ohne DB-Migration.
 3. World Region Screen mit Plot und drei Gebaeuden.
 4. Reward Bridge Interface und Fake/Lokal-Result-Demo.

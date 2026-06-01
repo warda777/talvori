@@ -409,58 +409,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final homeHubActions = [
       HomeSmartHubAction(
-        key: const Key('home-world-open-action'),
-        icon: Icons.public_rounded,
-        label: 'Welt öffnen',
-        subtitle: 'Startregion',
-        onTap: _openWorldRegion,
-      ),
-      HomeSmartHubAction(
         key: const Key('home-my-words-play-button'),
         icon: Icons.psychology_rounded,
         label: 'Lernen',
-        subtitle: 'Review',
         onTap: _showLearningSourcesPopup,
       ),
       HomeSmartHubAction(
         key: const Key('home-browser-return-button'),
         icon: Icons.travel_explore_rounded,
         label: 'Wörter sammeln',
-        subtitle: 'Import',
         onTap: _openExternalWordImport,
       ),
       HomeSmartHubAction(
         key: const Key('home-sentence-sparks-button'),
         icon: Icons.auto_awesome_rounded,
         label: 'Satzfunken',
-        subtitle: 'Tagesimpuls',
         onTap: _openSentenceSparks,
       ),
       HomeSmartHubAction(
         key: const Key('home-practice-button'),
         icon: Icons.sports_esports_rounded,
         label: 'Wortspiele',
-        subtitle: 'Challenges',
         onTap: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => const VocabScreen())),
-      ),
-      HomeSmartHubAction(
-        key: const Key('home-impuls-postfach-button'),
-        icon: Icons.forum_rounded,
-        label: 'Freunde',
-        subtitle: 'Chat',
-        badgeCount: impulseUnreadCount,
-        onTap: _openImpulseInbox,
-      ),
-      HomeSmartHubAction(
-        key: const Key('home-profile-button'),
-        icon: Icons.person_rounded,
-        label: 'Profil',
-        subtitle: 'Du',
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
       ),
     ];
 
@@ -521,61 +493,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      HomeTopBar(
-                                        buttonKey: _rightButtonKey,
-                                        progressPillKey: _progressPillKey,
-                                        counterKey:
-                                            _counterKey, // <-- NEU: Counter Key
-                                        crownButtonKey: _crownButtonKey,
-                                        fireballKey: _fireballKey,
-                                        onAllWords: () {
-                                          // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                                        },
-                                        onRewards: () =>
-                                            _todo('Rewards/Leaderboard/Stats'),
-                                        onProgressTap: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const CourseScreen(),
-                                            ),
-                                          );
-                                        },
-                                        selected: tagesimpulsSelection.count,
-                                        max: tagesimpulsSelection.maxCount,
-                                        showProgress:
-                                            tagesimpulsSelection.count <
-                                                tagesimpulsSelection.maxCount ||
-                                            _progressAnimationRunning,
-                                        onProgressAnimationStart: () {
-                                          // Animation gestartet - verzögere setState
-                                          if (mounted) {
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback((_) {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _progressAnimationRunning =
-                                                          true;
-                                                    });
-                                                  }
-                                                });
-                                          }
-                                        },
-                                        onProgressAnimationComplete: () {
-                                          // Animation fertig - jetzt kann die Pill ausgeblendet werden
-                                          // Verzögere setState, damit es nicht während des Builds aufgerufen wird
-                                          if (mounted) {
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback((_) {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _progressAnimationRunning =
-                                                          false;
-                                                    });
-                                                  }
-                                                });
-                                          }
-                                        },
+                                      Opacity(
+                                        opacity: 0.78,
+                                        child: HomeTopBar(
+                                          buttonKey: _rightButtonKey,
+                                          progressPillKey: _progressPillKey,
+                                          counterKey: _counterKey,
+                                          crownButtonKey: _crownButtonKey,
+                                          fireballKey: _fireballKey,
+                                          onAllWords: () {
+                                            // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                                          },
+                                          onRewards: () => _todo(
+                                            'Rewards/Leaderboard/Stats',
+                                          ),
+                                          onProgressTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const CourseScreen(),
+                                              ),
+                                            );
+                                          },
+                                          selected: tagesimpulsSelection.count,
+                                          max: tagesimpulsSelection.maxCount,
+                                          showProgress:
+                                              tagesimpulsSelection.count <
+                                                  tagesimpulsSelection
+                                                      .maxCount ||
+                                              _progressAnimationRunning,
+                                          onProgressAnimationStart: () {
+                                            if (mounted) {
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                    if (mounted) {
+                                                      setState(() {
+                                                        _progressAnimationRunning =
+                                                            true;
+                                                      });
+                                                    }
+                                                  });
+                                            }
+                                          },
+                                          onProgressAnimationComplete: () {
+                                            if (mounted) {
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                    if (mounted) {
+                                                      setState(() {
+                                                        _progressAnimationRunning =
+                                                            false;
+                                                      });
+                                                    }
+                                                  });
+                                            }
+                                          },
+                                        ),
                                       ),
                                       const SizedBox(height: 16),
                                       Center(
@@ -598,7 +571,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               _openSentenceSparks,
                                         ),
                                       ),
-                                      const SizedBox(height: 120),
+                                      const SizedBox(height: 102),
                                     ],
                                   ),
                                 ),
@@ -612,7 +585,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
-            floatingActionButton: HomeSmartHubMenu(actions: homeHubActions),
+            floatingActionButton: HomeSmartHubMenu(
+              actions: homeHubActions,
+              chatBadgeCount: impulseUnreadCount,
+              onChatTap: _openImpulseInbox,
+              onProfileTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
           ),
@@ -710,23 +690,21 @@ class _HomeWorldHero extends StatelessWidget {
 
   static const _cyan = Color(0xFF5DDCFF);
   static const _violet = Color(0xFFB36BFF);
-  static const _mint = Color(0xFF9FF7D5);
-
   @override
   Widget build(BuildContext context) {
-    final globeSize = compact ? 310.0 : 430.0;
-    final haloSize = compact ? 338.0 : 472.0;
+    final globeSize = compact ? 292.0 : 500.0;
+    final haloSize = compact ? 316.0 : 542.0;
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
     final companionSize = companionState.isExpanded
-        ? (compact ? 116.0 : 134.0)
-        : (compact ? 86.0 : 96.0);
+        ? (compact ? 96.0 : 118.0)
+        : (compact ? 72.0 : 84.0);
     final companionWidth = companionState.isExpanded
-        ? (compact ? 280.0 : 312.0)
+        ? (compact ? 336.0 : 460.0)
         : companionSize + 10;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 520),
+      constraints: const BoxConstraints(maxWidth: 590),
       child: Column(
         key: const Key('talvori-world-home-hero'),
         mainAxisSize: MainAxisSize.min,
@@ -750,117 +728,94 @@ class _HomeWorldHero extends StatelessWidget {
             ),
           ),
           SizedBox(height: globeGap),
-          Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: haloSize,
-                height: haloSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      _cyan.withValues(alpha: 0.16),
-                      _violet.withValues(alpha: 0.08),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-              TalvoriWorldGlobe(onTap: onGlobeTap, size: globeSize),
-              Positioned(
-                bottom: compact ? 22 : 28,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 13,
-                    vertical: 7,
-                  ),
+          SizedBox(
+            width: haloSize,
+            height: haloSize,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: haloSize,
+                  height: haloSize,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF07101A).withValues(alpha: 0.86),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: _mint.withValues(alpha: 0.36)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _cyan.withValues(alpha: 0.12),
-                        blurRadius: 22,
-                      ),
-                    ],
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.touch_app_rounded, size: 15, color: _mint),
-                      SizedBox(width: 6),
-                      Text(
-                        'Welt öffnen',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0,
-                        ),
-                      ),
-                    ],
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        _cyan.withValues(alpha: 0.16),
+                        _violet.withValues(alpha: 0.08),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: (haloSize - globeSize) / 2,
+                  child: TalvoriWorldGlobe(onTap: onGlobeTap, size: globeSize),
+                ),
+              ],
+            ),
           ),
+          if (showCompanion) SizedBox(height: compact ? 10 : 54),
           if (showCompanion)
             SizedBox(
               height: companionState.isExpanded
-                  ? (compact ? 206 : 228)
-                  : (compact ? 92 : 104),
+                  ? (compact ? 238 : 264)
+                  : (compact ? 52 : 60),
               child: Align(
-                alignment: Alignment.centerRight,
+                alignment: Alignment.topLeft,
                 child: SizedBox(
                   width: companionWidth,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: TalvoriCompanionCard(
-                      mascotMood: companionState.mascotMood,
-                      emotion: companionState.emotion,
-                      title: companionDisplayName,
-                      message: _companionMessage(companionState.message),
-                      bubbleVisible: companionState.bubbleVisible,
-                      isExpanded: companionState.isExpanded,
-                      inputVisible: companionState.inputVisible,
-                      isThinking: companionState.isThinking,
-                      showChatHint:
-                          showHomeChatHint && companionState.bubbleVisible,
-                      mascotStyle: mascotStyle,
-                      mascotSize: companionSize,
-                      compactMascotScale: 0.68,
-                      messageMaxLines: compact ? 2 : 3,
-                      quickActions: [
-                        TalvoriCompanionQuickAction(
-                          key: const Key('home-companion-sentence-sparks'),
-                          label: 'Satzfunken',
-                          icon: Icons.auto_awesome_rounded,
-                          onTap: onSentenceSparksTap,
-                        ),
-                        TalvoriCompanionQuickAction(
-                          key: const Key('home-companion-learn'),
-                          label: 'Lernen',
-                          icon: Icons.psychology_rounded,
-                          onTap: onLearnTap,
-                        ),
-                        TalvoriCompanionQuickAction(
-                          key: const Key('home-companion-world'),
-                          label: 'Welt',
-                          icon: Icons.public_rounded,
-                          onTap: onGlobeTap,
-                        ),
-                      ],
-                      onMascotTap: onCompanionTap,
-                      onBubbleTap: onCompanionBubbleTap,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: onCompanionBubbleTap,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: TalvoriCompanionCard(
+                        mascotMood: companionState.mascotMood,
+                        emotion: companionState.emotion,
+                        title: companionDisplayName,
+                        message: _companionMessage(companionState.message),
+                        bubbleVisible: companionState.bubbleVisible,
+                        isExpanded: companionState.isExpanded,
+                        inputVisible: companionState.inputVisible,
+                        isThinking: companionState.isThinking,
+                        showChatHint:
+                            showHomeChatHint && companionState.bubbleVisible,
+                        mascotStyle: mascotStyle,
+                        mascotSize: companionSize,
+                        compactMascotScale: 0.68,
+                        messageMaxLines: compact ? 2 : 3,
+                        quickActions: [
+                          TalvoriCompanionQuickAction(
+                            key: const Key('home-companion-sentence-sparks'),
+                            label: 'Satzfunken',
+                            icon: Icons.auto_awesome_rounded,
+                            onTap: onSentenceSparksTap,
+                          ),
+                          TalvoriCompanionQuickAction(
+                            key: const Key('home-companion-learn'),
+                            label: 'Lernen',
+                            icon: Icons.psychology_rounded,
+                            onTap: onLearnTap,
+                          ),
+                          TalvoriCompanionQuickAction(
+                            key: const Key('home-companion-world'),
+                            label: 'Welt',
+                            icon: Icons.public_rounded,
+                            onTap: onGlobeTap,
+                          ),
+                        ],
+                        onMascotTap: onCompanionTap,
+                        onBubbleTap: onCompanionBubbleTap,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          SizedBox(height: compact ? 10 : 12),
+            )
+          else
+            SizedBox(height: globeGap),
         ],
       ),
     );
