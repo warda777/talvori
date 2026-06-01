@@ -51,7 +51,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
       counterKey: useKey ? widget.counterKey : null,
       selected: widget.selected,
       max: widget.max,
-      barWidth: 120,
+      barWidth: 54,
       onAnimationStart: widget.onProgressAnimationStart,
       onAnimationComplete: () {
         widget.onProgressAnimationComplete?.call();
@@ -92,7 +92,7 @@ class _HomeTopBarState extends State<HomeTopBar> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44,
+      height: 34,
       child: Align(
         alignment: Alignment.centerLeft,
         child: (widget.showProgress || _glitchEffectActive)

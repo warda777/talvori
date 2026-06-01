@@ -277,31 +277,26 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
             glowIntensity * 0.9; // Maximal 90% Opacity für starken Glow
 
         final pill = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [pillTop, pillBottom],
             ),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: cyan.withValues(alpha: 0.9), width: 1.6),
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(color: cyan.withValues(alpha: 0.82), width: 1.2),
             boxShadow: glowEnabled
                 ? [
                     BoxShadow(
-                      color: cyan.withValues(alpha: 0.26),
-                      blurRadius: 38,
-                      spreadRadius: -2,
+                      color: cyan.withValues(alpha: 0.2),
+                      blurRadius: 24,
+                      spreadRadius: -6,
                     ),
                     BoxShadow(
-                      color: violet.withValues(alpha: 0.12),
-                      blurRadius: 68,
-                      spreadRadius: -8,
-                    ),
-                    BoxShadow(
-                      color: cyan.withValues(alpha: 0.05),
-                      blurRadius: 90,
-                      spreadRadius: -14,
+                      color: violet.withValues(alpha: 0.1),
+                      blurRadius: 42,
+                      spreadRadius: -12,
                     ),
                   ]
                 : null,
@@ -312,22 +307,23 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
               widget.leading ??
                   const Icon(
                     Icons.system_update_alt_rounded,
-                    size: 16,
+                    size: 14,
                     color: Color(0xFFEAFBFF),
                   ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Text(
                 key: widget.counterKey, // <-- NEU: Key für den Counter
                 '$_displayedSelected/${widget.max}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
+                  fontSize: 14,
                   color: Color(0xFFF4FCFF),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 7),
               SizedBox(
                 width: widget.barWidth,
-                height: 10,
+                height: 7,
                 child: Stack(
                   children: [
                     // Hintergrund
@@ -337,7 +333,7 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                         borderRadius: BorderRadius.circular(5),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.08),
-                          width: 1,
+                          width: 0.8,
                         ),
                       ),
                     ),
@@ -370,10 +366,10 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                                       alpha: glowOpacity,
                                     ),
                                     blurRadius:
-                                        20 *
+                                        14 *
                                         glowIntensity, // Starker Blur bei maximalem Glow
                                     spreadRadius:
-                                        4 *
+                                        2 *
                                         glowIntensity, // Spread für mehr Intensität
                                   ),
                                   BoxShadow(
@@ -381,9 +377,9 @@ class _ProgressPillState extends ConsumerState<ProgressPill>
                                       alpha: glowOpacity * 0.6,
                                     ),
                                     blurRadius:
-                                        40 *
+                                        28 *
                                         glowIntensity, // Zusätzlicher äußerer Glow
-                                    spreadRadius: 2 * glowIntensity,
+                                    spreadRadius: glowIntensity,
                                   ),
                                 ]
                               : null,

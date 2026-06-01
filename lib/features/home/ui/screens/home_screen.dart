@@ -31,8 +31,6 @@ import 'package:talvori/features/world/ui/screens/world_region_screen.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
-import 'package:talvori/features/common/widgets/fireball_bounce_animation.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 const _homeSystemUiOverlayStyle = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
@@ -379,12 +377,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey _progressPillKey = GlobalKey();
   final GlobalKey _counterKey =
       GlobalKey(); // <-- NEU: Für Counter in Progress Pill
-  final GlobalKey _crownButtonKey = GlobalKey(); // Für Fireball Start-Position
-  final GlobalKey<FireballBounceAnimationState> _fireballKey =
-      GlobalKey<FireballBounceAnimationState>();
   final GlobalKey _rightButtonKey = GlobalKey(); // Für den rechten Button
-  final GlobalKey _practiceButtonKey =
-      GlobalKey(); // <-- NEU: Für Practice-Button
 
   @override
   Widget build(BuildContext context) {
@@ -505,24 +498,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     fit: StackFit
                         .expand, // wichtig: voller Bereich für die Animation
                     children: [
-                      // 🔥 Fireball HINTER dem Button
-                      FireballBounceAnimation(
-                        key: _fireballKey,
-                        anchorKey: _crownButtonKey,
-                        practiceKey:
-                            _practiceButtonKey, // <-- NEU: Practice-Button Key
-                        forceColor: const Color(0xFFA05260), // deine Farbe
-                        iconSize: 48,
-                        anchorOffset: const Offset(
-                          0,
-                          0,
-                        ), // Feintuning: falls 1-2px links, dann Offset(2, 0)
-                        child: SvgPicture.asset(
-                          'assets/icons/fireball_black.svg',
-                          width: 48,
-                          height: 48,
-                        ),
-                      ),
                       LayoutBuilder(
                         builder: (context, viewport) {
                           final compactHome = viewport.maxHeight < 760;
@@ -549,8 +524,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           buttonKey: _rightButtonKey,
                                           progressPillKey: _progressPillKey,
                                           counterKey: _counterKey,
-                                          crownButtonKey: _crownButtonKey,
-                                          fireballKey: _fireballKey,
                                           onAllWords: () {
                                             // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
                                           },
@@ -790,16 +763,62 @@ class _HomeWorldHero extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      width: haloSize,
-                      height: haloSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            _cyan.withValues(alpha: 0.16),
-                            _violet.withValues(alpha: 0.08),
-                            Colors.transparent,
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              left: -haloSize * 0.16,
+                              top: haloSize * 0.08,
+                              width: haloSize * 0.72,
+                              height: haloSize * 0.78,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      _cyan.withValues(alpha: 0.24),
+                                      _cyan.withValues(alpha: 0.1),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              right: -haloSize * 0.18,
+                              top: haloSize * 0.04,
+                              width: haloSize * 0.76,
+                              height: haloSize * 0.82,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      _violet.withValues(alpha: 0.22),
+                                      _violet.withValues(alpha: 0.09),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: haloSize * 0.1,
+                              right: haloSize * 0.1,
+                              top: haloSize * 0.18,
+                              height: haloSize * 0.6,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.06),
+                                      _cyan.withValues(alpha: 0.05),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
