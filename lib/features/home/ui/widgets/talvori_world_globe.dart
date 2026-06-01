@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_globe_3d/flutter_globe_3d.dart';
 
 class TalvoriWorldGlobe extends StatefulWidget {
   const TalvoriWorldGlobe({
@@ -18,23 +17,62 @@ class TalvoriWorldGlobe extends StatefulWidget {
   State<TalvoriWorldGlobe> createState() => _TalvoriWorldGlobeState();
 }
 
-class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
+  late final EarthController _controller;
+
+  static const _dayTexture = AssetImage(
+    'packages/flutter_globe_3d/assets/images/earth.jpg',
+  );
+  static const _nightTexture = AssetImage(
+    'packages/flutter_globe_3d/assets/images/earth_night.jpg',
+  );
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 22),
-    )..repeat();
+    _controller = EarthController()
+      ..enableAutoRotate = true
+      ..rotateSpeed = 0.28
+      ..lockNorthSouth = true
+      ..lockZoom = true
+      ..minZoom = 1
+      ..maxZoom = 1;
+    _controller
+      ..setLightMode(EarthLightMode.fixedCoordinates)
+      ..setFixedLightCoordinates(36, -34)
+      ..setCameraFocus(28, 18);
+    _seedTalvoriLights();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _seedTalvoriLights() {
+    for (final node in _talvoriNodes) {
+      _controller.addNode(
+        EarthNode(
+          id: node.id,
+          latitude: node.latitude,
+          longitude: node.longitude,
+          child: _GlobeLightNode(kind: node.kind),
+        ),
+      );
+    }
+
+    for (final connection in _talvoriConnections) {
+      _controller.connect(
+        EarthConnection(
+          fromId: connection.fromId,
+          toId: connection.toId,
+          color: connection.color,
+          width: connection.width,
+          isDashed: true,
+        ),
+      );
+    }
   }
 
   @override
@@ -47,19 +85,45 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe>
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: RepaintBoundary(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              final t = _controller.value;
-              final pulse = (math.sin(t * math.pi * 2) + 1) / 2;
-              return SizedBox.square(
-                dimension: widget.size,
-                child: CustomPaint(
-                  key: const Key('talvori-world-globe'),
-                  painter: _TalvoriWorldGlobePainter(rotation: t, pulse: pulse),
+          child: SizedBox.square(
+            key: const Key('talvori-world-globe'),
+            dimension: widget.size,
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          const Color(0xFFFFC56B).withValues(alpha: 0.2),
+                          const Color(0xFF53D7FF).withValues(alpha: 0.12),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.1, 0.48, 1],
+                      ),
+                    ),
+                  ),
                 ),
-              );
-            },
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.all(widget.size * 0.015),
+                    child: Earth3D(
+                      controller: _controller,
+                      texture: _dayTexture,
+                      nightTexture: _nightTexture,
+                      initialScale: 3.18,
+                      initialLatitude: 28,
+                      initialLongitude: 18,
+                      size: Size.square(widget.size),
+                    ),
+                  ),
+                ),
+                const Positioned.fill(child: _GlobeAtmosphereOverlay()),
+              ],
+            ),
           ),
         ),
       ),
@@ -67,473 +131,180 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe>
   }
 }
 
-class _TalvoriWorldGlobePainter extends CustomPainter {
-  const _TalvoriWorldGlobePainter({
-    required this.rotation,
-    required this.pulse,
-  });
+class _GlobeLightNode extends StatelessWidget {
+  const _GlobeLightNode({required this.kind});
 
-  final double rotation;
-  final double pulse;
+  final _TalvoriNodeKind kind;
 
-  static const _gold = Color(0xFFFFC56B);
-  static const _ice = Color(0xFFE6F7FF);
-  static const _cyan = Color(0xFF58DAFF);
-  static const _violet = Color(0xFF8266FF);
-  static const _ocean = Color(0xFF081A26);
-  static const _night = Color(0xFF02050A);
+  @override
+  Widget build(BuildContext context) {
+    final size = switch (kind) {
+      _TalvoriNodeKind.hub => 9.0,
+      _TalvoriNodeKind.city => 6.0,
+      _TalvoriNodeKind.spark => 4.0,
+    };
+    final color = switch (kind) {
+      _TalvoriNodeKind.hub => const Color(0xFFFFD48A),
+      _TalvoriNodeKind.city => const Color(0xFFFFB75F),
+      _TalvoriNodeKind.spark => const Color(0xFF8EEBFF),
+    };
 
+    return IgnorePointer(
+      child: SizedBox.square(
+        dimension: size * 2.6,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: size * 2.4,
+              height: size * 2.4,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.16),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.6),
+                    blurRadius: 16,
+                  ),
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.25),
+                    blurRadius: 28,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                boxShadow: [BoxShadow(color: color, blurRadius: 10)],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlobeAtmosphereOverlay extends StatelessWidget {
+  const _GlobeAtmosphereOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: CustomPaint(painter: _GlobeAtmospherePainter()),
+    );
+  }
+}
+
+class _GlobeAtmospherePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide * 0.405;
-    final sphereRect = Rect.fromCircle(center: center, radius: radius);
-
-    _drawSpace(canvas, size, center, radius);
-    _drawOuterAuras(canvas, center, radius);
-    _drawOrbitThreads(canvas, center, radius);
-    _drawSphere(canvas, center, radius, sphereRect);
-
-    final spherePath = Path()..addOval(sphereRect);
-    canvas.save();
-    canvas.clipPath(spherePath);
-
-    _drawLandLayer(canvas, center, radius);
-    _drawNightLights(canvas, center, radius);
-    _drawNetworkArcs(canvas, center, radius);
-    _drawCloudVeils(canvas, center, radius);
-    _drawDepthShade(canvas, center, radius, sphereRect);
-
-    canvas.restore();
-
-    _drawRim(canvas, center, radius, sphereRect);
-    _drawOuterSparkNodes(canvas, center, radius);
-  }
-
-  void _drawSpace(Canvas canvas, Size size, Offset center, double radius) {
-    final rect = Offset.zero & size;
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.1, -0.2),
-          radius: 0.92,
-          colors: [
-            _cyan.withValues(alpha: 0.12),
-            _violet.withValues(alpha: 0.045),
-            Colors.transparent,
-          ],
-          stops: const [0, 0.46, 1],
-        ).createShader(rect),
-    );
-
-    for (var i = 0; i < 32; i++) {
-      final angle = (i * 97.3 + rotation * 24) * math.pi / 180;
-      final distance = radius * (1.1 + (i % 9) * 0.12);
-      final pos = center + Offset(math.cos(angle), math.sin(angle)) * distance;
-      if (!rect.inflate(4).contains(pos)) continue;
-      final alpha = 0.08 + (i % 5) * 0.028 + pulse * 0.035;
-      canvas.drawCircle(
-        pos,
-        i % 7 == 0 ? 1.5 : 0.8,
-        Paint()..color = Colors.white.withValues(alpha: alpha),
-      );
-    }
-  }
-
-  void _drawOuterAuras(Canvas canvas, Offset center, double radius) {
-    canvas.drawCircle(
-      center,
-      radius * (1.42 + pulse * 0.02),
-      Paint()
-        ..shader = RadialGradient(
-          colors: [
-            _gold.withValues(alpha: 0.13),
-            _cyan.withValues(alpha: 0.11),
-            _violet.withValues(alpha: 0.05),
-            Colors.transparent,
-          ],
-          stops: const [0, 0.45, 0.72, 1],
-        ).createShader(Rect.fromCircle(center: center, radius: radius * 1.5)),
-    );
+    final radius = size.shortestSide * 0.43;
+    final rect = Rect.fromCircle(center: center, radius: radius);
 
     canvas.drawCircle(
       center,
-      radius * 1.035,
+      radius * 1.03,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.12
-        ..color = _cyan.withValues(alpha: 0.07 + pulse * 0.018)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22),
-    );
-  }
-
-  void _drawOrbitThreads(Canvas canvas, Offset center, double radius) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.85
-      ..strokeCap = StrokeCap.round
-      ..color = _gold.withValues(alpha: 0.2 + pulse * 0.04);
-
-    for (final spec in const [
-      (tilt: -0.62, width: 2.72, height: 1.15),
-      (tilt: 0.48, width: 2.6, height: 0.92),
-      (tilt: -0.08, width: 2.38, height: 1.42),
-    ]) {
-      canvas.save();
-      canvas.translate(center.dx, center.dy);
-      canvas.rotate(spec.tilt + rotation * math.pi * 0.16);
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: Offset.zero,
-          width: radius * spec.width,
-          height: radius * spec.height,
-        ),
-        paint,
-      );
-      canvas.restore();
-    }
-  }
-
-  void _drawSphere(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    Rect sphereRect,
-  ) {
-    canvas.drawCircle(
-      center + Offset(radius * 0.08, radius * 0.1),
-      radius * 1.02,
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.38)
+        ..strokeWidth = radius * 0.11
+        ..color = const Color(0xFF6BDEFF).withValues(alpha: 0.1)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
 
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.42, -0.52),
-          radius: 1.18,
-          colors: const [Color(0xFF294050), Color(0xFF102636), _ocean, _night],
-          stops: [0, 0.38, 0.72, 1],
-        ).createShader(sphereRect),
-    );
-  }
-
-  void _drawLandLayer(Canvas canvas, Offset center, double radius) {
-    final drift = math.sin(rotation * math.pi * 2) * radius * 0.34;
-    final landPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          _ice.withValues(alpha: 0.74),
-          const Color(0xFF927B58).withValues(alpha: 0.74),
-          const Color(0xFF2D5944).withValues(alpha: 0.46),
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-    final darkLandPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color(0xFF182017).withValues(alpha: 0.5);
-    final coastPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.012
-      ..strokeJoin = StrokeJoin.round
-      ..color = _gold.withValues(alpha: 0.46);
-    final icePaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = _ice.withValues(alpha: 0.58);
-
-    _drawLandMass(
-      canvas,
-      center + Offset(-0.48 * radius + drift, -0.08 * radius),
-      radius,
-      landPaint,
-      coastPaint,
-      1.0,
-      const [
-        Offset(-0.38, -0.34),
-        Offset(-0.1, -0.48),
-        Offset(0.16, -0.34),
-        Offset(0.32, -0.12),
-        Offset(0.22, 0.14),
-        Offset(0.08, 0.34),
-        Offset(-0.13, 0.46),
-        Offset(-0.26, 0.24),
-        Offset(-0.44, 0.1),
-      ],
-    );
-    _drawLandMass(
-      canvas,
-      center + Offset(0.28 * radius + drift * 0.62, 0.03 * radius),
-      radius,
-      darkLandPaint,
-      coastPaint,
-      0.92,
-      const [
-        Offset(-0.24, -0.38),
-        Offset(0.04, -0.5),
-        Offset(0.33, -0.3),
-        Offset(0.42, 0.04),
-        Offset(0.2, 0.28),
-        Offset(-0.08, 0.24),
-        Offset(-0.32, 0.05),
-      ],
-    );
-    _drawLandMass(
-      canvas,
-      center + Offset(-0.02 * radius - drift * 0.42, 0.44 * radius),
-      radius,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color(0xFF62543A).withValues(alpha: 0.42),
-      coastPaint,
-      0.54,
-      const [
-        Offset(-0.36, -0.16),
-        Offset(-0.08, -0.32),
-        Offset(0.26, -0.18),
-        Offset(0.34, 0.08),
-        Offset(0.1, 0.3),
-        Offset(-0.28, 0.18),
-      ],
-    );
-    _drawLandMass(
-      canvas,
-      center + Offset(-0.02 * radius + drift * 0.25, -0.62 * radius),
-      radius,
-      icePaint,
-      null,
-      0.42,
-      const [
-        Offset(-0.5, -0.04),
-        Offset(-0.16, -0.22),
-        Offset(0.26, -0.12),
-        Offset(0.48, 0.08),
-        Offset(0.1, 0.2),
-        Offset(-0.32, 0.16),
-      ],
-    );
-  }
-
-  void _drawNightLights(Canvas canvas, Offset center, double radius) {
-    final lights = const [
-      Offset(-0.48, -0.24),
-      Offset(-0.34, -0.18),
-      Offset(-0.18, -0.08),
-      Offset(-0.3, 0.12),
-      Offset(0.06, -0.28),
-      Offset(0.22, -0.14),
-      Offset(0.38, 0.02),
-      Offset(0.18, 0.28),
-      Offset(-0.08, 0.42),
-      Offset(0.44, 0.35),
-    ];
-    final drift = math.sin(rotation * math.pi * 2) * radius * 0.06;
-    for (var i = 0; i < lights.length; i++) {
-      final point = lights[i];
-      final pos = center + Offset(point.dx * radius + drift, point.dy * radius);
-      final size = radius * (i % 3 == 0 ? 0.025 : 0.018);
-      canvas.drawCircle(
-        pos,
-        size * 2.2,
-        Paint()
-          ..color = _gold.withValues(alpha: 0.13 + pulse * 0.04)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
-      );
-      canvas.drawCircle(
-        pos,
-        size,
-        Paint()..color = const Color(0xFFFFE1A3).withValues(alpha: 0.82),
-      );
-    }
-  }
-
-  void _drawNetworkArcs(Canvas canvas, Offset center, double radius) {
-    final points = <Offset>[
-      center + const Offset(-0.48, -0.24) * radius,
-      center + const Offset(-0.18, -0.08) * radius,
-      center + const Offset(0.06, -0.28) * radius,
-      center + const Offset(0.38, 0.02) * radius,
-      center + const Offset(0.18, 0.28) * radius,
-      center + const Offset(-0.3, 0.12) * radius,
-    ];
-    final arcPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.006
-      ..strokeCap = StrokeCap.round
-      ..color = _gold.withValues(alpha: 0.22 + pulse * 0.05);
-
-    for (var i = 0; i < points.length; i++) {
-      final start = points[i];
-      final end = points[(i + 2) % points.length];
-      final lift = Offset(
-        math.sin(rotation * math.pi * 2 + i) * radius * 0.18,
-        -radius * (0.12 + (i % 2) * 0.07),
-      );
-      final control = Offset.lerp(start, end, 0.5)! + lift;
-      final path = Path()
-        ..moveTo(start.dx, start.dy)
-        ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
-      canvas.drawPath(path, arcPaint);
-    }
-  }
-
-  void _drawCloudVeils(Canvas canvas, Offset center, double radius) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.024
-      ..strokeCap = StrokeCap.round
-      ..color = Colors.white.withValues(alpha: 0.13)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.6);
-    for (final spec in const [
-      (phase: 0.0, y: -0.34, width: 1.32),
-      (phase: 0.42, y: 0.14, width: 1.16),
-    ]) {
-      final drift =
-          math.sin((rotation + spec.phase) * math.pi * 2) * radius * 0.22;
-      final path = Path()
-        ..moveTo(
-          center.dx - radius * spec.width * 0.42 + drift,
-          center.dy + radius * spec.y,
-        );
-      for (var i = 0; i < 4; i++) {
-        final x0 = center.dx - radius * spec.width * 0.42 + drift;
-        final span = radius * spec.width * 0.84;
-        path.cubicTo(
-          x0 + span * (i + 0.18) / 4,
-          center.dy + radius * (spec.y + (i.isEven ? -0.03 : 0.025)),
-          x0 + span * (i + 0.45) / 4,
-          center.dy + radius * (spec.y + (i.isEven ? 0.026 : -0.03)),
-          x0 + span * (i + 0.78) / 4,
-          center.dy + radius * spec.y,
-        );
-      }
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  void _drawDepthShade(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    Rect sphereRect,
-  ) {
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.08),
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.64),
-          ],
-          stops: const [0, 0.48, 1],
-        ).createShader(sphereRect),
-    );
-    canvas.drawCircle(
-      center + Offset(-radius * 0.34, -radius * 0.42),
-      radius * 0.58,
-      Paint()
-        ..shader =
-            RadialGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.16),
-                _cyan.withValues(alpha: 0.04),
-                Colors.transparent,
-              ],
-            ).createShader(
-              Rect.fromCircle(
-                center: center + Offset(-radius * 0.34, -radius * 0.42),
-                radius: radius * 0.58,
-              ),
-            ),
-    );
-  }
-
-  void _drawRim(Canvas canvas, Offset center, double radius, Rect sphereRect) {
-    canvas.drawCircle(
-      center,
-      radius * 1.005,
+    canvas.drawArc(
+      rect.inflate(radius * 0.03),
+      -0.94,
+      1.62,
+      false,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = radius * 0.024
-        ..shader = SweepGradient(
+        ..strokeWidth = radius * 0.035
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFFFFD08A).withValues(alpha: 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+
+    canvas.drawCircle(
+      center + Offset(radius * 0.26, radius * 0.22),
+      radius * 0.98,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0.36, 0.3),
+          radius: 0.92,
           colors: [
-            _cyan.withValues(alpha: 0.34),
-            _ice.withValues(alpha: 0.78),
-            _gold.withValues(alpha: 0.52),
-            _violet.withValues(alpha: 0.28),
-            _cyan.withValues(alpha: 0.34),
+            Colors.transparent,
+            Colors.transparent,
+            Colors.black.withValues(alpha: 0.46),
           ],
-          transform: GradientRotation(rotation * math.pi * 0.28),
-        ).createShader(sphereRect),
+          stops: const [0, 0.58, 1],
+        ).createShader(rect),
     );
-  }
-
-  void _drawOuterSparkNodes(Canvas canvas, Offset center, double radius) {
-    for (var i = 0; i < 14; i++) {
-      final angle = (i / 14 * math.pi * 2) + rotation * math.pi * 2;
-      final pos =
-          center +
-          Offset(math.cos(angle), math.sin(angle)) *
-              radius *
-              (1.04 + (i % 4) * 0.035);
-      final paint = Paint()
-        ..color = _gold.withValues(alpha: i.isEven ? 0.78 : 0.36)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-      canvas.drawCircle(pos, i.isEven ? 2.1 : 1.2, paint);
-    }
-  }
-
-  void _drawLandMass(
-    Canvas canvas,
-    Offset anchor,
-    double radius,
-    Paint fill,
-    Paint? stroke,
-    double scale,
-    List<Offset> points,
-  ) {
-    if (points.isEmpty) return;
-    final path = Path()
-      ..moveTo(
-        anchor.dx + points.first.dx * radius * scale,
-        anchor.dy + points.first.dy * radius * scale,
-      );
-    for (var i = 1; i < points.length; i++) {
-      final current = points[i];
-      final previous = points[i - 1];
-      final mid = Offset.lerp(previous, current, 0.5)!;
-      path.quadraticBezierTo(
-        anchor.dx + previous.dx * radius * scale,
-        anchor.dy + previous.dy * radius * scale,
-        anchor.dx + mid.dx * radius * scale,
-        anchor.dy + mid.dy * radius * scale,
-      );
-    }
-    final last = points.last;
-    final first = points.first;
-    final mid = Offset.lerp(last, first, 0.5)!;
-    path.quadraticBezierTo(
-      anchor.dx + last.dx * radius * scale,
-      anchor.dy + last.dy * radius * scale,
-      anchor.dx + mid.dx * radius * scale,
-      anchor.dy + mid.dy * radius * scale,
-    );
-    path.close();
-    canvas.drawPath(path, fill);
-    if (stroke != null) canvas.drawPath(path, stroke);
   }
 
   @override
-  bool shouldRepaint(covariant _TalvoriWorldGlobePainter oldDelegate) {
-    return oldDelegate.rotation != rotation || oldDelegate.pulse != pulse;
-  }
+  bool shouldRepaint(covariant _GlobeAtmospherePainter oldDelegate) => false;
 }
+
+enum _TalvoriNodeKind { hub, city, spark }
+
+class _TalvoriNode {
+  const _TalvoriNode(this.id, this.latitude, this.longitude, this.kind);
+
+  final String id;
+  final double latitude;
+  final double longitude;
+  final _TalvoriNodeKind kind;
+}
+
+class _TalvoriConnection {
+  const _TalvoriConnection(
+    this.fromId,
+    this.toId, {
+    this.color = const Color(0xFFFFC56B),
+    this.width = 1.35,
+  });
+
+  final String fromId;
+  final String toId;
+  final Color color;
+  final double width;
+}
+
+const _talvoriNodes = [
+  _TalvoriNode('london', 51.5, -0.1, _TalvoriNodeKind.hub),
+  _TalvoriNode('paris', 48.9, 2.4, _TalvoriNodeKind.city),
+  _TalvoriNode('cairo', 30.0, 31.2, _TalvoriNodeKind.city),
+  _TalvoriNode('dubai', 25.2, 55.3, _TalvoriNodeKind.hub),
+  _TalvoriNode('delhi', 28.6, 77.2, _TalvoriNodeKind.city),
+  _TalvoriNode('singapore', 1.35, 103.8, _TalvoriNodeKind.hub),
+  _TalvoriNode('tokyo', 35.7, 139.7, _TalvoriNodeKind.city),
+  _TalvoriNode('sydney', -33.9, 151.2, _TalvoriNodeKind.spark),
+  _TalvoriNode('newyork', 40.7, -74.0, _TalvoriNodeKind.hub),
+  _TalvoriNode('mexico', 19.4, -99.1, _TalvoriNodeKind.city),
+  _TalvoriNode('rio', -22.9, -43.2, _TalvoriNodeKind.city),
+  _TalvoriNode('capetown', -33.9, 18.4, _TalvoriNodeKind.spark),
+  _TalvoriNode('lagos', 6.5, 3.4, _TalvoriNodeKind.city),
+  _TalvoriNode('reykjavik', 64.1, -21.9, _TalvoriNodeKind.spark),
+];
+
+const _talvoriConnections = [
+  _TalvoriConnection('london', 'newyork'),
+  _TalvoriConnection('london', 'paris', width: 1.1),
+  _TalvoriConnection('paris', 'cairo'),
+  _TalvoriConnection('cairo', 'dubai'),
+  _TalvoriConnection('dubai', 'delhi'),
+  _TalvoriConnection('dubai', 'singapore', width: 1.7),
+  _TalvoriConnection('singapore', 'tokyo'),
+  _TalvoriConnection('singapore', 'sydney', color: Color(0xFF86E7FF)),
+  _TalvoriConnection('newyork', 'mexico', color: Color(0xFF86E7FF)),
+  _TalvoriConnection('mexico', 'rio'),
+  _TalvoriConnection('rio', 'capetown', width: 1.2),
+  _TalvoriConnection('lagos', 'capetown'),
+  _TalvoriConnection('reykjavik', 'london', color: Color(0xFF86E7FF)),
+];
