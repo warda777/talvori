@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_globe_3d/flutter_globe_3d.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -34,6 +35,7 @@ import 'package:talvori/features/home/ui/screens/word_hunt_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_match_game_screen.dart';
 import 'package:talvori/features/home/ui/screens/word_puzzle_game_screen.dart';
 import 'package:talvori/features/home/ui/widgets/talvori_companion_card.dart';
+import 'package:talvori/features/home/ui/widgets/talvori_world_globe.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
 import 'package:talvori/features/world/ui/screens/world_region_screen.dart';
@@ -392,6 +394,15 @@ void main() {
     final initialHeroRect = tester.getRect(
       find.byKey(const Key('talvori-world-home-hero')),
     );
+    final initialGlobeHostState = tester.state<State<TalvoriWorldGlobe>>(
+      find.byType(TalvoriWorldGlobe),
+    );
+    final initialEarthRendererState = tester.state<State<Earth3D>>(
+      find.byKey(const ValueKey('talvori-earth3d-renderer')),
+    );
+    final initialEarthRendererWidget = tester.widget<Earth3D>(
+      find.byKey(const ValueKey('talvori-earth3d-renderer')),
+    );
 
     await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
@@ -414,6 +425,22 @@ void main() {
       find.byKey(const Key('talvori-world-globe-button')),
     );
     expect(chatOpenGlobeRect, initialGlobeRect);
+    expect(
+      tester.state<State<TalvoriWorldGlobe>>(find.byType(TalvoriWorldGlobe)),
+      same(initialGlobeHostState),
+    );
+    expect(
+      tester.state<State<Earth3D>>(
+        find.byKey(const ValueKey('talvori-earth3d-renderer')),
+      ),
+      same(initialEarthRendererState),
+    );
+    expect(
+      tester.widget<Earth3D>(
+        find.byKey(const ValueKey('talvori-earth3d-renderer')),
+      ),
+      same(initialEarthRendererWidget),
+    );
     final inputVisibleInputRect = tester.getRect(
       find.byKey(const Key('talvori-companion-chat-input')),
     );
@@ -431,6 +458,22 @@ void main() {
       find.byKey(const Key('talvori-world-globe-button')),
     );
     expect(keyboardOpenGlobeRect, initialGlobeRect);
+    expect(
+      tester.state<State<TalvoriWorldGlobe>>(find.byType(TalvoriWorldGlobe)),
+      same(initialGlobeHostState),
+    );
+    expect(
+      tester.state<State<Earth3D>>(
+        find.byKey(const ValueKey('talvori-earth3d-renderer')),
+      ),
+      same(initialEarthRendererState),
+    );
+    expect(
+      tester.widget<Earth3D>(
+        find.byKey(const ValueKey('talvori-earth3d-renderer')),
+      ),
+      same(initialEarthRendererWidget),
+    );
     final keyboardOpenHeroRect = tester.getRect(
       find.byKey(const Key('talvori-world-home-hero')),
     );

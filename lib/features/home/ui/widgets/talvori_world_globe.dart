@@ -21,6 +21,7 @@ class TalvoriWorldGlobe extends StatefulWidget {
 
 class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
   late final EarthController _controller;
+  late Widget _earthRenderer;
 
   static const _dayTexture = AssetImage(
     'packages/flutter_globe_3d/assets/images/earth.jpg',
@@ -46,6 +47,15 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
       ..setFixedLightCoordinates(34, -44)
       ..setCameraFocus(28, 18);
     _seedTalvoriLights();
+    _earthRenderer = _buildEarthRenderer(widget.size);
+  }
+
+  @override
+  void didUpdateWidget(covariant TalvoriWorldGlobe oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.size != widget.size) {
+      _earthRenderer = _buildEarthRenderer(widget.size);
+    }
   }
 
   @override
@@ -77,6 +87,20 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
         ),
       );
     }
+  }
+
+  Widget _buildEarthRenderer(double size) {
+    return Earth3D(
+      key: const ValueKey('talvori-earth3d-renderer'),
+      controller: _controller,
+      shaderAsset: _premiumEarthShader,
+      texture: _dayTexture,
+      nightTexture: _nightTexture,
+      initialScale: 3.18,
+      initialLatitude: 28,
+      initialLongitude: 18,
+      size: Size.square(size),
+    );
   }
 
   @override
@@ -114,16 +138,7 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                 Positioned.fill(
                   child: Padding(
                     padding: EdgeInsets.all(widget.size * 0.015),
-                    child: Earth3D(
-                      controller: _controller,
-                      shaderAsset: _premiumEarthShader,
-                      texture: _dayTexture,
-                      nightTexture: _nightTexture,
-                      initialScale: 3.18,
-                      initialLatitude: 28,
-                      initialLongitude: 18,
-                      size: Size.square(widget.size),
-                    ),
+                    child: _earthRenderer,
                   ),
                 ),
                 const Positioned.fill(child: _GlobeAtmosphereOverlay()),

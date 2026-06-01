@@ -872,6 +872,7 @@ class _HomeWorldHero extends StatelessWidget {
                     Positioned(
                       top: (haloSize - globeSize) / 2,
                       child: TalvoriWorldGlobe(
+                        key: const ValueKey('talvori-world-globe-host'),
                         onTap: onGlobeTap,
                         size: globeSize,
                       ),
