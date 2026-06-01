@@ -40,6 +40,7 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
 
   late final AnimationController _controller;
   double _rotation = math.pi;
+  double? _lastPanAngle;
   bool _open = false;
 
   @override
@@ -74,11 +75,40 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     action.onTap();
   }
 
-  void _rotateWheel(DragUpdateDetails details) {
+  double _angleFromCenter(Offset position, Offset center) {
+    final delta = position - center;
+    return math.atan2(delta.dy, delta.dx);
+  }
+
+  double _normalizeAngleDelta(double value) {
+    var delta = value;
+    while (delta > math.pi) {
+      delta -= math.pi * 2;
+    }
+    while (delta < -math.pi) {
+      delta += math.pi * 2;
+    }
+    return delta;
+  }
+
+  void _startWheelRotation(DragStartDetails details, Offset center) {
     if (!_open) return;
+    _lastPanAngle = _angleFromCenter(details.localPosition, center);
+  }
+
+  void _rotateWheel(DragUpdateDetails details, Offset center) {
+    if (!_open) return;
+    final nextAngle = _angleFromCenter(details.localPosition, center);
+    final previousAngle = _lastPanAngle ?? nextAngle;
+    final delta = _normalizeAngleDelta(nextAngle - previousAngle);
     setState(() {
-      _rotation += details.delta.dx * 0.011;
+      _rotation += delta;
     });
+    _lastPanAngle = nextAngle;
+  }
+
+  void _endWheelRotation() {
+    _lastPanAngle = null;
   }
 
   @override
@@ -95,7 +125,10 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
           height: _wheelHeight,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onHorizontalDragUpdate: _rotateWheel,
+            onPanStart: (details) => _startWheelRotation(details, wheelCenter),
+            onPanUpdate: (details) => _rotateWheel(details, wheelCenter),
+            onPanCancel: _endWheelRotation,
+            onPanEnd: (_) => _endWheelRotation(),
             child: Stack(
               alignment: Alignment.bottomCenter,
               clipBehavior: Clip.none,

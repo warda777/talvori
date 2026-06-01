@@ -78,6 +78,38 @@ void main() {
     await tester.pump();
   }
 
+  Future<void> rotateOpenWheelCounterClockwise(WidgetTester tester) async {
+    final hubCenter = tester.getCenter(
+      find.byKey(const Key('home-smart-hub-button')),
+    );
+    final gesture = await tester.startGesture(
+      hubCenter + const Offset(0, -100),
+    );
+    await tester.pump();
+    await gesture.moveTo(hubCenter + const Offset(-100, 0));
+    await tester.pump(const Duration(milliseconds: 80));
+    await gesture.moveTo(hubCenter + const Offset(0, 100));
+    await tester.pump(const Duration(milliseconds: 80));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 200));
+  }
+
+  Future<void> rotateOpenWheelQuarterCounterClockwise(
+    WidgetTester tester,
+  ) async {
+    final hubCenter = tester.getCenter(
+      find.byKey(const Key('home-smart-hub-button')),
+    );
+    final gesture = await tester.startGesture(
+      hubCenter + const Offset(0, -100),
+    );
+    await tester.pump();
+    await gesture.moveTo(hubCenter + const Offset(-100, 0));
+    await tester.pump(const Duration(milliseconds: 80));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 200));
+  }
+
   setUpAll(() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -1224,14 +1256,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final hubCenter = tester.getCenter(
-      find.byKey(const Key('home-smart-hub-button')),
-    );
-    await tester.dragFrom(
-      hubCenter + const Offset(0, -100),
-      const Offset(-300, 0),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
+    await rotateOpenWheelCounterClockwise(tester);
     await tapOpenWheelAction(tester, const Key('home-progress-hub-button'));
     await tester.pump(const Duration(milliseconds: 1000));
 
@@ -1245,7 +1270,7 @@ void main() {
   testWidgets('home wheel world hub button opens local known review screen', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -1258,14 +1283,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await openHomeHub(tester);
-    final hubCenter = tester.getCenter(
-      find.byKey(const Key('home-smart-hub-button')),
-    );
-    await tester.dragFrom(
-      hubCenter + const Offset(0, -100),
-      const Offset(-300, 0),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
+    await rotateOpenWheelCounterClockwise(tester);
+    await rotateOpenWheelQuarterCounterClockwise(tester);
     await tapOpenWheelAction(tester, const Key('home-known-review-button'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
