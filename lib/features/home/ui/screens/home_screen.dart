@@ -490,127 +490,133 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             extendBody: true,
             extendBodyBehindAppBar: true,
             resizeToAvoidBottomInset: false,
-            body: Stack(
-              fit: StackFit.expand,
-              children: [
-                const Positioned.fill(
-                  child: IgnorePointer(child: _HomeAmbientBackground()),
-                ),
-                SafeArea(
-                  child: Stack(
-                    fit: StackFit
-                        .expand, // wichtig: voller Bereich für die Animation
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, viewport) {
-                          final compactHome = viewport.maxHeight < 760;
-                          final showCompanion =
-                              viewport.maxHeight >= 640 || chatOverlayOpen;
-                          final disableHomeScroll = viewport.maxHeight >= 820;
+            body: MediaQuery.removeViewInsets(
+              context: context,
+              removeBottom: true,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const Positioned.fill(
+                    child: IgnorePointer(child: _HomeAmbientBackground()),
+                  ),
+                  SafeArea(
+                    child: Stack(
+                      fit: StackFit
+                          .expand, // wichtig: voller Bereich für die Animation
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, viewport) {
+                            final compactHome = viewport.maxHeight < 760;
+                            final showCompanion =
+                                viewport.maxHeight >= 640 || chatOverlayOpen;
+                            final disableHomeScroll = viewport.maxHeight >= 820;
 
-                          return Stack(
-                            children: [
-                              Padding(
-                                padding: HomeTheme.horizontal,
-                                child: SingleChildScrollView(
-                                  clipBehavior: Clip.none,
-                                  physics: disableHomeScroll
-                                      ? const NeverScrollableScrollPhysics()
-                                      : null,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Opacity(
-                                        opacity: 0.78,
-                                        child: HomeTopBar(
-                                          buttonKey: _rightButtonKey,
-                                          progressPillKey: _progressPillKey,
-                                          counterKey: _counterKey,
-                                          onAllWords: () {
-                                            // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
-                                          },
-                                          onRewards: () => _todo(
-                                            'Rewards/Leaderboard/Stats',
+                            return Stack(
+                              children: [
+                                Padding(
+                                  padding: HomeTheme.horizontal,
+                                  child: SingleChildScrollView(
+                                    clipBehavior: Clip.none,
+                                    physics: disableHomeScroll
+                                        ? const NeverScrollableScrollPhysics()
+                                        : null,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Opacity(
+                                          opacity: 0.78,
+                                          child: HomeTopBar(
+                                            buttonKey: _rightButtonKey,
+                                            progressPillKey: _progressPillKey,
+                                            counterKey: _counterKey,
+                                            onAllWords: () {
+                                              // Navigation wird jetzt von OpenContainer in top_bar.dart gehandhabt
+                                            },
+                                            onRewards: () => _todo(
+                                              'Rewards/Leaderboard/Stats',
+                                            ),
+                                            onProgressTap: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const CourseScreen(),
+                                                ),
+                                              );
+                                            },
+                                            selected:
+                                                tagesimpulsSelection.count,
+                                            max: tagesimpulsSelection.maxCount,
+                                            showProgress:
+                                                tagesimpulsSelection.count <
+                                                    tagesimpulsSelection
+                                                        .maxCount ||
+                                                _progressAnimationRunning,
+                                            onProgressAnimationStart: () {
+                                              if (mounted) {
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback((_) {
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          _progressAnimationRunning =
+                                                              true;
+                                                        });
+                                                      }
+                                                    });
+                                              }
+                                            },
+                                            onProgressAnimationComplete: () {
+                                              if (mounted) {
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback((_) {
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          _progressAnimationRunning =
+                                                              false;
+                                                        });
+                                                      }
+                                                    });
+                                              }
+                                            },
                                           ),
-                                          onProgressTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const CourseScreen(),
-                                              ),
-                                            );
-                                          },
-                                          selected: tagesimpulsSelection.count,
-                                          max: tagesimpulsSelection.maxCount,
-                                          showProgress:
-                                              tagesimpulsSelection.count <
-                                                  tagesimpulsSelection
-                                                      .maxCount ||
-                                              _progressAnimationRunning,
-                                          onProgressAnimationStart: () {
-                                            if (mounted) {
-                                              WidgetsBinding.instance
-                                                  .addPostFrameCallback((_) {
-                                                    if (mounted) {
-                                                      setState(() {
-                                                        _progressAnimationRunning =
-                                                            true;
-                                                      });
-                                                    }
-                                                  });
-                                            }
-                                          },
-                                          onProgressAnimationComplete: () {
-                                            if (mounted) {
-                                              WidgetsBinding.instance
-                                                  .addPostFrameCallback((_) {
-                                                    if (mounted) {
-                                                      setState(() {
-                                                        _progressAnimationRunning =
-                                                            false;
-                                                      });
-                                                    }
-                                                  });
-                                            }
-                                          },
                                         ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Center(
-                                        child: _HomeWorldHero(
-                                          wordCount: state.myWordsCount,
-                                          compact: compactHome,
-                                          onGlobeTap: _openWorldRegion,
+                                        const SizedBox(height: 16),
+                                        Center(
+                                          child: _HomeWorldHero(
+                                            wordCount: state.myWordsCount,
+                                            compact: compactHome,
+                                            onGlobeTap: _openWorldRegion,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 102),
-                                    ],
+                                        const SizedBox(height: 102),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (showCompanion && !chatOverlayOpen)
-                                _HomeCompanionOverlay(
-                                  viewportHeight: viewport.maxHeight,
-                                  compact: compactHome,
-                                  companionState: companionState,
-                                  companionDisplayName: companionDisplayName,
-                                  mascotStyle: mascotStyle,
-                                  showHomeChatHint: showHomeChatHint,
-                                  onCompanionTap: _toggleCompanion,
-                                  onCompanionBubbleTap: _openCompanionChatInput,
-                                  onLearnTap: _showLearningSourcesPopup,
-                                  onSentenceSparksTap: _openSentenceSparks,
-                                  onGlobeTap: _openWorldRegion,
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
+                                if (showCompanion && !chatOverlayOpen)
+                                  _HomeCompanionOverlay(
+                                    viewportHeight: viewport.maxHeight,
+                                    compact: compactHome,
+                                    companionState: companionState,
+                                    companionDisplayName: companionDisplayName,
+                                    mascotStyle: mascotStyle,
+                                    showHomeChatHint: showHomeChatHint,
+                                    onCompanionTap: _toggleCompanion,
+                                    onCompanionBubbleTap:
+                                        _openCompanionChatInput,
+                                    onLearnTap: _showLearningSourcesPopup,
+                                    onSentenceSparksTap: _openSentenceSparks,
+                                    onGlobeTap: _openWorldRegion,
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             floatingActionButton: HomeSmartHubMenu(actions: homeHubActions),
             floatingActionButtonLocation:

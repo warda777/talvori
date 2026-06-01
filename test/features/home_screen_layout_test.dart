@@ -389,6 +389,9 @@ void main() {
     final initialGlobeRect = tester.getRect(
       find.byKey(const Key('talvori-world-globe-button')),
     );
+    final initialHeroRect = tester.getRect(
+      find.byKey(const Key('talvori-world-home-hero')),
+    );
 
     await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
@@ -414,6 +417,14 @@ void main() {
       find.byKey(const Key('talvori-world-globe-button')),
     );
     expect(keyboardOpenGlobeRect, initialGlobeRect);
+    final keyboardOpenHeroRect = tester.getRect(
+      find.byKey(const Key('talvori-world-home-hero')),
+    );
+    expect(keyboardOpenHeroRect, initialHeroRect);
+    final heroContext = tester.element(
+      find.byKey(const Key('talvori-world-home-hero')),
+    );
+    expect(MediaQuery.viewInsetsOf(heroContext).bottom, 0);
 
     await tester.pump(const Duration(seconds: 7));
     await tester.pump();
