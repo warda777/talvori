@@ -322,22 +322,6 @@ class _GlobeAtmospherePainter extends CustomPainter {
     );
 
     canvas.drawCircle(
-      center + Offset(-radius * 0.28, -radius * 0.22),
-      radius * 0.82,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.32, -0.22),
-          radius: 0.9,
-          colors: [
-            const Color(0xFFD9E2E6).withValues(alpha: 0.08),
-            const Color(0xFF7F8D92).withValues(alpha: 0.03),
-            Colors.transparent,
-          ],
-          stops: const [0, 0.45, 1],
-        ).createShader(rect),
-    );
-
-    canvas.drawCircle(
       center + Offset(radius * 0.26, radius * 0.22),
       radius * 0.98,
       Paint()
