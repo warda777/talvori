@@ -493,6 +493,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             body: Stack(
               fit: StackFit.expand,
               children: [
+                const Positioned.fill(
+                  child: IgnorePointer(child: _HomeAmbientBackground()),
+                ),
                 SafeArea(
                   child: Stack(
                     fit: StackFit
@@ -763,11 +766,6 @@ class _HomeWorldHero extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   clipBehavior: Clip.none,
                   children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: _GlobeBackgroundGlow(size: haloSize),
-                      ),
-                    ),
                     Positioned(
                       top: (haloSize - globeSize) / 2,
                       child: TalvoriWorldGlobe(
@@ -860,22 +858,17 @@ class _HomeWorldHero extends StatelessWidget {
   }
 }
 
-class _GlobeBackgroundGlow extends StatelessWidget {
-  const _GlobeBackgroundGlow({required this.size});
-
-  final double size;
+class _HomeAmbientBackground extends StatelessWidget {
+  const _HomeAmbientBackground();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: size,
-      child: CustomPaint(painter: const _GlobeBackgroundGlowPainter()),
-    );
+    return CustomPaint(painter: const _HomeAmbientBackgroundPainter());
   }
 }
 
-class _GlobeBackgroundGlowPainter extends CustomPainter {
-  const _GlobeBackgroundGlowPainter();
+class _HomeAmbientBackgroundPainter extends CustomPainter {
+  const _HomeAmbientBackgroundPainter();
 
   static const _cyan = Color(0xFF00D8FF);
   static const _blue = Color(0xFF2E78FF);
@@ -885,12 +878,7 @@ class _GlobeBackgroundGlowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final coreBand = Rect.fromLTWH(
-      0,
-      size.height * 0.14,
-      size.width,
-      size.height * 0.72,
-    );
+    final rect = Offset.zero & size;
 
     void drawSideLight({
       required Alignment begin,
@@ -904,36 +892,54 @@ class _GlobeBackgroundGlowPainter extends CustomPainter {
           end: end,
           colors: colors,
           stops: stops,
-        ).createShader(coreBand);
-      canvas.drawRect(coreBand, paint);
+        ).createShader(rect);
+      canvas.drawRect(rect, paint);
     }
 
+    canvas.saveLayer(rect, Paint());
     drawSideLight(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: [
         _cyan.withValues(alpha: 0.24),
-        _blue.withValues(alpha: 0.15),
-        _blue.withValues(alpha: 0.04),
+        _blue.withValues(alpha: 0.16),
+        _blue.withValues(alpha: 0.05),
         _transparent,
       ],
-      stops: const [0.0, 0.16, 0.34, 0.58],
+      stops: const [0.0, 0.18, 0.38, 0.7],
     );
     drawSideLight(
       begin: Alignment.centerRight,
       end: Alignment.centerLeft,
       colors: [
         _purple.withValues(alpha: 0.22),
-        _violet.withValues(alpha: 0.14),
-        _violet.withValues(alpha: 0.04),
+        _violet.withValues(alpha: 0.15),
+        _violet.withValues(alpha: 0.05),
         _transparent,
       ],
-      stops: const [0.0, 0.16, 0.34, 0.58],
+      stops: const [0.0, 0.18, 0.38, 0.7],
     );
+
+    final verticalMask = Paint()
+      ..blendMode = BlendMode.dstIn
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          _transparent,
+          Color(0xAA000000),
+          Color(0xEE000000),
+          Color(0xAA000000),
+          _transparent,
+        ],
+        stops: [0.0, 0.26, 0.48, 0.7, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, verticalMask);
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _GlobeBackgroundGlowPainter oldDelegate) =>
+  bool shouldRepaint(covariant _HomeAmbientBackgroundPainter oldDelegate) =>
       false;
 }
 
