@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -705,7 +706,7 @@ class _HomeWorldHero extends StatelessWidget {
   final VoidCallback onSentenceSparksTap;
 
   static const _cyan = Color(0xFF5DDCFF);
-  static const _violet = Color(0xFFB36BFF);
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -765,62 +766,7 @@ class _HomeWorldHero extends StatelessWidget {
                   children: [
                     Positioned.fill(
                       child: IgnorePointer(
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Positioned(
-                              left: -haloSize * 0.16,
-                              top: haloSize * 0.08,
-                              width: haloSize * 0.72,
-                              height: haloSize * 0.78,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      _cyan.withValues(alpha: 0.24),
-                                      _cyan.withValues(alpha: 0.1),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              right: -haloSize * 0.18,
-                              top: haloSize * 0.04,
-                              width: haloSize * 0.76,
-                              height: haloSize * 0.82,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      _violet.withValues(alpha: 0.22),
-                                      _violet.withValues(alpha: 0.09),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: haloSize * 0.1,
-                              right: haloSize * 0.1,
-                              top: haloSize * 0.18,
-                              height: haloSize * 0.6,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      Colors.white.withValues(alpha: 0.06),
-                                      _cyan.withValues(alpha: 0.05),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        child: _GlobeBackgroundGlow(size: haloSize),
                       ),
                     ),
                     Positioned(
@@ -913,6 +859,101 @@ class _HomeWorldHero extends StatelessWidget {
     if (count >= 10000) return '${count ~/ 1000}k';
     return '$count';
   }
+}
+
+class _GlobeBackgroundGlow extends StatelessWidget {
+  const _GlobeBackgroundGlow({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: size,
+      child: CustomPaint(painter: const _GlobeBackgroundGlowPainter()),
+    );
+  }
+}
+
+class _GlobeBackgroundGlowPainter extends CustomPainter {
+  const _GlobeBackgroundGlowPainter();
+
+  static const _cyan = Color(0xFF00D8FF);
+  static const _blue = Color(0xFF2E78FF);
+  static const _violet = Color(0xFF9B4DFF);
+  static const _purple = Color(0xFFD35BFF);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide * 0.44;
+    final rimRect = Rect.fromCircle(center: center, radius: radius);
+
+    void drawAura({
+      required Offset offset,
+      required double radius,
+      required Color color,
+      required double alpha,
+    }) {
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            color.withValues(alpha: alpha),
+            color.withValues(alpha: alpha * 0.34),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.32, 1.0],
+        ).createShader(Rect.fromCircle(center: offset, radius: radius));
+      canvas.drawCircle(offset, radius, paint);
+    }
+
+    drawAura(
+      offset: center.translate(-radius * 0.52, -radius * 0.02),
+      radius: radius * 0.66,
+      color: _blue,
+      alpha: 0.18,
+    );
+    drawAura(
+      offset: center.translate(radius * 0.54, -radius * 0.01),
+      radius: radius * 0.64,
+      color: _violet,
+      alpha: 0.17,
+    );
+
+    final cyanGlow = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.075
+      ..strokeCap = StrokeCap.round
+      ..color = _cyan.withValues(alpha: 0.34)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+    canvas.drawArc(rimRect, math.pi * 0.58, math.pi * 0.9, false, cyanGlow);
+
+    final violetGlow = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.07
+      ..strokeCap = StrokeCap.round
+      ..color = _purple.withValues(alpha: 0.28)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11);
+    canvas.drawArc(rimRect, -math.pi * 0.42, math.pi * 0.84, false, violetGlow);
+
+    final cyanRim = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.018
+      ..strokeCap = StrokeCap.round
+      ..color = _cyan.withValues(alpha: 0.4);
+    canvas.drawArc(rimRect, math.pi * 0.63, math.pi * 0.78, false, cyanRim);
+
+    final violetRim = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.017
+      ..strokeCap = StrokeCap.round
+      ..color = _purple.withValues(alpha: 0.34);
+    canvas.drawArc(rimRect, -math.pi * 0.33, math.pi * 0.66, false, violetRim);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlobeBackgroundGlowPainter oldDelegate) =>
+      false;
 }
 
 class _HomeCompanionChatInput extends StatelessWidget {
