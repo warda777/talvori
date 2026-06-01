@@ -1,5 +1,10 @@
 # Finaler MVP-Blocker-Review
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieser Review fasst den aktuellen Release-Zustand der Talvori-App nach Legal-/Support-Verdrahtung, Smoke-Test, Store-Metadatenentwurf und Wortspiele-Scope zusammen. Es wurden keine App-Logik, keine Supabase-Daten, keine Imports, keine SQLite-/Vokabeldaten, keine SRS-Daten und kein `word_progress` geaendert.
@@ -110,11 +115,13 @@ Warum Blocker:
 - App Store und Google Play verlangen konkrete Angaben zu erfassten/verarbeiteten Daten.
 - AI-/Companion-, Notification-, Support- und Supabase-Vorbereitung muessen korrekt eingeordnet werden.
 - Der Google-Play-Data-Safety-Draft liegt vor: `docs/google_play_data_safety_draft.md`.
+- Die technische MVP-Entscheidungsmatrix liegt vor: `docs/mvp_data_safety_decision_matrix.md`.
 
 Naechste Aktion:
 
 - Angaben fuer lokale Lernstaende, Praeferenzen, Favoriten/bekannte Woerter, AI-/Companion-Daten, Notifications und Supportkontakt final beschreiben.
-- Final gegen den tatsaechlichen Release-Build pruefen: Supabase-Startcalls, AI/Companion, KI-Wortspiele, Uebersetzung, Tagesimpuls/Notifications, Voice/Audio, Fotozugriff und Marketing/Analytics.
+- Arbeitsannahme fuer den MVP: Marketing/Analytics ist aktuell nicht als Tracking aktiv, AI/Companion/KI-Spiele sind optionale externe Verarbeitung, Tagesimpuls ist optional aktiv mit AI-Generierung, Supabase hat einen aktiven Start-Read aber keinen Nutzer-Cloud-Sync, Voice/Audio/Foto sind optionale Chat-Funktionen.
+- Final gegen den tatsaechlichen Release-Build pruefen: Supabase-Startcalls, AI/Companion, KI-Wortspiele, Uebersetzung, Tagesimpuls/Notifications, Voice/Audio, Fotozugriff und erneute Marketing/Analytics-Suche.
 - Nicht als aktiv darstellen: Cloud-Backup, Account-Sync, Chat-Sync, produktiver Content-Package-Sync.
 
 ### F. MVP-Contentqualitaet / sichtbarer Wortbestand
@@ -201,6 +208,8 @@ Diese Punkte sind strategisch wichtig, blockieren aber den ersten MVP nicht, sol
 - Bewertung schreiben ist vorbereitet, aber noch nicht mit Store-Ziel verknuepft.
 - Hilfe/FAQ ist noch nicht voll ausgebaut.
 - Tagesimpuls/Notifications brauchen vor Store je Plattform eine echte Geraetepruefung, falls sichtbar beworben.
+- AI/Companion und KI-Wortspiele koennen Nutzertexte extern ueber Supabase Edge Functions verarbeiten; Store-Texte duerfen nicht suggerieren, dass diese Funktionen rein lokal laufen.
+- Voice/Audio und Fotoauswahl sind optional sichtbare Chat-Funktionen und sollten fuer Store-Screenshots nur genutzt werden, wenn die Permission-/Datenschutzangaben final abgeglichen sind.
 - Browser-/Share-Import sollte auf echten iOS-/Android-Browsern geprueft werden, falls als MVP-Pfad relevant.
 - Offline-Start wurde manuell bestanden, muss aber im finalen Release-Build erneut getestet werden.
 - Debug-/Developer-Sichtbarkeit muss im finalen Release-Build erneut geprueft werden.

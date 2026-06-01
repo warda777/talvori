@@ -1,5 +1,10 @@
 # Release-MVP-Restplan
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieser Plan sortiert den MVP-Restweg nach den abgeschlossenen Blöcken zu
@@ -203,6 +208,8 @@ Konkrete Richtung:
 - Privacy Nutrition / Data Safety Angaben
 - Google-Play-Data-Safety-Draft nutzen:
   `docs/google_play_data_safety_draft.md`
+- MVP-Data-Safety-Entscheidungsmatrix nutzen:
+  `docs/mvp_data_safety_decision_matrix.md`
 - Support-URL und Datenschutz-URL
 - Altersfreigabe
 - Google Play Application ID `eu.talvori.app` bestaetigen
@@ -300,6 +307,10 @@ Konkrete Richtung:
 - fehlerhafte AI/Notification-Fälle
 - unklare Data-Safety-Angaben zu Supabase, AI/Companion, Voice, Fotozugriff,
   Notifications und Marketing/Analytics
+- aktuelle Data-Safety-Arbeitsannahmen: Marketing/Analytics nicht als Tracking
+  aktiv; AI/Companion/KI-Spiele optional externe Verarbeitung; Tagesimpuls
+  optional mit AI-Generierung; Supabase aktiver Start-Read ohne User-Cloud-Sync;
+  Voice/Foto optional im Chat
 - App-Neustart nach lokaler Nutzung
 
 ## 4. Offene Sollte-vor-Release Punkte
@@ -347,6 +358,8 @@ Ziel:
   `https://talvori.eu/imprint/` und `https://talvori.eu/support/`.
 - Support-Mail ist `support@talvori.eu`; Legal-Mail ist `legal@talvori.eu`.
 - Finale juristische Pruefung der Web-Inhalte bleibt offen.
+- Data-Safety-Draft und Entscheidungsmatrix liegen vor; finale Play-Console-
+  Angaben bleiben gegen Release-Build und Datenschutztexte zu pruefen.
 
 Enthält:
 

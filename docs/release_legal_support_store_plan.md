@@ -1,5 +1,10 @@
 # Release-Plan: Rechtliches, Hilfe/Feedback und Store-Basics
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieses Dokument ist eine technische und produktorganisatorische Vorbereitung fuer den Release-MVP. Es ist keine Rechtsberatung und ersetzt keine finale juristische Pruefung. Alle rechtlichen Texte muessen vor Veroeffentlichung extern oder fachkundig geprueft und final freigegeben werden.
@@ -117,9 +122,15 @@ Wichtig fuer Talvori:
 - Notifications/Tagesimpuls brauchen transparente Beschreibung, besonders bei generierten Inhalten und Berechtigungen.
 - Fuer Google Play liegt ein Data-Safety-Draft vor:
   `docs/google_play_data_safety_draft.md`.
+- Fuer die offenen MVP-Entscheidungen liegt eine technische Matrix vor:
+  `docs/mvp_data_safety_decision_matrix.md`.
 - Final zu pruefen bleiben Supabase-Startcalls, AI/Companion, KI-Wortspiele,
   Uebersetzung, Tagesimpuls/Notifications, Voice/Audio, Fotozugriff und
   Marketing/Analytics gegen den tatsaechlichen Release-Build.
+- Aktuelle Arbeitsannahmen: Marketing/Analytics ist nicht als Tracking aktiv;
+  AI/Companion/KI-Spiele und Tagesimpuls-AI sind optionale externe Verarbeitung;
+  Supabase hat einen aktiven Start-Read, aber keinen Nutzer-Cloud-Sync; Voice,
+  Audio und Foto sind optionale Chat-Funktionen.
 
 ### AGB / Nutzungsbedingungen
 

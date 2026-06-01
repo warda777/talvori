@@ -1,5 +1,10 @@
 # Store-/Build-Identitaetscheck
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieser Check dokumentiert die technische Store-Identitaet der Talvori-App fuer den MVP. Es wurden keine Store-Einreichung, keine Supabase-Aenderung, kein Import, keine SQLite-/Vokabeldaten-Aenderung, keine SRS-Aenderung und keine UI-Aenderung vorgenommen.

@@ -1,5 +1,10 @@
 # MVP-Screenshot-Content-Auswahl
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-31
 
 Diese Datei dokumentiert eine sichere Auswahl gepruefter Englisch-Deutsch-Woerter fuer spaetere Store-Screenshots, Onboarding-Motive und die erste Nutzerreise. Es wurden keine Supabase-Daten, keine SQLite-/App-Vokabeldaten, keine SRS-/`word_progress`-Daten, keine Imports und keine Produktivfreigaben geaendert.

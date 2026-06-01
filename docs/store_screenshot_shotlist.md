@@ -1,5 +1,10 @@
 # Store-Screenshot-Shotlist MVP
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-31
 
 Diese Shotlist plant die Store-Screenshots fuer den Talvori-MVP. Es wurden keine Screenshots erstellt, keine UI geaendert, keine App-Daten geaendert und keine Produktivfreigaben gesetzt.

@@ -1,5 +1,10 @@
 # Google Play Data Safety Draft
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-31
 
 ## 1. Ziel
@@ -7,6 +12,10 @@ Stand: 2026-05-31
 Dieses Dokument bereitet die Google-Play-Data-Safety- und Datenschutzangaben fuer den Talvori-MVP vor. Es ist keine Rechtsberatung und keine finale Store-Angabe.
 
 Vor Store-Einreichung muessen die Angaben gegen den tatsaechlichen Release-Build, die finalen Datenschutztexte und die Play-Console-Fragen abgeglichen werden.
+
+Ergaenzende technische Entscheidungsmatrix:
+
+- `docs/mvp_data_safety_decision_matrix.md`
 
 ## 2. Gepruefte Bereiche
 
@@ -80,7 +89,7 @@ Entwurf, final zu pruefen:
 | Welche Datenarten koennten zutreffen? | App-Aktivitaet, App-Informationen und Leistung, Nutzergenerierte Inhalte, Audio, Fotos/Dateien, Kontaktinformationen bei Support-Mail. | Nur angeben, wenn im finalen Build aktiv. |
 | Welche Datenarten treffen wahrscheinlich nicht zu? | Standort, Kontakte, Kalender, Gesundheitsdaten, Finanzdaten, SMS/Anruflisten. | Gegen Manifest und Dependencies final pruefen. |
 
-## 6. MVP-Einschaetzung
+## 6. MVP-Entscheidungen Nach Technischer Pruefung
 
 ### Aktiv Im MVP
 
@@ -90,7 +99,12 @@ Entwurf, final zu pruefen:
 - externe Legal-/Support-Links zu `talvori.eu`
 - Support-Mail, wenn Nutzer aktiv schreibt
 - Supabase-Initialisierung und ein kleiner Kategorien-Read im Startpfad
-- lokale Notifications-Infrastruktur; konkrete Nutzung final pruefen
+- Tagesimpuls/Notifications als optionaler Nutzerpfad; die lokale Notification ist lokal, die Impuls-Generierung nutzt bei Aktivierung Supabase Edge Function `generate-daily-impulses`
+- AI/Companion und Impuls-Chat sind sichtbar und koennen Nutzertexte ueber Supabase Edge Function `ai-chat` verarbeiten
+- KI-bezogene Wortspiel-/Kontextpfade koennen optional `ai-chat` nutzen
+- Browser-/Share-Import ist als nutzerinitiierter lokaler Importpfad technisch aktiv
+- Voice/Audio und Fotoauswahl sind im Chat optional sichtbar; Audio bleibt lokal, Transkripte koennen bei AI-Antworten extern verarbeitet werden
+- Translation-Edge-Function `translate-word` ist bei ausstehenden/eigenen Woertern technisch erreichbar
 
 ### Vorbereitet, Aber Nicht Als Aktiv Bewerben
 
@@ -99,20 +113,26 @@ Entwurf, final zu pruefen:
 - produktiver Supabase-Content-Package-Sync
 - Chat-Sync
 - Premium/Abo
-- vollstaendige Analytics
+- vollstaendige Analytics; aktuell wurde nur ein lokaler `Marketing & Analysen`-Toggle gefunden, keine aktive Tracking-/Firebase-Integration
 - TOEFL/IELTS/Cambridge-Content-Pakete
 
 ### Unklar / Vor Release Pruefen
 
-- ob AI-/Companion-/Kategorie-Chat im MVP sichtbar aktiv bleibt
-- ob KI-Wortspiele im finalen Store-Scope aktiv gezeigt werden
-- ob `translate-word` fuer lokale Woerter im MVP aktiv erreichbar ist
-- ob Tagesimpuls-Notifications im Release Nutzerzustimmung abfragen und planen
-- ob Voice Recording, Speech-to-Text und lokale Audio-Dateien im MVP sichtbar nutzbar sind
-- ob Fotoauswahl im Chat sichtbar nutzbar ist
-- ob der Marketing-&-Analysen-Toggle nur lokal bleibt oder echte Analyse aktiviert
-- welche Supabase-Netzwerkcalls im Release-Startpfad wirklich laufen
+- finaler Geraetetest fuer Supabase-Startcalls und Startverhalten
+- finaler Permission-/Scheduling-Test fuer Tagesimpuls/Notifications
+- finaler Test fuer Voice Recording, Speech-to-Text und Fotoauswahl je Plattform
+- erneute Suche nach Tracking-/Analytics-SDKs direkt vor Store-Einreichung
 - ob Android App Links/http(s)-Intent-Filter in Store-Angaben oder Datenschutztexten erklaert werden muessen
+
+## 6.1 Klare Play-Console-Arbeitsannahmen Fuer Den MVP
+
+- Marketing & Analysen: nicht aktiv als Tracking; nur lokale Praeferenz, solange kein Tracking-SDK oder externer Analytics-Call hinzukommt.
+- AI/Companion/KI-Spiele: optionale aktive externe Verarbeitung, wenn Nutzer Chat/KI-Funktionen nutzt.
+- Tagesimpuls: optionale aktive Funktion; lokale Benachrichtigung plus externe AI-Generierung bei Planung.
+- Supabase: aktiver technischer Backend-Startpfad, aber kein Nutzerkonto, kein Cloud-Backup und kein unkontrollierter Release-Auto-Import.
+- Browser-/Share-Import: aktiv als nutzerinitiierter Import von geteiltem Text.
+- Translation: optional aktiv bei pending/eigenen Woertern; keine automatische Content-Freigabe.
+- Voice/Foto: optional aktive Chat-Funktionen; nicht in Store-Screenshots zeigen, wenn die Datenschutz-/Permission-Angaben noch nicht final abgeglichen sind.
 
 ## 7. Store-Risiken
 
@@ -126,13 +146,13 @@ Entwurf, final zu pruefen:
 
 ## 8. Konkrete Naechste ToDos
 
-1. Release-Build technisch pruefen: Welche Netzwerkcalls laufen direkt beim Start?
-2. Entscheiden, ob Supabase-Kategorien-Read im MVP-Release aktiv bleibt oder nur intern dokumentiert wird.
-3. Entscheiden, ob AI/Companion/KI-Wortspiele fuer den MVP aktiv, sichtbar oder nur vorbereitet sind.
-4. Entscheiden, ob Voice, Speech-to-Text und Fotoauswahl im MVP sichtbar bleiben.
-5. Entscheiden, ob Marketing/Analytics im MVP komplett deaktiviert bleibt.
-6. Notifications/Tagesimpuls gegen finalen Flow pruefen: Permission, Opt-in, Scheduling, Payload.
-7. Datenschutzseite final auf lokale Daten, Supabase, AI, Support-Mail, Notifications, Voice und externe Links abstimmen.
+1. Release-Build technisch pruefen: Welche Netzwerkcalls laufen direkt beim Start und bei AI/Tagesimpuls/Translation/Share-Import?
+2. Supabase-Kategorien-Read im Datenschutztext als aktiven Backend-Startpfad beruecksichtigen.
+3. AI/Companion/KI-Wortspiele in Data Safety als optionale externe Verarbeitung behandeln, solange sie im Release sichtbar bleiben.
+4. Voice, Speech-to-Text und Fotoauswahl vor Store final je Plattform testen und bei aktiver Sichtbarkeit deklarieren.
+5. Marketing/Analytics im MVP als nicht aktiv behandeln, solange keine Tracking-Integration gefunden wird; vor Einreichung erneut pruefen.
+6. Notifications/Tagesimpuls gegen finalen Flow pruefen: Permission, Opt-in, AI-Generierung, Scheduling, Payload.
+7. Datenschutzseite final auf lokale Daten, Supabase, AI, Support-Mail, Notifications, Voice, Foto und externe Links abstimmen.
 8. Play Console Data Safety mit finalem Build und finalem Datenschutztext ausfuellen.
 9. Support-/Loeschanfragen-Prozess dokumentieren.
 

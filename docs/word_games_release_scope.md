@@ -1,5 +1,10 @@
 # Wortspiele Release-Scope
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieses Dokument finalisiert den Wortspiel-Scope fuer den Talvori-MVP. Es beschreibt, welche sichtbaren Wortspiele im MVP als nutzbar gelten, welche nur vorbereitet sind und welche Store-Aussagen vermieden werden muessen.

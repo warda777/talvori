@@ -1,5 +1,10 @@
 # Android Release-Build-Check
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Datum: 2026-05-30
 
 Diese Notiz dokumentiert den erfolgreichen lokalen Android Release-Appbundle-Build fuer den Talvori-MVP. Es wurden keine Supabase-Daten, keine Imports, keine SQLite-/Vokabeldaten, keine SRS-Daten und kein `word_progress` geaendert. Es werden keine Secrets dokumentiert.

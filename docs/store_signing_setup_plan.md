@@ -1,5 +1,10 @@
 # Store-Signing-Setup-Plan
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Dieser Plan bereitet Apple Developer Signing/App Groups und Android Release Signing fuer den Talvori-MVP vor. Es wurden keine Store-Einreichung, keine echten Secrets, keine Keystore-Dateien, keine Provisioning Profiles, keine Supabase-Daten, keine Imports, keine SQLite-/Vokabeldaten und keine SRS-/`word_progress`-Daten geaendert.

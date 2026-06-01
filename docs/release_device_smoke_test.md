@@ -1,5 +1,10 @@
 # Release-/Device-Smoke-Test
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Datum: 2026-05-30
 
 Build-Typ: manuell getestet, Build-Typ nicht dokumentiert

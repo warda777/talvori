@@ -1,5 +1,10 @@
 # Store-Review-Hinweise Entwurf
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Diese Notizen sind ein Entwurf fuer spaetere Apple-/Google-Reviewer-Hinweise. Sie muessen vor Einreichung an den finalen Build, die Plattform und die tatsaechlich aktivierten Features angepasst werden.

@@ -1,5 +1,10 @@
 # Store-Release-Checkliste
 
+> Supersession notice: This document belongs to the old vocabulary-app MVP
+> launch path. It is preserved as Foundation Build / future compliance
+> material. The current public product direction is Talvori Welt; do not
+> continue this as the next launch path without explicit decision.
+
 Stand: 2026-05-30
 
 Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie ersetzt keine aktuelle Pruefung der Apple- und Google-Store-Vorgaben.
@@ -34,6 +39,7 @@ Diese Checkliste ist eine praktische Arbeitsliste fuer den Talvori-MVP. Sie erse
 - [ ] Altersfreigabe geprueft
 - [ ] Datenverwendungsangaben im Store konsistent mit App-Verhalten
 - [x] Google-Play-Data-Safety-Draft vorbereitet: `docs/google_play_data_safety_draft.md`
+- [x] MVP-Data-Safety-Entscheidungsmatrix erstellt: `docs/mvp_data_safety_decision_matrix.md`
 - [ ] Google-Play-Data-Safety-Angaben final gegen Release-Build geprueft
 
 ## 3. Support Und Feedback
@@ -125,8 +131,12 @@ Hinweis: Der dokumentierte Smoke-Test wurde manuell durchgefuehrt; der Build-Typ
 - [x] Supabase-Rolle im Data-Safety-Draft vorlaeufig beschrieben
 - [x] AI-/Companion-Datenfluesse im Data-Safety-Draft als final zu pruefen beschrieben
 - [x] Tagesimpuls/Notification-Daten im Data-Safety-Draft als final zu pruefen beschrieben
-- [ ] Marketing/Analytics-Toggle final gegen tatsaechliches Tracking pruefen
-- [ ] Voice/Audio, Spracherkennung und Fotozugriff final gegen sichtbaren MVP-Scope pruefen
+- [x] Marketing/Analytics technisch eingeordnet: aktueller Toggle speichert nur lokale Praeferenz, keine aktive Tracking-Integration gefunden
+- [x] AI/Companion/KI-Spiele technisch eingeordnet: optional aktiv und externe Verarbeitung ueber Supabase Edge Functions moeglich
+- [x] Tagesimpuls/Notifications technisch eingeordnet: optional aktiv, lokale Notification plus AI-Generierung ueber Supabase bei Planung
+- [x] Voice/Audio, Spracherkennung und Fotozugriff technisch eingeordnet: optional sichtbare Chat-Funktionen
+- [ ] Marketing/Analytics direkt vor Store-Einreichung erneut gegen tatsaechliches Tracking pruefen
+- [ ] Voice/Audio, Spracherkennung und Fotozugriff im finalen Release-Geraetetest pruefen
 - [ ] spaetere Accounts/Backups nicht als aktuell aktiv darstellen
 - [ ] spaetere Chat-/Companion-Synchronisation nicht als aktuell aktiv darstellen
 
