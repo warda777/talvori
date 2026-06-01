@@ -692,15 +692,11 @@ class _HomeWorldHero extends StatelessWidget {
   static const _violet = Color(0xFFB36BFF);
   @override
   Widget build(BuildContext context) {
-    final availableWidth = (MediaQuery.sizeOf(context).width - 32)
-        .clamp(280.0, 620.0)
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final globeSize = (screenWidth * (compact ? 1.06 : 1.1))
+        .clamp(compact ? 348.0 : 390.0, compact ? 440.0 : 650.0)
         .toDouble();
-    final globeSize = (availableWidth * (compact ? 0.93 : 0.96))
-        .clamp(compact ? 304.0 : 340.0, compact ? 348.0 : 560.0)
-        .toDouble();
-    final haloSize = (globeSize + (compact ? 28.0 : 40.0))
-        .clamp(globeSize, availableWidth)
-        .toDouble();
+    final haloSize = globeSize + (compact ? 26.0 : 36.0);
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
     final companionSize = companionState.isExpanded
@@ -736,31 +732,45 @@ class _HomeWorldHero extends StatelessWidget {
           ),
           SizedBox(height: globeGap),
           SizedBox(
-            width: haloSize,
+            width: double.infinity,
             height: haloSize,
-            child: Stack(
+            child: OverflowBox(
+              maxWidth: haloSize,
+              minWidth: haloSize,
+              maxHeight: haloSize,
+              minHeight: haloSize,
               alignment: Alignment.topCenter,
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: haloSize,
-                  height: haloSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        _cyan.withValues(alpha: 0.16),
-                        _violet.withValues(alpha: 0.08),
-                        Colors.transparent,
-                      ],
+              child: SizedBox(
+                width: haloSize,
+                height: haloSize,
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: haloSize,
+                      height: haloSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            _cyan.withValues(alpha: 0.16),
+                            _violet.withValues(alpha: 0.08),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      top: (haloSize - globeSize) / 2,
+                      child: TalvoriWorldGlobe(
+                        onTap: onGlobeTap,
+                        size: globeSize,
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  top: (haloSize - globeSize) / 2,
-                  child: TalvoriWorldGlobe(onTap: onGlobeTap, size: globeSize),
-                ),
-              ],
+              ),
             ),
           ),
           if (showCompanion) SizedBox(height: compact ? 10 : 54),
