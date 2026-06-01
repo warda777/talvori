@@ -361,6 +361,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetViewInsets);
     SharedPreferences.setMockInitialValues({});
     final repository = SharedPreferencesImpulseInboxRepository(
       storageKey: 'test_home_companion_chat_persistence',
@@ -385,6 +386,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
+    final initialGlobeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
+    );
 
     await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
@@ -399,6 +403,17 @@ void main() {
           .width,
       greaterThan(300),
     );
+    final chatOpenGlobeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
+    );
+    expect(chatOpenGlobeRect, initialGlobeRect);
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+    await tester.pump();
+    final keyboardOpenGlobeRect = tester.getRect(
+      find.byKey(const Key('talvori-world-globe-button')),
+    );
+    expect(keyboardOpenGlobeRect, initialGlobeRect);
 
     await tester.pump(const Duration(seconds: 7));
     await tester.pump();

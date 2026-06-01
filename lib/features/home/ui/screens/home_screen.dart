@@ -581,20 +581,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: _HomeWorldHero(
                                           wordCount: state.myWordsCount,
                                           compact: compactHome,
-                                          companionState: companionState,
-                                          companionDisplayName:
-                                              companionDisplayName,
-                                          mascotStyle: mascotStyle,
-                                          showCompanion: false,
-                                          companionVisible: false,
-                                          showHomeChatHint: showHomeChatHint,
                                           onGlobeTap: _openWorldRegion,
-                                          onCompanionTap: _toggleCompanion,
-                                          onCompanionBubbleTap:
-                                              _openCompanionChatInput,
-                                          onLearnTap: _showLearningSourcesPopup,
-                                          onSentenceSparksTap:
-                                              _openSentenceSparks,
                                         ),
                                       ),
                                       const SizedBox(height: 102),
@@ -804,32 +791,12 @@ class _HomeWorldHero extends StatelessWidget {
   const _HomeWorldHero({
     required this.wordCount,
     required this.compact,
-    required this.companionState,
-    required this.companionDisplayName,
-    required this.mascotStyle,
-    required this.showCompanion,
-    required this.companionVisible,
-    required this.showHomeChatHint,
     required this.onGlobeTap,
-    required this.onCompanionTap,
-    required this.onCompanionBubbleTap,
-    required this.onLearnTap,
-    required this.onSentenceSparksTap,
   });
 
   final int wordCount;
   final bool compact;
-  final CompanionState companionState;
-  final String companionDisplayName;
-  final TalvoriMascotStyle mascotStyle;
-  final bool showCompanion;
-  final bool companionVisible;
-  final bool showHomeChatHint;
   final VoidCallback onGlobeTap;
-  final VoidCallback onCompanionTap;
-  final VoidCallback onCompanionBubbleTap;
-  final VoidCallback onLearnTap;
-  final VoidCallback onSentenceSparksTap;
 
   static const _cyan = Color(0xFF5DDCFF);
 
@@ -842,14 +809,6 @@ class _HomeWorldHero extends StatelessWidget {
     final haloSize = globeSize + (compact ? 26.0 : 36.0);
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
-    final companionSize = companionState.isExpanded
-        ? (compact ? 116.0 : 136.0)
-        : (compact ? 110.0 : 128.0);
-    final companionWidth = companionState.isExpanded
-        ? (compact ? 336.0 : 460.0)
-        : companionSize + 10;
-    final companionSlotHeight = compact ? 280.0 : 310.0;
-    final companionLift = compact ? -24.0 : -36.0;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 590),
@@ -904,76 +863,7 @@ class _HomeWorldHero extends StatelessWidget {
               ),
             ),
           ),
-          if (showCompanion) SizedBox(height: compact ? 0 : 2),
-          if (showCompanion)
-            SizedBox(
-              height: companionSlotHeight,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  if (companionVisible)
-                    Positioned(
-                      left: 0,
-                      top: companionLift,
-                      child: SizedBox(
-                        width: companionWidth,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: onCompanionBubbleTap,
-                          child: Material(
-                            type: MaterialType.transparency,
-                            child: TalvoriCompanionCard(
-                              mascotMood: companionState.mascotMood,
-                              emotion: companionState.emotion,
-                              title: companionDisplayName,
-                              message: _companionMessage(
-                                companionState.message,
-                              ),
-                              bubbleVisible: companionState.bubbleVisible,
-                              isExpanded: companionState.isExpanded,
-                              inputVisible: companionState.inputVisible,
-                              isThinking: companionState.isThinking,
-                              showChatHint:
-                                  showHomeChatHint &&
-                                  companionState.bubbleVisible,
-                              mascotStyle: mascotStyle,
-                              mascotSize: companionSize,
-                              compactMascotScale: 0.84,
-                              messageMaxLines: compact ? 2 : 3,
-                              quickActions: [
-                                TalvoriCompanionQuickAction(
-                                  key: const Key(
-                                    'home-companion-sentence-sparks',
-                                  ),
-                                  label: 'Satzfunken',
-                                  icon: Icons.auto_awesome_rounded,
-                                  onTap: onSentenceSparksTap,
-                                ),
-                                TalvoriCompanionQuickAction(
-                                  key: const Key('home-companion-learn'),
-                                  label: 'Lernen',
-                                  icon: Icons.psychology_rounded,
-                                  onTap: onLearnTap,
-                                ),
-                                TalvoriCompanionQuickAction(
-                                  key: const Key('home-companion-world'),
-                                  label: 'Welt',
-                                  icon: Icons.public_rounded,
-                                  onTap: onGlobeTap,
-                                ),
-                              ],
-                              onMascotTap: onCompanionTap,
-                              onBubbleTap: onCompanionBubbleTap,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            )
-          else
-            SizedBox(height: globeGap),
+          SizedBox(height: globeGap),
         ],
       ),
     );
