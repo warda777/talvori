@@ -408,9 +408,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final keyboardInset = mediaQuery.viewInsets.bottom;
     final chatOverlayOpen =
         companionState.inputVisible || companionState.isThinking;
-    final chatClusterBottom = keyboardInset > 0
+    final chatInputHeightEstimate =
+        56.0 + ((_companionInputLineCount - 1) * 18.0);
+    final chatInputBottom = keyboardInset > 0
         ? keyboardInset + 2.0
-        : mediaQuery.padding.bottom + 150.0;
+        : mediaQuery.padding.bottom + 24.0;
+    final baseChatCardBottom = mediaQuery.padding.bottom + 150.0;
+    final inputAwareChatCardBottom =
+        chatInputBottom + chatInputHeightEstimate + 12.0;
+    final chatCardBottom = inputAwareChatCardBottom > baseChatCardBottom
+        ? inputAwareChatCardBottom
+        : baseChatCardBottom;
     final chatCompanionMascotSize = mediaQuery.size.width < 380 ? 112.0 : 124.0;
     final chatCompanionWidth = _safeClampDouble(
       mediaQuery.size.width - 32,
@@ -635,46 +643,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               key: const Key('talvori-companion-chat-cluster'),
               left: 0,
               right: 0,
-              bottom: chatClusterBottom,
+              bottom: chatCardBottom,
               child: Material(
                 type: MaterialType.transparency,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          width: chatCompanionWidth,
-                          child: TalvoriCompanionCard(
-                            mascotMood: companionState.mascotMood,
-                            emotion: companionState.emotion,
-                            title: companionDisplayName,
-                            message: companionState.message,
-                            bubbleVisible: companionState.bubbleVisible,
-                            isExpanded: true,
-                            inputVisible: companionState.inputVisible,
-                            isThinking: companionState.isThinking,
-                            messageMaxLines: 6,
-                            mascotStyle: mascotStyle,
-                            mascotSize: chatCompanionMascotSize,
-                            onMascotTap: _toggleCompanion,
-                            onBubbleTap: _openCompanionChatInput,
-                          ),
-                        ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: chatCompanionWidth,
+                      child: TalvoriCompanionCard(
+                        mascotMood: companionState.mascotMood,
+                        emotion: companionState.emotion,
+                        title: companionDisplayName,
+                        message: companionState.message,
+                        bubbleVisible: companionState.bubbleVisible,
+                        isExpanded: true,
+                        inputVisible: companionState.inputVisible,
+                        isThinking: companionState.isThinking,
+                        messageMaxLines: 6,
+                        mascotStyle: mascotStyle,
+                        mascotSize: chatCompanionMascotSize,
+                        onMascotTap: _toggleCompanion,
+                        onBubbleTap: _openCompanionChatInput,
                       ),
-                      if (companionState.inputVisible) ...[
-                        const SizedBox(height: 8),
-                        _HomeCompanionChatInput(
-                          key: const Key('talvori-companion-chat-input'),
-                          controller: _companionInputController,
-                          focusNode: _companionInputFocusNode,
-                          companionDisplayName: companionDisplayName,
-                          onSubmitMessage: _submitCompanionMessage,
-                        ),
-                      ],
-                    ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (companionState.inputVisible)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: chatInputBottom,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _HomeCompanionChatInput(
+                    key: const Key('talvori-companion-chat-input'),
+                    controller: _companionInputController,
+                    focusNode: _companionInputFocusNode,
+                    companionDisplayName: companionDisplayName,
+                    onSubmitMessage: _submitCompanionMessage,
                   ),
                 ),
               ),
