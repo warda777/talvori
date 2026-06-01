@@ -226,11 +226,11 @@ class _RotatingActionWheel extends StatelessWidget {
   }
 
   static Color _accentFor(int index, String label) {
-    if (label.contains('Satz')) return const Color(0xFFFFC96B);
-    if (label.contains('Stat')) return const Color(0xFFFFC96B);
+    if (label.contains('Satz')) return const Color(0xFFB36BFF);
+    if (label.contains('Stat')) return const Color(0xFF5DDCFF);
     if (label.contains('Welt')) return const Color(0xFF5DDCFF);
     if (label.contains('Profil')) return const Color(0xFFB36BFF);
-    if (label.contains('Spiel')) return const Color(0xFFFFB15F);
+    if (label.contains('Spiel')) return const Color(0xFFB36BFF);
     return index.isEven ? const Color(0xFF5DDCFF) : const Color(0xFFB36BFF);
   }
 }
@@ -368,7 +368,6 @@ class _HubCenterButton extends StatelessWidget {
 
   static const _cyan = Color(0xFF5DDCFF);
   static const _violet = Color(0xFFB36BFF);
-  static const _gold = Color(0xFFFFC96B);
 
   @override
   Widget build(BuildContext context) {
@@ -388,24 +387,22 @@ class _HubCenterButton extends StatelessWidget {
                 ? const [Color(0xFF151823), Color(0xFF05070D)]
                 : const [Color(0xFF283147), Color(0xFF070911)],
           ),
-          border: Border.all(color: _gold.withValues(alpha: 0.82), width: 1.6),
+          border: Border.all(
+            color: (open ? _violet : _cyan).withValues(alpha: 0.82),
+            width: 1.6,
+          ),
           boxShadow: [
             BoxShadow(
-              color: _gold.withValues(alpha: open ? 0.34 : 0.5),
+              color: _cyan.withValues(alpha: open ? 0.28 : 0.38),
               blurRadius: open ? 34 : 42,
               spreadRadius: -8,
+              offset: const Offset(-12, 0),
             ),
             BoxShadow(
-              color: _cyan.withValues(alpha: 0.28),
+              color: _violet.withValues(alpha: open ? 0.32 : 0.28),
               blurRadius: 58,
               spreadRadius: -18,
-              offset: const Offset(-16, 0),
-            ),
-            BoxShadow(
-              color: _violet.withValues(alpha: 0.3),
-              blurRadius: 58,
-              spreadRadius: -18,
-              offset: const Offset(16, 0),
+              offset: const Offset(12, 0),
             ),
           ],
         ),
@@ -422,7 +419,7 @@ class _HubCenterButton extends StatelessWidget {
                   colors: [
                     _cyan.withValues(alpha: 0.78),
                     _violet.withValues(alpha: 0.78),
-                    _gold.withValues(alpha: 0.82),
+                    _cyan.withValues(alpha: 0.64),
                     _cyan.withValues(alpha: 0.78),
                   ],
                 ),
@@ -434,7 +431,7 @@ class _HubCenterButton extends StatelessWidget {
               turns: open ? 1.125 : 0,
               child: Icon(
                 open ? Icons.close_rounded : Icons.add_rounded,
-                color: _gold,
+                color: Colors.white,
                 size: open ? 36 : 44,
               ),
             ),
