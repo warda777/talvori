@@ -20,6 +20,9 @@ class TalvoriWorldGlobe extends StatefulWidget {
 class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
   late final EarthController _controller;
 
+  static const _dayTexture = AssetImage(
+    'packages/flutter_globe_3d/assets/images/earth.jpg',
+  );
   static const _nightTexture = AssetImage(
     'packages/flutter_globe_3d/assets/images/earth_night.jpg',
   );
@@ -36,7 +39,7 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
       ..maxZoom = 1;
     _controller
       ..setLightMode(EarthLightMode.fixedCoordinates)
-      ..setFixedLightCoordinates(28, -54)
+      ..setFixedLightCoordinates(34, -44)
       ..setCameraFocus(28, 18);
     _seedTalvoriLights();
   }
@@ -95,8 +98,8 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          const Color(0xFFFFB45F).withValues(alpha: 0.18),
-                          const Color(0xFF22334A).withValues(alpha: 0.14),
+                          const Color(0xFFFFC078).withValues(alpha: 0.2),
+                          const Color(0xFF29384A).withValues(alpha: 0.18),
                           Colors.transparent,
                         ],
                         stops: const [0.12, 0.5, 1],
@@ -109,21 +112,21 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                     padding: EdgeInsets.all(widget.size * 0.015),
                     child: ColorFiltered(
                       colorFilter: const ColorFilter.matrix([
-                        0.94,
-                        0.07,
-                        0.02,
+                        0.68,
+                        0.12,
+                        0.03,
                         0,
-                        -10,
+                        -7,
+                        0.1,
+                        0.58,
                         0.05,
-                        0.77,
-                        0.02,
-                        0,
-                        -9,
-                        0.02,
-                        0.05,
-                        0.55,
                         0,
                         -8,
+                        0.04,
+                        0.12,
+                        0.48,
+                        0,
+                        -16,
                         0,
                         0,
                         0,
@@ -132,7 +135,7 @@ class _TalvoriWorldGlobeState extends State<TalvoriWorldGlobe> {
                       ]),
                       child: Earth3D(
                         controller: _controller,
-                        texture: _nightTexture,
+                        texture: _dayTexture,
                         nightTexture: _nightTexture,
                         initialScale: 3.18,
                         initialLatitude: 28,
@@ -234,7 +237,7 @@ class _GlobeAtmospherePainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = radius * 0.085
-        ..color = const Color(0xFF7FB7C9).withValues(alpha: 0.055)
+        ..color = const Color(0xFFA7CCD7).withValues(alpha: 0.07)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
 
@@ -247,8 +250,8 @@ class _GlobeAtmospherePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = radius * 0.032
         ..strokeCap = StrokeCap.round
-        ..color = const Color(0xFFFFB45F).withValues(alpha: 0.42)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
+        ..color = const Color(0xFFFFBE73).withValues(alpha: 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7.5),
     );
 
     for (final coastArc in _warmCoastEdgeArcs) {
@@ -276,6 +279,22 @@ class _GlobeAtmospherePainter extends CustomPainter {
     );
 
     canvas.drawCircle(
+      center + Offset(-radius * 0.28, -radius * 0.22),
+      radius * 0.82,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.32, -0.22),
+          radius: 0.9,
+          colors: [
+            const Color(0xFFD9E2E6).withValues(alpha: 0.08),
+            const Color(0xFF7F8D92).withValues(alpha: 0.03),
+            Colors.transparent,
+          ],
+          stops: const [0, 0.45, 1],
+        ).createShader(rect),
+    );
+
+    canvas.drawCircle(
       center + Offset(radius * 0.26, radius * 0.22),
       radius * 0.98,
       Paint()
@@ -285,9 +304,9 @@ class _GlobeAtmospherePainter extends CustomPainter {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.62),
+            Colors.black.withValues(alpha: 0.48),
           ],
-          stops: const [0, 0.5, 1],
+          stops: const [0, 0.56, 1],
         ).createShader(rect),
     );
   }
@@ -378,7 +397,7 @@ const _warmCoastEdgeArcs = [
     sweep: 0.52,
     inset: 0.3,
     width: 0.009,
-    alpha: 0.16,
+    alpha: 0.2,
     blur: 3,
   ),
   _WarmCoastEdgeArc(
@@ -386,7 +405,7 @@ const _warmCoastEdgeArcs = [
     sweep: 0.64,
     inset: 0.22,
     width: 0.01,
-    alpha: 0.18,
+    alpha: 0.22,
     blur: 4,
   ),
   _WarmCoastEdgeArc(
@@ -394,7 +413,7 @@ const _warmCoastEdgeArcs = [
     sweep: 0.42,
     inset: 0.18,
     width: 0.008,
-    alpha: 0.14,
+    alpha: 0.18,
     blur: 3,
   ),
   _WarmCoastEdgeArc(
@@ -402,7 +421,7 @@ const _warmCoastEdgeArcs = [
     sweep: 0.58,
     inset: 0.25,
     width: 0.011,
-    alpha: 0.18,
+    alpha: 0.23,
     blur: 4,
   ),
   _WarmCoastEdgeArc(
@@ -410,7 +429,7 @@ const _warmCoastEdgeArcs = [
     sweep: 0.5,
     inset: 0.16,
     width: 0.008,
-    alpha: 0.13,
+    alpha: 0.17,
     blur: 3,
   ),
 ];
