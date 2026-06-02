@@ -678,11 +678,15 @@ class _HomeCompanionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mascotSize = companionState.isExpanded
+    final mascotExpanded =
+        companionState.isExpanded &&
+        !companionState.inputVisible &&
+        !companionState.isThinking;
+    final mascotSize = mascotExpanded
         ? (compact ? 116.0 : 136.0)
         : (compact ? 110.0 : 128.0);
     const compactMascotScale = 0.84;
-    final effectiveMascotSize = companionState.isExpanded
+    final effectiveMascotSize = mascotExpanded
         ? mascotSize
         : mascotSize * compactMascotScale;
     final cardHeight =
@@ -719,7 +723,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
               title: companionDisplayName,
               message: _HomeWorldHero._companionMessage(companionState.message),
               bubbleVisible: companionState.bubbleVisible,
-              isExpanded: companionState.isExpanded,
+              isExpanded: mascotExpanded,
               inputVisible: companionState.inputVisible,
               isThinking: companionState.isThinking,
               showChatHint: showHomeChatHint && companionState.bubbleVisible,

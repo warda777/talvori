@@ -397,6 +397,10 @@ void main() {
     final focusMascotRect = tester.getRect(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
+    final focusCompanion = tester.widget<TalvoriCompanionCard>(
+      find.byType(TalvoriCompanionCard),
+    );
+    expect(focusCompanion.isExpanded, isTrue);
     final focusMascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -455,10 +459,13 @@ void main() {
       find.byType(TalvoriCompanionCard),
     );
     expect(inputVisibleChatCompanion.inputVisible, isTrue);
-    expect(
-      tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
-      focusMascotRect,
+    expect(inputVisibleChatCompanion.isExpanded, isFalse);
+    final inputVisibleMascotRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-mascot-image')),
     );
+    expect(inputVisibleMascotRect.height, lessThan(focusMascotRect.height));
+    expect(inputVisibleMascotRect.left, closeTo(focusMascotRect.left, 5));
+    expect(inputVisibleMascotRect.bottom, closeTo(focusMascotRect.bottom, 1));
     final inputVisibleMascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -671,6 +678,10 @@ void main() {
         tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
         inputVisibleMascotRect,
       );
+      final keyboardCompanion = tester.widget<TalvoriCompanionCard>(
+        find.byType(TalvoriCompanionCard),
+      );
+      expect(keyboardCompanion.isExpanded, isFalse);
       final keyboardMascotImage = tester.widget<Image>(
         find.byKey(const Key('talvori-companion-mascot-image')),
       );
