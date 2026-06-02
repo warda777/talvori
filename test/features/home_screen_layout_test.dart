@@ -732,6 +732,158 @@ void main() {
     expect(find.text('Bleib offen'), findsOneWidget);
   });
 
+  testWidgets(
+    'home companion chat keeps unsent draft across close and reopen',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({});
+      final aiReply = Completer<AiChatResult>();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+            companionAiServiceProvider.overrideWithValue(
+              CompanionAiService(
+                aiChatClient: _HomeFakeAiChatClient(
+                  (request) => aiReply.future,
+                ),
+              ),
+            ),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+      await tester.pump();
+      await tester.enterText(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
+        'Das ist mein Entwurf.',
+      );
+      await tester.pump();
+
+      await tester.tap(
+        find.byKey(const Key('talvori-world-globe-button')),
+        warnIfMissed: false,
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+        findsNothing,
+      );
+      expect(find.byType(WorldRegionScreen), findsNothing);
+
+      await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+      await tester.pump();
+
+      final reopenedInput = tester.widget<TextField>(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
+      );
+      expect(reopenedInput.controller?.text, 'Das ist mein Entwurf.');
+
+      await tester.tap(find.byKey(const Key('talvori-companion-chat-send')));
+      await tester.pump();
+
+      final submittedInput = tester.widget<TextField>(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
+      );
+      expect(submittedInput.controller?.text, isEmpty);
+    },
+  );
+
+  testWidgets('home chat barrier closes input before globe navigation', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('talvori-world-globe-button')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
+    expect(find.byType(WorldRegionScreen), findsNothing);
+
+    await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+    expect(find.byType(WorldRegionScreen), findsOneWidget);
+  });
+
+  testWidgets('home chat barrier closes input before hub actions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 0),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+
+    final inputRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+    );
+    await tester.tapAt(Offset(inputRect.center.dx, inputRect.top - 44));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
+    expect(find.byKey(const Key('home-smart-hub-tray')), findsNothing);
+
+    await openHomeHub(tester);
+    expect(find.byKey(const Key('home-smart-hub-tray')), findsOneWidget);
+  });
+
   testWidgets('home companion bubble drag keeps chat input focused', (
     tester,
   ) async {

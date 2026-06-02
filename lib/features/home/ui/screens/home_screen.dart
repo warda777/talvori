@@ -165,9 +165,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _closeCompanionChatInput() {
     _companionInputFocusNode.unfocus();
-    _companionInputController.clear();
-    _companionInputLineCount = 1;
-    _companionInputHeight = _HomeCompanionChatInput.estimatedHeight;
     _wasKeyboardVisibleForCompanionChat = false;
     ref.read(companionControllerProvider.notifier).compact();
     _cancelCompanionRestTimer();
@@ -616,6 +613,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   ),
                                 ),
+                                if (companionState.inputVisible)
+                                  Positioned.fill(
+                                    child: GestureDetector(
+                                      key: const Key(
+                                        'talvori-companion-chat-home-barrier',
+                                      ),
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: _closeCompanionChatInput,
+                                      child: const SizedBox.expand(),
+                                    ),
+                                  ),
                                 if (showCompanion)
                                   _HomeCompanionOverlay(
                                     viewportHeight: viewport.maxHeight,
@@ -640,7 +648,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
-            floatingActionButton: HomeSmartHubMenu(actions: homeHubActions),
+            floatingActionButton: GestureDetector(
+              key: const Key('talvori-companion-chat-hub-barrier'),
+              behavior: HitTestBehavior.translucent,
+              onTap: companionState.inputVisible
+                  ? _closeCompanionChatInput
+                  : null,
+              child: AbsorbPointer(
+                absorbing: companionState.inputVisible,
+                child: HomeSmartHubMenu(actions: homeHubActions),
+              ),
+            ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
           ),
