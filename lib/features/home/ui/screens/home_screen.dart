@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -901,23 +902,85 @@ class HomeStatusMessage {
   }
 }
 
-class _HomeAmbientBackground extends StatelessWidget {
+class _HomeAmbientBackground extends StatefulWidget {
   const _HomeAmbientBackground();
 
   @override
+  State<_HomeAmbientBackground> createState() => _HomeAmbientBackgroundState();
+}
+
+class _HomeAmbientBackgroundState extends State<_HomeAmbientBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 18),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: const _HomeAmbientBackgroundPainter());
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return CustomPaint(
+          painter: _HomeAmbientBackgroundPainter(phase: _controller.value),
+        );
+      },
+    );
   }
 }
 
 class _HomeAmbientBackgroundPainter extends CustomPainter {
-  const _HomeAmbientBackgroundPainter();
+  const _HomeAmbientBackgroundPainter({required this.phase});
+
+  final double phase;
 
   static const _cyan = Color(0xFF00D8FF);
   static const _blue = Color(0xFF2E78FF);
   static const _violet = Color(0xFF9B4DFF);
   static const _purple = Color(0xFFD35BFF);
   static const _transparent = Color(0x00000000);
+  static const _stars = <_HomeBackgroundStar>[
+    _HomeBackgroundStar(0.05, 0.18, 0.55, 0.16, 0.0),
+    _HomeBackgroundStar(0.12, 0.32, 0.75, 0.22, 0.18),
+    _HomeBackgroundStar(0.18, 0.08, 0.95, 0.2, 0.46),
+    _HomeBackgroundStar(0.23, 0.57, 0.6, 0.14, 0.74),
+    _HomeBackgroundStar(0.29, 0.22, 1.15, 0.24, 0.12),
+    _HomeBackgroundStar(0.34, 0.42, 0.7, 0.18, 0.62),
+    _HomeBackgroundStar(0.41, 0.13, 0.5, 0.13, 0.34),
+    _HomeBackgroundStar(0.47, 0.66, 1.05, 0.2, 0.88),
+    _HomeBackgroundStar(0.54, 0.25, 0.65, 0.16, 0.28),
+    _HomeBackgroundStar(0.59, 0.48, 0.9, 0.18, 0.8),
+    _HomeBackgroundStar(0.66, 0.16, 0.75, 0.17, 0.52),
+    _HomeBackgroundStar(0.71, 0.61, 1.2, 0.22, 0.08),
+    _HomeBackgroundStar(0.78, 0.34, 0.55, 0.14, 0.68),
+    _HomeBackgroundStar(0.84, 0.09, 0.9, 0.18, 0.4),
+    _HomeBackgroundStar(0.9, 0.51, 0.62, 0.15, 0.96),
+    _HomeBackgroundStar(0.96, 0.26, 0.8, 0.16, 0.2),
+    _HomeBackgroundStar(0.08, 0.72, 0.65, 0.12, 0.58),
+    _HomeBackgroundStar(0.16, 0.83, 1.0, 0.18, 0.84),
+    _HomeBackgroundStar(0.27, 0.77, 0.52, 0.11, 0.26),
+    _HomeBackgroundStar(0.38, 0.9, 0.82, 0.14, 0.66),
+    _HomeBackgroundStar(0.49, 0.81, 0.58, 0.11, 0.04),
+    _HomeBackgroundStar(0.61, 0.74, 0.95, 0.15, 0.48),
+    _HomeBackgroundStar(0.73, 0.86, 0.62, 0.12, 0.9),
+    _HomeBackgroundStar(0.87, 0.71, 1.05, 0.18, 0.3),
+    _HomeBackgroundStar(0.94, 0.92, 0.58, 0.11, 0.72),
+    _HomeBackgroundStar(0.33, 0.04, 0.72, 0.13, 0.38),
+    _HomeBackgroundStar(0.69, 0.03, 0.86, 0.16, 0.78),
+    _HomeBackgroundStar(0.52, 0.94, 0.7, 0.12, 0.14),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -963,6 +1026,9 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
       stops: const [0.0, 0.18, 0.38, 0.7],
     );
 
+    _drawStarField(canvas, size);
+    _drawShootingStars(canvas, size);
+
     final verticalMask = Paint()
       ..blendMode = BlendMode.dstIn
       ..shader = const LinearGradient(
@@ -981,9 +1047,103 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
     canvas.restore();
   }
 
+  void _drawStarField(Canvas canvas, Size size) {
+    for (final star in _stars) {
+      final twinkle =
+          0.72 + 0.28 * math.sin((phase + star.twinkleOffset) * math.pi * 2);
+      final alpha = star.alpha * twinkle;
+      final center = Offset(star.x * size.width, star.y * size.height);
+      final glowPaint = Paint()
+        ..color = const Color(0xFF77DFFF).withValues(alpha: alpha * 0.18)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.4);
+      canvas.drawCircle(center, star.radius * 2.2, glowPaint);
+
+      final corePaint = Paint()
+        ..color = Colors.white.withValues(alpha: alpha.clamp(0.0, 0.32));
+      canvas.drawCircle(center, star.radius, corePaint);
+    }
+  }
+
+  void _drawShootingStars(Canvas canvas, Size size) {
+    _drawShootingStar(
+      canvas,
+      size,
+      windowStart: 0.08,
+      windowLength: 0.16,
+      start: const Offset(0.82, 0.12),
+      travel: const Offset(-0.22, 0.13),
+    );
+    _drawShootingStar(
+      canvas,
+      size,
+      windowStart: 0.58,
+      windowLength: 0.14,
+      start: const Offset(0.34, 0.28),
+      travel: const Offset(0.2, 0.1),
+    );
+  }
+
+  void _drawShootingStar(
+    Canvas canvas,
+    Size size, {
+    required double windowStart,
+    required double windowLength,
+    required Offset start,
+    required Offset travel,
+  }) {
+    final progress = ((phase - windowStart) % 1.0) / windowLength;
+    if (progress < 0 || progress > 1) return;
+
+    final ease = Curves.easeInOut.transform(progress);
+    final opacity = math.sin(progress * math.pi) * 0.2;
+    final head = Offset(
+      (start.dx + travel.dx * ease) * size.width,
+      (start.dy + travel.dy * ease) * size.height,
+    );
+    final tail = Offset(
+      head.dx - travel.dx.sign * size.width * 0.12,
+      head.dy - travel.dy.sign * size.height * 0.055,
+    );
+
+    final paint = Paint()
+      ..strokeWidth = 1.1
+      ..strokeCap = StrokeCap.round
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          _transparent,
+          const Color(0xFFBEEBFF).withValues(alpha: opacity),
+          Colors.white.withValues(alpha: opacity * 0.85),
+        ],
+      ).createShader(Rect.fromPoints(tail, head));
+    canvas.drawLine(tail, head, paint);
+
+    final headPaint = Paint()
+      ..color = Colors.white.withValues(alpha: opacity * 0.9)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    canvas.drawCircle(head, 1.4, headPaint);
+  }
+
   @override
   bool shouldRepaint(covariant _HomeAmbientBackgroundPainter oldDelegate) =>
-      false;
+      oldDelegate.phase != phase;
+}
+
+class _HomeBackgroundStar {
+  const _HomeBackgroundStar(
+    this.x,
+    this.y,
+    this.radius,
+    this.alpha,
+    this.twinkleOffset,
+  );
+
+  final double x;
+  final double y;
+  final double radius;
+  final double alpha;
+  final double twinkleOffset;
 }
 
 class _HomeCompanionChatInput extends StatelessWidget {
