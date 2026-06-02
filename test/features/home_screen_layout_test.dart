@@ -344,8 +344,14 @@ void main() {
     final browserHint = tester.widget<Text>(
       find.text('Markiere ein Wort im Browser und teile es mit Tali.'),
     );
-    expect(browserHint.maxLines, 3);
-    expect(browserHint.overflow, TextOverflow.clip);
+    expect(browserHint.maxLines, isNull);
+    expect(browserHint.overflow, isNull);
+    expect(
+      find.byKey(const Key('home-companion-sentence-sparks')),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('home-companion-learn')), findsNothing);
+    expect(find.byKey(const Key('home-companion-world')), findsNothing);
     final mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -353,6 +359,58 @@ void main() {
       (mascotImage.image as AssetImage).assetName,
       TalvoriMascotAssets.spiritPathFor(TaliEmotion.neutral),
     );
+  });
+
+  testWidgets('companion bubble only shows quick actions for suggestions', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 360,
+            child: TalvoriCompanionCard(
+              message:
+                  'Das ist eine längere Antwort von Tali, die genug Raum in '
+                  'der Bubble bekommen soll und bei Bedarf scrollbar bleibt.',
+              quickActions: [
+                TalvoriCompanionQuickAction(
+                  key: const Key('test-companion-suggestion'),
+                  label: 'Vorschlag',
+                  icon: Icons.auto_awesome_rounded,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('test-companion-suggestion')), findsOneWidget);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 360,
+            child: TalvoriCompanionCard(
+              message: 'Nur Text, keine Suggestions.',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('test-companion-suggestion')), findsNothing);
   });
 
   testWidgets('home companion chat input sends prompt and shows response', (
@@ -737,6 +795,30 @@ void main() {
       );
       expect(MediaQuery.paddingOf(inputContext).bottom, 0);
       expect(MediaQuery.viewInsetsOf(inputContext).bottom, 320);
+      expect(
+        tester
+            .widget<TextField>(
+              find.byKey(const Key('talvori-companion-chat-text-field')),
+            )
+            .focusNode
+            ?.hasFocus,
+        isTrue,
+      );
+
+      await tester.drag(
+        find.byKey(const Key('talvori-companion-chat-dismiss-layer')),
+        const Offset(0, 80),
+      );
+      await tester.pump();
+      expect(
+        tester
+            .widget<TextField>(
+              find.byKey(const Key('talvori-companion-chat-text-field')),
+            )
+            .focusNode
+            ?.hasFocus,
+        isFalse,
+      );
 
       await tester.pumpWidget(buildHomeWithMediaQuery(baseMediaQuery));
       await tester.pump();

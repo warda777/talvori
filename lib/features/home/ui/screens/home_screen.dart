@@ -161,6 +161,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _cancelCompanionRestTimer();
   }
 
+  void _dismissCompanionKeyboard() {
+    if (!_companionInputFocusNode.hasFocus) return;
+    _companionInputFocusNode.unfocus();
+  }
+
   void _syncCompanionKeyboardVisibility({
     required bool inputVisible,
     required double keyboardInset,
@@ -613,9 +618,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     onCompanionTap: _toggleCompanion,
                                     onCompanionBubbleTap:
                                         _openCompanionChatInput,
-                                    onLearnTap: _showLearningSourcesPopup,
-                                    onSentenceSparksTap: _openSentenceSparks,
-                                    onGlobeTap: _openWorldRegion,
                                   ),
                               ],
                             );
@@ -637,6 +639,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: _closeCompanionChatInput,
+                onVerticalDragUpdate: (details) {
+                  if (details.delta.dy > 0.8) {
+                    _dismissCompanionKeyboard();
+                  }
+                },
+                onVerticalDragEnd: (details) {
+                  if ((details.primaryVelocity ?? 0) > 80) {
+                    _dismissCompanionKeyboard();
+                  }
+                },
               ),
             ),
           if (companionState.inputVisible)
@@ -648,12 +660,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 type: MaterialType.transparency,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _HomeCompanionChatInput(
-                    key: const Key('talvori-companion-chat-input'),
-                    controller: _companionInputController,
-                    focusNode: _companionInputFocusNode,
-                    companionDisplayName: companionDisplayName,
-                    onSubmitMessage: _submitCompanionMessage,
+                  child: Listener(
+                    onPointerMove: (event) {
+                      if (event.delta.dy > 0.8) {
+                        _dismissCompanionKeyboard();
+                      }
+                    },
+                    child: _HomeCompanionChatInput(
+                      key: const Key('talvori-companion-chat-input'),
+                      controller: _companionInputController,
+                      focusNode: _companionInputFocusNode,
+                      companionDisplayName: companionDisplayName,
+                      onSubmitMessage: _submitCompanionMessage,
+                    ),
                   ),
                 ),
               ),
@@ -675,9 +694,6 @@ class _HomeCompanionOverlay extends StatelessWidget {
     required this.showHomeChatHint,
     required this.onCompanionTap,
     required this.onCompanionBubbleTap,
-    required this.onLearnTap,
-    required this.onSentenceSparksTap,
-    required this.onGlobeTap,
   });
 
   final double viewportHeight;
@@ -689,9 +705,6 @@ class _HomeCompanionOverlay extends StatelessWidget {
   final bool showHomeChatHint;
   final VoidCallback onCompanionTap;
   final VoidCallback onCompanionBubbleTap;
-  final VoidCallback onLearnTap;
-  final VoidCallback onSentenceSparksTap;
-  final VoidCallback onGlobeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -704,7 +717,9 @@ class _HomeCompanionOverlay extends StatelessWidget {
         ? mascotSize
         : mascotSize * compactMascotScale;
     final cardHeight =
-        (companionState.bubbleVisible ? 152.0 : 0.0) +
+        (companionState.bubbleVisible
+            ? TalvoriCompanionCard.estimatedBubbleHeight
+            : 0.0) +
         effectiveMascotSize +
         18.0;
     final anchorBottom = _safeClampDouble(
@@ -747,27 +762,6 @@ class _HomeCompanionOverlay extends StatelessWidget {
               mascotStyle: mascotStyle,
               mascotSize: mascotSize,
               compactMascotScale: compactMascotScale,
-              messageMaxLines: compact ? 2 : 3,
-              quickActions: [
-                TalvoriCompanionQuickAction(
-                  key: const Key('home-companion-sentence-sparks'),
-                  label: 'Satzfunken',
-                  icon: Icons.auto_awesome_rounded,
-                  onTap: onSentenceSparksTap,
-                ),
-                TalvoriCompanionQuickAction(
-                  key: const Key('home-companion-learn'),
-                  label: 'Lernen',
-                  icon: Icons.psychology_rounded,
-                  onTap: onLearnTap,
-                ),
-                TalvoriCompanionQuickAction(
-                  key: const Key('home-companion-world'),
-                  label: 'Welt',
-                  icon: Icons.public_rounded,
-                  onTap: onGlobeTap,
-                ),
-              ],
               onMascotTap: onCompanionTap,
               onBubbleTap: onCompanionBubbleTap,
             ),

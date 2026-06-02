@@ -35,7 +35,6 @@ class TalvoriCompanionCard extends StatelessWidget {
     this.inputVisible = false,
     this.isThinking = false,
     this.showChatHint = false,
-    this.messageMaxLines = 3,
     this.quickActions = const [],
     this.onMascotTap,
     this.onBubbleTap,
@@ -54,14 +53,16 @@ class TalvoriCompanionCard extends StatelessWidget {
   final bool inputVisible;
   final bool isThinking;
   final bool showChatHint;
-  final int messageMaxLines;
   final List<TalvoriCompanionQuickAction> quickActions;
   final VoidCallback? onMascotTap;
   final VoidCallback? onBubbleTap;
 
+  static const estimatedBubbleHeight = 218.0;
+
   @override
   Widget build(BuildContext context) {
     final accent = _accentForMood(mood);
+    final hasQuickActions = quickActions.isNotEmpty;
     final effectiveMascotMood = mascotMood ?? _mascotMoodForCompanion(mood);
     final effectiveEmotion =
         emotion ??
@@ -89,8 +90,8 @@ class TalvoriCompanionCard extends StatelessWidget {
             effectiveMascotSize + 8.0,
             effectiveMascotSize + 24.0,
           );
-          final topInset = (bubbleVisible ? 152.0 : 0.0)
-              .clamp(0.0, bubbleVisible ? 170.0 : 0.0)
+          final topInset = (bubbleVisible ? estimatedBubbleHeight : 0.0)
+              .clamp(0.0, bubbleVisible ? estimatedBubbleHeight : 0.0)
               .toDouble();
 
           return SizedBox(
@@ -242,20 +243,28 @@ class TalvoriCompanionCard extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 3),
-                              Text(
-                                message,
-                                maxLines: messageMaxLines,
-                                overflow: TextOverflow.clip,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.82,
-                                      ),
-                                      height: 1.18,
-                                      letterSpacing: 0,
-                                    ),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight: hasQuickActions ? 86.0 : 132.0,
+                                ),
+                                child: SingleChildScrollView(
+                                  key: const Key(
+                                    'talvori-companion-message-scroll',
+                                  ),
+                                  child: Text(
+                                    message,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.82,
+                                          ),
+                                          height: 1.18,
+                                          letterSpacing: 0,
+                                        ),
+                                  ),
+                                ),
                               ),
-                              if (quickActions.isNotEmpty) ...[
+                              if (hasQuickActions) ...[
                                 const SizedBox(height: 8),
                                 Wrap(
                                   spacing: 6,
