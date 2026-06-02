@@ -678,10 +678,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mascotExpanded =
-        companionState.isExpanded &&
-        !companionState.inputVisible &&
-        !companionState.isThinking;
+    final mascotExpanded = companionState.isExpanded;
     final mascotSize = mascotExpanded
         ? (compact ? 116.0 : 136.0)
         : (compact ? 110.0 : 128.0);
