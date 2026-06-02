@@ -930,13 +930,15 @@ class _HomeAmbientBackgroundState extends State<_HomeAmbientBackground>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return CustomPaint(
-          painter: _HomeAmbientBackgroundPainter(phase: _controller.value),
-        );
-      },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return CustomPaint(
+            painter: _HomeAmbientBackgroundPainter(phase: _controller.value),
+          );
+        },
+      ),
     );
   }
 }
@@ -951,35 +953,19 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
   static const _violet = Color(0xFF9B4DFF);
   static const _purple = Color(0xFFD35BFF);
   static const _transparent = Color(0x00000000);
-  static const _stars = <_HomeBackgroundStar>[
-    _HomeBackgroundStar(0.05, 0.18, 0.55, 0.16, 0.0),
-    _HomeBackgroundStar(0.12, 0.32, 0.75, 0.22, 0.18),
-    _HomeBackgroundStar(0.18, 0.08, 0.95, 0.2, 0.46),
-    _HomeBackgroundStar(0.23, 0.57, 0.6, 0.14, 0.74),
-    _HomeBackgroundStar(0.29, 0.22, 1.15, 0.24, 0.12),
-    _HomeBackgroundStar(0.34, 0.42, 0.7, 0.18, 0.62),
-    _HomeBackgroundStar(0.41, 0.13, 0.5, 0.13, 0.34),
-    _HomeBackgroundStar(0.47, 0.66, 1.05, 0.2, 0.88),
-    _HomeBackgroundStar(0.54, 0.25, 0.65, 0.16, 0.28),
-    _HomeBackgroundStar(0.59, 0.48, 0.9, 0.18, 0.8),
-    _HomeBackgroundStar(0.66, 0.16, 0.75, 0.17, 0.52),
-    _HomeBackgroundStar(0.71, 0.61, 1.2, 0.22, 0.08),
-    _HomeBackgroundStar(0.78, 0.34, 0.55, 0.14, 0.68),
-    _HomeBackgroundStar(0.84, 0.09, 0.9, 0.18, 0.4),
-    _HomeBackgroundStar(0.9, 0.51, 0.62, 0.15, 0.96),
-    _HomeBackgroundStar(0.96, 0.26, 0.8, 0.16, 0.2),
-    _HomeBackgroundStar(0.08, 0.72, 0.65, 0.12, 0.58),
-    _HomeBackgroundStar(0.16, 0.83, 1.0, 0.18, 0.84),
-    _HomeBackgroundStar(0.27, 0.77, 0.52, 0.11, 0.26),
-    _HomeBackgroundStar(0.38, 0.9, 0.82, 0.14, 0.66),
-    _HomeBackgroundStar(0.49, 0.81, 0.58, 0.11, 0.04),
-    _HomeBackgroundStar(0.61, 0.74, 0.95, 0.15, 0.48),
-    _HomeBackgroundStar(0.73, 0.86, 0.62, 0.12, 0.9),
-    _HomeBackgroundStar(0.87, 0.71, 1.05, 0.18, 0.3),
-    _HomeBackgroundStar(0.94, 0.92, 0.58, 0.11, 0.72),
-    _HomeBackgroundStar(0.33, 0.04, 0.72, 0.13, 0.38),
-    _HomeBackgroundStar(0.69, 0.03, 0.86, 0.16, 0.78),
-    _HomeBackgroundStar(0.52, 0.94, 0.7, 0.12, 0.14),
+  static const _accentStars = <_HomeBackgroundStar>[
+    _HomeBackgroundStar(0.07, 0.2, 1.35, 0.44, 0.0),
+    _HomeBackgroundStar(0.15, 0.78, 1.08, 0.38, 0.18),
+    _HomeBackgroundStar(0.21, 0.49, 0.92, 0.34, 0.46),
+    _HomeBackgroundStar(0.32, 0.1, 1.18, 0.42, 0.74),
+    _HomeBackgroundStar(0.39, 0.86, 0.86, 0.33, 0.12),
+    _HomeBackgroundStar(0.48, 0.24, 1.0, 0.36, 0.62),
+    _HomeBackgroundStar(0.58, 0.58, 1.24, 0.4, 0.34),
+    _HomeBackgroundStar(0.67, 0.13, 0.94, 0.35, 0.88),
+    _HomeBackgroundStar(0.76, 0.72, 1.16, 0.4, 0.28),
+    _HomeBackgroundStar(0.84, 0.34, 0.88, 0.34, 0.8),
+    _HomeBackgroundStar(0.91, 0.09, 1.32, 0.45, 0.52),
+    _HomeBackgroundStar(0.94, 0.91, 1.04, 0.38, 0.08),
   ];
 
   @override
@@ -1026,6 +1012,7 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
       stops: const [0.0, 0.18, 0.38, 0.7],
     );
 
+    _drawGalaxyDust(canvas, size);
     _drawStarField(canvas, size);
     _drawShootingStars(canvas, size);
 
@@ -1047,20 +1034,137 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
     canvas.restore();
   }
 
+  void _drawGalaxyDust(Canvas canvas, Size size) {
+    final bandStart = Offset(size.width * -0.08, size.height * 0.88);
+    final bandEnd = Offset(size.width * 1.08, size.height * 0.22);
+    final cyanBand = Paint()
+      ..color = _cyan.withValues(alpha: 0.055)
+      ..strokeWidth = size.shortestSide * 0.18
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 34);
+    canvas.drawLine(bandStart, bandEnd, cyanBand);
+
+    final violetBand = Paint()
+      ..color = _violet.withValues(alpha: 0.045)
+      ..strokeWidth = size.shortestSide * 0.13
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24);
+    canvas.drawLine(
+      Offset(size.width * 0.18, size.height * 0.94),
+      Offset(size.width * 1.08, size.height * 0.34),
+      violetBand,
+    );
+
+    final dustPaint = Paint();
+    for (var i = 0; i < 80; i++) {
+      final t = _unitNoise(i, 9.2);
+      final drift = (_unitNoise(i, 13.7) - 0.5) * 0.18;
+      final x = (-0.04 + t * 1.12 + drift * 0.36) * size.width;
+      final y = (0.86 - t * 0.58 + drift) * size.height;
+      final alpha = 0.08 + _unitNoise(i, 17.1) * 0.14;
+      final radius = 0.35 + _unitNoise(i, 21.4) * 0.75;
+      dustPaint.color = const Color(0xFF93E8FF).withValues(alpha: alpha);
+      canvas.drawCircle(Offset(x, y), radius, dustPaint);
+    }
+  }
+
   void _drawStarField(Canvas canvas, Size size) {
-    for (final star in _stars) {
+    _drawGeneratedStarLayer(
+      canvas,
+      size,
+      count: 96,
+      seed: 1.7,
+      minRadius: 0.28,
+      maxRadius: 0.72,
+      minAlpha: 0.16,
+      maxAlpha: 0.34,
+      twinkleDepth: 0.14,
+      twinkleSpeed: 0.42,
+    );
+    _drawGeneratedStarLayer(
+      canvas,
+      size,
+      count: 56,
+      seed: 4.9,
+      minRadius: 0.55,
+      maxRadius: 1.08,
+      minAlpha: 0.24,
+      maxAlpha: 0.48,
+      twinkleDepth: 0.22,
+      twinkleSpeed: 0.68,
+    );
+
+    for (final star in _accentStars) {
       final twinkle =
-          0.72 + 0.28 * math.sin((phase + star.twinkleOffset) * math.pi * 2);
+          0.64 + 0.36 * math.sin((phase + star.twinkleOffset) * math.pi * 2);
       final alpha = star.alpha * twinkle;
       final center = Offset(star.x * size.width, star.y * size.height);
       final glowPaint = Paint()
-        ..color = const Color(0xFF77DFFF).withValues(alpha: alpha * 0.18)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.4);
-      canvas.drawCircle(center, star.radius * 2.2, glowPaint);
+        ..color = const Color(0xFF8BE8FF).withValues(alpha: alpha * 0.22)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.2);
+      canvas.drawCircle(center, star.radius * 3.8, glowPaint);
 
       final corePaint = Paint()
-        ..color = Colors.white.withValues(alpha: alpha.clamp(0.0, 0.32));
+        ..color = Colors.white.withValues(alpha: alpha.clamp(0.0, 0.56));
       canvas.drawCircle(center, star.radius, corePaint);
+
+      final flarePaint = Paint()
+        ..strokeWidth = 0.75
+        ..strokeCap = StrokeCap.round
+        ..color = Colors.white.withValues(alpha: alpha * 0.2);
+      canvas.drawLine(
+        center.translate(-star.radius * 3.2, 0),
+        center.translate(star.radius * 3.2, 0),
+        flarePaint,
+      );
+      canvas.drawLine(
+        center.translate(0, -star.radius * 3.2),
+        center.translate(0, star.radius * 3.2),
+        flarePaint,
+      );
+    }
+  }
+
+  void _drawGeneratedStarLayer(
+    Canvas canvas,
+    Size size, {
+    required int count,
+    required double seed,
+    required double minRadius,
+    required double maxRadius,
+    required double minAlpha,
+    required double maxAlpha,
+    required double twinkleDepth,
+    required double twinkleSpeed,
+  }) {
+    final glowPaint = Paint()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+    final corePaint = Paint();
+
+    for (var i = 0; i < count; i++) {
+      final x = _unitNoise(i, seed);
+      final y = _unitNoise(i, seed + 31.0);
+      final sizeMix = _unitNoise(i, seed + 71.0);
+      final alphaMix = _unitNoise(i, seed + 109.0);
+      final twinkleOffset = _unitNoise(i, seed + 173.0);
+      final twinkle =
+          1 -
+          twinkleDepth / 2 +
+          twinkleDepth *
+              math.sin((phase * twinkleSpeed + twinkleOffset) * math.pi * 2);
+      final alpha = (minAlpha + (maxAlpha - minAlpha) * alphaMix) * twinkle;
+      final radius = minRadius + (maxRadius - minRadius) * sizeMix;
+      final center = Offset(x * size.width, y * size.height);
+
+      if (radius > 0.82) {
+        glowPaint.color = const Color(
+          0xFF74DFFF,
+        ).withValues(alpha: alpha * 0.18);
+        canvas.drawCircle(center, radius * 2.5, glowPaint);
+      }
+
+      corePaint.color = Colors.white.withValues(alpha: alpha.clamp(0.0, 0.52));
+      canvas.drawCircle(center, radius, corePaint);
     }
   }
 
@@ -1069,7 +1173,7 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
       canvas,
       size,
       windowStart: 0.08,
-      windowLength: 0.16,
+      windowLength: 0.18,
       start: const Offset(0.82, 0.12),
       travel: const Offset(-0.22, 0.13),
     );
@@ -1077,7 +1181,7 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
       canvas,
       size,
       windowStart: 0.58,
-      windowLength: 0.14,
+      windowLength: 0.17,
       start: const Offset(0.34, 0.28),
       travel: const Offset(0.2, 0.1),
     );
@@ -1091,18 +1195,21 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
     required Offset start,
     required Offset travel,
   }) {
-    final progress = ((phase - windowStart) % 1.0) / windowLength;
-    if (progress < 0 || progress > 1) return;
+    final elapsed = phase >= windowStart
+        ? phase - windowStart
+        : phase + 1 - windowStart;
+    if (elapsed > windowLength) return;
+    final progress = elapsed / windowLength;
 
     final ease = Curves.easeInOut.transform(progress);
-    final opacity = math.sin(progress * math.pi) * 0.2;
+    final opacity = math.sin(progress * math.pi) * 0.44;
     final head = Offset(
       (start.dx + travel.dx * ease) * size.width,
       (start.dy + travel.dy * ease) * size.height,
     );
     final tail = Offset(
       head.dx - travel.dx.sign * size.width * 0.12,
-      head.dy - travel.dy.sign * size.height * 0.055,
+      head.dy - travel.dy.sign * size.height * 0.07,
     );
 
     final paint = Paint()
@@ -1123,6 +1230,11 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: opacity * 0.9)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
     canvas.drawCircle(head, 1.4, headPaint);
+  }
+
+  double _unitNoise(int index, double seed) {
+    final raw = math.sin(index * 12.9898 + seed * 78.233) * 43758.5453;
+    return raw - raw.floorToDouble();
   }
 
   @override
