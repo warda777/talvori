@@ -695,10 +695,13 @@ void main() {
         tester.getRect(find.byKey(const Key('talvori-world-home-hero'))),
         initialHeroRect,
       );
-      expect(
-        tester.getRect(find.byKey(const Key('talvori-companion-mascot-image'))),
-        inputVisibleMascotRect,
+      final keyboardMascotRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-mascot-image')),
       );
+      final keyboardBubbleRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-bubble')),
+      );
+      expect(keyboardMascotRect.size, inputVisibleMascotRect.size);
       final keyboardCompanion = tester.widget<TalvoriCompanionCard>(
         find.byType(TalvoriCompanionCard),
       );
@@ -714,6 +717,14 @@ void main() {
       expect(keyboardInputRect.bottom, closeTo(878, 1));
       expect(keyboardInputRect.bottom, lessThan(inputVisibleInputRect.bottom));
       expect(keyboardInputRect.bottom, lessThanOrEqualTo(880));
+      expect(
+        keyboardMascotRect.bottom,
+        lessThanOrEqualTo(keyboardInputRect.top - 12),
+      );
+      expect(
+        keyboardBubbleRect.bottom,
+        lessThanOrEqualTo(keyboardInputRect.top - 12),
+      );
       expect(textFieldRect.top, greaterThanOrEqualTo(keyboardInputRect.top));
       expect(textFieldRect.bottom, lessThanOrEqualTo(keyboardInputRect.bottom));
       expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);

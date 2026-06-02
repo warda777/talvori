@@ -411,6 +411,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final chatInputBottom = keyboardInset > 0
         ? keyboardInset + 2.0
         : mediaQuery.padding.bottom + 24.0;
+    final companionKeyboardMaxBottom =
+        companionState.inputVisible && keyboardInset > 0
+        ? mediaQuery.size.height -
+              chatInputBottom -
+              _HomeCompanionChatInput.estimatedHeight -
+              mediaQuery.viewPadding.top -
+              16.0
+        : null;
     final homeLayoutMediaQuery = mediaQuery.copyWith(
       padding: mediaQuery.padding.copyWith(
         bottom: mediaQuery.viewPadding.bottom,
@@ -597,6 +605,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     viewportHeight: viewport.maxHeight,
                                     compact: compactHome,
                                     companionState: companionState,
+                                    keyboardSafeMaxBottom:
+                                        companionKeyboardMaxBottom,
                                     companionDisplayName: companionDisplayName,
                                     mascotStyle: mascotStyle,
                                     showHomeChatHint: showHomeChatHint,
@@ -659,6 +669,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
     required this.viewportHeight,
     required this.compact,
     required this.companionState,
+    required this.keyboardSafeMaxBottom,
     required this.companionDisplayName,
     required this.mascotStyle,
     required this.showHomeChatHint,
@@ -672,6 +683,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
   final double viewportHeight;
   final bool compact;
   final CompanionState companionState;
+  final double? keyboardSafeMaxBottom;
   final String companionDisplayName;
   final TalvoriMascotStyle mascotStyle;
   final bool showHomeChatHint;
@@ -700,11 +712,14 @@ class _HomeCompanionOverlay extends StatelessWidget {
       compact ? 500.0 : 620.0,
       viewportHeight - (compact ? 132.0 : 164.0),
     );
-    final top = _safeClampDouble(
+    final baseTop = _safeClampDouble(
       anchorBottom - cardHeight,
       0.0,
       viewportHeight - effectiveMascotSize - 24.0,
     );
+    final top = keyboardSafeMaxBottom == null
+        ? baseTop
+        : _safeClampDouble(baseTop, 0.0, keyboardSafeMaxBottom! - cardHeight);
     final width = companionState.isExpanded
         ? (compact ? 336.0 : 460.0)
         : mascotSize + 10.0;
@@ -956,6 +971,7 @@ class _HomeCompanionChatInput extends StatelessWidget {
   });
 
   static const _accent = Color(0xFF9FCED0);
+  static const estimatedHeight = 64.0;
 
   final TextEditingController controller;
   final FocusNode focusNode;
