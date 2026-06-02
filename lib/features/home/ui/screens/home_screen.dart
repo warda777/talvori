@@ -422,7 +422,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ? mediaQuery.size.height -
               chatInputBottom -
               _HomeCompanionChatInput.estimatedHeight -
-              16.0
+              mediaQuery.padding.top -
+              12.0
         : null;
     final homeLayoutMediaQuery = mediaQuery.copyWith(
       padding: mediaQuery.padding.copyWith(

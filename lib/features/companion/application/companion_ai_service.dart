@@ -38,7 +38,7 @@ class CompanionAiService {
           },
         ),
       );
-      final reply = _shorten(result.reply);
+      final reply = _normalizeReply(result.reply);
       if (reply.isNotEmpty) return reply;
     } on Object {
       return _fallbackReply(trimmed, context);
@@ -65,9 +65,8 @@ class CompanionAiService {
     return 'Gute Frage. Für den MVP gebe ich dir kurz Rückenwind: Wähle ein kleines Paket und starte direkt.';
   }
 
-  String _shorten(String value) {
+  String _normalizeReply(String value) {
     final normalized = value.trim().replaceAll(RegExp(r'\s+'), ' ');
-    if (normalized.length <= 180) return normalized;
-    return '${normalized.substring(0, 177).trimRight()}...';
+    return normalized;
   }
 }

@@ -763,8 +763,8 @@ void main() {
       const baseMediaQuery = MediaQueryData(
         size: Size(800, 1200),
         devicePixelRatio: 1,
-        padding: EdgeInsets.only(bottom: 34),
-        viewPadding: EdgeInsets.only(bottom: 34),
+        padding: EdgeInsets.only(top: 59, bottom: 34),
+        viewPadding: EdgeInsets.only(top: 59, bottom: 34),
       );
 
       Widget buildHomeWithMediaQuery(MediaQueryData mediaQueryData) {
@@ -815,7 +815,7 @@ void main() {
       await tester.pumpWidget(
         buildHomeWithMediaQuery(
           baseMediaQuery.copyWith(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.only(top: 59),
             viewInsets: const EdgeInsets.only(bottom: 320),
           ),
         ),

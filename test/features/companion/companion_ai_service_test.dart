@@ -27,6 +27,31 @@ void main() {
     expect(capturedRequest?.context, isA<Map<String, Object?>>());
   });
 
+  test(
+    'keeps long AI replies instead of shortening them to a preview',
+    () async {
+      final longReply = List.filled(
+        12,
+        'Tali erklärt in Ruhe, warum diese Wörter zusammenpassen und wie daraus '
+        'eine kleine Lernrunde entsteht.',
+      ).join(' ');
+      final service = CompanionAiService(
+        aiChatClient: _FakeAiChatClient((request) async {
+          return AiChatResult(reply: longReply);
+        }),
+      );
+
+      final reply = await service.reply(
+        message: 'Erklär mir das länger.',
+        context: const CompanionAiContext(myWordsCount: 3),
+      );
+
+      expect(reply, longReply);
+      expect(reply.length, greaterThan(500));
+      expect(reply.endsWith('...'), isFalse);
+    },
+  );
+
   test('falls back locally when AI is unavailable', () async {
     final service = CompanionAiService(
       aiChatClient: _FakeAiChatClient((request) {
