@@ -619,14 +619,25 @@ void main() {
       addTearDown(tester.view.resetViewInsets);
       SharedPreferences.setMockInitialValues({});
 
-      await tester.pumpWidget(
-        ProviderScope(
+      const baseMediaQuery = MediaQueryData(
+        size: Size(800, 1200),
+        devicePixelRatio: 1,
+        padding: EdgeInsets.only(bottom: 34),
+        viewPadding: EdgeInsets.only(bottom: 34),
+      );
+
+      Widget buildHomeWithMediaQuery(MediaQueryData mediaQueryData) {
+        return ProviderScope(
           overrides: [
             localWordCountProvider.overrideWith((ref, categoryId) async => 0),
           ],
-          child: const MaterialApp(home: HomeScreen()),
-        ),
-      );
+          child: MaterialApp(
+            home: MediaQuery(data: mediaQueryData, child: const HomeScreen()),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildHomeWithMediaQuery(baseMediaQuery));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -636,6 +647,7 @@ void main() {
         find.byKey(const Key('talvori-companion-chat-input')),
         findsOneWidget,
       );
+
       final initialGlobeRect = tester.getRect(
         find.byKey(const Key('talvori-world-globe-button')),
       );
@@ -654,8 +666,19 @@ void main() {
         find.byKey(const Key('talvori-companion-chat-input')),
       );
       expect(find.byKey(const Key('talvori-companion-bubble')), findsOneWidget);
+      final inputVisibleHeroContext = tester.element(
+        find.byKey(const Key('talvori-world-home-hero')),
+      );
+      expect(MediaQuery.viewInsetsOf(inputVisibleHeroContext).bottom, 0);
 
-      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      await tester.pumpWidget(
+        buildHomeWithMediaQuery(
+          baseMediaQuery.copyWith(
+            padding: EdgeInsets.zero,
+            viewInsets: const EdgeInsets.only(bottom: 320),
+          ),
+        ),
+      );
       await tester.pump();
 
       final keyboardInputRect = tester.getRect(
@@ -698,8 +721,13 @@ void main() {
         find.byKey(const Key('talvori-world-home-hero')),
       );
       expect(MediaQuery.viewInsetsOf(heroContext).bottom, 0);
+      final inputContext = tester.element(
+        find.byKey(const Key('talvori-companion-chat-input')),
+      );
+      expect(MediaQuery.paddingOf(inputContext).bottom, 0);
+      expect(MediaQuery.viewInsetsOf(inputContext).bottom, 320);
 
-      tester.view.resetViewInsets();
+      await tester.pumpWidget(buildHomeWithMediaQuery(baseMediaQuery));
       await tester.pump();
       await tester.pump();
 

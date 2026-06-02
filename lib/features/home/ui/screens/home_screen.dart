@@ -411,6 +411,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final chatInputBottom = keyboardInset > 0
         ? keyboardInset + 2.0
         : mediaQuery.padding.bottom + 24.0;
+    final homeLayoutMediaQuery = mediaQuery.copyWith(
+      padding: mediaQuery.padding.copyWith(
+        bottom: mediaQuery.viewPadding.bottom,
+      ),
+      viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0),
+    );
 
     _syncCompanionKeyboardVisibility(
       inputVisible: companionState.inputVisible,
@@ -484,9 +490,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             extendBody: true,
             extendBodyBehindAppBar: true,
             resizeToAvoidBottomInset: false,
-            body: MediaQuery.removeViewInsets(
-              context: context,
-              removeBottom: true,
+            body: MediaQuery(
+              data: homeLayoutMediaQuery,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
