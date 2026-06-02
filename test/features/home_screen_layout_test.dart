@@ -162,7 +162,12 @@ void main() {
     expect(find.byKey(const Key('talvori-world-home-hero')), findsOneWidget);
     expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
     expect(find.byKey(const Key('home-smart-hub-button')), findsOneWidget);
-    expect(find.text('Deine Welt wartet.'), findsOneWidget);
+    expect(find.text('Deine Welt wartet'), findsOneWidget);
+    expect(
+      find.text('Sammle dein erstes Wort aus der echten Welt'),
+      findsOneWidget,
+    );
+    expect(find.text('0 Wörter · Talvori-Welt-Zentrale'), findsNothing);
     expect(find.byType(WordCard), findsNothing);
     expect(find.byType(Switch), findsNothing);
     final globeRect = tester.getRect(
@@ -175,6 +180,32 @@ void main() {
     expect(find.byIcon(Icons.grid_view_rounded), findsNothing);
     expect(find.text('Impuls vorbereiten'), findsNothing);
     expect(find.text('Impuls-Vorschau'), findsNothing);
+  });
+
+  testWidgets('home status text reflects available words', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localWordCountProvider.overrideWith((ref, categoryId) async => 3),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('3 Wörter warten'), findsOneWidget);
+    expect(
+      find.text('Starte eine kurze Runde oder sammle neue Wörter'),
+      findsOneWidget,
+    );
+    expect(find.text('3 Wörter · Talvori-Welt-Zentrale'), findsNothing);
   });
 
   testWidgets('home word card handles large counts without overflow', (

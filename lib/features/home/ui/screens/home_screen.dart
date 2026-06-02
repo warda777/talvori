@@ -794,6 +794,7 @@ class _HomeWorldHero extends StatelessWidget {
     final haloSize = globeSize + (compact ? 26.0 : 36.0);
     final topGap = compact ? 4.0 : 6.0;
     final globeGap = compact ? 10.0 : 14.0;
+    final statusMessage = HomeStatusMessage.fromWordCount(wordCount);
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 590),
@@ -802,7 +803,7 @@ class _HomeWorldHero extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Deine Welt wartet.',
+            statusMessage.headline,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: _cyan,
@@ -812,7 +813,7 @@ class _HomeWorldHero extends StatelessWidget {
           ),
           SizedBox(height: topGap),
           Text(
-            '${_compactWordCount(wordCount)} Wörter · Talvori-Welt-Zentrale',
+            statusMessage.subtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.52),
@@ -867,6 +868,36 @@ class _HomeWorldHero extends StatelessWidget {
     if (count >= 100000) return '${count ~/ 1000}k';
     if (count >= 10000) return '${count ~/ 1000}k';
     return '$count';
+  }
+}
+
+enum HomeStatusMessageType { fallback, wordsAvailable }
+
+class HomeStatusMessage {
+  const HomeStatusMessage({
+    required this.type,
+    required this.headline,
+    required this.subtitle,
+  });
+
+  final HomeStatusMessageType type;
+  final String headline;
+  final String subtitle;
+
+  static HomeStatusMessage fromWordCount(int wordCount) {
+    if (wordCount <= 0) {
+      return const HomeStatusMessage(
+        type: HomeStatusMessageType.fallback,
+        headline: 'Deine Welt wartet',
+        subtitle: 'Sammle dein erstes Wort aus der echten Welt',
+      );
+    }
+
+    return HomeStatusMessage(
+      type: HomeStatusMessageType.wordsAvailable,
+      headline: '${_HomeWorldHero._compactWordCount(wordCount)} Wörter warten',
+      subtitle: 'Starte eine kurze Runde oder sammle neue Wörter',
+    );
   }
 }
 
