@@ -395,15 +395,21 @@ void main() {
   testWidgets('companion bubble only shows quick actions for suggestions', (
     tester,
   ) async {
+    const longCompanionMessage =
+        'Tali hat eine längere Antwort vorbereitet. '
+        'Sie erklärt erst, warum ein kurzer Satzfunken heute sinnvoll ist, '
+        'nennt dann zwei mögliche Wörter und beschreibt am Ende noch, wie du '
+        'daraus eine kleine Lernrunde machen kannst. Diese Antwort ist bewusst '
+        'lang, damit die Bubble nicht hart bei wenigen Zeilen abschneidet, '
+        'sondern ihren Textbereich sauber scrollbar macht.';
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SizedBox(
             width: 360,
             child: TalvoriCompanionCard(
-              message:
-                  'Das ist eine längere Antwort von Tali, die genug Raum in '
-                  'der Bubble bekommen soll und bei Bedarf scrollbar bleibt.',
+              message: longCompanionMessage,
               quickActions: [
                 TalvoriCompanionQuickAction(
                   key: const Key('test-companion-suggestion'),
@@ -422,6 +428,16 @@ void main() {
       find.byKey(const Key('talvori-companion-message-scroll')),
       findsOneWidget,
     );
+    final messageScrollRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+    );
+    expect(messageScrollRect.height, greaterThan(120));
+    expect(messageScrollRect.height, lessThanOrEqualTo(142));
+    await tester.drag(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+      const Offset(0, -48),
+    );
+    await tester.pump();
     expect(find.byKey(const Key('test-companion-suggestion')), findsOneWidget);
 
     await tester.pumpWidget(
@@ -441,6 +457,10 @@ void main() {
       find.byKey(const Key('talvori-companion-message-scroll')),
       findsOneWidget,
     );
+    final textOnlyScrollRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+    );
+    expect(textOnlyScrollRect.height, lessThan(80));
     expect(find.byKey(const Key('test-companion-suggestion')), findsNothing);
   });
 
@@ -594,6 +614,15 @@ void main() {
     );
     expect(reopenedInput.controller?.text, isEmpty);
     expect(reopenedInput.maxLines, 5);
+
+    await tester.tapAt(const Offset(24, 560));
+    await tester.pump();
+    expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
+    expect(find.text('Starte mit einem Wort.'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
+    await tester.pump();
+    expect(find.text('Starte mit einem Wort.'), findsOneWidget);
 
     final chats = await repository.listChats();
     expect(

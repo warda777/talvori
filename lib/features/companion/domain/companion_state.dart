@@ -12,8 +12,11 @@ class CompanionState {
     required this.isThinking,
     this.inputText = '',
     this.lastUserMessage,
+    this.lastReplyMessage,
     this.errorMessage,
   });
+
+  static const defaultMessage = 'Bereit für dein nächstes Wort?';
 
   factory CompanionState.initial() {
     return const CompanionState(
@@ -22,7 +25,7 @@ class CompanionState {
       mascotMood: TalvoriMascotMood.greeting,
       emotion: TaliEmotion.neutral,
       title: 'Talvori',
-      message: 'Bereit für dein nächstes Wort?',
+      message: defaultMessage,
       inputVisible: false,
       isThinking: false,
     );
@@ -38,6 +41,7 @@ class CompanionState {
   final bool isThinking;
   final String inputText;
   final String? lastUserMessage;
+  final String? lastReplyMessage;
   final String? errorMessage;
 
   CompanionState copyWith({
@@ -51,8 +55,10 @@ class CompanionState {
     bool? isThinking,
     String? inputText,
     String? lastUserMessage,
+    String? lastReplyMessage,
     String? errorMessage,
     bool clearLastUserMessage = false,
+    bool clearLastReplyMessage = false,
     bool clearErrorMessage = false,
   }) {
     return CompanionState(
@@ -68,6 +74,9 @@ class CompanionState {
       lastUserMessage: clearLastUserMessage
           ? null
           : lastUserMessage ?? this.lastUserMessage,
+      lastReplyMessage: clearLastReplyMessage
+          ? null
+          : lastReplyMessage ?? this.lastReplyMessage,
       errorMessage: clearErrorMessage
           ? null
           : errorMessage ?? this.errorMessage,

@@ -25,6 +25,7 @@ void main() {
     expect(state.message, 'Bereit für dein nächstes Wort?');
     expect(state.inputVisible, isFalse);
     expect(state.isThinking, isFalse);
+    expect(state.lastReplyMessage, isNull);
   });
 
   test('compact hides the bubble and shows the idle mascot', () {
@@ -91,6 +92,7 @@ void main() {
     expect(state.mascotMood, TalvoriMascotMood.proud);
     expect(state.emotion, TaliEmotion.starEyes);
     expect(state.message, 'Stark, weiter so.');
+    expect(state.lastReplyMessage, 'Stark, weiter so.');
   });
 
   test('showMessage can set an explicit Tali emotion', () {
@@ -162,7 +164,7 @@ void main() {
     expect(state.isExpanded, isTrue);
     expect(state.bubbleVisible, isTrue);
     expect(state.inputVisible, isTrue);
-    expect(state.mascotMood, TalvoriMascotMood.thinkingChin);
+    expect(state.mascotMood, TalvoriMascotMood.greeting);
     expect(state.emotion, TaliEmotion.neutral);
   });
 
@@ -207,9 +209,58 @@ void main() {
     expect(state.inputVisible, isTrue);
     expect(state.bubbleVisible, isTrue);
     expect(state.message, 'Nimm ein kleines Paket.');
+    expect(state.lastReplyMessage, 'Nimm ein kleines Paket.');
     expect(state.mascotMood, TalvoriMascotMood.happy);
     expect(state.emotion, TaliEmotion.happy);
     expect(container.read(taliEmotionControllerProvider), TaliEmotion.happy);
+  });
+
+  test('compact and wakeUp keep the last companion reply', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.showAiResponse('Das bleibt in der Bubble.');
+    controller.compact();
+    var state = container.read(companionControllerProvider);
+
+    expect(state.isExpanded, isFalse);
+    expect(state.bubbleVisible, isFalse);
+    expect(state.message, 'Das bleibt in der Bubble.');
+    expect(state.lastReplyMessage, 'Das bleibt in der Bubble.');
+
+    controller.wakeUp();
+    state = container.read(companionControllerProvider);
+
+    expect(state.isExpanded, isTrue);
+    expect(state.bubbleVisible, isTrue);
+    expect(state.message, 'Das bleibt in der Bubble.');
+  });
+
+  test('discovery tips do not overwrite a retained reply', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.showAiResponse('Behalte diese Antwort.');
+    controller.compact();
+    controller.showDiscoveryTip(CompanionDiscoveryTips.wordGames);
+    final state = container.read(companionControllerProvider);
+
+    expect(state.bubbleVisible, isTrue);
+    expect(state.message, 'Behalte diese Antwort.');
+    expect(state.lastReplyMessage, 'Behalte diese Antwort.');
+  });
+
+  test('new companion replies replace the retained reply', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.showAiResponse('Erste Antwort.');
+    controller.submitUserMessage('Neue Frage');
+    controller.showAiResponse('Zweite Antwort.');
+    final state = container.read(companionControllerProvider);
+
+    expect(state.message, 'Zweite Antwort.');
+    expect(state.lastReplyMessage, 'Zweite Antwort.');
   });
 
   test('showError displays a friendly error state', () {

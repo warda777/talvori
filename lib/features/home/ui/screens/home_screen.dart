@@ -747,7 +747,7 @@ class _HomeCompanionOverlay extends StatelessWidget {
       child: SizedBox(
         width: width,
         child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.deferToChild,
           onTap: onCompanionBubbleTap,
           child: Material(
             type: MaterialType.transparency,

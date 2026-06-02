@@ -31,6 +31,9 @@ class CompanionController extends Notifier<CompanionState> {
   }
 
   void compact() {
+    final retainedReply = state.lastReplyMessage?.trim();
+    final shouldRestoreReply =
+        state.isThinking && retainedReply != null && retainedReply.isNotEmpty;
     state = state.copyWith(
       isExpanded: false,
       bubbleVisible: false,
@@ -38,6 +41,7 @@ class CompanionController extends Notifier<CompanionState> {
       emotion: TaliEmotion.neutral,
       inputVisible: false,
       isThinking: false,
+      message: shouldRestoreReply ? retainedReply : null,
     );
   }
 
@@ -54,6 +58,7 @@ class CompanionController extends Notifier<CompanionState> {
     TalvoriMascotMood? mood,
     TaliEmotion? emotion,
   }) {
+    final trimmed = message.trim();
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
@@ -63,12 +68,25 @@ class CompanionController extends Notifier<CompanionState> {
           (mood == null
               ? state.emotion
               : TalvoriMascotAssets.emotionForLegacyMood(mood)),
-      message: message,
+      message: trimmed.isEmpty ? CompanionState.defaultMessage : trimmed,
+      lastReplyMessage: trimmed.isEmpty ? null : trimmed,
+      clearLastReplyMessage: trimmed.isEmpty,
       clearErrorMessage: true,
     );
   }
 
   void showDiscoveryTip(CompanionDiscoveryTip tip) {
+    final retainedReply = state.lastReplyMessage?.trim();
+    if (retainedReply != null && retainedReply.isNotEmpty) {
+      state = state.copyWith(
+        isExpanded: true,
+        bubbleVisible: true,
+        message: retainedReply,
+        clearErrorMessage: true,
+      );
+      return;
+    }
+
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
@@ -135,6 +153,9 @@ class CompanionController extends Notifier<CompanionState> {
 
   void showAiResponse(String response) {
     final trimmed = response.trim();
+    final nextMessage = trimmed.isEmpty
+        ? 'Ich bin da. Frag mich einfach noch mal kurz.'
+        : trimmed;
     final emotion = _emotionForEvent(TaliEvent.aiResponseSuccess);
     state = state.copyWith(
       isExpanded: true,
@@ -143,15 +164,17 @@ class CompanionController extends Notifier<CompanionState> {
       isThinking: false,
       mascotMood: TalvoriMascotMood.happy,
       emotion: emotion,
-      message: trimmed.isEmpty
-          ? 'Ich bin da. Frag mich einfach noch mal kurz.'
-          : trimmed,
+      message: nextMessage,
+      lastReplyMessage: nextMessage,
       clearErrorMessage: true,
     );
   }
 
   void showError(String message) {
     final trimmed = message.trim();
+    final nextMessage = trimmed.isEmpty
+        ? 'Das hat gerade nicht geklappt. Versuch es gleich noch einmal.'
+        : trimmed;
     final emotion = _emotionForEvent(TaliEvent.aiResponseError);
     state = state.copyWith(
       isExpanded: true,
@@ -160,9 +183,8 @@ class CompanionController extends Notifier<CompanionState> {
       isThinking: false,
       mascotMood: TalvoriMascotMood.sad,
       emotion: emotion,
-      message: trimmed.isEmpty
-          ? 'Das hat gerade nicht geklappt. Versuch es gleich noch einmal.'
-          : trimmed,
+      message: nextMessage,
+      lastReplyMessage: nextMessage,
       errorMessage: trimmed.isEmpty ? 'unknown' : trimmed,
     );
   }

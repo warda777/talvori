@@ -57,7 +57,9 @@ class TalvoriCompanionCard extends StatelessWidget {
   final VoidCallback? onMascotTap;
   final VoidCallback? onBubbleTap;
 
-  static const estimatedBubbleHeight = 218.0;
+  static const estimatedBubbleHeight = 292.0;
+  static const _messageMaxHeight = 196.0;
+  static const _messageMaxHeightWithQuickActions = 142.0;
 
   @override
   Widget build(BuildContext context) {
@@ -245,12 +247,15 @@ class TalvoriCompanionCard extends StatelessWidget {
                               const SizedBox(height: 3),
                               ConstrainedBox(
                                 constraints: BoxConstraints(
-                                  maxHeight: hasQuickActions ? 86.0 : 132.0,
+                                  maxHeight: hasQuickActions
+                                      ? _messageMaxHeightWithQuickActions
+                                      : _messageMaxHeight,
                                 ),
                                 child: SingleChildScrollView(
                                   key: const Key(
                                     'talvori-companion-message-scroll',
                                   ),
+                                  physics: const BouncingScrollPhysics(),
                                   child: Text(
                                     message,
                                     style: Theme.of(context).textTheme.bodySmall
