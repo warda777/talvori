@@ -11,6 +11,25 @@ final companionControllerProvider =
     );
 
 class CompanionController extends Notifier<CompanionState> {
+  static const focusPrompts = [
+    'Sammle heute ein Wort aus deiner echten Welt.',
+    'Ein neues Wort kann später deine Welt bauen.',
+    'Such dir ein Wort, das dir heute begegnet ist.',
+    'Öffne den Browser, markiere ein Wort und bring es in deine Welt.',
+    'Eine kurze Runde reicht, um weiterzubauen.',
+    'Deine Welt wächst durch kleine Schritte.',
+  ];
+
+  static const chatPrompts = [
+    'Frag Tali kurz etwas.',
+    'Ich kann dir Wörter erklären oder daraus Sätze machen.',
+    'Schreib mir, wobei ich dir helfen soll.',
+    'Frag mich nach einem Beispiel, einer Übersetzung oder einem Satz.',
+  ];
+
+  int _focusPromptIndex = 0;
+  int _chatPromptIndex = 0;
+
   @override
   CompanionState build() => CompanionState.initial();
 
@@ -21,11 +40,16 @@ class CompanionController extends Notifier<CompanionState> {
 
   void wakeUp() {
     final emotion = _emotionForEvent(TaliEvent.appReady);
+    final retainedReply = state.lastReplyMessage?.trim();
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       mascotMood: TalvoriMascotMood.greeting,
       emotion: emotion,
+      inputVisible: false,
+      message: retainedReply != null && retainedReply.isNotEmpty
+          ? retainedReply
+          : _nextFocusPrompt(),
       clearErrorMessage: true,
     );
   }
@@ -107,10 +131,14 @@ class CompanionController extends Notifier<CompanionState> {
   }
 
   void openChatInput() {
+    final retainedReply = state.lastReplyMessage?.trim();
     state = state.copyWith(
       isExpanded: true,
       bubbleVisible: true,
       inputVisible: true,
+      message: retainedReply != null && retainedReply.isNotEmpty
+          ? retainedReply
+          : _nextChatPrompt(),
       clearErrorMessage: true,
     );
   }
@@ -187,5 +215,17 @@ class CompanionController extends Notifier<CompanionState> {
       lastReplyMessage: nextMessage,
       errorMessage: trimmed.isEmpty ? 'unknown' : trimmed,
     );
+  }
+
+  String _nextFocusPrompt() {
+    final prompt = focusPrompts[_focusPromptIndex % focusPrompts.length];
+    _focusPromptIndex = (_focusPromptIndex + 1) % focusPrompts.length;
+    return prompt;
+  }
+
+  String _nextChatPrompt() {
+    final prompt = chatPrompts[_chatPromptIndex % chatPrompts.length];
+    _chatPromptIndex = (_chatPromptIndex + 1) % chatPrompts.length;
+    return prompt;
   }
 }

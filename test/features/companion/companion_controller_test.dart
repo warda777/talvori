@@ -55,6 +55,23 @@ void main() {
     expect(state.bubbleVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.greeting);
     expect(state.emotion, TaliEmotion.neutral);
+    expect(CompanionController.focusPrompts, contains(state.message));
+  });
+
+  test('wakeUp rotates stable focus prompts without rebuild randomness', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.compact();
+    controller.wakeUp();
+    final firstPrompt = container.read(companionControllerProvider).message;
+    controller.compact();
+    controller.wakeUp();
+    final secondPrompt = container.read(companionControllerProvider).message;
+
+    expect(CompanionController.focusPrompts, contains(firstPrompt));
+    expect(CompanionController.focusPrompts, contains(secondPrompt));
+    expect(secondPrompt, isNot(firstPrompt));
   });
 
   test('toggleExpanded switches between expanded and compact states', () {
@@ -166,6 +183,21 @@ void main() {
     expect(state.inputVisible, isTrue);
     expect(state.mascotMood, TalvoriMascotMood.greeting);
     expect(state.emotion, TaliEmotion.neutral);
+    expect(CompanionController.chatPrompts, contains(state.message));
+    expect(state.message, isNot(CompanionDiscoveryTips.browserShare.message));
+  });
+
+  test('openChatInput uses chat prompt instead of browser discovery text', () {
+    final container = createContainer();
+    final controller = container.read(companionControllerProvider.notifier);
+
+    controller.showBrowserShareHint();
+    controller.openChatInput();
+    final state = container.read(companionControllerProvider);
+
+    expect(state.inputVisible, isTrue);
+    expect(CompanionController.chatPrompts, contains(state.message));
+    expect(state.message, isNot(CompanionDiscoveryTips.browserShare.message));
   });
 
   test('closeChatInput only hides the input', () {
@@ -233,6 +265,12 @@ void main() {
 
     expect(state.isExpanded, isTrue);
     expect(state.bubbleVisible, isTrue);
+    expect(state.message, 'Das bleibt in der Bubble.');
+
+    controller.openChatInput();
+    state = container.read(companionControllerProvider);
+
+    expect(state.inputVisible, isTrue);
     expect(state.message, 'Das bleibt in der Bubble.');
   });
 

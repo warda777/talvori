@@ -1382,6 +1382,9 @@ class _HomeCompanionChatInput extends StatefulWidget {
 class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
   final GlobalKey _inputBarKey = GlobalKey();
   late final ScrollController _textScrollController;
+  Timer? _inputScrollIndicatorTimer;
+  bool _inputScrollIndicatorCheckScheduled = false;
+  bool _showInputScrollIndicator = false;
 
   @override
   void initState() {
@@ -1390,7 +1393,6 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
     widget.controller.addListener(_scheduleHeightReport);
     widget.controller.addListener(_syncTextFieldState);
     widget.focusNode.addListener(_syncTextFieldState);
-    _textScrollController.addListener(_syncTextFieldState);
     _scheduleHeightReport();
   }
 
@@ -1415,7 +1417,7 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
     widget.controller.removeListener(_scheduleHeightReport);
     widget.controller.removeListener(_syncTextFieldState);
     widget.focusNode.removeListener(_syncTextFieldState);
-    _textScrollController.removeListener(_syncTextFieldState);
+    _inputScrollIndicatorTimer?.cancel();
     _textScrollController.dispose();
     super.dispose();
   }
@@ -1433,7 +1435,39 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
   void _syncTextFieldState() {
     if (!mounted) return;
     setState(() {});
+    _showInputScrollIndicatorForActivity();
     _scheduleHeightReport();
+  }
+
+  void _showInputScrollIndicatorForActivity() {
+    if (_inputScrollIndicatorCheckScheduled) return;
+    _inputScrollIndicatorCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _inputScrollIndicatorCheckScheduled = false;
+      if (!mounted || !widget.focusNode.hasFocus || !_inputCanScroll()) {
+        _inputScrollIndicatorTimer?.cancel();
+        if (_showInputScrollIndicator) {
+          setState(() => _showInputScrollIndicator = false);
+        }
+        return;
+      }
+
+      _inputScrollIndicatorTimer?.cancel();
+      if (!_showInputScrollIndicator) {
+        setState(() => _showInputScrollIndicator = true);
+      }
+      _inputScrollIndicatorTimer = Timer(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        setState(() => _showInputScrollIndicator = false);
+      });
+    });
+  }
+
+  bool _inputCanScroll() {
+    if (!_textScrollController.hasClients) return false;
+    final position = _textScrollController.position;
+    if (!position.hasContentDimensions) return false;
+    return position.maxScrollExtent > 0;
   }
 
   @override
@@ -1467,26 +1501,34 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  TextField(
-                    key: const Key('talvori-companion-chat-text-field'),
-                    controller: widget.controller,
-                    focusNode: widget.focusNode,
-                    scrollController: _textScrollController,
-                    minLines: 1,
-                    maxLines: 5,
-                    textInputAction: TextInputAction.send,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                    cursorColor: _HomeCompanionChatInput._accent,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: 'Frag ${widget.companionDisplayName} kurz ...',
-                      hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        fontSize: 14,
+                  Listener(
+                    onPointerMove: (event) {
+                      if (event.delta.dy.abs() > 0.2) {
+                        _syncTextFieldState();
+                      }
+                    },
+                    child: TextField(
+                      key: const Key('talvori-companion-chat-text-field'),
+                      controller: widget.controller,
+                      focusNode: widget.focusNode,
+                      scrollController: _textScrollController,
+                      minLines: 1,
+                      maxLines: 5,
+                      textInputAction: TextInputAction.send,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      cursorColor: _HomeCompanionChatInput._accent,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText:
+                            'Frag ${widget.companionDisplayName} kurz ...',
+                        hintStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 14,
+                        ),
+                        border: InputBorder.none,
                       ),
-                      border: InputBorder.none,
+                      onSubmitted: _submit,
                     ),
-                    onSubmitted: _submit,
                   ),
                   Positioned(
                     top: 2,
@@ -1495,7 +1537,7 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
                     child: _InputTextScrollIndicator(
                       key: const Key('talvori-companion-chat-input-scrollbar'),
                       controller: _textScrollController,
-                      visible: widget.focusNode.hasFocus,
+                      visible: _showInputScrollIndicator,
                     ),
                   ),
                 ],
@@ -1573,6 +1615,7 @@ class _InputTextScrollIndicator extends StatelessWidget {
           final thumbTop = (trackHeight - thumbHeight) * scrollProgress;
 
           return AnimatedOpacity(
+            key: const Key('talvori-companion-chat-input-scrollbar-opacity'),
             opacity: visible ? 1 : 0,
             duration: const Duration(milliseconds: 160),
             child: Stack(

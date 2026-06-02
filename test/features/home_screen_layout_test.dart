@@ -14,6 +14,7 @@ import 'package:talvori/core/local_database/models/local_word.dart';
 import 'package:talvori/core/local_database/providers/local_word_count_provider.dart';
 import 'package:talvori/core/local_database/providers/local_words_for_source_provider.dart';
 import 'package:talvori/features/companion/application/companion_ai_service.dart';
+import 'package:talvori/features/companion/application/companion_controller.dart';
 import 'package:talvori/features/companion/domain/companion_chat_constants.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/data/impulse_inbox_repository.dart';
@@ -553,6 +554,11 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-companion-chat-icon')));
     await tester.pump();
 
+    expect(find.text(CompanionController.chatPrompts.first), findsOneWidget);
+    expect(
+      find.text('Markiere ein Wort im Browser und teile es mit Tali.'),
+      findsNothing,
+    );
     expect(
       find.byKey(const Key('talvori-companion-chat-input')),
       findsOneWidget,
@@ -968,6 +974,10 @@ void main() {
         find.byKey(const Key('talvori-companion-chat-input-scrollbar-thumb')),
         findsOneWidget,
       );
+      final activeInputScrollbarOpacity = tester.widget<AnimatedOpacity>(
+        find.byKey(const Key('talvori-companion-chat-input-scrollbar-opacity')),
+      );
+      expect(activeInputScrollbarOpacity.opacity, 1);
       expect(tallInputRect.height, greaterThan(multilineInputRect.height));
       expect(tallInputRect.bottom, closeTo(keyboardInputRect.bottom, 1));
       expect(
@@ -986,6 +996,13 @@ void main() {
         tester.getRect(find.byKey(const Key('talvori-world-home-hero'))),
         initialHeroRect,
       );
+
+      await tester.pump(const Duration(milliseconds: 950));
+      await tester.pump(const Duration(milliseconds: 200));
+      final inactiveInputScrollbarOpacity = tester.widget<AnimatedOpacity>(
+        find.byKey(const Key('talvori-companion-chat-input-scrollbar-opacity')),
+      );
+      expect(inactiveInputScrollbarOpacity.opacity, 0);
 
       await tester.drag(
         find.byKey(const Key('talvori-companion-chat-send')),
@@ -1058,7 +1075,8 @@ void main() {
     await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
 
-    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
+    final focusPrompt = CompanionController.focusPrompts.first;
+    expect(find.text(focusPrompt), findsOneWidget);
     mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
@@ -1081,12 +1099,12 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
 
-    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsOneWidget);
+    expect(find.text(focusPrompt), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
 
-    expect(find.text('Wollen wir deine Welt weiterbauen?'), findsNothing);
+    expect(find.text(focusPrompt), findsNothing);
     mascotImage = tester.widget<Image>(
       find.byKey(const Key('talvori-companion-mascot-image')),
     );
