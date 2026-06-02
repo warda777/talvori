@@ -388,29 +388,32 @@ class _HubCenterButton extends StatelessWidget {
             endAngle: math.pi * 1.15,
             colors: [
               _cyan,
-              _cyan.withValues(alpha: 0.78),
+              _cyan.withValues(alpha: open ? 0.62 : 0.78),
+              open
+                  ? _violet.withValues(alpha: 0.96)
+                  : _violet.withValues(alpha: 0.78),
               _violet,
-              _violet.withValues(alpha: 0.82),
+              _violet.withValues(alpha: open ? 0.94 : 0.82),
               _cyan,
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: _cyan.withValues(alpha: open ? 0.28 : 0.34),
-              blurRadius: 30,
-              spreadRadius: -8,
+              color: _cyan.withValues(alpha: open ? 0.32 : 0.34),
+              blurRadius: open ? 34 : 30,
+              spreadRadius: open ? -7 : -8,
               offset: const Offset(-10, 7),
             ),
             BoxShadow(
-              color: _violet.withValues(alpha: open ? 0.34 : 0.3),
-              blurRadius: 36,
-              spreadRadius: -9,
+              color: _violet.withValues(alpha: open ? 0.44 : 0.3),
+              blurRadius: open ? 44 : 36,
+              spreadRadius: open ? -7 : -9,
               offset: const Offset(10, 8),
             ),
             BoxShadow(
-              color: _violet.withValues(alpha: 0.24),
-              blurRadius: 54,
-              spreadRadius: -20,
+              color: _violet.withValues(alpha: open ? 0.32 : 0.24),
+              blurRadius: open ? 62 : 54,
+              spreadRadius: open ? -18 : -20,
               offset: const Offset(0, 18),
             ),
           ],
@@ -440,9 +443,9 @@ class _HubCenterButton extends StatelessWidget {
           ),
           child: Center(
             child: AnimatedRotation(
-              duration: const Duration(milliseconds: 320),
+              duration: const Duration(milliseconds: 560),
               curve: Curves.easeOutCubic,
-              turns: open ? 0.125 : 0,
+              turns: open ? 1.125 : 0,
               child: const _GradientHubGlyph(),
             ),
           ),
