@@ -58,8 +58,11 @@ class TalvoriCompanionCard extends StatelessWidget {
   final VoidCallback? onBubbleTap;
 
   static const estimatedBubbleHeight = 292.0;
-  static const _messageMaxHeight = 196.0;
-  static const _messageMaxHeightWithQuickActions = 142.0;
+  static const _messageFontSize = 17.0;
+  static const _messageLineHeight = 1.3;
+  static const _messageVisibleLines = 5;
+  static const _messageMaxHeight =
+      _messageFontSize * _messageLineHeight * _messageVisibleLines;
 
   @override
   Widget build(BuildContext context) {
@@ -95,20 +98,19 @@ class TalvoriCompanionCard extends StatelessWidget {
           final topInset = (bubbleVisible ? estimatedBubbleHeight : 0.0)
               .clamp(0.0, bubbleVisible ? estimatedBubbleHeight : 0.0)
               .toDouble();
-          final messageStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.82),
-            height: 1.18,
+          final messageStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.white.withValues(alpha: 0.88),
+            fontSize: _messageFontSize,
+            height: _messageLineHeight,
+            fontWeight: FontWeight.w500,
             letterSpacing: 0,
           );
-          final messageMaxHeight = hasQuickActions
-              ? _messageMaxHeightWithQuickActions
-              : _messageMaxHeight;
           final messageViewportHeight = _measureMessageHeight(
             context: context,
             text: message,
             style: messageStyle,
             maxWidth: bubbleWidth - 24,
-            maxHeight: messageMaxHeight,
+            maxHeight: _messageMaxHeight,
           );
 
           return SizedBox(

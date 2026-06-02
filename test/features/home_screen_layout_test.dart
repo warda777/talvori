@@ -440,11 +440,12 @@ void main() {
     );
     expect(longMessageText.maxLines, isNull);
     expect(longMessageText.overflow, isNull);
+    expect(longMessageText.style?.fontSize, 17);
+    expect(longMessageText.style?.height, 1.3);
     final messageScrollRect = tester.getRect(
       find.byKey(const Key('talvori-companion-message-scroll')),
     );
-    expect(messageScrollRect.height, greaterThan(120));
-    expect(messageScrollRect.height, lessThanOrEqualTo(142));
+    expect(messageScrollRect.height, closeTo(110.5, 1.5));
     await tester.drag(
       find.byKey(const Key('talvori-companion-message-scroll')),
       const Offset(0, -48),
