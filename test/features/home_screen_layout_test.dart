@@ -428,6 +428,18 @@ void main() {
       find.byKey(const Key('talvori-companion-message-scroll')),
       findsOneWidget,
     );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('talvori-companion-message-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+      findsOneWidget,
+    );
+    final longMessageText = tester.widget<Text>(
+      find.text(longCompanionMessage),
+    );
+    expect(longMessageText.maxLines, isNull);
+    expect(longMessageText.overflow, isNull);
     final messageScrollRect = tester.getRect(
       find.byKey(const Key('talvori-companion-message-scroll')),
     );
@@ -571,6 +583,17 @@ void main() {
     expect(inputVisibleChatCompanion.isExpanded, isTrue);
     final inputVisibleMascotRect = tester.getRect(
       find.byKey(const Key('talvori-companion-mascot-image')),
+    );
+    final inputVisibleBubbleRect = tester.getRect(
+      find.byKey(const Key('talvori-companion-bubble')),
+    );
+    expect(
+      inputVisibleMascotRect.bottom,
+      lessThanOrEqualTo(inputVisibleInputRect.top - 12),
+    );
+    expect(
+      inputVisibleBubbleRect.bottom,
+      lessThanOrEqualTo(inputVisibleInputRect.top - 12),
     );
     expect(inputVisibleMascotRect, focusMascotRect);
     final inputVisibleMascotImage = tester.widget<Image>(

@@ -95,6 +95,21 @@ class TalvoriCompanionCard extends StatelessWidget {
           final topInset = (bubbleVisible ? estimatedBubbleHeight : 0.0)
               .clamp(0.0, bubbleVisible ? estimatedBubbleHeight : 0.0)
               .toDouble();
+          final messageStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.white.withValues(alpha: 0.82),
+            height: 1.18,
+            letterSpacing: 0,
+          );
+          final messageMaxHeight = hasQuickActions
+              ? _messageMaxHeightWithQuickActions
+              : _messageMaxHeight;
+          final messageViewportHeight = _measureMessageHeight(
+            context: context,
+            text: message,
+            style: messageStyle,
+            maxWidth: bubbleWidth - 24,
+            maxHeight: messageMaxHeight,
+          );
 
           return SizedBox(
             key: const Key('talvori-companion-card'),
@@ -245,28 +260,14 @@ class TalvoriCompanionCard extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 3),
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxHeight: hasQuickActions
-                                      ? _messageMaxHeightWithQuickActions
-                                      : _messageMaxHeight,
-                                ),
+                              SizedBox(
+                                height: messageViewportHeight,
                                 child: SingleChildScrollView(
                                   key: const Key(
                                     'talvori-companion-message-scroll',
                                   ),
                                   physics: const BouncingScrollPhysics(),
-                                  child: Text(
-                                    message,
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.82,
-                                          ),
-                                          height: 1.18,
-                                          letterSpacing: 0,
-                                        ),
-                                  ),
+                                  child: Text(message, style: messageStyle),
                                 ),
                               ),
                               if (hasQuickActions) ...[
@@ -295,6 +296,23 @@ class TalvoriCompanionCard extends StatelessWidget {
         },
       ),
     );
+  }
+
+  static double _measureMessageHeight({
+    required BuildContext context,
+    required String text,
+    required TextStyle? style,
+    required double maxWidth,
+    required double maxHeight,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: maxWidth);
+    final lineHeight = painter.preferredLineHeight;
+    final naturalHeight = painter.height + 1;
+    return naturalHeight.clamp(lineHeight, maxHeight).toDouble();
   }
 
   static Color _accentForMood(TalvoriCompanionMood mood) {

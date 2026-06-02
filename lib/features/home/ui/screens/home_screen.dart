@@ -418,12 +418,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final chatInputBottom = keyboardInset > 0
         ? keyboardInset + 2.0
         : mediaQuery.padding.bottom + 24.0;
-    final companionKeyboardMaxBottom =
-        companionState.inputVisible && keyboardInset > 0
+    final companionKeyboardMaxBottom = companionState.inputVisible
         ? mediaQuery.size.height -
               chatInputBottom -
               _HomeCompanionChatInput.estimatedHeight -
-              mediaQuery.viewPadding.top -
               16.0
         : null;
     final homeLayoutMediaQuery = mediaQuery.copyWith(
