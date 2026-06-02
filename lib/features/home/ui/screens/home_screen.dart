@@ -635,24 +635,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 FloatingActionButtonLocation.centerFloat,
           ),
           if (companionState.inputVisible)
-            Positioned.fill(
-              key: const Key('talvori-companion-chat-dismiss-layer'),
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: _closeCompanionChatInput,
-                onVerticalDragUpdate: (details) {
-                  if (details.delta.dy > 0.8) {
-                    _dismissCompanionKeyboard();
-                  }
-                },
-                onVerticalDragEnd: (details) {
-                  if ((details.primaryVelocity ?? 0) > 80) {
-                    _dismissCompanionKeyboard();
-                  }
-                },
-              ),
-            ),
-          if (companionState.inputVisible)
             Positioned(
               left: 0,
               right: 0,
@@ -661,9 +643,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 type: MaterialType.transparency,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Listener(
-                    onPointerMove: (event) {
-                      if (event.delta.dy > 0.8) {
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onVerticalDragUpdate: (details) {
+                      if (details.delta.dy > 0.8) {
+                        _dismissCompanionKeyboard();
+                      }
+                    },
+                    onVerticalDragEnd: (details) {
+                      if ((details.primaryVelocity ?? 0) > 80) {
                         _dismissCompanionKeyboard();
                       }
                     },

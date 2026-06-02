@@ -638,7 +638,7 @@ void main() {
     expect(reopenedInput.controller?.text, isEmpty);
     expect(reopenedInput.maxLines, 5);
 
-    await tester.tapAt(const Offset(24, 560));
+    await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
     await tester.pump();
     expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
     expect(find.text('Starte mit einem Wort.'), findsNothing);
@@ -712,7 +712,7 @@ void main() {
     expect(find.text('Bleib offen'), findsOneWidget);
   });
 
-  testWidgets('home companion chat input closes on outside tap', (
+  testWidgets('home companion bubble drag keeps chat input focused', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -743,11 +743,26 @@ void main() {
       find.byKey(const Key('talvori-companion-chat-text-field')),
       'Nicht senden',
     );
-    await tester.tapAt(const Offset(24, 560));
+    await tester.drag(
+      find.byKey(const Key('talvori-companion-message-scroll')),
+      const Offset(0, -48),
+    );
     await tester.pump();
 
-    expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
-    expect(find.text('Nicht senden'), findsNothing);
+    expect(
+      find.byKey(const Key('talvori-companion-chat-input')),
+      findsOneWidget,
+    );
+    expect(find.text('Nicht senden'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(
+            find.byKey(const Key('talvori-companion-chat-text-field')),
+          )
+          .focusNode
+          ?.hasFocus,
+      isTrue,
+    );
   });
 
   testWidgets(
@@ -889,7 +904,7 @@ void main() {
       );
 
       await tester.drag(
-        find.byKey(const Key('talvori-companion-chat-dismiss-layer')),
+        find.byKey(const Key('talvori-companion-chat-input')),
         const Offset(0, 80),
       );
       await tester.pump();
