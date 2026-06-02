@@ -36,7 +36,7 @@ class _HomeSmartHubMenuState extends State<HomeSmartHubMenu>
     with SingleTickerProviderStateMixin {
   static const _wheelHeight = 290.0;
   static const _wheelCenterY = 246.0;
-  static const _wheelRadius = 154.0;
+  static const _wheelRadius = 144.0;
 
   late final AnimationController _controller;
   double _rotation = math.pi;
