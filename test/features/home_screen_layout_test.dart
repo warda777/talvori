@@ -429,6 +429,10 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(const Key('talvori-companion-message-scrollbar')),
+      findsOneWidget,
+    );
+    expect(
       find.descendant(
         of: find.byKey(const Key('talvori-companion-message-scroll')),
         matching: find.byType(Scrollable),
@@ -442,6 +446,11 @@ void main() {
     expect(longMessageText.overflow, isNull);
     expect(longMessageText.style?.fontSize, 17);
     expect(longMessageText.style?.height, 1.3);
+    final messageScrollbar = tester.widget<RawScrollbar>(
+      find.byKey(const Key('talvori-companion-message-scrollbar')),
+    );
+    expect(messageScrollbar.thumbVisibility, isFalse);
+    expect(messageScrollbar.thickness, 3);
     final messageScrollRect = tester.getRect(
       find.byKey(const Key('talvori-companion-message-scroll')),
     );
@@ -468,6 +477,10 @@ void main() {
 
     expect(
       find.byKey(const Key('talvori-companion-message-scroll')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('talvori-companion-message-scrollbar')),
       findsOneWidget,
     );
     final textOnlyScrollRect = tester.getRect(
@@ -904,8 +917,47 @@ void main() {
         isTrue,
       );
 
-      await tester.drag(
+      await tester.enterText(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
+        'Zeile 1\nZeile 2\nZeile 3\nZeile 4\nZeile 5\nZeile 6',
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('talvori-companion-chat-input-scrollbar')),
+        findsOneWidget,
+      );
+      final tallInputRect = tester.getRect(
         find.byKey(const Key('talvori-companion-chat-input')),
+      );
+      final tallKeyboardMascotRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-mascot-image')),
+      );
+      final tallKeyboardBubbleRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-bubble')),
+      );
+      expect(tallInputRect.height, greaterThan(keyboardInputRect.height));
+      expect(tallInputRect.bottom, closeTo(keyboardInputRect.bottom, 1));
+      expect(
+        tallKeyboardMascotRect.bottom,
+        lessThanOrEqualTo(tallInputRect.top - 12),
+      );
+      expect(
+        tallKeyboardBubbleRect.bottom,
+        lessThanOrEqualTo(tallInputRect.top - 12),
+      );
+      expect(
+        tester.getRect(find.byKey(const Key('talvori-world-globe-button'))),
+        initialGlobeRect,
+      );
+      expect(
+        tester.getRect(find.byKey(const Key('talvori-world-home-hero'))),
+        initialHeroRect,
+      );
+
+      await tester.drag(
+        find.byKey(const Key('talvori-companion-chat-send')),
         const Offset(0, 80),
       );
       await tester.pump();

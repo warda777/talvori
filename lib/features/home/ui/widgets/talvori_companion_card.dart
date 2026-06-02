@@ -19,7 +19,7 @@ class TalvoriCompanionQuickAction {
   final Key? key;
 }
 
-class TalvoriCompanionCard extends StatelessWidget {
+class TalvoriCompanionCard extends StatefulWidget {
   const TalvoriCompanionCard({
     super.key,
     this.mood = TalvoriCompanionMood.neutral,
@@ -65,22 +65,43 @@ class TalvoriCompanionCard extends StatelessWidget {
       _messageFontSize * _messageLineHeight * _messageVisibleLines;
 
   @override
+  State<TalvoriCompanionCard> createState() => _TalvoriCompanionCardState();
+}
+
+class _TalvoriCompanionCardState extends State<TalvoriCompanionCard> {
+  late final ScrollController _messageScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _messageScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _messageScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final accent = _accentForMood(mood);
-    final hasQuickActions = quickActions.isNotEmpty;
-    final effectiveMascotMood = mascotMood ?? _mascotMoodForCompanion(mood);
+    final accent = _accentForMood(widget.mood);
+    final hasQuickActions = widget.quickActions.isNotEmpty;
+    final effectiveMascotMood =
+        widget.mascotMood ?? _mascotMoodForCompanion(widget.mood);
     final effectiveEmotion =
-        emotion ??
+        widget.emotion ??
         TalvoriMascotAssets.emotionForLegacyMood(effectiveMascotMood);
     final companionDisplayName = TalvoriMascotAssets.companionDisplayNameFor(
-      mascotStyle,
+      widget.mascotStyle,
     );
-    final effectiveTitle = title.trim().isEmpty || title == 'Talvori'
+    final effectiveTitle =
+        widget.title.trim().isEmpty || widget.title == 'Talvori'
         ? companionDisplayName
-        : title;
-    final effectiveMascotSize = isExpanded
-        ? mascotSize
-        : mascotSize * compactMascotScale;
+        : widget.title;
+    final effectiveMascotSize = widget.isExpanded
+        ? widget.mascotSize
+        : widget.mascotSize * widget.compactMascotScale;
 
     return Semantics(
       label: '$companionDisplayName ${effectiveMascotMood.name}',
@@ -95,22 +116,30 @@ class TalvoriCompanionCard extends StatelessWidget {
             effectiveMascotSize + 8.0,
             effectiveMascotSize + 24.0,
           );
-          final topInset = (bubbleVisible ? estimatedBubbleHeight : 0.0)
-              .clamp(0.0, bubbleVisible ? estimatedBubbleHeight : 0.0)
-              .toDouble();
+          final topInset =
+              (widget.bubbleVisible
+                      ? TalvoriCompanionCard.estimatedBubbleHeight
+                      : 0.0)
+                  .clamp(
+                    0.0,
+                    widget.bubbleVisible
+                        ? TalvoriCompanionCard.estimatedBubbleHeight
+                        : 0.0,
+                  )
+                  .toDouble();
           final messageStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Colors.white.withValues(alpha: 0.88),
-            fontSize: _messageFontSize,
-            height: _messageLineHeight,
+            fontSize: TalvoriCompanionCard._messageFontSize,
+            height: TalvoriCompanionCard._messageLineHeight,
             fontWeight: FontWeight.w500,
             letterSpacing: 0,
           );
           final messageViewportHeight = _measureMessageHeight(
             context: context,
-            text: message,
+            text: widget.message,
             style: messageStyle,
             maxWidth: bubbleWidth - 24,
-            maxHeight: _messageMaxHeight,
+            maxHeight: TalvoriCompanionCard._messageMaxHeight,
           );
 
           return SizedBox(
@@ -125,25 +154,28 @@ class TalvoriCompanionCard extends StatelessWidget {
                   bottom: 0,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: onMascotTap,
+                    onTap: widget.onMascotTap,
                     child: SizedBox(
                       width: effectiveMascotSize,
                       height: effectiveMascotSize,
                       child: TalvoriSpiritMascot(
                         assetPath: TalvoriMascotAssets.spiritPathFor(
                           effectiveEmotion,
-                          style: mascotStyle,
+                          style: widget.mascotStyle,
                         ),
-                        isActive: isExpanded || inputVisible || isThinking,
-                        compactMode: !isExpanded,
-                        glowIntensity: isExpanded ? 0.95 : 0.64,
+                        isActive:
+                            widget.isExpanded ||
+                            widget.inputVisible ||
+                            widget.isThinking,
+                        compactMode: !widget.isExpanded,
+                        glowIntensity: widget.isExpanded ? 0.95 : 0.64,
                         semanticLabel:
                             '$companionDisplayName Lerngeist ${effectiveMascotMood.name}',
                       ),
                     ),
                   ),
                 ),
-                if (bubbleVisible)
+                if (widget.bubbleVisible)
                   Positioned(
                     left: bubbleLeft,
                     bottom: bubbleBottom,
@@ -152,7 +184,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                       child: GestureDetector(
                         key: const Key('talvori-companion-bubble'),
                         behavior: HitTestBehavior.opaque,
-                        onTap: onBubbleTap,
+                        onTap: widget.onBubbleTap,
                         child: Container(
                           padding: const EdgeInsets.fromLTRB(12, 9, 12, 10),
                           decoration: BoxDecoration(
@@ -197,7 +229,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                                           ),
                                     ),
                                   ),
-                                  if (isThinking)
+                                  if (widget.isThinking)
                                     SizedBox(
                                       key: const Key(
                                         'talvori-companion-thinking-indicator',
@@ -213,10 +245,10 @@ class TalvoriCompanionCard extends StatelessWidget {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        if (showChatHint) ...[
+                                        if (widget.showChatHint) ...[
                                           _CompanionChatHint(
                                             accent: accent,
-                                            onTap: onBubbleTap,
+                                            onTap: widget.onBubbleTap,
                                           ),
                                           const SizedBox(width: 7),
                                         ],
@@ -225,7 +257,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                                             'talvori-companion-chat-icon',
                                           ),
                                           customBorder: const CircleBorder(),
-                                          onTap: onBubbleTap,
+                                          onTap: widget.onBubbleTap,
                                           child: Container(
                                             width: 30,
                                             height: 30,
@@ -264,12 +296,30 @@ class TalvoriCompanionCard extends StatelessWidget {
                               const SizedBox(height: 3),
                               SizedBox(
                                 height: messageViewportHeight,
-                                child: SingleChildScrollView(
+                                child: RawScrollbar(
                                   key: const Key(
-                                    'talvori-companion-message-scroll',
+                                    'talvori-companion-message-scrollbar',
                                   ),
-                                  physics: const BouncingScrollPhysics(),
-                                  child: Text(message, style: messageStyle),
+                                  controller: _messageScrollController,
+                                  thumbVisibility: false,
+                                  interactive: false,
+                                  radius: const Radius.circular(999),
+                                  thickness: 3,
+                                  thumbColor: Colors.white.withValues(
+                                    alpha: 0.38,
+                                  ),
+                                  trackVisibility: false,
+                                  child: SingleChildScrollView(
+                                    key: const Key(
+                                      'talvori-companion-message-scroll',
+                                    ),
+                                    controller: _messageScrollController,
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Text(
+                                      widget.message,
+                                      style: messageStyle,
+                                    ),
+                                  ),
                                 ),
                               ),
                               if (hasQuickActions) ...[
@@ -278,7 +328,7 @@ class TalvoriCompanionCard extends StatelessWidget {
                                   spacing: 6,
                                   runSpacing: 6,
                                   children: [
-                                    for (final action in quickActions)
+                                    for (final action in widget.quickActions)
                                       _CompanionQuickActionChip(
                                         action: action,
                                         accent: accent,
