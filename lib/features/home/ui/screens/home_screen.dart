@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -967,6 +968,48 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
     _HomeBackgroundStar(0.91, 0.09, 1.32, 0.45, 0.52),
     _HomeBackgroundStar(0.94, 0.91, 1.04, 0.38, 0.08),
   ];
+  static const _shootingStarEvents = <_HomeShootingStarEvent>[
+    _HomeShootingStarEvent(
+      windowStart: 0.06,
+      windowLength: 0.095,
+      start: Offset(0.12, -0.04),
+      travel: Offset(0.28, 0.18),
+      tailLength: 0.2,
+      brightness: 0.86,
+    ),
+    _HomeShootingStarEvent(
+      windowStart: 0.31,
+      windowLength: 0.08,
+      start: Offset(1.05, 0.17),
+      travel: Offset(-0.3, 0.16),
+      tailLength: 0.18,
+      brightness: 0.74,
+    ),
+    _HomeShootingStarEvent(
+      windowStart: 0.52,
+      windowLength: 0.11,
+      start: Offset(0.72, -0.05),
+      travel: Offset(-0.24, 0.24),
+      tailLength: 0.22,
+      brightness: 0.9,
+    ),
+    _HomeShootingStarEvent(
+      windowStart: 0.76,
+      windowLength: 0.085,
+      start: Offset(-0.06, 0.55),
+      travel: Offset(0.32, 0.13),
+      tailLength: 0.17,
+      brightness: 0.68,
+    ),
+    _HomeShootingStarEvent(
+      windowStart: 0.91,
+      windowLength: 0.07,
+      start: Offset(1.04, 0.72),
+      travel: Offset(-0.26, -0.16),
+      tailLength: 0.15,
+      brightness: 0.62,
+    ),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1169,67 +1212,91 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
   }
 
   void _drawShootingStars(Canvas canvas, Size size) {
-    _drawShootingStar(
-      canvas,
-      size,
-      windowStart: 0.08,
-      windowLength: 0.18,
-      start: const Offset(0.82, 0.12),
-      travel: const Offset(-0.22, 0.13),
-    );
-    _drawShootingStar(
-      canvas,
-      size,
-      windowStart: 0.58,
-      windowLength: 0.17,
-      start: const Offset(0.34, 0.28),
-      travel: const Offset(0.2, 0.1),
-    );
+    for (final event in _shootingStarEvents) {
+      if (_drawShootingStar(canvas, size, event)) {
+        return;
+      }
+    }
   }
 
-  void _drawShootingStar(
+  bool _drawShootingStar(
     Canvas canvas,
-    Size size, {
-    required double windowStart,
-    required double windowLength,
-    required Offset start,
-    required Offset travel,
-  }) {
-    final elapsed = phase >= windowStart
-        ? phase - windowStart
-        : phase + 1 - windowStart;
-    if (elapsed > windowLength) return;
-    final progress = elapsed / windowLength;
+    Size size,
+    _HomeShootingStarEvent event,
+  ) {
+    final elapsed = phase >= event.windowStart
+        ? phase - event.windowStart
+        : phase + 1 - event.windowStart;
+    if (elapsed > event.windowLength) return false;
+    final progress = elapsed / event.windowLength;
 
     final ease = Curves.easeInOut.transform(progress);
-    final opacity = math.sin(progress * math.pi) * 0.44;
+    final opacity = math.sin(progress * math.pi) * 0.42 * event.brightness;
     final head = Offset(
-      (start.dx + travel.dx * ease) * size.width,
-      (start.dy + travel.dy * ease) * size.height,
+      (event.start.dx + event.travel.dx * ease) * size.width,
+      (event.start.dy + event.travel.dy * ease) * size.height,
     );
-    final tail = Offset(
-      head.dx - travel.dx.sign * size.width * 0.12,
-      head.dy - travel.dy.sign * size.height * 0.07,
+    final travelVector = Offset(
+      event.travel.dx * size.width,
+      event.travel.dy * size.height,
     );
+    final travelDistance = travelVector.distance;
+    if (travelDistance == 0) return true;
 
-    final paint = Paint()
-      ..strokeWidth = 1.1
+    final direction = Offset(
+      travelVector.dx / travelDistance,
+      travelVector.dy / travelDistance,
+    );
+    final tail = head.translate(
+      -direction.dx * size.shortestSide * event.tailLength,
+      -direction.dy * size.shortestSide * event.tailLength,
+    );
+    final diffuseTail = Paint()
+      ..strokeWidth = 4.2
       ..strokeCap = StrokeCap.round
-      ..shader = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5)
+      ..shader = ui.Gradient.linear(
+        tail,
+        head,
+        [
           _transparent,
-          const Color(0xFFBEEBFF).withValues(alpha: opacity),
-          Colors.white.withValues(alpha: opacity * 0.85),
+          const Color(0xFF6FD9FF).withValues(alpha: opacity * 0.2),
+          const Color(0xFFD8F6FF).withValues(alpha: opacity * 0.34),
         ],
-      ).createShader(Rect.fromPoints(tail, head));
-    canvas.drawLine(tail, head, paint);
+        const [0.0, 0.62, 1.0],
+      );
+    canvas.drawLine(tail, head, diffuseTail);
 
-    final headPaint = Paint()
-      ..color = Colors.white.withValues(alpha: opacity * 0.9)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
-    canvas.drawCircle(head, 1.4, headPaint);
+    final coreTail = Paint()
+      ..strokeWidth = 1.25
+      ..strokeCap = StrokeCap.round
+      ..shader = ui.Gradient.linear(
+        tail,
+        head,
+        [
+          _transparent,
+          const Color(0xFFBEEBFF).withValues(alpha: opacity * 0.56),
+          Colors.white.withValues(alpha: opacity * 0.72),
+        ],
+        const [0.0, 0.68, 1.0],
+      );
+    canvas.drawLine(tail, head, coreTail);
+
+    final headGlow = Paint()
+      ..color = const Color(0xFF8FE7FF).withValues(alpha: opacity * 0.34)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.5);
+    canvas.drawCircle(head, 5.8, headGlow);
+
+    final headHalo = Paint()
+      ..color = const Color(0xFFD7F5FF).withValues(alpha: opacity * 0.42)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.8);
+    canvas.drawCircle(head, 2.6, headHalo);
+
+    final headCore = Paint()
+      ..color = Colors.white.withValues(alpha: opacity.clamp(0.0, 0.86));
+    canvas.drawCircle(head, 1.45, headCore);
+
+    return true;
   }
 
   double _unitNoise(int index, double seed) {
@@ -1240,6 +1307,24 @@ class _HomeAmbientBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _HomeAmbientBackgroundPainter oldDelegate) =>
       oldDelegate.phase != phase;
+}
+
+class _HomeShootingStarEvent {
+  const _HomeShootingStarEvent({
+    required this.windowStart,
+    required this.windowLength,
+    required this.start,
+    required this.travel,
+    required this.tailLength,
+    required this.brightness,
+  });
+
+  final double windowStart;
+  final double windowLength;
+  final Offset start;
+  final Offset travel;
+  final double tailLength;
+  final double brightness;
 }
 
 class _HomeBackgroundStar {
