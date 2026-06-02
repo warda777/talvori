@@ -29,7 +29,7 @@ import 'package:talvori/features/home/ui/screens/vocab_screen.dart';
 import 'package:talvori/features/home/ui/widgets/widgets.dart';
 import 'package:talvori/features/home/ui/theme/theme.dart';
 import 'package:talvori/features/home/ui/strings/strings.dart';
-import 'package:talvori/features/world/ui/screens/world_region_screen.dart';
+import 'package:talvori/features/world/local_world/ui/screens/local_world_screen.dart';
 import 'package:talvori/features/impuls_postfach/application/impulse_inbox_provider.dart';
 import 'package:talvori/features/impuls_postfach/ui/screens/impuls_postfach_screen.dart';
 import 'package:talvori/features/tagesimpuls/application/tagesimpuls_selection_provider.dart';
@@ -349,9 +349,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _openWorldRegion() {
     HapticFeedback.selectionClick();
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const WorldRegionScreen()));
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const LocalWorldScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          final fade = Curves.easeOutCubic.transform(animation.value);
+          final scale = 0.98 + (0.02 * fade);
+          return FadeTransition(
+            opacity: animation,
+            child: Transform.scale(scale: scale, child: child),
+          );
+        },
+      ),
+    );
   }
 
   void _openWorldHub() {

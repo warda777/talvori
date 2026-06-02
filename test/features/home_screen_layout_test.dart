@@ -39,7 +39,7 @@ import 'package:talvori/features/home/ui/widgets/talvori_companion_card.dart';
 import 'package:talvori/features/home/ui/widgets/talvori_world_globe.dart';
 import 'package:talvori/features/rewards/ui/screens/rewards_center_screen.dart';
 import 'package:talvori/features/tagesimpuls/ai/tagesimpuls_ai_client.dart';
-import 'package:talvori/features/world/ui/screens/world_region_screen.dart';
+import 'package:talvori/features/world/local_world/ui/screens/local_world_screen.dart';
 import 'package:talvori/features/words/ui/cards/word_card.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_source_detail_screen.dart';
 import 'package:talvori/features/words/ui/screens/local_learning_sources_screen.dart';
@@ -778,7 +778,7 @@ void main() {
         find.byKey(const Key('talvori-companion-chat-input')),
         findsNothing,
       );
-      expect(find.byType(WorldRegionScreen), findsNothing);
+      expect(find.byType(LocalWorldScreen), findsNothing);
 
       await tester.tap(find.byKey(const Key('talvori-companion-mascot-image')));
       await tester.pump();
@@ -835,12 +835,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byKey(const Key('talvori-companion-chat-input')), findsNothing);
-    expect(find.byType(WorldRegionScreen), findsNothing);
+    expect(find.byType(LocalWorldScreen), findsNothing);
 
     await tester.tap(find.byKey(const Key('talvori-world-globe-button')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
-    expect(find.byType(WorldRegionScreen), findsOneWidget);
+    expect(find.byType(LocalWorldScreen), findsOneWidget);
   });
 
   testWidgets('home chat barrier closes input before hub actions', (
@@ -1272,9 +1272,7 @@ void main() {
     );
   });
 
-  testWidgets('home globe opens Talvori Welt placeholder region', (
-    tester,
-  ) async {
+  testWidgets('home globe opens local world start region', (tester) async {
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -1293,9 +1291,58 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(find.byType(WorldRegionScreen), findsOneWidget);
-    expect(find.text('Talvori Welt'), findsOneWidget);
-    expect(find.text('Deine Welt entsteht hier.'), findsOneWidget);
+    expect(find.byType(LocalWorldScreen), findsOneWidget);
+    expect(find.text('Talvori Ursprungshain'), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-space-background')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('local-world-plot')), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-interactive-viewer')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('local-world-diorama-image')), findsOneWidget);
+    expect(find.byKey(const Key('local-world-building-house')), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-building-market')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-building-library')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('local-world-free-plot-west')), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-free-plot-center')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-free-plot-south')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-bridge-anchor-west')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-bridge-anchor-east')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('local-world-resource-coins')), findsOneWidget);
+    expect(find.byKey(const Key('local-world-resource-wood')), findsOneWidget);
+    expect(find.byKey(const Key('local-world-resource-stone')), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-resource-knowledge-points')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('local-world-back-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(find.byType(LocalWorldScreen), findsNothing);
+    expect(find.byKey(const Key('talvori-world-globe-button')), findsOneWidget);
   });
 
   testWidgets('home screen shows impulse inbox entry with unread badge', (
