@@ -419,11 +419,13 @@ class _HubCenterButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
-              center: const Alignment(-0.2, -0.25),
+              center: open
+                  ? const Alignment(0.24, -0.18)
+                  : const Alignment(-0.2, -0.25),
               radius: 0.9,
               colors: [
-                const Color(0xFF131A29).withValues(alpha: open ? 0.98 : 1),
-                const Color(0xFF070B15),
+                open ? const Color(0xFF111125) : const Color(0xFF131A29),
+                open ? const Color(0xFF060817) : const Color(0xFF070B15),
                 const Color(0xFF02040A),
               ],
             ),
@@ -438,21 +440,10 @@ class _HubCenterButton extends StatelessWidget {
           ),
           child: Center(
             child: AnimatedRotation(
-              duration: const Duration(milliseconds: 520),
-              curve: Curves.easeOutBack,
-              turns: open ? 1.125 : 0,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(scale: animation, child: child),
-                  );
-                },
-                child: _GradientHubGlyph(open: open, key: ValueKey(open)),
-              ),
+              duration: const Duration(milliseconds: 320),
+              curve: Curves.easeOutCubic,
+              turns: open ? 0.125 : 0,
+              child: const _GradientHubGlyph(),
             ),
           ),
         ),
@@ -462,9 +453,7 @@ class _HubCenterButton extends StatelessWidget {
 }
 
 class _GradientHubGlyph extends StatelessWidget {
-  const _GradientHubGlyph({required this.open, super.key});
-
-  final bool open;
+  const _GradientHubGlyph();
 
   @override
   Widget build(BuildContext context) {
@@ -473,8 +462,8 @@ class _GradientHubGlyph extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _GradientHubGlyphBar(angle: open ? math.pi / 4 : 0),
-          _GradientHubGlyphBar(angle: open ? -math.pi / 4 : math.pi / 2),
+          _GradientHubGlyphBar(angle: 0),
+          _GradientHubGlyphBar(angle: math.pi / 2),
         ],
       ),
     );
