@@ -447,7 +447,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       inputVisible: companionState.inputVisible,
       keyboardInset: keyboardInset,
     );
-
     final homeHubActions = [
       HomeSmartHubAction(
         key: const Key('home-impuls-postfach-button'),
@@ -735,7 +734,11 @@ class _HomeCompanionOverlay extends StatelessWidget {
     );
     final top = keyboardSafeMaxBottom == null
         ? baseTop
-        : _safeClampDouble(baseTop, 0.0, keyboardSafeMaxBottom! - cardHeight);
+        : _keyboardSafeTop(
+            baseTop: baseTop,
+            cardHeight: cardHeight,
+            keyboardSafeMaxBottom: keyboardSafeMaxBottom!,
+          );
     final width = companionState.isExpanded
         ? (compact ? 336.0 : 460.0)
         : mascotSize + 10.0;
@@ -770,6 +773,16 @@ class _HomeCompanionOverlay extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _keyboardSafeTop({
+    required double baseTop,
+    required double cardHeight,
+    required double keyboardSafeMaxBottom,
+  }) {
+    final keyboardSafeTop = keyboardSafeMaxBottom - cardHeight;
+    final lowerLimit = math.min(0.0, keyboardSafeTop);
+    return _safeClampDouble(baseTop, lowerLimit, keyboardSafeTop);
   }
 }
 
@@ -1375,6 +1388,9 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
     super.initState();
     _textScrollController = ScrollController();
     widget.controller.addListener(_scheduleHeightReport);
+    widget.controller.addListener(_syncTextFieldState);
+    widget.focusNode.addListener(_syncTextFieldState);
+    _textScrollController.addListener(_syncTextFieldState);
     _scheduleHeightReport();
   }
 
@@ -1383,7 +1399,13 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_scheduleHeightReport);
+      oldWidget.controller.removeListener(_syncTextFieldState);
       widget.controller.addListener(_scheduleHeightReport);
+      widget.controller.addListener(_syncTextFieldState);
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_syncTextFieldState);
+      widget.focusNode.addListener(_syncTextFieldState);
     }
     _scheduleHeightReport();
   }
@@ -1391,6 +1413,9 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
   @override
   void dispose() {
     widget.controller.removeListener(_scheduleHeightReport);
+    widget.controller.removeListener(_syncTextFieldState);
+    widget.focusNode.removeListener(_syncTextFieldState);
+    _textScrollController.removeListener(_syncTextFieldState);
     _textScrollController.dispose();
     super.dispose();
   }
@@ -1403,6 +1428,12 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
       if (renderObject is! RenderBox) return;
       widget.onHeightChanged(renderObject.size.height);
     });
+  }
+
+  void _syncTextFieldState() {
+    if (!mounted) return;
+    setState(() {});
+    _scheduleHeightReport();
   }
 
   @override
@@ -1433,36 +1464,41 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
         child: Row(
           children: [
             Expanded(
-              child: RawScrollbar(
-                key: const Key('talvori-companion-chat-input-scrollbar'),
-                controller: _textScrollController,
-                thumbVisibility: false,
-                interactive: false,
-                radius: const Radius.circular(999),
-                thickness: 3,
-                thumbColor: Colors.white.withValues(alpha: 0.36),
-                trackVisibility: false,
-                child: TextField(
-                  key: const Key('talvori-companion-chat-text-field'),
-                  controller: widget.controller,
-                  focusNode: widget.focusNode,
-                  scrollController: _textScrollController,
-                  minLines: 1,
-                  maxLines: 5,
-                  textInputAction: TextInputAction.send,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  cursorColor: _HomeCompanionChatInput._accent,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: 'Frag ${widget.companionDisplayName} kurz ...',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 14,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  TextField(
+                    key: const Key('talvori-companion-chat-text-field'),
+                    controller: widget.controller,
+                    focusNode: widget.focusNode,
+                    scrollController: _textScrollController,
+                    minLines: 1,
+                    maxLines: 5,
+                    textInputAction: TextInputAction.send,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    cursorColor: _HomeCompanionChatInput._accent,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Frag ${widget.companionDisplayName} kurz ...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
                     ),
-                    border: InputBorder.none,
+                    onSubmitted: _submit,
                   ),
-                  onSubmitted: _submit,
-                ),
+                  Positioned(
+                    top: 2,
+                    right: -2,
+                    bottom: 2,
+                    child: _InputTextScrollIndicator(
+                      key: const Key('talvori-companion-chat-input-scrollbar'),
+                      controller: _textScrollController,
+                      visible: widget.focusNode.hasFocus,
+                    ),
+                  ),
+                ],
               ),
             ),
             IconButton(
@@ -1488,6 +1524,88 @@ class _HomeCompanionChatInputState extends State<_HomeCompanionChatInput> {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
     widget.onSubmitMessage(trimmed);
+  }
+}
+
+class _InputTextScrollIndicator extends StatelessWidget {
+  const _InputTextScrollIndicator({
+    super.key,
+    required this.controller,
+    required this.visible,
+  });
+
+  final ScrollController controller;
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!controller.hasClients) {
+      return const SizedBox(width: 3);
+    }
+
+    final position = controller.position;
+    if (!position.hasContentDimensions) {
+      return const SizedBox(width: 3);
+    }
+
+    final maxScrollExtent = position.maxScrollExtent;
+    if (maxScrollExtent <= 0) {
+      return const SizedBox(width: 3);
+    }
+
+    return SizedBox(
+      width: 3,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final trackHeight = constraints.maxHeight;
+          if (trackHeight <= 0) return const SizedBox.shrink();
+
+          final visibleRatio =
+              position.viewportDimension /
+              (position.viewportDimension + maxScrollExtent);
+          final thumbHeight = (trackHeight * visibleRatio).clamp(
+            18.0,
+            trackHeight,
+          );
+          final scrollProgress = maxScrollExtent <= 0
+              ? 0.0
+              : (position.pixels / maxScrollExtent).clamp(0.0, 1.0);
+          final thumbTop = (trackHeight - thumbHeight) * scrollProgress;
+
+          return AnimatedOpacity(
+            opacity: visible ? 1 : 0,
+            duration: const Duration(milliseconds: 160),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: thumbTop,
+                  left: 0,
+                  right: 0,
+                  height: thumbHeight,
+                  child: DecoratedBox(
+                    key: const Key(
+                      'talvori-companion-chat-input-scrollbar-thumb',
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.34),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

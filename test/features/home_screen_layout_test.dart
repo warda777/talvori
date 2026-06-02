@@ -919,6 +919,33 @@ void main() {
 
       await tester.enterText(
         find.byKey(const Key('talvori-companion-chat-text-field')),
+        'Zeile 1\nZeile 2\nZeile 3',
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final multilineInputRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-chat-input')),
+      );
+      final multilineMascotRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-mascot-image')),
+      );
+      final multilineBubbleRect = tester.getRect(
+        find.byKey(const Key('talvori-companion-bubble')),
+      );
+      expect(multilineInputRect.height, greaterThan(keyboardInputRect.height));
+      expect(multilineInputRect.bottom, closeTo(keyboardInputRect.bottom, 1));
+      expect(
+        multilineMascotRect.bottom,
+        lessThanOrEqualTo(multilineInputRect.top - 12),
+      );
+      expect(
+        multilineBubbleRect.bottom,
+        lessThanOrEqualTo(multilineInputRect.top - 12),
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('talvori-companion-chat-text-field')),
         'Zeile 1\nZeile 2\nZeile 3\nZeile 4\nZeile 5\nZeile 6',
       );
       await tester.pump();
@@ -937,7 +964,11 @@ void main() {
       final tallKeyboardBubbleRect = tester.getRect(
         find.byKey(const Key('talvori-companion-bubble')),
       );
-      expect(tallInputRect.height, greaterThan(keyboardInputRect.height));
+      expect(
+        find.byKey(const Key('talvori-companion-chat-input-scrollbar-thumb')),
+        findsOneWidget,
+      );
+      expect(tallInputRect.height, greaterThan(multilineInputRect.height));
       expect(tallInputRect.bottom, closeTo(keyboardInputRect.bottom, 1));
       expect(
         tallKeyboardMascotRect.bottom,
