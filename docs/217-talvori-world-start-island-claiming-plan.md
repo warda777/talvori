@@ -116,6 +116,77 @@ Nicht in Phase 2C:
 - keine Oekonomie,
 - keine echte Freunde-/Social-Logik.
 
+## 5a. Private Insel-Positionierung per Longpress
+
+Spaeter sollen eigene private Inseln in einen Bearbeitungsmodus gebracht werden
+koennen.
+
+Grundregel:
+
+- Nur eigene/private Inseln sind verschiebbar.
+- Community-Inseln, Showcase-Inseln und fremde Inseln sind nicht frei
+  verschiebbar.
+- Longpress auf eine eigene Insel aktiviert den Bearbeitungsmodus.
+- Die aktive Insel wird visuell hervorgehoben, z. B. durch Glow,
+  Schwebeeffekt oder Bearbeitungsrahmen.
+- Der Nutzer kann die Insel im Space verschieben.
+- Beim Loslassen rastet die Insel spaeter auf gueltige Positionen,
+  Docking-Zonen oder Snap-Punkte ein.
+
+Ungueltige Positionen muessen verhindert werden:
+
+- keine Ueberlappung mit anderen Inseln,
+- nicht zu nah an Nachbarinseln,
+- keine Platzierung in blockierten Community-Zonen,
+- keine Position ausserhalb gueltiger Welt-/Region-Grenzen,
+- keine freie Verschiebung von Showcase- oder Community-Inseln.
+
+Phase 2C:
+
+- Diese Funktion wird noch nicht gebaut.
+- Die Architektur soll aber beruecksichtigen, dass eigene Inseln spaeter
+  beweglich sein koennen.
+- Mock-Daten duerfen bereits ein Feld fuer Beweglichkeit und
+  Platzierungszustand vorsehen.
+
+## 5b. Mehrere private Inseln und Nutzer-Archipel
+
+Die erste gewaehlte Insel ist die Hauptinsel des Nutzers.
+
+Spaeter kann der Nutzer weitere private Inseln freischalten, wenn die
+Hauptinsel weit genug ausgebaut ist. Diese Inseln bilden zusammen ein privates
+Insel-Set oder Nutzer-Archipel.
+
+Moegliche Rollen eigener Inseln:
+
+- Hauptinsel,
+- Erweiterungsinsel,
+- Themeninsel,
+- Eventinsel,
+- Deko-/Naturinsel.
+
+Fuer andere Nutzer muss klar sichtbar sein, welche Inseln zum selben Nutzer
+gehoeren.
+
+Moegliche Besitzer-Markierungen:
+
+- kleine Fahne,
+- Avatar-Icon,
+- Besitzer-Siegel,
+- farbiger Besitzring,
+- Companion-Symbol,
+- optional dezenter Nutzername.
+
+Regeln:
+
+- Die Markierung soll sichtbar, aber nicht stoerend sein.
+- Eine eigene Insel darf mehrere visuelle Hinweise tragen, aber nie wie ein
+  UI-Button wirken.
+- Community- und Showcase-Inseln brauchen eine andere Kennzeichnung als
+  private Nutzerinseln.
+- Phase 2C bereitet nur Ownership/OwnerBadge vor.
+- Keine echte Besitz-Persistenz und keine Cloud-Logik in Phase 2C.
+
 ## 6. Gefuehrte Freiheit statt Minecraft
 
 Leitplanke aus der alten Konzeptgrundlage:
@@ -338,6 +409,13 @@ Jede Insel braucht spaeter mindestens:
 - `assetPath`
 - `ownershipState`
 - `publicDisplayState`
+- optional `ownerId`
+- `islandRole`: `showcase`, `main`, `expansion`, `theme`, `event` oder
+  `community`
+- optional `ownerBadgeType`
+- optional `ownerBadgeAsset`
+- `isMovableByOwner`
+- `placementState`
 - optional `connectedIslandIds`
 - optional `placedItems`
 
@@ -460,6 +538,12 @@ Phase 2C gilt als gelungen, wenn:
 - `Mein Plot` springt zur eigenen Insel oder ist dafuer sauber vorbereitet.
 - Die Architektur bleibt modular und rendererunabhaengig.
 - Die Welt ist nicht als ein fertiges Gesamtbild gedacht.
+- Die Planung beruecksichtigt, dass Nutzer spaeter mehrere eigene Inseln
+  besitzen koennen.
+- Eigene Inseln koennen spaeter klar als Besitz eines Nutzers markiert werden.
+- Longpress-Verschieben eigener Inseln ist als spaetere Funktion vorgesehen,
+  aber nicht Teil von Phase 2C.
+- Community- und Showcase-Inseln bleiben nicht frei verschiebbar.
 - Keine Backend-/SRS-/Reward-Seiteneffekte entstehen.
 
 ## 18. Umgang mit aktuellem Stand
@@ -475,4 +559,3 @@ Entscheidungen:
 - Eigene Startinseln werden zunaechst lokal/mock und einfacher als die Showcase-Insel.
 - Gebaeudebau, Ressourcenlogik, Reward Bridge und Persistenz kommen spaeter.
 - Vor weiterem Code sollte dieser Startinsel-Claiming-Plan committed werden.
-
