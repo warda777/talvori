@@ -25,6 +25,9 @@ class LocalWorldScreen extends StatefulWidget {
 
 class _LocalWorldScreenState extends State<LocalWorldScreen> {
   late final TransformationController _worldTransformController;
+  LocalWorldCanvasMetrics? _worldCanvasMetrics;
+  LocalWorldStarterIsland? _selectedStarterIsland;
+  bool _worldCameraInitialized = false;
 
   @override
   void initState() {
@@ -39,7 +42,66 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
   }
 
   void _focusMyPlot() {
-    _worldTransformController.value = Matrix4.identity();
+    final selectedIsland = _selectedStarterIsland;
+    if (selectedIsland == null) {
+      _showWorldHint('Waehle zuerst deine Startinsel.');
+      _focusWorldPoint(_worldCanvasMetrics?.showcaseCenter, scale: 0.72);
+      return;
+    }
+
+    _focusWorldPoint(
+      _worldCanvasMetrics?.starterCenters[selectedIsland.id],
+      scale: 1.2,
+    );
+  }
+
+  void _focusWorldPoint(Offset? worldPoint, {double scale = 1.05}) {
+    if (worldPoint == null) return;
+    final viewportSize = MediaQuery.sizeOf(context);
+    final matrix = Matrix4.identity()
+      ..translateByDouble(
+        viewportSize.width / 2 - worldPoint.dx * scale,
+        viewportSize.height / 2 - worldPoint.dy * scale,
+        0,
+        1,
+      )
+      ..scaleByDouble(scale, scale, 1, 1);
+    _worldTransformController.value = matrix;
+  }
+
+  void _showWorldHint(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF07101A),
+      ),
+    );
+  }
+
+  void _showStarterIslandSheet(LocalWorldStarterIsland island) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _StarterIslandBottomSheet(
+          island: island,
+          selected: _selectedStarterIsland?.id == island.id,
+          onSelect: () {
+            Navigator.of(context).pop();
+            setState(() {
+              _selectedStarterIsland = island;
+            });
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _focusWorldPoint(
+                _worldCanvasMetrics?.starterCenters[island.id],
+                scale: 1.2,
+              );
+            });
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -53,7 +115,18 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
           fit: StackFit.expand,
           children: [
             const _LocalWorldBackground(),
-            LocalWorldPlotView(controller: _worldTransformController),
+            LocalWorldPlotView(
+              controller: _worldTransformController,
+              selectedStarterIslandId: _selectedStarterIsland?.id,
+              onStarterIslandTap: _showStarterIslandSheet,
+              onCanvasMetricsChanged: (metrics) {
+                _worldCanvasMetrics = metrics;
+                if (!_worldCameraInitialized) {
+                  _worldCameraInitialized = true;
+                  _focusWorldPoint(metrics.showcaseCenter, scale: 0.72);
+                }
+              },
+            ),
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, viewport) {
@@ -85,6 +158,132 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StarterIslandBottomSheet extends StatelessWidget {
+  const _StarterIslandBottomSheet({
+    required this.island,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  final LocalWorldStarterIsland island;
+  final bool selected;
+  final VoidCallback onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          key: const Key('local-world-starter-island-sheet'),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07101A).withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: island.accent.withValues(alpha: 0.38)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.44),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: island.accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: island.accent.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Icon(
+                      selected ? Icons.flag_rounded : Icons.terrain_rounded,
+                      color: island.accent,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          island.displayName,
+                          key: const Key('local-world-starter-island-title'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          island.biome,
+                          style: TextStyle(
+                            color: island.accent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                island.shortDescription,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.74),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key('local-world-select-starter-island'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: island.accent,
+                    foregroundColor: const Color(0xFF02050A),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                  onPressed: onSelect,
+                  icon: Icon(
+                    selected ? Icons.check_rounded : Icons.flag_rounded,
+                  ),
+                  label: Text(
+                    selected ? 'Bereits gewaehlt' : 'Diese Insel waehlen',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

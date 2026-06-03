@@ -1303,6 +1303,26 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('local-world-diorama-image')), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-starter-island-image-forest-clearing')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-starter-island-image-field')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-starter-island-image-rock')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-starter-island-image-desert')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-starter-island-image-snow-grove')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('local-world-building-house')), findsOneWidget);
     expect(
       find.byKey(const Key('local-world-building-market')),
@@ -1336,6 +1356,49 @@ void main() {
       find.byKey(const Key('local-world-resource-knowledge-points')),
       findsOneWidget,
     );
+
+    await tester.drag(
+      find.byKey(const Key('local-world-interactive-viewer')),
+      const Offset(460, 460),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(
+      find.byKey(const Key('local-world-starter-island-forest-clearing')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-starter-island-sheet')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-starter-island-title')),
+      findsOneWidget,
+    );
+    expect(find.text('Diese Insel waehlen'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const Key('local-world-select-starter-island')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-starter-island-sheet')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('local-world-selected-island-badge')),
+      findsOneWidget,
+    );
+    expect(find.text('Waldlichtung · Mein Plot'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('local-world-my-plot-action')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     await tester.tap(find.byKey(const Key('local-world-back-button')));
     await tester.pump();
