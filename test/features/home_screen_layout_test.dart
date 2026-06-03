@@ -1366,6 +1366,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Münzen'), findsOneWidget);
+    final resourceHintText = tester.widget<Text>(find.text('Münzen'));
+    expect(resourceHintText.style?.decoration, TextDecoration.none);
 
     await tester.drag(
       find.byKey(const Key('local-world-interactive-viewer')),

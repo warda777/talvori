@@ -146,33 +146,39 @@ class _ResourceHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const Key('local-world-resource-inline-hint'),
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-      decoration: BoxDecoration(
-        color: const Color(0xFF07101A).withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: resource.accent.withValues(alpha: 0.42)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.36),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        key: const Key('local-world-resource-inline-hint'),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: const Color(0xFF07101A).withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: resource.accent.withValues(alpha: 0.42)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.36),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: resource.accent.withValues(alpha: 0.16),
+              blurRadius: 16,
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: Text(
+          resource.label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+            decoration: TextDecoration.none,
+            decorationColor: Colors.transparent,
+            decorationThickness: 0,
           ),
-          BoxShadow(
-            color: resource.accent.withValues(alpha: 0.16),
-            blurRadius: 16,
-            spreadRadius: -4,
-          ),
-        ],
-      ),
-      child: Text(
-        resource.label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0,
         ),
       ),
     );
