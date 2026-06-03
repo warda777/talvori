@@ -26,7 +26,7 @@ class LocalWorldScreen extends StatefulWidget {
 class _LocalWorldScreenState extends State<LocalWorldScreen> {
   late final TransformationController _worldTransformController;
   LocalWorldCanvasMetrics? _worldCanvasMetrics;
-  LocalWorldStarterIsland? _selectedStarterIsland;
+  LocalWorldMapObject? _selectedStarterIsland;
   bool _worldCameraInitialized = false;
 
   @override
@@ -79,7 +79,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
     );
   }
 
-  void _showStarterIslandSheet(LocalWorldStarterIsland island) {
+  void _showStarterIslandSheet(LocalWorldMapObject island) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -104,6 +104,16 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
     );
   }
 
+  void _showCommunityRegionSheet(LocalWorldMapObject region) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _CommunityRegionBottomSheet(region: region);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -119,6 +129,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
               controller: _worldTransformController,
               selectedStarterIslandId: _selectedStarterIsland?.id,
               onStarterIslandTap: _showStarterIslandSheet,
+              onCommunityRegionTap: _showCommunityRegionSheet,
               onCanvasMetricsChanged: (metrics) {
                 _worldCanvasMetrics = metrics;
                 if (!_worldCameraInitialized) {
@@ -175,7 +186,7 @@ class _StarterIslandBottomSheet extends StatelessWidget {
     required this.onSelect,
   });
 
-  final LocalWorldStarterIsland island;
+  final LocalWorldMapObject island;
   final bool selected;
   final VoidCallback onSelect;
 
@@ -284,6 +295,111 @@ class _StarterIslandBottomSheet extends StatelessWidget {
                       letterSpacing: 0,
                     ),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CommunityRegionBottomSheet extends StatelessWidget {
+  const _CommunityRegionBottomSheet({required this.region});
+
+  final LocalWorldMapObject region;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          key: const Key('local-world-community-region-sheet'),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07101A).withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: region.accent.withValues(alpha: 0.34)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.44),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: region.accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: region.accent.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Icon(Icons.public_rounded, color: region.accent),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          region.displayName,
+                          key: const Key('local-world-community-region-title'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Community-Region',
+                          style: TextStyle(
+                            color: region.accent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                region.shortDescription,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.74),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Später als gemeinsames Ausbaugebiet verfügbar.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.62),
+                  fontSize: 13,
+                  height: 1.3,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
                 ),
               ),
             ],

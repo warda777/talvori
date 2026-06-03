@@ -1304,26 +1304,57 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('local-world-diorama-image')), findsOneWidget);
-    expect(
-      find.byKey(const Key('local-world-starter-island-image-forest-clearing')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('local-world-starter-island-image-field')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('local-world-starter-island-image-rock')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('local-world-starter-island-image-desert')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('local-world-starter-island-image-snow-grove')),
-      findsOneWidget,
-    );
+    const starterIslandIds = [
+      'ash-hill',
+      'autumn-grove',
+      'crystal-grove',
+      'desert',
+      'field',
+      'flower-meadow',
+      'forest-clearing',
+      'gorge',
+      'lagoon',
+      'lava-ridge',
+      'misty-moor',
+      'moonlit-heath',
+      'moss-plateau',
+      'mushroom-grove',
+      'rock',
+      'ruin-plateau',
+      'snow-grove',
+      'spring',
+      'thorn-steppe',
+      'wind-ridge',
+    ];
+    for (final id in starterIslandIds) {
+      expect(
+        find.byKey(Key('local-world-starter-island-image-$id')),
+        findsOneWidget,
+      );
+    }
+
+    const communityRegionIds = [
+      'alpine-village',
+      'capital-hub-main',
+      'crystal-magic-main',
+      'desert-main',
+      'forest-main',
+      'harbor-bridge',
+      'lagoon-main',
+      'mountain-highland',
+      'stadium-event',
+      'tower-landmark',
+      'tropical-bays-main',
+      'tropical-coast',
+      'tropical-main',
+      'water-archipelago',
+    ];
+    for (final id in communityRegionIds) {
+      expect(
+        find.byKey(Key('local-world-community-region-image-$id')),
+        findsOneWidget,
+      );
+    }
     expect(find.byKey(const Key('local-world-building-house')), findsOneWidget);
     expect(
       find.byKey(const Key('local-world-building-market')),
@@ -1371,7 +1402,7 @@ void main() {
 
     await tester.drag(
       find.byKey(const Key('local-world-interactive-viewer')),
-      const Offset(460, 460),
+      const Offset(700, 900),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
