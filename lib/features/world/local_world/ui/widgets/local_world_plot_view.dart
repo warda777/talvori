@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 const _worldLayoutCenter = Offset(0.5, 0.5);
 const _worldHorizontalCompression = 0.78;
 const _worldVerticalCompression = 0.74;
+const _showDockingDebug = false;
 
 double _compactWorldX(double x) {
   return _worldLayoutCenter.dx +
@@ -525,6 +526,149 @@ class _AssetWorldCanvas extends StatelessWidget {
     ),
   ];
 
+  static const _dockingPoints = [
+    LocalWorldDockingPoint(
+      id: 'showcase-west-bridge-anchor',
+      islandId: 'showcase-origin-grove',
+      localPosition: Offset(0.16, 0.62),
+      direction: LocalWorldDockingDirection.west,
+      type: LocalWorldDockingPointType.bridgeAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 80,
+    ),
+    LocalWorldDockingPoint(
+      id: 'showcase-east-bridge-anchor',
+      islandId: 'showcase-origin-grove',
+      localPosition: Offset(0.86, 0.62),
+      direction: LocalWorldDockingDirection.east,
+      type: LocalWorldDockingPointType.bridgeAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 80,
+    ),
+    LocalWorldDockingPoint(
+      id: 'forest-clearing-east-snap',
+      islandId: 'forest-clearing',
+      localPosition: Offset(0.82, 0.54),
+      direction: LocalWorldDockingDirection.east,
+      type: LocalWorldDockingPointType.hiddenSnapZone,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 60,
+    ),
+    LocalWorldDockingPoint(
+      id: 'field-west-snap',
+      islandId: 'field',
+      localPosition: Offset(0.18, 0.55),
+      direction: LocalWorldDockingDirection.west,
+      type: LocalWorldDockingPointType.hiddenSnapZone,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 60,
+    ),
+    LocalWorldDockingPoint(
+      id: 'field-east-platform',
+      islandId: 'field',
+      localPosition: Offset(0.82, 0.52),
+      direction: LocalWorldDockingDirection.east,
+      type: LocalWorldDockingPointType.platformAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.smallPlatform,
+      ],
+      priority: 58,
+    ),
+    LocalWorldDockingPoint(
+      id: 'rock-west-platform',
+      islandId: 'rock',
+      localPosition: Offset(0.18, 0.56),
+      direction: LocalWorldDockingDirection.west,
+      type: LocalWorldDockingPointType.platformAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.smallPlatform,
+      ],
+      priority: 58,
+    ),
+    LocalWorldDockingPoint(
+      id: 'capital-hub-south-platform',
+      islandId: 'capital-hub-main',
+      localPosition: Offset(0.5, 0.88),
+      direction: LocalWorldDockingDirection.south,
+      type: LocalWorldDockingPointType.platformAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.long,
+        LocalWorldConnectorType.smallPlatform,
+      ],
+      priority: 95,
+    ),
+    LocalWorldDockingPoint(
+      id: 'capital-hub-west-bridge',
+      islandId: 'capital-hub-main',
+      localPosition: Offset(0.16, 0.56),
+      direction: LocalWorldDockingDirection.west,
+      type: LocalWorldDockingPointType.bridgeAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 88,
+    ),
+    LocalWorldDockingPoint(
+      id: 'alpine-village-east-bridge',
+      islandId: 'alpine-village',
+      localPosition: Offset(0.84, 0.6),
+      direction: LocalWorldDockingDirection.east,
+      type: LocalWorldDockingPointType.bridgeAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.short,
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 84,
+    ),
+    LocalWorldDockingPoint(
+      id: 'harbor-bridge-north-platform',
+      islandId: 'harbor-bridge',
+      localPosition: Offset(0.48, 0.14),
+      direction: LocalWorldDockingDirection.north,
+      type: LocalWorldDockingPointType.platformAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.long,
+        LocalWorldConnectorType.smallPlatform,
+      ],
+      priority: 92,
+    ),
+    LocalWorldDockingPoint(
+      id: 'harbor-bridge-west-bridge',
+      islandId: 'harbor-bridge',
+      localPosition: Offset(0.14, 0.58),
+      direction: LocalWorldDockingDirection.west,
+      type: LocalWorldDockingPointType.bridgeAnchor,
+      supportedConnectorTypes: [
+        LocalWorldConnectorType.medium,
+        LocalWorldConnectorType.endCap,
+      ],
+      priority: 86,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final landscape = viewportSize.width > viewportSize.height;
@@ -535,6 +679,10 @@ class _AssetWorldCanvas extends StatelessWidget {
     final worldHeight = math.max(
       viewportSize.height * (landscape ? 7.2 : 7.8),
       landscape ? 6200.0 : 9200.0,
+    );
+    final showcaseSize = math.min(
+      worldWidth * (landscape ? 0.086 : 0.088),
+      worldHeight * (landscape ? 0.16 : 0.1),
     );
     final metrics = LocalWorldCanvasMetrics(
       size: Size(worldWidth, worldHeight),
@@ -549,6 +697,7 @@ class _AssetWorldCanvas extends StatelessWidget {
             worldHeight * _compactWorldY(island.centerY),
           ),
       },
+      dockingPoints: _dockingPoints,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -568,13 +717,7 @@ class _AssetWorldCanvas extends StatelessWidget {
               selected: false,
               onTap: () => onCommunityRegionTap(region),
             ),
-          _ShowcaseIsland(
-            center: metrics.showcaseCenter,
-            size: math.min(
-              worldWidth * (landscape ? 0.086 : 0.088),
-              worldHeight * (landscape ? 0.16 : 0.1),
-            ),
-          ),
+          _ShowcaseIsland(center: metrics.showcaseCenter, size: showcaseSize),
           for (final island in _starterIslands)
             _WorldMapObjectView(
               object: island,
@@ -582,8 +725,104 @@ class _AssetWorldCanvas extends StatelessWidget {
               selected: selectedStarterIslandId == island.id,
               onTap: () => onStarterIslandTap(island),
             ),
+          if (_showDockingDebug)
+            _DockingDebugLayer(
+              worldSize: metrics.size,
+              showcaseCenter: metrics.showcaseCenter,
+              showcaseSize: showcaseSize,
+              starters: _starterIslands,
+              communities: _communityRegions,
+              dockingPoints: _dockingPoints,
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _DockingDebugLayer extends StatelessWidget {
+  const _DockingDebugLayer({
+    required this.worldSize,
+    required this.showcaseCenter,
+    required this.showcaseSize,
+    required this.starters,
+    required this.communities,
+    required this.dockingPoints,
+  });
+
+  final Size worldSize;
+  final Offset showcaseCenter;
+  final double showcaseSize;
+  final List<LocalWorldMapObject> starters;
+  final List<LocalWorldMapObject> communities;
+  final List<LocalWorldDockingPoint> dockingPoints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (final dockingPoint in dockingPoints)
+              if (_resolveDockingPointPosition(dockingPoint)
+                  case final Offset position)
+                Positioned(
+                  left: position.dx - 5,
+                  top: position.dy - 5,
+                  width: 10,
+                  height: 10,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF62F7FF).withValues(alpha: 0.86),
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF62F7FF).withValues(alpha: 0.5),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Offset? _resolveDockingPointPosition(LocalWorldDockingPoint dockingPoint) {
+    if (dockingPoint.islandId == 'showcase-origin-grove') {
+      final left = showcaseCenter.dx - showcaseSize / 2;
+      final top = showcaseCenter.dy - showcaseSize / 2;
+      return Offset(
+        left + showcaseSize * dockingPoint.localPosition.dx,
+        top + showcaseSize * dockingPoint.localPosition.dy,
+      );
+    }
+
+    LocalWorldMapObject? object;
+    for (final candidate in [...starters, ...communities]) {
+      if (candidate.id == dockingPoint.islandId) {
+        object = candidate;
+        break;
+      }
+    }
+    if (object == null) {
+      return null;
+    }
+
+    final width = worldSize.width * object.widthFactor;
+    final height = width * 0.78;
+    final center = Offset(
+      worldSize.width * _compactWorldX(object.centerX),
+      worldSize.height * _compactWorldY(object.centerY),
+    );
+    final left = center.dx - width / 2;
+    final top = center.dy - height / 2;
+    return Offset(
+      left + width * dockingPoint.localPosition.dx,
+      top + height * dockingPoint.localPosition.dy,
     );
   }
 }
@@ -1033,9 +1272,56 @@ class LocalWorldCanvasMetrics {
     required this.size,
     required this.showcaseCenter,
     required this.starterCenters,
+    required this.dockingPoints,
   });
 
   final Size size;
   final Offset showcaseCenter;
   final Map<String, Offset> starterCenters;
+  final List<LocalWorldDockingPoint> dockingPoints;
+}
+
+enum LocalWorldDockingDirection {
+  north,
+  south,
+  east,
+  west,
+  northeast,
+  northwest,
+  southeast,
+  southwest,
+}
+
+enum LocalWorldDockingPointType { bridgeAnchor, platformAnchor, hiddenSnapZone }
+
+enum LocalWorldConnectorType {
+  short,
+  medium,
+  long,
+  cornerLeft,
+  cornerRight,
+  endCap,
+  smallPlatform,
+}
+
+class LocalWorldDockingPoint {
+  const LocalWorldDockingPoint({
+    required this.id,
+    required this.islandId,
+    required this.localPosition,
+    required this.direction,
+    required this.type,
+    required this.supportedConnectorTypes,
+    required this.priority,
+    this.isOccupied = false,
+  });
+
+  final String id;
+  final String islandId;
+  final Offset localPosition;
+  final LocalWorldDockingDirection direction;
+  final LocalWorldDockingPointType type;
+  final bool isOccupied;
+  final List<LocalWorldConnectorType> supportedConnectorTypes;
+  final int priority;
 }
