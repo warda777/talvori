@@ -44,7 +44,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
   void _focusMyPlot() {
     final selectedIsland = _selectedStarterIsland;
     if (selectedIsland == null) {
-      _showWorldHint('Waehle zuerst deine Startinsel.');
+      _showWorldHint('Wähle zuerst deine Startinsel.');
       _focusWorldPoint(_worldCanvasMetrics?.showcaseCenter, scale: 0.72);
       return;
     }
@@ -138,7 +138,11 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
                         left: 14,
                         top: 10,
                         right: 14,
-                        child: _LocalWorldHeader(compact: compact),
+                        child: _LocalWorldHeader(
+                          compact: compact,
+                          selectedIslandName:
+                              _selectedStarterIsland?.displayName,
+                        ),
                       ),
                       Positioned(
                         left: 14,
@@ -274,7 +278,7 @@ class _StarterIslandBottomSheet extends StatelessWidget {
                     selected ? Icons.check_rounded : Icons.flag_rounded,
                   ),
                   label: Text(
-                    selected ? 'Bereits gewaehlt' : 'Diese Insel waehlen',
+                    selected ? 'Bereits gewählt' : 'Diese Insel wählen',
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0,
@@ -303,7 +307,7 @@ class _LocalWorldQuickActions extends StatelessWidget {
         _WorldOverlayAction(
           key: const Key('local-world-my-plot-action'),
           icon: Icons.my_location_rounded,
-          label: 'Mein Plot',
+          label: 'Meine Insel',
           onTap: onMyPlotTap,
         ),
         const SizedBox(width: 12),
@@ -382,17 +386,24 @@ class _WorldOverlayAction extends StatelessWidget {
 }
 
 class _LocalWorldHeader extends StatelessWidget {
-  const _LocalWorldHeader({required this.compact});
+  const _LocalWorldHeader({
+    required this.compact,
+    required this.selectedIslandName,
+  });
 
   final bool compact;
+  final String? selectedIslandName;
 
   @override
   Widget build(BuildContext context) {
+    final subtitle = selectedIslandName == null
+        ? 'Wähle deine erste Insel'
+        : 'Deine Insel: $selectedIslandName';
     final titleBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Talvori Ursprungshain',
+          'Talvori Welt',
           key: const Key('local-world-region-title'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: Colors.white,
@@ -402,7 +413,8 @@ class _LocalWorldHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Dein erster lokaler Welt-Slice',
+          subtitle,
+          key: const Key('local-world-region-subtitle'),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: LocalWorldScreen._cyan,
             fontWeight: FontWeight.w800,

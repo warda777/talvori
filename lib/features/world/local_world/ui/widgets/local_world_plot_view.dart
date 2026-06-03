@@ -372,7 +372,7 @@ class _StarterIslandLabel extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            selected ? '$name · Mein Plot' : '$name · frei',
+            selected ? '$name · Meine Insel' : '$name · frei',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 11,

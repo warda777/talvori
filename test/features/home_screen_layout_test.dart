@@ -1292,7 +1292,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
 
     expect(find.byType(LocalWorldScreen), findsOneWidget);
-    expect(find.text('Talvori Ursprungshain'), findsOneWidget);
+    expect(find.text('Talvori Welt'), findsWidgets);
+    expect(find.text('Wähle deine erste Insel'), findsOneWidget);
     expect(
       find.byKey(const Key('local-world-space-background')),
       findsOneWidget,
@@ -1357,6 +1358,15 @@ void main() {
       findsOneWidget,
     );
 
+    await tester.tap(find.byKey(const Key('local-world-resource-coins')));
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('local-world-resource-inline-hint')),
+      findsOneWidget,
+    );
+    expect(find.text('Münzen'), findsOneWidget);
+
     await tester.drag(
       find.byKey(const Key('local-world-interactive-viewer')),
       const Offset(460, 460),
@@ -1378,7 +1388,7 @@ void main() {
       find.byKey(const Key('local-world-starter-island-title')),
       findsOneWidget,
     );
-    expect(find.text('Diese Insel waehlen'), findsOneWidget);
+    expect(find.text('Diese Insel wählen'), findsOneWidget);
 
     await tester.tap(
       find.byKey(const Key('local-world-select-starter-island')),
@@ -1394,7 +1404,8 @@ void main() {
       find.byKey(const Key('local-world-selected-island-badge')),
       findsOneWidget,
     );
-    expect(find.text('Waldlichtung · Mein Plot'), findsOneWidget);
+    expect(find.text('Waldlichtung · Meine Insel'), findsOneWidget);
+    expect(find.text('Deine Insel: Waldlichtung'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('local-world-my-plot-action')));
     await tester.pump();
