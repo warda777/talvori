@@ -2,6 +2,20 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+const _worldLayoutCenter = Offset(0.5, 0.5);
+const _worldHorizontalCompression = 0.78;
+const _worldVerticalCompression = 0.74;
+
+double _compactWorldX(double x) {
+  return _worldLayoutCenter.dx +
+      (x - _worldLayoutCenter.dx) * _worldHorizontalCompression;
+}
+
+double _compactWorldY(double y) {
+  return _worldLayoutCenter.dy +
+      (y - _worldLayoutCenter.dy) * _worldVerticalCompression;
+}
+
 class LocalWorldPlotView extends StatelessWidget {
   const LocalWorldPlotView({
     super.key,
@@ -29,9 +43,9 @@ class LocalWorldPlotView extends StatelessWidget {
           return InteractiveViewer(
             key: const Key('local-world-interactive-viewer'),
             transformationController: controller,
-            boundaryMargin: const EdgeInsets.all(5200),
+            boundaryMargin: const EdgeInsets.all(12000),
             constrained: false,
-            minScale: 0.16,
+            minScale: 0.055,
             maxScale: 2.8,
             panEnabled: true,
             scaleEnabled: true,
@@ -524,12 +538,15 @@ class _AssetWorldCanvas extends StatelessWidget {
     );
     final metrics = LocalWorldCanvasMetrics(
       size: Size(worldWidth, worldHeight),
-      showcaseCenter: Offset(worldWidth * 0.43, worldHeight * 0.51),
+      showcaseCenter: Offset(
+        worldWidth * _compactWorldX(0.43),
+        worldHeight * _compactWorldY(0.51),
+      ),
       starterCenters: {
         for (final island in _starterIslands)
           island.id: Offset(
-            worldWidth * island.centerX,
-            worldHeight * island.centerY,
+            worldWidth * _compactWorldX(island.centerX),
+            worldHeight * _compactWorldY(island.centerY),
           ),
       },
     );
@@ -634,8 +651,8 @@ class _WorldMapObjectView extends StatelessWidget {
     final width = worldSize.width * object.widthFactor;
     final height = width * 0.78;
     final center = Offset(
-      worldSize.width * object.centerX,
-      worldSize.height * object.centerY,
+      worldSize.width * _compactWorldX(object.centerX),
+      worldSize.height * _compactWorldY(object.centerY),
     );
     final labelBottom = object.type == LocalWorldObjectType.community
         ? 2.0
@@ -657,15 +674,6 @@ class _WorldMapObjectView extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              if (selected)
-                Positioned(
-                  top: height * 0.12,
-                  width: width * 0.72,
-                  height: height * 0.62,
-                  child: IgnorePointer(
-                    child: _SelectedIslandRing(accent: object.accent),
-                  ),
-                ),
               Positioned(
                 top: 0,
                 width: width,
@@ -692,22 +700,6 @@ class _WorldMapObjectView extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SelectedIslandRing extends StatelessWidget {
-  const _SelectedIslandRing({required this.accent});
-
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: accent.withValues(alpha: 0.7), width: 1.5),
       ),
     );
   }
