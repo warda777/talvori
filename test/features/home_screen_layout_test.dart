@@ -1444,6 +1444,18 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.text('Tippe auf die Lichtung, um dein Fundament zu beginnen.'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-guidance-pulse')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-area-hint')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(
         const Key('local-world-buildable-forest-clearing-foundation-started'),
       ),
@@ -1460,6 +1472,10 @@ void main() {
     expect(
       find.byKey(const Key('local-world-forest-clearing-build-sheet')),
       findsOneWidget,
+    );
+    expect(
+      find.text('Tippe auf die Lichtung, um dein Fundament zu beginnen.'),
+      findsNothing,
     );
     expect(find.text('Fundament beginnen'), findsWidgets);
     expect(
@@ -1489,6 +1505,18 @@ void main() {
     );
     expect(find.text('Fundament begonnen'), findsOneWidget);
     expect(find.text('Das Fundament hat begonnen.'), findsOneWidget);
+    expect(
+      find.text('Tippe auf die Lichtung, um dein Fundament zu beginnen.'),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-guidance-pulse')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-area-hint')),
+      findsNothing,
+    );
 
     await tester.tap(
       find.byKey(const Key('local-world-my-plot-action')),

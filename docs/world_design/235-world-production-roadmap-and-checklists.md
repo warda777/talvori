@@ -120,16 +120,18 @@ Freigabe bedeutet:
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
-| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `umgesetzt / lokal mock` | Lokale Anzeige von `base.png` + optionalem `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started` sind umgesetzt. Vor Commit muss der minimale Feedback-Scope aus 2E-A6 beachtet werden. Keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems oder Interiors. |
+| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `umgesetzt / lokal mock` | Lokale Anzeige von `base.png` + optionalem `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started` sind umgesetzt. Vor Commit muss der minimale Feedback-Scope aus 2E-A6 beachtet werden, inklusive einfacher Nutzerfuehrung fuer die erste Bauaktion: kurzer Hinweistext plus kontrastreicher visueller Fokus auf der `main_build_area`. Gruen/Mint auf gruen-gelber Inseloberflaeche ist nicht ausreichend; violett/magenta/cyan-basierter Fokus oder Glow ist zu bevorzugen. Keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors oder Audio-Implementierung. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
 
-Visuelle Pruefung des umgesetzten lokalen Phase-2E-E-Mock-Slices auf Geraet
-oder realistischem Preview-Setup. Danach wird entschieden, ob der Slice
-nachgebessert wird oder Phase 2F geplant werden darf.
+Vor Commit des umgesetzten lokalen Phase-2E-E-Mock-Slices muss der Kontrast der
+Nutzerfuehrung geprueft und bei Bedarf angepasst werden. Danach folgt erneut
+eine visuelle Pruefung auf Geraet oder realistischem Preview-Setup. Erst danach
+wird entschieden, ob der Slice nachgebessert wird oder Phase 2F geplant werden
+darf.
 
 Grund:
 
@@ -148,6 +150,26 @@ erlaubt: Fade-/Scale-Einblendung des Overlays, kurze dezente Hervorhebung der
 `build.foundation.started`. Sound/Effekte bleiben vorbereitet/minimal und sind
 nicht produktiv; es werden keine Sounddateien, keine Audio-Packages und keine
 Reward-/Ressourcenanimationen eingebaut.
+
+Ergaenzung Nutzerfuehrung:
+
+Der lokale Mock-Slice muss neben Build-State und Feedback auch eine einfache
+Nutzerfuehrung fuer die erste Bauaktion enthalten. Wenn die Waldlichtung
+ausgewaehlt ist und der BuildState `empty` ist, muss ein kurzer Hinweistext
+zeigen, warum die `main_build_area` relevant ist, und ein dezenter visueller
+Fokus muss die antippbare Flaeche erkennbar machen. Diese Fuehrung bleibt lokal
+und verschwindet, sobald die Bauflaeche angetippt oder `foundation_started`
+erreicht wurde.
+
+Ergaenzung Kontrast/Build-Impact:
+
+Der aktuelle visuelle Fokus muss vor Commit kontrastreicher umgesetzt werden.
+Gruen/Mint auf gruen-gelber Inseloberflaeche ist nicht ausreichend. Fuer den
+2E-E-Slice ist ein violett/magenta/cyan-basierter Fokus oder Glow zu
+bevorzugen. Der Wechsel `empty -> foundation_started` bleibt lokal/mock, soll
+aber als kleiner Build-Impact-Moment wirken. Sound/FX werden nur als ID
+vorbereitet, aktuell `build.foundation.started`; es gibt keine
+Audio-Implementierung, keine Sounddateien und keine neuen Packages.
 
 Aktuell nicht erlaubt:
 
@@ -260,6 +282,8 @@ Ein Schritt wird gestoppt, wenn:
 - Status nicht `freigegeben` ist,
 - Code versucht, fehlende Assets zu kaschieren,
 - Scope groesser wird als geplant,
+- neue Nutzerfuehrung nicht ausreichend kontrastreich ist,
+- Baufeedback nur als harter Bildwechsel ohne klaren Moment wirkt,
 - Supabase beruehrt wird,
 - SRS oder `word_progress` beruehrt werden,
 - Reward Bridge beruehrt wird,

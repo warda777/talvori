@@ -18,7 +18,6 @@ class LocalWorldScreen extends StatefulWidget {
   const LocalWorldScreen({super.key});
 
   static const _cyan = Color(0xFF5DDCFF);
-  static const _violet = Color(0xFFB36BFF);
   static const _mint = Color(0xFF9FF7D5);
 
   @override
@@ -33,6 +32,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
       LocalWorldForestClearingBuildState.empty;
   String? _activeBuildFeedbackId;
   Timer? _buildFeedbackTimer;
+  bool _forestClearingBuildHintDismissed = false;
   bool _worldCameraInitialized = false;
 
   @override
@@ -135,6 +135,12 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
       return;
     }
 
+    if (!_forestClearingBuildHintDismissed) {
+      setState(() {
+        _forestClearingBuildHintDismissed = true;
+      });
+    }
+
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -145,6 +151,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
             setState(() {
               _forestClearingBuildState =
                   LocalWorldForestClearingBuildState.foundationStarted;
+              _forestClearingBuildHintDismissed = true;
               _triggerForestClearingBuildFeedback();
             });
             _showWorldHint('Das Fundament hat begonnen.');
@@ -180,6 +187,11 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
               selectedStarterIslandId: _selectedStarterIsland?.id,
               forestClearingBuildState: _forestClearingBuildState,
               activeBuildFeedbackId: _activeBuildFeedbackId,
+              showForestClearingBuildGuidance:
+                  _selectedStarterIsland?.id == 'forest-clearing' &&
+                  _forestClearingBuildState ==
+                      LocalWorldForestClearingBuildState.empty &&
+                  !_forestClearingBuildHintDismissed,
               onStarterIslandTap: _showStarterIslandSheet,
               onForestClearingBuildAreaTap: _handleForestClearingBuildAreaTap,
               onCommunityRegionTap: _showCommunityRegionSheet,
@@ -212,12 +224,8 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
                         left: 14,
                         right: 14,
                         bottom: 14,
-                        child: Column(
-                          children: [
-                            const _LocalWorldFooterHint(),
-                            const SizedBox(height: 10),
-                            _LocalWorldQuickActions(onMyPlotTap: _focusMyPlot),
-                          ],
+                        child: _LocalWorldQuickActions(
+                          onMyPlotTap: _focusMyPlot,
                         ),
                       ),
                     ],
@@ -758,46 +766,6 @@ class _LocalWorldHeader extends StatelessWidget {
         const SizedBox(width: 16),
         const LocalWorldResourceBar(),
       ],
-    );
-  }
-}
-
-class _LocalWorldFooterHint extends StatelessWidget {
-  const _LocalWorldFooterHint();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF07101A).withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: LocalWorldScreen._violet.withValues(alpha: 0.24),
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: LocalWorldScreen._mint,
-            size: 18,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Mock-Ressourcen und Gebaeude sind nur ein lokaler UI-Zustand.',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.68),
-                fontSize: 12,
-                height: 1.3,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

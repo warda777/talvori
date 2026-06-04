@@ -64,6 +64,15 @@ Talvori nutzt bei Bauaktionen einen ruhigen Build-Feedback-Moment. Der erste
 Slice bleibt minimal: Fade/Scale des Overlays, dezente Hervorhebung,
 Hinweistext und vorbereitete Effekt-ID ohne Sounddatei.
 
+Ergaenzende Orientierung fuer Nutzerfuehrung:
+
+| Quelle / Orientierung | Ableitung fuer Talvori | Konkrete Entscheidung |
+| --- | --- | --- |
+| Apple Developer: Onboarding for Games, `https://developer.apple.com/app-store/onboarding-for-games/` | Neue Mechaniken sollen frueh, kontextuell und auf die naechsten Ziele bezogen eingefuehrt werden. | Die erste Bauaktion bekommt einen kurzen Welt-Hinweis statt eines separaten Tutorial-Systems. |
+| Roblox Creator Hub: Onboarding Techniques, `https://create.roblox.com/docs/production/game-design/onboarding-techniques` | Visuelle Elemente und Hinweise helfen Spielern, wichtige Schritte trotz Umgebung und UI wiederzufinden. | Die `main_build_area` bekommt in Phase 2E-E einen dezenten Fokus/Puls und kurzen Text. |
+| Don Norman: Signifiers, Not Affordances, `https://jnd.org/signifiers-not-affordances/` | Nutzer brauchen wahrnehmbare Signale, wo eine Handlung moeglich ist. Versteckte Hotspots sind riskant. | Bau-Hotspots duerfen nicht nur unsichtbar klickbar sein; sie brauchen bei neuen Mechaniken sichtbare Signifier. |
+| W3C WCAG 2.2 Contrast Minimum, `https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html` | Lesbarkeit und Erkennbarkeit brauchen ausreichenden Kontrast; gleicher Farbraum macht Hinweise schwer wahrnehmbar. | Bau-Hinweise duerfen nicht gruen/mint auf gruen-gelber Inseloberflaeche bleiben. |
+
 ## 3. Grundentscheidung
 
 Talvori nutzt bei Bauaktionen einen kurzen Build-Feedback-Moment:
@@ -82,6 +91,78 @@ Der Moment soll sagen:
 Er soll nicht sagen:
 
 > Hier wurde nur ein Bild ausgetauscht.
+
+## Nutzerfuehrung Bei Neuen Bauaufgaben
+
+Neue Bauaufgaben brauchen immer sichtbare Anleitung.
+
+Der Nutzer darf nicht raten muessen, welcher Kreis oder welche Flaeche
+antippbar ist. Fuehrung entsteht durch eine Kombination aus:
+
+- kurzem Text,
+- visuellem Fokus,
+- optionalem Puls oder Glow,
+- spaeter optionalem Pfeil oder Companion-Hinweis.
+
+Neue Aufgaben brauchen immer:
+
+- kurzen Hinweistext,
+- sichtbaren Fokus auf die relevante Flaeche,
+- klares Ergebnisfeedback nach der Aktion.
+
+Der Nutzer darf nie raten muessen, was als naechstes zu tun ist.
+
+Beispiel Phase 2E-E:
+
+- Text: `Tippe auf die Lichtung, um dein Fundament zu beginnen.`
+- Bauflaeche: dezenter Puls/Glow.
+- Danach Kontextkarte: `Fundament beginnen`.
+
+Diese Regel gilt kuenftig fuer:
+
+- neue Bauflaechen,
+- neue Aufgaben,
+- neue Gebaeude,
+- neue Weltinteraktionen.
+
+Hinweise muessen kurz sein. Sie duerfen nicht wie lange Tutorial-Texte wirken.
+Sie verschwinden oder werden reduziert, sobald der Nutzer die Aktion verstanden
+oder ausgefuehrt hat.
+
+Nicht erlaubt:
+
+- aggressive Pfeil-/Blink-Ueberladung,
+- dauerhaft blockierende Tutorial-Overlays,
+- technische Begriffe,
+- dauerhaftes Blinken,
+- Hinweise, die die Welt verdecken.
+
+## Kontrastregeln Fuer Interaktive Hinweise
+
+Interaktive Bauflaechen duerfen nicht nur mit einer Farbe hervorgehoben werden,
+die im gleichen Farbraum wie der Untergrund liegt.
+
+Gruen/Mint auf gruener oder gelber Wiesenflaeche ist zu schwach.
+
+Talvori-Standard fuer Bau-Hinweise:
+
+- Violett, Magenta oder Cyan als Kontrastfarbe,
+- bevorzugt mit weichem Glow oder Puls,
+- nicht aggressiv,
+- nicht neon-ueberladen.
+
+Das Highlight muss in World View und Island View auch auf detailreichen Assets
+lesbar bleiben. Textcue und visuelle Markierung muessen zusammenarbeiten.
+
+Wenn der Untergrund hell oder gruen ist, muss die Hervorhebung deutlich
+kaelter, dunkler oder staerker gesaettigt sein.
+
+Diese Regel gilt kuenftig fuer:
+
+- neue Bauflaechen,
+- neue Aufgaben,
+- neue Gebaeude-Interaktionen,
+- Objekt-Hotspots.
 
 ## 4. Phase-2E-E Erlaubter Feedback-Scope
 
@@ -105,6 +186,38 @@ Nicht erlaubt:
 - keine Reward Bridge,
 - keine Ressourcenanimation,
 - keine Persistenz.
+
+## Build-Impact-Sequenz Fuer Foundation Started
+
+Langfristiges Zielbild fuer `foundation_started`:
+
+1. Build Area fokussiert kurz.
+2. Fundament-/Steinmasse kommt von oben oder faellt leicht in die Szene.
+3. Kurzer Impact-Moment.
+4. Staubwolke wird aufgewirbelt.
+5. Kleine Steinsplitter/Debris bewegen sich kurz nach aussen.
+6. Fundament setzt sich.
+7. Kurzer Success-Glow.
+8. Hinweistext erscheint: `Das Fundament hat begonnen.`
+9. Optional spaeter Sound/Haptik.
+
+Diese Sequenz ist ein Zielbild fuer spaetere Ausbaustufen. Sie soll den Moment
+wertiger machen, ohne Talvori hektisch oder laut wirken zu lassen.
+
+Phase 2E-E darf nur eine sehr reduzierte Variante umsetzen:
+
+- Fade/Scale,
+- kontrastreicher Puls/Glow,
+- Hinweistext,
+- vorbereitete Effekt-ID.
+
+Nicht in Phase 2E-E:
+
+- kein Partikelsystem,
+- keine neuen Assets,
+- keine Sounddateien,
+- keine Haptik,
+- keine produktive FX-Schicht.
 
 ## 5. Ablauf Fuer `empty -> foundation_started`
 
@@ -178,6 +291,43 @@ Phase 2E-E bereitet nur die ID vor:
 Keine harte Sounddatei, kein produktiver Audio-Service und keine zentrale
 Feedback-Schicht in diesem Slice.
 
+## Modulares Sound- Und FX-ID-System
+
+Sound und Effekte duerfen nicht hart im Widget verdrahtet werden.
+
+Jede Bauaktion bekommt spaeter ein Event mit IDs. Diese IDs koennen spaeter
+zentral auf visuelle Effekte, Sound, Haptik oder reduzierte-Animation-Varianten
+abgebildet werden.
+
+Beispiel-IDs:
+
+- `build.foundation.focus`
+- `build.foundation.drop`
+- `build.foundation.impact`
+- `build.foundation.dust`
+- `build.foundation.complete`
+- `build.foundation.started`
+- `ui.task.focus`
+
+Moegliche Zuordnung spaeter:
+
+- `visualEffectId`,
+- `soundEffectId`,
+- `hapticEffectId`,
+- `reducedMotionVariantId`,
+- `durationMs`,
+- `canBeMuted`.
+
+In Phase 2E-E wird weiterhin nur `build.foundation.started` vorbereitet.
+
+Nicht in Phase 2E-E:
+
+- keine echten Sounddateien,
+- keine Audio-Packages,
+- kein produktiver Audio-Service.
+
+Spaeter muss Sound mutebar, ersetzbar und konfigurierbar sein.
+
 ## 9. Accessibility / Settings
 
 Regeln:
@@ -228,9 +378,14 @@ Status nach Erstellung dieses Dokuments:
 
 Stoppen, wenn:
 
+- interaktiver Hinweis nicht genug Kontrast hat,
+- Gruen/Mint auf gruenem Untergrund als primaerer Bauhinweis verwendet wird,
+- Nutzerfuehrung nur aus verstecktem Hotspot besteht,
 - Baufortschritt nur harter Bildwechsel bleibt,
 - Effekt zu uebertrieben wirkt,
+- Effekt unruhig oder hektisch wirkt,
 - Sound/Animation fest verdrahtet wird,
+- Sound hart an Datei oder Widget gekoppelt wird,
 - neue Packages eingebaut werden,
 - echte Audio-Dateien erzeugt werden,
 - Reward-/Ressourcenanimation gebaut wird,
@@ -240,6 +395,12 @@ Stoppen, wenn:
 
 Das Dokument ist gut, wenn:
 
+- Kontrastregel klar ist,
+- Violett, Magenta und Cyan als Talvori-Baukontrast definiert sind,
+- Build-Impact-Zielsequenz beschrieben ist,
+- Phase-2E-E-Minimalumfang klar abgegrenzt ist,
+- Sound-/FX-ID-System erweiterbar geplant ist,
+- Nutzerfuehrung kuenftig fuer alle neuen Interaktionen Pflicht ist,
 - klar ist, wie `empty -> foundation_started` visuell wirken soll,
 - Animation/Sound als erweiterbares System gedacht sind,
 - keine Sounddateien oder neuen Packages noetig sind,
