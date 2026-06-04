@@ -96,13 +96,13 @@ Reward- oder Persistenzarchitektur ableiten.
 
 Hauptblocker:
 
-Phase 2F darf noch nicht direkt gebaut werden. Der Planungsblock fuer
-`foundation_complete` wurde mit
-`docs/world_design/242-foundation-complete-plan.md` gestartet. Der naechste
-erlaubte Schritt ist ein Asset-Prompt fuer `foundation_complete`.
+Phase 2F darf noch nicht direkt gebaut werden. `foundation_complete.png`
+existiert und wurde lokal mit Base-/Started-/Complete-Vergleich vorgeprueft.
+Der naechste erlaubte Schritt ist nur der naechste Pruef-/Freigabeschritt fuer
+Phase 2F.
 
-Vor dem `foundation_complete`-Asset und vor jedem Phase-2F-Code muss erneut
-geprueft werden:
+Vor jeder Phase-2F-Freigabe und vor jedem Phase-2F-Code muss erneut geprueft
+werden:
 
 - Professional Game Development Research Gate,
 - Build-Feedback-Konzept,
@@ -129,7 +129,7 @@ und lokale Anzeige von `base.png` + `foundation_started.png`.
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
-| Phase 2F | `foundation_complete` | `Planung gestartet` | Plan in `docs/world_design/242-foundation-complete-plan.md` dokumentiert. Naechster erlaubter Schritt ist ein Asset-Prompt fuer `foundation_complete`; Phase-2F-Code bleibt blockiert, bis Asset, Preview, Template-Update und Freigabe erfolgt sind. |
+| Phase 2F | `foundation_complete` | `Asset generiert / lokal vorgeprueft` | `foundation_complete.png` existiert. Lokaler Preview-Check mit Base allein, Base + `foundation_started` und Base + `foundation_complete` wurde bestanden: sitzt plausibel auf `main_build_area`, klar weiter als `foundation_started`, bleibt nur Fundament, kein Haus, keine Waende, kein Dach, keine UI-/Marker-Optik, transparente Ecken und keine Chroma-Key-Reste. Template-Metadaten sind aktualisiert. Phase-2F-Code bleibt blockiert bis zur ausdruecklichen Freigabe. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
@@ -138,10 +138,9 @@ Aktuell erlaubter naechster Schritt:
 Phase 2E-E ist abgeschlossen und committed:
 `c82880e4 feat: polish forest clearing foundation guidance`.
 
-Der naechste sinnvolle Schritt ist ein Asset-Prompt fuer
+Der naechste sinnvolle Schritt ist ein Pruef-/Freigabeschritt fuer
 `foundation_complete`. Phase 2F darf noch nicht direkt gebaut werden; Code
-bleibt blockiert, bis `foundation_complete` als Asset erzeugt, geprueft, in
-`template.md` dokumentiert und ausdruecklich freigegeben wurde.
+bleibt blockiert, bis `foundation_complete` ausdruecklich freigegeben wurde.
 
 Vor Phase 2F muss erneut geprueft werden:
 
@@ -175,9 +174,10 @@ Der Slice beweist noch nicht:
 - Sound-/FX-System,
 - Expansion oder PlacedItems.
 
-Offene Punkte nach Phase 2E-E:
+Offene Punkte nach Phase 2E-E / aktueller 2F-Vorpruefung:
 
-- `foundation_complete` ist noch nicht geplant.
+- `foundation_complete` ist vorhanden und lokal vorgeprueft, aber noch nicht
+  final freigegeben.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -197,7 +197,7 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Interiors/ObjectDetail,
 - keine produktive Bau-/Lernlogik,
 - keine Sounddateien oder Audio-Implementierung,
-- kein Phase-2F-Code ohne vorherige Phase-2F-Planung.
+- kein Phase-2F-Code ohne ausdrueckliche Phase-2F-Freigabe.
 
 ## 6. Dokument-Abhaengigkeiten
 
@@ -286,8 +286,10 @@ umgesetzt, visuell geprueft, bestanden und mit Commit
 Der naechste offene Punkt ist die Planung von Phase 2F
 (`foundation_complete` Konzept, Asset, Scope, Feedback und Tests). Diese
 Planung ist mit `docs/world_design/242-foundation-complete-plan.md` gestartet.
-Der naechste offene Schritt ist der Asset-Prompt fuer `foundation_complete`;
-Phase 2F-Code darf noch nicht direkt gebaut werden.
+`foundation_complete.png` wurde erzeugt, lokal vorgeprueft und in
+`template.md` dokumentiert. Der naechste offene Schritt ist die explizite
+Phase-2F-Pruefung/Freigabeentscheidung; Phase 2F-Code darf noch nicht direkt
+gebaut werden.
 
 ## 10. Stop-Regeln
 
