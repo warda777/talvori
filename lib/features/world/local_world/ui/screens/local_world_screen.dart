@@ -77,7 +77,8 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
   }
 
   void _showWorldHint(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
@@ -86,13 +87,11 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
     );
   }
 
-  void _triggerForestClearingBuildFeedback() {
+  void _triggerForestClearingBuildFeedback(String feedbackId) {
     _buildFeedbackTimer?.cancel();
-    _activeBuildFeedbackId = LocalWorldBuildFeedbackIds.foundationStarted;
+    _activeBuildFeedbackId = feedbackId;
     _buildFeedbackTimer = Timer(const Duration(milliseconds: 900), () {
-      if (!mounted ||
-          _activeBuildFeedbackId !=
-              LocalWorldBuildFeedbackIds.foundationStarted) {
+      if (!mounted || _activeBuildFeedbackId != feedbackId) {
         return;
       }
       setState(() {
@@ -130,8 +129,8 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
     if (_selectedStarterIsland?.id != 'forest-clearing') return;
 
     if (_forestClearingBuildState ==
-        LocalWorldForestClearingBuildState.foundationStarted) {
-      _showWorldHint('Fundament begonnen');
+        LocalWorldForestClearingBuildState.foundationComplete) {
+      _showWorldHint('Das Fundament ist fertig.');
       return;
     }
 
@@ -146,15 +145,30 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return _ForestClearingBuildBottomSheet(
+          buildState: _forestClearingBuildState,
           onBeginFoundation: () {
             Navigator.of(context).pop();
             setState(() {
               _forestClearingBuildState =
                   LocalWorldForestClearingBuildState.foundationStarted;
               _forestClearingBuildHintDismissed = true;
-              _triggerForestClearingBuildFeedback();
+              _triggerForestClearingBuildFeedback(
+                LocalWorldBuildFeedbackIds.foundationStarted,
+              );
             });
             _showWorldHint('Das Fundament hat begonnen.');
+          },
+          onCompleteFoundation: () {
+            Navigator.of(context).pop();
+            setState(() {
+              _forestClearingBuildState =
+                  LocalWorldForestClearingBuildState.foundationComplete;
+              _forestClearingBuildHintDismissed = true;
+              _triggerForestClearingBuildFeedback(
+                LocalWorldBuildFeedbackIds.foundationComplete,
+              );
+            });
+            _showWorldHint('Das Fundament ist fertig.');
           },
         );
       },
@@ -472,12 +486,33 @@ class _CommunityRegionBottomSheet extends StatelessWidget {
 }
 
 class _ForestClearingBuildBottomSheet extends StatelessWidget {
-  const _ForestClearingBuildBottomSheet({required this.onBeginFoundation});
+  const _ForestClearingBuildBottomSheet({
+    required this.buildState,
+    required this.onBeginFoundation,
+    required this.onCompleteFoundation,
+  });
 
+  final LocalWorldForestClearingBuildState buildState;
   final VoidCallback onBeginFoundation;
+  final VoidCallback onCompleteFoundation;
 
   @override
   Widget build(BuildContext context) {
+    final completingFoundation =
+        buildState == LocalWorldForestClearingBuildState.foundationStarted;
+    final title = completingFoundation
+        ? 'Fundament fertigstellen'
+        : 'Fundament beginnen';
+    final body = completingFoundation
+        ? 'Der Sockel wird vollständig vorbereitet.'
+        : 'Die erste Grundlage deiner Insel entsteht.';
+    final actionKey = completingFoundation
+        ? const Key('local-world-forest-clearing-complete-foundation')
+        : const Key('local-world-forest-clearing-begin-foundation');
+    final onPressed = completingFoundation
+        ? onCompleteFoundation
+        : onBeginFoundation;
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -526,8 +561,8 @@ class _ForestClearingBuildBottomSheet extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Fundament beginnen',
+                        Text(
+                          title,
                           key: Key(
                             'local-world-forest-clearing-build-sheet-title',
                           ),
@@ -555,7 +590,7 @@ class _ForestClearingBuildBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                'Die erste Grundlage deiner Insel entsteht.',
+                body,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.74),
                   fontSize: 14,
@@ -568,18 +603,16 @@ class _ForestClearingBuildBottomSheet extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  key: const Key(
-                    'local-world-forest-clearing-begin-foundation',
-                  ),
+                  key: actionKey,
                   style: FilledButton.styleFrom(
                     backgroundColor: LocalWorldScreen._mint,
                     foregroundColor: const Color(0xFF02050A),
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
-                  onPressed: onBeginFoundation,
+                  onPressed: onPressed,
                   icon: const Icon(Icons.foundation_rounded),
-                  label: const Text(
-                    'Fundament beginnen',
+                  label: Text(
+                    title,
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0,

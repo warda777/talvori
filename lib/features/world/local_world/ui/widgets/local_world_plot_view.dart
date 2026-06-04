@@ -1034,6 +1034,8 @@ class _BuildableForestClearingIsland extends StatelessWidget {
       'assets/images/world/buildable_islands/forest_clearing/base.png';
   static const foundationStartedAssetPath =
       'assets/images/world/buildable_islands/forest_clearing/foundation_started.png';
+  static const foundationCompleteAssetPath =
+      'assets/images/world/buildable_islands/forest_clearing/foundation_complete.png';
   static const _assetAspectRatio = 1536 / 1024;
   static const _buildAreaAnchor = Offset(0.511, 0.508);
   static const _hitTestRadius = Size(0.18, 0.12);
@@ -1048,11 +1050,15 @@ class _BuildableForestClearingIsland extends StatelessWidget {
   Widget build(BuildContext context) {
     final foundationStarted =
         buildState == LocalWorldForestClearingBuildState.foundationStarted;
+    final foundationComplete =
+        buildState == LocalWorldForestClearingBuildState.foundationComplete;
+    final foundationVisible = foundationStarted || foundationComplete;
     final feedbackActive =
-        activeBuildFeedbackId == LocalWorldBuildFeedbackIds.foundationStarted;
+        activeBuildFeedbackId == LocalWorldBuildFeedbackIds.foundationStarted ||
+        activeBuildFeedbackId == LocalWorldBuildFeedbackIds.foundationComplete;
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final guidanceActive = showBuildGuidance && !foundationStarted;
+    final guidanceActive = showBuildGuidance && !foundationVisible;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1092,13 +1098,14 @@ class _BuildableForestClearingIsland extends StatelessWidget {
                 ),
               ),
             ),
-            if (foundationStarted)
+            if (foundationVisible)
               Positioned(
                 left: imageLeft,
                 top: imageTop,
                 width: imageWidth,
                 height: imageHeight,
                 child: _ForestClearingFoundationOverlay(
+                  buildState: buildState,
                   reducedMotion: reducedMotion,
                 ),
               ),
@@ -1132,25 +1139,27 @@ class _BuildableForestClearingIsland extends StatelessWidget {
               width: radius.width * 2,
               height: radius.height * 2,
               child: Semantics(
-                label: foundationStarted
-                    ? 'Fundament begonnen'
+                label: foundationComplete
+                    ? 'Fundament fertig'
+                    : foundationStarted
+                    ? 'Fundament fertigstellen'
                     : 'Fundament beginnen',
                 button: true,
                 child: GestureDetector(
                   key: const Key('local-world-forest-clearing-main-build-area'),
                   behavior: HitTestBehavior.opaque,
                   onTap: onBuildAreaTap,
-                  child: foundationStarted
+                  child: foundationVisible
                       ? const SizedBox.expand()
                       : const Center(child: _ForestClearingBuildAreaHint()),
                 ),
               ),
             ),
-            if (foundationStarted)
+            if (foundationVisible)
               Positioned(
                 left: anchor.dx - imageWidth * 0.12,
                 top: anchor.dy + radius.height * 0.72,
-                child: const _ForestClearingBuildStatusPill(),
+                child: _ForestClearingBuildStatusPill(buildState: buildState),
               ),
             if (guidanceActive)
               Positioned(
@@ -1255,15 +1264,23 @@ class _ForestClearingBuildGuidanceLabel extends StatelessWidget {
 }
 
 class _ForestClearingFoundationOverlay extends StatelessWidget {
-  const _ForestClearingFoundationOverlay({required this.reducedMotion});
+  const _ForestClearingFoundationOverlay({
+    required this.buildState,
+    required this.reducedMotion,
+  });
 
+  final LocalWorldForestClearingBuildState buildState;
   final bool reducedMotion;
 
   @override
   Widget build(BuildContext context) {
+    final foundationComplete =
+        buildState == LocalWorldForestClearingBuildState.foundationComplete;
     return TweenAnimationBuilder<double>(
-      key: const Key(
-        'local-world-buildable-forest-clearing-foundation-started-animation',
+      key: Key(
+        foundationComplete
+            ? 'local-world-buildable-forest-clearing-foundation-complete-animation'
+            : 'local-world-buildable-forest-clearing-foundation-started-animation',
       ),
       tween: Tween<double>(begin: 0, end: 1),
       duration: reducedMotion
@@ -1281,9 +1298,13 @@ class _ForestClearingFoundationOverlay extends StatelessWidget {
         );
       },
       child: Image.asset(
-        _BuildableForestClearingIsland.foundationStartedAssetPath,
-        key: const Key(
-          'local-world-buildable-forest-clearing-foundation-started',
+        foundationComplete
+            ? _BuildableForestClearingIsland.foundationCompleteAssetPath
+            : _BuildableForestClearingIsland.foundationStartedAssetPath,
+        key: Key(
+          foundationComplete
+              ? 'local-world-buildable-forest-clearing-foundation-complete'
+              : 'local-world-buildable-forest-clearing-foundation-started',
         ),
         fit: BoxFit.contain,
         alignment: Alignment.center,
@@ -1367,12 +1388,20 @@ class _ForestClearingBuildAreaHint extends StatelessWidget {
 }
 
 class _ForestClearingBuildStatusPill extends StatelessWidget {
-  const _ForestClearingBuildStatusPill();
+  const _ForestClearingBuildStatusPill({required this.buildState});
+
+  final LocalWorldForestClearingBuildState buildState;
 
   @override
   Widget build(BuildContext context) {
+    final foundationComplete =
+        buildState == LocalWorldForestClearingBuildState.foundationComplete;
     return Container(
-      key: const Key('local-world-forest-clearing-foundation-started-label'),
+      key: Key(
+        foundationComplete
+            ? 'local-world-forest-clearing-foundation-complete-label'
+            : 'local-world-forest-clearing-foundation-started-label',
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFF07101A).withValues(alpha: 0.72),
@@ -1381,8 +1410,8 @@ class _ForestClearingBuildStatusPill extends StatelessWidget {
           color: const Color(0xFFFFD980).withValues(alpha: 0.36),
         ),
       ),
-      child: const Text(
-        'Fundament begonnen',
+      child: Text(
+        foundationComplete ? 'Fundament fertig' : 'Fundament begonnen',
         style: TextStyle(
           color: Colors.white,
           fontSize: 9,
@@ -1671,9 +1700,14 @@ class LocalWorldBuildFeedbackIds {
   const LocalWorldBuildFeedbackIds._();
 
   static const foundationStarted = 'build.foundation.started';
+  static const foundationComplete = 'build.foundation.complete';
 }
 
-enum LocalWorldForestClearingBuildState { empty, foundationStarted }
+enum LocalWorldForestClearingBuildState {
+  empty,
+  foundationStarted,
+  foundationComplete,
+}
 
 class LocalWorldMapObject {
   const LocalWorldMapObject({

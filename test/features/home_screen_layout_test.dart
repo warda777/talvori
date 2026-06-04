@@ -1500,6 +1500,12 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(
+        const Key('local-world-buildable-forest-clearing-foundation-complete'),
+      ),
+      findsNothing,
+    );
+    expect(
       find.byKey(const Key('local-world-forest-clearing-build-feedback-glow')),
       findsOneWidget,
     );
@@ -1509,6 +1515,56 @@ void main() {
       find.text('Tippe auf die Lichtung, um dein Fundament zu beginnen.'),
       findsNothing,
     );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-guidance-pulse')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-area-hint')),
+      findsNothing,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('local-world-forest-clearing-main-build-area')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('Fundament fertigstellen'), findsWidgets);
+    expect(
+      find.text('Der Sockel wird vollständig vorbereitet.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('local-world-forest-clearing-complete-foundation')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-sheet')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(
+        const Key('local-world-buildable-forest-clearing-foundation-complete'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const Key('local-world-buildable-forest-clearing-foundation-started'),
+      ),
+      findsNothing,
+    );
+    expect(find.text('Fundament fertig'), findsOneWidget);
+    expect(find.text('Das Fundament ist fertig.'), findsOneWidget);
     expect(
       find.byKey(const Key('local-world-forest-clearing-build-guidance-pulse')),
       findsNothing,

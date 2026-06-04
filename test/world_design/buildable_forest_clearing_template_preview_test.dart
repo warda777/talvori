@@ -8,6 +8,8 @@ const _baseAssetPath =
     'assets/images/world/buildable_islands/forest_clearing/base.png';
 const _foundationAssetPath =
     'assets/images/world/buildable_islands/forest_clearing/foundation_started.png';
+const _foundationCompleteAssetPath =
+    'assets/images/world/buildable_islands/forest_clearing/foundation_complete.png';
 
 const _phoneWidth = 430.0;
 const _phoneHeight = 932.0;
@@ -19,6 +21,12 @@ const _focusCameraTarget = Offset(0.511, 0.508);
 const _visualBounds = Rect.fromLTRB(0.031, 0.028, 0.960, 0.948);
 const _logicalBounds = Rect.fromLTRB(0.031, 0.028, 0.960, 0.948);
 const _foundationVisibleBounds = Rect.fromLTRB(0.374, 0.412, 0.648, 0.604);
+const _foundationCompleteVisibleBounds = Rect.fromLTRB(
+  0.342,
+  0.377,
+  0.680,
+  0.638,
+);
 const _placementBounds = Rect.fromLTRB(0.355, 0.385, 0.670, 0.635);
 const _hitTestRadii = Size(0.180, 0.120);
 
@@ -28,12 +36,25 @@ void main() {
     (tester) async {
       expect(_readPngSize(File(_baseAssetPath)), _assetSize);
       expect(_readPngSize(File(_foundationAssetPath)), _assetSize);
+      expect(_readPngSize(File(_foundationCompleteAssetPath)), _assetSize);
       expect(_visualBounds.contains(_mainBuildAreaAnchor), isTrue);
       expect(_logicalBounds.contains(_mainBuildAreaAnchor), isTrue);
       expect(_placementBounds.contains(_foundationOverlayAnchor), isTrue);
       expect(
         _foundationVisibleBounds.contains(_foundationOverlayAnchor),
         isTrue,
+      );
+      expect(
+        _foundationCompleteVisibleBounds.contains(_foundationOverlayAnchor),
+        isTrue,
+      );
+      expect(
+        _foundationCompleteVisibleBounds.width,
+        greaterThan(_foundationVisibleBounds.width),
+      );
+      expect(
+        _foundationCompleteVisibleBounds.height,
+        greaterThan(_foundationVisibleBounds.height),
       );
 
       final fullLayout = _PreviewLayout.fullPortrait();
@@ -54,19 +75,25 @@ void main() {
       await _pumpPreviewHarness(
         tester,
         layout: fullLayout,
-        showFoundation: false,
+        foundationState: _PreviewFoundationState.empty,
         showDebug: false,
       );
       await _pumpPreviewHarness(
         tester,
         layout: fullLayout,
-        showFoundation: true,
+        foundationState: _PreviewFoundationState.started,
         showDebug: true,
       );
       await _pumpPreviewHarness(
         tester,
         layout: focusLayout,
-        showFoundation: true,
+        foundationState: _PreviewFoundationState.started,
+        showDebug: true,
+      );
+      await _pumpPreviewHarness(
+        tester,
+        layout: focusLayout,
+        foundationState: _PreviewFoundationState.complete,
         showDebug: true,
       );
     },
@@ -94,7 +121,7 @@ Size _readPngSize(File file) {
 Future<void> _pumpPreviewHarness(
   WidgetTester tester, {
   required _PreviewLayout layout,
-  required bool showFoundation,
+  required _PreviewFoundationState foundationState,
   required bool showDebug,
 }) async {
   await tester.pumpWidget(
@@ -106,7 +133,7 @@ Future<void> _pumpPreviewHarness(
         child: CustomPaint(
           painter: _ForestClearingPreviewPainter(
             layout: layout,
-            showFoundation: showFoundation,
+            foundationState: foundationState,
             showDebug: showDebug,
           ),
         ),
@@ -120,12 +147,12 @@ Future<void> _pumpPreviewHarness(
 class _ForestClearingPreviewPainter extends CustomPainter {
   const _ForestClearingPreviewPainter({
     required this.layout,
-    required this.showFoundation,
+    required this.foundationState,
     required this.showDebug,
   });
 
   final _PreviewLayout layout;
-  final bool showFoundation;
+  final _PreviewFoundationState foundationState;
   final bool showDebug;
 
   @override
@@ -135,9 +162,13 @@ class _ForestClearingPreviewPainter extends CustomPainter {
       RRect.fromRectAndRadius(layout.islandRect, const Radius.circular(14)),
       Paint()..color = const Color(0xAA789B4A),
     );
-    if (showFoundation) {
+    if (foundationState != _PreviewFoundationState.empty) {
       canvas.drawRect(
-        layout.normalizedRectToScreen(_foundationVisibleBounds),
+        layout.normalizedRectToScreen(
+          foundationState == _PreviewFoundationState.complete
+              ? _foundationCompleteVisibleBounds
+              : _foundationVisibleBounds,
+        ),
         Paint()..color = const Color(0xCCBDA16D),
       );
     }
@@ -256,10 +287,12 @@ class _ForestClearingPreviewPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ForestClearingPreviewPainter oldDelegate) {
     return oldDelegate.layout != layout ||
-        oldDelegate.showFoundation != showFoundation ||
+        oldDelegate.foundationState != foundationState ||
         oldDelegate.showDebug != showDebug;
   }
 }
+
+enum _PreviewFoundationState { empty, started, complete }
 
 class _PreviewLayout {
   const _PreviewLayout._(this.islandRect);
