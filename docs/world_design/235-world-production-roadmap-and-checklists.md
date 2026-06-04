@@ -77,35 +77,41 @@ Aktueller Stand der Talvori-Welt-Produktion:
 - DockingPoints sind lokal/mock vorbereitet.
 - Der erste Phase-2E-Code-Slice wurde visuell verworfen, weil die Asset-
   Grundlage nicht buildable war.
-- Das buildable Waldlichtung-Template ist jetzt der naechste Blocker.
+- Das buildable Waldlichtung-Template wurde fuer den kleinen Phase-2E-E-Slice
+  freigegeben.
+- Phase 2E-E wurde als lokaler Mock-Slice umgesetzt und mit Commit
+  `c82880e4 feat: polish forest clearing foundation guidance` abgeschlossen.
+- Der naechste Blocker ist nicht Code, sondern die Planung von Phase 2F
+  (`foundation_complete` Konzept, Asset und Scope).
 
 Interpretation:
 
-Talvori hat eine starke Weltbasis als Preview- und Auswahlwelt. Der naechste
-Schritt darf aber nicht wieder versuchen, BuildZones oder Fundamentfortschritt
-auf unvorbereitete Naturassets zu legen.
+Talvori hat eine starke Weltbasis als Preview- und Auswahlwelt. Phase 2E-E
+beweist als lokaler Proof-of-Concept, dass freigegebene buildable Assets,
+Layering, lokaler BuildState und einfache Nutzerfuehrung zusammen funktionieren.
+Der naechste Schritt darf daraus aber noch keine vollstaendige Bau-, Lern-,
+Reward- oder Persistenzarchitektur ableiten.
 
 ## 4. Aktueller Hauptblocker
 
 Hauptblocker:
 
-Kein weiterer Bau-Code, bis das buildable Waldlichtung-Template freigegeben ist.
+Phase 2F darf noch nicht direkt gebaut werden. Der naechste sinnvolle Schritt
+ist ein Planungsblock fuer Phase 2F: `foundation_complete` Konzept, Asset-
+Strategie, Scope, Feedback und Tests festlegen.
 
-Benoetigt:
+Vor Phase 2F muss erneut geprueft werden:
 
-- buildable base asset,
-- `foundation_started` overlay,
-- `template.md` oder strukturierte Metadaten,
-- Device-Screenshot,
-- visuelle Entscheidung: behalten / nachbessern / verwerfen.
+- Professional Game Development Research Gate,
+- Build-Feedback-Konzept,
+- Asset-Produktionsregeln,
+- State-/Modulsystem,
+- Scale-/Dimension-Regeln,
+- keine Erweiterung des Scopes ohne Dokumentation.
 
-Freigabe bedeutet:
-
-- Asset und Overlay passen perspektivisch zusammen.
-- Die Bauflaeche wirkt natuerlich.
-- `foundation_started` wirkt nicht wie UI oder Marker.
-- BuildZone-Anker und Overlay-Anker sind dokumentiert.
-- Der Test auf einem Zielgeraet wurde visuell geprueft.
+Die Freigabe aus Phase 2E-D/2E-E gilt nur fuer den kleinen lokalen Mock-Slice:
+Waldlichtung, `main_build_area`, lokaler Zustand `empty -> foundation_started`
+und lokale Anzeige von `base.png` + `foundation_started.png`.
 
 ## 5. Roadmap Phasen
 
@@ -120,60 +126,63 @@ Freigabe bedeutet:
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
-| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `umgesetzt / lokal mock` | Lokale Anzeige von `base.png` + optionalem `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started` sind umgesetzt. Vor Commit muss der minimale Feedback-Scope aus 2E-A6 beachtet werden, inklusive einfacher Nutzerfuehrung fuer die erste Bauaktion: kurzer Hinweistext plus kontrastreicher visueller Fokus auf der `main_build_area`. Gruen/Mint auf gruen-gelber Inseloberflaeche ist nicht ausreichend; violett/magenta/cyan-basierter Fokus oder Glow ist zu bevorzugen. Keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors oder Audio-Implementierung. |
-| Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
+| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
+| Phase 2F | `foundation_complete` | `offen / nur Planung erlaubt` | Phase 2F darf noch nicht direkt gebaut werden. Naechster sinnvoller Schritt ist ein Planungsblock fuer `foundation_complete` Konzept, Asset, Scope, Feedback und Tests. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
 
-Vor Commit des umgesetzten lokalen Phase-2E-E-Mock-Slices muss der Kontrast der
-Nutzerfuehrung geprueft und bei Bedarf angepasst werden. Danach folgt erneut
-eine visuelle Pruefung auf Geraet oder realistischem Preview-Setup. Erst danach
-wird entschieden, ob der Slice nachgebessert wird oder Phase 2F geplant werden
-darf.
+Phase 2E-E ist abgeschlossen und committed:
+`c82880e4 feat: polish forest clearing foundation guidance`.
 
-Grund:
+Der naechste sinnvolle Schritt ist ein reiner Planungsblock fuer Phase 2F:
+`foundation_complete` Konzept, Asset, Scope, Feedback und Tests planen. Phase
+2F darf noch nicht direkt gebaut werden.
 
-Phase 2E-E nutzt nur die freigegebenen Waldlichtung-Assets, die dokumentierten
-Anker-/Bounds-Werte und einen lokalen Screen-State. Der Slice zeigt `base.png`
-im Zustand `empty`, legt bei `foundation_started` das Overlay darueber und
-bleibt bewusst ohne Persistenz, Supabase, SRS, Reward Bridge, echte
-Ressourcenlogik, Expansion, PlacedItems oder Interiors.
+Vor Phase 2F muss erneut geprueft werden:
 
-Ergaenzung nach Phase 2E-A6:
+- Professional Game Development Research Gate,
+- Build-Feedback-Konzept,
+- Asset-Produktionsregeln,
+- State-/Modulsystem,
+- Scale-/Dimension-Regeln,
+- keine Erweiterung des Scopes ohne Dokumentation.
 
-Der lokale Wechsel `empty -> foundation_started` darf nicht als harter
-Bildtausch bleiben. Fuer Phase 2E-E ist nur ein minimaler Feedback-Moment
-erlaubt: Fade-/Scale-Einblendung des Overlays, kurze dezente Hervorhebung der
-`main_build_area`, Hinweistext und vorbereitete Effekt-ID
-`build.foundation.started`. Sound/Effekte bleiben vorbereitet/minimal und sind
-nicht produktiv; es werden keine Sounddateien, keine Audio-Packages und keine
-Reward-/Ressourcenanimationen eingebaut.
+Entscheidung nach Phase 2E-E:
 
-Ergaenzung Nutzerfuehrung:
+Phase 2E-E ist als lokaler Proof-of-Concept fuer die buildable Waldlichtung
+bestanden.
 
-Der lokale Mock-Slice muss neben Build-State und Feedback auch eine einfache
-Nutzerfuehrung fuer die erste Bauaktion enthalten. Wenn die Waldlichtung
-ausgewaehlt ist und der BuildState `empty` ist, muss ein kurzer Hinweistext
-zeigen, warum die `main_build_area` relevant ist, und ein dezenter visueller
-Fokus muss die antippbare Flaeche erkennbar machen. Diese Fuehrung bleibt lokal
-und verschwindet, sobald die Bauflaeche angetippt oder `foundation_started`
-erreicht wurde.
+Der Slice beweist nur:
 
-Ergaenzung Kontrast/Build-Impact:
+- Asset-Layering mit `base.png` + `foundation_started.png`,
+- lokale BuildState-Umschaltung `empty -> foundation_started`,
+- basic Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus,
+- minimaler visueller Feedback-Moment mit vorbereiteter ID
+  `build.foundation.started`.
 
-Der aktuelle visuelle Fokus muss vor Commit kontrastreicher umgesetzt werden.
-Gruen/Mint auf gruen-gelber Inseloberflaeche ist nicht ausreichend. Fuer den
-2E-E-Slice ist ein violett/magenta/cyan-basierter Fokus oder Glow zu
-bevorzugen. Der Wechsel `empty -> foundation_started` bleibt lokal/mock, soll
-aber als kleiner Build-Impact-Moment wirken. Sound/FX werden nur als ID
-vorbereitet, aktuell `build.foundation.started`; es gibt keine
-Audio-Implementierung, keine Sounddateien und keine neuen Packages.
+Der Slice beweist noch nicht:
 
-Aktuell nicht erlaubt:
+- vollstaendige Bauarchitektur,
+- Balancing,
+- Reward Bridge,
+- Persistenz,
+- Kategorie-System,
+- Sound-/FX-System,
+- Expansion oder PlacedItems.
 
-Alles ausserhalb des kleinen Phase-2E-E-Mock-Slices bleibt blockiert:
+Offene Punkte nach Phase 2E-E:
+
+- `foundation_complete` ist noch nicht geplant.
+- Es gibt kein echtes Bau-/Lern-/Reward-System.
+- Es gibt keine Persistenz.
+- Es gibt keine Ressourcenlogik.
+- Es gibt keine Sound-/FX-Schicht.
+- Es gibt kein Expansion-/PlacedItem-/Interior-System.
+- Es gibt keine Cloud-/Supabase-Logik.
+
+Aktuell nicht erlaubt / weiterhin blockiert:
 
 - keine Persistenz,
 - keine Supabase Writes,
@@ -183,7 +192,9 @@ Alles ausserhalb des kleinen Phase-2E-E-Mock-Slices bleibt blockiert:
 - keine Expansion,
 - keine PlacedItems,
 - keine Interiors/ObjectDetail,
-- keine produktive Bau-/Lernlogik.
+- keine produktive Bau-/Lernlogik,
+- keine Sounddateien oder Audio-Implementierung,
+- kein Phase-2F-Code ohne vorherige Phase-2F-Planung.
 
 ## 6. Dokument-Abhaengigkeiten
 
@@ -267,9 +278,11 @@ Dokumentationsarbeit und sind fuer Phase 2E-D erledigt.
 Die lokale Device-Mock-Preview, der isolierte Widget-Test-Harness und die
 Anker-/Bounds-Dokumentation sind erledigt. Die Freigabeentscheidung fuer Phase
 2E-D ist dokumentiert. Phase 2E-E ist als kleiner lokaler Mock-Code-Slice
-umgesetzt und muss vor Commit den minimalen Feedback-Scope aus Phase 2E-A6
-einhalten. Der naechste offene Punkt ist die visuelle Pruefung des umgesetzten
-Slices auf Geraet oder realistischem Preview-Setup.
+umgesetzt, visuell geprueft, bestanden und mit Commit
+`c82880e4 feat: polish forest clearing foundation guidance` abgeschlossen.
+Der naechste offene Punkt ist die Planung von Phase 2F
+(`foundation_complete` Konzept, Asset, Scope, Feedback und Tests). Phase 2F
+darf noch nicht direkt gebaut werden.
 
 ## 10. Stop-Regeln
 
