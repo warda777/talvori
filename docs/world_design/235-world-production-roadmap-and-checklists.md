@@ -96,11 +96,13 @@ Reward- oder Persistenzarchitektur ableiten.
 
 Hauptblocker:
 
-Phase 2F darf noch nicht direkt gebaut werden. Der naechste sinnvolle Schritt
-ist ein Planungsblock fuer Phase 2F: `foundation_complete` Konzept, Asset-
-Strategie, Scope, Feedback und Tests festlegen.
+Phase 2F darf noch nicht direkt gebaut werden. Der Planungsblock fuer
+`foundation_complete` wurde mit
+`docs/world_design/242-foundation-complete-plan.md` gestartet. Der naechste
+erlaubte Schritt ist ein Asset-Prompt fuer `foundation_complete`.
 
-Vor Phase 2F muss erneut geprueft werden:
+Vor dem `foundation_complete`-Asset und vor jedem Phase-2F-Code muss erneut
+geprueft werden:
 
 - Professional Game Development Research Gate,
 - Build-Feedback-Konzept,
@@ -127,7 +129,7 @@ und lokale Anzeige von `base.png` + `foundation_started.png`.
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
-| Phase 2F | `foundation_complete` | `offen / nur Planung erlaubt` | Phase 2F darf noch nicht direkt gebaut werden. Naechster sinnvoller Schritt ist ein Planungsblock fuer `foundation_complete` Konzept, Asset, Scope, Feedback und Tests. |
+| Phase 2F | `foundation_complete` | `Planung gestartet` | Plan in `docs/world_design/242-foundation-complete-plan.md` dokumentiert. Naechster erlaubter Schritt ist ein Asset-Prompt fuer `foundation_complete`; Phase-2F-Code bleibt blockiert, bis Asset, Preview, Template-Update und Freigabe erfolgt sind. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
@@ -136,9 +138,10 @@ Aktuell erlaubter naechster Schritt:
 Phase 2E-E ist abgeschlossen und committed:
 `c82880e4 feat: polish forest clearing foundation guidance`.
 
-Der naechste sinnvolle Schritt ist ein reiner Planungsblock fuer Phase 2F:
-`foundation_complete` Konzept, Asset, Scope, Feedback und Tests planen. Phase
-2F darf noch nicht direkt gebaut werden.
+Der naechste sinnvolle Schritt ist ein Asset-Prompt fuer
+`foundation_complete`. Phase 2F darf noch nicht direkt gebaut werden; Code
+bleibt blockiert, bis `foundation_complete` als Asset erzeugt, geprueft, in
+`template.md` dokumentiert und ausdruecklich freigegeben wurde.
 
 Vor Phase 2F muss erneut geprueft werden:
 
@@ -281,8 +284,10 @@ Anker-/Bounds-Dokumentation sind erledigt. Die Freigabeentscheidung fuer Phase
 umgesetzt, visuell geprueft, bestanden und mit Commit
 `c82880e4 feat: polish forest clearing foundation guidance` abgeschlossen.
 Der naechste offene Punkt ist die Planung von Phase 2F
-(`foundation_complete` Konzept, Asset, Scope, Feedback und Tests). Phase 2F
-darf noch nicht direkt gebaut werden.
+(`foundation_complete` Konzept, Asset, Scope, Feedback und Tests). Diese
+Planung ist mit `docs/world_design/242-foundation-complete-plan.md` gestartet.
+Der naechste offene Schritt ist der Asset-Prompt fuer `foundation_complete`;
+Phase 2F-Code darf noch nicht direkt gebaut werden.
 
 ## 10. Stop-Regeln
 
