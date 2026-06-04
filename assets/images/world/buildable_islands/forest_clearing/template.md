@@ -5,8 +5,8 @@ Stand: 2026-06-04
 Diese Datei beschreibt das aktuelle buildable Waldlichtung-Template als
 menschenlesbare Metadaten- und Planungsdatei. Sie ist noch keine technische
 Runtime-Konfiguration. Sie dokumentiert die begrenzte Freigabe fuer den sehr
-kleinen Phase-2E-E-Code-Slice und den lokal vorgeprueften Asset-Stand fuer
-Phase 2F `foundation_complete`.
+kleinen Phase-2E-E-Code-Slice und die formale Freigabe fuer den engen lokalen
+Phase-2F-Mock-Slice `foundation_complete`.
 
 Fuehrende Dokumente:
 
@@ -20,8 +20,8 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E freigegeben / 2F Asset lokal vorgeprueft`
-- `phase`: `2E-B / 2E-C / 2E-D / 2F Asset-Vorpruefung`
+- `status`: `2E-E freigegeben / 2F freigegeben fuer engen lokalen Mock-Slice`
+- `phase`: `2E-B / 2E-C / 2E-D / 2F Freigabe`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -30,13 +30,16 @@ Fuehrende Dokumente:
 - `codeAllowed`:
   - `phase2EE`: `true`, nur fuer den abgeschlossenen sehr kleinen
     Phase-2E-E-Code-Slice
-  - `phase2F`: `false`, `foundation_complete` ist vorhanden und lokal
-    vorgeprueft, aber noch nicht final freigegeben
+  - `phase2F`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
+    `foundation_started -> foundation_complete`
 
-Dieses Template ist ausschliesslich fuer den kleinen lokalen Phase-2E-E-Mock-
-Slice code-freigegeben. Jede Nutzung ausserhalb dieses Scopes, insbesondere
-Phase 2F-Code fuer `foundation_complete`, braucht eine neue
-Freigabeentscheidung.
+Dieses Template ist code-freigegeben fuer:
+
+- den abgeschlossenen kleinen lokalen Phase-2E-E-Mock-Slice,
+- den engen lokalen Phase-2F-Mock-Slice `foundation_started ->
+  foundation_complete`.
+
+Jede Nutzung ausserhalb dieser Scopes braucht eine neue Freigabeentscheidung.
 
 ## 2. Zweck Des Assets
 
@@ -95,11 +98,12 @@ Vorlaeufige Sichtpruefung:
 - `foundation_complete` enthaelt kein Haus, keine Waende und kein Dach.
 - `foundation_complete` zeigt keine UI-/Marker-Optik, hat transparente Ecken
   und keine sichtbaren Chroma-Key-Reste.
-- `foundation_complete` ist lokal vorgeprueft, aber fuer Phase 2F noch nicht
-  final freigegeben.
+- `foundation_complete` ist formal fuer den engen lokalen Phase-2F-Mock-Slice
+  freigegeben.
 
 Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
-ergaenzt und stuetzt die dokumentierte Freigabeentscheidung fuer Phase 2E-E.
+ergaenzt und stuetzt die dokumentierten Freigabeentscheidungen fuer Phase 2E-E
+und Phase 2F.
 
 ## 4. Zonen
 
@@ -168,14 +172,16 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
   - sichtbarer Overlay-Bereich: asset local `(575, 422)` bis `(995, 618)`,
     normalized `(0.374, 0.412)` bis `(0.648, 0.604)`
 - `foundationCompleteOverlayAnchor`:
-  - `TBD` fuer Phase-2F-Code/Freigabe
+  - `TBD` fuer spaetere praezise Runtime-Konfiguration
   - lokale Preview: Overlay sitzt plausibel auf derselben `main_build_area`
     und nutzt denselben `1536 x 1024` Canvas
-  - keine finalen Runtime-Koordinaten in diesem Metadatenblock raten
+  - fuer den engen lokalen Phase-2F-Mock-Slice darf derselbe
+    `mainBuildAreaAnchor` / `foundationOverlayAnchor` als lokaler Mock-Anker
+    genutzt werden
 - `foundationCompleteOverlayScale`:
-  - `TBD` fuer Phase-2F-Code/Freigabe
+  - `TBD` fuer spaetere praezise Runtime-Konfiguration
   - lokale Preview: keine Bildstreckung noetig, da gleicher Canvas
-  - finale Skalierung bleibt offen bis zur expliziten 2F-Freigabe
+  - fuer den engen lokalen Phase-2F-Mock-Slice ist Canvas-Scale `1.0` erlaubt
 - `focusCameraTarget`:
   - asset local: `(785, 520)`
   - normalized: `(0.511, 0.508)`
@@ -211,7 +217,7 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
 - `foundation_started` ist als eigenes transparentes Overlay vorhanden und nur
   fuer den kleinen lokalen Phase-2E-E-Mock-Slice freigegeben.
 - `foundation_complete` ist als eigenes transparentes Overlay vorhanden und
-  lokal vorgeprueft, aber noch nicht fuer Phase-2F-Code freigegeben.
+  fuer den engen lokalen Phase-2F-Mock-Slice freigegeben.
 - Geplante `BuildAreaState`-Reihenfolge fuer diesen Buildplatz:
   `empty -> foundation_started -> foundation_complete`.
 - `foundation_complete` ersetzt `foundation_started` visuell, statt dauerhaft
@@ -253,8 +259,10 @@ Vorlaeufige Einschaetzung:
   Haus/Huette, Hof/Vorplatz, ersten Weg oder Expansion.
 
 Diese Einschaetzung wurde in einer isolierten App-/Preview-Harness-Pruefung
-und einer temporaeren visuellen PNG-Komposition bestaetigt. Finale Freigabe
-bleibt eine getrennte Entscheidung.
+und einer temporaeren visuellen PNG-Komposition bestaetigt. Die formale
+Phase-2F-Freigabe fuer den engen lokalen Mock-Slice ist in Abschnitt 12
+dokumentiert; jede groessere produktive Nutzung bleibt eine getrennte
+Entscheidung.
 
 ## 9. Phase-2E-/2F-Grenzen
 
@@ -315,8 +323,8 @@ Phase-2F-Preview-Ergaenzung:
   - `/private/tmp/talvori_phase2f_foundation_complete_preview/03_base_plus_foundation_complete.png`
   - `/private/tmp/talvori_phase2f_foundation_complete_preview/contact_sheet_base_started_complete.png`
 - `foundationCompletePreviewResult`: `passt`
-- `foundationCompletePreviewDecision`: lokales Prueffazit positiv, aber noch
-  keine finale Phase-2F-Codefreigabe.
+- `foundationCompletePreviewDecision`: formal freigegeben fuer den engen
+  lokalen Phase-2F-Mock-Slice.
 
 ## 11. Offene Pruefungen
 
@@ -327,25 +335,27 @@ Phase-2F-Preview-Ergaenzung:
 - `foundation_complete`-Overlay existiert und wurde lokal mit
   Vergleichs-Previews vorgeprueft.
 - Lokales 2F-Prueffazit fuer `foundation_complete`: `passt`.
-- `foundation_complete` ist noch nicht final fuer Phase-2F-Code freigegeben.
-- Finale `foundationCompleteOverlayAnchor`- und
-  `foundationCompleteOverlayScale`-Werte bleiben fuer 2F-Code/Freigabe offen.
+- `foundation_complete` ist fuer den engen lokalen Phase-2F-Mock-Slice
+  freigegeben.
+- Praezise `foundationCompleteOverlayAnchor`- und
+  `foundationCompleteOverlayScale`-Werte bleiben fuer spaetere
+  Runtime-/Produktionskonfiguration offen; der lokale 2F-Mock-Slice darf den
+  identischen Canvas und den vorhandenen BuildArea-Anker verwenden.
 - Eine echte physische Geraetepruefung kann optional spaeter ergaenzt werden,
   ist aber nicht Teil dieses isolierten Preview-Harness.
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
-- Freigabeentscheidung fuer Phase 2E-E ist dokumentiert.
+- Freigabeentscheidungen fuer Phase 2E-E und Phase 2F sind dokumentiert.
 
 ## 12. Freigabeentscheidung
 
 - `phase2EEDecision`: `released for Phase 2E-E local mock code slice`
 - `phase2EECodeAllowed`: `true`, nur fuer den abgeschlossenen kleinen lokalen
   Phase-2E-E-Mock-Slice
-- `phase2FDecision`: `foundation_complete asset generated and locally
-  prechecked, pending final release`
-- `phase2FCodeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2F Pruef-/Freigabeschritt fuer foundation_complete`
+- `phase2FDecision`: `released for narrow Phase 2F local mock code slice`
+- `phase2FCodeAllowed`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
+- `nextAllowedStep`: `Phase 2F kleiner lokaler Mock-Code-Slice mit foundation_complete`
 
-Freigabe gilt nur fuer:
+Phase-2E-E-Freigabe gilt nur fuer:
 
 - lokale Anzeige von `base.png` + `foundation_started.png`,
 - `main_build_area` auf der Waldlichtung,
@@ -356,7 +366,19 @@ Die lokale Vorpruefung von `foundation_complete` gilt nur fuer:
 - Dokumentation und Metadaten,
 - lokalen visuellen Vergleich `base`, `base + foundation_started`,
   `base + foundation_complete`,
-- Vorbereitung des naechsten Phase-2F-Pruef-/Freigabeschritts.
+- Vorbereitung und Umsetzung des engen lokalen Phase-2F-Mock-Slices.
+
+Die Phase-2F-Freigabe gilt ausschliesslich fuer:
+
+- lokale Mock-Erweiterung `foundation_started -> foundation_complete`,
+- Anzeige `base.png + foundation_complete.png`,
+- `foundation_complete` ersetzt `foundation_started` visuell,
+- kein dauerhaftes Stapeln von `foundation_started` und
+  `foundation_complete`,
+- lokale Kontextkarte oder Button `Fundament fertigstellen`,
+- kurzer Hinweis / lokales Feedback,
+- vorbereitete Feedback-ID `build.foundation.complete`,
+- keine echte Audio-/FX-Implementierung.
 
 Freigabe gilt nicht fuer:
 
@@ -364,17 +386,17 @@ Freigabe gilt nicht fuer:
 - Supabase,
 - Reward Bridge,
 - SRS-/`word_progress`,
-- Phase-2F-Code,
-- `foundation_complete`-App-Integration,
 - echtes Expansion-System,
 - PlacedItem-System,
 - Interior/ObjectDetail,
 - produktive Bau-/Lernlogik,
+- Ressourcenlogik,
+- Audio/Sounddateien,
 - Sound-/FX-Schicht.
 
-## 13. Akzeptanzkriterien Fuer Spaetere Freigabe
+## 13. Akzeptanzkriterien Fuer Freigabe Und Spaetere Erweiterungen
 
-Das Asset darf erst freigegeben werden, wenn:
+Die dokumentierte 2E-/2F-Freigabe basiert darauf, dass:
 
 - `template.md` existiert,
 - `foundation_started` existiert,
@@ -392,4 +414,5 @@ Fuer Phase 2F zusaetzlich:
   enthalten,
 - `foundation_complete` darf nicht wie UI, Marker oder moderne Plattform
   wirken,
-- finale Phase-2F-Codefreigabe muss separat dokumentiert werden.
+- Phase-2F-Code darf nur innerhalb des oben definierten engen lokalen
+  Mock-Slices starten.

@@ -81,8 +81,11 @@ Aktueller Stand der Talvori-Welt-Produktion:
   freigegeben.
 - Phase 2E-E wurde als lokaler Mock-Slice umgesetzt und mit Commit
   `c82880e4 feat: polish forest clearing foundation guidance` abgeschlossen.
-- Der naechste Blocker ist nicht Code, sondern die Planung von Phase 2F
-  (`foundation_complete` Konzept, Asset und Scope).
+- Phase 2F (`foundation_complete`) ist formal fuer einen engen lokalen
+  Mock-Code-Slice freigegeben.
+- Der naechste Blocker betrifft nicht diesen kleinen Mock-Slice, sondern jede
+  groessere Bau-, Lern-, Reward-, Persistenz-, Sound-/FX- oder
+  Expansion-Architektur.
 
 Interpretation:
 
@@ -96,13 +99,14 @@ Reward- oder Persistenzarchitektur ableiten.
 
 Hauptblocker:
 
-Phase 2F darf noch nicht direkt gebaut werden. `foundation_complete.png`
-existiert und wurde lokal mit Base-/Started-/Complete-Vergleich vorgeprueft.
-Der naechste erlaubte Schritt ist nur der naechste Pruef-/Freigabeschritt fuer
-Phase 2F.
+Phase 2F ist formal nur fuer einen sehr kleinen lokalen Mock-Code-Slice
+freigegeben. `foundation_complete.png` existiert, wurde lokal mit
+Base-/Started-/Complete-Vergleich vorgeprueft und ist fuer die lokale
+Mock-Erweiterung `foundation_started -> foundation_complete` freigegeben.
+Jede Nutzung ausserhalb dieses engen Scopes bleibt blockiert.
 
-Vor jeder Phase-2F-Freigabe und vor jedem Phase-2F-Code muss erneut geprueft
-werden:
+Vor jedem Phase-2F-Code ausserhalb des freigegebenen lokalen Mock-Slices muss
+erneut geprueft werden:
 
 - Professional Game Development Research Gate,
 - Build-Feedback-Konzept,
@@ -111,9 +115,11 @@ werden:
 - Scale-/Dimension-Regeln,
 - keine Erweiterung des Scopes ohne Dokumentation.
 
-Die Freigabe aus Phase 2E-D/2E-E gilt nur fuer den kleinen lokalen Mock-Slice:
-Waldlichtung, `main_build_area`, lokaler Zustand `empty -> foundation_started`
-und lokale Anzeige von `base.png` + `foundation_started.png`.
+Die Freigaben aus Phase 2E-D/2E-E und Phase 2F gelten nur fuer die kleinen
+lokalen Mock-Slices: Waldlichtung, `main_build_area`, lokaler Zustand
+`empty -> foundation_started -> foundation_complete` und lokale Anzeige von
+`base.png` + `foundation_started.png` oder `base.png` +
+`foundation_complete.png`.
 
 ## 5. Roadmap Phasen
 
@@ -129,7 +135,7 @@ und lokale Anzeige von `base.png` + `foundation_started.png`.
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
-| Phase 2F | `foundation_complete` | `Asset generiert / lokal vorgeprueft` | `foundation_complete.png` existiert. Lokaler Preview-Check mit Base allein, Base + `foundation_started` und Base + `foundation_complete` wurde bestanden: sitzt plausibel auf `main_build_area`, klar weiter als `foundation_started`, bleibt nur Fundament, kein Haus, keine Waende, kein Dach, keine UI-/Marker-Optik, transparente Ecken und keine Chroma-Key-Reste. Template-Metadaten sind aktualisiert. Phase-2F-Code bleibt blockiert bis zur ausdruecklichen Freigabe. |
+| Phase 2F | `foundation_complete` | `freigegeben` | `foundation_complete.png` existiert. Lokaler Preview-Check mit Base allein, Base + `foundation_started` und Base + `foundation_complete` wurde bestanden: sitzt plausibel auf `main_build_area`, klar weiter als `foundation_started`, bleibt nur Fundament, kein Haus, keine Waende, kein Dach, keine UI-/Marker-Optik, transparente Ecken und keine Chroma-Key-Reste. Formal freigegeben fuer den naechsten kleinen lokalen 2F-Mock-Code-Slice: lokale Mock-Erweiterung `foundation_started -> foundation_complete`, Anzeige `base.png` + `foundation_complete.png`, `foundation_complete` ersetzt `foundation_started`, kleine lokale Kontextkarte oder Button `Fundament fertigstellen`, kurzer Hinweis / Feedback und vorbereitete Feedback-ID `build.foundation.complete`. Groessere Systeme bleiben blockiert. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
@@ -138,11 +144,23 @@ Aktuell erlaubter naechster Schritt:
 Phase 2E-E ist abgeschlossen und committed:
 `c82880e4 feat: polish forest clearing foundation guidance`.
 
-Der naechste sinnvolle Schritt ist ein Pruef-/Freigabeschritt fuer
-`foundation_complete`. Phase 2F darf noch nicht direkt gebaut werden; Code
-bleibt blockiert, bis `foundation_complete` ausdruecklich freigegeben wurde.
+Der naechste erlaubte Schritt ist ein kleiner lokaler Phase-2F-Mock-Code-Slice
+innerhalb der dokumentierten Freigabe fuer `foundation_complete`.
 
-Vor Phase 2F muss erneut geprueft werden:
+Erlaubter Minimal-Scope:
+
+- lokale Mock-Erweiterung `foundation_started -> foundation_complete`,
+- Anzeige `base.png` + `foundation_complete.png`,
+- `foundation_complete` ersetzt `foundation_started` visuell,
+- kein dauerhaftes Stapeln von `foundation_started` und
+  `foundation_complete`,
+- kleine lokale Kontextkarte oder Button `Fundament fertigstellen`,
+- kurzer Hinweis / lokales Feedback,
+- vorbereitete Feedback-ID `build.foundation.complete`,
+- keine echte Audio-/FX-Implementierung.
+
+Vor jedem weiteren Phase-2F-Ausbau ausserhalb des freigegebenen lokalen
+Mock-Slices muss erneut geprueft werden:
 
 - Professional Game Development Research Gate,
 - Build-Feedback-Konzept,
@@ -174,10 +192,10 @@ Der Slice beweist noch nicht:
 - Sound-/FX-System,
 - Expansion oder PlacedItems.
 
-Offene Punkte nach Phase 2E-E / aktueller 2F-Vorpruefung:
+Offene Punkte nach Phase 2E-E / formaler 2F-Freigabe:
 
-- `foundation_complete` ist vorhanden und lokal vorgeprueft, aber noch nicht
-  final freigegeben.
+- `foundation_complete` ist nur fuer den engen lokalen Mock-Slice
+  freigegeben; produktive Bau-/Lernlogik bleibt blockiert.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -197,7 +215,8 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Interiors/ObjectDetail,
 - keine produktive Bau-/Lernlogik,
 - keine Sounddateien oder Audio-Implementierung,
-- kein Phase-2F-Code ohne ausdrueckliche Phase-2F-Freigabe.
+- kein Phase-2F-Code ausserhalb des ausdruecklich freigegebenen lokalen
+  Mock-Slices.
 
 ## 6. Dokument-Abhaengigkeiten
 
@@ -283,13 +302,15 @@ Anker-/Bounds-Dokumentation sind erledigt. Die Freigabeentscheidung fuer Phase
 2E-D ist dokumentiert. Phase 2E-E ist als kleiner lokaler Mock-Code-Slice
 umgesetzt, visuell geprueft, bestanden und mit Commit
 `c82880e4 feat: polish forest clearing foundation guidance` abgeschlossen.
-Der naechste offene Punkt ist die Planung von Phase 2F
-(`foundation_complete` Konzept, Asset, Scope, Feedback und Tests). Diese
-Planung ist mit `docs/world_design/242-foundation-complete-plan.md` gestartet.
-`foundation_complete.png` wurde erzeugt, lokal vorgeprueft und in
-`template.md` dokumentiert. Der naechste offene Schritt ist die explizite
-Phase-2F-Pruefung/Freigabeentscheidung; Phase 2F-Code darf noch nicht direkt
-gebaut werden.
+Die Planung von Phase 2F (`foundation_complete` Konzept, Asset, Scope,
+Feedback und Tests) ist mit
+`docs/world_design/242-foundation-complete-plan.md` gestartet und fuer den
+engen lokalen Mock-Slice abgeschlossen.
+`foundation_complete.png` wurde erzeugt, lokal vorgeprueft, formal fuer den
+engen lokalen Phase-2F-Mock-Slice freigegeben und in `template.md`
+dokumentiert. Der naechste offene Schritt ist der kleine lokale
+Phase-2F-Mock-Code-Slice innerhalb der dokumentierten Freigabe; alles darueber
+hinaus bleibt blockiert.
 
 ## 10. Stop-Regeln
 
