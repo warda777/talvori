@@ -118,7 +118,7 @@ Freigabe bedeutet:
 | Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
-| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Anker-/Bounds-Felder, Template-Status, Entscheidung. |
+| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `geprueft / offen` | Lokale Device-Mock-Preview ist visuell brauchbar; echter App-/Device-Check, Anker-/Bounds-Felder und Freigabe fehlen. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | blockiert | Erst erlaubt, wenn 2E-D freigegeben ist. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
@@ -126,15 +126,17 @@ Freigabe bedeutet:
 
 Aktuell erlaubter naechster Schritt:
 
-Phase 2E-D: Asset-/Metadatenpruefung auf Geraet vorbereiten. Dabei muessen
-`base.png`, `foundation_started.png` und `template.md` in einer echten App- oder
-Mock-Ansicht geprueft werden. Zu klaeren sind Device-Screenshot,
-Anker-/Bounds-Felder, Template-Status und Freigabeentscheidung.
+Phase 2E-D fortfuehren: echten App-/Device-Check oder freigabefaehige Preview
+mit Anker-/Bounds-Definition vorbereiten. `base.png`,
+`foundation_started.png` und `template.md` wurden lokal in einer
+Device-Mock-Komposition geprueft, aber noch nicht freigegeben.
 
 Grund:
 
-`foundation_started` existiert und wurde visuell auf `base.png` vorgeprueft. Es
-ist noch nicht freigegeben, weil Device-Check und Ankerdefinition fehlen.
+`foundation_started` existiert und wurde in einer 430 x 932 Portrait-Mock-
+Preview auf `base.png` geprueft. Es sitzt visuell brauchbar auf der zentralen
+`main_build_area` und wirkt nicht wie UI oder Marker. Code bleibt blockiert,
+weil echter App-/Device-Check, Ankerdefinition und Freigabeentscheidung fehlen.
 
 Aktuell nicht erlaubt:
 
@@ -220,6 +222,8 @@ Aktueller Schwerpunkt:
 
 Die ToDos bis einschliesslich Device-Screenshot sind Asset- und
 Dokumentationsarbeit, kein Flutter-Code.
+Die lokale Device-Mock-Preview ist erledigt; der naechste offene Punkt ist ein
+freigabefaehiger App-/Device-Check mit Anker-/Bounds-Entscheidung.
 
 ## 10. Stop-Regeln
 
