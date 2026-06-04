@@ -18,7 +18,7 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `geprueft / offen`
+- `status`: `freigabe vorbereitet`
 - `phase`: `2E-B / 2E-C / 2E-D`
 - `role`: `Island View Core/Base with foundation_started overlay metadata`
 - `assetPaths`:
@@ -26,8 +26,8 @@ Fuehrende Dokumente:
   - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
 - `codeAllowed`: `false`
 
-Dieses Template ist nicht fuer Code freigegeben, bis echter App-/Device-Check,
-Ankerdefinition und Freigabeentscheidung erfolgt sind.
+Dieses Template ist nicht fuer Code freigegeben, bis die
+Freigabeentscheidung explizit dokumentiert wurde.
 
 ## 2. Zweck Des Assets
 
@@ -73,10 +73,11 @@ Vorlaeufige Sichtpruefung:
 - `foundation_started` existiert als separates transparentes Overlay.
 - Das Overlay sitzt vorlaeufig sauber auf der `main_build_area`.
 - Das Overlay wirkt wie ein frueher Fundamentansatz, nicht wie UI oder Marker.
-- Das Overlay ist noch nicht final freigegeben, weil der Device-Check fehlt.
+- Das Overlay ist noch nicht final freigegeben, weil die explizite
+  Freigabeentscheidung fehlt.
 
-Diese Bewertung wurde durch eine lokale Device-Mock-Preview ergaenzt, ersetzt
-aber keinen echten App-/Device-Check und keine finale Freigabe.
+Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
+ergaenzt, ersetzt aber keine finale Freigabeentscheidung.
 
 ## 4. Zonen
 
@@ -127,17 +128,48 @@ aber keinen echten App-/Device-Check und keine finale Freigabe.
 
 ## 5. Anker-Felder
 
-Technische Koordinaten werden nicht geschaetzt. Sie bleiben bis Device- und
-Layout-Check offen.
+Alle Werte sind relativ zum Template-Asset mit `1536 x 1024` Pixeln gedacht.
+Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
 
-- `mainBuildAreaAnchor`: TBD after device/layout check
-- `foundationOverlayAnchor`: TBD after device/layout check
-- `foundationOverlayScale`: TBD
-- `focusCameraTarget`: TBD
-- `visualBounds`: TBD
-- `logicalBounds`: TBD
-- `hitTestShape`: TBD
-- `placementBounds`: TBD
+- `mainBuildAreaAnchor`:
+  - asset local: `(785, 520)`
+  - normalized: `(0.511, 0.508)`
+  - Begruendung: Mittelpunkt der ruhigen zentralen Bauflaeche.
+- `foundationOverlayAnchor`:
+  - asset local: `(785, 520)`
+  - normalized: `(0.511, 0.508)`
+  - Begruendung: Mittelpunkt des sichtbaren `foundation_started`-Overlays.
+- `foundationOverlayScale`:
+  - `1.0` bei identischem Base-/Overlay-Canvas `1536 x 1024`
+  - keine separate Bildstreckung noetig
+  - sichtbarer Overlay-Bereich: asset local `(575, 422)` bis `(995, 618)`,
+    normalized `(0.374, 0.412)` bis `(0.648, 0.604)`
+- `focusCameraTarget`:
+  - asset local: `(785, 520)`
+  - normalized: `(0.511, 0.508)`
+  - Begruendung: haelt `main_build_area` in der Island-View-Fokusansicht
+    zentral sichtbar.
+- `visualBounds`:
+  - asset local: `(48, 29)` bis `(1475, 971)`
+  - normalized: `(0.031, 0.028)` bis `(0.960, 0.948)`
+  - gemessen aus der sichtbaren Alpha-Bounding-Box von `base.png`
+- `logicalBounds`:
+  - vorlaeufig identisch mit `visualBounds`
+  - normalized: `(0.031, 0.028)` bis `(0.960, 0.948)`
+  - spaetere polygonale Insel-/Alpha-Hitshape kann diese Grobbounds ersetzen,
+    ist fuer Phase 2E aber nicht noetig.
+- `hitTestShape`:
+  - shape: `ellipse`
+  - center: `(0.511, 0.508)`
+  - radius: `(0.180, 0.120)`
+  - Full-Portrait-Preview-Tapziel: ca. `148 x 66` Screen-Pixel bei 410 px
+    Inselbreite, also groesser als ein kleines Mindest-Tapziel.
+- `placementBounds`:
+  - shape: `rect`
+  - asset local ca. `(545, 394)` bis `(1029, 650)`
+  - normalized: `(0.355, 0.385)` bis `(0.670, 0.635)`
+  - Zweck: erster Fundament-/Haus-/Vorplatz-Bereich innerhalb der
+    `main_build_area`.
 
 ## 6. State-/Modul-Regeln
 
@@ -179,8 +211,9 @@ Vorlaeufige Einschaetzung:
   zu klein fuer spaetere Aussenobjekte.
 - Interior-/Object-Detail-Objekte gehoeren nicht in Island View.
 
-Diese Einschaetzung wurde in einer lokalen Device-Mock-Preview grob
-bestaetigt. Ein echter App-/Device-Check bleibt offen.
+Diese Einschaetzung wurde in einer isolierten App-/Preview-Harness-Pruefung
+und einer temporaeren visuellen PNG-Komposition bestaetigt. Finale Freigabe
+bleibt eine getrennte Entscheidung.
 
 ## 9. Phase-2E-Grenzen
 
@@ -198,40 +231,52 @@ In diesem Template-Block gilt:
 ## 10. Device-/Preview-Check
 
 - `devicePreviewCheckDone`: ja, als lokale Device-Mock-Preview.
-- `method`: temporaere PNG-Komposition mit 430 x 932 Portrait-Frame,
-  dezent reservierten UI-Zonen, Base allein, Base + `foundation_started` sowie
-  naeherem Island-View-Fokus.
+- `method`: isolierter Widget-Test-Harness plus temporaere visuelle
+  PNG-Komposition.
+- `widgetHarness`: `test/world_design/buildable_forest_clearing_template_preview_test.dart`
+- `widgetHarnessChecks`:
+  - PNG-Dateien existieren und melden `1536 x 1024` im Header.
+  - `mainBuildAreaAnchor`, `foundationOverlayAnchor`, `visualBounds`,
+    `logicalBounds`, `placementBounds` und `hitTestShape` sind relativ zum
+    Template pruefbar.
+  - Full-Portrait- und Island-View-Fokuslayout blockieren die
+    `placementBounds` nicht durch reservierte UI-Zonen.
+- `visualMethod`: temporaere PNG-Komposition mit 430 x 932 Portrait-Frame,
+  dezent reservierten UI-Zonen, Base allein, Base + `foundation_started`,
+  Debug-Bounds und naeherem Island-View-Fokus.
 - `previewFiles`:
-  - `/private/tmp/talvori_2e_d_forest_clearing/base_portrait_full.png`
-  - `/private/tmp/talvori_2e_d_forest_clearing/foundation_portrait_full.png`
-  - `/private/tmp/talvori_2e_d_forest_clearing/base_island_view_focus.png`
-  - `/private/tmp/talvori_2e_d_forest_clearing/foundation_island_view_focus.png`
-  - `/private/tmp/talvori_2e_d_forest_clearing/contact_sheet.png`
-- `repoFilesCreated`: nein.
-- `result`: offen / nicht freigegeben.
+  - `/private/tmp/talvori_2e_d_forest_clearing/app_preview_base.png`
+  - `/private/tmp/talvori_2e_d_forest_clearing/app_preview_foundation_bounds.png`
+  - `/private/tmp/talvori_2e_d_forest_clearing/app_preview_focus_bounds.png`
+  - `/private/tmp/talvori_2e_d_forest_clearing/app_preview_anchor_contact_sheet.png`
+- `repoHarnessFilesCreated`: ja,
+  `test/world_design/buildable_forest_clearing_template_preview_test.dart`.
+- `repoPreviewFilesCreated`: nein, Preview-PNGs bleiben temporaer.
+- `result`: freigabe vorbereitet / nicht freigegeben.
 - `begruendung`: Das Overlay sitzt in der Mock-Preview sauber auf der zentralen
   `main_build_area`, wirkt wie ein frueher Fundamentansatz und nicht wie UI
   oder Marker. Die Bauflaeche bleibt in Portrait lesbar, Standard-UI-Zonen
   wuerden den Bauplatz in dieser Mock-Komposition nicht verdecken, und Raum fuer
   spaeteres kleines Haus, Hof, Weg, Deko und Erweiterung bleibt plausibel.
-  Freigabe fehlt weiterhin, weil kein echter App-/Device-Check und keine
-  exakte Anker-/Bounds-Definition erfolgt sind.
+  Die Anker-/Bounds-Werte sind fuer Phase 2E ausreichend dokumentiert. Freigabe
+  fehlt weiterhin, weil sie noch nicht explizit entschieden wurde.
 
 ## 11. Offene Pruefungen
 
-- Lokale Device-Mock-Preview wurde durchgefuehrt.
-- Echter App-/Device-Screenshot fehlt weiterhin.
+- Isolierter Widget-Test-Harness wurde durchgefuehrt.
+- Temporaere visuelle Preview-Dateien wurden erzeugt.
 - `foundation_started`-Overlay existiert und wurde visuell auf `base.png`
   vorgeprueft.
-- Echte App-/Device-Pruefung der Overlay-Passung fehlt weiterhin.
-- Koordinaten/Anchors sind noch TBD.
+- Eine echte physische Geraetepruefung kann optional spaeter ergaenzt werden,
+  ist aber nicht Teil dieses isolierten Preview-Harness.
+- Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
 - Finale Freigabeentscheidung fehlt.
 
 ## 12. Vorlaeufige Entscheidung
 
-- `decision`: `device-mock preview visually acceptable, not released; pending app/device check, anchor/bounds definition, and release decision`
+- `decision`: `app-preview harness and visual bounds check acceptable; release prepared, not released; pending explicit release decision`
 - `codeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2E-D fortfuehren: echten App-/Device-Check oder freigabefaehige Preview mit Anker-/Bounds-Definition vorbereiten`
+- `nextAllowedStep`: `Phase 2E-D Freigabeentscheidung dokumentieren; Phase 2E-E bleibt bis dahin blockiert`
 
 ## 13. Akzeptanzkriterien Fuer Spaetere Freigabe
 

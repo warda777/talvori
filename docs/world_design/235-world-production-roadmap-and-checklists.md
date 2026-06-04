@@ -118,7 +118,7 @@ Freigabe bedeutet:
 | Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
-| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `geprueft / offen` | Lokale Device-Mock-Preview ist visuell brauchbar; echter App-/Device-Check, Anker-/Bounds-Felder und Freigabe fehlen. |
+| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigabe vorbereitet` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; explizite Freigabe fehlt. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | blockiert | Erst erlaubt, wenn 2E-D freigegeben ist. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
@@ -126,17 +126,20 @@ Freigabe bedeutet:
 
 Aktuell erlaubter naechster Schritt:
 
-Phase 2E-D fortfuehren: echten App-/Device-Check oder freigabefaehige Preview
-mit Anker-/Bounds-Definition vorbereiten. `base.png`,
-`foundation_started.png` und `template.md` wurden lokal in einer
-Device-Mock-Komposition geprueft, aber noch nicht freigegeben.
+Phase 2E-D Freigabeentscheidung dokumentieren. `base.png`,
+`foundation_started.png` und `template.md` wurden in einem isolierten
+Widget-Test-Harness sowie in einer temporaeren visuellen Preview mit
+Anker-/Bounds-Werten geprueft, aber noch nicht freigegeben.
 
 Grund:
 
-`foundation_started` existiert und wurde in einer 430 x 932 Portrait-Mock-
-Preview auf `base.png` geprueft. Es sitzt visuell brauchbar auf der zentralen
-`main_build_area` und wirkt nicht wie UI oder Marker. Code bleibt blockiert,
-weil echter App-/Device-Check, Ankerdefinition und Freigabeentscheidung fehlen.
+`foundation_started` existiert und wurde in einer 430 x 932 Portrait-Preview
+auf `base.png` geprueft. Es sitzt visuell brauchbar auf der zentralen
+`main_build_area` und wirkt nicht wie UI oder Marker. `mainBuildAreaAnchor`,
+`foundationOverlayAnchor`, `foundationOverlayScale`, `focusCameraTarget`,
+`visualBounds`, `logicalBounds`, `hitTestShape` und `placementBounds` sind in
+`template.md` dokumentiert. Code bleibt blockiert, weil die explizite
+Freigabeentscheidung fehlt.
 
 Aktuell nicht erlaubt:
 
@@ -222,8 +225,9 @@ Aktueller Schwerpunkt:
 
 Die ToDos bis einschliesslich Device-Screenshot sind Asset- und
 Dokumentationsarbeit, kein Flutter-Code.
-Die lokale Device-Mock-Preview ist erledigt; der naechste offene Punkt ist ein
-freigabefaehiger App-/Device-Check mit Anker-/Bounds-Entscheidung.
+Die lokale Device-Mock-Preview, der isolierte Widget-Test-Harness und die
+Anker-/Bounds-Dokumentation sind erledigt. Der naechste offene Punkt ist die
+explizite Freigabeentscheidung fuer Phase 2E-D.
 
 ## 10. Stop-Regeln
 
