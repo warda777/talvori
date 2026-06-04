@@ -190,6 +190,49 @@ Layout-Regel:
 Der erste Bauplatz ist die Mitte des Lern->Bau-Gefuehls, aber er darf spaetere
 Zonen nicht verschliessen.
 
+## Expansion- Und Docking-Layout Als Pflicht
+
+Bewertung des generierten Base-Assets
+`assets/images/world/buildable_islands/forest_clearing/base.png`:
+
+- Das Asset besitzt eine freie zentrale Bauflaeche.
+- Es ist technisch als freigestelltes PNG nutzbar.
+- Es wirkt visuell schoen und hochwertig.
+- Es funktioniert aber noch nicht ausreichend als langfristig ausbaubares
+  Insel-/Grundstueck-Template.
+
+Grund fuer den Status `nachbessern`:
+
+- Die Insel wirkt zu abgeschlossen.
+- Erweiterungsflaechen sind nicht klar genug vorbereitet.
+- Docking-/Connector-Stellen sind nicht eindeutig genug.
+- Landwachstum von innen nach aussen ist nicht ausreichend sichtbar mitgedacht.
+- Das Asset ist schoen, aber noch nicht klar genug als ausbaubares
+  Spielsystem-Template.
+
+Buildable Starter-Inseln duerfen nicht nur eine zentrale Bauflaeche haben. Sie
+muessen von Anfang an Erweiterung und Docking mitdenken. Die Insel soll von
+innen nach aussen wachsen koennen:
+
+- Zentrum: erstes Fundament / Startgebaeude.
+- Innerer Ring: erster Weg, Lichtpunkt, kleine Deko.
+- Mittlerer Ring: Bibliothek, zweite BuildZone, Kategoriegebaeude.
+- Randbereiche: `dockingCandidates`, Connector-Anker, spaetere
+  Land-Erweiterung.
+- Aussenbereiche: moegliche Expansion-Module oder zusaetzliche Inselstuecke.
+
+Konkrete Layout-Regeln:
+
+- Mindestens zwei klare Docking-/Connector-Kandidaten am Rand.
+- Mindestens eine `future_expansion_area`.
+- Randflaechen duerfen nicht komplett durch Baeume oder Felsen blockiert sein.
+- Erweiterungsstellen sollen natuerlich wirken, zum Beispiel als flache
+  Felsnasen, offene Grasraender oder kleine Plateau-Kanten.
+- Keine fertigen Bruecken.
+- Keine technischen Steckpunkte.
+- Keine UI-Markierungen.
+- Trotzdem muss visuell erkennbar sein, wo spaeter etwas anschliessen koennte.
+
 ## 8. Zonenplan
 
 ### `main_build_area`
@@ -338,6 +381,8 @@ Landscape:
 Aus dem Greybox-Layout folgt fuer den Base-Prompt:
 
 - zentrale oder leicht vorne/unten versetzte natuerliche Bauflaeche,
+- center-to-edge growth layout,
+- first build area in center, future growth around it,
 - Rand-Baeume und Buesche,
 - ruhige Mitte,
 - keine fertigen Gebaeude,
@@ -345,6 +390,10 @@ Aus dem Greybox-Layout folgt fuer den Base-Prompt:
 - klare 2.5D-Perspektive,
 - transparente PNG-Ausgabe,
 - subtile Docking-faehige Raender,
+- island must include readable expansion-ready edges,
+- at least two natural docking candidate ledges,
+- at least one future expansion area,
+- do not make the island feel like a closed finished plateau,
 - sichtbarer schwebender Inselkoerper.
 
 Bereiche, die frei bleiben muessen:

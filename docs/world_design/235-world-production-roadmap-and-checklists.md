@@ -113,7 +113,7 @@ Freigabe bedeutet:
 | --- | --- | --- | --- |
 | Phase 2E-A | Buildable Waldlichtung Asset-Konzept | `fertig` | Konzept in `docs/world_design/236-buildable-forest-clearing-template-concept.md` dokumentiert. |
 | Phase 2E-A2 | Buildable Waldlichtung Greybox/Layout | `fertig` | Funktionales Layout in `docs/world_design/237-buildable-forest-clearing-greybox-layout.md` dokumentiert. |
-| Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `offen` | Freigestelltes Base-Asset ohne UI/Space/Schrift. |
+| Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `nachbessern` | Base-Asset wurde generiert, aber Expansion-/Docking-Layout ist noch nicht klar genug. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `offen` | Perspektivisch passendes Overlay fuer die echte Bauflaeche. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Template-Status, Entscheidung. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | blockiert | Erst erlaubt, wenn 2E-D freigegeben ist. |
@@ -123,8 +123,14 @@ Freigabe bedeutet:
 
 Aktuell erlaubter naechster Schritt:
 
-Base- und `foundation_started`-Prompts aus Phase 2E-A/2E-A2 ableiten,
-Dateistruktur/`template.md` vorbereiten und danach Phase 2E-B starten.
+Base-Asset-Prompt mit verbindlichen Expansion-/Docking-Anforderungen
+ueberarbeiten und Phase 2E-B erneut als Asset-Block ausfuehren.
+
+Grund:
+
+Das generierte Base-Asset besitzt zwar eine freie Bauflaeche, wirkt aber noch
+zu abgeschlossen. Erweiterungsflaechen, Docking-/Connector-Kandidaten und
+Landwachstum von innen nach aussen sind nicht deutlich genug vorbereitet.
 
 Aktuell nicht erlaubt:
 
