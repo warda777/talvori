@@ -6,8 +6,9 @@ Diese Datei beschreibt das aktuelle buildable Waldlichtung-Template als
 menschenlesbare Metadaten- und Planungsdatei. Sie ist noch keine technische
 Runtime-Konfiguration. Sie dokumentiert die begrenzte Freigabe fuer den sehr
 kleinen Phase-2E-E-Code-Slice und die formale Freigabe fuer den engen lokalen
-Phase-2F-Mock-Slice `foundation_complete` sowie den Start der
-Phase-2G-Planung und Asset-Prompt-Vorbereitung fuer `frame_started` / Rohbau.
+Phase-2F-Mock-Slice `foundation_complete` sowie den Start der Phase-2G-Planung,
+Asset-Prompt-Vorbereitung und Anchor-/Alignment-Definition fuer
+`frame_started` / Rohbau.
 
 Fuehrende Dokumente:
 
@@ -17,25 +18,29 @@ Fuehrende Dokumente:
 - `docs/world_design/238-multi-scale-world-and-interior-system.md`
 - `docs/world_design/239-world-scale-and-dimension-rules.md`
 - `docs/world_design/240-private-island-state-system.md`
+- `docs/world_design/245-build-alignment-and-anchor-system.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G Asset-Prompt vorbereitet`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G Prompt-Vorbereitung`
-- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; frame_started planned and prompted`
+- `status`: `2E-E bestanden / 2F bestanden / 2G Anchor-Block erforderlich`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G Anchor-Definition`
+- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; frame_started candidate present but not released`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
   - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
   - `foundation_complete`: `assets/images/world/buildable_islands/forest_clearing/foundation_complete.png`
+  - `frame_started_candidate`: `assets/images/world/buildable_islands/forest_clearing/frame_started.png`
+    - Status: vorhanden/lokal, aber nicht freigegeben.
 - `codeAllowed`:
   - `phase2EE`: `true`, nur fuer den abgeschlossenen sehr kleinen
     Phase-2E-E-Code-Slice
   - `phase2F`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
     `foundation_started -> foundation_complete`
-  - `phase2G`: `false`, Phase 2G ist nur geplant und als Prompt vorbereitet;
-    Code und Asset-Erzeugung bleiben bis Prompt-Freigabe, Asset-Erzeugung,
-    Preview, Device-Check und Freigabe blockiert.
+  - `phase2G`: `false`, Phase 2G ist geplant, als Prompt vorbereitet und
+    jetzt durch einen Anchor-/Alignment-Block gestoppt; Code und weitere
+    Asset-Freigabe bleiben bis Anchor-Definition, gezielter Asset-
+    Nachbesserung, Preview, Device-Check und Freigabe blockiert.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -45,9 +50,11 @@ Dieses Template ist code-freigegeben fuer:
 
 Jede Nutzung ausserhalb dieser Scopes braucht eine neue Freigabeentscheidung.
 `frame_started` / Rohbau ist aktuell nur als naechster geplanter
-`BuildAreaState` dokumentiert. Ein Asset-Prompt existiert in
-`docs/world_design/244-frame-started-asset-prompt.md`, ist aber noch nicht fuer
-Asset-Erzeugung freigegeben.
+`BuildAreaState` dokumentiert. Ein lokaler `frame_started.png`-Kandidat
+existiert, ist aber nicht freigegeben. Die manuelle Sichtpruefung verlangt ein
+exaktes Aufsetzen auf `foundation_complete`; deshalb ist vor weiterer
+Freigabe das Anchor-/Alignment-System aus
+`docs/world_design/245-build-alignment-and-anchor-system.md` fuehrend.
 
 ## 2. Zweck Des Assets
 
@@ -108,6 +115,10 @@ Vorlaeufige Sichtpruefung:
   und keine sichtbaren Chroma-Key-Reste.
 - `foundation_complete` ist formal fuer den engen lokalen Phase-2F-Mock-Slice
   freigegeben.
+- `frame_started` existiert als lokaler Kandidat, ist aber nicht freigegeben.
+- Grund: Die manuelle Sichtpruefung verlangt exaktere Pfosten-/Fuss-
+  Ausrichtung auf `foundation_complete`; ungefaehres Zentrum-Alignment reicht
+  fuer Rohbau nicht.
 
 Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
 ergaenzt und stuetzt die dokumentierten Freigabeentscheidungen fuer Phase 2E-E
@@ -180,7 +191,8 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
   - sichtbarer Overlay-Bereich: asset local `(575, 422)` bis `(995, 618)`,
     normalized `(0.374, 0.412)` bis `(0.648, 0.604)`
 - `foundationCompleteOverlayAnchor`:
-  - `TBD` fuer spaetere praezise Runtime-Konfiguration
+  - asset local: `(785, 520)`
+  - normalized: `(0.511, 0.508)`
   - lokale Preview: Overlay sitzt plausibel auf derselben `main_build_area`
     und nutzt denselben `1536 x 1024` Canvas
   - fuer den engen lokalen Phase-2F-Mock-Slice darf derselbe
@@ -217,6 +229,65 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
   - Zweck: erster Fundament-/Haus-/Vorplatz-Bereich innerhalb der
     `main_build_area`.
 
+### Phase-2G Anchor-/Footprint-Ergaenzung Fuer `foundation_complete`
+
+Diese Werte gelten fuer Asset-Prompts, Debug-Overlays und spaetere
+Template-Metadaten. Sie sind Asset-lokale Pixelwerte im `1536 x 1024` Canvas.
+
+- `foundationCompleteReferenceVisibleBounds`: `(525, 386)` bis `(1045, 653)`
+- `foundationCompleteReferenceCenter`: `(785, 519.5)`
+- `build_center`: `(785, 520)`
+- `foundation_complete_outer_polygon`:
+  - `(785, 386)`
+  - `(950, 420)`
+  - `(1045, 505)`
+  - `(1015, 585)`
+  - `(900, 650)`
+  - `(785, 653)`
+  - `(650, 650)`
+  - `(545, 585)`
+  - `(525, 515)`
+  - `(610, 425)`
+- `safe_inner_build_polygon`:
+  - `(785, 445)`
+  - `(895, 470)`
+  - `(930, 545)`
+  - `(875, 610)`
+  - `(785, 620)`
+  - `(695, 610)`
+  - `(640, 545)`
+  - `(675, 470)`
+- `max_frame_footprint_polygon`:
+  - `(785, 420)`
+  - `(925, 455)`
+  - `(970, 545)`
+  - `(905, 630)`
+  - `(785, 640)`
+  - `(665, 630)`
+  - `(600, 545)`
+  - `(645, 455)`
+- `supportAnchors`:
+  - `rear_left_support`: `(690, 475)`
+  - `rear_right_support`: `(880, 475)`
+  - `front_left_support`: `(690, 585)`
+  - `front_right_support`: `(880, 585)`
+  - `mid_support_center`: `(785, 520)`
+  - `mid_support_rear`: `(785, 465)`
+  - `mid_support_front`: `(785, 600)`
+- `supportTolerance`: `+/- 16 px` horizontal, `+/- 12 px` vertical
+- `contactPointRadius`: maximal ca. `18 x 12 px` fuer kleine Fussplatten
+- `frameStartedMaxSilhouetteBounds`: grob `(600, 315)` bis `(970, 705)`
+
+Regel:
+
+- `frame_started`-Pfosten/Fuesse muessen auf diesen Support-Ankern oder
+  innerhalb des `safe_inner_build_polygon` sitzen.
+- Sichtbare Fussplatten duerfen nicht ausserhalb des
+  `max_frame_footprint_polygon` auf Gras/Erde landen.
+- Zentrum-Alignment allein ist fuer `frame_started` nicht ausreichend.
+- Vor Freigabe ist eine Debug-Overlay-Pruefung mit
+  `foundation_complete + frame_started` Pflicht.
+
 ## 6. State-/Modul-Regeln
 
 - Base ist `IslandBaseState`, nicht vollstaendiger Ausbau.
@@ -235,11 +306,16 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
   `PlacedWorldItem`.
 - `frame_started` hat einen vorbereiteten Asset-Prompt in
   `docs/world_design/244-frame-started-asset-prompt.md`.
+- Ein lokaler `frame_started.png`-Kandidat existiert, ist aber nicht
+  freigegeben.
+- Weitere `frame_started`-Freigabe ist blockiert, bis die Anchor-/Footprint-
+  Regeln aus `docs/world_design/245-build-alignment-and-anchor-system.md`
+  angewendet und per Debug-Overlay bestanden wurden.
 - Empfohlene Materialrichtung fuer `frame_started`: leichter Holzrahmen mit
   hoechstens kleinen Stein-/Erdkontaktpunkten auf dem Fundament.
-- `frame_started` braucht vor Asset-Erzeugung eine explizite Prompt-Freigabe
-  und vor Code einen eigenen Preview-/Device-Check mit dokumentierter
-  Freigabe.
+- `frame_started` braucht vor weiterer Asset-Erzeugung oder Asset-
+  Nachbesserung einen Bezug auf die Anchor-/Footprint-Regeln aus `245` und vor
+  Code einen eigenen Preview-/Device-Check mit dokumentierter Freigabe.
 - Innenraeume sind eigene `InteriorState`.
 - Objektansichten sind eigene `ObjectDetailState`.
 - Keine spaeteren Items duerfen in Base eingebrannt werden.
@@ -297,7 +373,8 @@ In diesem Template-Block gilt:
 - Kein Interior/ObjectDetail.
 - Keine Phase-2G-Asset-Erzeugung.
 - Keine Phase-2G-App-Integration.
-- Kein `frame_started`-Overlay ohne ausdrueckliche Prompt-Freigabe.
+- Keine `frame_started`-Freigabe ohne Anchor-/Footprint- und
+  Debug-Overlay-Check.
 
 ## 10. Device-/Preview-Check
 
@@ -373,8 +450,13 @@ Phase-2F-Preview-Ergaenzung:
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
 - Freigabe- und Abschlussentscheidungen fuer Phase 2E-E und Phase 2F sind
   dokumentiert.
-- `frame_started` / Rohbau ist geplant und als Asset-Prompt vorbereitet;
-  Prompt-Freigabe, Asset, Preview, Device-Check und Freigabe fehlen.
+- `frame_started` / Rohbau ist geplant und als Asset-Prompt vorbereitet.
+- Ein lokaler `frame_started.png`-Kandidat existiert, ist aber nicht
+  freigegeben.
+- Anchor-/Footprint-Regeln fuer den Aufbau auf `foundation_complete` sind in
+  `docs/world_design/245-build-alignment-and-anchor-system.md` dokumentiert.
+- Vor weiterer Asset-Freigabe fehlen: Anchor-basierte Nachbesserung,
+  Alignment-Preview, Device-Check und Freigabe.
 
 ## 12. Freigabeentscheidung
 
@@ -386,9 +468,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2FCompletionCommit`: `b13d2162 fix: refine foundation complete guidance flow`
 - `phase2GPlanningStatus`: `started in docs/world_design/243-frame-started-plan.md`
 - `phase2GPromptStatus`: `prepared in docs/world_design/244-frame-started-asset-prompt.md; review open`
+- `phase2GAlignmentStatus`: `required in docs/world_design/245-build-alignment-and-anchor-system.md`
+- `phase2GFrameStartedCandidateStatus`: `present locally, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2G Prompt pruefen/freigeben oder nachbessern`
+- `nextAllowedStep`: `Phase 2G Prompt/Asset anhand der Anchor-Regeln nachbessern und erneute Alignment-Preview pruefen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -453,9 +537,17 @@ Phase-2G-Prompt-Vorbereitung gilt nur fuer:
 - Pruefung des Prompts durch den Nutzer,
 - Nachbesserung des Prompts, falls noetig.
 
+Phase-2G-Anchor-Definition gilt nur fuer:
+
+- exakte Support-Anker auf `foundation_complete`,
+- `safe_inner_build_polygon`,
+- `max_frame_footprint_polygon`,
+- Debug-Overlay-Gates fuer spaetere Asset-Freigabe,
+- Stopp der aktuellen `frame_started`-Freigabe.
+
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
-- Asset-Erzeugung,
+- Asset-Freigabe,
 - PNG-Aenderungen,
 - App-Integration,
 - Code,
