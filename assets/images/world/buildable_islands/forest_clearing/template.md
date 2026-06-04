@@ -20,8 +20,8 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E freigegeben / 2F freigegeben fuer engen lokalen Mock-Slice`
-- `phase`: `2E-B / 2E-C / 2E-D / 2F Freigabe`
+- `status`: `2E-E bestanden / 2F bestanden als lokaler Mock-Slice`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -36,7 +36,7 @@ Fuehrende Dokumente:
 Dieses Template ist code-freigegeben fuer:
 
 - den abgeschlossenen kleinen lokalen Phase-2E-E-Mock-Slice,
-- den engen lokalen Phase-2F-Mock-Slice `foundation_started ->
+- den abgeschlossenen engen lokalen Phase-2F-Mock-Slice `foundation_started ->
   foundation_complete`.
 
 Jede Nutzung ausserhalb dieser Scopes braucht eine neue Freigabeentscheidung.
@@ -325,6 +325,12 @@ Phase-2F-Preview-Ergaenzung:
 - `foundationCompletePreviewResult`: `passt`
 - `foundationCompletePreviewDecision`: formal freigegeben fuer den engen
   lokalen Phase-2F-Mock-Slice.
+- `foundationCompleteDeviceCheck`: ja, Geraetepruefung nach Umsetzung
+  bestanden.
+- `foundationCompleteImplementationCommit`:
+  `b13d2162 fix: refine foundation complete guidance flow`
+- `foundationCompleteImplementationResult`: `fertig / lokaler Mock-Slice
+  bestanden`
 
 ## 11. Offene Pruefungen
 
@@ -336,7 +342,7 @@ Phase-2F-Preview-Ergaenzung:
   Vergleichs-Previews vorgeprueft.
 - Lokales 2F-Prueffazit fuer `foundation_complete`: `passt`.
 - `foundation_complete` ist fuer den engen lokalen Phase-2F-Mock-Slice
-  freigegeben.
+  umgesetzt und bestanden.
 - Praezise `foundationCompleteOverlayAnchor`- und
   `foundationCompleteOverlayScale`-Werte bleiben fuer spaetere
   Runtime-/Produktionskonfiguration offen; der lokale 2F-Mock-Slice darf den
@@ -344,16 +350,18 @@ Phase-2F-Preview-Ergaenzung:
 - Eine echte physische Geraetepruefung kann optional spaeter ergaenzt werden,
   ist aber nicht Teil dieses isolierten Preview-Harness.
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
-- Freigabeentscheidungen fuer Phase 2E-E und Phase 2F sind dokumentiert.
+- Freigabe- und Abschlussentscheidungen fuer Phase 2E-E und Phase 2F sind
+  dokumentiert.
 
 ## 12. Freigabeentscheidung
 
 - `phase2EEDecision`: `released for Phase 2E-E local mock code slice`
 - `phase2EECodeAllowed`: `true`, nur fuer den abgeschlossenen kleinen lokalen
   Phase-2E-E-Mock-Slice
-- `phase2FDecision`: `released for narrow Phase 2F local mock code slice`
+- `phase2FDecision`: `completed narrow Phase 2F local mock code slice`
 - `phase2FCodeAllowed`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
-- `nextAllowedStep`: `Phase 2F kleiner lokaler Mock-Code-Slice mit foundation_complete`
+- `phase2FCompletionCommit`: `b13d2162 fix: refine foundation complete guidance flow`
+- `nextAllowedStep`: `Phase 2G Planung fuer frame_started / Rohbau`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -385,6 +393,25 @@ Die Phase-2F-Freigabe gilt ausschliesslich fuer:
   Buttons und Hinweisboxen,
 - vorbereitete Feedback-ID `build.foundation.complete`,
 - keine echte Audio-/FX-Implementierung.
+
+Phase 2F ist als lokaler Proof-of-Concept bestanden. Der Slice beweist nur:
+
+- Asset-Layering mit `base.png` + `foundation_complete.png`,
+- lokale BuildState-Umschaltung `foundation_started -> foundation_complete`,
+- direkten Tap-Flow ohne doppelte Bestaetigung,
+- kleine In-World-Labels ohne grosse Snackbar,
+- verbesserten Abstand zwischen Fokusrahmen, Bauobjekt und Label.
+
+Der Slice beweist noch nicht:
+
+- Rohbau / `frame_started`,
+- vollstaendige Bauarchitektur,
+- Balancing,
+- Reward Bridge,
+- Persistenz,
+- Ressourcenlogik,
+- Sound-/FX-Schicht,
+- Expansion, PlacedItems oder Interiors/ObjectDetail.
 
 Freigabe gilt nicht fuer:
 
@@ -420,5 +447,4 @@ Fuer Phase 2F zusaetzlich:
   enthalten,
 - `foundation_complete` darf nicht wie UI, Marker oder moderne Plattform
   wirken,
-- Phase-2F-Code darf nur innerhalb des oben definierten engen lokalen
-  Mock-Slices starten.
+- Phase 2F bleibt auf den abgeschlossenen engen lokalen Mock-Slice begrenzt.
