@@ -116,9 +116,9 @@ Freigabe bedeutet:
 | Phase 2E-A3 | Multi-Scale World/Interior System | `fertig` | Detailstufen in `docs/world_design/238-multi-scale-world-and-interior-system.md` dokumentiert. |
 | Phase 2E-A4 | World Scale and Dimension Rules | `fertig` | Massstab, Footprints und Referenzobjekte in `docs/world_design/239-world-scale-and-dimension-rules.md` dokumentiert. |
 | Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
-| Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `nachbessern` | Base-Asset wurde generiert, aber Expansion-/Docking-Layout ist noch nicht klar genug. |
-| Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `offen` | Perspektivisch passendes Overlay fuer die echte Bauflaeche. |
-| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Template-Status, Entscheidung. |
+| Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
+| Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
+| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Anker-/Bounds-Felder, Template-Status, Entscheidung. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | blockiert | Erst erlaubt, wenn 2E-D freigegeben ist. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
@@ -126,21 +126,15 @@ Freigabe bedeutet:
 
 Aktuell erlaubter naechster Schritt:
 
-Base-Asset-Prompt mit verbindlichen Expansion-/Docking-Anforderungen
-ueberarbeiten und Phase 2E-B erneut als Asset-Block ausfuehren. Dabei beachten:
-Phase 2E erzeugt nur ein Island-View-Base-Asset, nicht Innenraeume,
-Gebaeude-Detailansichten oder Objekt-Detailraeume. Der Prompt muss zusaetzlich
-die Scale-/Dimension-Regeln aus `239` beruecksichtigen: genug Platz fuer
-Startgebaeude, Hof/Vorplatz, ersten Weg, Deko, Future Expansion und plausible
-Docking-/Connector-Raender. Zusaetzlich gilt `240`: Das Base-Asset zeigt nur
-den Core/IslandBaseState und darf spaeteres Wachstum, Placed Items,
-Innenraeume oder Object-Detail-Zustaende nicht als ein einziges Bild loesen.
+Phase 2E-D: Asset-/Metadatenpruefung auf Geraet vorbereiten. Dabei muessen
+`base.png`, `foundation_started.png` und `template.md` in einer echten App- oder
+Mock-Ansicht geprueft werden. Zu klaeren sind Device-Screenshot,
+Anker-/Bounds-Felder, Template-Status und Freigabeentscheidung.
 
 Grund:
 
-Das generierte Base-Asset besitzt zwar eine freie Bauflaeche, wirkt aber noch
-zu abgeschlossen. Erweiterungsflaechen, Docking-/Connector-Kandidaten und
-Landwachstum von innen nach aussen sind nicht deutlich genug vorbereitet.
+`foundation_started` existiert und wurde visuell auf `base.png` vorgeprueft. Es
+ist noch nicht freigegeben, weil Device-Check und Ankerdefinition fehlen.
 
 Aktuell nicht erlaubt:
 

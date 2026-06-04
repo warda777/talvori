@@ -19,9 +19,11 @@ Fuehrende Dokumente:
 
 - `templateId`: `buildable_forest_clearing`
 - `status`: `generiert / in Pruefung`
-- `phase`: `2E-B`
-- `role`: `Island View Core/Base`
-- `assetPath`: `assets/images/world/buildable_islands/forest_clearing/base.png`
+- `phase`: `2E-B / 2E-C`
+- `role`: `Island View Core/Base with foundation_started overlay metadata`
+- `assetPaths`:
+  - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
+  - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
 - `codeAllowed`: `false`
 
 Dieses Template ist nicht fuer Code freigegeben, bis Device-Check,
@@ -42,7 +44,7 @@ Es enthaelt nicht:
 - Gebaeude,
 - Innenraeume,
 - Object Detail Views,
-- `foundation_started`,
+- `foundation_started` im Base-Asset,
 - fertige Wege,
 - Placed Items.
 
@@ -55,8 +57,8 @@ Wachstum kommt spaeter ueber:
 - `InteriorState`,
 - `ObjectDetailState`.
 
-Das Asset ist Grundlage fuer ein spaeteres `foundation_started`-Overlay, aber
-enthaelt dieses Overlay noch nicht.
+Das Base-Asset ist Grundlage fuer das separate `foundation_started`-Overlay,
+enthaelt dieses Overlay aber nicht selbst.
 
 ## 3. Visuelle Bewertung
 
@@ -68,6 +70,10 @@ Vorlaeufige Sichtpruefung:
 - Groessenverhaeltnisse wirken fuer Island View brauchbar.
 - Keine fertigen Gebaeude sichtbar.
 - Keine UI-/Marker-Optik sichtbar.
+- `foundation_started` existiert als separates transparentes Overlay.
+- Das Overlay sitzt vorlaeufig sauber auf der `main_build_area`.
+- Das Overlay wirkt wie ein frueher Fundamentansatz, nicht wie UI oder Marker.
+- Das Overlay ist noch nicht final freigegeben, weil der Device-Check fehlt.
 
 Diese Bewertung ersetzt keinen Device-Screenshot und keine finale Freigabe.
 
@@ -124,7 +130,7 @@ Technische Koordinaten werden nicht geschaetzt. Sie bleiben bis Device- und
 Layout-Check offen.
 
 - `mainBuildAreaAnchor`: TBD after device/layout check
-- `foundationOverlayAnchor`: TBD after `foundation_started` creation
+- `foundationOverlayAnchor`: TBD after device/layout check
 - `foundationOverlayScale`: TBD
 - `focusCameraTarget`: TBD
 - `visualBounds`: TBD
@@ -137,7 +143,8 @@ Layout-Check offen.
 - Base ist `IslandBaseState`, nicht vollstaendiger Ausbau.
 - Gebaeude werden spaeter `PlacedWorldItemState`.
 - Land-Erweiterungen werden spaeter `IslandExpansionState`.
-- `foundation_started` wird spaeter eigenes transparentes Overlay.
+- `foundation_started` ist als eigenes transparentes Overlay vorhanden, aber
+  noch nicht final freigegeben.
 - Innenraeume sind eigene `InteriorState`.
 - Objektansichten sind eigene `ObjectDetailState`.
 - Keine spaeteren Items duerfen in Base eingebrannt werden.
@@ -178,7 +185,7 @@ Diese Einschaetzung muss im Device-Check bestaetigt werden.
 In diesem Template-Block gilt:
 
 - Kein Code.
-- Kein `foundation_started`.
+- Keine App-Integration des `foundation_started`-Overlays.
 - Keine Persistenz.
 - Keine Reward Bridge.
 - Keine SRS-/`word_progress`-Aenderung.
@@ -189,16 +196,17 @@ In diesem Template-Block gilt:
 ## 10. Offene Pruefungen
 
 - Device-Screenshot in echter App-/Mock-Ansicht fehlt.
-- `foundation_started`-Overlay fehlt.
-- Echte Overlay-Passung ist ungeprueft.
+- `foundation_started`-Overlay existiert und wurde visuell auf `base.png`
+  vorgeprueft.
+- Echte Device-Pruefung der Overlay-Passung fehlt weiterhin.
 - Koordinaten/Anchors sind noch TBD.
 - Finale Freigabeentscheidung fehlt.
 
 ## 11. Vorlaeufige Entscheidung
 
-- `decision`: `generiert, template metadata prepared, pending foundation_started and device check`
+- `decision`: `foundation_started generated and visually pre-checked, pending device check and anchor definition`
 - `codeAllowed`: `false`
-- `nextAllowedStep`: `foundation_started overlay prompt / Phase 2E-C oder Device-Mock-Preview vorbereiten`
+- `nextAllowedStep`: `Phase 2E-D Asset-/Metadatenpruefung auf Geraet vorbereiten`
 
 ## 12. Akzeptanzkriterien Fuer Spaetere Freigabe
 
