@@ -473,9 +473,9 @@ Phase 2E:
 
 - eine Starter-Insel,
 - eine `main_build_area`,
-- eine `blocked_area`,
-- eine `decoration_area`,
-- zwei PathNodes,
+- eine `blocked_area` als nicht sichtbare Validierungsvorbereitung,
+- eine `decoration_area` als nicht sichtbare Architekturvorbereitung,
+- zwei PathNodes als nicht sichtbare Architekturvorbereitung,
 - Kontextkarte `Fundament beginnen`,
 - lokaler Mock-State,
 - sichtbarer Zustand: `empty` -> `foundation_started`,
@@ -504,6 +504,10 @@ Phase 2E nutzt nur:
 - eine Starter-Insel,
 - eine sichtbare/interaktive `main_build_area`,
 - den Zustand `empty` -> `foundation_started`.
+
+`blocked_area`, `decoration_area` und PathNodes duerfen nur unsichtbar als
+Architektur- oder Validierungsvorbereitung existieren. Sie erzeugen im ersten
+Slice keine Deko, keine Wege und keine zusaetzliche Nutzerinteraktion.
 
 Nicht Teil von Phase 2E:
 

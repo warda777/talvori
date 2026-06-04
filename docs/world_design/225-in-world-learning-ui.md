@@ -85,9 +85,9 @@ Beispiel:
 
 1. Nutzer tippt auf eine freie BuildZone.
 2. Karte zeigt `Fundament beginnen`.
-3. Aufgabe: `Erkenne 3 Woerter`.
+3. Aufgabe: `Erkenne 3 einfache Woerter`.
 4. Ressource: `Stein`, aber nur kontextuell und klein.
-5. Nach Erfolg: BuildZone wechselt von `leer` zu `Fundament begonnen`.
+5. Nach Erfolg: BuildZone wechselt von `empty` zu `foundation_started`.
 6. Tali/Vori kommentiert kurz.
 7. Karte bietet `Noch eine kleine Aufgabe` oder `Spaeter weitermachen`.
 
@@ -122,7 +122,7 @@ Text:
 
 Aufgabe:
 
-- 3 Woerter erkennen.
+- 3 einfache Woerter erkennen.
 
 Ressource:
 
@@ -131,7 +131,7 @@ Ressource:
 Wirkung:
 
 - Bauplatz wird vorbereitet oder Fundament beginnt.
-- Sichtbarer Zustand wechselt z. B. von `leer` zu `Fundament begonnen`.
+- Sichtbarer Zustand wechselt von `empty` zu `foundation_started`.
 
 UI-Regeln:
 
@@ -144,7 +144,7 @@ UI-Regeln:
 Beispielkarte:
 
 - Ziel: `Fundament beginnen`
-- Aufgabe: `Erkenne 3 Woerter`
+- Aufgabe: `Erkenne 3 einfache Woerter`
 - Wirkung: `Der Bauplatz bekommt seine erste Grundlage`
 - Aktion: `Aufgabe starten`
 
@@ -364,8 +364,8 @@ Grenzen:
 
 Umfang:
 
-- eine Starter-Insel,
-- eine BuildZone,
+- Waldlichtung als empfohlene Starter-Insel,
+- eine `main_build_area`,
 - Kontextkarte `Fundament beginnen`,
 - lokale Mock-Aufgabe,
 - sichtbar lokaler Fortschritt,
@@ -376,11 +376,11 @@ Umfang:
 
 Empfohlener Ablauf:
 
-1. Nutzer tippt auf BuildZone.
+1. Nutzer tippt auf `main_build_area`.
 2. Kontextkarte erscheint.
-3. Nutzer startet `3 Woerter erkennen`.
+3. Nutzer startet `3 einfache Woerter erkennen`.
 4. Lokale Mock-Antwort wird als erfolgreich bewertet.
-5. Bauzustand wechselt sichtbar zu `Fundament begonnen`.
+5. Bauzustand wechselt sichtbar zu `foundation_started`.
 6. Companion kommentiert.
 7. Naechster Schritt wird angeboten.
 
@@ -444,10 +444,10 @@ Dieses Dokument ist gut, wenn:
 
 Ein spaeterer erster UI-Slice gilt als passend, wenn:
 
-- Tap auf BuildZone eine Kontextkarte oeffnet,
+- Tap auf `main_build_area` eine Kontextkarte oeffnet,
 - die Karte `Fundament beginnen` zeigt,
 - eine lokale Mock-Aufgabe geloest werden kann,
-- die BuildZone sichtbar ihren Zustand aendert,
+- die BuildZone sichtbar zu `foundation_started` wechselt,
 - Companion-Kommentar erscheint,
 - keine Persistenz, keine Supabase Writes, keine echte Reward Bridge und keine
   SRS-/`word_progress`-Aenderungen passieren.

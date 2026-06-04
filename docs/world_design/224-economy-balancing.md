@@ -545,10 +545,9 @@ Fruehe Warnsignale:
 
 Fuer den ersten technischen Slice nur:
 
-- Stein,
-- Holz,
-- Wissen,
-- eine BuildZone,
+- sichtbar Stein,
+- Holz und Wissen nur als architektonische Vorbereitung, nicht UI-dominant,
+- eine `main_build_area`,
 - ein Fundament,
 - eine lokale Mock-Aufgabe,
 - lokale Mock-Kosten,
@@ -558,10 +557,10 @@ Fuer den ersten technischen Slice nur:
 
 Empfohlener Mini-Slice:
 
-1. BuildZone zeigt `Fundament beginnen`.
+1. `main_build_area` zeigt `Fundament beginnen`.
 2. Lokale Mock-Aufgabe erzeugt `Stein`.
 3. Mock-Kosten pruefen, ob das Fundament einen Fortschrittsschritt bekommt.
-4. Sichtbarer Zustand wechselt von `leer` zu `Fundament begonnen`.
+4. Sichtbarer Zustand wechselt von `empty` zu `foundation_started`.
 5. Kein SRS, kein `word_progress`, kein Supabase, keine Cloud.
 
 Warum so klein:
