@@ -198,6 +198,121 @@ assets/images/world/buildable_islands/forest_clearing/foundation_complete.png
 
 Diese Datei darf erst nach einem eigenen Asset-Block erzeugt werden.
 
+## Asset-Prompt Fuer `foundation_complete`
+
+Status:
+
+- Prompt vorbereitet.
+- Asset noch nicht erzeugt.
+- Kein Code.
+- Kein `template.md`-Update.
+- Keine App-Integration.
+
+Spaetere Zieldatei:
+
+```text
+assets/images/world/buildable_islands/forest_clearing/foundation_complete.png
+```
+
+Grundlage fuer den Asset-Block:
+
+- `assets/images/world/buildable_islands/forest_clearing/base.png`
+- `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
+
+### Vollstaendiger Prompt Auf Englisch
+
+```text
+Create a transparent PNG overlay only for the Talvori buildable forest clearing
+island. The overlay represents the "foundation_complete" construction state.
+
+Use the existing base island image and the existing "foundation_started" overlay
+as visual references. The new overlay must use the exact same canvas size as the
+base and foundation_started images: 1536 x 1024 px. It must be RGBA with a fully
+transparent background and transparent corners.
+
+The overlay must align to the existing main_build_area in the center / slightly
+front part of the forest clearing. It must use the same 2.5D / isometric mobile
+game perspective, lighting direction, material language and scale as the current
+base island and foundation_started overlay.
+
+Create a complete but simple natural stone foundation. It should look more
+finished, stable and intentional than foundation_started, clearly different from
+the earlier rough first foundation marks. It should look complete enough to be
+called a finished foundation and prepared to support a small cozy hut or house
+later.
+
+Use natural stones, compacted earth, subtle edge definition and materials that
+fit the forest clearing: soft earth, moss-adjacent stones, natural stone edges,
+slightly leveled ground. Keep it calm, high quality and integrated into the
+island. The foundation should feel like part of the world, not an interface
+element.
+
+The foundation must leave enough space for a future yard / front area / first
+path. It must not cover the future expansion area, must not block docking
+candidates, and must not dominate the island. It should remain category-neutral
+and not imply a specific future theme such as travel, health, business, school,
+food or technology.
+
+This is not a building state. Do not create frame_started. Do not add walls,
+roof, scaffolding, house parts, hut parts or finished building elements. The
+result should be only the completed foundation layer, ready for a later
+construction stage.
+```
+
+### Negative Prompt / Ausschlussliste
+
+```text
+No full island image. No background. No sky. No space background. No shadow
+rectangle. No matte. No hard rectangular canvas artifact. No green-screen or
+chroma-key residue.
+
+No house. No hut. No walls. No roof. No finished building. No building frame.
+No scaffolding. No doors. No windows. No furniture. No interior view.
+
+No modern concrete slab. No modern platform. No rectangular UI platform. No
+glowing magical platform. No UI marker. No selection ring. No button. No text.
+No labels. No icons. No category symbols.
+
+No heavy particles baked into the asset. No large dust cloud baked into the
+static overlay. No aggressive glow. No explosion. No magical effect.
+
+Do not make the foundation oversized. Do not cover the yard/front area. Do not
+cover the path candidate. Do not cover future expansion areas. Do not block
+docking candidates. Do not make it look like frame_started or a building.
+```
+
+### Technische Anforderungen
+
+- Output-Datei fuer den spaeteren Asset-Block:
+  `assets/images/world/buildable_islands/forest_clearing/foundation_complete.png`
+- PNG RGBA.
+- Transparente Ecken.
+- Transparenter Hintergrund.
+- Gleiche Canvas-Groesse wie Base und Started: `1536 x 1024`.
+- Sichtbarer Inhalt sitzt in derselben `main_build_area` wie
+  `foundation_started`.
+- Keine separate Inselgrafik.
+- Keine rechteckige Matte.
+- Keine harten Schatten, die wie ein eingebrannter Hintergrund wirken.
+- In diesem Prompt-Block wird kein Asset erzeugt.
+
+### Pruefkriterien Nach Erzeugung
+
+Nach einem spaeteren Asset-Block muss geprueft werden:
+
+- Overlay passt perspektivisch und raeumlich auf `base.png`.
+- Overlay ersetzt `foundation_started` visuell, statt dauerhaft darueber
+  gestapelt zu werden.
+- Es wirkt vollstaendig, stabil und natuerlich.
+- Es unterscheidet sich klar von `foundation_started`.
+- Es sieht nicht wie `frame_started` aus.
+- Es enthaelt keine Gebaeudeteile, keine Waende, kein Dach und kein Haus.
+- Es wirkt nicht wie UI, Marker, Plattform oder moderner Betonblock.
+- Es blockiert spaeteres Haus/Huette, Hof/Vorplatz, Weg, Expansion und
+  DockingCandidates nicht.
+- Es funktioniert in Island View und bleibt bei erwarteter Skalierung lesbar.
+- Es bleibt category-neutral.
+
 ## 7. Feedback-Sequenz
 
 Geplanter Build-Feedback-Moment:
@@ -364,8 +479,9 @@ Das Dokument ist gut, wenn:
 
 ## 15. Offene Fragen
 
-- Wie stark muss sich `foundation_complete` visuell von `foundation_started`
-  unterscheiden, ohne schon wie Rohbau zu wirken?
+- Reicht die im Asset-Prompt definierte Unterscheidung
+  "stabiler/fertiger als `foundation_started`, aber kein Rohbau/Gebaeude" nach
+  dem ersten Device-Check aus?
 - Soll der spaetere Phase-2F-Slice wieder nur einen Button nutzen oder bereits
   eine lokale Mock-Aufgabe vorbereiten?
 - Reicht ein einziges Overlay langfristig fuer den Fundamentabschluss oder
