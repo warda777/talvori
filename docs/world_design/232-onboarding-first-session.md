@@ -119,7 +119,7 @@ Ablauf:
 
 - Nutzer tippt auf Bauplatz.
 - Kontextkarte zeigt `Fundament beginnen`.
-- Lokale Mock-Aufgabe: 3 Woerter erkennen oder eine kleine Aufgabe.
+- Lokale Mock-Aufgabe: 3 einfache Woerter erkennen.
 - Sichtbar nur Stein oder Bauimpuls.
 - Ergebnis erfolgreich.
 - `foundation_started` wird sichtbar.
@@ -223,7 +223,7 @@ Ziel:
 Aufgabe:
 
 - sehr einfache lokale Mock-Aufgabe,
-- 3 Woerter erkennen oder eine kleine Aufgabe.
+- 3 einfache Woerter erkennen.
 
 Klarstellung fuer den ersten technischen Slice:
 
@@ -418,7 +418,7 @@ Der erste Slice aus Onboarding-Sicht:
 - `Meine Insel` fokussiert sie.
 - Bauplatz kann fokussiert/angetippt werden.
 - Kontextkarte `Fundament beginnen`.
-- Lokale Mock-Aufgabe erfolgreich.
+- Lokale Mock-Aufgabe `3 einfache Woerter erkennen` erfolgreich.
 - `foundation_started` sichtbar.
 - Companion-Kommentar.
 - Keine Persistenz.
