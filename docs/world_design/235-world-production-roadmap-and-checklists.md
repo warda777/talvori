@@ -261,7 +261,61 @@ Perspektive.
 Naechster Schritt: Prompt fuer Base-Asset ueberarbeiten.
 ```
 
-## 12. Prueffragen Vor Jedem Neuen Chat/Codex-Prompt
+## 12. Professional Game Development Research Gate
+
+Vor groesseren Entscheidungen zu Game Design, Weltarchitektur,
+Asset-Produktion, Buildable Islands, Economy/Balancing, Retention,
+Monetarisierung, Cloud/Backend, Social, Animation, Roadmap oder Code-Slices
+muss geprueft werden:
+
+- Wie wuerden professionelle Game-Entwickler oder erfahrene Studios dieses
+  Problem typischerweise angehen?
+- Gibt es bewaehrte Begriffe oder Methoden wie Prototype, Greybox/Blockout,
+  Vertical Slice, Pre-Production, Production Gate, LiveOps, Economy Balancing,
+  Level Design, Asset Pipeline, LOD oder Content Pipeline?
+- Gibt es aktuelle Quellen, Artikel, Dokumentationen oder Best Practices, die
+  fuer die Entscheidung relevant sind?
+- Was davon passt zu Talvori?
+- Was passt nicht zu Talvori?
+- Welche konkrete Ableitung ergibt sich daraus fuer Talvori?
+
+Regel:
+
+Codex soll bei solchen Entscheidungen nicht nur raten. Wenn die Frage
+professionelles Game Design, Asset-Produktion, Economy, Retention,
+Monetarisierung, Social, Cloud oder technische Architektur betrifft, soll Codex
+nach Moeglichkeit aktuelle Quellen recherchieren oder klar dokumentieren, wenn
+keine Recherche durchgefuehrt wurde.
+
+Jede research-informed Entscheidung haelt kurz fest:
+
+- recherchierte Orientierung / Quelle / Methode,
+- Ableitung fuer Talvori,
+- Entscheidung,
+- Risiken,
+- was dadurch erlaubt ist,
+- was dadurch blockiert ist.
+
+Beispiele:
+
+- Vor finaler Asset-Produktion pruefen: Wie arbeiten Profis mit
+  Greybox/Blockout, Asset Pipeline und Vertical Slice?
+- Vor Balancing pruefen: Wie arbeiten Aufbau-/Mobile-Games mit Quellen,
+  Senken, Progression und Anti-Farming?
+- Vor Monetarisierung pruefen: Wie decken Lern-/Mobile-Produkte Kosten, ohne
+  Pay-to-Win zu werden?
+- Vor Cloud-Entscheidung pruefen: Was muss lokal bleiben, was muss
+  server-authoritative sein?
+- Vor Social pruefen: Wie werden sichere Kommunikation, Moderation und
+  Missbrauchsschutz geplant?
+
+Stop-Regel:
+
+Wenn eine groessere Entscheidung getroffen werden soll, aber kein
+Professional-Research-Gate durchgefuehrt wurde, wird der Schritt gestoppt oder
+auf einen Recherche-/Planungsblock zurueckgefuehrt.
+
+## 13. Prueffragen Vor Jedem Neuen Chat/Codex-Prompt
 
 Vor jedem neuen Chat oder Codex-Prompt pruefen:
 
@@ -272,12 +326,16 @@ Vor jedem neuen Chat oder Codex-Prompt pruefen:
 - Ist der Scope klein?
 - Gibt es einen Testplan?
 - Wird etwas an Datenlogik, SRS, Reward oder Cloud geaendert?
+- Wurde geprueft, wie professionelle Game-Entwickler dieses Problem loesen
+  wuerden?
+- Ist eine aktuelle Recherche noetig?
+- Wurde die Ableitung fuer Talvori dokumentiert?
 - Ist ein Commit danach geplant?
 
 Wenn die Antwort auf eine dieser Fragen unklar ist, muss der Prompt zuerst
 praezisiert oder als Planungsblock formuliert werden.
 
-## 13. Akzeptanzkriterien
+## 14. Akzeptanzkriterien
 
 Dieses Dokument ist gut, wenn:
 
@@ -286,4 +344,5 @@ Dieses Dokument ist gut, wenn:
 - Phase 2E nicht wieder auf unvorbereiteten Assets startet,
 - ToDos und Statuswerte vorhanden sind,
 - Code-Gates und Asset-Gates klar sind,
+- das Professional-Research-Gate vor groesseren Entscheidungen sichtbar ist,
 - es als Checkliste vor neuen Prompts nutzbar ist.
