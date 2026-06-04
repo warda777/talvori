@@ -112,6 +112,7 @@ Freigabe bedeutet:
 | Phase | Aufgabe | Status | Ziel / Gate |
 | --- | --- | --- | --- |
 | Phase 2E-A | Buildable Waldlichtung Asset-Konzept | `fertig` | Konzept in `docs/world_design/236-buildable-forest-clearing-template-concept.md` dokumentiert. |
+| Phase 2E-A2 | Buildable Waldlichtung Greybox/Layout | `fertig` | Funktionales Layout in `docs/world_design/237-buildable-forest-clearing-greybox-layout.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `offen` | Freigestelltes Base-Asset ohne UI/Space/Schrift. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `offen` | Perspektivisch passendes Overlay fuer die echte Bauflaeche. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Template-Status, Entscheidung. |
@@ -122,7 +123,7 @@ Freigabe bedeutet:
 
 Aktuell erlaubter naechster Schritt:
 
-Base- und `foundation_started`-Prompts aus Phase 2E-A ableiten,
+Base- und `foundation_started`-Prompts aus Phase 2E-A/2E-A2 ableiten,
 Dateistruktur/`template.md` vorbereiten und danach Phase 2E-B starten.
 
 Aktuell nicht erlaubt:
