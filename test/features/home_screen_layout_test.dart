@@ -1439,8 +1439,61 @@ void main() {
     );
     expect(find.text('Waldlichtung · Meine Insel'), findsOneWidget);
     expect(find.text('Deine Insel: Waldlichtung'), findsOneWidget);
+    expect(
+      find.byKey(const Key('local-world-buildable-forest-clearing-base')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const Key('local-world-buildable-forest-clearing-foundation-started'),
+      ),
+      findsNothing,
+    );
 
-    await tester.tap(find.byKey(const Key('local-world-my-plot-action')));
+    await tester.tap(
+      find.byKey(const Key('local-world-forest-clearing-main-build-area')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('Fundament beginnen'), findsWidgets);
+    expect(
+      find.text('Die erste Grundlage deiner Insel entsteht.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('local-world-forest-clearing-begin-foundation')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-sheet')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(
+        const Key('local-world-buildable-forest-clearing-foundation-started'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('local-world-forest-clearing-build-feedback-glow')),
+      findsOneWidget,
+    );
+    expect(find.text('Fundament begonnen'), findsOneWidget);
+    expect(find.text('Das Fundament hat begonnen.'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const Key('local-world-my-plot-action')),
+      warnIfMissed: false,
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

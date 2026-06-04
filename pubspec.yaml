@@ -57,5 +57,6 @@ flutter:
     - assets/images/
     - assets/images/mascot/
     - assets/images/world/
+    - assets/images/world/buildable_islands/forest_clearing/
     - assets/sounds/
     - assets/local_import/default_words_v1.json

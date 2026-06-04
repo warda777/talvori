@@ -22,7 +22,10 @@ class LocalWorldPlotView extends StatelessWidget {
     super.key,
     required this.controller,
     required this.selectedStarterIslandId,
+    required this.forestClearingBuildState,
+    required this.activeBuildFeedbackId,
     required this.onStarterIslandTap,
+    required this.onForestClearingBuildAreaTap,
     required this.onCommunityRegionTap,
     required this.onCanvasMetricsChanged,
   });
@@ -31,7 +34,10 @@ class LocalWorldPlotView extends StatelessWidget {
 
   final TransformationController controller;
   final String? selectedStarterIslandId;
+  final LocalWorldForestClearingBuildState forestClearingBuildState;
+  final String? activeBuildFeedbackId;
   final ValueChanged<LocalWorldMapObject> onStarterIslandTap;
+  final VoidCallback onForestClearingBuildAreaTap;
   final ValueChanged<LocalWorldMapObject> onCommunityRegionTap;
   final ValueChanged<LocalWorldCanvasMetrics> onCanvasMetricsChanged;
 
@@ -53,7 +59,10 @@ class LocalWorldPlotView extends StatelessWidget {
             child: _AssetWorldCanvas(
               viewportSize: Size(constraints.maxWidth, constraints.maxHeight),
               selectedStarterIslandId: selectedStarterIslandId,
+              forestClearingBuildState: forestClearingBuildState,
+              activeBuildFeedbackId: activeBuildFeedbackId,
               onStarterIslandTap: onStarterIslandTap,
+              onForestClearingBuildAreaTap: onForestClearingBuildAreaTap,
               onCommunityRegionTap: onCommunityRegionTap,
               onCanvasMetricsChanged: onCanvasMetricsChanged,
             ),
@@ -68,14 +77,20 @@ class _AssetWorldCanvas extends StatelessWidget {
   const _AssetWorldCanvas({
     required this.viewportSize,
     required this.selectedStarterIslandId,
+    required this.forestClearingBuildState,
+    required this.activeBuildFeedbackId,
     required this.onStarterIslandTap,
+    required this.onForestClearingBuildAreaTap,
     required this.onCommunityRegionTap,
     required this.onCanvasMetricsChanged,
   });
 
   final Size viewportSize;
   final String? selectedStarterIslandId;
+  final LocalWorldForestClearingBuildState forestClearingBuildState;
+  final String? activeBuildFeedbackId;
   final ValueChanged<LocalWorldMapObject> onStarterIslandTap;
+  final VoidCallback onForestClearingBuildAreaTap;
   final ValueChanged<LocalWorldMapObject> onCommunityRegionTap;
   final ValueChanged<LocalWorldCanvasMetrics> onCanvasMetricsChanged;
 
@@ -715,6 +730,9 @@ class _AssetWorldCanvas extends StatelessWidget {
               object: region,
               worldSize: metrics.size,
               selected: false,
+              forestClearingBuildState: forestClearingBuildState,
+              activeBuildFeedbackId: activeBuildFeedbackId,
+              onForestClearingBuildAreaTap: onForestClearingBuildAreaTap,
               onTap: () => onCommunityRegionTap(region),
             ),
           _ShowcaseIsland(center: metrics.showcaseCenter, size: showcaseSize),
@@ -723,6 +741,9 @@ class _AssetWorldCanvas extends StatelessWidget {
               object: island,
               worldSize: metrics.size,
               selected: selectedStarterIslandId == island.id,
+              forestClearingBuildState: forestClearingBuildState,
+              activeBuildFeedbackId: activeBuildFeedbackId,
+              onForestClearingBuildAreaTap: onForestClearingBuildAreaTap,
               onTap: () => onStarterIslandTap(island),
             ),
           if (_showDockingDebug)
@@ -877,12 +898,18 @@ class _WorldMapObjectView extends StatelessWidget {
     required this.object,
     required this.worldSize,
     required this.selected,
+    required this.forestClearingBuildState,
+    required this.activeBuildFeedbackId,
+    required this.onForestClearingBuildAreaTap,
     required this.onTap,
   });
 
   final LocalWorldMapObject object;
   final Size worldSize;
   final bool selected;
+  final LocalWorldForestClearingBuildState forestClearingBuildState;
+  final String? activeBuildFeedbackId;
+  final VoidCallback onForestClearingBuildAreaTap;
   final VoidCallback onTap;
 
   @override
@@ -896,6 +923,10 @@ class _WorldMapObjectView extends StatelessWidget {
     final labelBottom = object.type == LocalWorldObjectType.community
         ? 2.0
         : 0.0;
+    final buildableForestClearing =
+        selected &&
+        object.type == LocalWorldObjectType.starter &&
+        object.id == 'forest-clearing';
 
     return Positioned(
       left: center.dx - width / 2,
@@ -917,14 +948,23 @@ class _WorldMapObjectView extends StatelessWidget {
                 top: 0,
                 width: width,
                 height: height,
-                child: Image.asset(
-                  object.assetPath,
-                  key: Key(
-                    'local-world-${object.type.keyName}-image-${object.id}',
-                  ),
-                  fit: BoxFit.contain,
-                  alignment: Alignment.center,
-                ),
+                child: buildableForestClearing
+                    ? _BuildableForestClearingIsland(
+                        buildState: forestClearingBuildState,
+                        activeBuildFeedbackId: activeBuildFeedbackId,
+                        imageKey: Key(
+                          'local-world-${object.type.keyName}-image-${object.id}',
+                        ),
+                        onBuildAreaTap: onForestClearingBuildAreaTap,
+                      )
+                    : Image.asset(
+                        object.assetPath,
+                        key: Key(
+                          'local-world-${object.type.keyName}-image-${object.id}',
+                        ),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                      ),
               ),
               if (selected)
                 Positioned(
@@ -964,6 +1004,264 @@ class _OwnershipBadge extends StatelessWidget {
         ],
       ),
       child: Icon(Icons.flag_rounded, size: 18, color: accent),
+    );
+  }
+}
+
+class _BuildableForestClearingIsland extends StatelessWidget {
+  const _BuildableForestClearingIsland({
+    required this.buildState,
+    required this.activeBuildFeedbackId,
+    required this.imageKey,
+    required this.onBuildAreaTap,
+  });
+
+  static const baseAssetPath =
+      'assets/images/world/buildable_islands/forest_clearing/base.png';
+  static const foundationStartedAssetPath =
+      'assets/images/world/buildable_islands/forest_clearing/foundation_started.png';
+  static const _assetAspectRatio = 1536 / 1024;
+  static const _buildAreaAnchor = Offset(0.511, 0.508);
+  static const _hitTestRadius = Size(0.18, 0.12);
+
+  final LocalWorldForestClearingBuildState buildState;
+  final String? activeBuildFeedbackId;
+  final Key imageKey;
+  final VoidCallback onBuildAreaTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final foundationStarted =
+        buildState == LocalWorldForestClearingBuildState.foundationStarted;
+    final feedbackActive =
+        activeBuildFeedbackId == LocalWorldBuildFeedbackIds.foundationStarted;
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final availableHeight = constraints.maxHeight;
+        final imageWidth = math.min(
+          availableWidth,
+          availableHeight * _assetAspectRatio,
+        );
+        final imageHeight = imageWidth / _assetAspectRatio;
+        final imageLeft = (availableWidth - imageWidth) / 2;
+        final imageTop = (availableHeight - imageHeight) / 2;
+        final anchor = Offset(
+          imageLeft + imageWidth * _buildAreaAnchor.dx,
+          imageTop + imageHeight * _buildAreaAnchor.dy,
+        );
+        final radius = Size(
+          imageWidth * _hitTestRadius.width,
+          imageHeight * _hitTestRadius.height,
+        );
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              left: imageLeft,
+              top: imageTop,
+              width: imageWidth,
+              height: imageHeight,
+              child: KeyedSubtree(
+                key: const Key('local-world-buildable-forest-clearing-base'),
+                child: Image.asset(
+                  baseAssetPath,
+                  key: imageKey,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.center,
+                ),
+              ),
+            ),
+            if (foundationStarted)
+              Positioned(
+                left: imageLeft,
+                top: imageTop,
+                width: imageWidth,
+                height: imageHeight,
+                child: _ForestClearingFoundationOverlay(
+                  reducedMotion: reducedMotion,
+                ),
+              ),
+            if (feedbackActive)
+              Positioned(
+                left: anchor.dx - radius.width * 0.95,
+                top: anchor.dy - radius.height * 0.95,
+                width: radius.width * 1.9,
+                height: radius.height * 1.9,
+                child: IgnorePointer(
+                  child: _ForestClearingBuildFeedbackGlow(
+                    reducedMotion: reducedMotion,
+                  ),
+                ),
+              ),
+            Positioned(
+              left: anchor.dx - radius.width,
+              top: anchor.dy - radius.height,
+              width: radius.width * 2,
+              height: radius.height * 2,
+              child: Semantics(
+                label: foundationStarted
+                    ? 'Fundament begonnen'
+                    : 'Fundament beginnen',
+                button: true,
+                child: GestureDetector(
+                  key: const Key('local-world-forest-clearing-main-build-area'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onBuildAreaTap,
+                  child: Center(
+                    child: _ForestClearingBuildAreaHint(
+                      started: foundationStarted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (foundationStarted)
+              Positioned(
+                left: anchor.dx - imageWidth * 0.12,
+                top: anchor.dy + radius.height * 0.72,
+                child: const _ForestClearingBuildStatusPill(),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ForestClearingFoundationOverlay extends StatelessWidget {
+  const _ForestClearingFoundationOverlay({required this.reducedMotion});
+
+  final bool reducedMotion;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: const Key(
+        'local-world-buildable-forest-clearing-foundation-started-animation',
+      ),
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: reducedMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final easedValue = value.clamp(0.0, 1.0).toDouble();
+        return Opacity(
+          opacity: easedValue,
+          child: Transform.scale(
+            scale: reducedMotion ? 1 : 0.96 + easedValue * 0.04,
+            child: child,
+          ),
+        );
+      },
+      child: Image.asset(
+        _BuildableForestClearingIsland.foundationStartedAssetPath,
+        key: const Key(
+          'local-world-buildable-forest-clearing-foundation-started',
+        ),
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+      ),
+    );
+  }
+}
+
+class _ForestClearingBuildFeedbackGlow extends StatelessWidget {
+  const _ForestClearingBuildFeedbackGlow({required this.reducedMotion});
+
+  final bool reducedMotion;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: const Key('local-world-forest-clearing-build-feedback-glow'),
+      tween: Tween<double>(begin: 1, end: 0),
+      duration: reducedMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 650),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final fade = value.clamp(0.0, 1.0).toDouble();
+        return Opacity(
+          opacity: fade,
+          child: Transform.scale(
+            scale: reducedMotion ? 1 : 0.92 + (1 - fade) * 0.14,
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFD980).withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: const Color(0xFFFFD980).withValues(alpha: 0.24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFFD980).withValues(alpha: 0.22),
+              blurRadius: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ForestClearingBuildAreaHint extends StatelessWidget {
+  const _ForestClearingBuildAreaHint({required this.started});
+
+  final bool started;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = started ? const Color(0xFFFFD980) : const Color(0xFF9FF7D5);
+    return Container(
+      key: const Key('local-world-forest-clearing-build-area-hint'),
+      width: started ? 28 : 34,
+      height: started ? 28 : 34,
+      decoration: BoxDecoration(
+        color: const Color(0xFF07101A).withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(color: accent.withValues(alpha: 0.12), blurRadius: 18),
+        ],
+      ),
+    );
+  }
+}
+
+class _ForestClearingBuildStatusPill extends StatelessWidget {
+  const _ForestClearingBuildStatusPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('local-world-forest-clearing-foundation-started-label'),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF07101A).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFFFFD980).withValues(alpha: 0.36),
+        ),
+      ),
+      child: const Text(
+        'Fundament begonnen',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0,
+        ),
+      ),
     );
   }
 }
@@ -1240,6 +1538,14 @@ enum LocalWorldObjectType {
 
   final String keyName;
 }
+
+class LocalWorldBuildFeedbackIds {
+  const LocalWorldBuildFeedbackIds._();
+
+  static const foundationStarted = 'build.foundation.started';
+}
+
+enum LocalWorldForestClearingBuildState { empty, foundationStarted }
 
 class LocalWorldMapObject {
   const LocalWorldMapObject({

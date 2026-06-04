@@ -116,30 +116,38 @@ Freigabe bedeutet:
 | Phase 2E-A3 | Multi-Scale World/Interior System | `fertig` | Detailstufen in `docs/world_design/238-multi-scale-world-and-interior-system.md` dokumentiert. |
 | Phase 2E-A4 | World Scale and Dimension Rules | `fertig` | Massstab, Footprints und Referenzobjekte in `docs/world_design/239-world-scale-and-dimension-rules.md` dokumentiert. |
 | Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
+| Phase 2E-A6 | Build Feedback Animation/Sound | `fertig` | Build-Feedback, minimale Animation, vorbereitete Effekt-ID und Sound-Grenzen in `docs/world_design/241-build-feedback-animation-and-sound.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
-| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `offen / erlaubt als kleiner lokaler Mock-Slice` | Erlaubt ist nur lokale Anzeige von `base.png` + `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started`. |
+| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `umgesetzt / lokal mock` | Lokale Anzeige von `base.png` + optionalem `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started` sind umgesetzt. Vor Commit muss der minimale Feedback-Scope aus 2E-A6 beachtet werden. Keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems oder Interiors. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
 
-Phase 2E-E: kleiner lokaler Code-Slice mit freigegebenen Assets.
-`base.png`, `foundation_started.png` und `template.md` wurden in einem
-isolierten Widget-Test-Harness sowie in einer temporaeren visuellen Preview mit
-Anker-/Bounds-Werten geprueft und fuer diesen engen Scope freigegeben.
+Visuelle Pruefung des umgesetzten lokalen Phase-2E-E-Mock-Slices auf Geraet
+oder realistischem Preview-Setup. Danach wird entschieden, ob der Slice
+nachgebessert wird oder Phase 2F geplant werden darf.
 
 Grund:
 
-`foundation_started` existiert und wurde in einer 430 x 932 Portrait-Preview
-auf `base.png` geprueft. Es sitzt visuell brauchbar auf der zentralen
-`main_build_area` und wirkt nicht wie UI oder Marker. `mainBuildAreaAnchor`,
-`foundationOverlayAnchor`, `foundationOverlayScale`, `focusCameraTarget`,
-`visualBounds`, `logicalBounds`, `hitTestShape` und `placementBounds` sind in
-`template.md` dokumentiert. Die Freigabeentscheidung fuer Phase 2E-D ist
-dokumentiert.
+Phase 2E-E nutzt nur die freigegebenen Waldlichtung-Assets, die dokumentierten
+Anker-/Bounds-Werte und einen lokalen Screen-State. Der Slice zeigt `base.png`
+im Zustand `empty`, legt bei `foundation_started` das Overlay darueber und
+bleibt bewusst ohne Persistenz, Supabase, SRS, Reward Bridge, echte
+Ressourcenlogik, Expansion, PlacedItems oder Interiors.
+
+Ergaenzung nach Phase 2E-A6:
+
+Der lokale Wechsel `empty -> foundation_started` darf nicht als harter
+Bildtausch bleiben. Fuer Phase 2E-E ist nur ein minimaler Feedback-Moment
+erlaubt: Fade-/Scale-Einblendung des Overlays, kurze dezente Hervorhebung der
+`main_build_area`, Hinweistext und vorbereitete Effekt-ID
+`build.foundation.started`. Sound/Effekte bleiben vorbereitet/minimal und sind
+nicht produktiv; es werden keine Sounddateien, keine Audio-Packages und keine
+Reward-/Ressourcenanimationen eingebaut.
 
 Aktuell nicht erlaubt:
 
@@ -236,8 +244,10 @@ Die ToDos bis einschliesslich Device-Screenshot waren Asset- und
 Dokumentationsarbeit und sind fuer Phase 2E-D erledigt.
 Die lokale Device-Mock-Preview, der isolierte Widget-Test-Harness und die
 Anker-/Bounds-Dokumentation sind erledigt. Die Freigabeentscheidung fuer Phase
-2E-D ist dokumentiert. Der naechste offene Punkt ist Phase 2E-E als kleiner
-lokaler Mock-Code-Slice.
+2E-D ist dokumentiert. Phase 2E-E ist als kleiner lokaler Mock-Code-Slice
+umgesetzt und muss vor Commit den minimalen Feedback-Scope aus Phase 2E-A6
+einhalten. Der naechste offene Punkt ist die visuelle Pruefung des umgesetzten
+Slices auf Geraet oder realistischem Preview-Setup.
 
 ## 10. Stop-Regeln
 

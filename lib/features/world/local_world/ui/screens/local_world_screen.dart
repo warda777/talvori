@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,6 +29,10 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
   late final TransformationController _worldTransformController;
   LocalWorldCanvasMetrics? _worldCanvasMetrics;
   LocalWorldMapObject? _selectedStarterIsland;
+  LocalWorldForestClearingBuildState _forestClearingBuildState =
+      LocalWorldForestClearingBuildState.empty;
+  String? _activeBuildFeedbackId;
+  Timer? _buildFeedbackTimer;
   bool _worldCameraInitialized = false;
 
   @override
@@ -37,6 +43,7 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
 
   @override
   void dispose() {
+    _buildFeedbackTimer?.cancel();
     _worldTransformController.dispose();
     super.dispose();
   }
@@ -79,6 +86,21 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
     );
   }
 
+  void _triggerForestClearingBuildFeedback() {
+    _buildFeedbackTimer?.cancel();
+    _activeBuildFeedbackId = LocalWorldBuildFeedbackIds.foundationStarted;
+    _buildFeedbackTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted ||
+          _activeBuildFeedbackId !=
+              LocalWorldBuildFeedbackIds.foundationStarted) {
+        return;
+      }
+      setState(() {
+        _activeBuildFeedbackId = null;
+      });
+    });
+  }
+
   void _showStarterIslandSheet(LocalWorldMapObject island) {
     showModalBottomSheet<void>(
       context: context,
@@ -98,6 +120,34 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
                 scale: 1.2,
               );
             });
+          },
+        );
+      },
+    );
+  }
+
+  void _handleForestClearingBuildAreaTap() {
+    if (_selectedStarterIsland?.id != 'forest-clearing') return;
+
+    if (_forestClearingBuildState ==
+        LocalWorldForestClearingBuildState.foundationStarted) {
+      _showWorldHint('Fundament begonnen');
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _ForestClearingBuildBottomSheet(
+          onBeginFoundation: () {
+            Navigator.of(context).pop();
+            setState(() {
+              _forestClearingBuildState =
+                  LocalWorldForestClearingBuildState.foundationStarted;
+              _triggerForestClearingBuildFeedback();
+            });
+            _showWorldHint('Das Fundament hat begonnen.');
           },
         );
       },
@@ -128,7 +178,10 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
             LocalWorldPlotView(
               controller: _worldTransformController,
               selectedStarterIslandId: _selectedStarterIsland?.id,
+              forestClearingBuildState: _forestClearingBuildState,
+              activeBuildFeedbackId: _activeBuildFeedbackId,
               onStarterIslandTap: _showStarterIslandSheet,
+              onForestClearingBuildAreaTap: _handleForestClearingBuildAreaTap,
               onCommunityRegionTap: _showCommunityRegionSheet,
               onCanvasMetricsChanged: (metrics) {
                 _worldCanvasMetrics = metrics;
@@ -400,6 +453,130 @@ class _CommunityRegionBottomSheet extends StatelessWidget {
                   height: 1.3,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ForestClearingBuildBottomSheet extends StatelessWidget {
+  const _ForestClearingBuildBottomSheet({required this.onBeginFoundation});
+
+  final VoidCallback onBeginFoundation;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        child: Container(
+          key: const Key('local-world-forest-clearing-build-sheet'),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF07101A).withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: LocalWorldScreen._mint.withValues(alpha: 0.38),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.44),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: LocalWorldScreen._mint.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: LocalWorldScreen._mint.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.foundation_rounded,
+                      color: LocalWorldScreen._mint,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fundament beginnen',
+                          key: Key(
+                            'local-world-forest-clearing-build-sheet-title',
+                          ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Waldlichtung',
+                          style: TextStyle(
+                            color: LocalWorldScreen._mint,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Die erste Grundlage deiner Insel entsteht.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.74),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key(
+                    'local-world-forest-clearing-begin-foundation',
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: LocalWorldScreen._mint,
+                    foregroundColor: const Color(0xFF02050A),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                  onPressed: onBeginFoundation,
+                  icon: const Icon(Icons.foundation_rounded),
+                  label: const Text(
+                    'Fundament beginnen',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
+                  ),
                 ),
               ),
             ],
