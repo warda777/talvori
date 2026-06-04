@@ -118,18 +118,18 @@ Freigabe bedeutet:
 | Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `generiert / in Pruefung` | Base-Asset existiert und ist in `template.md` dokumentiert; Device-Check und finale Freigabe fehlen. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
-| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigabe vorbereitet` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; explizite Freigabe fehlt. |
-| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | blockiert | Erst erlaubt, wenn 2E-D freigegeben ist. |
+| Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
+| Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `offen / erlaubt als kleiner lokaler Mock-Slice` | Erlaubt ist nur lokale Anzeige von `base.png` + `foundation_started.png`, `main_build_area` auf Waldlichtung und lokaler Mock-Zustand `empty -> foundation_started`. |
 | Phase 2F | `foundation_complete` | `geplant` / spaeter | Nach bewiesenem 2E-Slice. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
 
-Phase 2E-D Freigabeentscheidung dokumentieren. `base.png`,
-`foundation_started.png` und `template.md` wurden in einem isolierten
-Widget-Test-Harness sowie in einer temporaeren visuellen Preview mit
-Anker-/Bounds-Werten geprueft, aber noch nicht freigegeben.
+Phase 2E-E: kleiner lokaler Code-Slice mit freigegebenen Assets.
+`base.png`, `foundation_started.png` und `template.md` wurden in einem
+isolierten Widget-Test-Harness sowie in einer temporaeren visuellen Preview mit
+Anker-/Bounds-Werten geprueft und fuer diesen engen Scope freigegeben.
 
 Grund:
 
@@ -138,13 +138,22 @@ auf `base.png` geprueft. Es sitzt visuell brauchbar auf der zentralen
 `main_build_area` und wirkt nicht wie UI oder Marker. `mainBuildAreaAnchor`,
 `foundationOverlayAnchor`, `foundationOverlayScale`, `focusCameraTarget`,
 `visualBounds`, `logicalBounds`, `hitTestShape` und `placementBounds` sind in
-`template.md` dokumentiert. Code bleibt blockiert, weil die explizite
-Freigabeentscheidung fehlt.
+`template.md` dokumentiert. Die Freigabeentscheidung fuer Phase 2E-D ist
+dokumentiert.
 
 Aktuell nicht erlaubt:
 
-Phase 2E-E oder spaetere Bau-Code-Slices. Code bleibt blockiert, bis ein
-buildable Waldlichtung-Template freigegeben ist.
+Alles ausserhalb des kleinen Phase-2E-E-Mock-Slices bleibt blockiert:
+
+- keine Persistenz,
+- keine Supabase Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine echte Ressourcenlogik,
+- keine Expansion,
+- keine PlacedItems,
+- keine Interiors/ObjectDetail,
+- keine produktive Bau-/Lernlogik.
 
 ## 6. Dokument-Abhaengigkeiten
 
@@ -223,11 +232,12 @@ Konkrete ToDos:
 
 Aktueller Schwerpunkt:
 
-Die ToDos bis einschliesslich Device-Screenshot sind Asset- und
-Dokumentationsarbeit, kein Flutter-Code.
+Die ToDos bis einschliesslich Device-Screenshot waren Asset- und
+Dokumentationsarbeit und sind fuer Phase 2E-D erledigt.
 Die lokale Device-Mock-Preview, der isolierte Widget-Test-Harness und die
-Anker-/Bounds-Dokumentation sind erledigt. Der naechste offene Punkt ist die
-explizite Freigabeentscheidung fuer Phase 2E-D.
+Anker-/Bounds-Dokumentation sind erledigt. Die Freigabeentscheidung fuer Phase
+2E-D ist dokumentiert. Der naechste offene Punkt ist Phase 2E-E als kleiner
+lokaler Mock-Code-Slice.
 
 ## 10. Stop-Regeln
 

@@ -4,7 +4,8 @@ Stand: 2026-06-04
 
 Diese Datei beschreibt das aktuelle buildable Waldlichtung-Template als
 menschenlesbare Metadaten- und Planungsdatei. Sie ist noch keine technische
-Runtime-Konfiguration und keine Freigabe fuer Code.
+Runtime-Konfiguration. Sie dokumentiert die begrenzte Freigabe fuer den sehr
+kleinen Phase-2E-E-Code-Slice.
 
 Fuehrende Dokumente:
 
@@ -18,16 +19,17 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `freigabe vorbereitet`
+- `status`: `freigegeben`
 - `phase`: `2E-B / 2E-C / 2E-D`
 - `role`: `Island View Core/Base with foundation_started overlay metadata`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
   - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
-- `codeAllowed`: `false`
+- `codeAllowed`: `true`, nur fuer den sehr kleinen Phase-2E-E-Code-Slice
 
-Dieses Template ist nicht fuer Code freigegeben, bis die
-Freigabeentscheidung explizit dokumentiert wurde.
+Dieses Template ist ausschliesslich fuer den kleinen lokalen Phase-2E-E-Mock-
+Slice freigegeben. Jede Nutzung ausserhalb dieses Scopes braucht eine neue
+Freigabeentscheidung.
 
 ## 2. Zweck Des Assets
 
@@ -73,11 +75,10 @@ Vorlaeufige Sichtpruefung:
 - `foundation_started` existiert als separates transparentes Overlay.
 - Das Overlay sitzt vorlaeufig sauber auf der `main_build_area`.
 - Das Overlay wirkt wie ein frueher Fundamentansatz, nicht wie UI oder Marker.
-- Das Overlay ist noch nicht final freigegeben, weil die explizite
-  Freigabeentscheidung fehlt.
+- Das Overlay ist fuer den kleinen lokalen Phase-2E-E-Mock-Slice freigegeben.
 
 Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
-ergaenzt, ersetzt aber keine finale Freigabeentscheidung.
+ergaenzt und stuetzt die dokumentierte Freigabeentscheidung fuer Phase 2E-E.
 
 ## 4. Zonen
 
@@ -176,8 +177,8 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
 - Base ist `IslandBaseState`, nicht vollstaendiger Ausbau.
 - Gebaeude werden spaeter `PlacedWorldItemState`.
 - Land-Erweiterungen werden spaeter `IslandExpansionState`.
-- `foundation_started` ist als eigenes transparentes Overlay vorhanden, aber
-  noch nicht final freigegeben.
+- `foundation_started` ist als eigenes transparentes Overlay vorhanden und nur
+  fuer den kleinen lokalen Phase-2E-E-Mock-Slice freigegeben.
 - Innenraeume sind eigene `InteriorState`.
 - Objektansichten sind eigene `ObjectDetailState`.
 - Keine spaeteren Items duerfen in Base eingebrannt werden.
@@ -252,14 +253,14 @@ In diesem Template-Block gilt:
 - `repoHarnessFilesCreated`: ja,
   `test/world_design/buildable_forest_clearing_template_preview_test.dart`.
 - `repoPreviewFilesCreated`: nein, Preview-PNGs bleiben temporaer.
-- `result`: freigabe vorbereitet / nicht freigegeben.
+- `result`: freigegeben fuer Phase 2E-E.
 - `begruendung`: Das Overlay sitzt in der Mock-Preview sauber auf der zentralen
   `main_build_area`, wirkt wie ein frueher Fundamentansatz und nicht wie UI
   oder Marker. Die Bauflaeche bleibt in Portrait lesbar, Standard-UI-Zonen
   wuerden den Bauplatz in dieser Mock-Komposition nicht verdecken, und Raum fuer
   spaeteres kleines Haus, Hof, Weg, Deko und Erweiterung bleibt plausibel.
-  Die Anker-/Bounds-Werte sind fuer Phase 2E ausreichend dokumentiert. Freigabe
-  fehlt weiterhin, weil sie noch nicht explizit entschieden wurde.
+  Die Anker-/Bounds-Werte sind fuer Phase 2E ausreichend dokumentiert. Die
+  Freigabe gilt nur fuer den kleinen lokalen Phase-2E-E-Mock-Slice.
 
 ## 11. Offene Pruefungen
 
@@ -270,13 +271,30 @@ In diesem Template-Block gilt:
 - Eine echte physische Geraetepruefung kann optional spaeter ergaenzt werden,
   ist aber nicht Teil dieses isolierten Preview-Harness.
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
-- Finale Freigabeentscheidung fehlt.
+- Freigabeentscheidung fuer Phase 2E-E ist dokumentiert.
 
-## 12. Vorlaeufige Entscheidung
+## 12. Freigabeentscheidung
 
-- `decision`: `app-preview harness and visual bounds check acceptable; release prepared, not released; pending explicit release decision`
-- `codeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2E-D Freigabeentscheidung dokumentieren; Phase 2E-E bleibt bis dahin blockiert`
+- `decision`: `released for Phase 2E-E local mock code slice`
+- `codeAllowed`: `true`, nur fuer den kleinen lokalen Phase-2E-E-Mock-Slice
+- `nextAllowedStep`: `Phase 2E-E kleiner lokaler Code-Slice mit freigegebenen Assets`
+
+Freigabe gilt nur fuer:
+
+- lokale Anzeige von `base.png` + `foundation_started.png`,
+- `main_build_area` auf der Waldlichtung,
+- lokalen Mock-Zustand `empty -> foundation_started`.
+
+Freigabe gilt nicht fuer:
+
+- Persistenz,
+- Supabase,
+- Reward Bridge,
+- SRS-/`word_progress`,
+- echtes Expansion-System,
+- PlacedItem-System,
+- Interior/ObjectDetail,
+- produktive Bau-/Lernlogik.
 
 ## 13. Akzeptanzkriterien Fuer Spaetere Freigabe
 
