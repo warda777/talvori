@@ -115,6 +115,7 @@ Freigabe bedeutet:
 | Phase 2E-A2 | Buildable Waldlichtung Greybox/Layout | `fertig` | Funktionales Layout in `docs/world_design/237-buildable-forest-clearing-greybox-layout.md` dokumentiert. |
 | Phase 2E-A3 | Multi-Scale World/Interior System | `fertig` | Detailstufen in `docs/world_design/238-multi-scale-world-and-interior-system.md` dokumentiert. |
 | Phase 2E-A4 | World Scale and Dimension Rules | `fertig` | Massstab, Footprints und Referenzobjekte in `docs/world_design/239-world-scale-and-dimension-rules.md` dokumentiert. |
+| Phase 2E-A5 | Private Island State System | `fertig` | State-/Modulsystem in `docs/world_design/240-private-island-state-system.md` dokumentiert. |
 | Phase 2E-B | Asset-Erzeugung Waldlichtung buildable base | `nachbessern` | Base-Asset wurde generiert, aber Expansion-/Docking-Layout ist noch nicht klar genug. |
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `offen` | Perspektivisch passendes Overlay fuer die echte Bauflaeche. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `offen` | Device-Screenshot, Template-Status, Entscheidung. |
@@ -131,7 +132,9 @@ Phase 2E erzeugt nur ein Island-View-Base-Asset, nicht Innenraeume,
 Gebaeude-Detailansichten oder Objekt-Detailraeume. Der Prompt muss zusaetzlich
 die Scale-/Dimension-Regeln aus `239` beruecksichtigen: genug Platz fuer
 Startgebaeude, Hof/Vorplatz, ersten Weg, Deko, Future Expansion und plausible
-Docking-/Connector-Raender.
+Docking-/Connector-Raender. Zusaetzlich gilt `240`: Das Base-Asset zeigt nur
+den Core/IslandBaseState und darf spaeteres Wachstum, Placed Items,
+Innenraeume oder Object-Detail-Zustaende nicht als ein einziges Bild loesen.
 
 Grund:
 
