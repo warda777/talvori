@@ -86,9 +86,11 @@ Aktueller Stand der Talvori-Welt-Produktion:
   `b13d2162 fix: refine foundation complete guidance flow` abgeschlossen.
 - Phase 2G (`frame_started` / Rohbau) wurde als reiner Planungsblock in
   `docs/world_design/243-frame-started-plan.md` gestartet.
-- Der naechste Blocker betrifft Phase-2G-Asset-Erzeugung, Phase-2G-Code und
-  jede groessere Bau-, Lern-, Reward-, Persistenz-, Sound-/FX- oder
-  Expansion-Architektur.
+- Der Asset-Prompt-/Freigabeblock fuer `frame_started` wurde in
+  `docs/world_design/244-frame-started-asset-prompt.md` vorbereitet.
+- Der naechste Blocker betrifft die Prompt-Freigabe, Phase-2G-Asset-
+  Erzeugung, Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
+  Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
 Interpretation:
 
@@ -102,10 +104,11 @@ Reward- oder Persistenzarchitektur ableiten.
 
 Hauptblocker:
 
-Phase 2F ist abgeschlossen. Phase 2G ist nur als Planung gestartet.
-`frame_started` / Rohbau darf daraus nicht automatisch als Asset oder Code
-gestartet werden. Asset-Prompt, Asset-Erzeugung und Code brauchen jeweils
-eigene Freigabe und eine erneute Pruefung der Gates.
+Phase 2F ist abgeschlossen. Phase 2G ist nur als Planung und
+Asset-Prompt-Vorbereitung gestartet. `frame_started` / Rohbau darf daraus nicht
+automatisch als Asset oder Code gestartet werden. Der Prompt muss zuerst
+geprueft, freigegeben oder nachgebessert werden. Asset-Erzeugung und Code
+brauchen danach jeweils eigene Freigabe und eine erneute Pruefung der Gates.
 
 Vor jedem Phase-2G-Code oder jedem Ausbau ausserhalb des abgeschlossenen
 lokalen Phase-2F-Mock-Slices muss erneut geprueft werden:
@@ -138,7 +141,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
 | Phase 2F | `foundation_complete` | `fertig / lokaler Mock-Slice bestanden` | Lokale Mock-Erweiterung `foundation_started -> foundation_complete` ist umgesetzt. Anzeige `base.png` + `foundation_complete.png` ist umgesetzt; `foundation_complete` ersetzt `foundation_started` visuell ohne dauerhaftes Stapeln. Direkter Tap-Flow funktioniert. Grosse Snackbar wurde entfernt. Kleine In-World-Labels `Fundament begonnen` und `Fundament fertig` bleiben. Label-Abstand wurde verbessert und auf Geraet geprueft. Feedback-ID `build.foundation.complete` ist vorbereitet, ohne Sound-/FX-Implementierung. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, Ressourcenlogik, Sound-/FX-Schicht, Audio/Sounddateien, Expansion, PlacedItems, Interiors/ObjectDetail oder produktive Bau-/Lernlogik. Commit: `b13d2162 fix: refine foundation complete guidance flow`. |
-| Phase 2G | `frame_started` / Rohbau | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/243-frame-started-plan.md`. `frame_started` bleibt geplant als `BuildAreaState`/Overlay nach `foundation_complete`, nicht als `PlacedWorldItem`. Code und Asset-Erzeugung bleiben blockiert. Naechster erlaubter Schritt nach Planung ist ein Asset-Prompt-/Freigabeblock mit kurzem fokussiertem Research-Gate, nicht Code. |
+| Phase 2G | `frame_started` / Rohbau | `Asset-Prompt vorbereitet / Freigabe offen` | Reiner Planungsblock in `docs/world_design/243-frame-started-plan.md`; Asset-Prompt-/Freigabeblock in `docs/world_design/244-frame-started-asset-prompt.md`. `frame_started` bleibt geplant als `BuildAreaState`/Overlay nach `foundation_complete`, nicht als `PlacedWorldItem`. Empfehlung: leichter Holzrahmen mit hoechstens kleinen Stein-/Erdkontaktpunkten. Code und Asset-Erzeugung bleiben blockiert. Naechster erlaubter Schritt ist Prompt pruefen/freigeben oder Prompt nachbessern, nicht direkt Asset-Erzeugung oder Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -152,9 +155,13 @@ Phase 2F ist abgeschlossen und committed:
 Phase 2G ist als Planungsblock gestartet:
 `docs/world_design/243-frame-started-plan.md`.
 
-Der naechste sinnvolle Schritt ist nicht automatisch Phase-2G-Code, sondern ein
-Asset-Prompt-/Freigabeblock fuer `frame_started` mit kurzem fokussiertem
-Research-Gate. Asset-Erzeugung und Code bleiben bis dahin blockiert.
+Der Asset-Prompt-/Freigabeblock fuer `frame_started` ist vorbereitet:
+`docs/world_design/244-frame-started-asset-prompt.md`.
+
+Der naechste sinnvolle Schritt ist nicht automatisch Asset-Erzeugung oder
+Phase-2G-Code, sondern Prompt-Pruefung: Prompt freigeben oder nachbessern.
+Asset-Erzeugung und Code bleiben bis zu einer ausdruecklichen Freigabe
+blockiert.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -193,8 +200,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
 
 - `foundation_complete` ist nur als lokaler Mock-Slice abgeschlossen;
   produktive Bau-/Lernlogik bleibt blockiert.
-- Phase 2G (`frame_started` / Rohbau) ist nur geplant, aber nicht als Asset
-  erzeugt, nicht freigegeben und darf nicht automatisch gebaut werden.
+- Phase 2G (`frame_started` / Rohbau) ist geplant und als Asset-Prompt
+  vorbereitet, aber nicht als Asset erzeugt, nicht freigegeben und darf nicht
+  automatisch gebaut werden.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -214,7 +222,7 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Interiors/ObjectDetail,
 - keine produktive Bau-/Lernlogik,
 - keine Sounddateien oder Audio-Implementierung,
-- keine Phase-2G-Asset-Erzeugung ohne Asset-Prompt-/Freigabeblock,
+- keine Phase-2G-Asset-Erzeugung ohne ausdrueckliche Prompt-Freigabe,
 - kein Phase-2G-Code ohne Asset, Preview, Device-Check und Freigabe,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
@@ -310,9 +318,12 @@ engen lokalen Mock-Slice abgeschlossen.
 freigegeben, als lokaler Phase-2F-Mock-Slice umgesetzt, auf Geraet geprueft
 und mit Commit `b13d2162 fix: refine foundation complete guidance flow`
 abgeschlossen. Phase 2G-Planung (`frame_started` / Rohbau) wurde mit
-`docs/world_design/243-frame-started-plan.md` gestartet. Der naechste offene
-Schritt ist ein Asset-Prompt-/Freigabeblock fuer `frame_started`; Code bleibt
-blockiert, bis Asset, Preview, Device-Check, Freigabe und Tests definiert sind.
+`docs/world_design/243-frame-started-plan.md` gestartet. Der
+Asset-Prompt-/Freigabeblock wurde in
+`docs/world_design/244-frame-started-asset-prompt.md` vorbereitet. Der naechste
+offene Schritt ist Prompt-Pruefung: freigeben oder nachbessern. Asset-Erzeugung
+und Code bleiben blockiert, bis Prompt, Asset, Preview, Device-Check, Freigabe
+und Tests definiert sind.
 
 ## 10. Stop-Regeln
 

@@ -7,7 +7,7 @@ menschenlesbare Metadaten- und Planungsdatei. Sie ist noch keine technische
 Runtime-Konfiguration. Sie dokumentiert die begrenzte Freigabe fuer den sehr
 kleinen Phase-2E-E-Code-Slice und die formale Freigabe fuer den engen lokalen
 Phase-2F-Mock-Slice `foundation_complete` sowie den Start der
-Phase-2G-Planung fuer `frame_started` / Rohbau.
+Phase-2G-Planung und Asset-Prompt-Vorbereitung fuer `frame_started` / Rohbau.
 
 Fuehrende Dokumente:
 
@@ -21,9 +21,9 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G Planung gestartet`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G Planung`
-- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; frame_started planned`
+- `status`: `2E-E bestanden / 2F bestanden / 2G Asset-Prompt vorbereitet`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G Prompt-Vorbereitung`
+- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; frame_started planned and prompted`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
   - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
@@ -33,8 +33,9 @@ Fuehrende Dokumente:
     Phase-2E-E-Code-Slice
   - `phase2F`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
     `foundation_started -> foundation_complete`
-  - `phase2G`: `false`, Phase 2G ist nur geplant; Code und Asset-Erzeugung
-    bleiben bis Asset-Prompt, Preview, Device-Check und Freigabe blockiert.
+  - `phase2G`: `false`, Phase 2G ist nur geplant und als Prompt vorbereitet;
+    Code und Asset-Erzeugung bleiben bis Prompt-Freigabe, Asset-Erzeugung,
+    Preview, Device-Check und Freigabe blockiert.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -44,8 +45,9 @@ Dieses Template ist code-freigegeben fuer:
 
 Jede Nutzung ausserhalb dieser Scopes braucht eine neue Freigabeentscheidung.
 `frame_started` / Rohbau ist aktuell nur als naechster geplanter
-`BuildAreaState` dokumentiert und nicht fuer Asset-Erzeugung oder Code
-freigegeben.
+`BuildAreaState` dokumentiert. Ein Asset-Prompt existiert in
+`docs/world_design/244-frame-started-asset-prompt.md`, ist aber noch nicht fuer
+Asset-Erzeugung freigegeben.
 
 ## 2. Zweck Des Assets
 
@@ -231,9 +233,13 @@ Screen-Pixel werden daraus erst durch den Renderer abgeleitet.
 - `frame_started` ist nur geplant: erster Rohbauzustand nach
   `foundation_complete`, weiterhin als `BuildAreaState`/Overlay, nicht als
   `PlacedWorldItem`.
-- `frame_started` braucht vor Asset-Erzeugung einen eigenen
-  Asset-Prompt-/Freigabeblock und vor Code einen eigenen Preview-/Device-Check
-  mit dokumentierter Freigabe.
+- `frame_started` hat einen vorbereiteten Asset-Prompt in
+  `docs/world_design/244-frame-started-asset-prompt.md`.
+- Empfohlene Materialrichtung fuer `frame_started`: leichter Holzrahmen mit
+  hoechstens kleinen Stein-/Erdkontaktpunkten auf dem Fundament.
+- `frame_started` braucht vor Asset-Erzeugung eine explizite Prompt-Freigabe
+  und vor Code einen eigenen Preview-/Device-Check mit dokumentierter
+  Freigabe.
 - Innenraeume sind eigene `InteriorState`.
 - Objektansichten sind eigene `ObjectDetailState`.
 - Keine spaeteren Items duerfen in Base eingebrannt werden.
@@ -291,7 +297,7 @@ In diesem Template-Block gilt:
 - Kein Interior/ObjectDetail.
 - Keine Phase-2G-Asset-Erzeugung.
 - Keine Phase-2G-App-Integration.
-- Kein `frame_started`-Overlay ohne eigenen Asset-Prompt-/Freigabeblock.
+- Kein `frame_started`-Overlay ohne ausdrueckliche Prompt-Freigabe.
 
 ## 10. Device-/Preview-Check
 
@@ -367,8 +373,8 @@ Phase-2F-Preview-Ergaenzung:
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
 - Freigabe- und Abschlussentscheidungen fuer Phase 2E-E und Phase 2F sind
   dokumentiert.
-- `frame_started` / Rohbau ist nur geplant; Asset, Preview, Device-Check und
-  Freigabe fehlen.
+- `frame_started` / Rohbau ist geplant und als Asset-Prompt vorbereitet;
+  Prompt-Freigabe, Asset, Preview, Device-Check und Freigabe fehlen.
 
 ## 12. Freigabeentscheidung
 
@@ -379,9 +385,10 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2FCodeAllowed`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
 - `phase2FCompletionCommit`: `b13d2162 fix: refine foundation complete guidance flow`
 - `phase2GPlanningStatus`: `started in docs/world_design/243-frame-started-plan.md`
+- `phase2GPromptStatus`: `prepared in docs/world_design/244-frame-started-asset-prompt.md; review open`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2G Asset-Prompt-/Freigabeblock fuer frame_started / Rohbau`
+- `nextAllowedStep`: `Phase 2G Prompt pruefen/freigeben oder nachbessern`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -440,7 +447,13 @@ Phase-2G-Planung gilt nur fuer:
 - Abgrenzung zu `foundation_complete` und `building_level_1`,
 - UX-, Asset-, Scope- und Stop-Regeln fuer einen spaeteren Freigabeblock.
 
-Phase-2G-Planung erlaubt noch nicht:
+Phase-2G-Prompt-Vorbereitung gilt nur fuer:
+
+- Materialentscheidung und Prompt fuer einen spaeteren `frame_started`-Asset,
+- Pruefung des Prompts durch den Nutzer,
+- Nachbesserung des Prompts, falls noetig.
+
+Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
 - Asset-Erzeugung,
 - PNG-Aenderungen,
