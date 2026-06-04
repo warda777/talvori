@@ -110,13 +110,44 @@ Neue Aufgaben brauchen immer:
 - sichtbaren Fokus auf die relevante Flaeche,
 - klares Ergebnisfeedback nach der Aktion.
 
+Jeder `BuildState`, der eine moegliche Folgeaktion hat, braucht einen klaren
+naechsten Handlungshinweis. Das gilt nicht nur fuer den ersten leeren Bauplatz,
+sondern auch fuer Zwischenzustaende wie `foundation_started`.
+
 Der Nutzer darf nie raten muessen, was als naechstes zu tun ist.
 
-Beispiel Phase 2E-E:
+Beispiele:
 
-- Text: `Tippe auf die Lichtung, um dein Fundament zu beginnen.`
-- Bauflaeche: dezenter Puls/Glow.
-- Danach Kontextkarte: `Fundament beginnen`.
+- Phase 2E-E / `empty`:
+  - Text: `Tippe auf die Lichtung, um dein Fundament zu beginnen.`
+  - Bauflaeche: dezenter Puls/Glow.
+  - Tap auf die markierte Flaeche loest im lokalen Mock direkt
+    `foundation_started` aus.
+- Phase 2F / `foundation_started`:
+  - Text: `Tippe auf das begonnene Fundament, um es fertigzustellen.`
+  - begonnenes Fundament / `main_build_area`: dezenter Puls/Glow.
+  - Tap auf die markierte Flaeche loest im lokalen Mock direkt
+    `foundation_complete` aus.
+
+Wenn der sichtbare Hinweis bereits eine klare Tap-Aktion benennt, darf der Tap
+direkt die Aktion ausfuehren. Bottom-Karten oder Bestaetigungsbuttons sind
+optional und vor allem dann sinnvoll, wenn eine Aktion Kosten, Risiko, Auswahl
+oder echte Ressourcen verbraucht. Fuer den lokalen 2E-/2F-Mock-Slice ist die
+direkte Tap-Aktion besser als doppelte Bestaetigung.
+
+Grosse Snackbar-Hinweise nach jedem Bauschritt sollen vermieden werden, wenn
+bereits ein kleines Weltlabel, ein sichtbarer Zustandswechsel und ein kurzer
+Feedback-Moment vorhanden sind. Ergebnisfeedback bleibt kurz und
+unaufdringlich.
+
+Abstandsregel:
+
+Jedes neue Bau- oder UI-Element braucht sichtbaren Abstand zu Bauobjekten,
+Fokusrahmen/Glow, In-World-Labels, Buttons und Hinweisboxen. Labels duerfen
+Bauobjekte und Fokusrahmen nicht beruehren. Buttons duerfen Hinweise oder
+Labels nicht beruehren. Hinweise duerfen nicht so liegen, dass sie das gebaute
+Element verdecken. Dieser Abstand muss bei neuen Elementen direkt mitgeprueft
+werden, damit Korrekturen nicht immer erst nach der Geraetepruefung auffallen.
 
 Diese Regel gilt kuenftig fuer:
 
@@ -170,7 +201,7 @@ Erlaubt:
 
 - leichte Fade-/Scale-Animation des `foundation_started`-Overlays,
 - kurze subtile Highlight-/Glow-Andeutung an der `main_build_area`,
-- kurzer Hinweistext `Das Fundament hat begonnen.`,
+- kurzes In-World-Label, z. B. `Fundament begonnen`,
 - Sound-Architektur nur als vorbereitete ID/Hook,
 - keine echte Sounddatei,
 - keine neuen Packages.
@@ -198,7 +229,7 @@ Langfristiges Zielbild fuer `foundation_started`:
 5. Kleine Steinsplitter/Debris bewegen sich kurz nach aussen.
 6. Fundament setzt sich.
 7. Kurzer Success-Glow.
-8. Hinweistext erscheint: `Das Fundament hat begonnen.`
+8. Kurzes In-World-Label erscheint, z. B. `Fundament begonnen`.
 9. Optional spaeter Sound/Haptik.
 
 Diese Sequenz ist ein Zielbild fuer spaetere Ausbaustufen. Sie soll den Moment
@@ -224,15 +255,14 @@ Nicht in Phase 2E-E:
 Der erste lokale Baufortschritt folgt diesem Ablauf:
 
 1. Nutzer tippt auf `main_build_area`.
-2. Kontextkarte `Fundament beginnen` erscheint.
-3. Nutzer tippt Button `Fundament beginnen`.
-4. Die Baufläche bekommt eine kurze Hervorhebung.
-5. `foundation_started` blendet ein.
-6. Optional erscheint ein minimaler Glow oder Staub-Eindruck ohne neues Asset.
-7. Text erscheint: `Das Fundament hat begonnen.`
-8. Spaeter optional: kurzer Companion-Kommentar.
+2. Der lokale Mock-State wechselt direkt zu `foundation_started`.
+3. Die Bauflaeche bekommt eine kurze Hervorhebung.
+4. `foundation_started` blendet ein.
+5. Optional erscheint ein minimaler Glow oder Staub-Eindruck ohne neues Asset.
+6. Kleines In-World-Label erscheint: `Fundament begonnen`.
+7. Spaeter optional: kurzer Companion-Kommentar.
 
-Phase 2E-E nutzt nur die Schritte 1 bis 7. Der Companion-Kommentar bleibt
+Phase 2E-E nutzt nur die Schritte 1 bis 6. Der Companion-Kommentar bleibt
 konzeptionell vorbereitet und kann spaeter im bestehenden Companion-System
 sauber angeschlossen werden.
 

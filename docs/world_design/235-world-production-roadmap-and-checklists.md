@@ -135,7 +135,7 @@ lokalen Mock-Slices: Waldlichtung, `main_build_area`, lokaler Zustand
 | Phase 2E-C | Asset-Erzeugung `foundation_started` Overlay | `generiert / vorgeprueft` | Overlay existiert und wurde visuell auf `base.png` geprueft; Device-Check und Freigabe fehlen. |
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
-| Phase 2F | `foundation_complete` | `freigegeben` | `foundation_complete.png` existiert. Lokaler Preview-Check mit Base allein, Base + `foundation_started` und Base + `foundation_complete` wurde bestanden: sitzt plausibel auf `main_build_area`, klar weiter als `foundation_started`, bleibt nur Fundament, kein Haus, keine Waende, kein Dach, keine UI-/Marker-Optik, transparente Ecken und keine Chroma-Key-Reste. Formal freigegeben fuer den naechsten kleinen lokalen 2F-Mock-Code-Slice: lokale Mock-Erweiterung `foundation_started -> foundation_complete`, Anzeige `base.png` + `foundation_complete.png`, `foundation_complete` ersetzt `foundation_started`, kleine lokale Kontextkarte oder Button `Fundament fertigstellen`, kurzer Hinweis / Feedback und vorbereitete Feedback-ID `build.foundation.complete`. Groessere Systeme bleiben blockiert. |
+| Phase 2F | `foundation_complete` | `freigegeben` | `foundation_complete.png` existiert. Lokaler Preview-Check mit Base allein, Base + `foundation_started` und Base + `foundation_complete` wurde bestanden: sitzt plausibel auf `main_build_area`, klar weiter als `foundation_started`, bleibt nur Fundament, kein Haus, keine Waende, kein Dach, keine UI-/Marker-Optik, transparente Ecken und keine Chroma-Key-Reste. Formal freigegeben fuer den naechsten kleinen lokalen 2F-Mock-Code-Slice: lokale Mock-Erweiterung `foundation_started -> foundation_complete`, Anzeige `base.png` + `foundation_complete.png`, `foundation_complete` ersetzt `foundation_started`, direkter Tap auf den sichtbaren Folgehinweis / Fokusbereich, kurzes In-World-Feedback und vorbereitete Feedback-ID `build.foundation.complete`. Groessere Systeme bleiben blockiert. |
 | Phase 2G | `frame_started` / Rohbau | `geplant` / spaeter | Erst nach belastbarer Fundamentlogik. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
@@ -154,8 +154,14 @@ Erlaubter Minimal-Scope:
 - `foundation_complete` ersetzt `foundation_started` visuell,
 - kein dauerhaftes Stapeln von `foundation_started` und
   `foundation_complete`,
-- kleine lokale Kontextkarte oder Button `Fundament fertigstellen`,
-- kurzer Hinweis / lokales Feedback,
+- direkter Tap auf den sichtbaren Folgehinweis / Fokusbereich,
+- sichtbarer Folgehinweis im Zustand `foundation_started`:
+  `Tippe auf das begonnene Fundament, um es fertigzustellen.`,
+- visueller Fokus / Glow auf dem begonnenen Fundament oder der
+  `main_build_area`,
+- kurzes In-World-Feedback ohne grosse Snackbar,
+- sichtbarer Abstand zwischen Fokusrahmen/Glow, Bauobjekt, In-World-Label,
+  Buttons und Hinweisboxen,
 - vorbereitete Feedback-ID `build.foundation.complete`,
 - keine echte Audio-/FX-Implementierung.
 

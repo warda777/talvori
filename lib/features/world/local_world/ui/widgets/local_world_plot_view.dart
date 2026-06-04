@@ -1058,7 +1058,10 @@ class _BuildableForestClearingIsland extends StatelessWidget {
         activeBuildFeedbackId == LocalWorldBuildFeedbackIds.foundationComplete;
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final guidanceActive = showBuildGuidance && !foundationVisible;
+    final guidanceActive = showBuildGuidance && !foundationComplete;
+    final guidanceText = foundationStarted
+        ? 'Tippe auf das begonnene Fundament, um es fertigzustellen.'
+        : 'Tippe auf die Lichtung, um dein Fundament zu beginnen.';
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1158,7 +1161,7 @@ class _BuildableForestClearingIsland extends StatelessWidget {
             if (foundationVisible)
               Positioned(
                 left: anchor.dx - imageWidth * 0.12,
-                top: anchor.dy + radius.height * 0.72,
+                top: anchor.dy + radius.height * 1.16,
                 child: _ForestClearingBuildStatusPill(buildState: buildState),
               ),
             if (guidanceActive)
@@ -1166,7 +1169,7 @@ class _BuildableForestClearingIsland extends StatelessWidget {
                 left: imageLeft + imageWidth * 0.14,
                 right: availableWidth - imageLeft - imageWidth * 0.86,
                 top: math.max(0, anchor.dy - radius.height * 2.75),
-                child: const _ForestClearingBuildGuidanceLabel(),
+                child: _ForestClearingBuildGuidanceLabel(text: guidanceText),
               ),
           ],
         );
@@ -1228,7 +1231,9 @@ class _ForestClearingBuildGuidancePulse extends StatelessWidget {
 }
 
 class _ForestClearingBuildGuidanceLabel extends StatelessWidget {
-  const _ForestClearingBuildGuidanceLabel();
+  const _ForestClearingBuildGuidanceLabel({required this.text});
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -1248,8 +1253,8 @@ class _ForestClearingBuildGuidanceLabel extends StatelessWidget {
           ),
         ],
       ),
-      child: const Text(
-        'Tippe auf die Lichtung, um dein Fundament zu beginnen.',
+      child: Text(
+        text,
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.white,

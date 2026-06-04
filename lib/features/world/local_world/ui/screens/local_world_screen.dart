@@ -18,7 +18,6 @@ class LocalWorldScreen extends StatefulWidget {
   const LocalWorldScreen({super.key});
 
   static const _cyan = Color(0xFF5DDCFF);
-  static const _mint = Color(0xFF9FF7D5);
 
   @override
   State<LocalWorldScreen> createState() => _LocalWorldScreenState();
@@ -128,51 +127,35 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
   void _handleForestClearingBuildAreaTap() {
     if (_selectedStarterIsland?.id != 'forest-clearing') return;
 
-    if (_forestClearingBuildState ==
-        LocalWorldForestClearingBuildState.foundationComplete) {
-      _showWorldHint('Das Fundament ist fertig.');
+    if (_forestClearingBuildState == LocalWorldForestClearingBuildState.empty) {
+      setState(() {
+        _forestClearingBuildState =
+            LocalWorldForestClearingBuildState.foundationStarted;
+        _forestClearingBuildHintDismissed = true;
+        _triggerForestClearingBuildFeedback(
+          LocalWorldBuildFeedbackIds.foundationStarted,
+        );
+      });
       return;
     }
 
-    if (!_forestClearingBuildHintDismissed) {
+    if (_forestClearingBuildState ==
+        LocalWorldForestClearingBuildState.foundationStarted) {
       setState(() {
+        _forestClearingBuildState =
+            LocalWorldForestClearingBuildState.foundationComplete;
         _forestClearingBuildHintDismissed = true;
+        _triggerForestClearingBuildFeedback(
+          LocalWorldBuildFeedbackIds.foundationComplete,
+        );
       });
+      return;
     }
 
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _ForestClearingBuildBottomSheet(
-          buildState: _forestClearingBuildState,
-          onBeginFoundation: () {
-            Navigator.of(context).pop();
-            setState(() {
-              _forestClearingBuildState =
-                  LocalWorldForestClearingBuildState.foundationStarted;
-              _forestClearingBuildHintDismissed = true;
-              _triggerForestClearingBuildFeedback(
-                LocalWorldBuildFeedbackIds.foundationStarted,
-              );
-            });
-            _showWorldHint('Das Fundament hat begonnen.');
-          },
-          onCompleteFoundation: () {
-            Navigator.of(context).pop();
-            setState(() {
-              _forestClearingBuildState =
-                  LocalWorldForestClearingBuildState.foundationComplete;
-              _forestClearingBuildHintDismissed = true;
-              _triggerForestClearingBuildFeedback(
-                LocalWorldBuildFeedbackIds.foundationComplete,
-              );
-            });
-            _showWorldHint('Das Fundament ist fertig.');
-          },
-        );
-      },
-    );
+    if (_forestClearingBuildState ==
+        LocalWorldForestClearingBuildState.foundationComplete) {
+      return;
+    }
   }
 
   void _showCommunityRegionSheet(LocalWorldMapObject region) {
@@ -203,9 +186,12 @@ class _LocalWorldScreenState extends State<LocalWorldScreen> {
               activeBuildFeedbackId: _activeBuildFeedbackId,
               showForestClearingBuildGuidance:
                   _selectedStarterIsland?.id == 'forest-clearing' &&
-                  _forestClearingBuildState ==
-                      LocalWorldForestClearingBuildState.empty &&
-                  !_forestClearingBuildHintDismissed,
+                  (_forestClearingBuildState ==
+                          LocalWorldForestClearingBuildState
+                              .foundationStarted ||
+                      (_forestClearingBuildState ==
+                              LocalWorldForestClearingBuildState.empty &&
+                          !_forestClearingBuildHintDismissed)),
               onStarterIslandTap: _showStarterIslandSheet,
               onForestClearingBuildAreaTap: _handleForestClearingBuildAreaTap,
               onCommunityRegionTap: _showCommunityRegionSheet,
@@ -475,149 +461,6 @@ class _CommunityRegionBottomSheet extends StatelessWidget {
                   height: 1.3,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ForestClearingBuildBottomSheet extends StatelessWidget {
-  const _ForestClearingBuildBottomSheet({
-    required this.buildState,
-    required this.onBeginFoundation,
-    required this.onCompleteFoundation,
-  });
-
-  final LocalWorldForestClearingBuildState buildState;
-  final VoidCallback onBeginFoundation;
-  final VoidCallback onCompleteFoundation;
-
-  @override
-  Widget build(BuildContext context) {
-    final completingFoundation =
-        buildState == LocalWorldForestClearingBuildState.foundationStarted;
-    final title = completingFoundation
-        ? 'Fundament fertigstellen'
-        : 'Fundament beginnen';
-    final body = completingFoundation
-        ? 'Der Sockel wird vollständig vorbereitet.'
-        : 'Die erste Grundlage deiner Insel entsteht.';
-    final actionKey = completingFoundation
-        ? const Key('local-world-forest-clearing-complete-foundation')
-        : const Key('local-world-forest-clearing-begin-foundation');
-    final onPressed = completingFoundation
-        ? onCompleteFoundation
-        : onBeginFoundation;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        child: Container(
-          key: const Key('local-world-forest-clearing-build-sheet'),
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF07101A).withValues(alpha: 0.96),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: LocalWorldScreen._mint.withValues(alpha: 0.38),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.44),
-                blurRadius: 28,
-                offset: const Offset(0, 16),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: LocalWorldScreen._mint.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: LocalWorldScreen._mint.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.foundation_rounded,
-                      color: LocalWorldScreen._mint,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          key: Key(
-                            'local-world-forest-clearing-build-sheet-title',
-                          ),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Waldlichtung',
-                          style: TextStyle(
-                            color: LocalWorldScreen._mint,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                body,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.74),
-                  fontSize: 14,
-                  height: 1.35,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0,
-                ),
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  key: actionKey,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: LocalWorldScreen._mint,
-                    foregroundColor: const Color(0xFF02050A),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                  ),
-                  onPressed: onPressed,
-                  icon: const Icon(Icons.foundation_rounded),
-                  label: Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
-                    ),
-                  ),
                 ),
               ),
             ],

@@ -375,8 +375,14 @@ Die Phase-2F-Freigabe gilt ausschliesslich fuer:
 - `foundation_complete` ersetzt `foundation_started` visuell,
 - kein dauerhaftes Stapeln von `foundation_started` und
   `foundation_complete`,
-- lokale Kontextkarte oder Button `Fundament fertigstellen`,
-- kurzer Hinweis / lokales Feedback,
+- direkter Tap auf den sichtbaren Folgehinweis / Fokusbereich,
+- sichtbarer Folgehinweis im Zustand `foundation_started`:
+  `Tippe auf das begonnene Fundament, um es fertigzustellen.`,
+- visueller Fokus / Glow auf dem begonnenen Fundament oder der
+  `main_build_area`,
+- kurzes In-World-Feedback ohne grosse Snackbar,
+- sichtbarer Abstand zwischen Fokusrahmen/Glow, Bauobjekt, In-World-Label,
+  Buttons und Hinweisboxen,
 - vorbereitete Feedback-ID `build.foundation.complete`,
 - keine echte Audio-/FX-Implementierung.
 
