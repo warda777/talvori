@@ -98,9 +98,11 @@ Aktueller Stand der Talvori-Welt-Produktion:
 - Das Waldlichtung-Masterlayout-/Plot-System wurde in
   `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
   gestartet.
-- Der naechste Blocker betrifft Masterlayout, Plot-Groessen, Plot-Sockets,
-  Anchor-Regeln, Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
-  Persistenz-, Sound-/FX- oder Expansion-Architektur.
+- Phase 2G-M1 wurde als Greybox-/Scale-/Plot-Messblock in
+  `docs/world_design/247-island-greybox-scale-and-plot-metrics.md` gestartet.
+- Der naechste Blocker betrifft konkrete Plot-Metriken, Greybox-Struktur,
+  Plot-Sockets, Anchor-Regeln, Phase-2G-Code und jede groessere Bau-, Lern-,
+  Reward-, Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
 Interpretation:
 
@@ -156,6 +158,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2F | `foundation_complete` | `fertig / lokaler Mock-Slice bestanden` | Lokale Mock-Erweiterung `foundation_started -> foundation_complete` ist umgesetzt. Anzeige `base.png` + `foundation_complete.png` ist umgesetzt; `foundation_complete` ersetzt `foundation_started` visuell ohne dauerhaftes Stapeln. Direkter Tap-Flow funktioniert. Grosse Snackbar wurde entfernt. Kleine In-World-Labels `Fundament begonnen` und `Fundament fertig` bleiben. Label-Abstand wurde verbessert und auf Geraet geprueft. Feedback-ID `build.foundation.complete` ist vorbereitet, ohne Sound-/FX-Implementierung. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, Ressourcenlogik, Sound-/FX-Schicht, Audio/Sounddateien, Expansion, PlacedItems, Interiors/ObjectDetail oder produktive Bau-/Lernlogik. Commit: `b13d2162 fix: refine foundation complete guidance flow`. |
 | Phase 2G | `frame_started` / Rohbau | `gestoppt / Masterlayout erforderlich` | Planung in `docs/world_design/243-frame-started-plan.md`, Prompt-Vorbereitung in `docs/world_design/244-frame-started-asset-prompt.md` und Anchor-Regeln in `docs/world_design/245-build-alignment-and-anchor-system.md` bleiben erhalten, aber `frame_started` wird nicht weitergebaut. Grund: Vor weiteren Bauassets fehlt das Insel-Masterlayout mit modularen Plot-Flaechen, Sockets, Anchors und Footprints. Der nicht freigegebene Kandidat wurde geloescht. |
 | Phase 2G-M | Waldlichtung Masterlayout / Modular Plot System | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/246-island-master-layout-and-modular-plot-system.md`. Die aktuelle Waldlichtung gilt als `StarterCorePlot`, nicht als vollstaendige Insel. Naechster erlaubter Schritt ist Greybox-/Masterlayout- oder Scale-/Plot-Messblock, nicht Asset oder Code. |
+| Phase 2G-M1 | Greybox / Scale / Plot Metrics | `Planung gestartet` | Reiner Mess-/Greybox-Planungsblock in `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`. Definiert relative Plotgroessen, Mindestkapazitaet, StarterCorePlot-Rolle, Socket-Kompatibilitaet und erste Text-Greybox. Naechster erlaubter Schritt: konkrete Plot-Metriken festlegen oder Greybox-Skizze/Layout-Preview planen. Kein Asset und kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -178,11 +181,14 @@ Der Anchor-/Alignment-Definitionsblock fuer `frame_started` ist gestartet:
 Der Masterlayout-/Plot-System-Block fuer die Waldlichtung ist gestartet:
 `docs/world_design/246-island-master-layout-and-modular-plot-system.md`.
 
+Der Greybox-/Scale-/Plot-Messblock ist gestartet:
+`docs/world_design/247-island-greybox-scale-and-plot-metrics.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern Greybox-/Masterlayout- oder Scale-/Plot-Messplanung:
-Standard-Plotgroessen, Socket-Kompatibilitaet, StarterCorePlot-Groesse und
-minimale private Inselkapazitaet muessen definiert werden. `frame_started`
-bleibt gestoppt.
+Asset-Freigabe, sondern konkrete Plot-Metriken festlegen oder eine
+Greybox-Skizze/Layout-Preview planen. Standard-Plotmass, StarterCorePlot-Mass,
+Socket-Abstand, Wegbreite, Sicherheitszonen und Inselgroesse-zu-Plotanzahl
+muessen als naechster Schritt geplant werden. `frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -230,6 +236,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
 - Vor weiterer Asset-Freigabe fehlt zusaetzlich ein Insel-Masterlayout mit
   Plot-Typen, Plot-Groessen, ConnectionSockets, BuildAnchors,
   PathAnchors, DecorationAnchors, ExpansionSockets und Footprints.
+- Phase 2G-M1 hat relative Plotgroessen, Mindestkapazitaet und erste
+  Socket-Kompatibilitaeten geplant; konkrete Pixel-/Canvas-Metriken und
+  Greybox-Preview fehlen weiterhin.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -254,6 +263,13 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - kein neues Bauasset ohne Footprint,
 - kein neues Bauasset ohne Anschluss-/Socket-Konzept, wenn es mit Wegen oder
   Grundstuecken verbunden wird,
+- kein neues Inselasset ohne Masterlayout,
+- kein neues Plot-Asset ohne Plotgroesse,
+- kein Gebaeudeasset ohne Gebaeude-Footprint,
+- kein Wegasset ohne Socket-Kompatibilitaet,
+- kein Dekoasset ohne Deko-Sicherheitszone,
+- keine Insel als vollstaendige Privatinsel behandeln, wenn sie nur
+  `StarterCorePlot` ist,
 - kein weiterer Ausbau, wenn die Inselgroesse fuer die geplante Landschaft
   nicht reicht,
 - keine Einzelassets nur nach Augenmass,
@@ -392,6 +408,15 @@ Ein Schritt wird gestoppt, wenn:
 - ein neues Bauasset keinen Anchor hat,
 - ein neues Bauasset keinen Footprint hat,
 - ein anschlussrelevantes Asset kein Socket-/Connection-Konzept hat,
+- ein neues Inselasset ohne Masterlayout gestartet wird,
+- ein Plot-Asset ohne Plotgroesse gestartet wird,
+- ein Gebaeudeasset ohne Gebaeude-Footprint gestartet wird,
+- ein Wegasset ohne Socket-Kompatibilitaet gestartet wird,
+- ein Dekoasset ohne Deko-Sicherheitszone gestartet wird,
+- eine Insel als vollstaendige Privatinsel behandelt wird, obwohl sie nur
+  `StarterCorePlot` ist,
+- `frame_started` weitergebaut werden soll, bevor `starter_home_plot` im
+  Masterlayout definiert ist,
 - die Inselgroesse fuer die geplante Landschaft nicht reicht,
 - Einzelassets nur nach Augenmass erzeugt werden,
 - Pfosten/Fuesse sichtbar ausserhalb des Referenzfundaments landen,

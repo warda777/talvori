@@ -10,7 +10,8 @@ Phase-2F-Mock-Slice `foundation_complete` sowie den Start der Phase-2G-Planung,
 Asset-Prompt-Vorbereitung und Anchor-/Alignment-Definition fuer
 `frame_started` / Rohbau. Phase 2G ist inzwischen vollstaendig gestoppt, bis
 das Waldlichtung-Masterlayout mit modularen Plot-Flaechen, Anchors, Sockets und
-Footprints geplant ist.
+Footprints geplant ist. Phase 2G-M1 startet die Greybox-/Scale-/Plot-
+Messplanung.
 
 Fuehrende Dokumente:
 
@@ -22,12 +23,13 @@ Fuehrende Dokumente:
 - `docs/world_design/240-private-island-state-system.md`
 - `docs/world_design/245-build-alignment-and-anchor-system.md`
 - `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+- `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / Masterlayout erforderlich`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / Masterlayout-Planung`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M1 Plot-Messplanung gestartet`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M1 Greybox-Plot-Metriken`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -43,6 +45,8 @@ Fuehrende Dokumente:
     Asset-Erzeugung bleiben bis IslandMasterLayout, Plot-Typ, Anchor,
     Footprint, Socket-/Anschlusskonzept, Preview, Device-Check und Freigabe
     blockiert.
+  - `phase2GM1`: `false` fuer Code/Assets; erlaubt nur weitere
+    Greybox-/Scale-/Plot-Messplanung.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -57,7 +61,10 @@ weiterer Rohbau-Asset-Arbeit sind das Anchor-/Alignment-System aus
 `docs/world_design/245-build-alignment-and-anchor-system.md` und das
 Island-Masterlayout aus
 `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
-fuehrend.
+fuehrend. Die Plot-Metrik-Planung aus
+`docs/world_design/247-island-greybox-scale-and-plot-metrics.md` definiert die
+aktuelle Waldlichtung als `StarterCorePlot` und blockiert weitere Assets, bis
+Plotgroesse, Sockets, Footprints und Sicherheitszonen konkreter sind.
 
 ## 2. Zweck Des Assets
 
@@ -122,6 +129,8 @@ Vorlaeufige Sichtpruefung:
 - Grund: Einzelne Bauzustaende koennen nicht sinnvoll weitergebaut werden,
   solange Inselgroesse, Plot-Typ, Anchors, Sockets, Footprints und
   Anschlussregeln nicht als Gesamtsystem definiert sind.
+- Die aktuelle Waldlichtung wird fuer die Masterlayout-Planung nur als
+  `StarterCorePlot` bewertet, nicht als vollstaendige private Insel.
 
 Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
 ergaenzt und stuetzt die dokumentierten Freigabeentscheidungen fuer Phase 2E-E
@@ -385,6 +394,11 @@ In diesem Template-Block gilt:
   Debug-Overlay-Check.
 - Kein neues Bauasset ohne Plot-Typ, Anchor, Footprint und
   Anschluss-/Socket-Konzept.
+- Kein neues Inselasset ohne Masterlayout.
+- Kein Plot-Asset ohne Plotgroesse.
+- Kein Gebaeudeasset ohne Gebaeude-Footprint.
+- Kein Wegasset ohne Socket-Kompatibilitaet.
+- Kein Dekoasset ohne Deko-Sicherheitszone.
 
 ## 10. Device-/Preview-Check
 
@@ -469,6 +483,8 @@ Phase-2F-Preview-Ergaenzung:
 - Das Waldlichtung-Masterlayout und modulare Plot-System sind in
   `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
   gestartet.
+- Der Greybox-/Scale-/Plot-Messblock ist in
+  `docs/world_design/247-island-greybox-scale-and-plot-metrics.md` gestartet.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
   Anschluss-/Socket-Konzept, Anchor-basierte Nachbesserung, Alignment-Preview,
   Device-Check und Freigabe.
@@ -485,10 +501,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GPromptStatus`: `prepared in docs/world_design/244-frame-started-asset-prompt.md; review open`
 - `phase2GAlignmentStatus`: `required in docs/world_design/245-build-alignment-and-anchor-system.md`
 - `phase2GMasterLayoutStatus`: `started in docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+- `phase2GM1PlotMetricsStatus`: `started in docs/world_design/247-island-greybox-scale-and-plot-metrics.md`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Masterlayout-/Plot-Greybox oder Scale-/Plot-Messblock planen`
+- `nextAllowedStep`: `konkrete Plot-Metriken festlegen oder Greybox-Skizze/Layout-Preview planen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -568,6 +585,15 @@ Phase-2G-Masterlayout-Planung gilt nur fuer:
 - Definition von Plot-Sockets,
 - Definition von Build-/Path-/Deko-/Expansion-Ankern,
 - Stoppen weiterer Einzelassets ohne Plot-/Socket-System.
+
+Phase-2G-M1-Plot-Messplanung gilt nur fuer:
+
+- relative Plotgroessen,
+- Mindestkapazitaet der privaten Insel,
+- Bewertung der aktuellen Waldlichtung als `StarterCorePlot`,
+- Socket-Typen und Kompatibilitaetsregeln,
+- erste Text-Greybox,
+- Definition der naechsten Messwerte.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
