@@ -115,8 +115,15 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Sie wirkt zu linear/rasterhaft, `market_square` haengt zu stark als
   vertikaler Schwanz unter `hub_seed_south`, und `water_edge_east` ist zu lang
   diagonal angebunden.
-- Der naechste Blocker betrifft eine nachgebesserte M5-Layoutvariante oder
-  eine bewusste Bestaetigung der M4-Greybox nach manueller Pruefung,
+- Phase 2G-M5 wurde mit einer Variante-B-Debug-Greybox fortgesetzt. Die neuen
+  Preview-Dateien liegen als Dokumentationsmaterial unter
+  `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`.
+- Variante B ist noch nicht visuell bestaetigt, wirkt aber weniger linear:
+  `market_square` haengt nicht mehr als langer vertikaler Schwanz,
+  `water_edge_east` liegt klarer an einer rechten/oberen Randlogik, und
+  `garden_west`/`nature_north` rahmen den Starterbereich organischer.
+- Der naechste Blocker betrifft die manuelle visuelle Pruefung der
+  Variante-B-Greybox oder eine erneute Nachbesserung,
   Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
@@ -180,6 +187,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M3 | Sichtbare Greybox-Preview / Layout-Pruefung | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/249-island-greybox-preview-plan.md`. Definiert sichtbare Debug-Greybox-Elemente, Plot-Status, Socket-, Weg-, Footprint- und Sicherheitszonen-Overlays, Status-Legende, Pruefkriterien und Mobile-Lesbarkeitsfragen. In diesem Block wurden keine Preview-PNGs erzeugt. Naechster erlaubter Schritt: tatsaechliche Debug-Greybox-Preview erzeugen/pruefen oder Metriken/Layout nachbessern. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M4 | Debug-Greybox-Preview-Erzeugung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox.png`, `02_socket_debug_overlay.png`, `03_footprint_debug_overlay.png`, `04_status_legend.png` und `README.md` unter `docs/world_design/previews/phase2g_m3_island_greybox/`. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: visuelle Pruefung durch Nutzer, danach Metriken/Layout bestaetigen oder nachbessern. |
 | Phase 2G-M5 | Visuelle Greybox-Bewertung / Layout-Nachbesserung | `Review gestartet / Nachbesserung empfohlen` | Reiner Bewertungsblock in `docs/world_design/250-island-greybox-layout-review.md`. M4 ist als technisches Debugdiagramm brauchbar, aber nicht als visuell plausibles Insel-Masterlayout bestaetigt. Hauptprobleme: zu lineare Achse `path_south -> hub_seed_south -> market_square`, langer Markt-Schwanz, zu diagonale Wasseranbindung und zu rasterhafte Aussenform. Empfehlung: M4 nachbessern und eine neue M5-Greybox-Variante, bevorzugt Variante B, erzeugen. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M5-B | Variante-B Debug-Greybox-Nachbesserung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox_variant_b.png`, `02_socket_debug_overlay_variant_b.png`, `03_footprint_debug_overlay_variant_b.png`, `04_status_legend_variant_b.png` und `README.md` unter `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`. Variante B reduziert die lineare M4-Achse, verschiebt `market_square` naeher an `hub_seed_south`, liest `water_edge_east` staerker als Randzone und rahmt `starter_home` organischer. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: manuelle visuelle Pruefung der Variante-B-Greybox, danach bestaetigen oder erneut nachbessern. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -218,11 +226,15 @@ wurden als Dokumentationsmaterial erzeugt:
 Der visuelle Greybox-Layout-Review ist gestartet:
 `docs/world_design/250-island-greybox-layout-review.md`.
 
+Die nachgebesserte Variante-B-Debug-Greybox wurde erzeugt:
+`docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern eine nachgebesserte M5-Layoutvariante als neue
-Debug-Greybox zu planen/erzeugen oder M4 nach bewusster manueller Pruefung zu
-bestaetigen. Die Preview-Dateien sind nur Dokumentations-/Debugmaterial, kein
-finales Inselbild. `frame_started` bleibt gestoppt.
+Asset-Freigabe, sondern die manuelle visuelle Pruefung der
+Variante-B-Greybox. Danach darf Variante B bestaetigt oder erneut
+nachgebessert werden. Die Preview-Dateien sind nur
+Dokumentations-/Debugmaterial, kein finales Inselbild. `frame_started` bleibt
+gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -289,6 +301,11 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   aber nicht visuell bestaetigt. Sichtbare Risiken sind die lineare
   Markt-/Hub-Achse, der lange `market_square`-Schwanz, die unnatuerliche
   `water_edge_east`-Diagonale und die rasterhafte Gesamtform.
+- Phase 2G-M5-B hat eine Variante-B-Debug-Greybox erzeugt. Sichtbare
+  Verbesserung: weniger lineare Markt-/Hub-Achse, `market_square` naeher am
+  Hub, `water_edge_east` klarer als Randzone, Starterbereich organischer
+  gerahmt. Offen bleiben manuelle visuelle Bestaetigung, Mobile-Lesbarkeit,
+  Footprint-/Safety-Dichte und finale Layout-Entscheidung.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -340,6 +357,10 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Expansion ohne nachvollziehbare Randlogik,
 - keine Bauzustaende, solange der `starter_home_plot` im bestaetigten Layout
   nicht feststeht,
+- keine Variante-B-Greybox als bestaetigt behandeln, bevor die manuelle
+  visuelle Pruefung abgeschlossen ist,
+- keine Dokumentations-Preview als finales Inselbild oder Spielasset
+  behandeln,
 - keine Phase-2G-Asset-Freigabe ohne Anchor-/Debug-Overlay-Check,
 - keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf
   Masterlayout-, Plot-, Anchor- und Footprint-Regeln,

@@ -15,7 +15,9 @@ Messplanung. Phase 2G-M2 konkretisiert erste logische Plot-Metriken und eine
 Koordinaten-Greybox. Phase 2G-M3 plant die sichtbare Greybox-Preview und
 Layout-Pruefung fuer das Insel-Masterlayout. Phase 2G-M4 erzeugt diese
 Debug-Greybox-Previews als Dokumentationsmaterial. Phase 2G-M5 bewertet diese
-Preview visuell und empfiehlt eine nachgebesserte Layoutvariante.
+Preview visuell und empfiehlt eine nachgebesserte Layoutvariante. Phase
+2G-M5-B erzeugt diese Variante-B-Debug-Greybox als Dokumentationsmaterial;
+manuelle visuelle Pruefung und Layoutbestaetigung bleiben offen.
 
 Fuehrende Dokumente:
 
@@ -35,8 +37,8 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M5 Layout-Review gestartet`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M5 Layout-Bewertung`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M5-B Debug-Greybox erzeugt`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M5-B Variante-B-Preview`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -62,6 +64,9 @@ Fuehrende Dokumente:
     Dokumentations-/Debug-Preview-Dateien ausserhalb des Asset-Ordners.
   - `phase2GM5`: `false` fuer Code/Assets; erlaubt nur visuelle
     Greybox-Bewertung, Layout-Nachbesserungsplanung und Variantenvergleich.
+  - `phase2GM5B`: `false` fuer Code/Assets; erlaubt nur die erzeugten
+    Variante-B-Dokumentations-/Debug-Preview-Dateien ausserhalb des
+    Asset-Ordners und die manuelle visuelle Pruefung.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -94,6 +99,11 @@ Dokumentationsmaterial, keine Spielassets und keine Codefreigabe.
 technisch pruefbar, aber visuell noch nicht bestaetigt. Die aktuelle Struktur
 wirkt zu linear/rasterhaft; `market_square` haengt zu stark unter
 `hub_seed_south`, und `water_edge_east` ist zu lang diagonal angebunden.
+Die Variante-B-Debug-Greybox wurde daraufhin unter
+`docs/world_design/previews/phase2g_m5_island_greybox_variant_b/` erzeugt.
+Sie ist Dokumentationsmaterial, keine Spielasset-Erzeugung und keine
+Freigabe. Sie soll manuell visuell geprueft werden, bevor das Masterlayout
+bestaetigt oder erneut nachgebessert wird.
 
 ## 2. Zweck Des Assets
 
@@ -534,6 +544,18 @@ Phase-2F-Preview-Ergaenzung:
   `water_edge_east`-Anbindung und zu rasterhafte Gesamtform.
 - Empfehlung: M4 nachbessern und eine neue M5-Greybox-Variante erzeugen,
   bevorzugt Variante B aus `250`.
+- Die Variante-B-Debug-Greybox wurde unter
+  `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/` erzeugt.
+- Variante-B-Preview-Dateien: `01_island_plot_greybox_variant_b.png`,
+  `02_socket_debug_overlay_variant_b.png`,
+  `03_footprint_debug_overlay_variant_b.png`,
+  `04_status_legend_variant_b.png` und `README.md`.
+- Sichtbare Verbesserung gegenueber M4: weniger lineare Markt-/Hub-Achse,
+  `market_square` naeher am Hub, `water_edge_east` klarer als Randzone,
+  Starterbereich organischer durch `garden_west` und `nature_north` gerahmt.
+- Variante B ist noch nicht bestaetigt; manuelle visuelle Pruefung,
+  Mobile-Lesbarkeit, Footprint-/Safety-Dichte und finale Layoutentscheidung
+  bleiben offen.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
   Anschluss-/Socket-Konzept, visuell bestaetigte oder nachgebesserte
   Greybox, Anchor-basierte Nachbesserung, Alignment-Preview, Device-Check und
@@ -559,10 +581,13 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM4VisualReviewStatus`: `reviewed in docs/world_design/250-island-greybox-layout-review.md; not confirmed`
 - `phase2GM5LayoutReviewStatus`: `started; M4 nachbessern empfohlen`
 - `phase2GM5RecommendedNextVariant`: `Variante B`
+- `phase2GM5BPreviewFilesStatus`: `created under docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`
+- `phase2GM5BPreviewFilesAreGameAssets`: `false`
+- `phase2GM5BManualReviewStatus`: `open`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M5-Layoutvariante als neue Debug-Greybox planen/erzeugen oder M4 nach bewusster manueller Pruefung bestaetigen`
+- `nextAllowedStep`: `manuelle visuelle Pruefung der Variante-B-Greybox; danach Variante B bestaetigen oder erneut nachbessern`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -688,6 +713,14 @@ Phase-2G-M5-Layout-Review gilt nur fuer:
 - Nachbesserungsprinzipien,
 - Variantenvergleich,
 - Empfehlung fuer eine neue M5-Debug-Greybox.
+
+Phase-2G-M5-B-Debug-Preview gilt nur fuer:
+
+- Dokumentations-/Debug-Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`,
+- sichtbare Pruefung einer organischeren Variante-B-Plotstruktur,
+- README-Prueffazit und Risiken,
+- manuelle visuelle Pruefung als naechsten Schritt.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
