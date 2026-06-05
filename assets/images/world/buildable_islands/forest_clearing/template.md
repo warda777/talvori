@@ -16,8 +16,9 @@ Koordinaten-Greybox. Phase 2G-M3 plant die sichtbare Greybox-Preview und
 Layout-Pruefung fuer das Insel-Masterlayout. Phase 2G-M4 erzeugt diese
 Debug-Greybox-Previews als Dokumentationsmaterial. Phase 2G-M5 bewertet diese
 Preview visuell und empfiehlt eine nachgebesserte Layoutvariante. Phase
-2G-M5-B erzeugt diese Variante-B-Debug-Greybox als Dokumentationsmaterial;
-manuelle visuelle Pruefung und Layoutbestaetigung bleiben offen.
+2G-M5-B erzeugt diese Variante-B-Debug-Greybox als Dokumentationsmaterial.
+Phase 2G-M5-C bereitet die manuelle Sichtpruefung vor; Nutzerentscheidung und
+Layoutbestaetigung bleiben offen.
 
 Fuehrende Dokumente:
 
@@ -37,8 +38,8 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M5-B Debug-Greybox erzeugt`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M5-B Variante-B-Preview`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M5-C manuelle Pruefung vorbereitet`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M5-C Variante-B-Sichtpruefung`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -67,6 +68,9 @@ Fuehrende Dokumente:
   - `phase2GM5B`: `false` fuer Code/Assets; erlaubt nur die erzeugten
     Variante-B-Dokumentations-/Debug-Preview-Dateien ausserhalb des
     Asset-Ordners und die manuelle visuelle Pruefung.
+  - `phase2GM5C`: `false` fuer Code/Assets; erlaubt nur das
+    Pruefprotokoll zur manuellen Variante-B-Sichtpruefung und die spaetere
+    Nutzerentscheidung.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -103,7 +107,9 @@ Die Variante-B-Debug-Greybox wurde daraufhin unter
 `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/` erzeugt.
 Sie ist Dokumentationsmaterial, keine Spielasset-Erzeugung und keine
 Freigabe. Sie soll manuell visuell geprueft werden, bevor das Masterlayout
-bestaetigt oder erneut nachgebessert wird.
+bestaetigt oder erneut nachgebessert wird. Das Pruefprotokoll fuer diese
+manuelle Sichtpruefung liegt in
+`docs/world_design/251-island-greybox-variant-b-manual-review.md`.
 
 ## 2. Zweck Des Assets
 
@@ -556,6 +562,11 @@ Phase-2F-Preview-Ergaenzung:
 - Variante B ist noch nicht bestaetigt; manuelle visuelle Pruefung,
   Mobile-Lesbarkeit, Footprint-/Safety-Dichte und finale Layoutentscheidung
   bleiben offen.
+- Die manuelle Variante-B-Sichtpruefung wurde in
+  `docs/world_design/251-island-greybox-variant-b-manual-review.md`
+  vorbereitet.
+- Der Status bleibt: `manuelle Pruefung vorbereitet / Nutzerentscheidung
+  offen`.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
   Anschluss-/Socket-Konzept, visuell bestaetigte oder nachgebesserte
   Greybox, Anchor-basierte Nachbesserung, Alignment-Preview, Device-Check und
@@ -584,10 +595,12 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM5BPreviewFilesStatus`: `created under docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`
 - `phase2GM5BPreviewFilesAreGameAssets`: `false`
 - `phase2GM5BManualReviewStatus`: `open`
+- `phase2GM5CManualReviewPreparation`: `prepared in docs/world_design/251-island-greybox-variant-b-manual-review.md`
+- `phase2GM5CUserDecisionStatus`: `open`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `manuelle visuelle Pruefung der Variante-B-Greybox; danach Variante B bestaetigen oder erneut nachbessern`
+- `nextAllowedStep`: `Nutzer prueft Variante-B-Greybox visuell; danach Variante B bestaetigen, mit kleinen Korrekturen bestaetigen, erneut nachbessern oder zu einer anderen Variante zurueckkehren`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -721,6 +734,14 @@ Phase-2G-M5-B-Debug-Preview gilt nur fuer:
 - sichtbare Pruefung einer organischeren Variante-B-Plotstruktur,
 - README-Prueffazit und Risiken,
 - manuelle visuelle Pruefung als naechsten Schritt.
+
+Phase-2G-M5-C-Sichtpruefungs-Vorbereitung gilt nur fuer:
+
+- Pruefprotokoll in
+  `docs/world_design/251-island-greybox-variant-b-manual-review.md`,
+- Prueffragen und Bewertungskriterien,
+- Entscheidungsmoeglichkeiten fuer die spaetere Nutzerentscheidung,
+- Festhalten weiterhin blockierter Systeme.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

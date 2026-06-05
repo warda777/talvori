@@ -122,8 +122,12 @@ Aktueller Stand der Talvori-Welt-Produktion:
   `market_square` haengt nicht mehr als langer vertikaler Schwanz,
   `water_edge_east` liegt klarer an einer rechten/oberen Randlogik, und
   `garden_west`/`nature_north` rahmen den Starterbereich organischer.
-- Der naechste Blocker betrifft die manuelle visuelle Pruefung der
-  Variante-B-Greybox oder eine erneute Nachbesserung,
+- Die manuelle visuelle Pruefung fuer Variante B wurde in
+  `docs/world_design/251-island-greybox-variant-b-manual-review.md`
+  vorbereitet. Nutzerentscheidung bleibt offen.
+- Der naechste Blocker betrifft die Nutzer-Sichtpruefung der
+  Variante-B-Greybox, eine Bestaetigung mit oder ohne kleine Korrekturen oder
+  eine erneute Nachbesserung,
   Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
@@ -188,6 +192,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M4 | Debug-Greybox-Preview-Erzeugung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox.png`, `02_socket_debug_overlay.png`, `03_footprint_debug_overlay.png`, `04_status_legend.png` und `README.md` unter `docs/world_design/previews/phase2g_m3_island_greybox/`. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: visuelle Pruefung durch Nutzer, danach Metriken/Layout bestaetigen oder nachbessern. |
 | Phase 2G-M5 | Visuelle Greybox-Bewertung / Layout-Nachbesserung | `Review gestartet / Nachbesserung empfohlen` | Reiner Bewertungsblock in `docs/world_design/250-island-greybox-layout-review.md`. M4 ist als technisches Debugdiagramm brauchbar, aber nicht als visuell plausibles Insel-Masterlayout bestaetigt. Hauptprobleme: zu lineare Achse `path_south -> hub_seed_south -> market_square`, langer Markt-Schwanz, zu diagonale Wasseranbindung und zu rasterhafte Aussenform. Empfehlung: M4 nachbessern und eine neue M5-Greybox-Variante, bevorzugt Variante B, erzeugen. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M5-B | Variante-B Debug-Greybox-Nachbesserung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox_variant_b.png`, `02_socket_debug_overlay_variant_b.png`, `03_footprint_debug_overlay_variant_b.png`, `04_status_legend_variant_b.png` und `README.md` unter `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`. Variante B reduziert die lineare M4-Achse, verschiebt `market_square` naeher an `hub_seed_south`, liest `water_edge_east` staerker als Randzone und rahmt `starter_home` organischer. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: manuelle visuelle Pruefung der Variante-B-Greybox, danach bestaetigen oder erneut nachbessern. |
+| Phase 2G-M5-C | Variante-B manuelle Sichtpruefung | `Pruefung vorbereitet / Nutzerentscheidung offen` | Reiner Dokumentationsblock in `docs/world_design/251-island-greybox-variant-b-manual-review.md`. Dokumentiert Prueffragen, Bewertungskriterien, Entscheidungsmoeglichkeiten und offene Pruefpunkte fuer die manuelle Sichtpruefung der Variante-B-Greybox. Keine finale Entscheidung, kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -229,12 +234,15 @@ Der visuelle Greybox-Layout-Review ist gestartet:
 Die nachgebesserte Variante-B-Debug-Greybox wurde erzeugt:
 `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`.
 
+Die manuelle Sichtpruefung fuer Variante B wurde vorbereitet:
+`docs/world_design/251-island-greybox-variant-b-manual-review.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die manuelle visuelle Pruefung der
-Variante-B-Greybox. Danach darf Variante B bestaetigt oder erneut
-nachgebessert werden. Die Preview-Dateien sind nur
-Dokumentations-/Debugmaterial, kein finales Inselbild. `frame_started` bleibt
-gestoppt.
+Asset-Freigabe, sondern die Nutzer-Sichtpruefung der Variante-B-Greybox.
+Danach darf Variante B bestaetigt, mit kleinen Korrekturen bestaetigt, erneut
+nachgebessert oder zugunsten einer anderen Variante verworfen werden. Die
+Preview-Dateien sind nur Dokumentations-/Debugmaterial, kein finales
+Inselbild. `frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -306,6 +314,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Hub, `water_edge_east` klarer als Randzone, Starterbereich organischer
   gerahmt. Offen bleiben manuelle visuelle Bestaetigung, Mobile-Lesbarkeit,
   Footprint-/Safety-Dichte und finale Layout-Entscheidung.
+- Phase 2G-M5-C hat die manuelle Variante-B-Sichtpruefung vorbereitet.
+  Dokumentiert sind Prueffragen, Bewertungskriterien, Entscheidungsmoeglichkeiten
+  und offene Pruefpunkte. Status bleibt: Nutzerentscheidung offen.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
