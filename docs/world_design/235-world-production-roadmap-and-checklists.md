@@ -109,8 +109,15 @@ Aktueller Stand der Talvori-Welt-Produktion:
 - Phase 2G-M4 wurde als reine Debug-Greybox-Preview-Erzeugung gestartet.
   Die Preview-Dateien liegen als Dokumentationsmaterial unter
   `docs/world_design/previews/phase2g_m3_island_greybox/`.
-- Der naechste Blocker betrifft die manuelle visuelle Pruefung der
-  Debug-Greybox durch den Nutzer, Mobile-Lesbarkeit, Inselkapazitaet,
+- Phase 2G-M5 wurde als visueller Greybox-Layout-Review in
+  `docs/world_design/250-island-greybox-layout-review.md` gestartet.
+- Die M4-Greybox ist technisch pruefbar, aber visuell noch nicht bestaetigt:
+  Sie wirkt zu linear/rasterhaft, `market_square` haengt zu stark als
+  vertikaler Schwanz unter `hub_seed_south`, und `water_edge_east` ist zu lang
+  diagonal angebunden.
+- Der naechste Blocker betrifft eine nachgebesserte M5-Layoutvariante oder
+  eine bewusste Bestaetigung der M4-Greybox nach manueller Pruefung,
+  Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
@@ -172,6 +179,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M2 | Konkrete Plot-Metriken / Koordinaten-Greybox | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`. Konkretisiert `P` als `100 x 72gu`, definiert vorlaeufige Plot-, Weg-, Socket- und Sicherheitsmetriken, `starter_home_plot = 1.5P`, Starter-/Expansion-Plots und eine erste Koordinaten-Greybox. Naechster erlaubter Schritt: Greybox-Skizze/Layout-Preview planen oder Mobile-Lesbarkeit/Inselkapazitaet pruefen. Kein Asset und kein Code. |
 | Phase 2G-M3 | Sichtbare Greybox-Preview / Layout-Pruefung | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/249-island-greybox-preview-plan.md`. Definiert sichtbare Debug-Greybox-Elemente, Plot-Status, Socket-, Weg-, Footprint- und Sicherheitszonen-Overlays, Status-Legende, Pruefkriterien und Mobile-Lesbarkeitsfragen. In diesem Block wurden keine Preview-PNGs erzeugt. Naechster erlaubter Schritt: tatsaechliche Debug-Greybox-Preview erzeugen/pruefen oder Metriken/Layout nachbessern. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M4 | Debug-Greybox-Preview-Erzeugung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox.png`, `02_socket_debug_overlay.png`, `03_footprint_debug_overlay.png`, `04_status_legend.png` und `README.md` unter `docs/world_design/previews/phase2g_m3_island_greybox/`. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: visuelle Pruefung durch Nutzer, danach Metriken/Layout bestaetigen oder nachbessern. |
+| Phase 2G-M5 | Visuelle Greybox-Bewertung / Layout-Nachbesserung | `Review gestartet / Nachbesserung empfohlen` | Reiner Bewertungsblock in `docs/world_design/250-island-greybox-layout-review.md`. M4 ist als technisches Debugdiagramm brauchbar, aber nicht als visuell plausibles Insel-Masterlayout bestaetigt. Hauptprobleme: zu lineare Achse `path_south -> hub_seed_south -> market_square`, langer Markt-Schwanz, zu diagonale Wasseranbindung und zu rasterhafte Aussenform. Empfehlung: M4 nachbessern und eine neue M5-Greybox-Variante, bevorzugt Variante B, erzeugen. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -207,10 +215,13 @@ Der Debug-Greybox-Preview-Erzeugungsblock ist gestartet. Preview-Dateien
 wurden als Dokumentationsmaterial erzeugt:
 `docs/world_design/previews/phase2g_m3_island_greybox/`.
 
+Der visuelle Greybox-Layout-Review ist gestartet:
+`docs/world_design/250-island-greybox-layout-review.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die visuelle Pruefung der Debug-Greybox durch den
-Nutzer. Danach muessen Metriken/Layout entweder bestaetigt oder nachgebessert
-werden. Die Preview-Dateien sind nur Dokumentations-/Debugmaterial, kein
+Asset-Freigabe, sondern eine nachgebesserte M5-Layoutvariante als neue
+Debug-Greybox zu planen/erzeugen oder M4 nach bewusster manueller Pruefung zu
+bestaetigen. Die Preview-Dateien sind nur Dokumentations-/Debugmaterial, kein
 finales Inselbild. `frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
@@ -274,6 +285,10 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Plot-Greybox, Socket-Overlay, Footprint-/Safety-Overlay, Status-Legende und
   README. Die manuelle Nutzerpruefung und echte Mobile-Lesbarkeit bleiben
   offen.
+- Phase 2G-M5 hat M4 visuell bewertet. Ergebnis: M4 ist technisch hilfreich,
+  aber nicht visuell bestaetigt. Sichtbare Risiken sind die lineare
+  Markt-/Hub-Achse, der lange `market_square`-Schwanz, die unnatuerliche
+  `water_edge_east`-Diagonale und die rasterhafte Gesamtform.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -317,6 +332,14 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Ausbauinsel, die nicht mindestens 12 geplante Slots plausibel
   vorbereitet,
 - keine Asset-Produktion, bevor die Greybox visuell geprueft wurde,
+- keine Greybox als bestaetigt behandeln, wenn sie zu linear oder rasterhaft
+  wirkt,
+- keine Market-/Hub-Struktur als langer isolierter Schwanz,
+- keine WaterEdge-Verbindung ueber unnatuerlich lange Diagonale ohne
+  Uebergangsplot,
+- keine Expansion ohne nachvollziehbare Randlogik,
+- keine Bauzustaende, solange der `starter_home_plot` im bestaetigten Layout
+  nicht feststeht,
 - keine Phase-2G-Asset-Freigabe ohne Anchor-/Debug-Overlay-Check,
 - keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf
   Masterlayout-, Plot-, Anchor- und Footprint-Regeln,
@@ -439,11 +462,13 @@ Der Greybox-/Scale-/Plot-Messblock wurde in
 Der konkrete Plot-Metrik-/Koordinaten-Greybox-Block wurde in
 `docs/world_design/248-island-plot-metrics-and-greybox-layout.md` gestartet.
 Der sichtbare Greybox-Preview-/Layout-Pruefblock wurde in
-`docs/world_design/249-island-greybox-preview-plan.md` gestartet. Der naechste
+`docs/world_design/249-island-greybox-preview-plan.md` gestartet. Der
 Debug-Greybox-Preview-Erzeugungsblock hat die geplanten Preview-Dateien unter
-`docs/world_design/previews/phase2g_m3_island_greybox/` erzeugt. Der naechste
-offene Schritt ist die visuelle Nutzerpruefung dieser Debug-Greybox und danach
-eine Bestaetigung oder Nachbesserung der Metriken/Layoutstruktur.
+`docs/world_design/previews/phase2g_m3_island_greybox/` erzeugt. Der visuelle
+Greybox-Layout-Review wurde in
+`docs/world_design/250-island-greybox-layout-review.md` gestartet. Ergebnis:
+M4 ist technisch pruefbar, aber visuell zu linear/rasterhaft und sollte durch
+eine neue M5-Greybox-Variante nachgebessert werden.
 Asset-Freigabe und Code bleiben blockiert, bis Plot, Anchor, Footprint,
 sichtbare Preview, Device-Check, Freigabe und Tests definiert sind.
 
@@ -478,6 +503,14 @@ Ein Schritt wird gestoppt, wenn:
 - das Starterlayout weniger als 7 funktionale Slots zeigt,
 - die Ausbauinsel nicht mindestens 12 geplante Slots plausibel vorbereitet,
 - Asset-Produktion gestartet wird, bevor die Greybox visuell geprueft wurde,
+- eine Greybox als bestaetigt behandelt wird, obwohl sie zu linear oder
+  rasterhaft wirkt,
+- eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,
+- `water_edge_east` ueber eine unnatuerlich lange Diagonale ohne
+  Uebergangsplot angebunden wird,
+- Expansion ohne nachvollziehbare Randlogik geplant wird,
+- Bauzustaende weitergebaut werden, solange der `starter_home_plot` im
+  bestaetigten Layout nicht feststeht,
 - die Inselgroesse fuer die geplante Landschaft nicht reicht,
 - Einzelassets nur nach Augenmass erzeugt werden,
 - Pfosten/Fuesse sichtbar ausserhalb des Referenzfundaments landen,
