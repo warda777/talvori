@@ -13,7 +13,8 @@ das Waldlichtung-Masterlayout mit modularen Plot-Flaechen, Anchors, Sockets und
 Footprints geplant ist. Phase 2G-M1 startet die Greybox-/Scale-/Plot-
 Messplanung. Phase 2G-M2 konkretisiert erste logische Plot-Metriken und eine
 Koordinaten-Greybox. Phase 2G-M3 plant die sichtbare Greybox-Preview und
-Layout-Pruefung fuer das Insel-Masterlayout.
+Layout-Pruefung fuer das Insel-Masterlayout. Phase 2G-M4 erzeugt diese
+Debug-Greybox-Previews als Dokumentationsmaterial.
 
 Fuehrende Dokumente:
 
@@ -32,8 +33,8 @@ Fuehrende Dokumente:
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M3 Greybox-Preview geplant`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M3 Preview-Planung`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M4 Debug-Greybox erzeugt`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M4 Preview-Erzeugung`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -55,6 +56,8 @@ Fuehrende Dokumente:
     Plot-Metrik- und Greybox-Planung.
   - `phase2GM3`: `false` fuer Code/Assets; erlaubt nur Planung einer
     sichtbaren Debug-Greybox-Preview und Layout-Pruefung.
+  - `phase2GM4`: `false` fuer Code/Assets; erlaubt nur
+    Dokumentations-/Debug-Preview-Dateien ausserhalb des Asset-Ordners.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -79,7 +82,10 @@ und einer ersten Koordinaten-Greybox. Diese Werte sind keine finalen
 Asset-Pixel. `docs/world_design/249-island-greybox-preview-plan.md` definiert
 als naechsten Schritt eine sichtbare Debug-Greybox mit Plot-Status, Socket-,
 Weg-, Footprint- und Sicherheitszonen-Overlays. In diesem Template-Block
-wurden keine Preview-PNGs erzeugt.
+wurden keine Preview-PNGs erzeugt. Phase 2G-M4 erzeugt die geplanten
+Debug-Greybox-Previews unter
+`docs/world_design/previews/phase2g_m3_island_greybox/`; diese Dateien sind
+Dokumentationsmaterial, keine Spielassets und keine Codefreigabe.
 
 ## 2. Zweck Des Assets
 
@@ -505,10 +511,16 @@ Phase-2F-Preview-Ergaenzung:
   gestartet.
 - Der sichtbare Greybox-Preview-/Layout-Pruefblock ist in
   `docs/world_design/249-island-greybox-preview-plan.md` gestartet.
-- In diesem Block wurden keine Preview-Dateien erzeugt.
+- Der Debug-Greybox-Preview-Erzeugungsblock hat die geplanten Preview-Dateien
+  unter `docs/world_design/previews/phase2g_m3_island_greybox/` erzeugt.
+- Preview-Dateien: `01_island_plot_greybox.png`,
+  `02_socket_debug_overlay.png`, `03_footprint_debug_overlay.png`,
+  `04_status_legend.png` und `README.md`.
+- Die Preview-Dateien sind Dokumentationsmaterial, keine Spielassets, keine
+  finale Kunst und keine Codefreigabe.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
-  Anschluss-/Socket-Konzept, sichtbare Greybox-Preview, Anchor-basierte
-  Nachbesserung, Alignment-Preview, Device-Check und Freigabe.
+  Anschluss-/Socket-Konzept, visuelle Nutzerpruefung der Debug-Greybox,
+  Anchor-basierte Nachbesserung, Alignment-Preview, Device-Check und Freigabe.
 
 ## 12. Freigabeentscheidung
 
@@ -525,11 +537,13 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM1PlotMetricsStatus`: `started in docs/world_design/247-island-greybox-scale-and-plot-metrics.md`
 - `phase2GM2ConcreteMetricsStatus`: `started in docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
 - `phase2GM3PreviewPlanStatus`: `started in docs/world_design/249-island-greybox-preview-plan.md`
-- `phase2GM3PreviewFilesCreated`: `false`
+- `phase2GM4PreviewFilesStatus`: `created under docs/world_design/previews/phase2g_m3_island_greybox/`
+- `phase2GM4PreviewFilesAreGameAssets`: `false`
+- `phase2GM4UserReviewStatus`: `open`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `tatsaechliche Debug-Greybox-Preview erzeugen/pruefen oder Metriken/Layout nachbessern`
+- `nextAllowedStep`: `visuelle Nutzerpruefung der Debug-Greybox, danach Metriken/Layout bestaetigen oder nachbessern`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -637,6 +651,16 @@ Phase-2G-M3-Greybox-Preview-Planung gilt nur fuer:
 - Pruefkriterien fuer sieben Starter-/Vorbereitungsplots und 12 bis 14
   geplante Ausbau-Slots,
 - Mobile-Lesbarkeitsfragen.
+
+Phase-2G-M4-Debug-Preview-Erzeugung gilt nur fuer:
+
+- Dokumentations-PNGs im Ordner
+  `docs/world_design/previews/phase2g_m3_island_greybox/`,
+- sichtbare Plot-Greybox,
+- Socket-Debug-Overlay,
+- Footprint-/Safety-Overlay,
+- Status- und Socket-Legende,
+- README mit Prueffazit und Risiken.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
