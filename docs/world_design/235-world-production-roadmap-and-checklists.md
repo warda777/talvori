@@ -1,6 +1,6 @@
 # Talvori Welt: Production Roadmap Und Checklists
 
-Stand: 2026-06-04
+Stand: 2026-06-05
 
 Dieses Dokument ist die zentrale Produktionskontrolle fuer Talvori Welt. Es
 ordnet Roadmap, ToDos, Gates und Checklisten, damit vor weiteren World-Schritten
@@ -104,7 +104,10 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Planungsblock in
   `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
   gestartet.
-- Der naechste Blocker betrifft visuelle Greybox-Preview, Mobile-Lesbarkeit,
+- Phase 2G-M3 wurde als sichtbarer Greybox-Preview-/Layout-Pruefblock in
+  `docs/world_design/249-island-greybox-preview-plan.md` gestartet.
+- Der naechste Blocker betrifft die tatsaechliche Debug-Greybox-Preview,
+  Status-Legende, Socket-/Footprint-Overlays, Mobile-Lesbarkeit,
   Inselkapazitaet, Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
@@ -164,6 +167,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M | Waldlichtung Masterlayout / Modular Plot System | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/246-island-master-layout-and-modular-plot-system.md`. Die aktuelle Waldlichtung gilt als `StarterCorePlot`, nicht als vollstaendige Insel. Naechster erlaubter Schritt ist Greybox-/Masterlayout- oder Scale-/Plot-Messblock, nicht Asset oder Code. |
 | Phase 2G-M1 | Greybox / Scale / Plot Metrics | `Planung gestartet` | Reiner Mess-/Greybox-Planungsblock in `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`. Definiert relative Plotgroessen, Mindestkapazitaet, StarterCorePlot-Rolle, Socket-Kompatibilitaet und erste Text-Greybox. Naechster erlaubter Schritt: konkrete Plot-Metriken festlegen oder Greybox-Skizze/Layout-Preview planen. Kein Asset und kein Code. |
 | Phase 2G-M2 | Konkrete Plot-Metriken / Koordinaten-Greybox | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`. Konkretisiert `P` als `100 x 72gu`, definiert vorlaeufige Plot-, Weg-, Socket- und Sicherheitsmetriken, `starter_home_plot = 1.5P`, Starter-/Expansion-Plots und eine erste Koordinaten-Greybox. Naechster erlaubter Schritt: Greybox-Skizze/Layout-Preview planen oder Mobile-Lesbarkeit/Inselkapazitaet pruefen. Kein Asset und kein Code. |
+| Phase 2G-M3 | Sichtbare Greybox-Preview / Layout-Pruefung | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/249-island-greybox-preview-plan.md`. Definiert sichtbare Debug-Greybox-Elemente, Plot-Status, Socket-, Weg-, Footprint- und Sicherheitszonen-Overlays, Status-Legende, Pruefkriterien und Mobile-Lesbarkeitsfragen. In diesem Block wurden keine Preview-PNGs erzeugt. Naechster erlaubter Schritt: tatsaechliche Debug-Greybox-Preview erzeugen/pruefen oder Metriken/Layout nachbessern. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -192,9 +196,13 @@ Der Greybox-/Scale-/Plot-Messblock ist gestartet:
 Der konkrete Plot-Metrik-/Koordinaten-Greybox-Block ist gestartet:
 `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`.
 
+Der sichtbare Greybox-Preview-/Layout-Pruefblock ist gestartet:
+`docs/world_design/249-island-greybox-preview-plan.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern eine Greybox-Skizze/Layout-Preview planen oder die
-logischen Metriken gegen Mobile-Lesbarkeit und Inselkapazitaet pruefen.
+Asset-Freigabe, sondern eine tatsaechliche Debug-Greybox-Preview erzeugen und
+pruefen oder die logischen Metriken/Layoutstruktur nachbessern. Diese Preview
+darf nur Dokumentations-/Debugmaterial sein, kein finales Inselbild.
 `frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
@@ -250,6 +258,10 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   `P = 100 x 72gu`, `starter_home_plot = 1.5P`, `pathWidth = 16gu`,
   `socketWidth = 18gu` und eine erste Koordinaten-Greybox. Eine visuelle
   Greybox-Preview und Mobile-Lesbarkeitspruefung fehlen weiterhin.
+- Phase 2G-M3 hat die sichtbare Greybox-Preview geplant, aber noch keine
+  Preview-Dateien erzeugt. Status-Legende, Socket-Overlay,
+  Footprint-Overlay, Sicherheitszonen-Overlay und Mobile-Lesbarkeitspruefung
+  muessen in einem spaeteren Debug-Preview-Block sichtbar geprueft werden.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -284,6 +296,15 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - kein weiterer Ausbau, wenn die Inselgroesse fuer die geplante Landschaft
   nicht reicht,
 - keine Einzelassets nur nach Augenmass,
+- kein finales Inselbild aus einer Debug-Greybox ableiten,
+- keine Greybox ohne Status-Legende,
+- kein Plot ohne sichtbaren Socket,
+- kein Weg ohne pruefbare Verbindung,
+- kein Gebaeude-Footprint ohne Sicherheitsabstand,
+- kein Starterlayout, das weniger als 7 funktionale Slots zeigt,
+- keine Ausbauinsel, die nicht mindestens 12 geplante Slots plausibel
+  vorbereitet,
+- keine Asset-Produktion, bevor die Greybox visuell geprueft wurde,
 - keine Phase-2G-Asset-Freigabe ohne Anchor-/Debug-Overlay-Check,
 - keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf
   Masterlayout-, Plot-, Anchor- und Footprint-Regeln,
@@ -401,9 +422,16 @@ Phase 2G vollstaendig gestoppt, weil vor weiteren Bauassets zuerst das
 Waldlichtung-Masterlayout mit modularen Plot-Flaechen und Anschlussregeln
 geplant werden muss:
 `docs/world_design/246-island-master-layout-and-modular-plot-system.md`.
-Der naechste offene Schritt ist Greybox-/Masterlayout- oder
-Scale-/Plot-Messplanung. Asset-Freigabe und Code bleiben blockiert, bis Plot,
-Anchor, Footprint, Preview, Device-Check, Freigabe und Tests definiert sind.
+Der Greybox-/Scale-/Plot-Messblock wurde in
+`docs/world_design/247-island-greybox-scale-and-plot-metrics.md` gestartet.
+Der konkrete Plot-Metrik-/Koordinaten-Greybox-Block wurde in
+`docs/world_design/248-island-plot-metrics-and-greybox-layout.md` gestartet.
+Der sichtbare Greybox-Preview-/Layout-Pruefblock wurde in
+`docs/world_design/249-island-greybox-preview-plan.md` gestartet. Der naechste
+offene Schritt ist eine tatsaechliche Debug-Greybox-Preview oder eine
+Metrik-/Layout-Nachbesserung. Asset-Freigabe und Code bleiben blockiert, bis
+Plot, Anchor, Footprint, sichtbare Preview, Device-Check, Freigabe und Tests
+definiert sind.
 
 ## 10. Stop-Regeln
 
@@ -428,6 +456,14 @@ Ein Schritt wird gestoppt, wenn:
   `StarterCorePlot` ist,
 - `frame_started` weitergebaut werden soll, bevor `starter_home_plot` im
   Masterlayout definiert ist,
+- ein finales Inselbild aus einer Debug-Greybox abgeleitet werden soll,
+- eine Greybox ohne Status-Legende entsteht,
+- ein Plot ohne sichtbaren Socket bewertet wird,
+- ein Weg ohne pruefbare Verbindung entsteht,
+- ein Gebaeude-Footprint ohne Sicherheitsabstand eingezeichnet wird,
+- das Starterlayout weniger als 7 funktionale Slots zeigt,
+- die Ausbauinsel nicht mindestens 12 geplante Slots plausibel vorbereitet,
+- Asset-Produktion gestartet wird, bevor die Greybox visuell geprueft wurde,
 - die Inselgroesse fuer die geplante Landschaft nicht reicht,
 - Einzelassets nur nach Augenmass erzeugt werden,
 - Pfosten/Fuesse sichtbar ausserhalb des Referenzfundaments landen,
