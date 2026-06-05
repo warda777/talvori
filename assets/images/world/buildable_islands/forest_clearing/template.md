@@ -11,7 +11,8 @@ Asset-Prompt-Vorbereitung und Anchor-/Alignment-Definition fuer
 `frame_started` / Rohbau. Phase 2G ist inzwischen vollstaendig gestoppt, bis
 das Waldlichtung-Masterlayout mit modularen Plot-Flaechen, Anchors, Sockets und
 Footprints geplant ist. Phase 2G-M1 startet die Greybox-/Scale-/Plot-
-Messplanung.
+Messplanung. Phase 2G-M2 konkretisiert erste logische Plot-Metriken und eine
+Koordinaten-Greybox.
 
 Fuehrende Dokumente:
 
@@ -24,12 +25,13 @@ Fuehrende Dokumente:
 - `docs/world_design/245-build-alignment-and-anchor-system.md`
 - `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
 - `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`
+- `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M1 Plot-Messplanung gestartet`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M1 Greybox-Plot-Metriken`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M2 Plot-Metriken geplant`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M2 Koordinaten-Greybox`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -47,6 +49,8 @@ Fuehrende Dokumente:
     blockiert.
   - `phase2GM1`: `false` fuer Code/Assets; erlaubt nur weitere
     Greybox-/Scale-/Plot-Messplanung.
+  - `phase2GM2`: `false` fuer Code/Assets; erlaubt nur logische
+    Plot-Metrik- und Greybox-Planung.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -65,6 +69,10 @@ fuehrend. Die Plot-Metrik-Planung aus
 `docs/world_design/247-island-greybox-scale-and-plot-metrics.md` definiert die
 aktuelle Waldlichtung als `StarterCorePlot` und blockiert weitere Assets, bis
 Plotgroesse, Sockets, Footprints und Sicherheitszonen konkreter sind.
+`docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
+konkretisiert diese Planung mit `P = 100 x 72gu`, `starter_home_plot = 1.5P`
+und einer ersten Koordinaten-Greybox. Diese Werte sind keine finalen
+Asset-Pixel.
 
 ## 2. Zweck Des Assets
 
@@ -485,6 +493,9 @@ Phase-2F-Preview-Ergaenzung:
   gestartet.
 - Der Greybox-/Scale-/Plot-Messblock ist in
   `docs/world_design/247-island-greybox-scale-and-plot-metrics.md` gestartet.
+- Der konkrete Plot-Metrik-/Koordinaten-Greybox-Block ist in
+  `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
+  gestartet.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
   Anschluss-/Socket-Konzept, Anchor-basierte Nachbesserung, Alignment-Preview,
   Device-Check und Freigabe.
@@ -502,10 +513,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GAlignmentStatus`: `required in docs/world_design/245-build-alignment-and-anchor-system.md`
 - `phase2GMasterLayoutStatus`: `started in docs/world_design/246-island-master-layout-and-modular-plot-system.md`
 - `phase2GM1PlotMetricsStatus`: `started in docs/world_design/247-island-greybox-scale-and-plot-metrics.md`
+- `phase2GM2ConcreteMetricsStatus`: `started in docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `konkrete Plot-Metriken festlegen oder Greybox-Skizze/Layout-Preview planen`
+- `nextAllowedStep`: `Greybox-Skizze/Layout-Preview planen oder Mobile-Lesbarkeit/Inselkapazitaet pruefen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -594,6 +606,14 @@ Phase-2G-M1-Plot-Messplanung gilt nur fuer:
 - Socket-Typen und Kompatibilitaetsregeln,
 - erste Text-Greybox,
 - Definition der naechsten Messwerte.
+
+Phase-2G-M2-Plot-Metrikplanung gilt nur fuer:
+
+- `P = 100 x 72gu` als logische Greybox-Einheit,
+- vorlaeufige Plot-, Weg-, Socket- und Sicherheitsmetriken,
+- `starter_home_plot = 1.5P`,
+- erste Koordinaten-Greybox,
+- Trennung von Starter- und Expansion-Plots.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

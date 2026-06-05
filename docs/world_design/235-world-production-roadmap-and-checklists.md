@@ -100,9 +100,13 @@ Aktueller Stand der Talvori-Welt-Produktion:
   gestartet.
 - Phase 2G-M1 wurde als Greybox-/Scale-/Plot-Messblock in
   `docs/world_design/247-island-greybox-scale-and-plot-metrics.md` gestartet.
-- Der naechste Blocker betrifft konkrete Plot-Metriken, Greybox-Struktur,
-  Plot-Sockets, Anchor-Regeln, Phase-2G-Code und jede groessere Bau-, Lern-,
-  Reward-, Persistenz-, Sound-/FX- oder Expansion-Architektur.
+- Phase 2G-M2 wurde als konkreter Plot-Metrik- und Koordinaten-Greybox-
+  Planungsblock in
+  `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
+  gestartet.
+- Der naechste Blocker betrifft visuelle Greybox-Preview, Mobile-Lesbarkeit,
+  Inselkapazitaet, Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
+  Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
 Interpretation:
 
@@ -159,6 +163,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G | `frame_started` / Rohbau | `gestoppt / Masterlayout erforderlich` | Planung in `docs/world_design/243-frame-started-plan.md`, Prompt-Vorbereitung in `docs/world_design/244-frame-started-asset-prompt.md` und Anchor-Regeln in `docs/world_design/245-build-alignment-and-anchor-system.md` bleiben erhalten, aber `frame_started` wird nicht weitergebaut. Grund: Vor weiteren Bauassets fehlt das Insel-Masterlayout mit modularen Plot-Flaechen, Sockets, Anchors und Footprints. Der nicht freigegebene Kandidat wurde geloescht. |
 | Phase 2G-M | Waldlichtung Masterlayout / Modular Plot System | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/246-island-master-layout-and-modular-plot-system.md`. Die aktuelle Waldlichtung gilt als `StarterCorePlot`, nicht als vollstaendige Insel. Naechster erlaubter Schritt ist Greybox-/Masterlayout- oder Scale-/Plot-Messblock, nicht Asset oder Code. |
 | Phase 2G-M1 | Greybox / Scale / Plot Metrics | `Planung gestartet` | Reiner Mess-/Greybox-Planungsblock in `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`. Definiert relative Plotgroessen, Mindestkapazitaet, StarterCorePlot-Rolle, Socket-Kompatibilitaet und erste Text-Greybox. Naechster erlaubter Schritt: konkrete Plot-Metriken festlegen oder Greybox-Skizze/Layout-Preview planen. Kein Asset und kein Code. |
+| Phase 2G-M2 | Konkrete Plot-Metriken / Koordinaten-Greybox | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`. Konkretisiert `P` als `100 x 72gu`, definiert vorlaeufige Plot-, Weg-, Socket- und Sicherheitsmetriken, `starter_home_plot = 1.5P`, Starter-/Expansion-Plots und eine erste Koordinaten-Greybox. Naechster erlaubter Schritt: Greybox-Skizze/Layout-Preview planen oder Mobile-Lesbarkeit/Inselkapazitaet pruefen. Kein Asset und kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -184,11 +189,13 @@ Der Masterlayout-/Plot-System-Block fuer die Waldlichtung ist gestartet:
 Der Greybox-/Scale-/Plot-Messblock ist gestartet:
 `docs/world_design/247-island-greybox-scale-and-plot-metrics.md`.
 
+Der konkrete Plot-Metrik-/Koordinaten-Greybox-Block ist gestartet:
+`docs/world_design/248-island-plot-metrics-and-greybox-layout.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern konkrete Plot-Metriken festlegen oder eine
-Greybox-Skizze/Layout-Preview planen. Standard-Plotmass, StarterCorePlot-Mass,
-Socket-Abstand, Wegbreite, Sicherheitszonen und Inselgroesse-zu-Plotanzahl
-muessen als naechster Schritt geplant werden. `frame_started` bleibt gestoppt.
+Asset-Freigabe, sondern eine Greybox-Skizze/Layout-Preview planen oder die
+logischen Metriken gegen Mobile-Lesbarkeit und Inselkapazitaet pruefen.
+`frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -239,6 +246,10 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
 - Phase 2G-M1 hat relative Plotgroessen, Mindestkapazitaet und erste
   Socket-Kompatibilitaeten geplant; konkrete Pixel-/Canvas-Metriken und
   Greybox-Preview fehlen weiterhin.
+- Phase 2G-M2 hat vorlaeufige logische Greybox-Metriken definiert:
+  `P = 100 x 72gu`, `starter_home_plot = 1.5P`, `pathWidth = 16gu`,
+  `socketWidth = 18gu` und eine erste Koordinaten-Greybox. Eine visuelle
+  Greybox-Preview und Mobile-Lesbarkeitspruefung fehlen weiterhin.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
