@@ -8,7 +8,9 @@ Runtime-Konfiguration. Sie dokumentiert die begrenzte Freigabe fuer den sehr
 kleinen Phase-2E-E-Code-Slice und die formale Freigabe fuer den engen lokalen
 Phase-2F-Mock-Slice `foundation_complete` sowie den Start der Phase-2G-Planung,
 Asset-Prompt-Vorbereitung und Anchor-/Alignment-Definition fuer
-`frame_started` / Rohbau.
+`frame_started` / Rohbau. Phase 2G ist inzwischen vollstaendig gestoppt, bis
+das Waldlichtung-Masterlayout mit modularen Plot-Flaechen, Anchors, Sockets und
+Footprints geplant ist.
 
 Fuehrende Dokumente:
 
@@ -19,28 +21,28 @@ Fuehrende Dokumente:
 - `docs/world_design/239-world-scale-and-dimension-rules.md`
 - `docs/world_design/240-private-island-state-system.md`
 - `docs/world_design/245-build-alignment-and-anchor-system.md`
+- `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G Anchor-Block erforderlich`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G Anchor-Definition`
-- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; frame_started candidate present but not released`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / Masterlayout erforderlich`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / Masterlayout-Planung`
+- `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
   - `foundation_started`: `assets/images/world/buildable_islands/forest_clearing/foundation_started.png`
   - `foundation_complete`: `assets/images/world/buildable_islands/forest_clearing/foundation_complete.png`
-  - `frame_started_candidate`: `assets/images/world/buildable_islands/forest_clearing/frame_started.png`
-    - Status: vorhanden/lokal, aber nicht freigegeben.
+  - `frame_started`: nicht vorhanden / nicht freigegeben / geloeschter Kandidat
 - `codeAllowed`:
   - `phase2EE`: `true`, nur fuer den abgeschlossenen sehr kleinen
     Phase-2E-E-Code-Slice
   - `phase2F`: `true`, nur fuer den engen lokalen Phase-2F-Mock-Slice
     `foundation_started -> foundation_complete`
-  - `phase2G`: `false`, Phase 2G ist geplant, als Prompt vorbereitet und
-    jetzt durch einen Anchor-/Alignment-Block gestoppt; Code und weitere
-    Asset-Freigabe bleiben bis Anchor-Definition, gezielter Asset-
-    Nachbesserung, Preview, Device-Check und Freigabe blockiert.
+  - `phase2G`: `false`, Phase 2G ist gestoppt; Code und weitere
+    Asset-Erzeugung bleiben bis IslandMasterLayout, Plot-Typ, Anchor,
+    Footprint, Socket-/Anschlusskonzept, Preview, Device-Check und Freigabe
+    blockiert.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -49,12 +51,13 @@ Dieses Template ist code-freigegeben fuer:
   foundation_complete`.
 
 Jede Nutzung ausserhalb dieser Scopes braucht eine neue Freigabeentscheidung.
-`frame_started` / Rohbau ist aktuell nur als naechster geplanter
-`BuildAreaState` dokumentiert. Ein lokaler `frame_started.png`-Kandidat
-existiert, ist aber nicht freigegeben. Die manuelle Sichtpruefung verlangt ein
-exaktes Aufsetzen auf `foundation_complete`; deshalb ist vor weiterer
-Freigabe das Anchor-/Alignment-System aus
-`docs/world_design/245-build-alignment-and-anchor-system.md` fuehrend.
+`frame_started` / Rohbau ist aktuell gestoppt. Der fruehere lokale
+`frame_started.png`-Kandidat war nicht freigegeben und wurde geloescht. Vor
+weiterer Rohbau-Asset-Arbeit sind das Anchor-/Alignment-System aus
+`docs/world_design/245-build-alignment-and-anchor-system.md` und das
+Island-Masterlayout aus
+`docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+fuehrend.
 
 ## 2. Zweck Des Assets
 
@@ -115,10 +118,10 @@ Vorlaeufige Sichtpruefung:
   und keine sichtbaren Chroma-Key-Reste.
 - `foundation_complete` ist formal fuer den engen lokalen Phase-2F-Mock-Slice
   freigegeben.
-- `frame_started` existiert als lokaler Kandidat, ist aber nicht freigegeben.
-- Grund: Die manuelle Sichtpruefung verlangt exaktere Pfosten-/Fuss-
-  Ausrichtung auf `foundation_complete`; ungefaehres Zentrum-Alignment reicht
-  fuer Rohbau nicht.
+- `frame_started` ist gestoppt und nicht vorhanden/freigegeben.
+- Grund: Einzelne Bauzustaende koennen nicht sinnvoll weitergebaut werden,
+  solange Inselgroesse, Plot-Typ, Anchors, Sockets, Footprints und
+  Anschlussregeln nicht als Gesamtsystem definiert sind.
 
 Diese Bewertung wurde durch eine isolierte App-/Preview-Harness-Pruefung
 ergaenzt und stuetzt die dokumentierten Freigabeentscheidungen fuer Phase 2E-E
@@ -306,16 +309,21 @@ Regel:
   `PlacedWorldItem`.
 - `frame_started` hat einen vorbereiteten Asset-Prompt in
   `docs/world_design/244-frame-started-asset-prompt.md`.
-- Ein lokaler `frame_started.png`-Kandidat existiert, ist aber nicht
-  freigegeben.
-- Weitere `frame_started`-Freigabe ist blockiert, bis die Anchor-/Footprint-
-  Regeln aus `docs/world_design/245-build-alignment-and-anchor-system.md`
-  angewendet und per Debug-Overlay bestanden wurden.
+- Der lokale `frame_started.png`-Kandidat wurde nicht freigegeben und
+  geloescht.
+- Weitere `frame_started`-Arbeit ist blockiert, bis die
+  Masterlayout-/Plot-Regeln aus
+  `docs/world_design/246-island-master-layout-and-modular-plot-system.md` und
+  die Anchor-/Footprint-Regeln aus
+  `docs/world_design/245-build-alignment-and-anchor-system.md` angewendet
+  wurden.
 - Empfohlene Materialrichtung fuer `frame_started`: leichter Holzrahmen mit
   hoechstens kleinen Stein-/Erdkontaktpunkten auf dem Fundament.
 - `frame_started` braucht vor weiterer Asset-Erzeugung oder Asset-
-  Nachbesserung einen Bezug auf die Anchor-/Footprint-Regeln aus `245` und vor
-  Code einen eigenen Preview-/Device-Check mit dokumentierter Freigabe.
+  Nachbesserung einen definierten Plot-Typ, Anchor, Footprint,
+  Anschluss-/Socket-Konzept und einen Bezug auf die Anchor-/Footprint-Regeln
+  aus `245`; vor Code braucht es einen eigenen Preview-/Device-Check mit
+  dokumentierter Freigabe.
 - Innenraeume sind eigene `InteriorState`.
 - Objektansichten sind eigene `ObjectDetailState`.
 - Keine spaeteren Items duerfen in Base eingebrannt werden.
@@ -375,6 +383,8 @@ In diesem Template-Block gilt:
 - Keine Phase-2G-App-Integration.
 - Keine `frame_started`-Freigabe ohne Anchor-/Footprint- und
   Debug-Overlay-Check.
+- Kein neues Bauasset ohne Plot-Typ, Anchor, Footprint und
+  Anschluss-/Socket-Konzept.
 
 ## 10. Device-/Preview-Check
 
@@ -450,13 +460,18 @@ Phase-2F-Preview-Ergaenzung:
 - Exakte Docking-, Expansion- und Path-Anker bleiben ausserhalb von Phase 2E-D.
 - Freigabe- und Abschlussentscheidungen fuer Phase 2E-E und Phase 2F sind
   dokumentiert.
-- `frame_started` / Rohbau ist geplant und als Asset-Prompt vorbereitet.
-- Ein lokaler `frame_started.png`-Kandidat existiert, ist aber nicht
-  freigegeben.
+- `frame_started` / Rohbau ist geplant und als Asset-Prompt vorbereitet, aber
+  vollstaendig gestoppt.
+- Der lokale `frame_started.png`-Kandidat wurde nicht freigegeben und
+  geloescht.
 - Anchor-/Footprint-Regeln fuer den Aufbau auf `foundation_complete` sind in
   `docs/world_design/245-build-alignment-and-anchor-system.md` dokumentiert.
-- Vor weiterer Asset-Freigabe fehlen: Anchor-basierte Nachbesserung,
-  Alignment-Preview, Device-Check und Freigabe.
+- Das Waldlichtung-Masterlayout und modulare Plot-System sind in
+  `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+  gestartet.
+- Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
+  Anschluss-/Socket-Konzept, Anchor-basierte Nachbesserung, Alignment-Preview,
+  Device-Check und Freigabe.
 
 ## 12. Freigabeentscheidung
 
@@ -469,10 +484,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GPlanningStatus`: `started in docs/world_design/243-frame-started-plan.md`
 - `phase2GPromptStatus`: `prepared in docs/world_design/244-frame-started-asset-prompt.md; review open`
 - `phase2GAlignmentStatus`: `required in docs/world_design/245-build-alignment-and-anchor-system.md`
-- `phase2GFrameStartedCandidateStatus`: `present locally, not released`
+- `phase2GMasterLayoutStatus`: `started in docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+- `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Phase 2G Prompt/Asset anhand der Anchor-Regeln nachbessern und erneute Alignment-Preview pruefen`
+- `nextAllowedStep`: `Masterlayout-/Plot-Greybox oder Scale-/Plot-Messblock planen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -545,9 +561,18 @@ Phase-2G-Anchor-Definition gilt nur fuer:
 - Debug-Overlay-Gates fuer spaetere Asset-Freigabe,
 - Stopp der aktuellen `frame_started`-Freigabe.
 
+Phase-2G-Masterlayout-Planung gilt nur fuer:
+
+- Bewertung der aktuellen Waldlichtung als `StarterCorePlot`,
+- Definition von Plot-Typen,
+- Definition von Plot-Sockets,
+- Definition von Build-/Path-/Deko-/Expansion-Ankern,
+- Stoppen weiterer Einzelassets ohne Plot-/Socket-System.
+
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
 - Asset-Freigabe,
+- Asset-Erzeugung,
 - PNG-Aenderungen,
 - App-Integration,
 - Code,

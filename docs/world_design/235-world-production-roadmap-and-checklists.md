@@ -92,9 +92,15 @@ Aktueller Stand der Talvori-Welt-Produktion:
   gezeigt, dass ungefaehres Zentrum-Alignment fuer Rohbau nicht reicht.
 - Der zusaetzliche Anchor-/Alignment-Definitionsblock fuer Phase 2G wurde in
   `docs/world_design/245-build-alignment-and-anchor-system.md` gestartet.
-- Der naechste Blocker betrifft Anchor-/Footprint-Freigabe,
-  `frame_started`-Nachbesserung, Phase-2G-Code und jede groessere Bau-,
-  Lern-, Reward-, Persistenz-, Sound-/FX- oder Expansion-Architektur.
+- Phase 2G `frame_started` wurde danach vollstaendig gestoppt, weil vor
+  weiteren Bauassets ein Insel-Masterlayout mit modularen Plot-Flaechen,
+  Sockets, Anchors und Footprints fehlt.
+- Das Waldlichtung-Masterlayout-/Plot-System wurde in
+  `docs/world_design/246-island-master-layout-and-modular-plot-system.md`
+  gestartet.
+- Der naechste Blocker betrifft Masterlayout, Plot-Groessen, Plot-Sockets,
+  Anchor-Regeln, Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
+  Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
 Interpretation:
 
@@ -108,13 +114,14 @@ Reward- oder Persistenzarchitektur ableiten.
 
 Hauptblocker:
 
-Phase 2F ist abgeschlossen. Phase 2G ist nur als Planung, Asset-Prompt-
-Vorbereitung und Anchor-/Alignment-Definitionsblock gestartet. Der aktuelle
-`frame_started.png`-Kandidat ist nicht freigegeben. `frame_started` / Rohbau
-darf nicht automatisch als Asset oder Code weitergefuehrt werden. Vor jeder
-weiteren Asset-Freigabe muessen Anchor-, Footprint-, Support- und
-Debug-Overlay-Regeln angewendet werden. Asset-Erzeugung/Nachbesserung und Code
-brauchen danach jeweils eigene Freigabe und eine erneute Pruefung der Gates.
+Phase 2F ist abgeschlossen. Phase 2G `frame_started` ist vollstaendig
+gestoppt. Der geloeschte `frame_started.png`-Kandidat war nicht freigegeben.
+Einzelne Bauzustaende duerfen nicht weitergebaut werden, solange die
+Waldlichtung nicht als `IslandMasterLayout` mit modularen Plot-Flaechen,
+ConnectionSockets, BuildAnchors, PathAnchors, DecorationAnchors,
+ExpansionSockets und FootprintPolygons geplant ist. Vor jeder weiteren
+Asset-Erzeugung muessen Plot-Typ, Anchor, Footprint und Anschlusskonzept
+feststehen. Code braucht danach eine eigene Freigabe und erneute Gates.
 
 Vor jedem Phase-2G-Code oder jedem Ausbau ausserhalb des abgeschlossenen
 lokalen Phase-2F-Mock-Slices muss erneut geprueft werden:
@@ -147,7 +154,8 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2E-D | Asset-/Metadatenpruefung auf Geraet | `freigegeben` | Isolierter Widget-Test-Harness und temporaere visuelle Preview sind brauchbar; Anker-/Bounds-Werte sind dokumentiert; Freigabe gilt nur fuer den kleinen Phase-2E-E-Mock-Slice. |
 | Phase 2E-E | Kleiner Code-Slice mit freigegebenen Assets | `fertig / lokaler Mock-Slice bestanden` | Lokale Anzeige von `base.png` + `foundation_started.png` ist umgesetzt. `main_build_area` auf Waldlichtung ist umgesetzt. Lokaler Zustand `empty -> foundation_started` ist umgesetzt. Nutzerfuehrung mit Hinweistext und kontrastreichem Fokus ist umgesetzt. Minimaler Feedback-Moment mit vorbereiteter ID `build.foundation.started` ist umgesetzt. Visuell auf Geraet geprueft. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, echte Ressourcenlogik, Expansion, PlacedItems, Interiors/ObjectDetail, produktive Bau-/Lernlogik, Sounddatei oder Audio-Implementierung. Commit: `c82880e4 feat: polish forest clearing foundation guidance`. |
 | Phase 2F | `foundation_complete` | `fertig / lokaler Mock-Slice bestanden` | Lokale Mock-Erweiterung `foundation_started -> foundation_complete` ist umgesetzt. Anzeige `base.png` + `foundation_complete.png` ist umgesetzt; `foundation_complete` ersetzt `foundation_started` visuell ohne dauerhaftes Stapeln. Direkter Tap-Flow funktioniert. Grosse Snackbar wurde entfernt. Kleine In-World-Labels `Fundament begonnen` und `Fundament fertig` bleiben. Label-Abstand wurde verbessert und auf Geraet geprueft. Feedback-ID `build.foundation.complete` ist vorbereitet, ohne Sound-/FX-Implementierung. Keine ausgeschlossenen Systeme wurden beruehrt: keine Persistenz, Supabase Writes, SRS-/`word_progress`-Aenderung, Reward Bridge, Ressourcenlogik, Sound-/FX-Schicht, Audio/Sounddateien, Expansion, PlacedItems, Interiors/ObjectDetail oder produktive Bau-/Lernlogik. Commit: `b13d2162 fix: refine foundation complete guidance flow`. |
-| Phase 2G | `frame_started` / Rohbau | `Anchor-/Alignment-Block erforderlich / Asset nicht freigegeben` | Reiner Planungsblock in `docs/world_design/243-frame-started-plan.md`; Asset-Prompt-/Freigabeblock in `docs/world_design/244-frame-started-asset-prompt.md`; Anchor-/Footprint-Regeln in `docs/world_design/245-build-alignment-and-anchor-system.md`. Der aktuelle `frame_started.png`-Kandidat ist vorhanden, aber nicht freigegeben. Naechster erlaubter Schritt ist Anchor-basierte Prompt-/Asset-Nachbesserung und erneute Alignment-Preview, nicht Code. |
+| Phase 2G | `frame_started` / Rohbau | `gestoppt / Masterlayout erforderlich` | Planung in `docs/world_design/243-frame-started-plan.md`, Prompt-Vorbereitung in `docs/world_design/244-frame-started-asset-prompt.md` und Anchor-Regeln in `docs/world_design/245-build-alignment-and-anchor-system.md` bleiben erhalten, aber `frame_started` wird nicht weitergebaut. Grund: Vor weiteren Bauassets fehlt das Insel-Masterlayout mit modularen Plot-Flaechen, Sockets, Anchors und Footprints. Der nicht freigegebene Kandidat wurde geloescht. |
+| Phase 2G-M | Waldlichtung Masterlayout / Modular Plot System | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/246-island-master-layout-and-modular-plot-system.md`. Die aktuelle Waldlichtung gilt als `StarterCorePlot`, nicht als vollstaendige Insel. Naechster erlaubter Schritt ist Greybox-/Masterlayout- oder Scale-/Plot-Messblock, nicht Asset oder Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -167,10 +175,14 @@ Der Asset-Prompt-/Freigabeblock fuer `frame_started` ist vorbereitet:
 Der Anchor-/Alignment-Definitionsblock fuer `frame_started` ist gestartet:
 `docs/world_design/245-build-alignment-and-anchor-system.md`.
 
+Der Masterlayout-/Plot-System-Block fuer die Waldlichtung ist gestartet:
+`docs/world_design/246-island-master-layout-and-modular-plot-system.md`.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern Anchor-basierte Nachbesserung: Prompt/Asset auf
-konkrete Support-Punkte, Footprint-Polygone und Debug-Overlay-Gates
-ausrichten. Der aktuelle `frame_started.png`-Kandidat bleibt blockiert.
+Asset-Freigabe, sondern Greybox-/Masterlayout- oder Scale-/Plot-Messplanung:
+Standard-Plotgroessen, Socket-Kompatibilitaet, StarterCorePlot-Groesse und
+minimale private Inselkapazitaet muessen definiert werden. `frame_started`
+bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -210,11 +222,14 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
 - `foundation_complete` ist nur als lokaler Mock-Slice abgeschlossen;
   produktive Bau-/Lernlogik bleibt blockiert.
 - Phase 2G (`frame_started` / Rohbau) ist geplant und als Asset-Prompt
-  vorbereitet; ein lokaler `frame_started.png`-Kandidat existiert, ist aber
-  wegen unzureichend exakter Anchor-/Footprint-Passung nicht freigegeben.
+  vorbereitet, aber vollstaendig gestoppt.
+- Der nicht freigegebene `frame_started.png`-Kandidat wurde geloescht und darf
+  nicht committed werden.
 - Anchor-/Support-Punkte fuer `foundation_complete` sind in
-  `docs/world_design/245-build-alignment-and-anchor-system.md` definiert und
-  muessen vor weiterer Asset-Freigabe angewendet werden.
+  `docs/world_design/245-build-alignment-and-anchor-system.md` definiert.
+- Vor weiterer Asset-Freigabe fehlt zusaetzlich ein Insel-Masterlayout mit
+  Plot-Typen, Plot-Groessen, ConnectionSockets, BuildAnchors,
+  PathAnchors, DecorationAnchors, ExpansionSockets und Footprints.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -234,9 +249,17 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Interiors/ObjectDetail,
 - keine produktive Bau-/Lernlogik,
 - keine Sounddateien oder Audio-Implementierung,
+- kein neues Bauasset ohne Plot-Typ,
+- kein neues Bauasset ohne Anchor,
+- kein neues Bauasset ohne Footprint,
+- kein neues Bauasset ohne Anschluss-/Socket-Konzept, wenn es mit Wegen oder
+  Grundstuecken verbunden wird,
+- kein weiterer Ausbau, wenn die Inselgroesse fuer die geplante Landschaft
+  nicht reicht,
+- keine Einzelassets nur nach Augenmass,
 - keine Phase-2G-Asset-Freigabe ohne Anchor-/Debug-Overlay-Check,
-- keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf die
-  Anchor-/Footprint-Regeln,
+- keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf
+  Masterlayout-, Plot-, Anchor- und Footprint-Regeln,
 - kein Phase-2G-Code ohne Asset, Preview, Device-Check und Freigabe,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
@@ -276,6 +299,10 @@ Vor Asset-Nutzung pruefen:
 - BuildZone-Anker sind dokumentiert.
 - Aufbau-Assets haben `referenceState`, `build_center`, Support-Anker,
   `safe_inner_build_polygon` und `max_frame_footprint_polygon`.
+- Aufbau-Assets sind einem Plot-Typ und einem `building_footprint_polygon`
+  zugeordnet.
+- Plot-Sockets und Weg-/Zaun-/Deko-Anker sind fuer anschlussrelevante Assets
+  dokumentiert.
 - Support-Fuesse/Kontaktpunkte sitzen sichtbar auf dem Referenzzustand und
   nicht ausserhalb des zulaessigen Fundaments.
 - Debug-Overlay-Pruefung mit Referenzzustand wurde bestanden.
@@ -342,10 +369,14 @@ Asset-Prompt-/Freigabeblock wurde in
 `docs/world_design/244-frame-started-asset-prompt.md` vorbereitet. Die
 nachfolgende lokale Sichtpruefung des `frame_started.png`-Kandidaten hat einen
 zusaetzlichen Anchor-/Alignment-Block erzwungen:
-`docs/world_design/245-build-alignment-and-anchor-system.md`. Der naechste
-offene Schritt ist Anchor-basierte Prompt-/Asset-Nachbesserung und erneute
-Alignment-Preview. Asset-Freigabe und Code bleiben blockiert, bis Support-
-Anker, Footprint, Preview, Device-Check, Freigabe und Tests definiert sind.
+`docs/world_design/245-build-alignment-and-anchor-system.md`. Danach wurde
+Phase 2G vollstaendig gestoppt, weil vor weiteren Bauassets zuerst das
+Waldlichtung-Masterlayout mit modularen Plot-Flaechen und Anschlussregeln
+geplant werden muss:
+`docs/world_design/246-island-master-layout-and-modular-plot-system.md`.
+Der naechste offene Schritt ist Greybox-/Masterlayout- oder
+Scale-/Plot-Messplanung. Asset-Freigabe und Code bleiben blockiert, bis Plot,
+Anchor, Footprint, Preview, Device-Check, Freigabe und Tests definiert sind.
 
 ## 10. Stop-Regeln
 
@@ -357,6 +388,12 @@ Ein Schritt wird gestoppt, wenn:
 - Perspektive nicht passt,
 - ein aufbauendes BuildAreaState-Asset nicht auf definierten Support-Ankern
   oder innerhalb des zulaessigen Footprints steht,
+- ein neues Bauasset keinen Plot-Typ hat,
+- ein neues Bauasset keinen Anchor hat,
+- ein neues Bauasset keinen Footprint hat,
+- ein anschlussrelevantes Asset kein Socket-/Connection-Konzept hat,
+- die Inselgroesse fuer die geplante Landschaft nicht reicht,
+- Einzelassets nur nach Augenmass erzeugt werden,
 - Pfosten/Fuesse sichtbar ausserhalb des Referenzfundaments landen,
 - kein Debug-Overlay-Check fuer ein aufbauendes Asset dokumentiert ist,
 - Status nicht `freigegeben` ist,
