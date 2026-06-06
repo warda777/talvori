@@ -180,6 +180,13 @@ SequenceObjects und SensitiveSmallObjects. Daraus folgen keine finale
 Mobile-UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 Container-Implementierung, keine ThemeIsland-Umsetzung, keine Asset- oder
 Codefreigabe und kein `frame_started`.
+Phase 2G-M12-E2 prueft diese M12-E-Previews visuell in
+`docs/world_design/277-mobile-clutter-visual-review.md`. Ergebnis: M12-E ist
+als erste Mobile-/Clutter-Planungsrichtung grundsaetzlich brauchbar. Daraus
+folgen weiterhin keine finale Mobile-UI, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine Container-Implementierung, keine automatische
+Wortplatzierung, keine ThemeIsland-Umsetzung, keine Asset- oder Codefreigabe
+und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -220,11 +227,12 @@ Fuehrende Dokumente:
 - `docs/world_design/274-sensitive-content-representation-rules.md`
 - `docs/world_design/275-sensitive-content-visual-review.md`
 - `docs/world_design/276-mobile-clutter-rules-small-objects.md`
+- `docs/world_design/277-mobile-clutter-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-E Mobile Clutter Rules gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-E2 Mobile Clutter Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -442,6 +450,14 @@ Fuehrende Dokumente:
     finale Mobile-UI, keine finale Datenstruktur, keine Runtime-Konfiguration,
     keine Container-Implementierung, keine ThemeIsland-Umsetzung, keine App-/
     Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM12E2`: `false` fuer Code/Assets; erlaubt nur die visuelle
+    Dokumentationspruefung in
+    `docs/world_design/277-mobile-clutter-visual-review.md`.
+    M12-E2 darf M12-E als erste Mobile-/Clutter-Planungsrichtung
+    grundsaetzlich brauchbar bewerten, aber keine finale Mobile-UI, keine
+    finale Datenstruktur, keine Runtime-Konfiguration, keine Container-
+    Implementierung, keine automatische Wortplatzierung, keine ThemeIsland-
+    Umsetzung, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -600,19 +616,20 @@ M12-B2 prueft diese Routing-Previews in
 `docs/world_design/271-word-to-island-routing-visual-review.md` als
 grundsaetzlich brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine
 Routing-Implementierung, keine Datenstruktur-Freigabe und keine automatische
-Wortplatzierung. M12-C, M12-D und M12-E bleiben offen.
+Wortplatzierung. M12-C, M12-D und M12-E wurden spaeter als reine Planungs-/
+Review-Bloecke gestartet.
 M12-C leitet in `docs/world_design/272-plot-capability-derivation.md` erste
 Plot-Capabilities aus Taxonomy, ThemeIsland-Priorisierung und Routing ab.
 Capabilities sind Erlaubnisse, keine Pflichtbelegung. `core_plot` ist nicht
 automatisch `home`; `hub_capable_plot` ist nicht automatisch Markt; Edge-Plots
 bleiben durch Natur-, Wasser-, Farm- oder Expansion-Regeln begrenzt. M12-D und
-M12-E bleiben offen.
+M12-E wurden spaeter als reine Folgeplanungen gestartet.
 M12-C2 prueft diese Capability-Previews in
 `docs/world_design/273-plot-capability-visual-review.md` als grundsaetzlich
 brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine Plot-
 Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung und
 keine automatische Wortplatzierung aus Plot-Capabilities. M12-D und M12-E
-bleiben offen.
+wurden spaeter gestartet; daraus folgt weiterhin keine Umsetzung.
 M12-D startet in
 `docs/world_design/274-sensitive-content-representation-rules.md` die
 Darstellungsregeln fuer sensible, abstrakte und gesellschaftlich heikle
@@ -621,7 +638,7 @@ Lerninhalte. Preview-Dateien liegen unter
 Standardwege sind Codex, ContextCard, sanfter CompanionDialog, Backlog,
 RequiresUserChoice und BlockedUntilRules. Automatische Gebaeude, Symbole,
 Assets, Rewards, Retention-Druck oder sensible ThemeIsland-Umsetzungen bleiben
-blockiert. M12-E bleibt offen.
+blockiert. M12-E wurde spaeter als Mobile-/Clutter-Planung gestartet.
 M12-D2 prueft diese Sensitive-Content-Previews in
 `docs/world_design/275-sensitive-content-visual-review.md` als grundsaetzlich
 brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine finale
@@ -1161,6 +1178,14 @@ In diesem Template-Block gilt:
 - Keine sensitiveSmallObjects ohne M12-D-Regeln.
 - Keine App- oder Assetfreigabe aus M12-E.
 - Keine automatische Wortplatzierung aus Clutter-Regeln.
+- Keine finale Mobile-UI aus M12-E2.
+- Keine finale Datenstruktur aus M12-E2.
+- Keine Runtime-Konfiguration aus M12-E2.
+- Keine Container-Implementierung aus M12-E2.
+- Keine automatische Wortplatzierung aus M12-E2.
+- Keine Device- oder Accessibility-Entscheidung ohne spaetere echte Mobile-
+  Pruefung.
+- Keine App- oder Assetfreigabe aus M12-E oder M12-E2.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1389,10 +1414,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12DSensitiveContentRulesStatus`: `started in docs/world_design/274-sensitive-content-representation-rules.md; previews created under docs/world_design/previews/phase2g_m12d_sensitive_content_rules/; no final safety implementation, no moderation implementation, no automatic sensitive visualization`
 - `phase2GM12D2SensitiveContentReviewStatus`: `started in docs/world_design/275-sensitive-content-visual-review.md; first sensitive content planning direction usable; no final safety implementation, no moderation implementation, no automatic sensitive visualization`
 - `phase2GM12EMobileClutterRulesStatus`: `started in docs/world_design/276-mobile-clutter-rules-small-objects.md; previews created under docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/; no final mobile UI, no final data structure, no runtime config, no container implementation`
+- `phase2GM12E2MobileClutterReviewStatus`: `started in docs/world_design/277-mobile-clutter-visual-review.md; first mobile clutter planning direction usable; no final mobile UI, no final data structure, no runtime config, no container implementation`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-E reviewen oder Mobile-/Clutter-Regeln nachbessern; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-E2 reviewen oder echte Mobile-/Accessibility-/Pagination-Pruefung planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1940,8 +1966,8 @@ Phase-2G-M12-B2-Word-to-Island-Routing-Visual-Review gilt nur fuer:
 - Bestaetigung, dass Routing nur Vorschlaege macht und sichtbare Platzierung
   passende Regeln sowie Nutzerbestaetigung braucht,
 - Dokumentation, dass M12-C Plot-Capability Derivation, M12-D Sensitive
-  Content Representation Rules und M12-E Mobile And Clutter Rules offen
-  bleiben,
+  Content Representation Rules und M12-E Mobile And Clutter Rules als
+  Folge-Gates noetig sind,
 - Stop-Regeln gegen finale Routing-Implementierung aus M12-B2, automatische
   Wortplatzierung aus M12-B2, Datenstruktur-Freigabe aus M12-B2,
   Plot-Capability-Ableitung ohne M12-C, sensible Begriffe ohne M12-D,
@@ -2007,7 +2033,8 @@ Phase-2G-M12-D-Sensitive-Content-Rules gilt nur fuer:
 - Stop-Regeln gegen automatische Visualisierung, Gebaeude-/Symbol-/
   Assetproduktion, Beratung, Retention-Druck, pauschale Symbolik und
   dramatisierende Companion-Reaktionen,
-- Dokumentation, dass M12-E Mobile And Clutter Rules offen bleibt.
+- Dokumentation, dass M12-E Mobile And Clutter Rules als eigener Folgeblock
+  noetig ist.
 
 Phase-2G-M12-D2-Sensitive-Content-Visual-Review gilt nur fuer:
 
@@ -2048,6 +2075,26 @@ Phase-2G-M12-E-Mobile-Clutter-Rules gilt nur fuer:
 - keine Runtime-Konfiguration,
 - keine Container-Implementierung,
 - keine ThemeIsland-Umsetzung,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M12-E2-Mobile-Clutter-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/277-mobile-clutter-visual-review.md`,
+- visuelle und inhaltliche Pruefung der M12-E-Previews unter
+  `docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/`,
+- Bestaetigung, dass Ladder, Matrix, Container-Beispiele und Stop-Gates als
+  erste Mobile-/Clutter-Planungsrichtung brauchbar sind,
+- Bestaetigung, dass TinyObjects nicht dauerhaft in IslandView gehoeren,
+  Container keine Objektlisten sein duerfen und Labels nur kontextuell sichtbar
+  sein sollen,
+- Stop-Regeln gegen finale Mobile-UI, finale Datenstruktur, Runtime-
+  Konfiguration, Container-Implementierung, automatische Wortplatzierung,
+  ThemeIsland-Umsetzung und App-/Assetfreigabe aus M12-E oder M12-E2,
+- Dokumentation, dass echte Device-, Accessibility-, Pagination- und
+  Tap-Target-Pruefungen spaeter offen bleiben,
+- keine PNG-Aenderungen,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 
