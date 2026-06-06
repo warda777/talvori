@@ -339,11 +339,23 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung,
   keine ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und
   kein `frame_started`.
+- Phase 2G-M12-D wurde als Sensitive Content Representation Rules in
+  `docs/world_design/274-sensitive-content-representation-rules.md`
+  gestartet. Preview-Dateien liegen unter
+  `docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`.
+  M12-D definiert erste Regeln fuer sensible, abstrakte und gesellschaftlich
+  heikle Lerninhalte. Standardwege sind Codex, ContextCard, sanfter
+  CompanionDialog, Backlog, RequiresUserChoice und BlockedUntilRules statt
+  automatischer Gebaeude-, Symbol-, Objekt-, Reward- oder Retention-
+  Darstellung. Daraus folgen keine finale Safety-Implementierung, keine
+  Moderations-Implementierung, keine finale Datenstruktur, keine
+  ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
-  M12-B-/M12-B2-/M12-C-/M12-C2-Bewertung.
+  M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -355,8 +367,9 @@ Aktueller Stand der Talvori-Welt-Produktion:
   dokumentarisch geprueft, M12-B2 als erste Routing-Planungsrichtung
   dokumentarisch bestaetigt, M12-C als erste Plot-Capability-Ableitung
   dokumentarisch geprueft, M12-C2 als erste Plot-Capability-Planungsrichtung
-  dokumentarisch bestaetigt oder konkrete Taxonomy-/Routing-Follow-ups geplant
-  werden.
+  dokumentarisch bestaetigt, M12-D als Sensitive-Content-Regelgrundlage
+  dokumentarisch geprueft oder konkrete Taxonomy-/Routing-/Safety-Follow-ups
+  geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -451,6 +464,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M12-B2 | Word-to-Island Routing Visual Review | `Review gestartet / erste Routing-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/271-word-to-island-routing-visual-review.md`. Bewertet die M12-B-Previews visuell. Ergebnis: Pipeline, Matrix, Beispielkarten und Multi-home-/Backlog-Flow sind als erste Routing-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln gegen automatische Platzierung, falsche Depth-Ebene, Multi-home ohne Nutzer-/Kontextentscheidung und sensitive Begriffe ohne M12-D. Keine finale Routing-Implementierung, keine finale Datenstruktur, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-C | Plot-Capability Derivation | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/272-plot-capability-derivation.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12c_plot_capability_derivation/`: `01_plot_capability_pipeline.png`, `02_plot_type_capability_matrix.png`, `03_early_theme_capability_cards.png`, `04_mid_late_special_plot_limits.png` und `README.md`. Leitet erste Plot-Capabilities fuer abstrakte Plottypen und Early ThemeIslands ab. Keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-C2 | Plot-Capability Visual Review | `Review gestartet / erste Capability-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/273-plot-capability-visual-review.md`. Bewertet die M12-C-Previews visuell. Ergebnis: Pipeline, Matrix, Early Theme Cards und Mid/Late/Special Limits sind als erste Plot-Capability-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln: `allowedFunctions` sind Erlaubnisse, `core_plot` ist nicht automatisch `home`, `hub_capable_plot` ist nicht automatisch Markt, und Water/Farm/Travel/Vehicle/Digital/Sensitive bleiben gated. Keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M12-D | Sensitive Content Representation Rules | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/274-sensitive-content-representation-rules.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`: `01_sensitive_content_decision_pipeline.png`, `02_sensitive_category_matrix.png`, `03_safe_representation_examples.png`, `04_blocked_until_rules_map.png` und `README.md`. Definiert erste neutrale Darstellungswege fuer sensible, abstrakte und gesellschaftlich heikle Begriffe: Codex, ContextCard, CompanionDialog, QuestWithoutSymbol, NeutralBlueprint, BacklogOnly, RequiresUserChoice und BlockedUntilRules. Keine finale Safety-Implementierung, keine Moderations-Implementierung, keine automatische Visualisierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -631,6 +645,13 @@ M12-E Mobile And Clutter Rules erlaubt. Keine finale Plot-Datenstruktur,
 keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-
 Umsetzung und keine Assetfreigabe duerfen aus M12-C2 abgeleitet werden.
 
+Phase 2G-M12-D startet die Sensitive Content Representation Rules als
+Planungs- und Previewgrundlage. Als naechster Schritt ist nur M12-D-Review,
+M12-D-Nachbesserung oder M12-E Mobile And Clutter Rules erlaubt. Keine finale
+Safety-Implementierung, keine Moderations-Implementierung, keine automatische
+Visualisierung sensibler Begriffe, keine sensible ThemeIsland-Umsetzung und
+keine Assetfreigabe duerfen aus M12-D abgeleitet werden.
+
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
 begruendet wurden.
@@ -799,6 +820,8 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   M12-C2 bewertet diese erste Capability-Richtung als grundsaetzlich
   brauchbar; offen bleiben Sensitive-Content-Regeln und Mobile-/Clutter-
   Regeln.
+  M12-D startet Sensitive-Content-Regeln und erzeugt Preview-Dateien; offen
+  bleiben M12-D-Review und Mobile-/Clutter-Regeln.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -1068,6 +1091,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung
   planen,
 - keine App- oder Assetfreigabe aus M12-C oder M12-C2 ableiten,
+- keine sensible ThemeIsland-Umsetzung aus M12-D ableiten,
+- keine automatische Visualisierung sensibler Begriffe planen,
+- keine Gebaeude-, Symbol- oder Assetproduktion fuer sensible Begriffe aus
+  M12-D ableiten,
+- keine medizinische, juristische oder politische Beratung im Spielsystem
+  planen,
+- keine Retention-Mechanik mit Angst, Krankheit, Tod, Schuld, Politik oder
+  Religion planen,
+- keine Companion-Reaktion planen, die sensible Inhalte dramatisiert oder
+  Druck erzeugt,
+- keine pauschale Symbolik fuer Religion, Politik, Identitaet oder soziale
+  Gruppen planen,
+- keine finale Sensitive-Content-Implementierung ohne spaetere Safety-/UX-
+  Pruefung planen,
+- keine App- oder Assetfreigabe aus M12-D ableiten,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1525,6 +1563,20 @@ Ein Schritt wird gestoppt, wenn:
 - Water-, Travel-, Vehicle- oder Digital-Plots ohne eigene Folgepruefung
   geplant werden,
 - aus M12-C oder M12-C2 App-, Code- oder Assetfreigabe abgeleitet wird,
+- aus M12-D eine sensible ThemeIsland-Umsetzung abgeleitet wird,
+- sensible Begriffe automatisch visualisiert werden,
+- Gebaeude, Symbole oder Assets fuer sensible Begriffe aus M12-D abgeleitet
+  werden,
+- medizinische, juristische oder politische Beratung im Spielsystem geplant
+  wird,
+- Retention-Mechaniken mit Angst, Krankheit, Tod, Schuld, Politik oder
+  Religion geplant werden,
+- Companion-Reaktionen sensible Inhalte dramatisieren oder Druck erzeugen,
+- pauschale Symbolik fuer Religion, Politik, Identitaet oder soziale Gruppen
+  geplant wird,
+- aus M12-D App-, Code- oder Assetfreigabe abgeleitet wird,
+- finale Sensitive-Content-Implementierung ohne spaetere Safety-/UX-Pruefung
+  geplant wird,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,

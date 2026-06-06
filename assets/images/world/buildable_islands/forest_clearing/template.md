@@ -155,6 +155,15 @@ als erste Plot-Capability-Planungsrichtung grundsaetzlich brauchbar, bleibt
 aber ohne finale Plot-Datenstruktur, Runtime-Konfiguration, Plot-
 Implementierung, ThemeIsland-Umsetzung, Assetfreigabe, Codefreigabe und
 `frame_started`.
+Phase 2G-M12-D startet Sensitive Content Representation Rules in
+`docs/world_design/274-sensitive-content-representation-rules.md` und erzeugt
+Dokumentationspreviews unter
+`docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`. M12-D
+definiert neutrale Darstellungswege fuer sensible, abstrakte und
+gesellschaftlich heikle Begriffe. Daraus folgt keine finale Safety-
+Implementierung, keine Moderations-Implementierung, keine automatische
+Visualisierung, keine sensible ThemeIsland-Umsetzung, keine Asset- oder
+Codefreigabe und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -192,11 +201,12 @@ Fuehrende Dokumente:
 - `docs/world_design/271-word-to-island-routing-visual-review.md`
 - `docs/world_design/272-plot-capability-derivation.md`
 - `docs/world_design/273-plot-capability-visual-review.md`
+- `docs/world_design/274-sensitive-content-representation-rules.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-C2 Plot-Capability Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-D Sensitive Content Rules gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -385,6 +395,16 @@ Fuehrende Dokumente:
     keine Runtime-Konfiguration, keine Plot-Implementierung, keine
     ThemeIsland-Umsetzung, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
+  - `phase2GM12D`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/274-sensitive-content-representation-rules.md` und
+    Dokumentations-/Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`.
+    M12-D darf sichere Darstellungswege fuer sensible Begriffe planen, aber
+    keine finale Safety-Implementierung, keine Moderations-Implementierung,
+    keine finale Datenstruktur, keine automatische Visualisierung, keine
+    sensible ThemeIsland-Umsetzung, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -556,6 +576,15 @@ brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine Plot-
 Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung und
 keine automatische Wortplatzierung aus Plot-Capabilities. M12-D und M12-E
 bleiben offen.
+M12-D startet in
+`docs/world_design/274-sensitive-content-representation-rules.md` die
+Darstellungsregeln fuer sensible, abstrakte und gesellschaftlich heikle
+Lerninhalte. Preview-Dateien liegen unter
+`docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`.
+Standardwege sind Codex, ContextCard, sanfter CompanionDialog, Backlog,
+RequiresUserChoice und BlockedUntilRules. Automatische Gebaeude, Symbole,
+Assets, Rewards, Retention-Druck oder sensible ThemeIsland-Umsetzungen bleiben
+blockiert. M12-E bleibt offen.
 
 ## 2. Zweck Des Assets
 
@@ -1048,6 +1077,20 @@ In diesem Template-Block gilt:
 - Keine Gartenwachstums- oder Farm-Mechanik ohne Fairness-/Timer-Regeln.
 - Keine Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung.
 - Keine App- oder Assetfreigabe aus M12-C oder M12-C2.
+- Keine sensible ThemeIsland-Umsetzung aus M12-D.
+- Keine automatische Visualisierung sensibler Begriffe.
+- Keine Gebaeude-, Symbol- oder Assetproduktion fuer sensible Begriffe aus
+  M12-D.
+- Keine medizinische, juristische oder politische Beratung im Spielsystem.
+- Keine Retention-Mechanik mit Angst, Krankheit, Tod, Schuld, Politik oder
+  Religion.
+- Keine Companion-Reaktion, die sensible Inhalte dramatisiert oder Druck
+  erzeugt.
+- Keine pauschale Symbolik fuer Religion, Politik, Identitaet oder soziale
+  Gruppen.
+- Keine finale Sensitive-Content-Implementierung ohne spaetere Safety-/UX-
+  Pruefung.
+- Keine App- oder Assetfreigabe aus M12-D.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1273,10 +1316,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12B2WordToIslandRoutingReviewStatus`: `started in docs/world_design/271-word-to-island-routing-visual-review.md; first routing planning direction usable; no final routing implementation, no final data structure, no automatic placement`
 - `phase2GM12CPlotCapabilityDerivationStatus`: `started in docs/world_design/272-plot-capability-derivation.md; previews created under docs/world_design/previews/phase2g_m12c_plot_capability_derivation/; no final plot data structure, no runtime config, no plot implementation`
 - `phase2GM12C2PlotCapabilityReviewStatus`: `started in docs/world_design/273-plot-capability-visual-review.md; first plot capability planning direction usable; no final plot data structure, no runtime config, no plot implementation`
+- `phase2GM12DSensitiveContentRulesStatus`: `started in docs/world_design/274-sensitive-content-representation-rules.md; previews created under docs/world_design/previews/phase2g_m12d_sensitive_content_rules/; no final safety implementation, no moderation implementation, no automatic sensitive visualization`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-C2 reviewen oder M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-D reviewen oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1877,6 +1921,21 @@ Phase-2G-M12-C2-Plot-Capability-Visual-Review gilt nur fuer:
   Umsetzung ohne M12-E, Gartenwachstums-/Farm-Mechanik ohne Fairness-/Timer-
   Regeln, Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung und
   App-/Assetfreigabe aus M12-C oder M12-C2.
+
+Phase-2G-M12-D-Sensitive-Content-Rules gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/274-sensitive-content-representation-rules.md`,
+- Dokumentationspreviews unter
+  `docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`,
+- erste Regeln fuer sensible, abstrakte und gesellschaftlich heikle Begriffe,
+- neutrale Darstellungswege wie Codex, ContextCard, CompanionDialog,
+  QuestWithoutSymbol, NeutralBlueprint, BacklogOnly, RequiresUserChoice und
+  BlockedUntilRules,
+- Stop-Regeln gegen automatische Visualisierung, Gebaeude-/Symbol-/
+  Assetproduktion, Beratung, Retention-Druck, pauschale Symbolik und
+  dramatisierende Companion-Reaktionen,
+- Dokumentation, dass M12-E Mobile And Clutter Rules offen bleibt.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
