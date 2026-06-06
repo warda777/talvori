@@ -292,6 +292,15 @@ PNGs, keine Tests, keine finale Growth-Implementierung, keine Timer-
 Implementierung, keine Retention-Implementierung, keine Monetarisierungsregel,
 keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
 Assetfreigabe, kein Code und kein `frame_started`.
+Phase 2G-M13-I startet Asset Prioritization Scope Gate in
+`docs/world_design/289-asset-prioritization-scope-gate.md`. M13-I ist ein
+reiner Asset-Prioritization-/Scope-Gate-Planungsblock. Die Waldlichtung bleibt
+Starter-/Testform. Aus M13-I entstehen keine neuen Assets, keine Bauzustaende,
+keine ThemeIsland-Bases und keine Container-/TinyObject-/Sensitive-/Companion-/
+Growth-Assets. `frame_started` bleibt blockiert. Daraus folgen keine PNGs,
+keine Tests, keine finale Assetliste, keine Produktionsfreigabe, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code
+und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -344,11 +353,12 @@ Fuehrende Dokumente:
 - `docs/world_design/286-container-pagination-and-tap-target-rules.md`
 - `docs/world_design/287-sensitive-content-policy-deepening.md`
 - `docs/world_design/288-growth-timer-fairness-rules.md`
+- `docs/world_design/289-asset-prioritization-scope-gate.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-H Growth And Timer Fairness Rules gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-I Asset Prioritization Scope Gate gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -664,6 +674,14 @@ Fuehrende Dokumente:
     Implementierung, keine Monetarisierungsregel, keine finale Datenstruktur,
     keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
     `frame_started` erzeugen.
+  - `phase2GM13I`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/289-asset-prioritization-scope-gate.md`.
+    M13-I darf Asset-Priorisierung, Scope-Gates, Asset-Kategorien,
+    Prioritaetslogik und Blocker planen und textuell visualisieren, aber keine
+    PNGs, keine Tests, keine Assetproduktion, keine finale Assetliste, keine
+    finale Produktionsfreigabe, keine finale Datenstruktur, keine Runtime-
+    Konfiguration, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1551,6 +1569,23 @@ In diesem Template-Block gilt:
 - Keine App- oder Assetfreigabe aus M13-H.
 - Kein Code aus M13-H.
 - Kein `frame_started` oder Bauzustand aus M13-H.
+- Keine Assetproduktion aus M13-I.
+- Keine finale Assetliste aus M13-I.
+- Keine App- oder Assetfreigabe aus M13-I.
+- Keine ThemeIsland-Base-Produktion aus M13-I.
+- Kein `frame_started` aus M13-I.
+- Keine Bauzustaende aus M13-I.
+- Keine TinyObject-Massenproduktion.
+- Keine Sensitive-/Special-Assets.
+- Keine Companion-Animation-/Voice-/Audio-Assets.
+- Keine Growth-/Timer-Druckassets.
+- Keine Social-/Showcase-Assets.
+- Keine PNG-Erzeugung aus M13-I.
+- Keine Tests aus M13-I.
+- Kein Code aus M13-I.
+- Keine Runtime-Konfiguration aus M13-I.
+- Keine automatische Assetproduktion aus Taxonomy, Routing, Capability Sheets,
+  Onboarding oder Roadmap.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1801,10 +1836,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13FContainerPaginationTapTargetStatus`: `started in docs/world_design/286-container-pagination-and-tap-target-rules.md; textual visualization only; no PNGs, no tests, no final UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM13GSensitivePolicyDeepeningStatus`: `started in docs/world_design/287-sensitive-content-policy-deepening.md; policy structure only; no safety implementation, no moderation implementation, no final data structure, no runtime config, no automatic classification`
 - `phase2GM13HGrowthTimerFairnessStatus`: `started in docs/world_design/288-growth-timer-fairness-rules.md; fairness structure only; no growth implementation, no timer implementation, no retention implementation, no monetization rule, no runtime config`
+- `phase2GM13IAssetPrioritizationScopeGateStatus`: `started in docs/world_design/289-asset-prioritization-scope-gate.md; scope gate only; no asset production, no final asset list, no production release, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-H reviewen, M13-H nachbessern oder M13-I/M13-J als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-I reviewen, M13-I nachbessern oder M13-J/M13-K als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2725,6 +2761,31 @@ Phase-2G-M13-H-Growth-And-Timer-Fairness-Rules gilt nur fuer:
 - keine App-/Assetfreigabe,
 - kein Code,
 - kein `frame_started`.
+
+Phase-2G-M13-I-Asset-Prioritization-Scope-Gate gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/289-asset-prioritization-scope-gate.md`,
+- Asset-Priorisierung, Scope-Gates, Asset-Kategorien, Prioritaetslogik und
+  Blocker,
+- textuelle Visualisierung mit Mermaid, ASCII-Flows, Markdown-Tabellen,
+  Scope-/Asset-Matrizen und Gate-/Decision-Flows,
+- Trennung von Documentation Previews, Debug/QA, Product UI Previews,
+  Build-State-Overlays, ThemeIsland-Bases, Container-/Detail-Assets,
+  TinyObjects, Sensitive/Special, Companion, Deko und System UI nur als Planung,
+- keine PNGs,
+- keine Tests,
+- keine Assetproduktion,
+- keine finale Assetliste,
+- keine finale Produktionsfreigabe,
+- keine ThemeIsland-Base-Produktion,
+- kein `frame_started`,
+- keine Bauzustaende,
+- keine Container-/TinyObject-/Sensitive-/Companion-/Growth-Assets,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine App-/Assetfreigabe,
+- kein Code.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
