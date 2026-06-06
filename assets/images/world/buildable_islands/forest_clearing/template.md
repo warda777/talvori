@@ -18,7 +18,24 @@ Debug-Greybox-Previews als Dokumentationsmaterial. Phase 2G-M5 bewertet diese
 Preview visuell und empfiehlt eine nachgebesserte Layoutvariante. Phase
 2G-M5-B erzeugt diese Variante-B-Debug-Greybox als Dokumentationsmaterial.
 Phase 2G-M5-C bereitet die manuelle Sichtpruefung vor; Nutzerentscheidung und
-Layoutbestaetigung bleiben offen.
+Layoutbestaetigung bleiben offen. Phase 2G-M6 stoppt jede Bestaetigung von
+Variante B als feste Gebaeudeanordnung und startet die Planung fuer flexible
+Plot-Faehigkeiten und Lernwort-Semantik. Phase 2G-M6-B vertieft diese Planung
+mit Placement Decision Pipeline, Capability Matrix, Word Placement
+Requirements, Visual Representation Tiers, User Choice, Ambiguity Handling,
+Visual Clutter und Rebuild/Move/Personalization. Phase 2G-M6-C vertieft die
+Planung mit abstrakten Datenmodell-Skizzen, Trennung von Lernfortschritt und
+Baufortschritt, Browser-/Real-World-Import, Representation Priority,
+Sensitive/Abstract Handling und Learning Mode Integration. Phase 2G-M6-D
+vertieft die Planung mit Progression ohne feste Baureihenfolge, freier
+Erstwahl, Import-Governance/Privacy/Safety, Nutzerziel-/Kategorie-
+Priorisierung und Anforderungen an die naechste Capability-Greybox. Phase
+2G-M6-E erweitert die Planung um Themeninseln und das Personal Learning
+Archipelago; die Waldlichtung bleibt Starter-/Testform und muss nicht alle
+Lernwelten aufnehmen. Phase 2G-M6-F vertieft die Verbindungen zwischen
+mehreren Inseln: Archipel-Navigation, Shared Codex/Blueprint/Backlog,
+Cross-Island Word Routing, Island Slot Lifecycle, Ownership/Identity und
+UX-Komplexitaetsschutz.
 
 Fuehrende Dokumente:
 
@@ -34,12 +51,13 @@ Fuehrende Dokumente:
 - `docs/world_design/248-island-plot-metrics-and-greybox-layout.md`
 - `docs/world_design/249-island-greybox-preview-plan.md`
 - `docs/world_design/250-island-greybox-layout-review.md`
+- `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M5-C manuelle Pruefung vorbereitet`
-- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M5-C Variante-B-Sichtpruefung`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M6-F Archipel-Verbindungslogik ergaenzt`
+- `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
   - `base`: `assets/images/world/buildable_islands/forest_clearing/base.png`
@@ -71,6 +89,27 @@ Fuehrende Dokumente:
   - `phase2GM5C`: `false` fuer Code/Assets; erlaubt nur das
     Pruefprotokoll zur manuellen Variante-B-Sichtpruefung und die spaetere
     Nutzerentscheidung.
+  - `phase2GM6`: `false` fuer Code/Assets; erlaubt nur Planung von
+    flexiblen Plot-Faehigkeiten, Nutzerplatzierung, Lernwort-Semantik,
+    Blueprints, Backlogs und spaeteren Greybox-Umbenennungen.
+  - `phase2GM6B`: `false` fuer Code/Assets; erlaubt nur
+    Entscheidungslogik fuer Placement Pipeline, Capability Matrix,
+    Word Placement Requirements, Representation Tiers, User Choice,
+    Ambiguity, Visual Clutter und Rebuild/Move-Fragen.
+  - `phase2GM6C`: `false` fuer Code/Assets; erlaubt nur abstrakte
+    Datenmodell-Skizzen, Learning-vs-Build-Trennung, Import-Workflow,
+    Representation Priority, Sensitive/Abstract Handling und
+    Learning-Mode-Integration.
+  - `phase2GM6D`: `false` fuer Code/Assets; erlaubt nur Progression ohne
+    Zwangsreihenfolge, Free-Start-Onboarding, Import-Governance/Privacy/Safety,
+    Nutzerziel-/Kategorie-Priorisierung und Anforderungen an eine spaetere
+    abstrakte Capability-Greybox.
+  - `phase2GM6E`: `false` fuer Code/Assets; erlaubt nur Planung von
+    Themeninseln, Personal Learning Archipelago, Word-to-Island Routing,
+    Free/Paid-Prinzipien und Production Scope Control.
+  - `phase2GM6F`: `false` fuer Code/Assets; erlaubt nur Planung von
+    Archipel-Navigation, Shared Codex/Blueprint/Backlog, Cross-Island Word
+    Routing, Island Slot Lifecycle, Ownership/Identity und UX-Komplexitaet.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -110,6 +149,10 @@ Freigabe. Sie soll manuell visuell geprueft werden, bevor das Masterlayout
 bestaetigt oder erneut nachgebessert wird. Das Pruefprotokoll fuer diese
 manuelle Sichtpruefung liegt in
 `docs/world_design/251-island-greybox-variant-b-manual-review.md`.
+Nach der Nutzerpruefung darf Variante B nicht als starre Gebaeudeanordnung
+bestaetigt werden. Die fuehrende Planung fuer flexible Plot-Faehigkeiten und
+Lernwort-Semantik liegt in
+`docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`.
 
 ## 2. Zweck Des Assets
 
@@ -565,12 +608,49 @@ Phase-2F-Preview-Ergaenzung:
 - Die manuelle Variante-B-Sichtpruefung wurde in
   `docs/world_design/251-island-greybox-variant-b-manual-review.md`
   vorbereitet.
-- Der Status bleibt: `manuelle Pruefung vorbereitet / Nutzerentscheidung
-  offen`.
+- Die Sichtpruefung hat ergeben: Variante B darf nicht als finale feste
+  Gebaeudeanordnung bestaetigt werden.
+- Bisherige Debug-Labels wie `starter_home`, `garden_west`,
+  `market_square`, `water_edge_east` oder `farm_southwest` muessen als
+  flexible Plot-Slots mit Capabilities umgedeutet werden.
+- Die flexible Plot-/Learning-Semantics-Planung wurde in
+  `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+  gestartet.
+- Die Planung wurde in Phase 2G-M6-B vertieft: Placement Decision Pipeline,
+  Plot Capability Matrix, Word Placement Requirements, Visual Representation
+  Tiers, User Choice Regeln, Ambiguity Handling, Visual Clutter Regeln und
+  Rebuild/Move/Personalization-Entscheidungen sind dokumentiert.
+- Die Planung wurde in Phase 2G-M6-C vertieft: Abstract Data Model Sketch,
+  Learning Progress vs. Build Progress, Browser Import / Real-World Word
+  Intake, Representation Priority, Sensitive And Abstract Concept Handling und
+  Learning Mode Integration sind dokumentiert.
+- Die Planung wurde in Phase 2G-M6-D vertieft: Progression Without Forced
+  Build Order, First Session And Free Start Choice, Import Governance,
+  Privacy And Safety, User Goal And Category Priority und Next Greybox
+  Renaming Requirements sind dokumentiert.
+- Die Planung wurde in Phase 2G-M6-E vertieft: Thematic Island And
+  Archipelago Strategy, Candidate Theme Islands, First Island Choice And
+  Island Slots, Island Roadmap And Learning Path, Theme Islands With Flexible
+  Plot Slots, Word To Island Routing, Free And Paid Island Access Principles
+  und Production Scope Control sind dokumentiert.
+- Die Planung wurde in Phase 2G-M6-F vertieft: Archipelago Navigation And
+  World Map, Shared Codex Blueprint And Backlog Across Islands,
+  Cross-Island Word Routing And Multi-Home Words, Island Slot Lifecycle,
+  Island Ownership And Identity und Archipelago UX Complexity Control sind
+  dokumentiert.
 - Vor weiterer Asset-Freigabe fehlen: Plot-Typ, Plot-Groesse,
-  Anschluss-/Socket-Konzept, visuell bestaetigte oder nachgebesserte
-  Greybox, Anchor-basierte Nachbesserung, Alignment-Preview, Device-Check und
-  Freigabe.
+  Plot-Capabilities, Placement Decision Pipeline, Word Placement
+  Requirements, Visual Representation Tiers, Nutzerplatzierung,
+  Lernwort-Semantik, abstrakte Datenmodell-Entscheidungen, Import-/Sense-/
+  Safety-Pruefung, Import-Governance/Privacy-Regeln, Onboarding fuer freie
+  Erstwahl, Nutzerziel-/Kategorie-Priorisierung, Representation Priority,
+  Themeninsel-/Archipel-Strategie, Word-to-Island Routing,
+  Cross-Island-Routing, gemeinsamer Codex-/Blueprint-/Backlog-Plan,
+  Island-Slot-Lifecycle, Ownership-/Identity-Logik,
+  Visual-Clutter-Grenzen, Rebuild/Move-Regeln, Anschluss-/Socket-Konzept,
+  visuell bestaetigte oder nachgebesserte Greybox mit abstrakten
+  Capability-Labels, ThemeIsland-Roadmap, Anchor-basierte Nachbesserung,
+  Alignment-Preview, Device-Check und Freigabe.
 
 ## 12. Freigabeentscheidung
 
@@ -596,11 +676,17 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM5BPreviewFilesAreGameAssets`: `false`
 - `phase2GM5BManualReviewStatus`: `open`
 - `phase2GM5CManualReviewPreparation`: `prepared in docs/world_design/251-island-greybox-variant-b-manual-review.md`
-- `phase2GM5CUserDecisionStatus`: `open`
+- `phase2GM5CUserDecisionStatus`: `evaluated; do not confirm Variant B as fixed building layout`
+- `phase2GM6FlexiblePlotSemanticsStatus`: `started in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+- `phase2GM6BDecisionLogicStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 15-22`
+- `phase2GM6CDataImportSafetyLearningStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 23-28`
+- `phase2GM6DProgressionOnboardingGovernanceGreyboxStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 29-33`
+- `phase2GM6EThemeIslandArchipelagoStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 34-41`
+- `phase2GM6FArchipelagoConnectionStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 42-47`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Nutzer prueft Variante-B-Greybox visuell; danach Variante B bestaetigen, mit kleinen Korrekturen bestaetigen, erneut nachbessern oder zu einer anderen Variante zurueckkehren`
+- `nextAllowedStep`: `M6-F-Vertiefung pruefen; danach committen; danach Greybox mit abstrakten Capability-Labels und/oder ThemeIsland-Roadmap planen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -742,6 +828,72 @@ Phase-2G-M5-C-Sichtpruefungs-Vorbereitung gilt nur fuer:
 - Prueffragen und Bewertungskriterien,
 - Entscheidungsmoeglichkeiten fuer die spaetere Nutzerentscheidung,
 - Festhalten weiterhin blockierter Systeme.
+
+Phase-2G-M6-Flexible-Plot-/Learning-Semantics-Planung gilt nur fuer:
+
+- Stoppen einer finalen Variante-B-Bestaetigung als feste Gebaeudeanordnung,
+- Definition flexibler Plot-Slots mit `plotSize`, `allowedFunctions`,
+  Anchors, Sockets, Footprints und Nutzerwahl,
+- Planung, wie Lernwoerter in Objekte, Bauteile, Szenen, Blueprints,
+  Backlogs, Companion-Vorschlaege oder Codex-Eintraege uebersetzt werden,
+- Vorbereitung spaeterer Greybox-Umbenennung von festen Debug-Rollen zu
+  Capability-Labels.
+
+Phase-2G-M6-B-Entscheidungslogik gilt nur fuer:
+
+- Placement Decision Pipeline,
+- Plot Capability Matrix,
+- Word Placement Requirements,
+- Visual Representation Tiers,
+- User Choice und Suggestions,
+- Ambiguity und Context Handling,
+- Visual Clutter Rules,
+- offene Rebuild/Move/Personalization-Regeln.
+
+Phase-2G-M6-C-Vertiefung gilt nur fuer:
+
+- abstrakte Datenmodell-Skizzen,
+- Trennung von Learning Progress und Build Progress,
+- Browser-/Real-World-Import-Workflow,
+- Representation Priority und Conflict Resolution,
+- Sensitive And Abstract Concept Handling,
+- Learning Mode Integration,
+- Stop-Regeln fuer Import, Sense-Auswahl, Safety und Lernmodus-Massenerzeugung.
+
+Phase-2G-M6-D-Vertiefung gilt nur fuer:
+
+- Progression ohne feste Baureihenfolge,
+- freie Erstwahl in der ersten Session,
+- Import Governance, Privacy und Safety,
+- Nutzerziel-/Kategorie-Priorisierung,
+- Anforderungen an die naechste Debug-Greybox mit abstrakten
+  Capability-Labels,
+- Stop-Regeln fuer Onboarding, Progression, Import, sensitive Kategorien und
+  Capability-Greybox.
+
+Phase-2G-M6-E-Vertiefung gilt nur fuer:
+
+- Thematic Island And Archipelago Strategy,
+- Candidate Theme Islands,
+- First Island Choice And Island Slots,
+- Island Roadmap And Learning Path,
+- Theme Islands With Flexible Plot Slots,
+- Word To Island Routing,
+- Free And Paid Island Access Principles,
+- Production Scope Control,
+- Stop-Regeln gegen Alles-auf-eine-Insel, Pay-to-Win und Multi-Island-Scope-
+  Explosion.
+
+Phase-2G-M6-F-Vertiefung gilt nur fuer:
+
+- Archipelago Navigation And World Map,
+- Shared Codex Blueprint And Backlog Across Islands,
+- Cross-Island Word Routing And Multi-Home Words,
+- Island Slot Lifecycle,
+- Island Ownership And Identity,
+- Archipelago UX Complexity Control,
+- Stop-Regeln fuer Archipel-Navigation, gemeinsamen Backlog, Island Slots,
+  Ownership/Identity und Social-/Privacy-Trennung.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

@@ -2,7 +2,7 @@
 
 Stand: 2026-06-05
 
-Status: `manuelle Pruefung vorbereitet / Nutzerentscheidung offen`
+Status: `manuelle Pruefung ausgewertet / keine finale Layoutbestaetigung`
 
 ## 1. Zweck
 
@@ -21,6 +21,16 @@ Variante B ist weiterhin:
 - kein Spielasset,
 - keine Codefreigabe,
 - keine Asset-Freigabe fuer `frame_started`.
+
+Nach der manuellen Sichtpruefung gilt zusaetzlich:
+
+- Variante B darf nicht als finale feste Gebaeudeanordnung bestaetigt werden.
+- Die bisherigen Labels wie `starter_home`, `garden_west` oder
+  `market_square` duerfen nicht als dauerhaft verdrahtete Bauplaetze
+  verstanden werden.
+- Variante B bleibt hoechstens eine raeumliche Testform.
+- Fuehrend ist jetzt
+  `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`.
 
 ## 2. Gepruefte Dateien
 
@@ -80,34 +90,38 @@ lassen, dass daraus spaeter eine organische Inselstruktur ableitbar ist.
 
 ## 5. Entscheidungsmoeglichkeiten
 
-Nach der manuellen Sichtpruefung gibt es vier erlaubte Entscheidungen:
+Die urspruenglichen Entscheidungsmoeglichkeiten werden durch die
+Nutzererkenntnis eingeschraenkt. Eine finale Bestaetigung von Variante B als
+feste Gebaeudeanordnung ist nicht mehr erlaubt.
 
-### Variante B Bestaetigen
+### Variante B Als Raeumliche Testform Behalten
 
-Variante B wird als naechste fuehrende Greybox-Struktur fuer das
-Insel-Masterlayout akzeptiert.
+Variante B kann als ungefaehre raeumliche Testform erhalten bleiben.
 
 Erlaubt danach:
 
-- Metriken und Plot-Anker auf Basis von Variante B weiter konkretisieren,
-- eine naechste Planungs- oder Debug-Preview-Stufe vorbereiten.
+- Debug-Labels abstrahieren,
+- Plot-Slots als flexible Flaechen mit Faehigkeiten neu benennen,
+- naechste Greybox mit Capability-Labels planen.
 
 Nicht automatisch erlaubt:
 
 - Spielasset-Erzeugung,
 - `frame_started`,
 - Code,
-- finale Inselkunst.
+- finale Inselkunst,
+- feste Nutzerreihenfolge,
+- feste Positionen fuer Haus, Garten, Markt oder Garage.
 
-### Variante B Mit Kleinen Korrekturen Bestaetigen
+### Variante B Mit Kleinen Korrekturen Weiterverwenden
 
-Variante B ist grundsaetzlich gut, braucht aber kleine Korrekturen, zum
-Beispiel Abstand, Label-Dichte, einzelne Plot-Positionen oder bessere
-Lesbarkeit.
+Variante B kann weiterverwendet werden, wenn die festen Rollen in flexible
+Plot-Slots umgewandelt werden.
 
 Erlaubt danach:
 
 - gezielte Metrik-/Preview-Nachbesserung,
+- Umbenennung in `core_plot_*`, `hub_capable_plot_*`, `edge_*`,
 - keine neue Asset-Produktion.
 
 ### Variante B Erneut Nachbessern
@@ -130,11 +144,26 @@ Erlaubt danach:
   `docs/world_design/250-island-greybox-layout-review.md`,
 - erneuter Debug-Preview-Block.
 
+### Flexible Plot-/Learning-Semantics-Planung Einschieben
+
+Diese Entscheidung ist aktuell fuehrend.
+
+Erlaubt danach:
+
+- Planung aus
+  `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+  pruefen,
+- Greybox-Namen und Plot-Rollen auf flexible Capabilities umstellen,
+- spaeter eine neue Debug-Greybox mit abstrakten Plot-Slots erzeugen.
+
 ## 6. Offene Pruefpunkte
 
 Offen bleiben:
 
 - echte Nutzerentscheidung zur Variante-B-Greybox,
+- Umdeutung der Variante-B-Labels in flexible Plot-Slots,
+- Plot-Capability-Modell fuer die naechste Greybox,
+- Lernwort-Semantik und Blueprint-/Backlog-Regeln,
 - Mobile-Lesbarkeit der Labels und Plotdichte,
 - ob `hub_seed_south`, `market_square` und `path_south` genuegend Abstand und
   Kapazitaet haben,
@@ -171,7 +200,6 @@ Weiterhin blockiert bleiben:
 Naechster erlaubter Schritt:
 
 ```text
-Nutzer prueft die Variante-B-Greybox visuell; danach Variante B bestaetigen,
-mit kleinen Korrekturen bestaetigen, erneut nachbessern oder zu einer anderen
-Variante zurueckkehren.
+Flexible Plot-/Learning-Semantics-Planung pruefen; danach Greybox-Namen,
+Plot-Rollen und Capability-Labels nachbessern.
 ```

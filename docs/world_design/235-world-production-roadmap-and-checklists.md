@@ -125,9 +125,37 @@ Aktueller Stand der Talvori-Welt-Produktion:
 - Die manuelle visuelle Pruefung fuer Variante B wurde in
   `docs/world_design/251-island-greybox-variant-b-manual-review.md`
   vorbereitet. Nutzerentscheidung bleibt offen.
-- Der naechste Blocker betrifft die Nutzer-Sichtpruefung der
-  Variante-B-Greybox, eine Bestaetigung mit oder ohne kleine Korrekturen oder
-  eine erneute Nachbesserung,
+- Die Nutzerpruefung hat einen grundlegenden Designpunkt offengelegt:
+  Variante B darf nicht als starre Gebaeudeanordnung bestaetigt werden.
+  Debug-Labels wie `starter_home`, `garden_west` oder `market_square` muessen
+  als flexible Plot-Slots mit Faehigkeiten interpretiert werden.
+- Phase 2G-M6 wurde als reiner Planungsblock in
+  `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+  gestartet. Er klaert flexible Nutzerplatzierung und die Semantik zwischen
+  Lernwoertern, Blueprints, sichtbaren Weltobjekten, Szenen und Codex.
+- Phase 2G-M6 wurde vertieft: Placement Decision Pipeline, Plot Capability
+  Matrix, Word Placement Requirements, Visual Representation Tiers, User
+  Choice Regeln, Ambiguity Handling, Visual Clutter Regeln und
+  Rebuild/Move/Personalization-Entscheidungen sind dokumentiert.
+- Phase 2G-M6-C wurde ergaenzt: abstrakte Datenmodell-Skizzen,
+  Trennung von Lernfortschritt und Baufortschritt, Browser-/Real-World-
+  Import-Workflow, Repraesentationsprioritaet, sensible/abstrakte Begriffe und
+  Learning-Mode-Integration sind dokumentiert.
+- Phase 2G-M6-D wurde ergaenzt: Progression ohne feste Baureihenfolge,
+  freie Erstwahl, Import-Governance/Privacy/Safety, Nutzerziel-/Kategorie-
+  Priorisierung und Anforderungen an die naechste Greybox mit abstrakten
+  Capability-Labels sind dokumentiert.
+- Phase 2G-M6-E wurde ergaenzt: Themeninseln / Personal Learning Archipelago
+  sind als uebergeordnete Strategie dokumentiert. Eine Insel muss nicht alle
+  Lernwelten abdecken; Waldlichtung/Variante B bleibt Starter-/Testform.
+- Phase 2G-M6-F wurde ergaenzt: Archipel-Navigation, gemeinsamer Codex/
+  Blueprint/Backlog, Cross-Island Word Routing, Island Slot Lifecycle,
+  Island Ownership/Identity und Archipelago UX Complexity Control sind
+  dokumentiert.
+- Der naechste Blocker betrifft die Pruefung dieser flexiblen
+  Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
+  Entscheidungslogik, danach die Nachbesserung von
+  Greybox-Namen, Plot-Rollen, Capability-Labels und ThemeIsland-Roadmap,
   Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
@@ -191,8 +219,14 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M3 | Sichtbare Greybox-Preview / Layout-Pruefung | `Planung gestartet` | Reiner Planungsblock in `docs/world_design/249-island-greybox-preview-plan.md`. Definiert sichtbare Debug-Greybox-Elemente, Plot-Status, Socket-, Weg-, Footprint- und Sicherheitszonen-Overlays, Status-Legende, Pruefkriterien und Mobile-Lesbarkeitsfragen. In diesem Block wurden keine Preview-PNGs erzeugt. Naechster erlaubter Schritt: tatsaechliche Debug-Greybox-Preview erzeugen/pruefen oder Metriken/Layout nachbessern. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M4 | Debug-Greybox-Preview-Erzeugung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox.png`, `02_socket_debug_overlay.png`, `03_footprint_debug_overlay.png`, `04_status_legend.png` und `README.md` unter `docs/world_design/previews/phase2g_m3_island_greybox/`. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: visuelle Pruefung durch Nutzer, danach Metriken/Layout bestaetigen oder nachbessern. |
 | Phase 2G-M5 | Visuelle Greybox-Bewertung / Layout-Nachbesserung | `Review gestartet / Nachbesserung empfohlen` | Reiner Bewertungsblock in `docs/world_design/250-island-greybox-layout-review.md`. M4 ist als technisches Debugdiagramm brauchbar, aber nicht als visuell plausibles Insel-Masterlayout bestaetigt. Hauptprobleme: zu lineare Achse `path_south -> hub_seed_south -> market_square`, langer Markt-Schwanz, zu diagonale Wasseranbindung und zu rasterhafte Aussenform. Empfehlung: M4 nachbessern und eine neue M5-Greybox-Variante, bevorzugt Variante B, erzeugen. Kein finales Inselbild, kein Asset, kein Code. |
-| Phase 2G-M5-B | Variante-B Debug-Greybox-Nachbesserung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox_variant_b.png`, `02_socket_debug_overlay_variant_b.png`, `03_footprint_debug_overlay_variant_b.png`, `04_status_legend_variant_b.png` und `README.md` unter `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`. Variante B reduziert die lineare M4-Achse, verschiebt `market_square` naeher an `hub_seed_south`, liest `water_edge_east` staerker als Randzone und rahmt `starter_home` organischer. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Naechster erlaubter Schritt: manuelle visuelle Pruefung der Variante-B-Greybox, danach bestaetigen oder erneut nachbessern. |
-| Phase 2G-M5-C | Variante-B manuelle Sichtpruefung | `Pruefung vorbereitet / Nutzerentscheidung offen` | Reiner Dokumentationsblock in `docs/world_design/251-island-greybox-variant-b-manual-review.md`. Dokumentiert Prueffragen, Bewertungskriterien, Entscheidungsmoeglichkeiten und offene Pruefpunkte fuer die manuelle Sichtpruefung der Variante-B-Greybox. Keine finale Entscheidung, kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M5-B | Variante-B Debug-Greybox-Nachbesserung | `Preview erzeugt / Nutzerpruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_island_plot_greybox_variant_b.png`, `02_socket_debug_overlay_variant_b.png`, `03_footprint_debug_overlay_variant_b.png`, `04_status_legend_variant_b.png` und `README.md` unter `docs/world_design/previews/phase2g_m5_island_greybox_variant_b/`. Variante B reduziert die lineare M4-Achse, verschiebt `market_square` naeher an `hub_seed_south`, liest `water_edge_east` staerker als Randzone und rahmt `starter_home` organischer. Die Preview-Dateien sind keine Spielassets und geben keine Asset- oder Codefreigabe. Nach der Sichtpruefung darf Variante B nicht als finale feste Gebaeudeanordnung bestaetigt werden; fuehrend ist Phase 2G-M6. |
+| Phase 2G-M5-C | Variante-B manuelle Sichtpruefung | `ausgewertet / keine finale Layoutbestaetigung` | Reiner Dokumentationsblock in `docs/world_design/251-island-greybox-variant-b-manual-review.md`. Die Sichtpruefung hat gezeigt, dass Variante B zu stark wie eine feste Gebaeudeanordnung wirkt. Variante B darf nur noch als raeumliche Testform gelesen werden. Keine finale Entscheidung, kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6 | Flexible Plot Placement / Learning Semantics | `Planung gestartet / Variante-B nicht final bestaetigen` | Reiner Planungsblock in `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`. Stoppt jede Bestaetigung der Variante-B-Greybox als feste Gebaeudeanordnung. Plots werden als flexible Slots mit `plotSize`, `allowedFunctions`, Anchors, Sockets, Footprints und Nutzerwahl verstanden. Lernwoerter werden ueber Semantik in Weltobjekte, Bauteile, Szenen, Blueprints, Backlogs, Companion-Vorschlaege oder Codex-Eintraege uebersetzt. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6-B | Placement Decision / Semantics Logic | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Placement Decision Pipeline, Plot Capability Matrix, Word Placement Requirements, Visual Representation Tiers, User Choice Regeln, Ambiguity Handling, Visual Clutter Regeln und offene Rebuild/Move/Personalization-Entscheidungen. Kein Wort-zu-Welt-System ohne Pipeline, keine Plot-Freigabe ohne Capability Matrix, kein Objekt ohne Placement Requirements. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6-C | Data Model / Import / Safety / Learning Modes | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um abstrakte Datenmodell-Skizzen (`PlotSlot`, `WordSemanticProfile`, `PlacementCandidate`, `BlueprintEntry` usw.), Trennung von Learning Progress und Build Progress, Browser-/Real-World-Import-Workflow, Repraesentationsprioritaet, sensible/abstrakte Begriffe und Learning-Mode-Integration. Kein Word-to-World-System ohne Modellskizze, kein Import ohne Kontext-/Sense-/Safety-Pruefung, kein sensibles Wort automatisch als Weltobjekt. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6-D | Progression / Onboarding / Governance / Capability Greybox | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Progression ohne feste Baureihenfolge, freie Erstwahl, Import-Governance/Privacy/Safety, Nutzerziel-/Kategorie-Priorisierung und Anforderungen an die naechste Greybox mit abstrakten Capability-Labels. Keine freie Plot-Platzierung ohne Onboarding-Erklaerung, kein Import ohne Governance-/Privacy-/Safety-Regeln, keine naechste Greybox mit festen Gebaeude-Rollenlabels. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6-E | Theme Islands / Personal Learning Archipelago | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Thematic Island And Archipelago Strategy, Candidate Theme Islands, First Island Choice, Island Roadmap, Word To Island Routing, Free/Paid-Prinzipien und Production Scope Control. Keine einzelne Insel darf alle Lernwelten erzwingen. Keine Themeninsel ohne Plot-Capabilities und Word-to-Island-Routing. Keine Monetarisierung ohne eigenes Dokument. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M6-F | Archipelago Navigation / Shared Backlog / Island Slots | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Archipelago Navigation, Shared Codex/Blueprint/Backlog, Cross-Island Word Routing, Multi-Home Words, Island Slot Lifecycle, Island Ownership/Identity und UX-Komplexitaetsschutz. Kein Multi-Island-System ohne Archipel-Navigation, kein Themeninsel-System ohne gemeinsamen Codex-/Blueprint-/Backlog-Plan, keine Social-/Showcase-Funktion ohne eigenes Privacy-/Social-Konzept. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -237,12 +271,36 @@ Die nachgebesserte Variante-B-Debug-Greybox wurde erzeugt:
 Die manuelle Sichtpruefung fuer Variante B wurde vorbereitet:
 `docs/world_design/251-island-greybox-variant-b-manual-review.md`.
 
+Die Variante-B-Greybox darf nach der Nutzerpruefung nicht als feste
+Gebaeudeanordnung bestaetigt werden. Die flexible Plot-/Learning-Semantics-
+Planung ist gestartet:
+`docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`.
+Die Planung wurde in Phase 2G-M6-B mit konkreter Entscheidungslogik vertieft:
+Placement Decision Pipeline, Capability Matrix, Word Placement Requirements,
+Visual Representation Tiers, User Choice, Ambiguity Handling, Visual Clutter
+und Rebuild/Move/Personalization.
+Die Planung wurde in Phase 2G-M6-C erneut vertieft: abstrakte
+Datenmodell-Skizzen, Learning Progress vs. Build Progress, Browser-/Real-
+World-Import, Representation Priority, Sensitive/Abstract Handling und
+Learning Mode Integration.
+Die Planung wurde in Phase 2G-M6-D erneut vertieft: Progression ohne feste
+Baureihenfolge, First Session / Free Start Choice, Import Governance,
+User Goal / Category Priority und Next Greybox Renaming Requirements.
+Die Planung wurde in Phase 2G-M6-E erneut vertieft: Personal Learning
+Archipelago, Candidate Theme Islands, First Island Choice, Island Roadmap,
+Theme Islands mit flexiblen Plot-Slots, Word-to-Island Routing, Free/Paid-
+Prinzipien und Production Scope Control.
+Die Planung wurde in Phase 2G-M6-F erneut vertieft: Archipelago Navigation,
+Shared Codex/Blueprint/Backlog, Cross-Island Word Routing, Multi-Home Words,
+Island Slot Lifecycle, Island Ownership/Identity und UX Complexity Control.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die Nutzer-Sichtpruefung der Variante-B-Greybox.
-Danach darf Variante B bestaetigt, mit kleinen Korrekturen bestaetigt, erneut
-nachgebessert oder zugunsten einer anderen Variante verworfen werden. Die
-Preview-Dateien sind nur Dokumentations-/Debugmaterial, kein finales
-Inselbild. `frame_started` bleibt gestoppt.
+Asset-Freigabe, sondern die Pruefung der M6-F-Vertiefung. Danach kann
+committed werden; anschliessend darf eine Greybox mit abstrakten
+Capability-Labels und/oder eine ThemeIsland-Roadmap geplant werden, oder
+Datenmodell/UX wird weiter vertieft. Die Preview-Dateien sind nur
+Dokumentations-/Debugmaterial, kein finales Inselbild. `frame_started` bleibt
+gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -316,7 +374,34 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Footprint-/Safety-Dichte und finale Layout-Entscheidung.
 - Phase 2G-M5-C hat die manuelle Variante-B-Sichtpruefung vorbereitet.
   Dokumentiert sind Prueffragen, Bewertungskriterien, Entscheidungsmoeglichkeiten
-  und offene Pruefpunkte. Status bleibt: Nutzerentscheidung offen.
+  und offene Pruefpunkte. Die Sichtpruefung ist ausgewertet: Variante B darf
+  nicht als finale feste Gebaeudeanordnung bestaetigt werden.
+- Phase 2G-M6 hat die Nutzererkenntnis aufgenommen, dass Variante B zu sehr
+  wie eine feste Gebaeudeanordnung wirkt. Die neue Regel: Plots sind flexible
+  Grundstuecksflaechen mit Capabilities; Nutzer waehlen kompatible Nutzungen.
+  Lernwoerter werden nicht blind platziert, sondern ueber Semantik,
+  Blueprints, Backlogs, Szenen, Companion-Vorschlaege oder Codex abgebildet.
+- Phase 2G-M6-B hat die fehlende Entscheidungslogik ergaenzt. Offen bleiben
+  die Pruefung der Pipeline, die spaetere konkrete Datenmodellierung, echte
+  UI-/UX-Entscheidungen fuer Nutzerwahl, Rebuild/Move-Regeln und eine neue
+  Greybox mit abstrakten Capability-Labels.
+- Phase 2G-M6-C hat tieferliegende Planungsdetails ergaenzt. Offen bleiben
+  konkrete Datenmodell-Entscheidungen, Import-Safety-Regeln, Sense-Auswahl-UX,
+  Rebuild/Move-Folgen, Learning-Mode-Produktentscheidungen und jede
+  Implementierung.
+- Phase 2G-M6-D hat Progression ohne Zwang, freie Erstwahl, Import-
+  Governance, Kategorie-/Nutzerziel-Priorisierung und Anforderungen an eine
+  abstrakte Capability-Greybox ergaenzt. Offen bleiben echte Onboarding-UX,
+  konkrete Import-Governance, Datenschutz-/Cloud-Entscheidungen und eine neue
+  Debug-Greybox ohne feste Gebaeuderollen.
+- Phase 2G-M6-E hat die Archipel-Strategie ergaenzt. Offen bleiben konkrete
+  ThemeIsland-Priorisierung, erste Inselwahl, Word-to-Island-Routing-UX,
+  Monetarisierungsdokument, Scope-Gates und eine moegliche zweite
+  Themeninsel-Preview.
+- Phase 2G-M6-F hat die Verbindungslogik zwischen mehreren Inseln ergaenzt.
+  Offen bleiben konkrete Archipel-Navigation, gemeinsame Backlog-/Blueprint-
+  Datenstruktur, IslandSlot-Limits, Owner-Marker, Social-/Privacy-Konzept und
+  UX-Reduktion fuer viele Inseln.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -370,6 +455,54 @@ Aktuell nicht erlaubt / weiterhin blockiert:
   nicht feststeht,
 - keine Variante-B-Greybox als bestaetigt behandeln, bevor die manuelle
   visuelle Pruefung abgeschlossen ist,
+- keine Variante-B-Greybox als finale feste Gebaeudeanordnung behandeln,
+- kein Nutzer muss mit Hausbau beginnen,
+- kein Wort darf falsch oder ohne passenden Kontext platziert werden,
+- kein `Fenster` ohne Wand oder passenden Hauszustand,
+- keine `Giesskanne` ohne Garten, Hof oder geeigneten Objektanker,
+- kein abstraktes Wort als beliebiges physisches Objekt erzwingen,
+- keine automatische Platzierung ohne Nutzerbestaetigung,
+- keine Kategorie hart codieren,
+- keine Spielassets, bevor Plot-Flexibilitaet und Wort-Semantik geklaert sind,
+- kein Wort-zu-Welt-System ohne Placement Decision Pipeline,
+- kein Word-to-World-System ohne abstrakte Datenmodell-Skizze,
+- kein Import-Feature ohne Kontext-/Sense-/Safety-Pruefung,
+- keine sichtbare Darstellung bei mehrdeutigen Woertern ohne Sense-
+  Entscheidung,
+- kein sensibler oder abstrakter Begriff automatisch als Weltobjekt,
+- keine Kopplung, bei der Lernfortschritt automatisch starre Baupositionen
+  erzwingt,
+- kein Lernmodus darf ohne Nutzerbestaetigung sichtbare Weltobjekte
+  massenhaft erzeugen,
+- keine freie Plot-Platzierung ohne Onboarding-Erklaerung,
+- keine Progression, die den Nutzer faktisch wieder zum Hausstart zwingt,
+- kein Import ohne Governance-/Privacy-/Safety-Regeln,
+- keine sensible Kategorie ohne Bestaetigung und neutrale Darstellung,
+- keine naechste Greybox mit festen Gebaeude-Rollenlabels,
+- keine Capability-Greybox ohne `allowedFunctions` und `isUserSelectable`,
+- keine Kategorie-Priorisierung ohne Nutzerziel und Satzkontext,
+- keine einzelne Insel darf alle Lernwelten erzwingen,
+- kein Meer-/Tauchen-/Boot-Thema auf Waldlichtung pressen, wenn Kuesteninsel
+  sinnvoller ist,
+- keine Stadt-/Krankenhaus-/Flughafen-Komplexitaet auf Starterinsel pressen,
+- keine Themeninsel ohne eigene Plot-Capabilities,
+- keine Themeninsel ohne Word-to-Island-Routing,
+- keine Monetarisierung ohne eigenes spaeteres Dokument,
+- keine Paywall, die Core Learning blockiert,
+- keine Multi-Island-Produktion ohne Scope-Gate,
+- kein Multi-Island-System ohne Archipel-Navigation,
+- kein Themeninsel-System ohne gemeinsamen Codex-/Blueprint-/Backlog-Plan,
+- kein Multi-Home-Wort ohne Cross-Island-Routing,
+- kein Insel-Slot-System ohne Status/Lifecycle,
+- keine mehreren privaten Inseln ohne Besitzer-/Identitaetslogik,
+- keine Archipel-Roadmap, die den Nutzer mit zu vielen Optionen ueberfordert,
+- keine Social-/Showcase-Funktion ohne eigenes Privacy-/Social-Konzept,
+- keine Plot-Freigabe ohne Capability Matrix,
+- kein Objekt sichtbar platzieren ohne Placement Requirements,
+- kein abstraktes Wort ohne passenden Repraesentationstyp,
+- keine Weltvisualisierung, die Mobile-Lesbarkeit ueberlaedt,
+- kein Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
+  Blueprints und Backlogs,
 - keine Dokumentations-Preview als finales Inselbild oder Spielasset
   behandeln,
 - keine Phase-2G-Asset-Freigabe ohne Anchor-/Debug-Overlay-Check,
@@ -500,9 +633,15 @@ Debug-Greybox-Preview-Erzeugungsblock hat die geplanten Preview-Dateien unter
 Greybox-Layout-Review wurde in
 `docs/world_design/250-island-greybox-layout-review.md` gestartet. Ergebnis:
 M4 ist technisch pruefbar, aber visuell zu linear/rasterhaft und sollte durch
-eine neue M5-Greybox-Variante nachgebessert werden.
-Asset-Freigabe und Code bleiben blockiert, bis Plot, Anchor, Footprint,
-sichtbare Preview, Device-Check, Freigabe und Tests definiert sind.
+eine neue M5-Greybox-Variante nachgebessert werden. Die Variante-B-Preview und
+manuelle Sichtpruefung haben danach gezeigt, dass feste Rollen wie
+`starter_home`, `garden_west` oder `market_square` nicht als finale
+Gebaeudepositionen bestaetigt werden duerfen. Die flexible
+Plot-/Learning-Semantics-Planung wurde in
+`docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+gestartet. Asset-Freigabe und Code bleiben blockiert, bis Plot-Capabilities,
+Nutzerplatzierung, Wort-Semantik, Anchor, Footprint, sichtbare Preview,
+Device-Check, Freigabe und Tests definiert sind.
 
 ## 10. Stop-Regeln
 
@@ -537,6 +676,61 @@ Ein Schritt wird gestoppt, wenn:
 - Asset-Produktion gestartet wird, bevor die Greybox visuell geprueft wurde,
 - eine Greybox als bestaetigt behandelt wird, obwohl sie zu linear oder
   rasterhaft wirkt,
+- eine Plot-Greybox als feste Gebaeudeanordnung behandelt wird,
+- ein Nutzer mit Hausbau beginnen muss,
+- ein Lernwort ohne passenden Kontext platziert werden soll,
+- ein `Fenster` ohne Wand oder passenden Hauszustand platziert werden soll,
+- eine `Giesskanne` ohne Garten, Hof oder geeigneten Objektanker platziert
+  werden soll,
+- ein abstraktes Wort als beliebiges physisches Objekt erzwungen wird,
+- automatische Platzierung ohne Nutzerbestaetigung geplant wird,
+- Kategorien hart codiert werden,
+- Spielassets erzeugt werden, bevor Plot-Flexibilitaet und Wort-Semantik
+  geklaert sind,
+- ein Wort-zu-Welt-System ohne Placement Decision Pipeline geplant wird,
+- ein Word-to-World-System ohne abstrakte Datenmodell-Skizze geplant wird,
+- ein Import-Feature ohne Kontext-/Sense-/Safety-Pruefung geplant wird,
+- ein mehrdeutiges Wort sichtbar dargestellt werden soll, ohne dass Sense
+  entschieden oder bestaetigt ist,
+- ein sensibler oder abstrakter Begriff automatisch als Weltobjekt erscheinen
+  soll,
+- Lernfortschritt automatisch starre Baupositionen erzwingen soll,
+- ein Lernmodus ohne Nutzerbestaetigung sichtbare Weltobjekte massenhaft
+  erzeugen soll,
+- freie Plot-Platzierung ohne Onboarding-Erklaerung geplant wird,
+- Progression den Nutzer faktisch wieder zum Hausstart zwingt,
+- Import ohne Governance-/Privacy-/Safety-Regeln geplant wird,
+- eine sensible Kategorie ohne Bestaetigung und neutrale Darstellung sichtbar
+  werden soll,
+- die naechste Greybox feste Gebaeude-Rollenlabels nutzt,
+- eine Capability-Greybox ohne `allowedFunctions` und `isUserSelectable`
+  geplant wird,
+- Kategorie-Priorisierung ohne Nutzerziel und Satzkontext geplant wird,
+- eine einzelne Insel alle Lernwelten tragen soll,
+- Meer-, Tauchen- oder Boot-Themen auf die Waldlichtung gepresst werden,
+  obwohl eine Kuesteninsel sinnvoller ist,
+- Stadt-, Krankenhaus- oder Flughafen-Komplexitaet auf die Starterinsel
+  gepresst wird,
+- eine Themeninsel ohne eigene Plot-Capabilities geplant wird,
+- eine Themeninsel ohne Word-to-Island-Routing geplant wird,
+- Monetarisierung ohne eigenes spaeteres Dokument geplant wird,
+- eine Paywall Core Learning blockiert,
+- Multi-Island-Produktion ohne Scope-Gate gestartet wird,
+- ein Multi-Island-System ohne Archipel-Navigation geplant wird,
+- ein Themeninsel-System ohne gemeinsamen Codex-/Blueprint-/Backlog-Plan
+  geplant wird,
+- ein Multi-Home-Wort ohne Cross-Island-Routing geplant wird,
+- ein Insel-Slot-System ohne Status/Lifecycle geplant wird,
+- mehrere private Inseln ohne Besitzer-/Identitaetslogik geplant werden,
+- eine Archipel-Roadmap den Nutzer mit zu vielen Optionen ueberfordert,
+- Social- oder Showcase-Funktionen ohne eigenes Privacy-/Social-Konzept
+  geplant werden,
+- ein Plot ohne Capability Matrix freigegeben wird,
+- ein Objekt sichtbar platziert wird, ohne Placement Requirements zu erfuellen,
+- ein abstraktes Wort ohne passenden Repraesentationstyp visualisiert wird,
+- eine Weltvisualisierung Mobile-Lesbarkeit ueberlaedt,
+- Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
+  Blueprints und Backlogs geplant wird,
 - eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,
 - `water_edge_east` ueber eine unnatuerlich lange Diagonale ohne
   Uebergangsplot angebunden wird,
