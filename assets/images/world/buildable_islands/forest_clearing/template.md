@@ -320,6 +320,15 @@ ThemeIsland-Bases, keine finale Onboarding-UI und keine App-Integration.
 finale Startinsel, keine finale ThemeIsland-Roadmap, keine finale Datenstruktur,
 keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+Phase 2G-M13-L startet Word-to-Island Product UX Preview Plan in
+`docs/world_design/292-word-to-island-product-ux-preview-plan.md`. M13-L ist
+ein reiner Word-to-Island Product UX Preview Planungsblock. Die Waldlichtung
+bleibt Starter-/Testform. M13-L erzeugt keine neuen Assets, keine
+Bauzustaende, keine automatische Wortplatzierung, keine finale
+Word-to-Island-UI und keine App-Integration. `frame_started` bleibt blockiert.
+Daraus folgen keine PNGs, keine Tests, keine finale Routing-Datenstruktur,
+keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -375,11 +384,12 @@ Fuehrende Dokumente:
 - `docs/world_design/289-asset-prioritization-scope-gate.md`
 - `docs/world_design/290-m13-consolidated-readiness-review.md`
 - `docs/world_design/291-early-onboarding-product-wireframe-plan.md`
+- `docs/world_design/292-word-to-island-product-ux-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-K Early Onboarding Product Wireframe Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-L Word-to-Island Product UX Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -719,6 +729,16 @@ Fuehrende Dokumente:
     QA-/Device-Checklisten und textuelle Flows planen, aber keine PNGs, keine
     Tests, keine App-Integration, keine finale Onboarding-UI, keine finale
     Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+    App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM13L`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/292-word-to-island-product-ux-preview-plan.md`.
+    M13-L darf Word-to-Island-UX-Wireframes, Produkt-UX-Pfade,
+    Sense-Auswahl, Container-Hinweise, Codex-/Blueprint-/Backlog-Routen und
+    QA-/Device-Checklisten planen, aber keine PNGs, keine Tests, keine
+    App-Integration, keine finale Word-to-Island-UI, keine
+    Word-to-Island-Implementierung, keine Routing-Datenstruktur, keine
+    Runtime-Konfiguration, keine automatische Wortplatzierung, keine
     App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
@@ -1650,6 +1670,17 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-K.
 - Keine Tests aus M13-K.
 - Kein `frame_started` oder Bauzustand aus M13-K.
+- Keine finale Word-to-Island-UI aus M13-L.
+- Keine Word-to-Island-Implementierung aus M13-L.
+- Keine Routing-Datenstruktur aus M13-L.
+- Keine Runtime-Konfiguration aus M13-L.
+- Keine automatische Wortplatzierung aus M13-L.
+- Keine App-Integration aus M13-L.
+- Keine Codefreigabe aus M13-L.
+- Keine Assetfreigabe aus M13-L.
+- Keine PNG-Erzeugung aus M13-L.
+- Keine Tests aus M13-L.
+- Kein `frame_started` oder Bauzustand aus M13-L.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1903,10 +1934,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13IAssetPrioritizationScopeGateStatus`: `started in docs/world_design/289-asset-prioritization-scope-gate.md; scope gate only; no asset production, no final asset list, no production release, no runtime config, no frame_started`
 - `phase2GM13JConsolidatedReadinessReviewStatus`: `started in docs/world_design/290-m13-consolidated-readiness-review.md; readiness review only; M13 chain usable as planning foundation; no code release, no asset release, no final roadmap, no runtime config, no frame_started`
 - `phase2GM13KEarlyOnboardingWireframeStatus`: `started in docs/world_design/291-early-onboarding-product-wireframe-plan.md; wireframe planning only; no final onboarding UI, no final start island, no app integration, no runtime config, no frame_started`
+- `phase2GM13LWordToIslandProductUXPreviewStatus`: `started in docs/world_design/292-word-to-island-product-ux-preview-plan.md; UX preview planning only; no final Word-to-Island UI, no implementation, no routing data structure, no automatic placement, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-K reviewen, M13-K nachbessern oder M13-L/M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-L reviewen, M13-L nachbessern oder M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2903,6 +2935,33 @@ Phase-2G-M13-K-Early-Onboarding-Product-Wireframe-Plan gilt nur fuer:
 - keine finale ThemeIsland-Roadmap,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-L-Word-to-Island-Product-UX-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/292-word-to-island-product-ux-preview-plan.md`,
+- mobile-first UX-Wireframes fuer Wort-Eingang, Vorschlagskarte,
+  Sense-Auswahl, Container-Hinweis und Codex-/ContextCard-Routen,
+- Beispielpfade fuer direkt passende Woerter, mehrdeutige Woerter,
+  Kleinteile/Container, Gebaeudeteile/Blueprint und sensible oder abstrakte
+  Begriffe,
+- textuelle Visualisierung mit ASCII-Wireframes, Mermaid-Flows,
+  Markdown-Tabellen, Product-UX-Beschreibungen und QA-/Device-Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale Word-to-Island-UI,
+- keine Word-to-Island-Implementierung,
+- keine Routing-Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
 - keine neuen Assets,
 - keine Plot-Implementierung,
 - keine ThemeIsland-Umsetzung,
