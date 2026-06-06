@@ -472,13 +472,24 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine finale Safety-Implementierung, keine Moderations-Implementierung,
   keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
   Assetfreigabe, kein Code und kein `frame_started`.
+- Phase 2G-M13-H wurde als Growth And Timer Fairness Rules in
+  `docs/world_design/288-growth-timer-fairness-rules.md` gestartet. M13-H
+  vertieft nur Fairness-, Timer-, Growth-, Retention-, Tali/Vori- und
+  Gate-Regeln fuer Wachstum, Garten-/Farm-Progression, Daily-Momente,
+  Comebacks und Wartezeiten. Visualisierung bleibt textuell mit Mermaid,
+  ASCII-Flows, Markdown-Tabellen, Fairness-/Timer-Matrizen und Decision-Flows.
+  Daraus folgen keine PNGs, keine Tests, keine App-Integration, keine finale
+  Growth-Implementierung, keine Timer-Implementierung, keine Retention-
+  Implementierung, keine Monetarisierungsregel, keine finale Datenstruktur,
+  keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
-  M13-F-/M13-G-Bewertung.
+  M13-F-/M13-G-/M13-H-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -504,7 +515,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Word-to-Island-UX-Flow dokumentarisch geprueft, M13-E als Device-/
   Accessibility-Preview-Pruefplan dokumentarisch geprueft, M13-F als
   Container-Pagination-/Tap-Target-Regelplan dokumentarisch geprueft,
-  M13-G als Sensitive-Content-Policy-Vertiefung dokumentarisch geprueft oder
+  M13-G als Sensitive-Content-Policy-Vertiefung dokumentarisch geprueft,
+  M13-H als Growth-/Timer-Fairness-Regelplan dokumentarisch geprueft oder
   konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-
   Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
@@ -615,6 +627,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-E | Device And Accessibility Preview Plan | `Planung gestartet / Pruefplan definiert` | Reiner Dokumentationsblock in `docs/world_design/285-device-accessibility-preview-plan.md`. Plant Pruefkategorien, Preview-Typen, Checklisten, harte Blocker und Freigabegrade fuer Device-Groessen, Portrait-Fokus, Tap-Ziele, Text-Containment, Accessibility, Mobile-Clutter und UX-Komplexitaet. Keine neuen PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-F | Container Pagination And Tap Target Rules | `Planung gestartet / Regeln textuell visualisiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/286-container-pagination-and-tap-target-rules.md`. Plant Container-, Pagination-, Tap-Target-, Label-, Clutter- und QA-Overlay-Regeln fuer kleine Objektgruppen. Visualisierung nur als ASCII-Wireframes, Mermaid-Diagramm und Markdown-Tabellen. Keine PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine Container-Implementierung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-G | Sensitive Content Policy Deepening | `Planung gestartet / Policy textuell vertieft` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/287-sensitive-content-policy-deepening.md`. Vertieft Sensitive-Kategorien, Safe Representation Tiers, automatische Visualisierungsstopps, Tali/Vori-Verhalten, Privacy, User-Control, Policy-Matrizen und Gates. Visualisierung nur als Mermaid-Flow, ASCII-Flow und Markdown-Tabellen. Keine PNGs, keine Tests, keine finale Safety-Implementierung, keine Moderations-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine automatische Klassifikation, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-H | Growth And Timer Fairness Rules | `Planung gestartet / Fairness textuell vertieft` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/288-growth-timer-fairness-rules.md`. Vertieft Growth-Arten, Timer-Regeln, Streak-/Retention-Regeln, Tali/Vori-Erinnerungen, Fairness-Gates, harte Blocker und No-Decay-/No-Pay-to-Win-Leitplanken. Visualisierung nur als Mermaid-Flows, ASCII-Flow, Markdown-Tabellen und Fairness-/Timer-Matrizen. Keine PNGs, keine Tests, keine finale Growth-Implementierung, keine Timer-Implementierung, keine Retention-Implementierung, keine Monetarisierungsregel, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -845,7 +858,7 @@ naechster Schritt ist nur M13-Review, M13-Nachbesserung, M13-B Onboarding
 Choice Review, M13-C ThemeIsland Capability Sheets, M13-D
 Word-to-Island-UX-Flow, M13-E Device And Accessibility Preview Plan,
 M13-F Container Pagination And Tap Target Rules oder M13-G Sensitive Content
-Policy Deepening erlaubt. Keine finale
+Policy Deepening oder M13-H Growth And Timer Fairness Rules erlaubt. Keine finale
 ThemeIsland-Roadmap, keine
 ThemeIsland-Umsetzung, keine Implementierungsfreigabe, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung,
@@ -923,6 +936,18 @@ erzeugt keine PNGs, keine Tests, keine App-Integration, keine finale Safety-
 Implementierung, keine Moderations-Implementierung, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine automatische Klassifikation,
 keine App-/Assetfreigabe, keinen Code und kein `frame_started`.
+
+Phase 2G-M13-H startet Growth And Timer Fairness Rules als reinen
+Dokumentations- und Visualisierungsplanungsblock. M13-H vertieft faire
+Wachstumsarten, Timer-Regeln, weiche Daily-/Comeback-Momente, Tali/Vori-
+Erinnerungston, Fairness-Gates und harte Blocker gegen Verfall, Schuld,
+FOMO, Pay-to-Win und monetarisierte Streak-Rettung. Der Block nutzt nur
+Mermaid, ASCII-Flows, Markdown-Tabellen, Fairness-/Timer-Matrizen und
+Decision-Flows. Er erzeugt keine PNGs, keine Tests, keine App-Integration,
+keine finale Growth-Implementierung, keine Timer-Implementierung, keine
+Retention-Implementierung, keine Monetarisierungsregel, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keinen
+Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1551,6 +1576,25 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine App- oder Assetfreigabe aus M13-G ableiten,
 - keinen Code aus M13-G ableiten,
 - kein `frame_started` oder Bauzustand aus M13-G weiterbauen,
+- keine Growth-Implementierung aus M13-H ableiten,
+- keine Timer-Implementierung aus M13-H ableiten,
+- keine Retention-Implementierung aus M13-H ableiten,
+- keine Monetarisierungsregel aus M13-H ableiten,
+- keine finale Datenstruktur aus M13-H ableiten,
+- keine Runtime-Konfiguration aus M13-H ableiten,
+- keine Pflanzenverfall- oder Verlustmechanik planen,
+- keine harte Streak-Strafe planen,
+- keine monetarisierte Streak-Rettung planen,
+- keine Pay-to-Win-Beschleunigung planen,
+- keine Push-Drucklogik ohne eigenes Konzept planen,
+- keine Schuld-/Angst-/FOMO-Mechanik planen,
+- keine sensiblen Begriffe als Retention-Ausloeser planen,
+- keine Social-Ranking-Drucklogik planen,
+- keine PNG-Erzeugung aus M13-H ableiten,
+- keine Tests aus M13-H ableiten,
+- keine App- oder Assetfreigabe aus M13-H ableiten,
+- keinen Code aus M13-H ableiten,
+- kein `frame_started` oder Bauzustand aus M13-H weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2200,6 +2244,24 @@ Ein Schritt wird gestoppt, wenn:
 - aus M13-G Tests abgeleitet werden,
 - aus M13-G App-, Code- oder Assetfreigabe abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M13-G weitergebaut werden,
+- aus M13-H eine Growth-Implementierung abgeleitet wird,
+- aus M13-H eine Timer-Implementierung abgeleitet wird,
+- aus M13-H eine Retention-Implementierung abgeleitet wird,
+- aus M13-H eine Monetarisierungsregel abgeleitet wird,
+- aus M13-H eine finale Datenstruktur abgeleitet wird,
+- aus M13-H Runtime-Konfiguration abgeleitet wird,
+- Pflanzenverfall oder Verlustmechanik geplant wird,
+- harte Streak-Strafe geplant wird,
+- monetarisierte Streak-Rettung geplant wird,
+- Pay-to-Win-Beschleunigung geplant wird,
+- Push-Drucklogik ohne eigenes Konzept geplant wird,
+- Schuld-, Angst- oder FOMO-Mechanik geplant wird,
+- sensible Begriffe als Retention-Ausloeser geplant werden,
+- Social-Ranking-Drucklogik geplant wird,
+- aus M13-H PNG-Erzeugung abgeleitet wird,
+- aus M13-H Tests abgeleitet werden,
+- aus M13-H App-, Code- oder Assetfreigabe abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M13-H weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,

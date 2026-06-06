@@ -281,6 +281,17 @@ Symbol, Quest, Reward oder Companion-Druck uebersetzt werden. Daraus folgen
 keine PNGs, keine Tests, keine finale Safety-Implementierung, keine
 Moderations-Implementierung, keine finale Datenstruktur, keine Runtime-
 Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
+Phase 2G-M13-H startet Growth And Timer Fairness Rules in
+`docs/world_design/288-growth-timer-fairness-rules.md`. M13-H ist ein reiner
+Growth-/Timer-/Fairness-Planungsblock fuer Garten-/Farm-/Growth-/Timer-/
+Daily-/Comeback-Mechaniken. Die Waldlichtung bleibt Starter-/Testform. Solche
+Mechaniken duerfen nicht automatisch aus bestehenden Planungen umgesetzt
+werden. Pflanzenverfall, Schuld, Streak-Strafen, Pay-to-Win,
+FOMO-Mechaniken und Premium-Druck bleiben blockiert. Daraus folgen keine
+PNGs, keine Tests, keine finale Growth-Implementierung, keine Timer-
+Implementierung, keine Retention-Implementierung, keine Monetarisierungsregel,
+keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
+Assetfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -332,11 +343,12 @@ Fuehrende Dokumente:
 - `docs/world_design/285-device-accessibility-preview-plan.md`
 - `docs/world_design/286-container-pagination-and-tap-target-rules.md`
 - `docs/world_design/287-sensitive-content-policy-deepening.md`
+- `docs/world_design/288-growth-timer-fairness-rules.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-G Sensitive Content Policy Deepening gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-H Growth And Timer Fairness Rules gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -642,6 +654,15 @@ Fuehrende Dokumente:
     aber keine Safety-Implementierung, keine Moderations-Implementierung,
     keine finale Datenstruktur, keine Runtime-Konfiguration, keine
     automatische Klassifikation, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
+  - `phase2GM13H`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/288-growth-timer-fairness-rules.md`.
+    M13-H darf Growth-/Timer-/Fairness-, Retention-, Tali/Vori- und
+    Gate-Regeln planen und textuell visualisieren, aber keine Growth-
+    Implementierung, keine Timer-Implementierung, keine Retention-
+    Implementierung, keine Monetarisierungsregel, keine finale Datenstruktur,
+    keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
     `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
@@ -1511,6 +1532,25 @@ In diesem Template-Block gilt:
 - Keine App- oder Assetfreigabe aus M13-G.
 - Kein Code aus M13-G.
 - Kein `frame_started` oder Bauzustand aus M13-G.
+- Keine Growth-Implementierung aus M13-H.
+- Keine Timer-Implementierung aus M13-H.
+- Keine Retention-Implementierung aus M13-H.
+- Keine Monetarisierungsregel aus M13-H.
+- Keine finale Datenstruktur aus M13-H.
+- Keine Runtime-Konfiguration aus M13-H.
+- Keine Pflanzenverfall- oder Verlustmechanik.
+- Keine harte Streak-Strafe.
+- Keine monetarisierte Streak-Rettung.
+- Keine Pay-to-Win-Beschleunigung.
+- Keine Push-Drucklogik ohne eigenes Konzept.
+- Keine Schuld-/Angst-/FOMO-Mechanik.
+- Keine sensiblen Begriffe als Retention-Ausloeser.
+- Keine Social-Ranking-Drucklogik.
+- Keine PNG-Erzeugung aus M13-H.
+- Keine Tests aus M13-H.
+- Keine App- oder Assetfreigabe aus M13-H.
+- Kein Code aus M13-H.
+- Kein `frame_started` oder Bauzustand aus M13-H.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1760,10 +1800,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13EDeviceAccessibilityPreviewPlanStatus`: `started in docs/world_design/285-device-accessibility-preview-plan.md; preview check plan only; no PNGs, no tests, no final UI, no final data structure, no runtime config`
 - `phase2GM13FContainerPaginationTapTargetStatus`: `started in docs/world_design/286-container-pagination-and-tap-target-rules.md; textual visualization only; no PNGs, no tests, no final UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM13GSensitivePolicyDeepeningStatus`: `started in docs/world_design/287-sensitive-content-policy-deepening.md; policy structure only; no safety implementation, no moderation implementation, no final data structure, no runtime config, no automatic classification`
+- `phase2GM13HGrowthTimerFairnessStatus`: `started in docs/world_design/288-growth-timer-fairness-rules.md; fairness structure only; no growth implementation, no timer implementation, no retention implementation, no monetization rule, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-G reviewen, M13-G nachbessern oder M13-H/M13-I als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-H reviewen, M13-H nachbessern oder M13-I/M13-J als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2654,6 +2695,32 @@ Phase-2G-M13-G-Sensitive-Content-Policy-Deepening gilt nur fuer:
 - keine sensible ThemeIsland-Umsetzung,
 - keine neuen Assets,
 - keine Plot-Implementierung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-H-Growth-And-Timer-Fairness-Rules gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/288-growth-timer-fairness-rules.md`,
+- Growth-/Timer-/Fairness-, Retention-, Tali/Vori- und Gate-Regeln,
+- textuelle Visualisierung mit Mermaid, ASCII-Flows, Markdown-Tabellen,
+  Fairness-/Timer-Matrizen und Decision-Flows,
+- Garten-/Farm-/Growth-/Timer-/Daily-/Comeback-Mechaniken nur als Planung,
+- keine Pflanzenverfall-, Schuld-, Streak-Straf-, Pay-to-Win-, FOMO- oder
+  Premium-Druckmechanik,
+- keine PNGs,
+- keine Tests,
+- keine finale Growth-Implementierung,
+- keine Timer-Implementierung,
+- keine Retention-Implementierung,
+- keine Monetarisierungsregel,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
 - keine Bauzustaende,
 - keine App-/Assetfreigabe,
 - kein Code,
