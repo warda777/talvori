@@ -453,12 +453,22 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Tests, keine App-Integration, keine finale UI, keine finale Datenstruktur,
   keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
   `frame_started`.
+- Phase 2G-M13-F wurde als Container Pagination And Tap Target Rules in
+  `docs/world_design/286-container-pagination-and-tap-target-rules.md`
+  gestartet. M13-F plant nur Container-, Pagination-, Tap-Target-, Label-,
+  Clutter- und QA-Overlay-Regeln fuer ContainerOpenView,
+  DetailInteractionView und kleine Objektgruppen. Die Visualisierung bleibt
+  textuell mit ASCII-Wireframes, Mermaid und Tabellen. Daraus folgen keine
+  PNGs, keine Tests, keine App-Integration, keine finale UI, keine finale
+  Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein
+  Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
-  M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D- und M13-E-Bewertung.
+  M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
+  M13-F-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -482,9 +492,10 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Onboarding-Choice-Planungsrichtung dokumentarisch bestaetigt, M13-C als
   ThemeIsland-Capability-Sheet-Planung dokumentarisch geprueft, M13-D als
   Word-to-Island-UX-Flow dokumentarisch geprueft, M13-E als Device-/
-  Accessibility-Preview-Pruefplan dokumentarisch geprueft oder konkrete
-  Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-Follow-ups
-  geplant werden.
+  Accessibility-Preview-Pruefplan dokumentarisch geprueft, M13-F als
+  Container-Pagination-/Tap-Target-Regelplan dokumentarisch geprueft oder
+  konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-
+  Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -591,6 +602,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-C | ThemeIsland Capability Sheets | `Planung gestartet / Sheets erstellt` | Reiner Dokumentationsblock in `docs/world_design/283-theme-island-capability-sheets.md`. Konkretisiert ThemeIsland-Kandidaten als Planungsstruktur: Foundation-Sheets fuer Zuhause/Alltag, Schule/Lernen und Garten/Natur nah sowie kompakte Sheets fuer Expansion Wave 1, Expansion Wave 2, System-Heavy und Sensitive/Special. Enthaelt Capability-Matrix, Gates und Stop-Regeln. Keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-D | Word-to-Island UX Flow | `Planung gestartet / UX-Flow definiert` | Reiner Dokumentationsblock in `docs/world_design/284-word-to-island-ux-flow.md`. Plant den Nutzerfluss von Wortaufnahme ueber Kontext/Sense, Worttyp, Safety, ThemeIsland-Kandidat, Depth-Kandidat und Nutzerentscheidung zu PlacementCandidate, Blueprint, Codex oder Backlog. Keine finale Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-E | Device And Accessibility Preview Plan | `Planung gestartet / Pruefplan definiert` | Reiner Dokumentationsblock in `docs/world_design/285-device-accessibility-preview-plan.md`. Plant Pruefkategorien, Preview-Typen, Checklisten, harte Blocker und Freigabegrade fuer Device-Groessen, Portrait-Fokus, Tap-Ziele, Text-Containment, Accessibility, Mobile-Clutter und UX-Komplexitaet. Keine neuen PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-F | Container Pagination And Tap Target Rules | `Planung gestartet / Regeln textuell visualisiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/286-container-pagination-and-tap-target-rules.md`. Plant Container-, Pagination-, Tap-Target-, Label-, Clutter- und QA-Overlay-Regeln fuer kleine Objektgruppen. Visualisierung nur als ASCII-Wireframes, Mermaid-Diagramm und Markdown-Tabellen. Keine PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine Container-Implementierung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -819,8 +831,9 @@ Visualisierungsblock. Preview-Dateien liegen unter
 `docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`. Als
 naechster Schritt ist nur M13-Review, M13-Nachbesserung, M13-B Onboarding
 Choice Review, M13-C ThemeIsland Capability Sheets, M13-D
-Word-to-Island-UX-Flow oder M13-E Device And Accessibility Preview Plan
-erlaubt. Keine finale ThemeIsland-Roadmap, keine
+Word-to-Island-UX-Flow, M13-E Device And Accessibility Preview Plan oder
+M13-F Container Pagination And Tap Target Rules erlaubt. Keine finale
+ThemeIsland-Roadmap, keine
 ThemeIsland-Umsetzung, keine Implementierungsfreigabe, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung,
 keine App-/Assetfreigabe und kein `frame_started` duerfen aus M13 abgeleitet
@@ -877,6 +890,16 @@ Accessibility, Mobile-Clutter und UX-Komplexitaet geprueft werden. Der Block
 erzeugt keine Preview-PNGs, keine Tests, keine App-Integration, keine finale
 UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
 Assetfreigabe, keinen Code und kein `frame_started`.
+
+Phase 2G-M13-F startet Container Pagination And Tap Target Rules als reinen
+Dokumentations- und Visualisierungsplanungsblock. M13-F klaert, wie
+ContainerOpenView, DetailInteractionView, kleine Objektgruppen und
+Lernobjekte spaeter ueber Pagination, klare Fokusobjekte, ausreichend grosse
+Tap-Ziele, kontextuelle Labels, Clutter-Begrenzung und QA-Overlay-Regeln
+mobile bedienbar bleiben. Der Block nutzt nur Mermaid, ASCII-Wireframes und
+Markdown-Tabellen. Er erzeugt keine PNGs, keine Tests, keine App-Integration,
+keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration,
+keine App-/Assetfreigabe, keinen Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1473,6 +1496,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine finale ThemeIsland-UI aus M13-E ableiten,
 - keine finale Word-to-Island-UI aus M13-E ableiten,
 - keine finale Container-/Depth-UI aus M13-E ableiten,
+- keine Container-Implementierung aus M13-F ableiten,
+- keine finale ContainerOpenView-UI aus M13-F ableiten,
+- keine finale DetailInteractionView-UI aus M13-F ableiten,
+- keine finale Pagination-Logik aus M13-F ableiten,
+- keine Runtime-Konfiguration aus M13-F ableiten,
+- keine Tests aus M13-F ableiten,
+- keine PNG-Erzeugung aus M13-F ableiten,
+- keine App- oder Assetfreigabe aus M13-F ableiten,
+- keinen Code aus M13-F ableiten,
+- kein `frame_started` oder Bauzustand aus M13-F weiterbauen,
+- keine Kleinteile dauerhaft in IslandView platzieren,
+- keine TinyObject-Tap-Ziele ohne Container, Zoom oder DetailInteraction
+  planen,
+- keine Growth-/Timer-Mechanik ohne Fairness-Regeln planen,
+- keine sensitiveSmallObjects ohne M12-D-Regeln planen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2092,6 +2130,20 @@ Ein Schritt wird gestoppt, wenn:
 - aus M13-E eine finale ThemeIsland-UI abgeleitet wird,
 - aus M13-E eine finale Word-to-Island-UI abgeleitet wird,
 - aus M13-E eine finale Container-/Depth-UI abgeleitet wird,
+- aus M13-F eine Container-Implementierung abgeleitet wird,
+- aus M13-F eine finale ContainerOpenView-UI abgeleitet wird,
+- aus M13-F eine finale DetailInteractionView-UI abgeleitet wird,
+- aus M13-F eine finale Pagination-Logik abgeleitet wird,
+- aus M13-F Runtime-Konfiguration abgeleitet wird,
+- aus M13-F Tests abgeleitet werden,
+- aus M13-F PNG-Erzeugung abgeleitet wird,
+- aus M13-F App-, Code- oder Assetfreigabe abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M13-F weitergebaut werden,
+- Kleinteile dauerhaft in IslandView platziert werden,
+- TinyObject-Tap-Ziele ohne Container, Zoom oder DetailInteraction geplant
+  werden,
+- Growth-/Timer-Mechanik ohne Fairness-Regeln geplant wird,
+- sensitiveSmallObjects ohne M12-D-Regeln geplant werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,

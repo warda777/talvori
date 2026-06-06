@@ -261,6 +261,16 @@ Accessibility-Pruefung getroffen werden, wenn der Zustand visuell pruefbar
 ist. Daraus folgen keine neuen PNGs, keine Tests, keine finale UI, keine
 finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
 kein Code und kein `frame_started`.
+Phase 2G-M13-F startet Container Pagination And Tap Target Rules in
+`docs/world_design/286-container-pagination-and-tap-target-rules.md`. M13-F
+ist ein reiner Container-/Pagination-/Tap-Target-Planungsblock fuer
+ContainerOpenView, DetailInteractionView, kleine Objektgruppen, Labels,
+Clutter-Vermeidung und QA-Overlays. Die Waldlichtung bleibt Starter-/Testform;
+kleine Objekte duerfen nicht dauerhaft in IslandView oder Waldlichtung
+gepresst werden. Container-, DetailInteraction- und QA-Overlay-Regeln muessen
+vor produktnaher Umsetzung visuell geprueft werden. Daraus folgen keine PNGs,
+keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-
+Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -310,11 +320,12 @@ Fuehrende Dokumente:
 - `docs/world_design/283-theme-island-capability-sheets.md`
 - `docs/world_design/284-word-to-island-ux-flow.md`
 - `docs/world_design/285-device-accessibility-preview-plan.md`
+- `docs/world_design/286-container-pagination-and-tap-target-rules.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-E Device Accessibility Preview Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-F Container Pagination And Tap Target Rules gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -604,6 +615,14 @@ Fuehrende Dokumente:
     PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine
     Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
+  - `phase2GM13F`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/286-container-pagination-and-tap-target-rules.md`.
+    M13-F darf Container-, Pagination-, Tap-Target-, Label-, Clutter- und
+    QA-Overlay-Regeln planen und textuell visualisieren, aber keine PNGs,
+    keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-
+    Konfiguration, keine Container-Implementierung, keine App-/Assetfreigabe
+    und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1441,6 +1460,20 @@ In diesem Template-Block gilt:
 - Keine finale ThemeIsland-UI aus M13-E.
 - Keine finale Word-to-Island-UI aus M13-E.
 - Keine finale Container-/Depth-UI aus M13-E.
+- Keine Container-Implementierung aus M13-F.
+- Keine finale ContainerOpenView-UI aus M13-F.
+- Keine finale DetailInteractionView-UI aus M13-F.
+- Keine finale Pagination-Logik aus M13-F.
+- Keine Runtime-Konfiguration aus M13-F.
+- Keine Tests aus M13-F.
+- Keine PNG-Erzeugung aus M13-F.
+- Keine App- oder Assetfreigabe aus M13-F.
+- Kein Code aus M13-F.
+- Kein `frame_started` oder Bauzustand aus M13-F.
+- Keine Kleinteile dauerhaft in IslandView.
+- Keine TinyObject-Tap-Ziele ohne Container, Zoom oder DetailInteraction.
+- Keine Growth-/Timer-Mechanik ohne Fairness-Regeln.
+- Keine sensitiveSmallObjects ohne M12-D-Regeln.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1688,10 +1721,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13CThemeIslandCapabilitySheetsStatus`: `started in docs/world_design/283-theme-island-capability-sheets.md; capability sheets only; no final roadmap, no final start island, no final data structure, no runtime config, no implementation release`
 - `phase2GM13DWordToIslandUXFlowStatus`: `started in docs/world_design/284-word-to-island-ux-flow.md; UX flow only; no final routing implementation, no final routing data structure, no runtime config, no automatic word placement`
 - `phase2GM13EDeviceAccessibilityPreviewPlanStatus`: `started in docs/world_design/285-device-accessibility-preview-plan.md; preview check plan only; no PNGs, no tests, no final UI, no final data structure, no runtime config`
+- `phase2GM13FContainerPaginationTapTargetStatus`: `started in docs/world_design/286-container-pagination-and-tap-target-rules.md; textual visualization only; no PNGs, no tests, no final UI, no final data structure, no runtime config, no container implementation`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-E reviewen, M13-E nachbessern oder M13-F/M13-G als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-F reviewen, M13-F nachbessern oder M13-G/M13-H als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2533,6 +2567,31 @@ Phase-2G-M13-E-Device-And-Accessibility-Preview-Plan gilt nur fuer:
 - keine Plot-Implementierung,
 - keine ThemeIsland-Umsetzung,
 - keine Bauzustaende,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-F-Container-Pagination-And-Tap-Target-Rules gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/286-container-pagination-and-tap-target-rules.md`,
+- Container-, Pagination-, Tap-Target-, Label-, Clutter- und QA-Overlay-
+  Regeln,
+- textuelle Visualisierung mit ASCII-Wireframes, Mermaid und
+  Markdown-Tabellen,
+- Beispiele fuer Federmappe, Kuechenschublade, Gartenbeet und Bootskiste,
+- harte Blocker fuer ueberladene Container und zu kleine Tap-Ziele,
+- keine PNGs,
+- keine Tests,
+- keine finale UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine Container-Implementierung,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine Kleinteile dauerhaft in IslandView oder Waldlichtung,
+- keine App-/Assetfreigabe,
 - kein Code,
 - kein `frame_started`.
 
