@@ -204,6 +204,13 @@ ordnet ThemeIsland-Kandidaten in Foundation, Expansion Wave 1, Expansion Wave
 ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine Implementierungs-
 freigabe, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 App-/Assetfreigabe, kein Code und kein `frame_started`.
+Phase 2G-M13-A2 startet die visuelle Pruefung des ThemeIsland Roadmap Drafts
+in `docs/world_design/280-theme-island-roadmap-visual-review.md`. Ergebnis fuer
+den Review-Stand: M13 ist als erster Roadmap-Draft brauchbar. Daraus folgen
+keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine ThemeIsland-
+Umsetzung, keine Implementierungsfreigabe, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -247,11 +254,12 @@ Fuehrende Dokumente:
 - `docs/world_design/277-mobile-clutter-visual-review.md`
 - `docs/world_design/278-m12-consolidated-readiness-review.md`
 - `docs/world_design/279-theme-island-roadmap-draft.md`
+- `docs/world_design/280-theme-island-roadmap-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13 ThemeIsland Roadmap Draft gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-A2 ThemeIsland Roadmap Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -491,6 +499,14 @@ Fuehrende Dokumente:
     M13 darf ThemeIsland-Kandidaten in Roadmap-Wellen ordnen, aber keine
     finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine
     Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-
+    Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
+  - `phase2GM13A2`: `false` fuer Code/Assets; erlaubt nur den visuellen
+    Dokumentationsreview in
+    `docs/world_design/280-theme-island-roadmap-visual-review.md`.
+    M13-A2 darf M13 als ersten Roadmap-Draft bewerten, aber keine finale
+    ThemeIsland-Roadmap, keine finale Startinsel, keine ThemeIsland-Umsetzung,
+    keine Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-
     Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
 
@@ -1245,6 +1261,22 @@ In diesem Template-Block gilt:
 - Keine Sensitive-/Special-Insel ohne vertiefte Safety-/UX-/Policy-Regeln.
 - Keine App- oder Assetfreigabe aus M13.
 - Kein `frame_started` oder Bauzustand aus M13.
+- Keine finale ThemeIsland-Roadmap aus M13-A2.
+- Keine finale Startinsel aus M13-A2.
+- Keine Implementierungsfreigabe aus M13-A2.
+- Keine finale Datenstruktur aus M13-A2.
+- Keine Runtime-Konfiguration aus M13-A2.
+- Keine automatische Wortplatzierung aus M13-A2.
+- Keine ThemeIsland-Umsetzung aus M13-A2.
+- Keine Assets aus M13-A2.
+- Keine Foundation-Insel ohne M13-B Onboarding Choice Review.
+- Keine Foundation-Insel ohne Device-/Accessibility-/Tap-Target-Pruefung.
+- Keine Garten-/Farm-Wachstumslogik ohne Fairness-/Timer-Regeln.
+- Keine Kuesten-/Hafeninsel ohne Water-/Dock-/Mobile-Komplexitaetspruefung.
+- Keine Stadt-/Verkehr-/Technikinsel ohne eigenes Systemkonzept.
+- Keine Sensitive-/Special-Insel ohne vertiefte Safety-/UX-/Policy-Regeln.
+- Keine App- oder Assetfreigabe aus M13/M13-A2.
+- Kein `frame_started` oder Bauzustand aus M13/M13-A2.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1476,10 +1508,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12E2MobileClutterReviewStatus`: `started in docs/world_design/277-mobile-clutter-visual-review.md; first mobile clutter planning direction usable; no final mobile UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM12FConsolidatedReadinessReviewStatus`: `started in docs/world_design/278-m12-consolidated-readiness-review.md; M12 chain usable as consolidated planning foundation; no final roadmap, no implementation release, no final data structure, no runtime config`
 - `phase2GM13ThemeIslandRoadmapDraftStatus`: `started in docs/world_design/279-theme-island-roadmap-draft.md; previews created under docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/; no final ThemeIsland roadmap, no implementation release, no final data structure, no runtime config`
+- `phase2GM13A2ThemeIslandRoadmapReviewStatus`: `started in docs/world_design/280-theme-island-roadmap-visual-review.md; first roadmap draft usable; no final ThemeIsland roadmap, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13 visuell pruefen oder M13-B/M13-C/M13-D als reinen Planungsblock starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-A2 reviewen, M13-B Early Island Onboarding Choice Review oder weitere reine M13-Folgeplanung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2191,6 +2224,25 @@ Phase-2G-M13-ThemeIsland-Roadmap-Draft gilt nur fuer:
 - Gate-Dokumentation gegen Code, Assets, finale Roadmap, Runtime-
   Konfiguration, ThemeIsland-Umsetzung und automatische Wortplatzierung,
 - keine finale ThemeIsland-Roadmap,
+- keine ThemeIsland-Umsetzung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-A2-ThemeIsland-Roadmap-Visual-Review gilt nur fuer:
+
+- visuellen Dokumentationsreview in
+  `docs/world_design/280-theme-island-roadmap-visual-review.md`,
+- Pruefung der M13-Previews unter
+  `docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`,
+- Bestaetigung, dass Foundation, Expansion Wave 1, Expansion Wave 2,
+  System-Heavy Wave und Sensitive/Special Wave als erster Draft verstaendlich
+  sind,
+- Bestaetigung, dass M13-B Early Island Onboarding Choice Review als naechster
+  sinnvoller reiner Planungsblock offen bleibt,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Startinsel,
 - keine ThemeIsland-Umsetzung,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,

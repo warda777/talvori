@@ -401,12 +401,20 @@ Aktueller Stand der Talvori-Welt-Produktion:
   folgen keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine
   Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-
   Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
+- Phase 2G-M13-A2 wurde als visuelle Pruefung des ThemeIsland Roadmap Drafts
+  in `docs/world_design/280-theme-island-roadmap-visual-review.md` gestartet.
+  Ergebnis fuer den Review-Stand: M13 ist als erster Roadmap-Draft brauchbar.
+  Foundation, Expansion Wave 1, Expansion Wave 2, System-Heavy Wave und
+  Sensitive/Special Wave sind verstaendlich. Daraus folgen keine finale
+  ThemeIsland-Roadmap, keine finale Startinsel, keine ThemeIsland-Umsetzung,
+  keine Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-
+  Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
-  M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-/M13-
-  Bewertung.
+  M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
+  M13- und M13-A2-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -424,7 +432,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Regelgrundlage dokumentarisch geprueft, M12-E2 als erste Mobile-/Clutter-
   Planungsrichtung dokumentarisch bestaetigt, M12-F als konsolidierte
   M12-Planungsgrundlage dokumentarisch bestaetigt, M13 als nicht-finaler
-  ThemeIsland-Roadmap-Draft dokumentarisch geprueft oder konkrete
+  ThemeIsland-Roadmap-Draft dokumentarisch geprueft, M13-A2 als erster
+  Roadmap-Draft dokumentarisch bestaetigt oder konkrete
   Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-Follow-ups
   geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
@@ -527,6 +536,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M12-E2 | Mobile Clutter Visual Review | `Review gestartet / erste Mobile-Clutter-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/277-mobile-clutter-visual-review.md`. Bewertet die M12-E-Previews visuell und inhaltlich. Ergebnis: Ladder, Matrix, Container-Beispiele und Stop-Gates sind als erste Mobile-/Clutter-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln gegen TinyObjects in IslandView, ueberfuellte Container, dauerhafte Labelwolken, verdeckende Deko und sensitiveSmallObjects ohne M12-D. Keine finale Mobile-UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine Container-Implementierung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-F | M12 Consolidated Readiness Review | `Review gestartet / M12-Kette als Planungsgrundlage brauchbar` | Reiner Dokumentationsblock in `docs/world_design/278-m12-consolidated-readiness-review.md`. Konsolidiert M12 bis M12-E2: ThemeIsland-Priorisierung, Word-to-Island Routing, Plot-Capabilities, Sensitive Content und Mobile/Clutter. Ergebnis: Die M12-Kette ist als Grundlage fuer weitere reine Planung brauchbar, aber keine finale ThemeIsland-Roadmap, keine Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13 | ThemeIsland Roadmap Draft | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/279-theme-island-roadmap-draft.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`: `01_theme_island_roadmap_waves.png`, `02_early_island_candidate_cards.png`, `03_roadmap_gate_flow.png`, `04_risk_and_scope_map.png` und `README.md`. Ordnet Kandidaten in Foundation, Expansion Wave 1, Expansion Wave 2, System-Heavy Wave und Sensitive/Special Wave. Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-A2 | ThemeIsland Roadmap Visual Review | `Review gestartet / erster Roadmap-Draft brauchbar` | Reiner Dokumentationsblock in `docs/world_design/280-theme-island-roadmap-visual-review.md`. Bewertet die M13-Previews visuell und inhaltlich. Ergebnis: Die Roadmap-Wellen, Early Candidate Cards, Gate Flow und Risk/Scope Map sind als erster Roadmap-Draft brauchbar. Keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -760,6 +770,13 @@ ThemeIsland-Umsetzung, keine Implementierungsfreigabe, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung,
 keine App-/Assetfreigabe und kein `frame_started` duerfen aus M13 abgeleitet
 werden.
+
+Phase 2G-M13-A2 bewertet den ThemeIsland Roadmap Draft visuell und inhaltlich
+als ersten brauchbaren Roadmap-Draft. Die Bestaetigung gilt nur fuer die
+Planungsrichtung der Roadmap-Wellen und nicht fuer eine finale Startinsel,
+ThemeIsland-Umsetzung, finale Datenstruktur, Runtime-Konfiguration,
+Implementierungsfreigabe oder App-/Assetfreigabe. Als naechster sinnvoller
+reiner Planungsblock bleibt M13-B Early Island Onboarding Choice Review offen.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1270,6 +1287,25 @@ Aktuell nicht erlaubt / weiterhin blockiert:
   planen,
 - keine App- oder Assetfreigabe aus M13 ableiten,
 - kein `frame_started` oder Bauzustand aus M13 weiterbauen,
+- keine finale ThemeIsland-Roadmap aus M13-A2 ableiten,
+- keine finale Startinsel aus M13-A2 ableiten,
+- keine Implementierungsfreigabe aus M13-A2 ableiten,
+- keine finale Datenstruktur aus M13-A2 ableiten,
+- keine Runtime-Konfiguration aus M13-A2 ableiten,
+- keine automatische Wortplatzierung aus M13-A2 ableiten,
+- keine ThemeIsland-Umsetzung aus M13-A2 ableiten,
+- keine Assets aus M13-A2 erzeugen,
+- keine Foundation-Insel ohne M13-B Onboarding Choice Review planen,
+- keine Foundation-Insel ohne Device-/Accessibility-/Tap-Target-Pruefung
+  planen,
+- keine Garten-/Farm-Wachstumslogik ohne Fairness-/Timer-Regeln planen,
+- keine Kuesten-/Hafeninsel ohne Water-/Dock-/Mobile-
+  Komplexitaetspruefung planen,
+- keine Stadt-/Verkehr-/Technikinsel ohne eigenes Systemkonzept planen,
+- keine Sensitive-/Special-Insel ohne vertiefte Safety-/UX-/Policy-Regeln
+  planen,
+- keine App- oder Assetfreigabe aus M13/M13-A2 ableiten,
+- kein `frame_started` oder Bauzustand aus M13/M13-A2 weiterbauen,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1794,6 +1830,26 @@ Ein Schritt wird gestoppt, wenn:
   geplant wird,
 - aus M13 App-, Code- oder Assetfreigabe abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M13 weitergebaut werden,
+- aus M13-A2 eine finale ThemeIsland-Roadmap abgeleitet wird,
+- aus M13-A2 eine finale Startinsel abgeleitet wird,
+- aus M13-A2 eine Implementierungsfreigabe abgeleitet wird,
+- aus M13-A2 eine finale Datenstruktur abgeleitet wird,
+- aus M13-A2 Runtime-Konfiguration abgeleitet wird,
+- aus M13-A2 automatische Wortplatzierung abgeleitet wird,
+- aus M13-A2 eine ThemeIsland-Umsetzung abgeleitet wird,
+- aus M13-A2 Assets erzeugt werden,
+- eine Foundation-Insel ohne M13-B Onboarding Choice Review geplant wird,
+- eine Foundation-Insel ohne Device-/Accessibility-/Tap-Target-Pruefung
+  geplant wird,
+- Garten- oder Farm-Wachstumslogik ohne Fairness-/Timer-Regeln geplant wird,
+- eine Kuesten- oder Hafeninsel ohne Water-/Dock-/Mobile-
+  Komplexitaetspruefung geplant wird,
+- eine Stadt-, Verkehrs- oder Technikinsel ohne eigenes Systemkonzept geplant
+  wird,
+- eine Sensitive- oder Special-Insel ohne vertiefte Safety-/UX-/Policy-Regeln
+  geplant wird,
+- aus M13/M13-A2 App-, Code- oder Assetfreigabe abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M13/M13-A2 weitergebaut werden,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
