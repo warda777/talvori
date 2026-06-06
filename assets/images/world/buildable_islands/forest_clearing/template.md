@@ -365,6 +365,16 @@ App-Integration. M13-P erzeugt keine Codefreigabe. `frame_started` bleibt
 blockiert. Daraus folgen keine PNGs, keine Tests, keine finale Datenstruktur,
 keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+M14-A startet den Foundation Choice Product Preview Plan in
+`docs/world_design/297-foundation-choice-product-preview-plan.md`. M14-A ist
+ein reiner Product-Preview-Plan fuer die Foundation Choice. Die Waldlichtung
+bleibt Starter-/Testform. M14-A erzeugt keine neuen Assets, keine
+Bauzustaende, keine finale Foundation-Choice-UI, keine finale Onboarding-UI,
+keine finale Startinsel und keine App-Integration. Product Preview bedeutet
+keine Umsetzung. `frame_started` bleibt blockiert. Daraus folgen keine PNGs,
+keine Tests, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -425,11 +435,12 @@ Fuehrende Dokumente:
 - `docs/world_design/294-foundation-choice-device-preview-plan.md`
 - `docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`
 - `docs/world_design/296-implementation-candidate-gate.md`
+- `docs/world_design/297-foundation-choice-product-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-P Implementation Candidate Gate gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-A Foundation Choice Product Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -822,6 +833,17 @@ Fuehrende Dokumente:
     keine finale Word-to-Island-UI, keine finale Container-UI, keine finale
     Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe und
     kein `frame_started` erzeugen.
+  - `m14A`: `false` fuer Code/Assets; erlaubt nur das Planungsdokument
+    `docs/world_design/297-foundation-choice-product-preview-plan.md`.
+    M14-A darf produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow,
+    Foundation-Karten, ASCII-Product-Previews und Product-/Device-/
+    Accessibility-Checklisten fuer die Foundation Choice planen, aber keine
+    PNGs, keine Tests, keine App-Integration, keine finale
+    Foundation-Choice-UI, keine finale Onboarding-UI, keine finale Startinsel,
+    keine finale ThemeIsland-Roadmap, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine automatische Wortplatzierung, keine
+    App-/Assetfreigabe, keine Implementierungsfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1813,6 +1835,21 @@ In diesem Template-Block gilt:
 - Keine finale Datenstruktur aus M13-P.
 - Keine Runtime-Konfiguration aus M13-P.
 - Kein `frame_started` oder Bauzustand aus M13-P.
+- Keine finale Foundation-Choice-UI aus M14-A.
+- Keine finale Onboarding-UI aus M14-A.
+- Keine finale Startinsel aus M14-A.
+- Keine finale ThemeIsland-Roadmap aus M14-A.
+- Keine App-Integration aus M14-A.
+- Keine Codefreigabe aus M14-A.
+- Keine Implementierungsfreigabe aus M14-A.
+- Keine Assetfreigabe aus M14-A.
+- Keine finale Datenstruktur aus M14-A.
+- Keine Runtime-Konfiguration aus M14-A.
+- Keine automatische Wortplatzierung aus M14-A.
+- Keine PNG-Erzeugung aus M14-A.
+- Keine Tests aus M14-A.
+- Keine Spielassets aus M14-A.
+- Kein `frame_started` oder Bauzustand aus M14-A.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2071,10 +2108,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13NFoundationChoiceDevicePreviewStatus`: `started in docs/world_design/294-foundation-choice-device-preview-plan.md; device preview planning only; no final onboarding UI, no final Foundation Choice UI, no final start island, no final data structure, no runtime config, no frame_started`
 - `phase2GM13OThemeIslandRoadmapScopeFreezeStatus`: `started in docs/world_design/295-theme-island-roadmap-scope-freeze-review.md; scope freeze review only; planning stability only; no final ThemeIsland roadmap, no implementation, no asset release, no runtime config, no frame_started`
 - `phase2GM13PImplementationCandidateGateStatus`: `started in docs/world_design/296-implementation-candidate-gate.md; gate review only; no implementation release, no code release, no asset release, no final UI, no final data structure, no runtime config, no frame_started`
+- `m14AFoundationChoiceProductPreviewStatus`: `started in docs/world_design/297-foundation-choice-product-preview-plan.md; product preview planning only; no final Foundation Choice UI, no final onboarding UI, no final start island, no app integration, no code release, no asset release, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-P reviewen, M13-P nachbessern oder M14-A/M14-B/M14-C als reine Product-Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M14-A reviewen, M14-A nachbessern oder M14-A2/M14-B/M14-C als reine Product-Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3228,6 +3266,36 @@ Phase-2G-M13-P-Implementation-Candidate-Gate gilt nur fuer:
 - keine ThemeIsland-Umsetzung,
 - keine Bauzustaende,
 - keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+M14-A-Foundation-Choice-Product-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/297-foundation-choice-product-preview-plan.md`,
+- produktnahe Preview-Zustaende fuer Welcome, Foundation Cards, Fokus,
+  Auswahl, Confirm, Safe Exit und Planning State,
+- Copy-Regeln fuer erlaubte und blockierte Foundation-Choice-Formulierungen,
+- Foundation-Karten fuer Zuhause/Alltag, Schule/Lernen und Garten/Natur nah,
+- ASCII-Product-Wireframes, ASCII-Mobile-Frames und ASCII-State-Previews,
+- Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-
+  Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale Foundation-Choice-UI,
+- keine finale Onboarding-UI,
+- keine finale Startinsel,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- keine Implementierungsfreigabe,
 - kein Code,
 - kein `frame_started`.
 
