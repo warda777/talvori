@@ -69,6 +69,11 @@ Dokumentationspreviews unter
 Der Review-Stand empfiehlt Tap-Auswahl zuerst und Audio + Tap als zweite Stufe,
 aber keine finale Challenge-Art, keine Challenge-Implementierung, keine App-
 Integration und keine Assetfreigabe.
+Phase 2G-M10-B2 prueft diese M10-B-Previews visuell in
+`docs/world_design/261-challenge-interaction-visual-review.md`. Ergebnis:
+Die erste Challenge-Empfehlung ist grundsaetzlich brauchbar, aber weiterhin
+keine finale Challenge-Systementscheidung, keine Implementierung, keine App-
+Integration, keine Assetfreigabe und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -93,11 +98,12 @@ Fuehrende Dokumente:
 - `docs/world_design/258-emotional-product-flow-preview-plan.md`
 - `docs/world_design/259-emotional-product-flow-visual-review.md`
 - `docs/world_design/260-challenge-interaction-comparison.md`
+- `docs/world_design/261-challenge-interaction-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10-B Challenge Comparison gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10-B2 Challenge Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -193,6 +199,12 @@ Fuehrende Dokumente:
     `docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/`.
     Keine Challenge-Implementierung, keine finale Challenge-Art, keine
     App-Integration und keine Assetfreigabe.
+  - `phase2GM10B2`: `false` fuer Code/Assets; erlaubt nur die visuelle
+    Dokumentationspruefung in
+    `docs/world_design/261-challenge-interaction-visual-review.md`.
+    M10-B2 darf die erste Challenge-Empfehlung als brauchbar bewerten, aber
+    keine finale Challenge-Systementscheidung, keine Implementierung und keine
+    App-/Assetfreigabe erzeugen.
   - `phase2GM10C`: `false` fuer Code/Assets; vorgemerkt fuer Tali/Vori-
     Companion-Reaktionsflow.
   - `phase2GM11`: `false` fuer Code/Assets; vorgemerkt fuer mehrere
@@ -277,6 +289,11 @@ Empfehlung fuer den Review-Stand: Tap-Auswahl als erster Prototype-Flow,
 Audio + Tap als zweite Stufe, Matching/Sortieren spaeter und Mini-Sequenzen
 spaeter fuer Aktionen. Review, Accessibility-/Silent-Mode-Pruefung,
 Mobile-Pruefung fuer Drag-and-drop und weitere Beispiel-Flows bleiben offen.
+M10-B2 prueft diese Previews visuell in
+`docs/world_design/261-challenge-interaction-visual-review.md`. Ergebnis:
+Die M10-B-Empfehlung ist als erste Prototype-Richtung grundsaetzlich brauchbar,
+aber keine finale Challenge-Systementscheidung fuer alle Themen. M10-C und M11
+bleiben offen.
 
 ## 2. Zweck Des Assets
 
@@ -663,6 +680,11 @@ In diesem Template-Block gilt:
 - Keine Audio-Challenge ohne Accessibility-/Silent-Mode-Alternative.
 - Keine allgemeine Challenge-Systementscheidung ohne weitere Beispiel-Flows.
 - Keine App- oder Assetfreigabe aus M10-B ableiten.
+- Keine Challenge-Implementierung aus M10-B2 ableiten.
+- Keine finale Challenge-Systementscheidung ohne M11.
+- Keine Audio-Challenge ohne Silent-/Accessibility-Fallback.
+- Kein Drag-and-drop ohne Mobile-Bedienbarkeitspruefung.
+- Keine App- oder Assetfreigabe aus M10-B oder M10-B2.
 
 ## 10. Device-/Preview-Check
 
@@ -871,12 +893,13 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM9BRequiredFollowUps`: `M10 Emotional Product Flow Preview; M10-B Challenge Interaction Comparison; M10-C Companion Reaction Flow; M11 Multi-Example Container Flow Previews`
 - `phase2GM10EmotionalProductFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m10_emotional_product_flow/; reviewed in docs/world_design/259-emotional-product-flow-visual-review.md; usable as emotional product preview; documentation preview only`
 - `phase2GM10DVisualReviewStatus`: `started; M10 usable as emotional product flow preview; M10-B started later; M10-C and M11 remain open`
-- `phase2GM10BChallengeComparisonStatus`: `started in docs/world_design/260-challenge-interaction-comparison.md; previews created under docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/; review open; documentation preview only`
+- `phase2GM10BChallengeComparisonStatus`: `started in docs/world_design/260-challenge-interaction-comparison.md; previews created under docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/; reviewed in docs/world_design/261-challenge-interaction-visual-review.md; documentation preview only`
 - `phase2GM10BRecommendedFirstChallenge`: `Tap selection first; Audio + Tap second; Matching/Sorting later; Mini sequences later for actions; not final until visual review`
+- `phase2GM10B2ChallengeVisualReviewStatus`: `started in docs/world_design/261-challenge-interaction-visual-review.md; first recommendation usable; no final challenge-system decision`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M10-B visuell pruefen oder M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M10-B dokumentarisch bestaetigen oder M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1168,8 +1191,8 @@ M9-B-Follow-ups sind verbindlich vorgemerkt:
 - `Phase 2G-M10 Emotional Product Flow Preview`: emotionale/spielnaehere
   Produktversion der M9-Preview; geprueft / grundsaetzlich brauchbar,
 - `Phase 2G-M10-B Challenge Interaction Comparison`: Vergleich von Tippen,
-  Audio, Drag-and-drop, Zuordnung und Kombinationen; gestartet / Preview
-  erzeugt / Review offen,
+  Audio, Drag-and-drop, Zuordnung und Kombinationen; geprueft / erste
+  Empfehlung brauchbar,
 - `Phase 2G-M10-C Companion Reaction Flow`: Tali/Vori-Reaktionsflow als
   eigener Motivationsmoment,
 - `Phase 2G-M11 Multi-Example Container Flow Previews`: weitere Flows fuer
@@ -1221,6 +1244,23 @@ Phase-2G-M10-B-Challenge-Interaction-Comparison gilt nur fuer:
 - Stop-Regeln gegen Challenge-Implementierung, finale Challenge-Art,
   ungeprueftes Drag-and-drop, Audio ohne Accessibility-/Silent-Mode-
   Alternative und App-/Assetfreigabe aus M10-B.
+
+Phase-2G-M10-B2-Challenge-Interaction-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/261-challenge-interaction-visual-review.md`,
+- visuelle Bewertung der M10-B-Preview-Dateien,
+- Entscheidungsempfehlung, M10-B als erste Prototype-Richtung
+  grundsaetzlich brauchbar zu behandeln,
+- bestaetigte Reihenfolge fuer den Review-Stand:
+  - `MVP`: Tap-Auswahl,
+  - `Early`: Audio + Tap,
+  - `Later`: Matching / Sortieren,
+  - `Advanced`: Mini-Sequenzen,
+- Stop-Regeln gegen Challenge-Implementierung, finale Challenge-
+  Systementscheidung ohne M11, Audio ohne Silent-/Accessibility-Fallback,
+  Drag-and-drop ohne Mobile-Bedienbarkeitspruefung sowie App-/Assetfreigabe
+  aus M10-B oder M10-B2.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

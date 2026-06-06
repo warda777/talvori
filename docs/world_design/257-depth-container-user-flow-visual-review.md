@@ -220,7 +220,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 | Offener Punkt | Warum wichtig | Folgeblock | Status |
 | --- | --- | --- | --- |
 | Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | geprueft / grundsaetzlich brauchbar |
-| Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | gestartet / Preview erzeugt / Review offen |
+| Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | geprueft / erste Empfehlung brauchbar |
 | Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | offen |
 | Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
 | Keine Code-/Assetfreigabe | M9/M9-B ist Dokumentation und visuelle Pruefung, keine Implementierung. | bleibt Stop-Regel | aktiv |
@@ -244,5 +244,8 @@ Preview-Dateien unter
 erzeugt. Ergebnis fuer den Review-Stand: Tap-Auswahl ist die empfohlene erste
 Prototype-Challenge, Audio + Tap die zweite Stufe, Matching/Sortieren spaetere
 Varianten und Mini-Sequenzen spaeter fuer Aktionswoerter. Diese Empfehlung ist
-noch keine finale Challenge-Art-Freigabe. M10-C und M11 bleiben weiterhin
+in der visuellen M10-B2-Pruefung
+`docs/world_design/261-challenge-interaction-visual-review.md` als erste
+Prototype-Richtung grundsaetzlich brauchbar. Sie ist weiterhin keine finale
+Challenge-Systementscheidung fuer alle Themen. M10-C und M11 bleiben weiterhin
 offen.
