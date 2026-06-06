@@ -35,7 +35,9 @@ Archipelago; die Waldlichtung bleibt Starter-/Testform und muss nicht alle
 Lernwelten aufnehmen. Phase 2G-M6-F vertieft die Verbindungen zwischen
 mehreren Inseln: Archipel-Navigation, Shared Codex/Blueprint/Backlog,
 Cross-Island Word Routing, Island Slot Lifecycle, Ownership/Identity und
-UX-Komplexitaetsschutz.
+UX-Komplexitaetsschutz. Phase 2G-M7 plant eine abstrakte Capability-Greybox,
+in der feste Variante-B-Rollenlabels durch neutrale Plot-Slots mit
+Capabilities ersetzt werden.
 
 Fuehrende Dokumente:
 
@@ -52,11 +54,12 @@ Fuehrende Dokumente:
 - `docs/world_design/249-island-greybox-preview-plan.md`
 - `docs/world_design/250-island-greybox-layout-review.md`
 - `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
+- `docs/world_design/253-capability-greybox-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M6-F Archipel-Verbindungslogik ergaenzt`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M7 Capability-Greybox geplant`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -110,6 +113,10 @@ Fuehrende Dokumente:
   - `phase2GM6F`: `false` fuer Code/Assets; erlaubt nur Planung von
     Archipel-Navigation, Shared Codex/Blueprint/Backlog, Cross-Island Word
     Routing, Island Slot Lifecycle, Ownership/Identity und UX-Komplexitaet.
+  - `phase2GM7`: `false` fuer Code/Assets; erlaubt nur Planung einer
+    abstrakten Capability-Greybox mit neutralen Plot-Slots,
+    `allowedFunctions`, `isUserSelectable`, `unlockState`, Anchors, Sockets
+    und Footprints. Preview-PNGs wurden in diesem Block nicht erzeugt.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -683,10 +690,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM6DProgressionOnboardingGovernanceGreyboxStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 29-33`
 - `phase2GM6EThemeIslandArchipelagoStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 34-41`
 - `phase2GM6FArchipelagoConnectionStatus`: `deepened in docs/world_design/252-flexible-plot-placement-and-learning-semantics.md sections 42-47`
+- `phase2GM7CapabilityGreyboxPlanStatus`: `started in docs/world_design/253-capability-greybox-plan.md; no preview PNGs generated`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M6-F-Vertiefung pruefen; danach committen; danach Greybox mit abstrakten Capability-Labels und/oder ThemeIsland-Roadmap planen`
+- `nextAllowedStep`: `M7-Capability-Greybox-Plan pruefen; danach tatsaechliche Debug-Capability-Greybox erzeugen oder M7-Metadaten nachbessern`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -894,6 +902,19 @@ Phase-2G-M6-F-Vertiefung gilt nur fuer:
 - Archipelago UX Complexity Control,
 - Stop-Regeln fuer Archipel-Navigation, gemeinsamen Backlog, Island Slots,
   Ownership/Identity und Social-/Privacy-Trennung.
+
+Phase-2G-M7-Capability-Greybox-Planung gilt nur fuer:
+
+- Planung der abstrakten Capability-Greybox in
+  `docs/world_design/253-capability-greybox-plan.md`,
+- Umbenennung alter Variante-B-Rollenlabels in neutrale Plot-Slots,
+- Definition von `plotSize`, `allowedFunctions`, `isUserSelectable`,
+  `unlockState`, `pathSockets`, `objectAnchors`, `buildingFootprint`,
+  `requiredAdjacency` und Hinweisen,
+- Planung spaeterer Debug-Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m7_capability_greybox/`,
+- Stop-Regeln gegen feste Gebaeude-Rollenlabels, Asset-Ableitung und
+  Codefreigabe aus der Capability-Greybox.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

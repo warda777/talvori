@@ -152,11 +152,17 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Blueprint/Backlog, Cross-Island Word Routing, Island Slot Lifecycle,
   Island Ownership/Identity und Archipelago UX Complexity Control sind
   dokumentiert.
+- Phase 2G-M7 wurde als reiner Planungsblock in
+  `docs/world_design/253-capability-greybox-plan.md` gestartet. Er bereitet
+  eine abstrakte Capability-Greybox vor, die feste Variante-B-Rollenlabels
+  durch neutrale Plot-Slots mit `allowedFunctions`, `isUserSelectable`,
+  `unlockState`, Anchors, Sockets und Footprints ersetzt.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
-  Entscheidungslogik, danach die Nachbesserung von
-  Greybox-Namen, Plot-Rollen, Capability-Labels und ThemeIsland-Roadmap,
-  Mobile-Lesbarkeit, Inselkapazitaet,
+  Entscheidungslogik sowie des M7-Capability-Greybox-Plans. Danach duerfen
+  nur M7-Metadaten nachgebessert oder eine Debug-Capability-Greybox als
+  Dokumentationsmaterial geplant/erzeugt werden. Offen bleiben
+  ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
@@ -227,6 +233,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M6-D | Progression / Onboarding / Governance / Capability Greybox | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Progression ohne feste Baureihenfolge, freie Erstwahl, Import-Governance/Privacy/Safety, Nutzerziel-/Kategorie-Priorisierung und Anforderungen an die naechste Greybox mit abstrakten Capability-Labels. Keine freie Plot-Platzierung ohne Onboarding-Erklaerung, kein Import ohne Governance-/Privacy-/Safety-Regeln, keine naechste Greybox mit festen Gebaeude-Rollenlabels. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M6-E | Theme Islands / Personal Learning Archipelago | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Thematic Island And Archipelago Strategy, Candidate Theme Islands, First Island Choice, Island Roadmap, Word To Island Routing, Free/Paid-Prinzipien und Production Scope Control. Keine einzelne Insel darf alle Lernwelten erzwingen. Keine Themeninsel ohne Plot-Capabilities und Word-to-Island-Routing. Keine Monetarisierung ohne eigenes Dokument. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M6-F | Archipelago Navigation / Shared Backlog / Island Slots | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Archipelago Navigation, Shared Codex/Blueprint/Backlog, Cross-Island Word Routing, Multi-Home Words, Island Slot Lifecycle, Island Ownership/Identity und UX-Komplexitaetsschutz. Kein Multi-Island-System ohne Archipel-Navigation, kein Themeninsel-System ohne gemeinsamen Codex-/Blueprint-/Backlog-Plan, keine Social-/Showcase-Funktion ohne eigenes Privacy-/Social-Konzept. Kein finales Inselbild, kein Asset, kein Code. |
+| Phase 2G-M7 | Abstrakte Capability-Greybox | `Planung gestartet / keine Preview-PNGs` | Reiner Planungsblock in `docs/world_design/253-capability-greybox-plan.md`. Uebersetzt feste Variante-B-Labels in abstrakte Plot-Slots wie `core_plot_a`, `hub_capable_plot_a` und `edge_water_capable_plot_a`; definiert pro Plot `plotSize`, `allowedFunctions`, `isUserSelectable`, `unlockState`, `pathSockets`, `objectAnchors`, `buildingFootprint`, `requiredAdjacency` und Hinweise. Geplante Preview-Dateien werden nur dokumentiert, nicht erzeugt. Keine neue Greybox mit festen Gebaeude-Rollenlabels, keine Asset-Produktion, keine Codefreigabe. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -294,11 +301,17 @@ Die Planung wurde in Phase 2G-M6-F erneut vertieft: Archipelago Navigation,
 Shared Codex/Blueprint/Backlog, Cross-Island Word Routing, Multi-Home Words,
 Island Slot Lifecycle, Island Ownership/Identity und UX Complexity Control.
 
+Die Planung wurde in Phase 2G-M7 als abstrakte Capability-Greybox-Planung
+gestartet:
+`docs/world_design/253-capability-greybox-plan.md`.
+M7 ersetzt feste Variante-B-Rollenlabels durch neutrale Plot-Slots und
+bereitet `allowedFunctions`, `isUserSelectable`, `unlockState`, Anchors,
+Sockets und Footprints fuer eine spaetere Debug-Greybox vor.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die Pruefung der M6-F-Vertiefung. Danach kann
-committed werden; anschliessend darf eine Greybox mit abstrakten
-Capability-Labels und/oder eine ThemeIsland-Roadmap geplant werden, oder
-Datenmodell/UX wird weiter vertieft. Die Preview-Dateien sind nur
+Asset-Freigabe, sondern die Pruefung des M7-Plans. Danach darf entweder die
+tatsaechliche Debug-Capability-Greybox als Dokumentationsmaterial erzeugt
+oder die M7-Metadaten nachgebessert werden. Die Preview-Dateien waeren nur
 Dokumentations-/Debugmaterial, kein finales Inselbild. `frame_started` bleibt
 gestoppt.
 
@@ -402,6 +415,11 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Offen bleiben konkrete Archipel-Navigation, gemeinsame Backlog-/Blueprint-
   Datenstruktur, IslandSlot-Limits, Owner-Marker, Social-/Privacy-Konzept und
   UX-Reduktion fuer viele Inseln.
+- Phase 2G-M7 hat die naechste abstrakte Capability-Greybox geplant. Offen
+  bleiben die manuelle Pruefung der Plot-Metadaten, die eigentliche
+  Debug-Preview-Erzeugung, eine moegliche einfache Nutzer-/Produktansicht
+  neben der technischen Vollansicht und die Kompatibilitaet mit spaeteren
+  ThemeIsland-Capabilities.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -497,6 +515,13 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine mehreren privaten Inseln ohne Besitzer-/Identitaetslogik,
 - keine Archipel-Roadmap, die den Nutzer mit zu vielen Optionen ueberfordert,
 - keine Social-/Showcase-Funktion ohne eigenes Privacy-/Social-Konzept,
+- keine neue Greybox mit festen Gebaeude-Rollenlabels,
+- keine Capability-Greybox ohne `allowedFunctions`,
+- keine Capability-Greybox ohne `isUserSelectable`,
+- keine Capability-Greybox ohne klare Trennung zwischen technischer
+  Debugansicht und spaeterer Nutzeransicht,
+- keine Asset-Produktion aus Capability-Greybox ableiten,
+- keine Codefreigabe aus Capability-Greybox ableiten,
 - keine Plot-Freigabe ohne Capability Matrix,
 - kein Objekt sichtbar platzieren ohne Placement Requirements,
 - kein abstraktes Wort ohne passenden Repraesentationstyp,
