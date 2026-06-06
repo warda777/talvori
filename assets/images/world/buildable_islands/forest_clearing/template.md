@@ -1,6 +1,6 @@
 # Buildable Forest Clearing Template Metadata
 
-Stand: 2026-06-05
+Stand: 2026-06-06
 
 Diese Datei beschreibt das aktuelle buildable Waldlichtung-Template als
 menschenlesbare Metadaten- und Planungsdatei. Sie ist noch keine technische
@@ -50,7 +50,12 @@ Anchor-, Container-, Depth-, Nutzerflow- und Freigabeentscheidungen brauchen
 nach Moeglichkeit eine passende Debug-, Preview-, Flow- oder QA-Darstellung.
 Phase 2G-M9 erzeugt eine erste vereinfachte Nutzer-/Produktansicht fuer den
 Depth-/Container-Flow Haus/Kueche -> Schublade -> Besteck als
-Dokumentationspreview.
+Dokumentationspreview. Phase 2G-M9-B bewertet diese Preview visuell: M9 ist
+als erster vereinfachter Nutzer-/Produktflow grundsaetzlich brauchbar, darf
+aber nicht allein als allgemeines Container-System bestaetigt werden. Weitere
+Beispiel-Flows bleiben empfohlen. M9-B legt ausserdem verbindliche
+Follow-ups fest: emotionalere/spielnaehere Produktflow-Preview,
+Challenge-Artenvergleich, Tali/Vori-Reaktionsflow und mehrere Beispiel-Flows.
 
 Fuehrende Dokumente:
 
@@ -71,11 +76,12 @@ Fuehrende Dokumente:
 - `docs/world_design/254-capability-greybox-visual-review.md`
 - `docs/world_design/255-world-depth-gameplay-retention-research.md`
 - `docs/world_design/256-depth-container-user-flow-preview-plan.md`
+- `docs/world_design/257-depth-container-user-flow-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M9 Depth Container Preview erzeugt`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M9-B Depth Container Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -149,6 +155,21 @@ Fuehrende Dokumente:
     `docs/world_design/previews/phase2g_m9_depth_container_user_flow/` und
     das Planungsdokument
     `docs/world_design/256-depth-container-user-flow-preview-plan.md`.
+  - `phase2GM9B`: `false` fuer Code/Assets; erlaubt nur visuelle
+    Dokumentationspruefung der M9-Depth-/Container-Preview in
+    `docs/world_design/257-depth-container-user-flow-visual-review.md`.
+    M9 darf als erster Beispiel-Flow bestaetigt werden, aber nicht als
+    allgemeines Container-System fuer alle Themen.
+  - `phase2GM10`: `false` fuer Code/Assets; vorgemerkt fuer eine
+    emotionalere, spielnaehere Produktflow-Preview.
+  - `phase2GM10B`: `false` fuer Code/Assets; vorgemerkt fuer
+    Challenge-Interaktionsvergleich: Tippen, Audio, Drag-and-drop,
+    Zuordnung und moegliche Kombinationen.
+  - `phase2GM10C`: `false` fuer Code/Assets; vorgemerkt fuer Tali/Vori-
+    Companion-Reaktionsflow.
+  - `phase2GM11`: `false` fuer Code/Assets; vorgemerkt fuer mehrere
+    Container-Beispiel-Flows: Schule/Federmappe, Hafen/Bootskajute und
+    Garten/Beet.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -199,6 +220,17 @@ technische Debug-Greybox brauchbar. Die M8-Planung in
 dass `objectAnchors` optionale technische Anker sind und dass kleinere
 Woerter, Container und Interaktionen ueber Depth-/Zoom-Ebenen statt ueber eine
 ueberladene Island View geloest werden muessen.
+Die M9-Preview und M9-B-Pruefung liegen in
+`docs/world_design/256-depth-container-user-flow-preview-plan.md` und
+`docs/world_design/257-depth-container-user-flow-visual-review.md`. M9 ist als
+erster vereinfachter Nutzer-/Produktflow brauchbar, aber nur fuer das
+Beispiel Haus/Kueche -> Schublade -> Besteck. Weitere Flows wie
+Schule/Federmappe, Hafen/Bootskajute und Garten/Beet muessen geplant oder
+geprueft werden, bevor daraus ein allgemeines Container-System abgeleitet
+wird. Die emotionalere Produktversion, die genaue Challenge-Art und die
+Tali/Vori-Reaktion sind offene Pflichtpruefungen. Keine allgemeine
+Depth-/Container-UX darf daraus abgeleitet werden, solange diese Follow-ups
+nicht geprueft oder bewusst begruendet zurueckgestellt wurden.
 
 ## 2. Zweck Des Assets
 
@@ -558,6 +590,17 @@ In diesem Template-Block gilt:
 - Keine Nutzeransicht mit zu vielen technischen Labels.
 - Keine Mini-Challenge ohne klares Feedback und Reward Moment.
 - Keine Spielasset- oder Codefreigabe aus M9 ableiten.
+- Keine Produktentscheidung aus nur einem M9-Beispiel-Flow fuer alle Themen.
+- Kein Container-System ohne mehrere Beispiel-Flows.
+- Keine finale Nutzer-UX ohne emotionale/spielerische Pruefung.
+- Keine Code- oder Assetfreigabe aus M9 oder M9-B ableiten.
+- Keine allgemeine Container-Systementscheidung, bevor mehrere Beispiel-Flows
+  geprueft wurden.
+- Keine finale Depth-/Container-UX, bevor emotionale/spielerische Wirkung
+  visualisiert wurde.
+- Keine Challenge-Implementierung, bevor Challenge-Arten verglichen wurden.
+- Keine Companion-UX, bevor Tali/Vori-Reaktionsflow visualisiert wurde.
+- Keine offenen M9-/M9-B-Follow-ups stillschweigend ueberspringen.
 
 ## 10. Device-/Preview-Check
 
@@ -762,10 +805,12 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM7CVisualReviewStatus`: `started in docs/world_design/254-capability-greybox-visual-review.md; M7-B usable as technical debug greybox; simplified product view recommended`
 - `phase2GM8WorldDepthGameplayRetentionStatus`: `started in docs/world_design/255-world-depth-gameplay-retention-research.md; objectAnchors are optional technical anchors, not required visible objects`
 - `phase2GM9DepthContainerUserFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m9_depth_container_user_flow/; documentation preview only`
+- `phase2GM9BDepthContainerUserFlowReviewStatus`: `started in docs/world_design/257-depth-container-user-flow-visual-review.md; M9 usable as first simplified user/product flow, not enough for general container-system confirmation`
+- `phase2GM9BRequiredFollowUps`: `M10 Emotional Product Flow Preview; M10-B Challenge Interaction Comparison; M10-C Companion Reaction Flow; M11 Multi-Example Container Flow Previews`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M9-Preview visuell pruefen; Flow bestaetigen oder nachbessern; danach weitere Beispiel-Flows wie Schule/Federmappe oder Hafen/Bootskajute planen`
+- `nextAllowedStep`: `M9-B pruefen; M9 als ersten Beispiel-Flow bestaetigen; danach M10/M10-B/M10-C/M11-Follow-ups planen, bevor Code, Assets oder frame_started wieder erlaubt werden`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1039,6 +1084,31 @@ Phase-2G-M9-Depth-/Container-User-Flow-Preview gilt nur fuer:
   Haus/Kueche -> Schublade -> Besteck,
 - Pruefung, ob Container den Flow ruhiger machen und eine Mini-Challenge mit
   Feedback/Reward sichtbar ist.
+
+Phase-2G-M9-B-Depth-/Container-User-Flow-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/257-depth-container-user-flow-visual-review.md`,
+- visuelle Bewertung der M9-Preview-Dateien,
+- Entscheidungsempfehlung, M9 als ersten Beispiel-Flow grundsaetzlich zu
+  bestaetigen,
+- Empfehlung weiterer Beispiel-Flows fuer Schule/Federmappe,
+  Hafen/Bootskajute und Garten/Beet,
+- Stop-Regeln gegen eine allgemeine Produktentscheidung aus nur einem
+  Beispiel-Flow.
+
+M9-B-Follow-ups sind verbindlich vorgemerkt:
+
+- `Phase 2G-M10 Emotional Product Flow Preview`: emotionale/spielnaehere
+  Produktversion der M9-Preview,
+- `Phase 2G-M10-B Challenge Interaction Comparison`: Vergleich von Tippen,
+  Audio, Drag-and-drop, Zuordnung und Kombinationen,
+- `Phase 2G-M10-C Companion Reaction Flow`: Tali/Vori-Reaktionsflow als
+  eigener Motivationsmoment,
+- `Phase 2G-M11 Multi-Example Container Flow Previews`: weitere Flows fuer
+  Schule/Federmappe, Hafen/Bootskajute und Garten/Beet.
+
+Diese Follow-ups duerfen nicht stillschweigend uebersprungen werden.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

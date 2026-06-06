@@ -1,6 +1,6 @@
 # Talvori Welt: Production Roadmap Und Checklists
 
-Stand: 2026-06-05
+Stand: 2026-06-06
 
 Dieses Dokument ist die zentrale Produktionskontrolle fuer Talvori Welt. Es
 ordnet Roadmap, ToDos, Gates und Checklisten, damit vor weiteren World-Schritten
@@ -25,6 +25,7 @@ Grundlagen:
 - `docs/world_design/254-capability-greybox-visual-review.md`
 - `docs/world_design/255-world-depth-gameplay-retention-research.md`
 - `docs/world_design/256-depth-container-user-flow-preview-plan.md`
+- `docs/world_design/257-depth-container-user-flow-visual-review.md`
 - `docs/220-talvori-world-professional-game-architecture-research.md`
 - `docs/221-talvori-world-build-and-expansion-architecture.md`
 - `docs/222-talvori-world-game-system-master-plan.md`
@@ -183,11 +184,22 @@ Aktueller Stand der Talvori-Welt-Produktion:
   `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`.
   Sie zeigen den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck und sind
   Dokumentationsmaterial, keine Spielassets und keine Codefreigabe.
+- Phase 2G-M9-B wurde als visuelle Pruefung in
+  `docs/world_design/257-depth-container-user-flow-visual-review.md`
+  gestartet. Ergebnis: M9 ist als erster vereinfachter Nutzer-/Produktflow
+  grundsaetzlich brauchbar, darf aber nicht allein als allgemeines
+  Container-System bestaetigt werden. Weitere Beispiel-Flows bleiben
+  empfohlen.
+- M9-B hat verbindliche Follow-up-Punkte festgelegt. Diese duerfen nicht
+  stillschweigend uebersprungen werden: emotionalere/spielnaehere
+  Produktflow-Preview, Challenge-Interaktionsvergleich, Tali/Vori-
+  Reaktionsflow und mehrere Beispiel-Flows fuer Schule, Hafen und Garten.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
-  Entscheidungslogik sowie der M7-C-/M8-/M9-Bewertung. Danach duerfen nur M7-B
-  als technische Debug-Greybox bestaetigt, gezielt nachgebessert, M9 visuell
-  bestaetigt oder nachgebessert oder weitere Beispiel-Flows geplant werden.
+  Entscheidungslogik sowie der M7-C-, M8-, M9- und M9-B-Bewertung. Danach
+  duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
+  nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt oder
+  die M9-B-Follow-ups M10, M10-B, M10-C und M11 geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -265,6 +277,11 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M7-C | Capability-Greybox Visual Review | `Review gestartet / M7-B technisch brauchbar` | Reiner Dokumentationsblock in `docs/world_design/254-capability-greybox-visual-review.md`. Bewertet die M7-B-Previews visuell. Ergebnis: alte Rollenlabels sind entfernt, abstrakte Plotnamen und Metadaten sind lesbar, `allowedFunctions` suggerieren keine feste Bauentscheidung, Anchors/Sockets/Footprints sind intern pruefbar und der Nutzerwahl-Flow ist verstaendlich. M7-B ist als technische Debug-Greybox brauchbar, aber nicht als Nutzeransicht. M7-D als vereinfachte Nutzer-/Produktansicht bleibt empfohlen. Keine Asset- oder Codefreigabe. |
 | Phase 2G-M8 | World Depth / Gameplay / Retention Research | `Research-/Planungsblock gestartet` | Reiner Research- und Planungsblock in `docs/world_design/255-world-depth-gameplay-retention-research.md`. Klaert Island-/Plot-/Building-/Interior-/Object-/Container-/Detail-Depth, Container-Objekte, Word-Type-to-Depth-Mapping, Anchor-Semantik, Interaction/Challenge Loop, Core/Meta Loop, Lessons aus erfolgreichen Spielen, faire Reward-Momente, Retention ohne Ausbeutung und Monetarisierungsgrundlagen. `objectAnchors` sind optionale technische Moeglichkeiten, keine Pflichtobjekte. Kein Asset, kein Code, keine App-Integration. |
 | Phase 2G-M9 | Depth-/Container User Flow Preview | `Preview erzeugt / visuelle Pruefung offen` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/256-depth-container-user-flow-preview-plan.md`. Erzeugt `01_depth_flow_storyboard.png`, `02_depth_level_stack.png`, `03_interaction_reward_loop.png` und `README.md` unter `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`. Die Preview zeigt den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck als vereinfachte Nutzer-/Produktansicht. Keine Spielassets, keine finale UI, keine Codefreigabe, kein `frame_started`. |
+| Phase 2G-M9-B | Depth-/Container User Flow Visual Review | `Review gestartet / erster Flow brauchbar` | Reiner Dokumentationsblock in `docs/world_design/257-depth-container-user-flow-visual-review.md`. Bewertet die M9-Previews visuell. Ergebnis: Der Flow Haus/Kueche -> Schublade -> Besteck ist als erste vereinfachte Nutzer-/Produktansicht grundsaetzlich brauchbar, zeigt aktive Nutzerhandlung, Mini-Challenge, Feedback, Reward Moment und optionales naechstes Ziel. Er reicht aber nicht aus, um ein allgemeines Container-System fuer alle Themen abzuleiten. Weitere Beispiel-Flows wie Schule/Federmappe, Hafen/Bootskajute und Garten/Beet bleiben empfohlen. Keine Asset- oder Codefreigabe. |
+| Phase 2G-M10 | Emotional Product Flow Preview | `vorgemerkt / Pflichtpruefung offen` | Soll eine emotionalere, spielnaehere Version des M9-Flows planen oder visualisieren. Ziel: mehr Atmosphaere, Neugier, Spielreiz und Produktgefuehl, ohne finale UI oder Spielasset zu erzeugen. Kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M10-B | Challenge Interaction Comparison | `vorgemerkt / Pflichtpruefung offen` | Soll Challenge-Arten vergleichen: Tippen, Audio, Drag-and-drop, Zuordnung und moegliche Kombinationen. Ziel: UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand vor Implementierung klaeren. Keine Challenge-Implementierung, kein Code, kein Asset. |
+| Phase 2G-M10-C | Companion Reaction Flow | `vorgemerkt / Pflichtpruefung offen` | Soll Tali/Vori-Reaktion als eigenen Flow visualisieren. Ziel: Companion als emotionalen Motivationsanker pruefen, statt ihn nur als Textzeile im Storyboard zu behandeln. Kein Companion-Code, kein Asset, keine App-Integration. |
+| Phase 2G-M11 | Multi-Example Container Flow Previews | `vorgemerkt / Pflichtpruefung offen` | Soll mehrere Beispiel-Flows planen oder visualisieren: Schule/Federmappe/Stifte, Hafen/Bootskajute/Kompass-Karte-Seil und Garten/Beet/Samen-Giesskanne-Pflanze. Ziel: kein allgemeines Container-System aus nur einem Kuechenbeispiel ableiten. Keine Spielassets, keine finale UI, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -365,11 +382,18 @@ den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck mit Storyboard,
 Depth-Level-Stack und Interaction-/Reward-Loop.
 
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die visuelle Pruefung der M9-Preview. Danach darf der
-Flow bestaetigt oder nachgebessert werden. Weitere Beispiel-Flows wie
-Schule/Federmappe oder Hafen/Bootskajute duerfen geplant werden. Die Preview-
-Dateien sind kein finales Inselbild und keine Spielassets. `frame_started`
-bleibt gestoppt.
+Asset-Freigabe. Die visuelle M9-B-Pruefung bestaetigt M9 als ersten
+vereinfachten Beispiel-Flow grundsaetzlich, blockiert aber jede allgemeine
+Container-Systementscheidung aus nur einem Kuechenbeispiel. Danach duerfen
+die verbindlichen M9-B-Follow-ups geplant werden: Phase 2G-M10 Emotional
+Product Flow Preview, Phase 2G-M10-B Challenge Interaction Comparison,
+Phase 2G-M10-C Companion Reaction Flow und Phase 2G-M11 Multi-Example
+Container Flow Previews. Die Preview-Dateien sind kein finales Inselbild und
+keine Spielassets. `frame_started` bleibt gestoppt.
+
+Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
+offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
+begruendet wurden.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -490,9 +514,16 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Interaction-Design, Fairness-Gates fuer Retention, eigenes Monetarisierungs-
   dokument und jede Implementierung.
 - Phase 2G-M9 hat eine erste vereinfachte Nutzer-/Produktansicht fuer den
-  Depth-/Container-Flow erzeugt. Offen bleiben visuelle Pruefung,
-  Nachbesserung oder Bestaetigung des Kueche-Schublade-Besteck-Flows sowie
-  weitere Beispiel-Flows wie Schule/Federmappe oder Hafen/Bootskajute.
+  Depth-/Container-Flow erzeugt.
+- Phase 2G-M9-B hat die visuelle Pruefung gestartet. Ergebnis: Der
+  Kueche-Schublade-Besteck-Flow ist als erster vereinfachter Nutzer-/
+  Produktflow brauchbar. Offen bleiben weitere Beispiel-Flows wie
+  Schule/Federmappe, Hafen/Bootskajute und Garten/Beet sowie eine spaetere
+  emotionale/spielerische Nutzer-UX-Pruefung.
+- Die offenen M9-/M9-B-Punkte sind verbindliche Follow-ups: M10 Emotional
+  Product Flow Preview, M10-B Challenge Interaction Comparison, M10-C
+  Companion Reaction Flow und M11 Multi-Example Container Flow Previews. Sie
+  duerfen vor Code-/Assetfreigaben nicht stillschweigend uebersprungen werden.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -634,6 +665,18 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Nutzeransicht mit zu vielen technischen Labels,
 - keine Mini-Challenge ohne klares Feedback und Reward Moment,
 - keine Spielasset- oder Codefreigabe aus M9 ableiten,
+- keine Produktentscheidung aus nur einem M9-Beispiel-Flow fuer alle Themen
+  ableiten,
+- kein Container-System ohne mehrere Beispiel-Flows bestaetigen,
+- keine finale Nutzer-UX ohne emotionale/spielerische Pruefung ableiten,
+- keine Code- oder Assetfreigabe aus M9 oder M9-B ableiten,
+- keine allgemeine Container-Systementscheidung, bevor mehrere Beispiel-Flows
+  geprueft wurden,
+- keine finale Depth-/Container-UX, bevor emotionale/spielerische Wirkung
+  visualisiert wurde,
+- keine Challenge-Implementierung, bevor Challenge-Arten verglichen wurden,
+- keine Companion-UX, bevor Tali/Vori-Reaktionsflow visualisiert wurde,
+- keine offenen M9-/M9-B-Follow-ups stillschweigend ueberspringen,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
 ## 6. Dokument-Abhaengigkeiten
@@ -910,6 +953,20 @@ Ein Schritt wird gestoppt, wenn:
 - eine Nutzeransicht zu viele technische Labels zeigt,
 - eine Mini-Challenge kein klares Feedback und keinen Reward Moment hat,
 - aus M9 eine Spielasset- oder Codefreigabe abgeleitet wird,
+- aus nur einem M9-Beispiel-Flow eine Produktentscheidung fuer alle Themen
+  abgeleitet wird,
+- ein Container-System ohne mehrere Beispiel-Flows bestaetigt wird,
+- finale Nutzer-UX ohne emotionale/spielerische Pruefung abgeleitet wird,
+- aus M9 oder M9-B Code- oder Assetfreigabe abgeleitet wird,
+- eine allgemeine Container-Systementscheidung getroffen wird, bevor mehrere
+  Beispiel-Flows geprueft wurden,
+- finale Depth-/Container-UX abgeleitet wird, bevor emotionale/spielerische
+  Wirkung visualisiert wurde,
+- eine Challenge implementiert werden soll, bevor Challenge-Arten verglichen
+  wurden,
+- Companion-UX geplant oder implementiert wird, bevor der Tali/Vori-
+  Reaktionsflow visualisiert wurde,
+- offene M9-/M9-B-Follow-ups stillschweigend uebersprungen werden,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
   Blueprints und Backlogs geplant wird,
 - eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,
