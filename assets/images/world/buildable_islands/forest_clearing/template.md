@@ -347,6 +347,15 @@ App-Integration. Foundation Choice bleibt Lernfokus, keine finale Startinsel.
 `frame_started` bleibt blockiert. Daraus folgen keine PNGs, keine Tests, keine
 finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
 kein Code und kein `frame_started`.
+Phase 2G-M13-O startet ThemeIsland Roadmap Scope Freeze Review in
+`docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`. M13-O ist
+ein reiner ThemeIsland-Roadmap-Scope-Freeze-Review. Die Waldlichtung bleibt
+Starter-/Testform. M13-O erzeugt keine neuen Assets, keine Bauzustaende, keine
+ThemeIsland-Bases, keine finale Roadmap, keine finale Startinsel und keine
+App-Integration. Scope Freeze bedeutet nur Planungsstabilitaet, keine
+Umsetzung. `frame_started` bleibt blockiert. Daraus folgen keine PNGs, keine
+Tests, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+App-/Assetfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -405,11 +414,12 @@ Fuehrende Dokumente:
 - `docs/world_design/292-word-to-island-product-ux-preview-plan.md`
 - `docs/world_design/293-container-qa-overlay-preview-plan.md`
 - `docs/world_design/294-foundation-choice-device-preview-plan.md`
+- `docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-N Foundation Choice Device Preview Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-O ThemeIsland Roadmap Scope Freeze Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -781,6 +791,16 @@ Fuehrende Dokumente:
     Foundation-Choice-UI, keine finale Startinsel, keine finale Datenstruktur,
     keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
     `frame_started` erzeugen.
+  - `phase2GM13O`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`.
+    M13-O darf ThemeIsland-Roadmap-Wellen, Scope-Freeze-Level,
+    Decision-/Readiness-Maps und Gate-Matrizen reviewen, aber keine PNGs,
+    keine Tests, keine App-Integration, keine finale ThemeIsland-Roadmap,
+    keine finale Startinsel, keine finale Onboarding-UI, keine finale
+    Foundation-Choice-UI, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1744,6 +1764,19 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-N.
 - Keine Tests aus M13-N.
 - Kein `frame_started` oder Bauzustand aus M13-N.
+- Keine finale ThemeIsland-Roadmap aus M13-O.
+- Keine ThemeIsland-Umsetzung aus M13-O.
+- Keine finale Startinsel aus M13-O.
+- Keine finale Onboarding-UI aus M13-O.
+- Keine finale Foundation-Choice-UI aus M13-O.
+- Keine finale Datenstruktur aus M13-O.
+- Keine Runtime-Konfiguration aus M13-O.
+- Keine App-Integration aus M13-O.
+- Keine Codefreigabe aus M13-O.
+- Keine Assetfreigabe aus M13-O.
+- Keine PNG-Erzeugung aus M13-O.
+- Keine Tests aus M13-O.
+- Kein `frame_started` oder Bauzustand aus M13-O.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2000,10 +2033,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13LWordToIslandProductUXPreviewStatus`: `started in docs/world_design/292-word-to-island-product-ux-preview-plan.md; UX preview planning only; no final Word-to-Island UI, no implementation, no routing data structure, no automatic placement, no runtime config, no frame_started`
 - `phase2GM13MContainerQAOverlayPreviewStatus`: `started in docs/world_design/293-container-qa-overlay-preview-plan.md; QA overlay planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no frame_started`
 - `phase2GM13NFoundationChoiceDevicePreviewStatus`: `started in docs/world_design/294-foundation-choice-device-preview-plan.md; device preview planning only; no final onboarding UI, no final Foundation Choice UI, no final start island, no final data structure, no runtime config, no frame_started`
+- `phase2GM13OThemeIslandRoadmapScopeFreezeStatus`: `started in docs/world_design/295-theme-island-roadmap-scope-freeze-review.md; scope freeze review only; planning stability only; no final ThemeIsland roadmap, no implementation, no asset release, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-N reviewen, M13-N nachbessern oder M13-O als reinen Review-Block starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-O reviewen, M13-O nachbessern oder M13-P/M14-A als reine Review-/Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3086,6 +3120,35 @@ Phase-2G-M13-N-Foundation-Choice-Device-Preview-Plan gilt nur fuer:
 - keine finale Foundation-Choice-UI,
 - keine finale Onboarding-UI,
 - keine finale Startinsel,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-O-ThemeIsland-Roadmap-Scope-Freeze-Review gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`,
+- nicht-finalen Scope-Freeze fuer Foundation, Expansion Wave 1, Expansion
+  Wave 2, System-Heavy und Sensitive/Special,
+- Scope-Freeze-Level wie `frozen-for-planning`,
+  `stable-but-needs-preview`, `candidate-only`, `requires-system-concept`,
+  `requires-policy-gate` und `blocked-for-implementation`,
+- textuelle Visualisierung mit Mermaid-Flows, ASCII-Gate-Flows,
+  Markdown-Tabellen, Scope-Freeze-Matrizen und Decision-/Readiness-Maps,
+- Planungsstabilitaet ohne Umsetzung,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Startinsel,
+- keine finale Onboarding-UI,
+- keine finale Foundation-Choice-UI,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine neuen Assets,
