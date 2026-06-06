@@ -436,6 +436,17 @@ blockiert. Daraus folgen keine PNGs, keine Screenshots, keine Flutter-/Dart-
 Dateien, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code und kein
 `frame_started`.
+M14-D2 startet den Device/Accessibility Review Harness Visual Review in
+`docs/world_design/304-device-accessibility-review-harness-visual-review.md`.
+M14-D2 ist ein reiner Review-Harness-Visual-Review. Die Waldlichtung bleibt
+Starter-/Testform. M14-D2 erzeugt keine neuen Assets, keine Bauzustaende,
+keine finale UI, keine Tests, keine Widget-Tests, keine
+Test-Harness-Implementierung und keine App-Integration. Review Harness Visual
+Review bedeutet keine Umsetzung. Kleine Objekte bleiben ohne Container-/QA-/
+Device-Gates blockiert. `frame_started` bleibt blockiert. Daraus folgen keine
+PNGs, keine Screenshots, keine Flutter-/Dart-Dateien, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+Implementierungsfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -503,11 +514,12 @@ Fuehrende Dokumente:
 - `docs/world_design/301-container-qa-product-preview-plan.md`
 - `docs/world_design/302-container-qa-product-preview-visual-review.md`
 - `docs/world_design/303-device-accessibility-review-harness-plan.md`
+- `docs/world_design/304-device-accessibility-review-harness-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-D Device/Accessibility Review Harness Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-D2 Device/Accessibility Review Harness Visual Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -972,6 +984,16 @@ Fuehrende Dokumente:
     finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
     Assetfreigabe, keine Implementierungsfreigabe und kein `frame_started`
     erzeugen.
+  - `m14D2`: `false` fuer Code/Assets; erlaubt nur das Reviewdokument
+    `docs/world_design/304-device-accessibility-review-harness-visual-review.md`.
+    M14-D2 darf den M14-D-Plan visuell/textuell gegen Coverage,
+    ASCII-Harness-Frames, Device-/Accessibility-Kategorien, Harness-States,
+    Runtime-Misread-Prevention und Guardrails pruefen, aber keine PNGs, keine
+    Screenshots, keine Tests, keine Widget-Tests, keine
+    Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-
+    Integration, keine finale UI, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+    Implementierungsfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2059,6 +2081,21 @@ In diesem Template-Block gilt:
 - Keine Screenshots aus M14-D.
 - Keine Spielassets aus M14-D.
 - Kein `frame_started` oder Bauzustand aus M14-D.
+- Keine Harness-Implementierung aus M14-D2.
+- Keine Tests aus M14-D2.
+- Keine Widget-Tests aus M14-D2.
+- Keine Flutter-/Dart-Dateien aus M14-D2.
+- Keine App-Integration aus M14-D2.
+- Keine finale UI aus M14-D2.
+- Keine finale Datenstruktur aus M14-D2.
+- Keine Runtime-Konfiguration aus M14-D2.
+- Keine Codefreigabe aus M14-D2.
+- Keine Implementierungsfreigabe aus M14-D2.
+- Keine Assetfreigabe aus M14-D2.
+- Keine PNG-Erzeugung aus M14-D2.
+- Keine Screenshots aus M14-D2.
+- Keine Spielassets aus M14-D2.
+- Kein `frame_started` oder Bauzustand aus M14-D2.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2324,10 +2361,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m14CContainerQAProductPreviewStatus`: `started in docs/world_design/301-container-qa-product-preview-plan.md; product preview planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14C2ContainerQAProductPreviewReviewStatus`: `started in docs/world_design/302-container-qa-product-preview-visual-review.md; visual/text review only; M14-C usable as product preview plan; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14DDeviceAccessibilityReviewHarnessPlanStatus`: `started in docs/world_design/303-device-accessibility-review-harness-plan.md; review harness planning only; no harness implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
+- `m14D2DeviceAccessibilityReviewHarnessReviewStatus`: `started in docs/world_design/304-device-accessibility-review-harness-visual-review.md; visual/text review only; M14-D usable as review harness plan; no harness implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M14-D reviewen, M14-D nachbessern oder M14-D2/M14-E/M14-C3 als reine Review-/Gate-Planung starten; Code, Assets, Tests, Screenshots und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M14-D2 reviewen, M14-D2 nachbessern oder M14-E/M14-D3/M14-C3 als reine Review-/Gate-Planung starten; Code, Assets, Tests, Screenshots und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3677,6 +3715,39 @@ M14-D-Device-/Accessibility-Review-Harness-Plan gilt nur fuer:
 - ASCII-Harness-Flows, ASCII-Device-Frames und ASCII-QA-Check-Overlays,
 - Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/
   Text-Containment-Checklisten,
+- keine PNGs,
+- keine Screenshots,
+- keine Tests,
+- keine Widget-Tests,
+- keine Test-Harness-Implementierung,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine finale UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- keine Implementierungsfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+M14-D2-Device-/Accessibility-Review-Harness-Visual-Review gilt nur fuer:
+
+- Reviewdokument in
+  `docs/world_design/304-device-accessibility-review-harness-visual-review.md`,
+- visuelle/textuelle Pruefung des M14-D-Review-Harness-Plans,
+- Review von Small Phone Foundation Choice, Word-to-Island Suggestion,
+  Sense Selection, ContainerOpenView Tap-Zone, DetailInteractionView Focus,
+  Tali/Vori Overlay Collision und Guardrail Copy,
+- Review von Product-Bereich-Matrix, Device-Klassen,
+  Accessibility-/UX-Pruefkategorien, Harness-State-Regeln und Stop-Regeln,
+- ASCII-Review-Overlays, ASCII-Device-Frames und
+  ASCII-Harness-Review-Skizzen,
+- Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/
+  Text-Containment-Review-Checklisten,
 - keine PNGs,
 - keine Screenshots,
 - keine Tests,
