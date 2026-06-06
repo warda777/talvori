@@ -187,6 +187,14 @@ folgen weiterhin keine finale Mobile-UI, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine Container-Implementierung, keine automatische
 Wortplatzierung, keine ThemeIsland-Umsetzung, keine Asset- oder Codefreigabe
 und kein `frame_started`.
+Phase 2G-M12-F startet den Consolidated Readiness Review in
+`docs/world_design/278-m12-consolidated-readiness-review.md`. M12-F prueft die
+komplette M12-Kette aus ThemeIsland-Priorisierung, Word-to-Island Routing,
+Plot-Capabilities, Sensitive Content und Mobile/Clutter zusammen. Ergebnis:
+M12 bis M12-E2 sind als konsolidierte Planungsgrundlage brauchbar. Daraus
+folgen keine finale ThemeIsland-Roadmap, keine Implementierungsfreigabe, keine
+finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
+kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -228,11 +236,12 @@ Fuehrende Dokumente:
 - `docs/world_design/275-sensitive-content-visual-review.md`
 - `docs/world_design/276-mobile-clutter-rules-small-objects.md`
 - `docs/world_design/277-mobile-clutter-visual-review.md`
+- `docs/world_design/278-m12-consolidated-readiness-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-E2 Mobile Clutter Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-F Consolidated Readiness Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -458,6 +467,13 @@ Fuehrende Dokumente:
     finale Datenstruktur, keine Runtime-Konfiguration, keine Container-
     Implementierung, keine automatische Wortplatzierung, keine ThemeIsland-
     Umsetzung, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM12F`: `false` fuer Code/Assets; erlaubt nur den konsolidierten
+    Dokumentationsreview in
+    `docs/world_design/278-m12-consolidated-readiness-review.md`.
+    M12-F darf M12 bis M12-E2 als Planungsgrundlage konsolidieren, aber keine
+    finale ThemeIsland-Roadmap, keine Implementierungsfreigabe, keine finale
+    Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe und
+    kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1186,6 +1202,15 @@ In diesem Template-Block gilt:
 - Keine Device- oder Accessibility-Entscheidung ohne spaetere echte Mobile-
   Pruefung.
 - Keine App- oder Assetfreigabe aus M12-E oder M12-E2.
+- Keine finale ThemeIsland-Roadmap aus M12-F.
+- Keine Implementierungsfreigabe aus M12-F.
+- Keine finale Datenstruktur aus M12-F.
+- Keine Runtime-Konfiguration aus M12-F.
+- Keine automatische Wortplatzierung aus M12-F.
+- Keine Plot- oder Container-Implementierung aus M12-F.
+- Keine Safety- oder Moderations-Implementierung aus M12-F.
+- Keine App-, Code- oder Assetfreigabe aus M12-F.
+- Kein `frame_started` oder Bauzustand aus M12-F.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1415,10 +1440,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12D2SensitiveContentReviewStatus`: `started in docs/world_design/275-sensitive-content-visual-review.md; first sensitive content planning direction usable; no final safety implementation, no moderation implementation, no automatic sensitive visualization`
 - `phase2GM12EMobileClutterRulesStatus`: `started in docs/world_design/276-mobile-clutter-rules-small-objects.md; previews created under docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/; no final mobile UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM12E2MobileClutterReviewStatus`: `started in docs/world_design/277-mobile-clutter-visual-review.md; first mobile clutter planning direction usable; no final mobile UI, no final data structure, no runtime config, no container implementation`
+- `phase2GM12FConsolidatedReadinessReviewStatus`: `started in docs/world_design/278-m12-consolidated-readiness-review.md; M12 chain usable as consolidated planning foundation; no final roadmap, no implementation release, no final data structure, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-E2 reviewen oder echte Mobile-/Accessibility-/Pagination-Pruefung planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-F reviewen oder reinen M13-Folgeplanungsblock starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2095,6 +2121,25 @@ Phase-2G-M12-E2-Mobile-Clutter-Visual-Review gilt nur fuer:
 - Dokumentation, dass echte Device-, Accessibility-, Pagination- und
   Tap-Target-Pruefungen spaeter offen bleiben,
 - keine PNG-Aenderungen,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M12-F-Consolidated-Readiness-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/278-m12-consolidated-readiness-review.md`,
+- konsolidierte Bewertung von M12 bis M12-E2,
+- Bestaetigung, dass ThemeIsland-Priorisierung, Word-to-Island Routing,
+  Plot-Capabilities, Sensitive Content und Mobile/Clutter als gemeinsame
+  Planungsgrundlage brauchbar sind,
+- Dokumentation offener Folgeblocks fuer ThemeIsland-Roadmap,
+  Word-to-Island-UX, Device-/Accessibility-Pruefung, Container-Pagination,
+  Sensitive-Policy, Timer-/Fairness-Regeln und Asset-Scope-Gates,
+- Stop-Regeln gegen finale ThemeIsland-Roadmap, Implementierungsfreigabe,
+  finale Datenstruktur, Runtime-Konfiguration, automatische Wortplatzierung,
+  Plot-/Container-Implementierung, Safety-/Moderations-Implementierung und
+  App-/Assetfreigabe aus M12-F,
+- keine PNG-Erzeugung oder PNG-Aenderung,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 
