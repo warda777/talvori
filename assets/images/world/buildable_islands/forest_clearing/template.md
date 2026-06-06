@@ -136,6 +136,12 @@ Dokumentationspreviews unter
 Planungs-/Previewgrundlage, keine finale Routing-Implementierung, keine finale
 Datenstruktur, keine automatische Wortplatzierung, keine Asset- oder
 Codefreigabe und kein `frame_started`.
+Phase 2G-M12-B2 prueft diese M12-B-Previews visuell in
+`docs/world_design/271-word-to-island-routing-visual-review.md`. Ergebnis:
+M12-B ist als erste Routing-Planungsrichtung grundsaetzlich brauchbar, bleibt
+aber ohne finale Routing-Implementierung, finale Datenstruktur, automatische
+Wortplatzierung, ThemeIsland-Umsetzung, Assetfreigabe, Codefreigabe und
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -170,11 +176,12 @@ Fuehrende Dokumente:
 - `docs/world_design/268-theme-island-prioritization.md`
 - `docs/world_design/269-theme-island-prioritization-visual-review.md`
 - `docs/world_design/270-word-to-island-routing-matrix.md`
+- `docs/world_design/271-word-to-island-routing-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-B Word-to-Island Routing gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-B2 Word-to-Island Routing Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -338,6 +345,14 @@ Fuehrende Dokumente:
     Routing-Implementierung, keine finale Datenstruktur, keine automatische
     Wortplatzierung, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
+  - `phase2GM12B2`: `false` fuer Code/Assets; erlaubt nur die visuelle
+    Dokumentationspruefung in
+    `docs/world_design/271-word-to-island-routing-visual-review.md`.
+    M12-B2 darf M12-B als erste Routing-Planungsrichtung grundsaetzlich
+    brauchbar bewerten, aber keine finale Routing-Implementierung, keine
+    finale Datenstruktur, keine automatische Wortplatzierung, keine
+    ThemeIsland-Umsetzung, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -492,6 +507,11 @@ Woerter erst ueber ThemeIsland, Depth-Ebene, Requirements, Kontext/Sense und
 Nutzerentscheidung in Placement, Codex, Blueprint oder Backlog gehen. Die
 Waldlichtung bleibt Starter-/Testform; es gibt keine automatische
 Wortplatzierung und keine Assetfreigabe.
+M12-B2 prueft diese Routing-Previews in
+`docs/world_design/271-word-to-island-routing-visual-review.md` als
+grundsaetzlich brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine
+Routing-Implementierung, keine Datenstruktur-Freigabe und keine automatische
+Wortplatzierung. M12-C, M12-D und M12-E bleiben offen.
 
 ## 2. Zweck Des Assets
 
@@ -956,6 +976,15 @@ In diesem Template-Block gilt:
 - Kein Verb als statisches Objekt erzwingen.
 - Kein Digitalbegriff ohne Digital-Object-/UI-Abgrenzung.
 - Keine Assetproduktion aus Routing-Karten ableiten.
+- Keine finale Routing-Implementierung aus M12-B2 ableiten.
+- Keine automatische Wortplatzierung aus M12-B2 ableiten.
+- Keine Datenstruktur-Freigabe aus M12-B2 ableiten.
+- Keine Plot-Capability-Ableitung ohne M12-C.
+- Keine sensiblen Begriffe ohne M12-D.
+- Keine Kleinteile-/Container-Umsetzung ohne M12-E Mobile-/Clutter-Regeln.
+- Keine Multi-home-Entscheidung ohne Nutzerziel, Satzkontext oder
+  Sense-Auswahl.
+- Keine App- oder Assetfreigabe aus M12-B oder M12-B2.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1178,10 +1207,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12ThemeIslandPrioritizationStatus`: `started in docs/world_design/268-theme-island-prioritization.md; previews created under docs/world_design/previews/phase2g_m12_theme_island_prioritization/; early candidates are home/everyday, school/learning, garden/near nature; no final ThemeIsland roadmap or build release`
 - `phase2GM12A2ThemeIslandPrioritizationReviewStatus`: `started in docs/world_design/269-theme-island-prioritization-visual-review.md; first ThemeIsland prioritization usable; no final ThemeIsland roadmap, no implementation, no asset release`
 - `phase2GM12BWordToIslandRoutingStatus`: `started in docs/world_design/270-word-to-island-routing-matrix.md; previews created under docs/world_design/previews/phase2g_m12b_word_to_island_routing/; no final routing implementation, no final data structure, no automatic placement`
+- `phase2GM12B2WordToIslandRoutingReviewStatus`: `started in docs/world_design/271-word-to-island-routing-visual-review.md; first routing planning direction usable; no final routing implementation, no final data structure, no automatic placement`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-B reviewen oder M12-C Plot-Capability, M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-B2 reviewen oder M12-C Plot-Capability, M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1717,6 +1747,26 @@ Phase-2G-M12-B-Word-to-Island-Routing gilt nur fuer:
   Nutzer-/Kontextentscheidung, sensible Begriffe ohne M12-D, Gebaeudeteile
   ohne Gebaeudezustand/Blueprint, Verben als statische Objekte,
   Digitalbegriffe ohne UI-Abgrenzung und Assetproduktion aus Routing-Karten.
+
+Phase-2G-M12-B2-Word-to-Island-Routing-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/271-word-to-island-routing-visual-review.md`,
+- visuelle Pruefung der M12-B-Previews unter
+  `docs/world_design/previews/phase2g_m12b_word_to_island_routing/`,
+- Bestaetigung, dass Pipeline, Matrix, Beispielkarten und Multi-home-/Backlog-
+  Flow als erste Routing-Planungsrichtung brauchbar sind,
+- Bestaetigung, dass Routing nur Vorschlaege macht und sichtbare Platzierung
+  passende Regeln sowie Nutzerbestaetigung braucht,
+- Dokumentation, dass M12-C Plot-Capability Derivation, M12-D Sensitive
+  Content Representation Rules und M12-E Mobile And Clutter Rules offen
+  bleiben,
+- Stop-Regeln gegen finale Routing-Implementierung aus M12-B2, automatische
+  Wortplatzierung aus M12-B2, Datenstruktur-Freigabe aus M12-B2,
+  Plot-Capability-Ableitung ohne M12-C, sensible Begriffe ohne M12-D,
+  Kleinteile-/Container-Umsetzung ohne M12-E, Multi-home-Entscheidungen ohne
+  Nutzerziel/Satzkontext/Sense-Auswahl und App-/Assetfreigabe aus M12-B oder
+  M12-B2.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

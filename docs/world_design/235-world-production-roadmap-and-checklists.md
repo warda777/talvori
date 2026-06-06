@@ -312,11 +312,20 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine finale Routing-Implementierung, keine finale Datenstruktur, keine
   automatische Wortplatzierung, keine ThemeIsland-Umsetzung, keine
   Assetproduktion, kein Code, kein Asset und kein `frame_started`.
+- Phase 2G-M12-B2 wurde als visuelle Pruefung in
+  `docs/world_design/271-word-to-island-routing-visual-review.md` gestartet.
+  Ergebnis fuer den Review-Stand: M12-B ist als erste Routing-
+  Planungsrichtung grundsaetzlich brauchbar. Pipeline, Worttyp-Matrix,
+  Beispielkarten und Multi-home-/Backlog-Flow sind fuer interne Planung
+  verstaendlich. Daraus folgen keine finale Routing-Implementierung, keine
+  finale Datenstruktur, keine automatische Wortplatzierung, keine
+  ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
-  M12-B-Bewertung.
+  M12-B-/M12-B2-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -325,7 +334,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Richtung dokumentarisch bestaetigt, der World-Content-Katalog als erste
   Content-/Location-Grundlage bestaetigt, M12/M12-A2 als erste ThemeIsland-
   Priorisierung dokumentarisch bestaetigt, M12-B als erste Routing-Matrix
-  dokumentarisch geprueft oder konkrete Taxonomy-/Routing-Follow-ups geplant
+  dokumentarisch geprueft, M12-B2 als erste Routing-Planungsrichtung
+  dokumentarisch bestaetigt oder konkrete Taxonomy-/Routing-Follow-ups geplant
   werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
@@ -418,6 +428,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M12 | ThemeIsland Prioritization | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/268-theme-island-prioritization.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12_theme_island_prioritization/`: `01_theme_island_priority_map.png`, `02_theme_island_decision_matrix.png`, `03_early_candidate_flow_examples.png`, `04_scope_risk_wave_plan.png` und `README.md`. Ergebnis fuer den Planungsstand: Zuhause/Alltag, Schule/Lernen und Garten/Natur nah als Early-Kandidaten; Kueste/Meer/Hafen, Essen/Restaurant/Cafe, Einkauf/Versorgung und Land/Farm als Mid-Kandidaten; Stadt, Verkehr, Arbeit, Freizeit, Outdoor und Technik spaeter; Gesundheit und Kultur/Gesellschaft/Verwaltung blockiert bis zu Sensitive-Content-Regeln. Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-A2 | ThemeIsland Prioritization Visual Review | `Review gestartet / erste Priorisierung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/269-theme-island-prioritization-visual-review.md`. Bewertet die M12-Previews visuell. Ergebnis: Early/Mid/Late/Sensitive-Struktur ist verstaendlich, Early-Kandidaten sind nachvollziehbar, Mid/Late/Sensitive-Risiken sind sichtbar, die Matrix ist dicht, aber fuer interne Planung brauchbar, und Texte bleiben innerhalb der Panels. Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine Assetproduktion, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-B | Word-to-Island Routing Matrix | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/270-word-to-island-routing-matrix.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12b_word_to_island_routing/`: `01_word_routing_pipeline.png`, `02_word_type_routing_matrix.png`, `03_example_word_routing_cards.png`, `04_multi_home_and_backlog_flow.png` und `README.md`. Klaert erste Routing-Ebenen, Worttypen, Beispielrouting, Multi-home-Woerter, Backlog/Fallback und Nutzerentscheidung. Keine finale Routing-Implementierung, keine finale Datenstruktur, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M12-B2 | Word-to-Island Routing Visual Review | `Review gestartet / erste Routing-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/271-word-to-island-routing-visual-review.md`. Bewertet die M12-B-Previews visuell. Ergebnis: Pipeline, Matrix, Beispielkarten und Multi-home-/Backlog-Flow sind als erste Routing-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln gegen automatische Platzierung, falsche Depth-Ebene, Multi-home ohne Nutzer-/Kontextentscheidung und sensitive Begriffe ohne M12-D. Keine finale Routing-Implementierung, keine finale Datenstruktur, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -575,6 +586,14 @@ Representation Rules oder M12-E Mobile And Clutter Rules erlaubt. Keine
 Routing-Implementierung, keine automatische Wortplatzierung, keine
 Datenstruktur-Freigabe, keine ThemeIsland-Umsetzung und keine Assetproduktion
 duerfen aus M12-B abgeleitet werden.
+
+Phase 2G-M12-B2 bewertet M12-B als erste Routing-Planungsrichtung
+grundsaetzlich brauchbar. Als naechster Schritt ist nur M12-B2-Review,
+M12-B/M12-B2-Nachbesserung, M12-C Plot-Capability Derivation, M12-D Sensitive
+Content Representation Rules oder M12-E Mobile And Clutter Rules erlaubt.
+Keine finale Routing-Implementierung, keine automatische Wortplatzierung,
+keine Datenstruktur-Freigabe, keine ThemeIsland-Umsetzung und keine
+Assetfreigabe duerfen aus M12-B2 abgeleitet werden.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -734,6 +753,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Sensitive-Content-Regeln und Mobile-/Clutter-Regeln.
   M12-B startet die Routing-Matrix und erzeugt Preview-Dateien; offen bleiben
   M12-B-Review, Plot-Capability-Ableitung, Sensitive-Content-Regeln und
+  Mobile-/Clutter-Regeln.
+  M12-B2 bewertet diese erste Routing-Richtung als grundsaetzlich brauchbar;
+  offen bleiben Plot-Capability-Ableitung, Sensitive-Content-Regeln und
   Mobile-/Clutter-Regeln.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
@@ -973,6 +995,16 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - kein Verb als statisches Objekt erzwingen,
 - keinen Digitalbegriff ohne Digital-Object-/UI-Abgrenzung planen,
 - keine Assetproduktion aus Routing-Karten ableiten,
+- keine finale Routing-Implementierung aus M12-B2 ableiten,
+- keine automatische Wortplatzierung aus M12-B2 ableiten,
+- keine Datenstruktur-Freigabe aus M12-B2 ableiten,
+- keine Plot-Capability-Ableitung ohne M12-C planen,
+- keine sensiblen Begriffe ohne M12-D behandeln,
+- keine Kleinteile-/Container-Umsetzung ohne M12-E Mobile-/Clutter-Regeln
+  planen,
+- keine Multi-home-Entscheidung ohne Nutzerziel, Satzkontext oder
+  Sense-Auswahl finalisieren,
+- keine App- oder Assetfreigabe aus M12-B oder M12-B2 ableiten,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1399,6 +1431,16 @@ Ein Schritt wird gestoppt, wenn:
 - ein Verb als statisches Objekt erzwungen wird,
 - ein Digitalbegriff ohne Digital-Object-/UI-Abgrenzung geplant wird,
 - aus Routing-Karten Assetproduktion abgeleitet wird,
+- aus M12-B2 eine finale Routing-Implementierung abgeleitet wird,
+- aus M12-B2 automatische Wortplatzierung abgeleitet wird,
+- aus M12-B2 eine Datenstruktur-Freigabe abgeleitet wird,
+- Plot-Capabilities ohne M12-C abgeleitet werden,
+- sensible Begriffe ohne M12-D behandelt oder sichtbar gemacht werden,
+- Kleinteile- oder Container-Umsetzung ohne M12-E Mobile-/Clutter-Regeln
+  geplant wird,
+- Multi-home-Entscheidungen ohne Nutzerziel, Satzkontext oder Sense-Auswahl
+  finalisiert werden,
+- aus M12-B oder M12-B2 App-, Code- oder Assetfreigabe abgeleitet wird,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
