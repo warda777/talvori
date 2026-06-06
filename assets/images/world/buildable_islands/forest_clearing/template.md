@@ -129,6 +129,13 @@ Ergebnis: M12 ist als erste ThemeIsland-Priorisierung grundsaetzlich
 brauchbar. Daraus folgen weiterhin keine finale ThemeIsland-Roadmap, keine
 ThemeIsland-Umsetzung, keine Assetproduktion, keine App-Integration und kein
 `frame_started`.
+Phase 2G-M12-B startet die Word-to-Island Routing Matrix in
+`docs/world_design/270-word-to-island-routing-matrix.md` und erzeugt
+Dokumentationspreviews unter
+`docs/world_design/previews/phase2g_m12b_word_to_island_routing/`. M12-B ist
+Planungs-/Previewgrundlage, keine finale Routing-Implementierung, keine finale
+Datenstruktur, keine automatische Wortplatzierung, keine Asset- oder
+Codefreigabe und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -162,11 +169,12 @@ Fuehrende Dokumente:
 - `docs/world_design/267-world-content-taxonomy-review.md`
 - `docs/world_design/268-theme-island-prioritization.md`
 - `docs/world_design/269-theme-island-prioritization-visual-review.md`
+- `docs/world_design/270-word-to-island-routing-matrix.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-A2 ThemeIsland Prioritization Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-B Word-to-Island Routing gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -321,6 +329,15 @@ Fuehrende Dokumente:
     brauchbar bewerten, aber keine finale ThemeIsland-Roadmap, keine
     ThemeIsland-Umsetzung, keine Assetproduktion, keine App-Integration und
     kein `frame_started` erzeugen.
+  - `phase2GM12B`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument `docs/world_design/270-word-to-island-routing-matrix.md`
+    und Dokumentations-/Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m12b_word_to_island_routing/`.
+    M12-B darf Routing-Ebenen, Worttypen, Beispiel-Routings,
+    Multi-home/Backlog und Fallbacks planen, aber keine finale
+    Routing-Implementierung, keine finale Datenstruktur, keine automatische
+    Wortplatzierung, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -470,6 +487,11 @@ M12-A2 prueft diese Previews in
 Ergebnis: Die Early/Mid/Late/Sensitive-Struktur ist verstaendlich, die Matrix
 ist fuer interne Planung dicht, aber brauchbar, und die Early-Flows sind
 nachvollziehbar. M12-A2 bestaetigt keine Umsetzung und keine Assetproduktion.
+M12-B klaert in `docs/world_design/270-word-to-island-routing-matrix.md`, dass
+Woerter erst ueber ThemeIsland, Depth-Ebene, Requirements, Kontext/Sense und
+Nutzerentscheidung in Placement, Codex, Blueprint oder Backlog gehen. Die
+Waldlichtung bleibt Starter-/Testform; es gibt keine automatische
+Wortplatzierung und keine Assetfreigabe.
 
 ## 2. Zweck Des Assets
 
@@ -925,6 +947,15 @@ In diesem Template-Block gilt:
 - Kein Gartenwachstum ohne Fairness-/Timer-Regeln.
 - Kein Zuhause/Alltag als Pflicht-Hausstart erzwingen.
 - Keine sensiblen Inseln ohne M12-D Sensitive-Content-Regeln.
+- Kein Word-to-Island-Routing-Code aus M12-B ableiten.
+- Keine automatische Wortplatzierung aus M12-B ableiten.
+- Kein sichtbares Objekt ohne passende Depth-Ebene.
+- Kein Multi-home-Wort ohne Nutzer- oder Kontextentscheidung final platzieren.
+- Kein sensibler Begriff ohne M12-D-Regeln.
+- Kein Gebaeudeteil ohne passenden Gebaeudezustand oder Blueprint.
+- Kein Verb als statisches Objekt erzwingen.
+- Kein Digitalbegriff ohne Digital-Object-/UI-Abgrenzung.
+- Keine Assetproduktion aus Routing-Karten ableiten.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1146,10 +1177,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM11C2WorldContentTaxonomyReviewStatus`: `started in docs/world_design/267-world-content-taxonomy-review.md; taxonomy catalog usable as first content/location foundation; follow-ups remain; no asset list, no final ThemeIsland roadmap, no build release`
 - `phase2GM12ThemeIslandPrioritizationStatus`: `started in docs/world_design/268-theme-island-prioritization.md; previews created under docs/world_design/previews/phase2g_m12_theme_island_prioritization/; early candidates are home/everyday, school/learning, garden/near nature; no final ThemeIsland roadmap or build release`
 - `phase2GM12A2ThemeIslandPrioritizationReviewStatus`: `started in docs/world_design/269-theme-island-prioritization-visual-review.md; first ThemeIsland prioritization usable; no final ThemeIsland roadmap, no implementation, no asset release`
+- `phase2GM12BWordToIslandRoutingStatus`: `started in docs/world_design/270-word-to-island-routing-matrix.md; previews created under docs/world_design/previews/phase2g_m12b_word_to_island_routing/; no final routing implementation, no final data structure, no automatic placement`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-B Word-to-Island-Routing, M12-C Plot-Capability, M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-B reviewen oder M12-C Plot-Capability, M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1665,6 +1697,26 @@ Phase-2G-M12-A2-ThemeIsland-Prioritization-Visual-Review gilt nur fuer:
   M12-B/M12-C, Schule/Federmappe ohne Mobile-/Clutter-Regeln, Gartenwachstum
   ohne Fairness-/Timer-Regeln, Zuhause/Alltag als Pflicht-Hausstart und
   sensible Inseln ohne M12-D.
+
+Phase-2G-M12-B-Word-to-Island-Routing gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/270-word-to-island-routing-matrix.md`,
+- Dokumentations-/Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m12b_word_to_island_routing/`,
+- erste Routing-Ebenen von ThemeIsland bis Codex/Blueprint/Backlog,
+- Worttypen wie konkrete Objekte, Gebaeudeteile, Aktionen, Multi-home-Woerter,
+  digitale Begriffe sowie abstrakte und sensible Begriffe,
+- Beispiel-Routings fuer spoon, pencil, watering can, compass, window, drive,
+  buy, health, justice, bank, apple und server,
+- Entscheidungsregeln gegen automatische Platzierung, falsche Depth-Ebene und
+  erzwungene Objektvisualisierung,
+- Multi-home-/Backlog-/Fallback-Logik,
+- Stop-Regeln gegen Routing-Code aus M12-B, automatische Wortplatzierung,
+  sichtbare Objekte ohne passende Depth-Ebene, Multi-home-Platzierung ohne
+  Nutzer-/Kontextentscheidung, sensible Begriffe ohne M12-D, Gebaeudeteile
+  ohne Gebaeudezustand/Blueprint, Verben als statische Objekte,
+  Digitalbegriffe ohne UI-Abgrenzung und Assetproduktion aus Routing-Karten.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
