@@ -533,13 +533,24 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine finale DetailInteractionView-UI, keine Container-Implementierung,
   keine finale Datenstruktur, keine Runtime-Konfiguration, keine
   App-/Assetfreigabe, kein Code und kein `frame_started`.
+- Phase 2G-M13-N wurde als Foundation Choice Device Preview Plan in
+  `docs/world_design/294-foundation-choice-device-preview-plan.md` gestartet.
+  M13-N plant nur Device-, Safe-Area-, Tap-Zone-, Text-Containment-,
+  Accessibility- und Layout-Pruefung fuer die Foundation Choice im Early
+  Onboarding. Visualisierung bleibt textuell mit ASCII-Device-Wireframes,
+  ASCII-Safe-Area-/Tap-Zone-Overlays, Mermaid-Flows, Markdown-Tabellen und
+  Device-/Accessibility-/Text-Containment-Checklisten. Daraus folgen keine
+  PNGs, keine Tests, keine App-Integration, keine finale Onboarding-UI, keine
+  finale Foundation-Choice-UI, keine finale Startinsel, keine finale
+  Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein
+  Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
-  M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-Bewertung.
+  M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -571,7 +582,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   als konsolidierte M13-Readiness-Grundlage dokumentarisch bestaetigt, M13-K
   als Early-Onboarding-Wireframe-Plan dokumentarisch geprueft, M13-L als
   Word-to-Island-Product-UX-Preview-Plan dokumentarisch geprueft, M13-M als
-  Container-QA-Overlay-Preview-Plan dokumentarisch geprueft oder konkrete
+  Container-QA-Overlay-Preview-Plan dokumentarisch geprueft, M13-N als
+  Foundation-Choice-Device-Preview-Plan dokumentarisch geprueft oder konkrete
   Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -689,6 +701,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-K | Early Onboarding Product Wireframe Plan | `Planung gestartet / Wireframes textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/291-early-onboarding-product-wireframe-plan.md`. Plant mobile-first Wireframes fuer Begruessung, drei Foundation-Lernfokus-Karten, Auswahl/Bestaetigung und Safe Exit mit Codex-/Blueprint-/Backlog-Fallback. Visualisierung nur als ASCII-Wireframes, Mermaid-Flow, Markdown-Tabellen, Wireframe-Beschreibungen und QA-/Device-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Onboarding-UI, keine finale Startinsel, keine finale ThemeIsland-Roadmap, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-L | Word-to-Island Product UX Preview Plan | `Planung gestartet / UX-Wireframes textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/292-word-to-island-product-ux-preview-plan.md`. Plant mobile-first UX-Wireframes fuer Wort-Eingang, Vorschlagskarte, Sense-Auswahl, Container-Hinweis und Codex-/ContextCard-Route fuer sensible oder abstrakte Begriffe. Visualisierung nur als ASCII-Wireframes, Mermaid-Flow, Markdown-Tabellen, Product-UX-Beschreibungen und QA-/Device-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Word-to-Island-UI, keine finale Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-M | Container QA Overlay Preview Plan | `Planung gestartet / QA-Overlays textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/293-container-qa-overlay-preview-plan.md`. Plant QA-Overlay-Ebenen, ASCII-QA-Wireframes, Device-/Accessibility-Checks und Entscheidungszustaende fuer ContainerOpenView, DetailInteractionView und kleine Objektgruppen. Visualisierung nur als ASCII-Wireframes, ASCII-QA-Overlays, Mermaid-Flow, Markdown-Tabellen und QA-/Device-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-N | Foundation Choice Device Preview Plan | `Planung gestartet / Device-Wireframes textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/294-foundation-choice-device-preview-plan.md`. Plant Device-Klassen, ASCII-Device-Wireframes, Safe-Area-/Tap-Zone-Overlays, Accessibility-Regeln und Text-Containment fuer die Foundation Choice zwischen Zuhause/Alltag, Schule/Lernen und Garten/Natur nah. Visualisierung nur als ASCII-Device-Wireframes, ASCII-Safe-Area-/Tap-Zone-Overlays, Mermaid-Flow, Markdown-Tabellen und Device-/Accessibility-/Text-Containment-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Onboarding-UI, keine finale Foundation-Choice-UI, keine finale Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1066,6 +1079,18 @@ Checklisten. Er erzeugt keine PNGs, keine Tests, keine App-Integration, keine
 finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine
 Container-Implementierung, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keinen Code und kein
+`frame_started`.
+
+Phase 2G-M13-N startet Foundation Choice Device Preview Plan als reinen
+Dokumentations- und Visualisierungsplanungsblock. M13-N plant textuelle
+Device-Klassen, Small-/Standard-/Large-Phone-Wireframes, Safe-Area-/
+Tap-Zone-Overlays, Accessibility-Regeln und Text-Containment fuer die
+Foundation Choice. Der Block nutzt nur ASCII-Device-Wireframes,
+ASCII-Safe-Area-/Tap-Zone-Overlays, Mermaid-Flows, Markdown-Tabellen und
+Device-/Accessibility-/Text-Containment-Checklisten. Er erzeugt keine PNGs,
+keine Tests, keine App-Integration, keine finale Onboarding-UI, keine finale
+Foundation-Choice-UI, keine finale Startinsel, keine finale Datenstruktur,
+keine Runtime-Konfiguration, keine App-/Assetfreigabe, keinen Code und kein
 `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
@@ -1779,6 +1804,17 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine PNG-Erzeugung aus M13-M ableiten,
 - keine Tests aus M13-M ableiten,
 - kein `frame_started` oder Bauzustand aus M13-M weiterbauen,
+- keine finale Foundation-Choice-UI aus M13-N ableiten,
+- keine finale Onboarding-UI aus M13-N ableiten,
+- keine finale Startinsel aus M13-N ableiten,
+- keine App-Integration aus M13-N ableiten,
+- keine Codefreigabe aus M13-N ableiten,
+- keine Assetfreigabe aus M13-N ableiten,
+- keine finale Datenstruktur aus M13-N ableiten,
+- keine Runtime-Konfiguration aus M13-N ableiten,
+- keine PNG-Erzeugung aus M13-N ableiten,
+- keine Tests aus M13-N ableiten,
+- kein `frame_started` oder Bauzustand aus M13-N weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2511,6 +2547,17 @@ Ein Schritt wird gestoppt, wenn:
 - aus M13-M PNG-Erzeugung abgeleitet wird,
 - aus M13-M Tests abgeleitet werden,
 - `frame_started` oder Bauzustaende aus M13-M weitergebaut werden,
+- aus M13-N eine finale Foundation-Choice-UI abgeleitet wird,
+- aus M13-N eine finale Onboarding-UI abgeleitet wird,
+- aus M13-N eine finale Startinsel abgeleitet wird,
+- aus M13-N App-Integration abgeleitet wird,
+- aus M13-N Codefreigabe abgeleitet wird,
+- aus M13-N Assetfreigabe abgeleitet wird,
+- aus M13-N eine finale Datenstruktur abgeleitet wird,
+- aus M13-N Runtime-Konfiguration abgeleitet wird,
+- aus M13-N PNG-Erzeugung abgeleitet wird,
+- aus M13-N Tests abgeleitet werden,
+- `frame_started` oder Bauzustaende aus M13-N weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,

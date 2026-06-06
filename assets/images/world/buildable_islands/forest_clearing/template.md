@@ -338,6 +338,15 @@ Objekte bleiben ohne Container-/QA-/Device-Gates blockiert. `frame_started`
 bleibt blockiert. Daraus folgen keine PNGs, keine Tests, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein
 Code und kein `frame_started`.
+Phase 2G-M13-N startet Foundation Choice Device Preview Plan in
+`docs/world_design/294-foundation-choice-device-preview-plan.md`. M13-N ist
+ein reiner Foundation-Choice-Device-Preview-Planungsblock. Die Waldlichtung
+bleibt Starter-/Testform. M13-N erzeugt keine neuen Assets, keine
+Bauzustaende, keine Foundation-Choice-UI, keine finale Onboarding-UI und keine
+App-Integration. Foundation Choice bleibt Lernfokus, keine finale Startinsel.
+`frame_started` bleibt blockiert. Daraus folgen keine PNGs, keine Tests, keine
+finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
+kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -395,11 +404,12 @@ Fuehrende Dokumente:
 - `docs/world_design/291-early-onboarding-product-wireframe-plan.md`
 - `docs/world_design/292-word-to-island-product-ux-preview-plan.md`
 - `docs/world_design/293-container-qa-overlay-preview-plan.md`
+- `docs/world_design/294-foundation-choice-device-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-M Container QA Overlay Preview Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-N Foundation Choice Device Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -761,6 +771,16 @@ Fuehrende Dokumente:
     keine Container-Implementierung, keine finale Datenstruktur, keine
     Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
+  - `phase2GM13N`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/294-foundation-choice-device-preview-plan.md`.
+    M13-N darf Device-Klassen, ASCII-Device-Wireframes, Safe-Area-/
+    Tap-Zone-Overlays, Accessibility-Regeln, Text-Containment und Layout-
+    Pruefung fuer Foundation Choice planen, aber keine PNGs, keine Tests,
+    keine App-Integration, keine finale Onboarding-UI, keine finale
+    Foundation-Choice-UI, keine finale Startinsel, keine finale Datenstruktur,
+    keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1713,6 +1733,17 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-M.
 - Keine Tests aus M13-M.
 - Kein `frame_started` oder Bauzustand aus M13-M.
+- Keine finale Foundation-Choice-UI aus M13-N.
+- Keine finale Onboarding-UI aus M13-N.
+- Keine finale Startinsel aus M13-N.
+- Keine App-Integration aus M13-N.
+- Keine Codefreigabe aus M13-N.
+- Keine Assetfreigabe aus M13-N.
+- Keine finale Datenstruktur aus M13-N.
+- Keine Runtime-Konfiguration aus M13-N.
+- Keine PNG-Erzeugung aus M13-N.
+- Keine Tests aus M13-N.
+- Kein `frame_started` oder Bauzustand aus M13-N.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1968,10 +1999,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13KEarlyOnboardingWireframeStatus`: `started in docs/world_design/291-early-onboarding-product-wireframe-plan.md; wireframe planning only; no final onboarding UI, no final start island, no app integration, no runtime config, no frame_started`
 - `phase2GM13LWordToIslandProductUXPreviewStatus`: `started in docs/world_design/292-word-to-island-product-ux-preview-plan.md; UX preview planning only; no final Word-to-Island UI, no implementation, no routing data structure, no automatic placement, no runtime config, no frame_started`
 - `phase2GM13MContainerQAOverlayPreviewStatus`: `started in docs/world_design/293-container-qa-overlay-preview-plan.md; QA overlay planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no frame_started`
+- `phase2GM13NFoundationChoiceDevicePreviewStatus`: `started in docs/world_design/294-foundation-choice-device-preview-plan.md; device preview planning only; no final onboarding UI, no final Foundation Choice UI, no final start island, no final data structure, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-M reviewen, M13-M nachbessern oder M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-N reviewen, M13-N nachbessern oder M13-O als reinen Review-Block starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3024,6 +3056,36 @@ Phase-2G-M13-M-Container-QA-Overlay-Preview-Plan gilt nur fuer:
 - keine finale ContainerOpenView-UI,
 - keine finale DetailInteractionView-UI,
 - keine Container-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-N-Foundation-Choice-Device-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/294-foundation-choice-device-preview-plan.md`,
+- Device-Klassen fuer Small Phone, Standard Phone, Large Phone und optionales
+  Tablet spaeter,
+- ASCII-Device-Wireframes fuer Intro, gestapelte Karten, Auswahl/Bestaetigung,
+  Standard Phone, Large Phone und blockierten Text-/Button-/Tali/Vori-Fall,
+- ASCII-Safe-Area-/Tap-Zone-Overlays fuer gute und blockierte Planung,
+- Foundation-Choice-Regeln fuer Zuhause/Alltag, Schule/Lernen und Garten/
+  Natur nah,
+- textuelle Visualisierung mit ASCII-Device-Wireframes, ASCII-Safe-Area-/
+  Tap-Zone-Overlays, Mermaid-Flows, Markdown-Tabellen und Device-/
+  Accessibility-/Text-Containment-Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale Foundation-Choice-UI,
+- keine finale Onboarding-UI,
+- keine finale Startinsel,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine neuen Assets,
