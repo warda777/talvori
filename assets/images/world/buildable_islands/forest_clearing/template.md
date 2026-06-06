@@ -58,7 +58,10 @@ Follow-ups fest: emotionalere/spielnaehere Produktflow-Preview,
 Challenge-Artenvergleich, Tali/Vori-Reaktionsflow und mehrere Beispiel-Flows.
 Phase 2G-M10 erzeugt die emotionalere Produktflow-Preview als
 Dokumentationsmaterial unter
-`docs/world_design/previews/phase2g_m10_emotional_product_flow/`.
+`docs/world_design/previews/phase2g_m10_emotional_product_flow/`. Phase
+2G-M10-D bewertet diese Preview visuell: M10 ist als emotionalere
+Produktflow-Preview grundsaetzlich brauchbar, gibt aber keine Challenge-,
+Companion-, Container-System-, Code- oder Assetfreigabe.
 
 Fuehrende Dokumente:
 
@@ -81,11 +84,12 @@ Fuehrende Dokumente:
 - `docs/world_design/256-depth-container-user-flow-preview-plan.md`
 - `docs/world_design/257-depth-container-user-flow-visual-review.md`
 - `docs/world_design/258-emotional-product-flow-preview-plan.md`
+- `docs/world_design/259-emotional-product-flow-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10 Emotional Product Preview erzeugt`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10-D Emotional Product Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -169,6 +173,12 @@ Fuehrende Dokumente:
     `docs/world_design/previews/phase2g_m10_emotional_product_flow/`.
     Die Dateien sind keine finale UI, keine Spielassets und keine
     Codefreigabe.
+  - `phase2GM10D`: `false` fuer Code/Assets; erlaubt nur visuelle
+    Dokumentationspruefung der M10-Preview in
+    `docs/world_design/259-emotional-product-flow-visual-review.md`.
+    M10 darf als emotionalere Produktflow-Preview grundsaetzlich brauchbar
+    bewertet werden, aber nicht als Challenge-, Companion- oder allgemeine
+    Container-Systemfreigabe.
   - `phase2GM10B`: `false` fuer Code/Assets; vorgemerkt fuer
     Challenge-Interaktionsvergleich: Tippen, Audio, Drag-and-drop,
     Zuordnung und moegliche Kombinationen.
@@ -243,6 +253,11 @@ M10 bearbeitet den emotionaleren Produktflow und erzeugt
 `03_tali_vori_light_reaction_concept.png` und `README.md` unter
 `docs/world_design/previews/phase2g_m10_emotional_product_flow/`. M10-B,
 M10-C und M11 bleiben offen.
+Die M10-D-Pruefung in
+`docs/world_design/259-emotional-product-flow-visual-review.md` bewertet M10
+als grundsaetzlich brauchbar. Daraus folgen keine finale Produktentscheidung,
+keine Challenge-Art, keine Companion-UX, keine allgemeine Container-
+Systementscheidung und keine App-/Assetfreigabe.
 
 ## 2. Zweck Des Assets
 
@@ -619,6 +634,10 @@ In diesem Template-Block gilt:
 - Keine Challenge-Art final entscheiden, bevor M10-B erfolgt.
 - Keine allgemeine Container-UX bestaetigen, bevor M10-B, M10-C und M11
   geprueft sind.
+- Keine finale Produktentscheidung aus M10 allein ableiten.
+- Keine Challenge-Art aus M10 ableiten.
+- Keine Tali/Vori-Companion-UX aus M10 ableiten.
+- Keine App- oder Assetfreigabe aus M10 oder M10-D ableiten.
 
 ## 10. Device-/Preview-Check
 
@@ -825,11 +844,12 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM9DepthContainerUserFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m9_depth_container_user_flow/; documentation preview only`
 - `phase2GM9BDepthContainerUserFlowReviewStatus`: `started in docs/world_design/257-depth-container-user-flow-visual-review.md; M9 usable as first simplified user/product flow, not enough for general container-system confirmation`
 - `phase2GM9BRequiredFollowUps`: `M10 Emotional Product Flow Preview; M10-B Challenge Interaction Comparison; M10-C Companion Reaction Flow; M11 Multi-Example Container Flow Previews`
-- `phase2GM10EmotionalProductFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m10_emotional_product_flow/; review open; documentation preview only`
+- `phase2GM10EmotionalProductFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m10_emotional_product_flow/; reviewed in docs/world_design/259-emotional-product-flow-visual-review.md; usable as emotional product preview; documentation preview only`
+- `phase2GM10DVisualReviewStatus`: `started; M10 usable as emotional product flow preview; M10-B, M10-C and M11 remain open`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M10 emotional product preview visuell pruefen; danach M10-B/M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M10 dokumentarisch bestaetigen oder M10-B/M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1119,7 +1139,7 @@ Phase-2G-M9-B-Depth-/Container-User-Flow-Visual-Review gilt nur fuer:
 M9-B-Follow-ups sind verbindlich vorgemerkt:
 
 - `Phase 2G-M10 Emotional Product Flow Preview`: emotionale/spielnaehere
-  Produktversion der M9-Preview; Preview erzeugt, Review offen,
+  Produktversion der M9-Preview; geprueft / grundsaetzlich brauchbar,
 - `Phase 2G-M10-B Challenge Interaction Comparison`: Vergleich von Tippen,
   Audio, Drag-and-drop, Zuordnung und Kombinationen,
 - `Phase 2G-M10-C Companion Reaction Flow`: Tali/Vori-Reaktionsflow als
@@ -1143,6 +1163,17 @@ Phase-2G-M10-Emotional-Product-Flow-Preview gilt nur fuer:
   Schubladen-Besteck-Flows,
 - leichte Tali/Vori-Praesenz als Vorgeschmack, nicht als M10-C-
   Companion-Flow-Freigabe.
+
+Phase-2G-M10-D-Emotional-Product-Flow-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/259-emotional-product-flow-visual-review.md`,
+- visuelle Bewertung der M10-Preview-Dateien,
+- Entscheidungsempfehlung, M10 als emotionalere Produktflow-Preview
+  grundsaetzlich zu bestaetigen,
+- Stop-Regeln gegen finale Produktentscheidung, Challenge-Art,
+  Companion-UX, Container-Systementscheidung sowie App-/Assetfreigabe aus
+  M10 oder M10-D.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
