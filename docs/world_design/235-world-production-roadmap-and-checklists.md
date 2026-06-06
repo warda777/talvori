@@ -30,6 +30,7 @@ Grundlagen:
 - `docs/world_design/259-emotional-product-flow-visual-review.md`
 - `docs/world_design/260-challenge-interaction-comparison.md`
 - `docs/world_design/261-challenge-interaction-visual-review.md`
+- `docs/world_design/262-companion-reaction-flow.md`
 - `docs/220-talvori-world-professional-game-architecture-research.md`
 - `docs/221-talvori-world-build-and-expansion-architecture.md`
 - `docs/222-talvori-world-game-system-master-plan.md`
@@ -208,7 +209,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   `docs/world_design/259-emotional-product-flow-visual-review.md` gestartet.
   Ergebnis: M10 ist als emotionalere Produktflow-Preview grundsaetzlich
   brauchbar. M10-B war danach als Pflicht-Follow-up offen und wurde im
-  Challenge-Comparison-Block gestartet; M10-C und M11 bleiben offen.
+  Challenge-Comparison-Block gestartet; M10-C wurde spaeter als Companion
+  Reaction Flow gestartet; M11 bleibt offen.
 - Phase 2G-M10-B wurde als Challenge Interaction Comparison in
   `docs/world_design/260-challenge-interaction-comparison.md` gestartet.
   Preview-Dateien liegen unter
@@ -224,15 +226,24 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Matching/Sortieren spaeter, Mini-Sequenzen advanced. Daraus folgen keine
   Challenge-Implementierung, keine finale Challenge-Systementscheidung, kein
   Code, kein Asset und kein `frame_started`.
+- Phase 2G-M10-C wurde als Tali/Vori Companion Reaction Flow in
+  `docs/world_design/262-companion-reaction-flow.md` gestartet. Preview-
+  Dateien liegen unter
+  `docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`.
+  M10-C plant Curiosity Cue, Gentle Nudge, Challenge Support, Success Reaction,
+  Correction Support, Idle Hint und optionale Next Goal Suggestion. Daraus
+  folgen keine finale Companion-UX, keine Companion-Implementierung, keine
+  Voice-/Audio-/Animation-Freigabe, kein Code, kein Asset und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
-  und M10-B2-Bewertung.
+  M10-B2- und M10-C-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
-  erste Challenge-Empfehlung dokumentarisch bestaetigt oder die offenen
-  Follow-ups M10-C und M11 geplant werden.
+  erste Challenge-Empfehlung dokumentarisch bestaetigt, M10-C visuell geprueft
+  oder der offene Follow-up M11 geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -311,11 +322,11 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M8 | World Depth / Gameplay / Retention Research | `Research-/Planungsblock gestartet` | Reiner Research- und Planungsblock in `docs/world_design/255-world-depth-gameplay-retention-research.md`. Klaert Island-/Plot-/Building-/Interior-/Object-/Container-/Detail-Depth, Container-Objekte, Word-Type-to-Depth-Mapping, Anchor-Semantik, Interaction/Challenge Loop, Core/Meta Loop, Lessons aus erfolgreichen Spielen, faire Reward-Momente, Retention ohne Ausbeutung und Monetarisierungsgrundlagen. `objectAnchors` sind optionale technische Moeglichkeiten, keine Pflichtobjekte. Kein Asset, kein Code, keine App-Integration. |
 | Phase 2G-M9 | Depth-/Container User Flow Preview | `Preview erzeugt / visuelle Pruefung offen` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/256-depth-container-user-flow-preview-plan.md`. Erzeugt `01_depth_flow_storyboard.png`, `02_depth_level_stack.png`, `03_interaction_reward_loop.png` und `README.md` unter `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`. Die Preview zeigt den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck als vereinfachte Nutzer-/Produktansicht. Keine Spielassets, keine finale UI, keine Codefreigabe, kein `frame_started`. |
 | Phase 2G-M9-B | Depth-/Container User Flow Visual Review | `Review gestartet / erster Flow brauchbar` | Reiner Dokumentationsblock in `docs/world_design/257-depth-container-user-flow-visual-review.md`. Bewertet die M9-Previews visuell. Ergebnis: Der Flow Haus/Kueche -> Schublade -> Besteck ist als erste vereinfachte Nutzer-/Produktansicht grundsaetzlich brauchbar, zeigt aktive Nutzerhandlung, Mini-Challenge, Feedback, Reward Moment und optionales naechstes Ziel. Er reicht aber nicht aus, um ein allgemeines Container-System fuer alle Themen abzuleiten. Weitere Beispiel-Flows wie Schule/Federmappe, Hafen/Bootskajute und Garten/Beet bleiben empfohlen. Keine Asset- oder Codefreigabe. |
-| Phase 2G-M10 | Emotional Product Flow Preview | `Preview erzeugt / Review gestartet` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/258-emotional-product-flow-preview-plan.md`. Erzeugt `01_emotional_storyboard.png`, `02_emotion_motivation_beats.png`, `03_tali_vori_light_reaction_concept.png` und `README.md` unter `docs/world_design/previews/phase2g_m10_emotional_product_flow/`. Ziel: mehr Atmosphaere, Neugier, Spielreiz und Produktgefuehl, ohne finale UI oder Spielasset zu erzeugen. M10-C bleibt fuer den vollstaendigen Companion-Reaktionsflow offen. Kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M10 | Emotional Product Flow Preview | `Preview erzeugt / Review gestartet` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/258-emotional-product-flow-preview-plan.md`. Erzeugt `01_emotional_storyboard.png`, `02_emotion_motivation_beats.png`, `03_tali_vori_light_reaction_concept.png` und `README.md` unter `docs/world_design/previews/phase2g_m10_emotional_product_flow/`. Ziel: mehr Atmosphaere, Neugier, Spielreiz und Produktgefuehl, ohne finale UI oder Spielasset zu erzeugen. M10-C wurde spaeter als eigener Companion-Reaktionsflow gestartet. Kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M10-D | Emotional Product Flow Visual Review | `Review gestartet / grundsaetzlich brauchbar` | Reiner Dokumentationsblock in `docs/world_design/259-emotional-product-flow-visual-review.md`. Bewertet die M10-Previews visuell. Ergebnis: M10 wirkt emotionaler und spielnaeher als M9, zeigt Curiosity Cue, aktive Nutzerhandlung, Reveal, Mini-Challenge, Feedback, Reward, freiwilliges naechstes Ziel und leichte Tali/Vori-Praesenz. M10 bestaetigt keine Challenge-Art, keine Companion-UX und kein allgemeines Container-System. Keine App-, Code- oder Assetfreigabe. |
 | Phase 2G-M10-B | Challenge Interaction Comparison | `gestartet / Preview erzeugt / durch M10-B2 geprueft` | Reiner Research-, Planungs- und Visualisierungsblock in `docs/world_design/260-challenge-interaction-comparison.md`. Erzeugt `01_challenge_type_matrix.png`, `02_kitchen_challenge_variants.png`, `03_recommended_challenge_progression.png` und `README.md` unter `docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/`. Empfehlung fuer den Review-Stand: Tap-Auswahl zuerst, Audio + Tap als zweite Stufe, Matching/Sortieren spaeter, Mini-Sequenzen spaeter fuer Aktionen. Keine Challenge-Implementierung, keine finale Challenge-Art, kein Code, kein Asset. |
 | Phase 2G-M10-B2 | Challenge Interaction Visual Review | `Review gestartet / erste Empfehlung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/261-challenge-interaction-visual-review.md`. Bewertet die M10-B-Previews visuell. Ergebnis: Die Matrix ist fuer interne Planung dicht, aber brauchbar; Tap-Auswahl ist als erster Prototype-Flow nachvollziehbar, Audio + Tap als zweite Stufe, Matching/Sortieren spaeter und Mini-Sequenzen fuer Aktionen. Keine finale Challenge-Systementscheidung ohne M11, keine Challenge-Implementierung, kein Code, kein Asset. |
-| Phase 2G-M10-C | Companion Reaction Flow | `vorgemerkt / Pflichtpruefung offen` | Soll Tali/Vori-Reaktion als eigenen Flow visualisieren. Ziel: Companion als emotionalen Motivationsanker pruefen, statt ihn nur als Textzeile im Storyboard zu behandeln. Kein Companion-Code, kein Asset, keine App-Integration. |
+| Phase 2G-M10-C | Companion Reaction Flow | `gestartet / Preview erzeugt / Review offen` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/262-companion-reaction-flow.md`. Erzeugt `01_companion_reaction_timeline.png`, `02_success_error_idle_reactions.png`, `03_companion_boundaries.png` und `README.md` unter `docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`. Ziel: Tali/Vori als emotionalen Motivationsanker pruefen, ohne Challenge zu loesen, Druck zu erzeugen oder finale Companion-UX freizugeben. Keine Companion-Implementierung, keine Voice-/Audio-/Animation-Freigabe, kein Code, kein Asset. |
 | Phase 2G-M11 | Multi-Example Container Flow Previews | `vorgemerkt / Pflichtpruefung offen` | Soll mehrere Beispiel-Flows planen oder visualisieren: Schule/Federmappe/Stifte, Hafen/Bootskajute/Kompass-Karte-Seil und Garten/Beet/Samen-Giesskanne-Pflanze. Ziel: kein allgemeines Container-System aus nur einem Kuechenbeispiel ableiten. Keine Spielassets, keine finale UI, kein Code. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
@@ -425,11 +436,13 @@ Phase 2G-M10-D bewertet M10 als grundsaetzlich brauchbar. Phase 2G-M10-B hat
 den Challenge-Interaktionsvergleich gestartet und Preview-Dateien unter
 `docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/`
 erzeugt. Phase 2G-M10-B2 bewertet diese Previews visuell als grundsaetzlich
-brauchbare erste Challenge-Empfehlung. Danach duerfen M10-B dokumentarisch
-bestaetigt oder die verbleibenden verbindlichen M9-B-Follow-ups geplant
-werden: Phase 2G-M10-C Companion Reaction Flow und Phase 2G-M11 Multi-Example
-Container Flow Previews. Die Preview-Dateien sind kein finales Inselbild, keine
-finale UI und keine Spielassets. `frame_started` bleibt gestoppt.
+brauchbare erste Challenge-Empfehlung. Phase 2G-M10-C hat den Tali/Vori
+Companion Reaction Flow gestartet und Preview-Dateien unter
+`docs/world_design/previews/phase2g_m10c_companion_reaction_flow/` erzeugt.
+Danach duerfen M10-C visuell geprueft oder der verbleibende verbindliche
+M9-B-Follow-up Phase 2G-M11 Multi-Example Container Flow Previews geplant
+werden. Die Preview-Dateien sind kein finales Inselbild, keine finale UI und
+keine Spielassets. `frame_started` bleibt gestoppt.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -570,7 +583,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   M10-B ist als Challenge-Interaktionsvergleich gestartet und hat Preview-
   Dateien erzeugt. M10-B2 bewertet die erste Empfehlung als brauchbar; finale
   Challenge-Systementscheidung, Implementierung und M11-Pruefung bleiben offen.
-  M10-C und M11 bleiben weiterhin offen.
+  M10-C ist als Companion Reaction Flow gestartet und hat Preview-Dateien
+  erzeugt; finale Companion-UX, Implementierung, Voice/Audio/Animation und
+  Review bleiben offen. M11 bleibt weiterhin offen.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -745,6 +760,13 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Audio-Challenge ohne Silent-/Accessibility-Fallback planen,
 - kein Drag-and-drop ohne Mobile-Bedienbarkeitspruefung entscheiden,
 - keine App- oder Assetfreigabe aus M10-B oder M10-B2 ableiten,
+- keine Companion-Implementierung aus M10-C ableiten,
+- keine Voice-/Audio-/Animation-Freigabe aus M10-C ableiten,
+- keine Companion-UX final entscheiden, bevor M10-C visuell geprueft wurde,
+- keine Companion-Reaktion planen, die Challenge automatisch loest,
+- keine Companion-Reaktion planen, die Druck, Schuldgefuehl oder harte Streak-
+  Mechanik erzeugt,
+- keine App- oder Assetfreigabe aus M10-C ableiten,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
 ## 6. Dokument-Abhaengigkeiten
@@ -855,6 +877,17 @@ Regeln:
   Assetfreigabe.
 - Eine Visualisierung darf eine Entscheidung pruefbar machen, aber nicht
   heimlich neue Architektur, neue Assets oder App-Integration freigeben.
+- Preview-Texte muessen sichtbar innerhalb ihrer Karten, Rahmen oder Panels
+  bleiben.
+- Kein Label darf aus einer Box herauslaufen oder abgeschnitten wirken.
+- Karten, Panels und Flow-Knoten brauchen ausreichend Padding fuer lange Titel.
+- Lange Titel muessen umgebrochen, gekuerzt oder mit groesserer Box
+  dargestellt werden.
+- Vor Commit soll bei neuen Preview-PNGs eine kurze visuelle
+  Text-Containment-Pruefung erfolgen.
+- Wenn eine unkritische Dokumentationsauffaelligkeit sichtbar ist, darf sie als
+  Quality Note dokumentiert werden; fuer spaetere Previews bleibt sie trotzdem
+  als Qualitaetsregel verbindlich.
 
 ## 9. Phase-2E ToDo-Liste
 
@@ -1016,6 +1049,12 @@ Ein Schritt wird gestoppt, wenn:
   werden soll, obwohl die Zusammenhaenge sonst unklar bleiben,
 - aus einer Dokumentationsvisualisierung eine Spielasset-Erzeugung abgeleitet
   werden soll,
+- eine neue entscheidungsrelevante Preview committed werden soll, obwohl
+  wichtige Texte aus Panels herauslaufen, abgeschnitten wirken oder nicht
+  eindeutig innerhalb ihrer Karten/Rahmen stehen,
+- eine dokumentierte unkritische Preview-Auffaelligkeit fuer spaetere Previews
+  ignoriert werden soll, statt sie als Text-Containment-Regel zu
+  beruecksichtigen,
 - Depth-/Container-Logik ohne visuelle Nutzerflow-Pruefung weiter geplant wird,
 - eine Container-Ansicht als reine Objektliste ohne Challenge geplant wird,
 - eine Nutzeransicht zu viele technische Labels zeigt,
@@ -1059,6 +1098,13 @@ Ein Schritt wird gestoppt, wenn:
 - Drag-and-drop ohne Mobile-Bedienbarkeitspruefung geplant oder entschieden
   wird,
 - aus M10-B oder M10-B2 App-, Code- oder Assetfreigabe abgeleitet wird,
+- aus M10-C Companion-Implementierung abgeleitet wird,
+- aus M10-C Voice-, Audio- oder Animationsfreigabe abgeleitet wird,
+- Companion-UX final entschieden werden soll, bevor M10-C visuell geprueft
+  wurde,
+- Tali/Vori eine Challenge automatisch loesen soll,
+- Tali/Vori Druck, Schuldgefuehl oder harte Streak-Mechanik erzeugen soll,
+- aus M10-C App-, Code- oder Assetfreigabe abgeleitet wird,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
   Blueprints und Backlogs geplant wird,
 - eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,

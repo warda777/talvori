@@ -221,7 +221,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 | --- | --- | --- | --- |
 | Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | geprueft / grundsaetzlich brauchbar |
 | Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | geprueft / erste Empfehlung brauchbar |
-| Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | offen |
+| Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | gestartet / Preview erzeugt / Review offen |
 | Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
 | Keine Code-/Assetfreigabe | M9/M9-B ist Dokumentation und visuelle Pruefung, keine Implementierung. | bleibt Stop-Regel | aktiv |
 | `frame_started` bleibt gestoppt | Bauassets sind weiterhin nicht freigegeben. | bleibt Stop-Regel | aktiv |
@@ -247,5 +247,13 @@ Varianten und Mini-Sequenzen spaeter fuer Aktionswoerter. Diese Empfehlung ist
 in der visuellen M10-B2-Pruefung
 `docs/world_design/261-challenge-interaction-visual-review.md` als erste
 Prototype-Richtung grundsaetzlich brauchbar. Sie ist weiterhin keine finale
-Challenge-Systementscheidung fuer alle Themen. M10-C und M11 bleiben weiterhin
-offen.
+Challenge-Systementscheidung fuer alle Themen.
+
+M10-C hat den Tali/Vori Companion Reaction Flow in
+`docs/world_design/262-companion-reaction-flow.md` gestartet und Preview-
+Dateien unter
+`docs/world_design/previews/phase2g_m10c_companion_reaction_flow/` erzeugt.
+Der Flow visualisiert Curiosity Cue, Gentle Nudge, Challenge Support, Success
+Reaction, Correction Support, Idle Hint und optionale Next Goal Suggestion.
+Diese Preview ist keine finale Companion-UX, keine Voice-/Audio-/Animation-
+Freigabe und keine Implementierung. M11 bleibt weiterhin offen.

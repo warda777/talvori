@@ -74,6 +74,17 @@ Phase 2G-M10-B2 prueft diese M10-B-Previews visuell in
 Die erste Challenge-Empfehlung ist grundsaetzlich brauchbar, aber weiterhin
 keine finale Challenge-Systementscheidung, keine Implementierung, keine App-
 Integration, keine Assetfreigabe und kein `frame_started`.
+Phase 2G-M10-C startet den Tali/Vori Companion Reaction Flow in
+`docs/world_design/262-companion-reaction-flow.md` und erzeugt
+Dokumentationspreviews unter
+`docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`. M10-C ist
+keine finale Companion-UX, keine Companion-Implementierung, keine Voice-,
+Audio- oder Animationsfreigabe, keine App-Integration und keine Assetfreigabe.
+In `01_companion_reaction_timeline.png` gibt es eine kleine visuelle
+Text-Containment-Auffaelligkeit: einzelne Labels wirken sehr nah am Kartenrand.
+Das ist fuer M10-C nicht blockierend, weil keine finale UI und kein Spielasset
+erzeugt wurde. Zukuenftige Diagramme und Previews muessen Texte sauber in ihren
+Rahmen halten; in diesem Block werden keine PNGs neu erzeugt oder geaendert.
 
 Fuehrende Dokumente:
 
@@ -99,11 +110,12 @@ Fuehrende Dokumente:
 - `docs/world_design/259-emotional-product-flow-visual-review.md`
 - `docs/world_design/260-challenge-interaction-comparison.md`
 - `docs/world_design/261-challenge-interaction-visual-review.md`
+- `docs/world_design/262-companion-reaction-flow.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10-B2 Challenge Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10-C Companion Reaction Flow gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -205,8 +217,12 @@ Fuehrende Dokumente:
     M10-B2 darf die erste Challenge-Empfehlung als brauchbar bewerten, aber
     keine finale Challenge-Systementscheidung, keine Implementierung und keine
     App-/Assetfreigabe erzeugen.
-  - `phase2GM10C`: `false` fuer Code/Assets; vorgemerkt fuer Tali/Vori-
-    Companion-Reaktionsflow.
+  - `phase2GM10C`: `false` fuer Code/Assets; erlaubt nur das Planungsdokument
+    `docs/world_design/262-companion-reaction-flow.md` und Dokumentations-/
+    Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`.
+    Keine finale Companion-UX, keine Companion-Implementierung, keine Voice-,
+    Audio- oder Animationsfreigabe.
   - `phase2GM11`: `false` fuer Code/Assets; vorgemerkt fuer mehrere
     Container-Beispiel-Flows: Schule/Federmappe, Hafen/Bootskajute und
     Garten/Beet.
@@ -275,7 +291,8 @@ M10 bearbeitet den emotionaleren Produktflow und erzeugt
 `01_emotional_storyboard.png`, `02_emotion_motivation_beats.png`,
 `03_tali_vori_light_reaction_concept.png` und `README.md` unter
 `docs/world_design/previews/phase2g_m10_emotional_product_flow/`. M10-B ist
-als Challenge-Comparison gestartet; M10-C und M11 bleiben offen.
+als Challenge-Comparison gestartet; M10-C wurde spaeter als Companion Reaction
+Flow gestartet; M11 bleibt offen.
 Die M10-D-Pruefung in
 `docs/world_design/259-emotional-product-flow-visual-review.md` bewertet M10
 als grundsaetzlich brauchbar. Daraus folgen keine finale Produktentscheidung,
@@ -292,8 +309,22 @@ Mobile-Pruefung fuer Drag-and-drop und weitere Beispiel-Flows bleiben offen.
 M10-B2 prueft diese Previews visuell in
 `docs/world_design/261-challenge-interaction-visual-review.md`. Ergebnis:
 Die M10-B-Empfehlung ist als erste Prototype-Richtung grundsaetzlich brauchbar,
-aber keine finale Challenge-Systementscheidung fuer alle Themen. M10-C und M11
-bleiben offen.
+aber keine finale Challenge-Systementscheidung fuer alle Themen. M10-C wurde
+spaeter als Companion Reaction Flow gestartet; M11 bleibt offen.
+M10-C startet den Tali/Vori Companion Reaction Flow in
+`docs/world_design/262-companion-reaction-flow.md` und erzeugt
+`01_companion_reaction_timeline.png`, `02_success_error_idle_reactions.png`,
+`03_companion_boundaries.png` und `README.md` unter
+`docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`. M10-C
+zeigt Curiosity Cue, Gentle Nudge, Challenge Support, Success Reaction,
+Correction Support, Idle Hint und optionales naechstes Ziel. Daraus folgen
+keine finale Companion-UX, keine Companion-Implementierung, keine Voice-/Audio-/
+Animation-Freigabe und keine App-/Assetfreigabe. M11 bleibt offen.
+Die Timeline-Preview enthaelt eine kleine nicht-blockierende
+Text-Containment-Auffaelligkeit bei einzelnen langen Labels. Sie wird als
+Quality Note dokumentiert; keine PNG-Neuerzeugung erfolgt in diesem Block.
+Fuer spaetere Previews gilt: Texte muessen innerhalb ihrer Karten, Panels oder
+Rahmen bleiben, und lange Titel brauchen Umbruch, Kuerzung oder mehr Boxbreite.
 
 ## 2. Zweck Des Assets
 
@@ -648,6 +679,11 @@ In diesem Template-Block gilt:
   dokumentierte Begruendung, warum sie nicht noetig ist.
 - Preview-Darstellungen bleiben Dokumentationsmaterial, solange keine
   Assetfreigabe explizit erteilt wurde.
+- Preview-Texte muessen sauber innerhalb ihrer Karten, Panels oder Rahmen
+  bleiben; keine wichtigen Labels duerfen herauslaufen oder abgeschnitten
+  wirken.
+- Nicht-blockierende Dokumentationsauffaelligkeiten muessen als Quality Note
+  dokumentiert und fuer spaetere Previews als Regel beruecksichtigt werden.
 - Keine Depth-/Container-Logik ohne visuelle Nutzerflow-Pruefung.
 - Keine Container-Ansicht als reine Objektliste ohne Challenge.
 - Keine Nutzeransicht mit zu vielen technischen Labels.
@@ -685,6 +721,13 @@ In diesem Template-Block gilt:
 - Keine Audio-Challenge ohne Silent-/Accessibility-Fallback.
 - Kein Drag-and-drop ohne Mobile-Bedienbarkeitspruefung.
 - Keine App- oder Assetfreigabe aus M10-B oder M10-B2.
+- Keine Companion-Implementierung aus M10-C ableiten.
+- Keine Voice-/Audio-/Animation-Freigabe aus M10-C ableiten.
+- Keine Companion-UX final entscheiden, bevor M10-C visuell geprueft wurde.
+- Keine Companion-Reaktion, die Challenge automatisch loest.
+- Keine Companion-Reaktion, die Druck, Schuldgefuehl oder harte Streak-
+  Mechanik erzeugt.
+- Keine App- oder Assetfreigabe aus M10-C ableiten.
 
 ## 10. Device-/Preview-Check
 
@@ -896,10 +939,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM10BChallengeComparisonStatus`: `started in docs/world_design/260-challenge-interaction-comparison.md; previews created under docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/; reviewed in docs/world_design/261-challenge-interaction-visual-review.md; documentation preview only`
 - `phase2GM10BRecommendedFirstChallenge`: `Tap selection first; Audio + Tap second; Matching/Sorting later; Mini sequences later for actions; not final until visual review`
 - `phase2GM10B2ChallengeVisualReviewStatus`: `started in docs/world_design/261-challenge-interaction-visual-review.md; first recommendation usable; no final challenge-system decision`
+- `phase2GM10CCompanionReactionFlowStatus`: `started in docs/world_design/262-companion-reaction-flow.md; previews created under docs/world_design/previews/phase2g_m10c_companion_reaction_flow/; review open; documentation preview only`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M10-B dokumentarisch bestaetigen oder M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M10-C visuell pruefen oder M11-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1194,7 +1238,7 @@ M9-B-Follow-ups sind verbindlich vorgemerkt:
   Audio, Drag-and-drop, Zuordnung und Kombinationen; geprueft / erste
   Empfehlung brauchbar,
 - `Phase 2G-M10-C Companion Reaction Flow`: Tali/Vori-Reaktionsflow als
-  eigener Motivationsmoment,
+  eigener Motivationsmoment; gestartet / Preview erzeugt / Review offen,
 - `Phase 2G-M11 Multi-Example Container Flow Previews`: weitere Flows fuer
   Schule/Federmappe, Hafen/Bootskajute und Garten/Beet.
 
@@ -1261,6 +1305,26 @@ Phase-2G-M10-B2-Challenge-Interaction-Visual-Review gilt nur fuer:
   Systementscheidung ohne M11, Audio ohne Silent-/Accessibility-Fallback,
   Drag-and-drop ohne Mobile-Bedienbarkeitspruefung sowie App-/Assetfreigabe
   aus M10-B oder M10-B2.
+
+Phase-2G-M10-C-Companion-Reaction-Flow gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/262-companion-reaction-flow.md`,
+- Dokumentations-/Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`,
+- `01_companion_reaction_timeline.png`,
+- `02_success_error_idle_reactions.png`,
+- `03_companion_boundaries.png`,
+- `README.md`,
+- Rollen Curiosity Trigger, Gentle Nudge, Challenge Support, Success Reaction,
+  Correction Support, Next Goal Suggestion und Comeback Motivation,
+- Timing-Regeln fuer kurze, optionale und nicht stoerende Companion-Hinweise,
+- Reaktionspfade fuer Erfolg, Fehler, Untaetigkeit und Wiederholung,
+- nicht-blockierende Quality Note zur Text-Containment-Auffaelligkeit in
+  `01_companion_reaction_timeline.png`,
+- Stop-Regeln gegen Companion-Implementierung, Voice-/Audio-/Animation-
+  Freigabe, Loesungs-Automatik, Druck/Schuld/Streak-Haerte sowie App-/Asset-
+  freigabe aus M10-C.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
