@@ -38,7 +38,13 @@ Cross-Island Word Routing, Island Slot Lifecycle, Ownership/Identity und
 UX-Komplexitaetsschutz. Phase 2G-M7 plant eine abstrakte Capability-Greybox,
 in der feste Variante-B-Rollenlabels durch neutrale Plot-Slots mit
 Capabilities ersetzt werden. Phase 2G-M7-B erzeugt die geplanten
-Debug-Capability-Greybox-Previews als Dokumentationsmaterial.
+Debug-Capability-Greybox-Previews als Dokumentationsmaterial. Phase 2G-M7-C
+bewertet diese Previews visuell: M7-B ist als technische Debug-Greybox
+brauchbar, aber nicht als Nutzeransicht. Phase 2G-M8 startet den Research- und
+Planungsblock fuer World Depth, Zoom-/Container-System, Gameplay-Motivation,
+Retention und faire Monetarisierungsgrundlagen. M8 klaert, dass
+`objectAnchors` optionale technische Moeglichkeiten sind und nicht als
+Pflichtobjekte gelesen werden duerfen.
 
 Fuehrende Dokumente:
 
@@ -56,11 +62,13 @@ Fuehrende Dokumente:
 - `docs/world_design/250-island-greybox-layout-review.md`
 - `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`
 - `docs/world_design/253-capability-greybox-plan.md`
+- `docs/world_design/254-capability-greybox-visual-review.md`
+- `docs/world_design/255-world-depth-gameplay-retention-research.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M7-B Capability-Greybox Preview erzeugt`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M8 World Depth Research gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -123,6 +131,12 @@ Fuehrende Dokumente:
     `docs/world_design/previews/phase2g_m7_capability_greybox/`.
     Die Dateien sind keine Spielassets und geben keine Code- oder
     Assetfreigabe.
+  - `phase2GM7C`: `false` fuer Code/Assets; erlaubt nur visuelle
+    Dokumentationspruefung der M7-B-Capability-Greybox und Planung einer
+    moeglichen vereinfachten Nutzer-/Produktansicht.
+  - `phase2GM8`: `false` fuer Code/Assets; erlaubt nur Research und Planung
+    fuer World Depth, Zoom-/Container-System, Gameplay-Motivation, Retention
+    und faire Monetarisierungsgrundlagen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -166,6 +180,13 @@ Nach der Nutzerpruefung darf Variante B nicht als starre Gebaeudeanordnung
 bestaetigt werden. Die fuehrende Planung fuer flexible Plot-Faehigkeiten und
 Lernwort-Semantik liegt in
 `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md`.
+Die visuelle M7-C-Pruefung liegt in
+`docs/world_design/254-capability-greybox-visual-review.md`; M7-B ist nur als
+technische Debug-Greybox brauchbar. Die M8-Planung in
+`docs/world_design/255-world-depth-gameplay-retention-research.md` ergaenzt,
+dass `objectAnchors` optionale technische Anker sind und dass kleinere
+Woerter, Container und Interaktionen ueber Depth-/Zoom-Ebenen statt ueber eine
+ueberladene Island View geloest werden muessen.
 
 ## 2. Zweck Des Assets
 
@@ -466,6 +487,11 @@ Vorlaeufige Einschaetzung:
 - Auto wird nicht in Phase 2E gebaut, aber die Insel wirkt nicht grundsaetzlich
   zu klein fuer spaetere Aussenobjekte.
 - Interior-/Object-Detail-Objekte gehoeren nicht in Island View.
+- Kleine Objektwoerter gehoeren je nach Semantik eher in `InteriorView`,
+  `ObjectView`, `ContainerOpenView` oder `DetailInteractionView` als dauerhaft
+  in die Island View.
+- `objectAnchors` sind optionale moegliche Objekt-, Container- oder
+  Interaktionspunkte. Sie erzeugen keine Pflicht fuer sichtbare Objekte.
 - `foundation_complete` wirkt im lokalen Preview groesser/stabiler als
   `foundation_started`, blockiert aber weiterhin nicht grundsaetzlich
   Haus/Huette, Hof/Vorplatz, ersten Weg oder Expansion.
@@ -500,6 +526,14 @@ In diesem Template-Block gilt:
 - Kein Gebaeudeasset ohne Gebaeude-Footprint.
 - Kein Wegasset ohne Socket-Kompatibilitaet.
 - Kein Dekoasset ohne Deko-Sicherheitszone.
+- Kein `objectAnchor` als Pflichtobjekt interpretieren.
+- Keine sichtbare Ueberfuellung durch zu viele Objekte auf einer Ebene.
+- Keine technische Anchor-/Capability-Ansicht als Nutzeransicht verwenden.
+- Keine Container-/Zoom-Logik ohne Depth-System.
+- Keine reine Museumsansicht ohne Interaktion oder Challenge.
+- Keine Retention-Mechanik ohne Fairness-/Ethikpruefung.
+- Keine Monetarisierung ohne eigenes Dokument.
+- Keine manipulative Pay-to-Win- oder Dark-Pattern-Mechanik.
 
 ## 10. Device-/Preview-Check
 
@@ -660,6 +694,8 @@ Phase-2F-Preview-Ergaenzung:
   Themeninsel-/Archipel-Strategie, Word-to-Island Routing,
   Cross-Island-Routing, gemeinsamer Codex-/Blueprint-/Backlog-Plan,
   Island-Slot-Lifecycle, Ownership-/Identity-Logik,
+  World Depth, Container-/Zoom-System, ObjectAnchor-Semantik,
+  Interaction-/Challenge-Loop, Retention-Fairness,
   Visual-Clutter-Grenzen, Rebuild/Move-Regeln, Anschluss-/Socket-Konzept,
   visuell bestaetigte oder nachgebesserte Greybox mit abstrakten
   Capability-Labels, ThemeIsland-Roadmap, Anchor-basierte Nachbesserung,
@@ -699,10 +735,12 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM7CapabilityGreyboxPlanStatus`: `started in docs/world_design/253-capability-greybox-plan.md; no preview PNGs generated`
 - `phase2GM7BPreviewFilesStatus`: `created under docs/world_design/previews/phase2g_m7_capability_greybox/`
 - `phase2GM7BPreviewFilesAreGameAssets`: `false`
+- `phase2GM7CVisualReviewStatus`: `started in docs/world_design/254-capability-greybox-visual-review.md; M7-B usable as technical debug greybox; simplified product view recommended`
+- `phase2GM8WorldDepthGameplayRetentionStatus`: `started in docs/world_design/255-world-depth-gameplay-retention-research.md; objectAnchors are optional technical anchors, not required visible objects`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M7-B-Capability-Greybox visuell pruefen; danach bestaetigen oder nachbessern`
+- `nextAllowedStep`: `M7-C-/M8-Empfehlungen pruefen; danach M7-B technisch bestaetigen/nachbessern, M7-D/M8 als vereinfachte Nutzer-/Produktansicht mit Depth-/Container-Flow planen oder Gameplay-/Retention weiter vertiefen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -936,6 +974,31 @@ Phase-2G-M7-B-Debug-Preview-Erzeugung gilt nur fuer:
 - visuelle Pruefung, ob abstrakte Plot-Slots, `allowedFunctions`,
   `isUserSelectable`, Anchors, Sockets, Footprints und Nutzerwahl-Flow
   verstaendlich sind.
+
+Phase-2G-M7-C-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/254-capability-greybox-visual-review.md`,
+- Bewertung der M7-B-Previews als technische Debug-Greybox,
+- Festhalten, dass M7-B nicht als Nutzeransicht verwendet werden darf,
+- Empfehlung, spaeter M7-D als vereinfachte Nutzer-/Produktansicht zu planen,
+- Stop-Regeln gegen Asset-/Codefreigabe aus M7-B und gegen Weiterarbeit an
+  `frame_started`, solange Capability-Greybox und Nutzeransicht nicht
+  geklaert sind.
+
+Phase-2G-M8-World-Depth-/Gameplay-/Retention-Research gilt nur fuer:
+
+- Research- und Planungsdokument in
+  `docs/world_design/255-world-depth-gameplay-retention-research.md`,
+- Klaerung von `IslandView`, `PlotView`, `BuildingView`, `InteriorView`,
+  `ObjectView`, `ContainerOpenView` und `DetailInteractionView`,
+- Klaerung, dass `objectAnchors` optionale technische Moeglichkeiten sind,
+  keine Pflichtobjekte,
+- Planung von Container-Objekten, Container-Entry-Ankern und inneren
+  Objektankern,
+- Planung von Interaction-/Challenge-Loops statt reiner Museumsansicht,
+- Research-informed Ableitungen aus erfolgreichen Spielen fuer faire
+  Motivation, Retention und spaetere Monetarisierungsgrundlagen.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
