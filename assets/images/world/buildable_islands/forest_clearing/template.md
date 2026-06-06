@@ -111,6 +111,11 @@ Phase 2G-M11-C startet den World Content Taxonomy-/Location-Katalog in
 Katalog sammelt moegliche Weltinhalte fuer spaetere Themeninseln, darf aber
 nicht als Assetliste, Bau-Freigabe oder finale ThemeIsland-Roadmap gelesen
 werden.
+Phase 2G-M11-C2 prueft diesen Katalog in
+`docs/world_design/267-world-content-taxonomy-review.md`. Ergebnis: Der
+Katalog ist als erste Content-/Location-Grundlage grundsaetzlich brauchbar,
+bleibt aber keine Assetliste, keine Bau-Freigabe, keine finale ThemeIsland-
+Roadmap und keine Codefreigabe.
 
 Fuehrende Dokumente:
 
@@ -141,11 +146,12 @@ Fuehrende Dokumente:
 - `docs/world_design/264-multi-example-container-flow-previews.md`
 - `docs/world_design/265-multi-example-container-flow-visual-review.md`
 - `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`
+- `docs/world_design/267-world-content-taxonomy-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M11-C Taxonomy Backlog gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M11-C2 Taxonomy Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -278,6 +284,13 @@ Fuehrende Dokumente:
     Der Katalog sammelt moegliche Weltinhalte fuer spaetere Themeninseln, gibt
     aber keine Assets, keine Bauzustaende, keine ThemeIsland-Umsetzung und
     kein `frame_started` frei.
+  - `phase2GM11C2`: `false` fuer Code/Assets; erlaubt nur die
+    Dokumentationspruefung in
+    `docs/world_design/267-world-content-taxonomy-review.md`. M11-C2 darf den
+    Taxonomy-Katalog als erste Content-/Location-Grundlage grundsaetzlich
+    brauchbar bewerten, aber keine finale ThemeIsland-Roadmap, keine
+    Assetliste, keine Plot-Capability-Ableitung, keine Word-to-Island-Routing-
+    Matrix, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -407,6 +420,12 @@ Wasser/Hafen/Kueste, Stadtzentrum, Industrie, oeffentliche Gebaeude,
 Verkehrslogik und grosse Landwirtschaftsbereiche muessen spaeter ueber
 ThemeIslands, Plot-Capabilities und Routing-Regeln getrennt werden. Der
 Katalog ist keine Assetfreigabe und keine finale ThemeIsland-Roadmap.
+M11-C2 prueft den Katalog in
+`docs/world_design/267-world-content-taxonomy-review.md` als erste Content-/
+Location-Grundlage. Ergebnis: Die 14 Hauptkategorien und die Ebenenlogik sind
+brauchbar. Offen bleiben ThemeIsland-Priorisierung, Word-to-Island-Routing-
+Matrix, Plot-Capability-Ableitung, Sensitive-Content-Regeln und Mobile-/
+Clutter-Regeln. Die Waldlichtung darf dadurch nicht ueberladen werden.
 
 ## 2. Zweck Des Assets
 
@@ -837,6 +856,13 @@ In diesem Template-Block gilt:
   ohne sensible Darstellungspruefung.
 - Keine Verkehrs-/Strassenlogik ohne eigenes Connector-/Path-Konzept.
 - Keine Fahrzeug-/Parklogik ohne Groessen- und Interaktionsregeln.
+- Keine ThemeIsland-Roadmap ohne Taxonomy-Review.
+- Keine Word-to-Island-Routing-Matrix ohne Taxonomy-Review.
+- Keine Plot-Capability-Ableitung ohne Kategoriepruefung.
+- Keine sensible Kategorie ohne eigene Darstellungs- und Safety-Regeln.
+- Keine Deko-/Kleinteile-Produktion ohne Mobile-/Clutter-Regeln.
+- Keine technische, Verkehrs- oder Fahrzeuglogik ohne eigenes Systemkonzept.
+- Keine Taxonomy-Begriffe als automatische Asset-Auftraege lesen.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1055,10 +1081,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM11MultiExampleContainerFlowStatus`: `started in docs/world_design/264-multi-example-container-flow-previews.md; previews created under docs/world_design/previews/phase2g_m11_multi_example_container_flows/; reviewed in docs/world_design/265-multi-example-container-flow-visual-review.md; no final container-system architecture`
 - `phase2GM11BMultiFlowVisualReviewStatus`: `started in docs/world_design/265-multi-example-container-flow-visual-review.md; Multi-Flow direction usable; school/case and garden/bed strongest; harbor/cabin valuable but mobile-riskier; no final container-system architecture`
 - `phase2GM11CWorldContentTaxonomyStatus`: `started in docs/world_design/266-world-content-taxonomy-and-location-catalog.md; taxonomy backlog only; no asset list, no final ThemeIsland roadmap, no build release`
+- `phase2GM11C2WorldContentTaxonomyReviewStatus`: `started in docs/world_design/267-world-content-taxonomy-review.md; taxonomy catalog usable as first content/location foundation; follow-ups remain; no asset list, no final ThemeIsland roadmap, no build release`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `Taxonomy-Katalog reviewen oder mobile/clutter/fairness/routing follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `ThemeIsland-Priorisierung, Word-to-Island-Routing, Plot-Capability, Sensitive-Content oder Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1513,6 +1540,26 @@ Phase-2G-M11-C-World-Content-Taxonomy gilt nur fuer:
   Starterinsel, ThemeIsland-Umsetzung ohne Scope-Gate, Deko-Massenproduktion
   ohne Clutter-Regeln, sensible Gebaeude ohne Darstellungspruefung sowie
   Verkehrs-/Fahrzeuglogik ohne eigene Regeln.
+
+Phase-2G-M11-C2-World-Content-Taxonomy-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/267-world-content-taxonomy-review.md`,
+- Pruefung, ob die 14 Hauptkategorien als erste Content-/Location-Grundlage
+  brauchbar sind,
+- Bestaetigung, dass die Ebene ThemeIsland -> Zone -> Plot/Gebaeude ->
+  Aussenbereich -> Innenraum -> Container/Fokusobjekt -> Detail/Deko fuer
+  spaetere Planung verstaendlich ist,
+- Vormerkung fehlender Querschnittsbereiche wie Innenraeume, Moebel,
+  Werkzeuge, Tiere, Kleidung, Wetter/Jahreszeiten, digitale Raeume,
+  Lernmaterialien, Gesundheits-/Notfallobjekte und sensible Kultur-/Politik-/
+  Gesellschaftsbereiche,
+- Stop-Regeln gegen ThemeIsland-Roadmap ohne Taxonomy-Review,
+  Word-to-Island-Routing-Matrix ohne Taxonomy-Review, Plot-Capability-
+  Ableitung ohne Kategoriepruefung, sensible Kategorien ohne eigene
+  Darstellungs- und Safety-Regeln, Deko-/Kleinteile-Produktion ohne
+  Mobile-/Clutter-Regeln, technische/Verkehrs-/Fahrzeuglogik ohne eigenes
+  Systemkonzept und Taxonomy-Begriffe als automatische Asset-Auftraege.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
