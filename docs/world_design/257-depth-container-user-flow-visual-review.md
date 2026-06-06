@@ -222,7 +222,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 | Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | geprueft / grundsaetzlich brauchbar |
 | Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | geprueft / erste Empfehlung brauchbar |
 | Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | geprueft / erste Richtung brauchbar |
-| Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
+| Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | gestartet / Preview erzeugt / Review offen |
 | Keine Code-/Assetfreigabe | M9/M9-B ist Dokumentation und visuelle Pruefung, keine Implementierung. | bleibt Stop-Regel | aktiv |
 | `frame_started` bleibt gestoppt | Bauassets sind weiterhin nicht freigegeben. | bleibt Stop-Regel | aktiv |
 
@@ -260,4 +260,14 @@ Freigabe und keine Implementierung. Die visuelle M10-C2-Pruefung liegt in
 `docs/world_design/263-companion-reaction-visual-review.md`. Ergebnis: M10-C
 ist als erste Companion-Reaktionsrichtung grundsaetzlich brauchbar. Voice,
 Audio, Animation, Rive/FX, Personality-Varianten und Comeback-Erinnerungen
-bleiben spaeter separat zu pruefen. M11 bleibt weiterhin offen.
+bleiben spaeter separat zu pruefen.
+
+M11 hat die Multi-Example Container Flow Previews in
+`docs/world_design/264-multi-example-container-flow-previews.md` gestartet und
+Preview-Dateien unter
+`docs/world_design/previews/phase2g_m11_multi_example_container_flows/`
+erzeugt. Die Previews pruefen Schule/Federmappe/Stifte,
+Hafen/Bootskajute/Kompass-Karte-Seil und Garten/Beet/Samen-Giesskanne-
+Pflanze. Ergebnis fuer den aktuellen Stand: Preview erzeugt, Review offen.
+Aus M11 folgt noch keine finale Container-Systemarchitektur, keine
+Flow-Implementierung, keine App-Integration und keine Assetfreigabe.
