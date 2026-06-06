@@ -149,6 +149,12 @@ Dokumentationspreviews unter
 ist Planungs-/Previewgrundlage, keine finale Plot-Datenstruktur, keine
 Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung,
 keine Asset- oder Codefreigabe und kein `frame_started`.
+Phase 2G-M12-C2 prueft diese M12-C-Previews visuell in
+`docs/world_design/273-plot-capability-visual-review.md`. Ergebnis: M12-C ist
+als erste Plot-Capability-Planungsrichtung grundsaetzlich brauchbar, bleibt
+aber ohne finale Plot-Datenstruktur, Runtime-Konfiguration, Plot-
+Implementierung, ThemeIsland-Umsetzung, Assetfreigabe, Codefreigabe und
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -185,11 +191,12 @@ Fuehrende Dokumente:
 - `docs/world_design/270-word-to-island-routing-matrix.md`
 - `docs/world_design/271-word-to-island-routing-visual-review.md`
 - `docs/world_design/272-plot-capability-derivation.md`
+- `docs/world_design/273-plot-capability-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-C Plot-Capability Derivation gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-C2 Plot-Capability Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -370,6 +377,14 @@ Fuehrende Dokumente:
     aber keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine
     Plot-Implementierung, keine ThemeIsland-Umsetzung, keine App-/
     Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM12C2`: `false` fuer Code/Assets; erlaubt nur die visuelle
+    Dokumentationspruefung in
+    `docs/world_design/273-plot-capability-visual-review.md`.
+    M12-C2 darf M12-C als erste Plot-Capability-Planungsrichtung
+    grundsaetzlich brauchbar bewerten, aber keine finale Plot-Datenstruktur,
+    keine Runtime-Konfiguration, keine Plot-Implementierung, keine
+    ThemeIsland-Umsetzung, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -535,6 +550,12 @@ Capabilities sind Erlaubnisse, keine Pflichtbelegung. `core_plot` ist nicht
 automatisch `home`; `hub_capable_plot` ist nicht automatisch Markt; Edge-Plots
 bleiben durch Natur-, Wasser-, Farm- oder Expansion-Regeln begrenzt. M12-D und
 M12-E bleiben offen.
+M12-C2 prueft diese Capability-Previews in
+`docs/world_design/273-plot-capability-visual-review.md` als grundsaetzlich
+brauchbare erste Planungsrichtung. Daraus folgt weiterhin keine Plot-
+Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung und
+keine automatische Wortplatzierung aus Plot-Capabilities. M12-D und M12-E
+bleiben offen.
 
 ## 2. Zweck Des Assets
 
@@ -1018,6 +1039,15 @@ In diesem Template-Block gilt:
   `sensitive`-Plots ohne eigene Folgepruefungen.
 - Keine Assetproduktion aus Plot-Capability-Karten ableiten.
 - Keine automatische Wortplatzierung aus Plot-Capabilities ableiten.
+- Keine finale Plot-Datenstruktur aus M12-C2 ableiten.
+- Keine Runtime-Konfiguration aus M12-C2 ableiten.
+- Keine Plot-Implementierung aus M12-C2 ableiten.
+- Keine ThemeIsland-Umsetzung aus M12-C2 ableiten.
+- Keine sensitive Plot-Funktion ohne M12-D.
+- Keine Kleinteile-/Container-/Schulobjekt-Umsetzung ohne M12-E.
+- Keine Gartenwachstums- oder Farm-Mechanik ohne Fairness-/Timer-Regeln.
+- Keine Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung.
+- Keine App- oder Assetfreigabe aus M12-C oder M12-C2.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1242,10 +1272,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12BWordToIslandRoutingStatus`: `started in docs/world_design/270-word-to-island-routing-matrix.md; previews created under docs/world_design/previews/phase2g_m12b_word_to_island_routing/; no final routing implementation, no final data structure, no automatic placement`
 - `phase2GM12B2WordToIslandRoutingReviewStatus`: `started in docs/world_design/271-word-to-island-routing-visual-review.md; first routing planning direction usable; no final routing implementation, no final data structure, no automatic placement`
 - `phase2GM12CPlotCapabilityDerivationStatus`: `started in docs/world_design/272-plot-capability-derivation.md; previews created under docs/world_design/previews/phase2g_m12c_plot_capability_derivation/; no final plot data structure, no runtime config, no plot implementation`
+- `phase2GM12C2PlotCapabilityReviewStatus`: `started in docs/world_design/273-plot-capability-visual-review.md; first plot capability planning direction usable; no final plot data structure, no runtime config, no plot implementation`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-C reviewen oder M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12-C2 reviewen oder M12-D Sensitive-Content oder M12-E Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1824,6 +1855,28 @@ Phase-2G-M12-C-Plot-Capability-Derivation gilt nur fuer:
   Regeln, water/farm/travel/vehicle/digital/sensitive Plots ohne eigene
   Folgepruefungen, Assetproduktion aus Plot-Capability-Karten und automatische
   Wortplatzierung aus Plot-Capabilities.
+
+Phase-2G-M12-C2-Plot-Capability-Visual-Review gilt nur fuer:
+
+- Review-Dokument in
+  `docs/world_design/273-plot-capability-visual-review.md`,
+- visuelle Pruefung der M12-C-Previews unter
+  `docs/world_design/previews/phase2g_m12c_plot_capability_derivation/`,
+- Bestaetigung, dass Pipeline, Matrix, Early Theme Cards und Mid/Late/Special
+  Limits als erste Plot-Capability-Planungsrichtung brauchbar sind,
+- Bestaetigung, dass `allowedFunctions` Erlaubnisse sind und keine
+  Pflichtbelegung erzeugen,
+- Bestaetigung, dass `core_plot` nicht automatisch `home` und
+  `hub_capable_plot` nicht automatisch Markt bedeutet,
+- Dokumentation, dass M12-D Sensitive Content Representation Rules und M12-E
+  Mobile And Clutter Rules offen bleiben,
+- Stop-Regeln gegen finale Plot-Datenstruktur aus M12-C2, Runtime-
+  Konfiguration aus M12-C2, Plot-Implementierung aus M12-C2, ThemeIsland-
+  Umsetzung aus M12-C2, automatische Wortplatzierung aus Plot-Capabilities,
+  sensitive Plot-Funktionen ohne M12-D, Kleinteile-/Container-/Schulobjekt-
+  Umsetzung ohne M12-E, Gartenwachstums-/Farm-Mechanik ohne Fairness-/Timer-
+  Regeln, Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung und
+  App-/Assetfreigabe aus M12-C oder M12-C2.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

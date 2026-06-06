@@ -330,11 +330,20 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung,
   keine ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und
   kein `frame_started`.
+- Phase 2G-M12-C2 wurde als visuelle Pruefung in
+  `docs/world_design/273-plot-capability-visual-review.md` gestartet.
+  Ergebnis fuer den Review-Stand: M12-C ist als erste Plot-Capability-
+  Planungsrichtung grundsaetzlich brauchbar. Pipeline, Plot-Type-Capability-
+  Matrix, Early Theme Capability Cards und Mid/Late/Special Plot Limits sind
+  fuer interne Planung verstaendlich. Daraus folgen keine finale Plot-
+  Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung,
+  keine ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und
+  kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
-  M12-B-/M12-B2-/M12-C-Bewertung.
+  M12-B-/M12-B2-/M12-C-/M12-C2-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -345,7 +354,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Priorisierung dokumentarisch bestaetigt, M12-B als erste Routing-Matrix
   dokumentarisch geprueft, M12-B2 als erste Routing-Planungsrichtung
   dokumentarisch bestaetigt, M12-C als erste Plot-Capability-Ableitung
-  dokumentarisch geprueft oder konkrete Taxonomy-/Routing-Follow-ups geplant
+  dokumentarisch geprueft, M12-C2 als erste Plot-Capability-Planungsrichtung
+  dokumentarisch bestaetigt oder konkrete Taxonomy-/Routing-Follow-ups geplant
   werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
@@ -440,6 +450,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M12-B | Word-to-Island Routing Matrix | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/270-word-to-island-routing-matrix.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12b_word_to_island_routing/`: `01_word_routing_pipeline.png`, `02_word_type_routing_matrix.png`, `03_example_word_routing_cards.png`, `04_multi_home_and_backlog_flow.png` und `README.md`. Klaert erste Routing-Ebenen, Worttypen, Beispielrouting, Multi-home-Woerter, Backlog/Fallback und Nutzerentscheidung. Keine finale Routing-Implementierung, keine finale Datenstruktur, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-B2 | Word-to-Island Routing Visual Review | `Review gestartet / erste Routing-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/271-word-to-island-routing-visual-review.md`. Bewertet die M12-B-Previews visuell. Ergebnis: Pipeline, Matrix, Beispielkarten und Multi-home-/Backlog-Flow sind als erste Routing-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln gegen automatische Platzierung, falsche Depth-Ebene, Multi-home ohne Nutzer-/Kontextentscheidung und sensitive Begriffe ohne M12-D. Keine finale Routing-Implementierung, keine finale Datenstruktur, keine automatische Wortplatzierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-C | Plot-Capability Derivation | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/272-plot-capability-derivation.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12c_plot_capability_derivation/`: `01_plot_capability_pipeline.png`, `02_plot_type_capability_matrix.png`, `03_early_theme_capability_cards.png`, `04_mid_late_special_plot_limits.png` und `README.md`. Leitet erste Plot-Capabilities fuer abstrakte Plottypen und Early ThemeIslands ab. Keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M12-C2 | Plot-Capability Visual Review | `Review gestartet / erste Capability-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/273-plot-capability-visual-review.md`. Bewertet die M12-C-Previews visuell. Ergebnis: Pipeline, Matrix, Early Theme Cards und Mid/Late/Special Limits sind als erste Plot-Capability-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln: `allowedFunctions` sind Erlaubnisse, `core_plot` ist nicht automatisch `home`, `hub_capable_plot` ist nicht automatisch Markt, und Water/Farm/Travel/Vehicle/Digital/Sensitive bleiben gated. Keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -613,6 +624,13 @@ And Clutter Rules erlaubt. Keine finale Plot-Datenstruktur, keine Runtime-
 Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung und
 keine Assetfreigabe duerfen aus M12-C abgeleitet werden.
 
+Phase 2G-M12-C2 bewertet M12-C als erste Plot-Capability-Planungsrichtung
+grundsaetzlich brauchbar. Als naechster Schritt ist nur M12-C2-Review,
+M12-C/M12-C2-Nachbesserung, M12-D Sensitive Content Representation Rules oder
+M12-E Mobile And Clutter Rules erlaubt. Keine finale Plot-Datenstruktur,
+keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-
+Umsetzung und keine Assetfreigabe duerfen aus M12-C2 abgeleitet werden.
+
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
 begruendet wurden.
@@ -777,6 +795,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Mobile-/Clutter-Regeln.
   M12-C startet die Plot-Capability-Ableitung und erzeugt Preview-Dateien;
   offen bleiben M12-C-Review, Sensitive-Content-Regeln und Mobile-/Clutter-
+  Regeln.
+  M12-C2 bewertet diese erste Capability-Richtung als grundsaetzlich
+  brauchbar; offen bleiben Sensitive-Content-Regeln und Mobile-/Clutter-
   Regeln.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
@@ -1036,6 +1057,17 @@ Aktuell nicht erlaubt / weiterhin blockiert:
   `sensitive`-Plots ohne eigene Folgepruefungen umsetzen,
 - keine Assetproduktion aus Plot-Capability-Karten ableiten,
 - keine automatische Wortplatzierung aus Plot-Capabilities ableiten,
+- keine finale Plot-Datenstruktur aus M12-C2 ableiten,
+- keine Runtime-Konfiguration aus M12-C2 ableiten,
+- keine Plot-Implementierung aus M12-C2 ableiten,
+- keine ThemeIsland-Umsetzung aus M12-C2 ableiten,
+- keine sensitive Plot-Funktion ohne M12-D planen,
+- keine Kleinteile-/Container-/Schulobjekt-Umsetzung ohne M12-E planen,
+- keine Gartenwachstums- oder Farm-Mechanik ohne Fairness-/Timer-Regeln
+  planen,
+- keine Water-/Travel-/Vehicle-/Digital-Plots ohne eigene Folgepruefung
+  planen,
+- keine App- oder Assetfreigabe aus M12-C oder M12-C2 ableiten,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1482,6 +1514,17 @@ Ein Schritt wird gestoppt, wenn:
   `sensitive`-Plots ohne eigene Folgepruefungen umgesetzt werden,
 - aus Plot-Capability-Karten Assetproduktion abgeleitet wird,
 - aus Plot-Capabilities automatische Wortplatzierung abgeleitet wird,
+- aus M12-C2 eine finale Plot-Datenstruktur abgeleitet wird,
+- aus M12-C2 Runtime-Konfiguration abgeleitet wird,
+- aus M12-C2 Plot-Implementierung abgeleitet wird,
+- aus M12-C2 ThemeIsland-Umsetzung abgeleitet wird,
+- eine sensitive Plot-Funktion ohne M12-D geplant wird,
+- Kleinteile-, Container- oder Schulobjekt-Umsetzung ohne M12-E geplant wird,
+- Gartenwachstums- oder Farm-Mechanik ohne Fairness-/Timer-Regeln geplant
+  wird,
+- Water-, Travel-, Vehicle- oder Digital-Plots ohne eigene Folgepruefung
+  geplant werden,
+- aus M12-C oder M12-C2 App-, Code- oder Assetfreigabe abgeleitet wird,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
