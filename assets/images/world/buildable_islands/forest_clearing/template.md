@@ -238,6 +238,18 @@ aufnehmen. Daraus folgen keine finale ThemeIsland-Roadmap, keine finale
 Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 ThemeIsland-Umsetzung, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+Phase 2G-M13-D startet den Word-to-Island UX Flow in
+`docs/world_design/284-word-to-island-ux-flow.md`. M13-D plant nur, wie ein
+Wort aus Nutzersicht ueber Kontext/Sense, Safety, Worttyp,
+ThemeIsland-Kandidat, Depth-Kandidat und Nutzerentscheidung zu Placement,
+Blueprint, Codex oder Backlog gefuehrt wird. Die Waldlichtung bleibt
+Starter-/Testform; Woerter duerfen nicht automatisch in sie hineingepresst
+werden. Kleine Objekte, sensible Begriffe, abstrakte Begriffe und
+mehrdeutige Woerter brauchen Routing-, Sense-, Safety- und Depth-Pruefung.
+Daraus folgen keine finale Word-to-Island-Implementierung, keine finale
+Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische
+Wortplatzierung, keine ThemeIsland-Umsetzung, keine App-/Assetfreigabe, kein
+Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -285,11 +297,12 @@ Fuehrende Dokumente:
 - `docs/world_design/281-early-island-onboarding-choice-review.md`
 - `docs/world_design/282-early-island-onboarding-choice-visual-review.md`
 - `docs/world_design/283-theme-island-capability-sheets.md`
+- `docs/world_design/284-word-to-island-ux-flow.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-C ThemeIsland Capability Sheets gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-D Word-to-Island UX Flow gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -564,6 +577,13 @@ Fuehrende Dokumente:
     finale Datenstruktur, keine Runtime-Konfiguration, keine ThemeIsland-
     Umsetzung, keine Plot-Implementierung, keine App-/Assetfreigabe und kein
     `frame_started` erzeugen.
+  - `phase2GM13D`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument `docs/world_design/284-word-to-island-ux-flow.md`.
+    M13-D darf den Word-to-Island UX Flow als Strukturmaterial planen, aber
+    keine finale Word-to-Island-Implementierung, keine finale Routing-
+    Datenstruktur, keine Runtime-Konfiguration, keine automatische
+    Wortplatzierung, keine ThemeIsland-Umsetzung, keine App-/Assetfreigabe und
+    kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1374,6 +1394,21 @@ In diesem Template-Block gilt:
 - Keine App- oder Assetfreigabe aus M13-C.
 - Kein Code aus M13-C.
 - Kein `frame_started` oder Bauzustand aus M13-C.
+- Keine finale Word-to-Island-Implementierung aus M13-D.
+- Keine finale Routing-Datenstruktur aus M13-D.
+- Keine Runtime-Konfiguration aus M13-D.
+- Keine automatische Wortplatzierung aus M13-D.
+- Keine automatische ThemeIsland-Auswahl ohne Nutzerbestaetigung.
+- Keine sichtbare Platzierung ohne passende Depth-Ebene.
+- Keine Kleinteile dauerhaft in IslandView.
+- Keine Gebaeudeteile ohne passenden Blueprint oder Bauzustand.
+- Keine Verben als statische Objekte erzwingen.
+- Keine sensiblen Begriffe automatisch visualisieren.
+- Keine Assets, keine Plot-Implementierung, keine ThemeIsland-Umsetzung und
+  keine Bauzustaende aus M13-D.
+- Keine App- oder Assetfreigabe aus M13-D.
+- Kein Code aus M13-D.
+- Kein `frame_started` oder Bauzustand aus M13-D.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1619,10 +1654,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13BEarlyIslandOnboardingChoiceStatus`: `started in docs/world_design/281-early-island-onboarding-choice-review.md; previews created under docs/world_design/previews/phase2g_m13b_early_island_onboarding_choice/; hybrid choice recommended as planning direction; no final onboarding UI, no final start island, no implementation release`
 - `phase2GM13B2EarlyIslandOnboardingChoiceReviewStatus`: `started in docs/world_design/282-early-island-onboarding-choice-visual-review.md; hybrid usable as first onboarding choice planning direction; no final onboarding UI, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GM13CThemeIslandCapabilitySheetsStatus`: `started in docs/world_design/283-theme-island-capability-sheets.md; capability sheets only; no final roadmap, no final start island, no final data structure, no runtime config, no implementation release`
+- `phase2GM13DWordToIslandUXFlowStatus`: `started in docs/world_design/284-word-to-island-ux-flow.md; UX flow only; no final routing implementation, no final routing data structure, no runtime config, no automatic word placement`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-C reviewen, M13-C nachbessern oder M13-D/M13-E als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-D reviewen, M13-D nachbessern oder M13-E/M13-F als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2416,6 +2452,28 @@ Phase-2G-M13-C-ThemeIsland-Capability-Sheets gilt nur fuer:
 - keine Runtime-Konfiguration,
 - keine ThemeIsland-Umsetzung,
 - keine Plot-Implementierung,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-D-Word-to-Island-UX-Flow gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/284-word-to-island-ux-flow.md`,
+- textuelle UX-Planung zwischen Wortaufnahme, Kontext/Sense, Safety,
+  ThemeIsland, Depth und Nutzerentscheidung,
+- PlacementCandidate, Blueprint, Codex und Backlog als Planungsbegriffe,
+- keine finale Word-to-Island-Implementierung,
+- keine finale Routing-Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
+- keine automatische ThemeIsland-Auswahl ohne Nutzerbestaetigung,
+- keine sichtbare Platzierung ohne passende Depth-Ebene,
+- keine Kleinteile dauerhaft in IslandView,
+- keine automatische Darstellung sensibler oder abstrakter Begriffe,
+- keine Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 
