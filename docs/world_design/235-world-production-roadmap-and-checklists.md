@@ -638,6 +638,18 @@ Aktueller Stand der Talvori-Welt-Produktion:
   finale DetailInteractionView-UI, keine Container-Implementierung, keine
   finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
   keine Implementierungsfreigabe, kein Code und kein `frame_started`.
+- M14-D wurde als Device/Accessibility Review Harness Plan in
+  `docs/world_design/303-device-accessibility-review-harness-plan.md`
+  gestartet. M14-D plant nur spaetere Review-Harness-Pruefungen fuer Device,
+  Accessibility, Text-Containment, Tap-Ziele, Safe Areas, Companion Collision,
+  Pagination und Guardrail Copy. Visualisierung bleibt textuell mit
+  ASCII-Harness-Flows, ASCII-Device-Frames, ASCII-QA-Check-Overlays,
+  Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/
+  Text-Containment-Checklisten. Daraus folgen keine PNGs, keine Screenshots,
+  keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine
+  Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale
+  Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+  Implementierungsfreigabe, kein Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -645,7 +657,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
   M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-/
-  M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-/M14-C2-Bewertung.
+  M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-/M14-C2-/M14-D-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -687,6 +699,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M14-B2-Word-to-Island-Product-Preview-Review dokumentarisch bestaetigt,
   M14-C-Container-QA-Product-Preview-Planung dokumentarisch geprueft,
   M14-C2-Container-QA-Product-Preview-Review dokumentarisch bestaetigt,
+  M14-D-Device-/Accessibility-Review-Harness-Planung dokumentarisch geprueft,
   nachgebessert oder konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -813,6 +826,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M14-B2 | Word-to-Island Product Preview Visual Review | `Review gestartet / M14-B als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/300-word-to-island-product-preview-visual-review.md`. Prueft den M14-B-Plan visuell/textuell gegen Product-Flow, Sense-/Route-Logik, Safety-/Clutter-Regeln, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-B ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Word-to-Island-UI, keine Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-C | Container QA Product Preview Plan | `Planung gestartet / Product-Preview textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/301-container-qa-product-preview-plan.md`. Plant produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow, QA-Zonen, Beispielpfade und ASCII-Product-Previews fuer ContainerOpenView, DetailInteractionView und kleine Objektgruppen. Visualisierung nur als ASCII-Product-Wireframes, ASCII-QA-Overlays, ASCII-Mobile-Frames, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-C2 | Container QA Product Preview Visual Review | `Review gestartet / M14-C als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/302-container-qa-product-preview-visual-review.md`. Prueft den M14-C-Plan visuell/textuell gegen Product-Wirkung, Beispielpfade, QA-Zonen, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-C ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-/QA-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-D | Device/Accessibility Review Harness Plan | `Planung gestartet / Harness-Pruefung textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/303-device-accessibility-review-harness-plan.md`. Plant nur spaetere Review-Harness-Pruefungen fuer Foundation Choice, Word-to-Island, Sense Selection, Fallbacks, ContainerOpenView, DetailInteractionView, Pagination, Tali/Vori-Bubbles, Safe Exit und Guardrail States. Visualisierung nur als ASCII-Harness-Flows, ASCII-Device-Frames, ASCII-QA-Check-Overlays, Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/Text-Containment-Checklisten. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1300,6 +1314,19 @@ Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale
 DetailInteractionView-UI, keine Container-Implementierung, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
 Implementierungsfreigabe, keinen Code und kein `frame_started`.
+
+M14-D startet den Device/Accessibility Review Harness Plan als reinen
+Dokumentations- und Visualisierungsplanungsblock. M14-D plant nur spaetere
+Review-Harness-Pruefungen fuer Device, Accessibility, Text-Containment,
+Tap-Ziele, Safe Areas, Companion Collision, Pagination und Guardrail Copy. Der
+Block nutzt nur ASCII-Harness-Flows, ASCII-Device-Frames,
+ASCII-QA-Check-Overlays, Mermaid-Flows, Markdown-Tabellen und Device-/
+Accessibility-/Tap-Target-/Text-Containment-Checklisten. Er erzeugt keine
+PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine
+Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-
+Integration, keine finale UI, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
+keinen Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2132,6 +2159,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Tests aus M14-C2 ableiten,
 - keine Spielassets aus M14-C2 ableiten,
 - kein `frame_started` oder Bauzustand aus M14-C2 weiterbauen,
+- keine Harness-Implementierung aus M14-D ableiten,
+- keine Tests aus M14-D ableiten,
+- keine Widget-Tests aus M14-D ableiten,
+- keine Flutter-/Dart-Dateien aus M14-D ableiten,
+- keine App-Integration aus M14-D ableiten,
+- keine finale UI aus M14-D ableiten,
+- keine finale Datenstruktur aus M14-D ableiten,
+- keine Runtime-Konfiguration aus M14-D ableiten,
+- keine Codefreigabe aus M14-D ableiten,
+- keine Implementierungsfreigabe aus M14-D ableiten,
+- keine Assetfreigabe aus M14-D ableiten,
+- keine PNG-Erzeugung aus M14-D ableiten,
+- keine Screenshots aus M14-D ableiten,
+- keine Spielassets aus M14-D ableiten,
+- kein `frame_started` oder Bauzustand aus M14-D weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2984,6 +3026,21 @@ Ein Schritt wird gestoppt, wenn:
 - aus M14-C2 Tests abgeleitet werden,
 - aus M14-C2 Spielassets abgeleitet werden,
 - `frame_started` oder Bauzustaende aus M14-C2 weitergebaut werden,
+- aus M14-D eine Harness-Implementierung abgeleitet wird,
+- aus M14-D Tests abgeleitet werden,
+- aus M14-D Widget-Tests abgeleitet werden,
+- aus M14-D Flutter-/Dart-Dateien abgeleitet werden,
+- aus M14-D App-Integration abgeleitet wird,
+- aus M14-D eine finale UI abgeleitet wird,
+- aus M14-D eine finale Datenstruktur abgeleitet wird,
+- aus M14-D Runtime-Konfiguration abgeleitet wird,
+- aus M14-D Codefreigabe abgeleitet wird,
+- aus M14-D Implementierungsfreigabe abgeleitet wird,
+- aus M14-D Assetfreigabe abgeleitet wird,
+- aus M14-D PNG-Erzeugung abgeleitet wird,
+- aus M14-D Screenshots abgeleitet werden,
+- aus M14-D Spielassets abgeleitet werden,
+- `frame_started` oder Bauzustaende aus M14-D weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
