@@ -663,6 +663,17 @@ Aktueller Stand der Talvori-Welt-Produktion:
   App-Integration, keine finale UI, keine finale Datenstruktur, keine
   Runtime-Konfiguration, keine App-/Assetfreigabe, keine
   Implementierungsfreigabe, kein Code und kein `frame_started`.
+- M14-E wurde als Small Implementation Slice Candidate Review in
+  `docs/world_design/305-small-implementation-slice-candidate-review.md`
+  gestartet. M14-E prueft nur, ob spaetere kleine Slices denkbar waeren.
+  Visualisierung bleibt textuell mit ASCII-Gate-Flows,
+  ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und Readiness-/
+  Blocker-/Scope-Matrizen. Daraus folgen keine PNGs, keine Screenshots, keine
+  Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine
+  Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale
+  Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+  Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung und
+  kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -671,7 +682,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
   M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-/
   M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-/M14-C2-/M14-D-/
-  M14-D2-Bewertung.
+  M14-D2-/M14-E-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -716,6 +727,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M14-D-Device-/Accessibility-Review-Harness-Planung dokumentarisch geprueft,
   M14-D2-Device-/Accessibility-Review-Harness-Review dokumentarisch
   bestaetigt,
+  M14-E-Small-Implementation-Slice-Candidate-Review dokumentarisch geprueft,
   nachgebessert oder konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -844,6 +856,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M14-C2 | Container QA Product Preview Visual Review | `Review gestartet / M14-C als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/302-container-qa-product-preview-visual-review.md`. Prueft den M14-C-Plan visuell/textuell gegen Product-Wirkung, Beispielpfade, QA-Zonen, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-C ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-/QA-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-D | Device/Accessibility Review Harness Plan | `Planung gestartet / Harness-Pruefung textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/303-device-accessibility-review-harness-plan.md`. Plant nur spaetere Review-Harness-Pruefungen fuer Foundation Choice, Word-to-Island, Sense Selection, Fallbacks, ContainerOpenView, DetailInteractionView, Pagination, Tali/Vori-Bubbles, Safe Exit und Guardrail States. Visualisierung nur als ASCII-Harness-Flows, ASCII-Device-Frames, ASCII-QA-Check-Overlays, Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/Text-Containment-Checklisten. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-D2 | Device/Accessibility Review Harness Visual Review | `Review gestartet / M14-D als Harness-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/304-device-accessibility-review-harness-visual-review.md`. Prueft den M14-D-Plan visuell/textuell gegen Coverage, Device-/Accessibility-Kategorien, ASCII-Harness-Frames, Harness-States, Runtime-Misread-Prevention und Guardrails. Ergebnis: M14-D ist als Review-Harness-Plan grundsaetzlich brauchbar; kleine Hinweise zu `harness_passed`, spaeteren Review-/Testtypen und nicht-finalen Device-Werten bleiben fuer spaetere Gate-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Device-Frames, ASCII-Harness-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/Text-Containment-Review-Checklisten. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-E | Small Implementation Slice Candidate Review | `Gate gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Gate-Reviewblock in `docs/world_design/305-small-implementation-slice-candidate-review.md`. Prueft nur, ob spaetere kleine Slices fuer Foundation Choice, Word-to-Island, Sense Selection, Fallbacks, Container, Device/Accessibility Harness oder bestehende Mock-Slice-Erweiterungen denkbar waeren. Ergebnis: keine direkte Implementierungsfreigabe; spaetere Review-/Harness-Kandidaten sind denkbar; ein sehr kleiner spaeterer Foundation-Choice-Slice koennte nach weiterem Gate theoretisch geprueft werden. `frame_started`, neue Assets, Growth/Garden, Sensitive/Special, Runtime-Konfiguration und automatische Wortplatzierung bleiben blockiert. Visualisierung nur als ASCII-Gate-Flows, ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und Readiness-/Blocker-/Scope-Matrizen. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1358,6 +1371,17 @@ Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-
 Integration, keine finale UI, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
 keinen Code und kein `frame_started`.
+
+M14-E startet den Small Implementation Slice Candidate Review als reinen
+Dokumentations- und Gate-Reviewblock. M14-E prueft nur, ob spaetere kleine
+Slices denkbar waeren. Der Block nutzt nur ASCII-Gate-Flows,
+ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und Readiness-/
+Blocker-/Scope-Matrizen. Er erzeugt keine PNGs, keine Screenshots, keine
+Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine
+Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+Implementierungsfreigabe, keinen Code, keine automatische Wortplatzierung und
+kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2220,6 +2244,22 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Screenshots aus M14-D2 ableiten,
 - keine Spielassets aus M14-D2 ableiten,
 - kein `frame_started` oder Bauzustand aus M14-D2 weiterbauen,
+- keine Implementierung aus M14-E ableiten,
+- keine Tests aus M14-E ableiten,
+- keine Widget-Tests aus M14-E ableiten,
+- keine Flutter-/Dart-Dateien aus M14-E ableiten,
+- keine App-Integration aus M14-E ableiten,
+- keine finale UI aus M14-E ableiten,
+- keine finale Datenstruktur aus M14-E ableiten,
+- keine Runtime-Konfiguration aus M14-E ableiten,
+- keine Codefreigabe aus M14-E ableiten,
+- keine Implementierungsfreigabe aus M14-E ableiten,
+- keine Assetfreigabe aus M14-E ableiten,
+- keine PNG-Erzeugung aus M14-E ableiten,
+- keine Screenshots aus M14-E ableiten,
+- keine Spielassets aus M14-E ableiten,
+- keine automatische Wortplatzierung aus M14-E ableiten,
+- kein `frame_started` oder Bauzustand aus M14-E weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3102,6 +3142,22 @@ Ein Schritt wird gestoppt, wenn:
 - aus M14-D2 Screenshots abgeleitet werden,
 - aus M14-D2 Spielassets abgeleitet werden,
 - `frame_started` oder Bauzustaende aus M14-D2 weitergebaut werden,
+- aus M14-E eine Implementierung abgeleitet wird,
+- aus M14-E Tests abgeleitet werden,
+- aus M14-E Widget-Tests abgeleitet werden,
+- aus M14-E Flutter-/Dart-Dateien abgeleitet werden,
+- aus M14-E App-Integration abgeleitet wird,
+- aus M14-E eine finale UI abgeleitet wird,
+- aus M14-E eine finale Datenstruktur abgeleitet wird,
+- aus M14-E Runtime-Konfiguration abgeleitet wird,
+- aus M14-E Codefreigabe abgeleitet wird,
+- aus M14-E Implementierungsfreigabe abgeleitet wird,
+- aus M14-E Assetfreigabe abgeleitet wird,
+- aus M14-E PNG-Erzeugung abgeleitet wird,
+- aus M14-E Screenshots abgeleitet werden,
+- aus M14-E Spielassets abgeleitet werden,
+- aus M14-E automatische Wortplatzierung abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M14-E weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,

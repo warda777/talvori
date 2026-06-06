@@ -447,6 +447,17 @@ Device-Gates blockiert. `frame_started` bleibt blockiert. Daraus folgen keine
 PNGs, keine Screenshots, keine Flutter-/Dart-Dateien, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
 Implementierungsfreigabe, kein Code und kein `frame_started`.
+M14-E startet den Small Implementation Slice Candidate Review in
+`docs/world_design/305-small-implementation-slice-candidate-review.md`. M14-E
+ist ein reiner Candidate Review. Die Waldlichtung bleibt Starter-/Testform.
+M14-E erzeugt keine neuen Assets, keine Bauzustaende, keine finale UI, keine
+Tests, keine Widget-Tests, keine Harness-Implementierung und keine App-
+Integration. Candidate Review bedeutet keine Umsetzung. Kleine Objekte bleiben
+ohne Container-/QA-/Device-Gates blockiert. `frame_started` bleibt blockiert.
+Daraus folgen keine PNGs, keine Screenshots, keine Flutter-/Dart-Dateien,
+keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine
+automatische Wortplatzierung und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -515,11 +526,12 @@ Fuehrende Dokumente:
 - `docs/world_design/302-container-qa-product-preview-visual-review.md`
 - `docs/world_design/303-device-accessibility-review-harness-plan.md`
 - `docs/world_design/304-device-accessibility-review-harness-visual-review.md`
+- `docs/world_design/305-small-implementation-slice-candidate-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-D2 Device/Accessibility Review Harness Visual Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-E Small Implementation Slice Candidate Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -994,6 +1006,16 @@ Fuehrende Dokumente:
     Integration, keine finale UI, keine finale Datenstruktur, keine
     Runtime-Konfiguration, keine App-/Assetfreigabe, keine
     Implementierungsfreigabe und kein `frame_started` erzeugen.
+  - `m14E`: `false` fuer Code/Assets; erlaubt nur das Gate-Reviewdokument
+    `docs/world_design/305-small-implementation-slice-candidate-review.md`.
+    M14-E darf spaetere kleine Slices als Kandidaten pruefen und
+    Readiness-/Blocker-/Scope-Matrizen erstellen, aber keine PNGs, keine
+    Screenshots, keine Tests, keine Widget-Tests, keine
+    Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-
+    Integration, keine finale UI, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/
+    Assetfreigabe, keine Implementierungsfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2096,6 +2118,22 @@ In diesem Template-Block gilt:
 - Keine Screenshots aus M14-D2.
 - Keine Spielassets aus M14-D2.
 - Kein `frame_started` oder Bauzustand aus M14-D2.
+- Keine Implementierung aus M14-E.
+- Keine Tests aus M14-E.
+- Keine Widget-Tests aus M14-E.
+- Keine Flutter-/Dart-Dateien aus M14-E.
+- Keine App-Integration aus M14-E.
+- Keine finale UI aus M14-E.
+- Keine finale Datenstruktur aus M14-E.
+- Keine Runtime-Konfiguration aus M14-E.
+- Keine Codefreigabe aus M14-E.
+- Keine Implementierungsfreigabe aus M14-E.
+- Keine Assetfreigabe aus M14-E.
+- Keine PNG-Erzeugung aus M14-E.
+- Keine Screenshots aus M14-E.
+- Keine Spielassets aus M14-E.
+- Keine automatische Wortplatzierung aus M14-E.
+- Kein `frame_started` oder Bauzustand aus M14-E.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2362,10 +2400,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m14C2ContainerQAProductPreviewReviewStatus`: `started in docs/world_design/302-container-qa-product-preview-visual-review.md; visual/text review only; M14-C usable as product preview plan; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14DDeviceAccessibilityReviewHarnessPlanStatus`: `started in docs/world_design/303-device-accessibility-review-harness-plan.md; review harness planning only; no harness implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14D2DeviceAccessibilityReviewHarnessReviewStatus`: `started in docs/world_design/304-device-accessibility-review-harness-visual-review.md; visual/text review only; M14-D usable as review harness plan; no harness implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
+- `m14ESmallImplementationSliceCandidateReviewStatus`: `started in docs/world_design/305-small-implementation-slice-candidate-review.md; gate review only; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M14-D2 reviewen, M14-D2 nachbessern oder M14-E/M14-D3/M14-C3 als reine Review-/Gate-Planung starten; Code, Assets, Tests, Screenshots und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M14-E reviewen, M14-E nachbessern oder M14-E2/M14-F/M14-D3 als reine Review-/Gate-Planung starten; Code, Assets, Tests, Screenshots und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3758,6 +3797,38 @@ M14-D2-Device-/Accessibility-Review-Harness-Visual-Review gilt nur fuer:
 - keine finale UI,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- keine Implementierungsfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+M14-E-Small-Implementation-Slice-Candidate-Review gilt nur fuer:
+
+- Gate-Reviewdokument in
+  `docs/world_design/305-small-implementation-slice-candidate-review.md`,
+- Kandidatenpruefung fuer Foundation Choice, Word-to-Island,
+  Sense Selection, Codex/Blueprint/Backlog, ContainerOpenView,
+  DetailInteractionView, Device/Accessibility Harness, bestehende
+  Mock-Slice-Erweiterung und `frame_started`,
+- Readiness-Level, Minimal-Slice-Kriterien, Kandidatenmatrix,
+  Einzelentscheidungen zu `frame_started` und Harness sowie Folgeblockplanung,
+- ASCII-Gate-Flows, ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und
+  Readiness-/Blocker-/Scope-Matrizen,
+- keine PNGs,
+- keine Screenshots,
+- keine Tests,
+- keine Widget-Tests,
+- keine Test-Harness-Implementierung,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine finale UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
 - keine neuen Assets,
 - keine Plot-Implementierung,
 - keine ThemeIsland-Umsetzung,
