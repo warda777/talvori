@@ -494,6 +494,19 @@ Implementierung und keine App-Integration. `frame_started` bleibt blockiert.
 Daraus folgen keine Flutter-/Dart-Dateien, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
 kein Code und kein `frame_started`.
+M15-A startet das Foundation Choice Implementation Gate in
+`docs/world_design/309-foundation-choice-implementation-gate.md`. M15-A ist ein
+reiner Dokumentations- und Gate-Reviewblock. Die Waldlichtung bleibt Starter-/
+Testform. M15-A prueft nur, ob ein spaeterer minimaler Foundation-Choice-Slice
+als lokale, nicht persistente, nicht finale Product Preview denkbar waere.
+Gate bedeutet keine Umsetzung. M15-A erzeugt keine neuen Assets, keine
+Bauzustaende, keine finale UI, keine Tests, keine Widget-Tests, keine
+Flutter-/Dart-Dateien und keine App-Integration. `frame_started` bleibt
+blockiert. Daraus folgen keine neuen PNGs, keine PNG-Aenderungen, keine
+Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase
+Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
+App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine
+automatische Wortplatzierung und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -566,11 +579,12 @@ Fuehrende Dokumente:
 - `docs/world_design/306-small-implementation-slice-candidate-visual-review.md`
 - `docs/world_design/307-visual-backfill-283-306.md`
 - `docs/world_design/308-visual-backfill-quality-review.md`
+- `docs/world_design/309-foundation-choice-implementation-gate.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-V1-B Visual Backfill Quality Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-A Foundation Choice Implementation Gate gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1087,6 +1101,18 @@ Fuehrende Dokumente:
     unter `assets/`, keine finale UI, keine Runtime-Konfiguration, keine
     App-/Assetfreigabe, keine Implementierungsfreigabe und kein
     `frame_started` erzeugen.
+  - `m15A`: `false` fuer Code/App/Assets; erlaubt nur das Gate-Dokument
+    `docs/world_design/309-foundation-choice-implementation-gate.md`. M15-A
+    darf pruefen, ob ein spaeterer minimaler Foundation-Choice-Slice als lokale,
+    nicht persistente, nicht finale Product Preview denkbar waere, aber keine
+    Implementierung, keine Tests, keine Widget-Tests, keine Flutter-/Dart-
+    Dateien, keine App-Integration, keine finale UI, keine Runtime-
+    Konfiguration, keine Persistenz, keine Supabase Writes, keine
+    SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
+    Codefreigabe, keine Implementierungsfreigabe, keine Assetfreigabe, keine
+    PNG-Erzeugung, keine PNG-Aenderung, keine Screenshots, keine Spielassets,
+    keine Asset-Dateien unter `assets/`, keine automatische Wortplatzierung
+    und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2251,6 +2277,27 @@ In diesem Template-Block gilt:
 - Keine Spielassets aus M14-V1-B.
 - Keine Asset-Dateien unter `assets/` aus M14-V1-B.
 - Kein `frame_started` oder Bauzustand aus M14-V1-B.
+- Keine Implementierung aus M15-A.
+- Keine Tests aus M15-A.
+- Keine Widget-Tests aus M15-A.
+- Keine Flutter-/Dart-Dateien aus M15-A.
+- Keine App-Integration aus M15-A.
+- Keine finale UI aus M15-A.
+- Keine Runtime-Konfiguration aus M15-A.
+- Keine Persistenz aus M15-A.
+- Keine Supabase Writes aus M15-A.
+- Keine SRS-/`word_progress`-Aenderung aus M15-A.
+- Keine Reward Bridge aus M15-A.
+- Keine Codefreigabe aus M15-A.
+- Keine Implementierungsfreigabe aus M15-A.
+- Keine Assetfreigabe aus M15-A.
+- Keine PNG-Erzeugung aus M15-A.
+- Keine PNG-Aenderung aus M15-A.
+- Keine Screenshots aus M15-A.
+- Keine Spielassets aus M15-A.
+- Keine Asset-Dateien unter `assets/` aus M15-A.
+- Keine automatische Wortplatzierung aus M15-A.
+- Kein `frame_started` oder Bauzustand aus M15-A.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2521,10 +2568,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m14E2SmallImplementationSliceCandidateVisualReviewStatus`: `started in docs/world_design/306-small-implementation-slice-candidate-visual-review.md; visual/text review only; M14-E usable as candidate review; implementation-candidate-later is no current code release; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14V1VisualBackfillStatus`: `started in docs/world_design/307-visual-backfill-283-306.md; documentation PNG previews generated under docs/world_design/previews/m14_visual_backfill_283_306; no Flutter or Dart files, no tests, no widget tests, no screenshots, no game assets, no asset files under assets, no final UI, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14V1BVisualBackfillQualityReviewStatus`: `started in docs/world_design/308-visual-backfill-quality-review.md; review only; existing PNG documentation previews checked; no new PNGs, no PNG changes, no Flutter or Dart files, no tests, no widget tests, no screenshots, no game assets, no asset files under assets, no final UI, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
+- `m15AFoundationChoiceImplementationGateStatus`: `started in docs/world_design/309-foundation-choice-implementation-gate.md; gate review only; later local non-persistent non-final preview theoretically possible only with separate implementation prompt and explicit user approval; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no PNGs, no PNG changes, no game assets, no asset files under assets, no final UI, no runtime config, no persistence, no Supabase writes, no SRS or word_progress changes, no Reward Bridge, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M14-V1-B reviewen, optional M14-V1-C nur bei spaeterem explizitem Fix-Wunsch planen, M14-E3/M15-A/M15-B/M15-C als reine Gate-Planung starten oder M14-F nur nach ausdruecklicher Nutzerfreigabe als separaten Implementierungs-Prompt pruefen; Code, Assets unter assets, Tests, Screenshots und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M15-A reviewen, optional M15-A2 als weiteres Review starten oder M14-F nur nach ausdruecklicher Nutzerfreigabe als separaten minimalen Implementierungs-Prompt pruefen; Code, Assets unter assets, Tests, Screenshots, Runtime-Konfiguration, Persistenz und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -4045,6 +4093,38 @@ M14-V1-B-Visual-Backfill-Quality-Review gilt nur fuer:
 - keine App-/Assetfreigabe,
 - keine Implementierungsfreigabe,
 - kein Code,
+- kein `frame_started`.
+
+M15-A-Foundation-Choice-Implementation-Gate gilt nur fuer:
+
+- Gate-Dokument in
+  `docs/world_design/309-foundation-choice-implementation-gate.md`,
+- Pruefung, ob ein spaeterer minimaler Foundation-Choice-Slice als lokale,
+  nicht persistente, nicht finale Product Preview denkbar waere,
+- Abgrenzung von erlaubtem Minimal-Scope und blockiertem Scope,
+- hypothetische Nennung moeglicher UI-/Onboarding-/Preview-/Testbereiche ohne
+  Dateiaenderung,
+- keine Implementierung,
+- keine Tests,
+- keine Widget-Tests,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine finale UI,
+- keine Runtime-Konfiguration,
+- keine Persistenz,
+- keine Supabase Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine Codefreigabe,
+- keine Implementierungsfreigabe,
+- keine Assetfreigabe,
+- keine PNG-Erzeugung,
+- keine PNG-Aenderung,
+- keine Screenshots,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- keine automatische Wortplatzierung,
+- keine Bauzustaende,
 - kein `frame_started`.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
