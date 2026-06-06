@@ -590,6 +590,17 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine finale Datenstruktur, keine Runtime-Konfiguration, keine
   App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code und kein
   `frame_started`.
+- M14-B wurde als Word-to-Island Product Preview Plan in
+  `docs/world_design/299-word-to-island-product-preview-plan.md` gestartet.
+  M14-B plant nur produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow und
+  ASCII-Product-Previews fuer Word-to-Island. Visualisierung bleibt textuell
+  mit ASCII-Product-Wireframes, ASCII-Mobile-Frames, ASCII-State-Previews,
+  Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-
+  Checklisten. Daraus folgen keine PNGs, keine Tests, keine App-Integration,
+  keine finale Word-to-Island-UI, keine finale Word-to-Island-Implementierung,
+  keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine
+  automatische Wortplatzierung, keine App-/Assetfreigabe, keine
+  Implementierungsfreigabe, kein Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -597,7 +608,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
   M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-/
-  M13-O-/M13-P-/M14-A-/M14-A2-Bewertung.
+  M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -635,6 +646,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M13-P als Implementation-Candidate-Gate dokumentarisch geprueft oder konkrete
   M14-A-Foundation-Choice-Product-Preview-Planung dokumentarisch geprueft,
   M14-A2-Foundation-Choice-Product-Preview-Review dokumentarisch bestaetigt,
+  M14-B-Word-to-Island-Product-Preview-Planung dokumentarisch geprueft,
   nachgebessert oder konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -757,6 +769,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-P | Implementation Candidate Gate | `Gate gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/296-implementation-candidate-gate.md`. Prueft, ob spaetere Product-/Review-Harness-/Implementation-Kandidaten denkbar sind, und ordnet sie nach `not-a-candidate`, `planning-only`, `preview-candidate-later`, `review-harness-candidate-later`, `implementation-candidate-later` und `blocked`. Visualisierung nur als Mermaid-Flows, ASCII-Gate-Flows, Markdown-Tabellen, Implementation-Readiness-Matrizen und Decision-/Blocker-Maps. Keine PNGs, keine Tests, keine App-Integration, keine finale Implementierungsfreigabe, keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine finale Onboarding-UI, keine finale Foundation-Choice-UI, keine finale Word-to-Island-UI, keine finale Container-UI, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | M14-A | Foundation Choice Product Preview Plan | `Planung gestartet / Product-Preview textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/297-foundation-choice-product-preview-plan.md`. Plant produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow, Foundation-Karten und ASCII-Product-Previews fuer die Foundation Choice zwischen Zuhause/Alltag, Schule/Lernen und Garten/Natur nah. Visualisierung nur als ASCII-Product-Wireframes, ASCII-Mobile-Frames, ASCII-State-Previews, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Foundation-Choice-UI, keine finale Onboarding-UI, keine finale Startinsel, keine finale ThemeIsland-Roadmap, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-A2 | Foundation Choice Product Preview Visual Review | `Review gestartet / M14-A als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/298-foundation-choice-product-preview-visual-review.md`. Prueft den M14-A-Plan visuell/textuell gegen Product-Flow, Foundation-Karten, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-A ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Foundation-Choice-UI, keine finale Onboarding-UI, keine finale Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-B | Word-to-Island Product Preview Plan | `Planung gestartet / Product-Preview textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/299-word-to-island-product-preview-plan.md`. Plant produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow, Beispielpfade und ASCII-Product-Previews fuer Word-to-Island. Visualisierung nur als ASCII-Product-Wireframes, ASCII-Mobile-Frames, ASCII-State-Previews, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Word-to-Island-UI, keine finale Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1194,6 +1207,18 @@ finale Foundation-Choice-UI, keine finale Onboarding-UI, keine finale
 Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 App-/Assetfreigabe, keine Implementierungsfreigabe, keinen Code und kein
 `frame_started`.
+
+M14-B startet den Word-to-Island Product Preview Plan als reinen
+Dokumentations- und Visualisierungsplanungsblock. M14-B plant nur
+produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow und
+ASCII-Product-Previews fuer Word-to-Island. Der Block nutzt nur
+ASCII-Product-Wireframes, ASCII-Mobile-Frames, ASCII-State-Previews,
+Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-
+Checklisten. Er erzeugt keine PNGs, keine Tests, keine App-Integration, keine
+finale Word-to-Island-UI, keine finale Word-to-Island-Implementierung, keine
+finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische
+Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
+keinen Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1974,6 +1999,19 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Tests aus M14-A2 ableiten,
 - keine Spielassets aus M14-A2 ableiten,
 - kein `frame_started` oder Bauzustand aus M14-A2 weiterbauen,
+- keine finale Word-to-Island-UI aus M14-B ableiten,
+- keine Word-to-Island-Implementierung aus M14-B ableiten,
+- keine finale Routing-Datenstruktur aus M14-B ableiten,
+- keine Runtime-Konfiguration aus M14-B ableiten,
+- keine automatische Wortplatzierung aus M14-B ableiten,
+- keine App-Integration aus M14-B ableiten,
+- keine Codefreigabe aus M14-B ableiten,
+- keine Implementierungsfreigabe aus M14-B ableiten,
+- keine Assetfreigabe aus M14-B ableiten,
+- keine PNG-Erzeugung aus M14-B ableiten,
+- keine Tests aus M14-B ableiten,
+- keine Spielassets aus M14-B ableiten,
+- kein `frame_started` oder Bauzustand aus M14-B weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2774,6 +2812,19 @@ Ein Schritt wird gestoppt, wenn:
 - aus M14-A2 Tests abgeleitet werden,
 - aus M14-A2 Spielassets abgeleitet werden,
 - `frame_started` oder Bauzustaende aus M14-A2 weitergebaut werden,
+- aus M14-B eine finale Word-to-Island-UI abgeleitet wird,
+- aus M14-B eine Word-to-Island-Implementierung abgeleitet wird,
+- aus M14-B eine finale Routing-Datenstruktur abgeleitet wird,
+- aus M14-B Runtime-Konfiguration abgeleitet wird,
+- aus M14-B automatische Wortplatzierung abgeleitet wird,
+- aus M14-B App-Integration abgeleitet wird,
+- aus M14-B Codefreigabe abgeleitet wird,
+- aus M14-B Implementierungsfreigabe abgeleitet wird,
+- aus M14-B Assetfreigabe abgeleitet wird,
+- aus M14-B PNG-Erzeugung abgeleitet wird,
+- aus M14-B Tests abgeleitet werden,
+- aus M14-B Spielassets abgeleitet werden,
+- `frame_started` oder Bauzustaende aus M14-B weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
