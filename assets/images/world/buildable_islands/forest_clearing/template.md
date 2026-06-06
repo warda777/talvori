@@ -229,6 +229,15 @@ keine finale Onboarding-UI, keine finale Startinsel, keine Onboarding-
 Implementierung, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+Phase 2G-M13-C startet die ThemeIsland Capability Sheets in
+`docs/world_design/283-theme-island-capability-sheets.md`. M13-C konkretisiert
+ThemeIsland-Kandidaten nur als Planungsstruktur fuer Lernbereiche, Worttypen,
+Plot-/Gebaeude-Faehigkeiten, Container-/Depth-Beispiele, Gates und Risiken.
+Die Waldlichtung bleibt Starter-/Testform und darf nicht alle ThemeIslands
+aufnehmen. Daraus folgen keine finale ThemeIsland-Roadmap, keine finale
+Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+ThemeIsland-Umsetzung, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -275,11 +284,12 @@ Fuehrende Dokumente:
 - `docs/world_design/280-theme-island-roadmap-visual-review.md`
 - `docs/world_design/281-early-island-onboarding-choice-review.md`
 - `docs/world_design/282-early-island-onboarding-choice-visual-review.md`
+- `docs/world_design/283-theme-island-capability-sheets.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-B2 Early Island Onboarding Choice Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-C ThemeIsland Capability Sheets gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -545,6 +555,14 @@ Fuehrende Dokumente:
     aber keine finale Onboarding-UI, keine finale Startinsel, keine Onboarding-
     Implementierung, keine ThemeIsland-Umsetzung, keine finale Datenstruktur,
     keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
+  - `phase2GM13C`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/283-theme-island-capability-sheets.md`.
+    M13-C darf ThemeIsland Capability Sheets als Strukturmaterial erstellen,
+    aber keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine
+    finale Datenstruktur, keine Runtime-Konfiguration, keine ThemeIsland-
+    Umsetzung, keine Plot-Implementierung, keine App-/Assetfreigabe und kein
     `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
@@ -1344,6 +1362,28 @@ In diesem Template-Block gilt:
   Pruefung.
 - Keine App- oder Assetfreigabe aus M13-B/M13-B2.
 - Kein `frame_started` oder Bauzustand aus M13-B/M13-B2.
+- Keine ThemeIsland-Umsetzung aus M13-C.
+- Keine finale ThemeIsland-Roadmap aus M13-C.
+- Keine finale Startinsel aus M13-C.
+- Keine finale Onboarding-UI aus M13-C.
+- Keine finale Datenstruktur aus M13-C.
+- Keine Runtime-Konfiguration aus M13-C.
+- Keine automatische Wortplatzierung aus M13-C.
+- Keine Assetproduktion aus M13-C.
+- Keine Plot-Implementierung aus M13-C.
+- Keine App- oder Assetfreigabe aus M13-C.
+- Kein Code aus M13-C.
+- Kein `frame_started` oder Bauzustand aus M13-C.
+- Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
+  Pruefung.
+- Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
+- Keine Schule-/Kleinteile-Umsetzung ohne Mobile-/Clutter-Regeln.
+- Kein Zuhause-/Alltag-Start als Pflicht-Hausstart.
+- Keine Sensitive-/Special-Insel ohne vertiefte Sensitive-Content-/Safety-/
+  UX-Regeln.
+- Keine Stadt-/Verkehr-/Technikinsel ohne eigenes Systemkonzept.
+- Keine Kuesten-/Hafeninsel ohne Water-/Dock-/Mobile-Komplexitaetspruefung.
+- Keine automatische Darstellung sensibler oder abstrakter Begriffe.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1578,10 +1618,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13A2ThemeIslandRoadmapReviewStatus`: `started in docs/world_design/280-theme-island-roadmap-visual-review.md; first roadmap draft usable; no final ThemeIsland roadmap, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GM13BEarlyIslandOnboardingChoiceStatus`: `started in docs/world_design/281-early-island-onboarding-choice-review.md; previews created under docs/world_design/previews/phase2g_m13b_early_island_onboarding_choice/; hybrid choice recommended as planning direction; no final onboarding UI, no final start island, no implementation release`
 - `phase2GM13B2EarlyIslandOnboardingChoiceReviewStatus`: `started in docs/world_design/282-early-island-onboarding-choice-visual-review.md; hybrid usable as first onboarding choice planning direction; no final onboarding UI, no final start island, no implementation release, no final data structure, no runtime config`
+- `phase2GM13CThemeIslandCapabilitySheetsStatus`: `started in docs/world_design/283-theme-island-capability-sheets.md; capability sheets only; no final roadmap, no final start island, no final data structure, no runtime config, no implementation release`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-B2 reviewen, M13-B/M13-B2 nachbessern oder M13-C/M13-D als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-C reviewen, M13-C nachbessern oder M13-D/M13-E als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2355,6 +2396,26 @@ Phase-2G-M13-B2-Early-Island-Onboarding-Choice-Visual-Review gilt nur fuer:
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine automatische Wortplatzierung,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-C-ThemeIsland-Capability-Sheets gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/283-theme-island-capability-sheets.md`,
+- textliche Capability Sheets fuer Foundation, Expansion Wave 1, Expansion
+  Wave 2, System-Heavy und Sensitive/Special,
+- Konkretisierung von Lernbereichen, Worttypen, Zonen, Plot-/Gebaeude-
+  Faehigkeiten, Container-/Depth-Beispielen, Gates und Risiken,
+- Bestaetigung, dass die Waldlichtung Starter-/Testform bleibt und nicht alle
+  ThemeIslands aufnehmen darf,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Startinsel,
+- keine finale Onboarding-UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine ThemeIsland-Umsetzung,
+- keine Plot-Implementierung,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 

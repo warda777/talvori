@@ -428,12 +428,21 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine finale Startinsel, keine Onboarding-Implementierung, keine
   ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-
   Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
+- Phase 2G-M13-C wurde als ThemeIsland Capability Sheets in
+  `docs/world_design/283-theme-island-capability-sheets.md` gestartet.
+  M13-C konkretisiert ThemeIsland-Kandidaten nur als Planungsstruktur:
+  Foundation-Sheets fuer Zuhause/Alltag, Schule/Lernen und Garten/Natur nah
+  sowie kompaktere Sheets fuer Expansion Wave 1, Expansion Wave 2,
+  System-Heavy und Sensitive/Special. Daraus folgen keine finale
+  ThemeIsland-Roadmap, keine finale Startinsel, keine finale Onboarding-UI,
+  keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-
+  Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
-  M13-, M13-A2-, M13-B- und M13-B2-Bewertung.
+  M13-, M13-A2-, M13-B-, M13-B2- und M13-C-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -454,7 +463,8 @@ Aktueller Stand der Talvori-Welt-Produktion:
   ThemeIsland-Roadmap-Draft dokumentarisch geprueft, M13-A2 als erster
   Roadmap-Draft dokumentarisch bestaetigt, M13-B als Early-Island-
   Onboarding-Choice-Planung dokumentarisch geprueft, M13-B2 als erste
-  Onboarding-Choice-Planungsrichtung dokumentarisch bestaetigt oder konkrete
+  Onboarding-Choice-Planungsrichtung dokumentarisch bestaetigt, M13-C als
+  ThemeIsland-Capability-Sheet-Planung dokumentarisch geprueft oder konkrete
   Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-Follow-ups
   geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
@@ -560,6 +570,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-A2 | ThemeIsland Roadmap Visual Review | `Review gestartet / erster Roadmap-Draft brauchbar` | Reiner Dokumentationsblock in `docs/world_design/280-theme-island-roadmap-visual-review.md`. Bewertet die M13-Previews visuell und inhaltlich. Ergebnis: Die Roadmap-Wellen, Early Candidate Cards, Gate Flow und Risk/Scope Map sind als erster Roadmap-Draft brauchbar. Keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-B | Early Island Onboarding Choice Review | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/281-early-island-onboarding-choice-review.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m13b_early_island_onboarding_choice/`: `01_onboarding_choice_flow.png`, `02_foundation_choice_cards.png`, `03_onboarding_variant_comparison.png`, `04_no_forced_start_guardrails.png` und `README.md`. Prueft eine reversible Foundation-Wahl zwischen Zuhause/Alltag, Schule/Lernen und Garten/Natur nah. Vorlaeufige Empfehlung: Hybrid aus kurzer Tali/Vori-Frage, drei Karten, Bestaetigung und spaeterer Aenderbarkeit. Keine finale Onboarding-UI, keine finale Startinsel, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-B2 | Early Island Onboarding Choice Visual Review | `Review gestartet / Hybrid-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/282-early-island-onboarding-choice-visual-review.md`. Bewertet die M13-B-Previews visuell und inhaltlich. Ergebnis: Onboarding Choice Flow, Foundation Choice Cards, Variantenvergleich und No-Forced-Start-Guardrails sind als erste Onboarding-Choice-Planungsrichtung brauchbar. Hybrid wird nur als Planungsrichtung bestaetigt. Keine finale Onboarding-UI, keine finale Startinsel, keine Onboarding-Implementierung, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-C | ThemeIsland Capability Sheets | `Planung gestartet / Sheets erstellt` | Reiner Dokumentationsblock in `docs/world_design/283-theme-island-capability-sheets.md`. Konkretisiert ThemeIsland-Kandidaten als Planungsstruktur: Foundation-Sheets fuer Zuhause/Alltag, Schule/Lernen und Garten/Natur nah sowie kompakte Sheets fuer Expansion Wave 1, Expansion Wave 2, System-Heavy und Sensitive/Special. Enthaelt Capability-Matrix, Gates und Stop-Regeln. Keine finale ThemeIsland-Roadmap, keine finale Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -819,6 +830,14 @@ Fallback verbindet. Daraus folgen keine finale Onboarding-UI, keine finale
 Startinsel, keine Onboarding-Implementierung, keine ThemeIsland-Umsetzung,
 keine finale Datenstruktur, keine Runtime-Konfiguration, keine automatische
 Wortplatzierung, keine App-/Assetfreigabe und kein `frame_started`.
+
+Phase 2G-M13-C startet ThemeIsland Capability Sheets als reinen
+Dokumentationsblock. Die Sheets konkretisieren Lernbereiche, Worttypen,
+Zonen, Plot-/Gebaeude-Faehigkeiten, Container-/Depth-Ideen, Gates und Risiken
+fuer Foundation, Expansion, System-Heavy und Sensitive/Special. Sie sind nur
+Planungsstruktur: keine finale Roadmap, keine finale Startinsel, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine ThemeIsland-Umsetzung, keine
+App-/Assetfreigabe, kein Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1378,6 +1397,28 @@ Aktuell nicht erlaubt / weiterhin blockiert:
   Pruefung planen,
 - keine App- oder Assetfreigabe aus M13-B/M13-B2 ableiten,
 - kein `frame_started` oder Bauzustand aus M13-B/M13-B2 weiterbauen,
+- keine ThemeIsland-Umsetzung aus M13-C ableiten,
+- keine finale ThemeIsland-Roadmap aus M13-C ableiten,
+- keine finale Startinsel aus M13-C ableiten,
+- keine finale Onboarding-UI aus M13-C ableiten,
+- keine finale Datenstruktur aus M13-C ableiten,
+- keine Runtime-Konfiguration aus M13-C ableiten,
+- keine automatische Wortplatzierung aus M13-C ableiten,
+- keine Assetproduktion aus M13-C ableiten,
+- keine App- oder Assetfreigabe aus M13-C ableiten,
+- keinen Code aus M13-C ableiten,
+- kein `frame_started` oder Bauzustand aus M13-C weiterbauen,
+- keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
+  Pruefung planen,
+- keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
+- keine Schule-/Kleinteile-Umsetzung ohne Mobile-/Clutter-Regeln planen,
+- keinen Zuhause-/Alltag-Start als Pflicht-Hausstart planen,
+- keine Sensitive-/Special-Insel ohne vertiefte Sensitive-Content-/Safety-/
+  UX-Regeln planen,
+- keine Stadt-/Verkehr-/Technikinsel ohne eigenes Systemkonzept planen,
+- keine Kuesten-/Hafeninsel ohne Water-/Dock-/Mobile-
+  Komplexitaetspruefung planen,
+- keine automatische Darstellung sensibler oder abstrakter Begriffe planen,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1952,6 +1993,29 @@ Ein Schritt wird gestoppt, wenn:
   Pruefung geplant wird,
 - aus M13-B/M13-B2 App-, Code- oder Assetfreigabe abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M13-B/M13-B2 weitergebaut werden,
+- aus M13-C eine ThemeIsland-Umsetzung abgeleitet wird,
+- aus M13-C eine finale ThemeIsland-Roadmap abgeleitet wird,
+- aus M13-C eine finale Startinsel abgeleitet wird,
+- aus M13-C eine finale Onboarding-UI abgeleitet wird,
+- aus M13-C eine finale Datenstruktur abgeleitet wird,
+- aus M13-C Runtime-Konfiguration abgeleitet wird,
+- aus M13-C automatische Wortplatzierung abgeleitet wird,
+- aus M13-C Assetproduktion abgeleitet wird,
+- aus M13-C App-, Code- oder Assetfreigabe abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M13-C weitergebaut werden,
+- eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
+  Pruefung geplant wird,
+- eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
+- eine Schule- oder Kleinteile-Umsetzung ohne Mobile-/Clutter-Regeln geplant
+  wird,
+- Zuhause oder Alltag als Pflicht-Hausstart geplant wird,
+- eine Sensitive- oder Special-Insel ohne vertiefte Sensitive-Content-,
+  Safety- und UX-Regeln geplant wird,
+- eine Stadt-, Verkehrs- oder Technikinsel ohne eigenes Systemkonzept geplant
+  wird,
+- eine Kuesten- oder Hafeninsel ohne Water-/Dock-/Mobile-
+  Komplexitaetspruefung geplant wird,
+- sensible oder abstrakte Begriffe automatisch dargestellt werden,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
