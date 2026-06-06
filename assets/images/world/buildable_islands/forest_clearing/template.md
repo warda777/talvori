@@ -311,6 +311,15 @@ folgen keine PNGs, keine Tests, keine finale ThemeIsland-Roadmap, keine finale
 Startinsel, keine finale Onboarding-UI, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+Phase 2G-M13-K startet Early Onboarding Product Wireframe Plan in
+`docs/world_design/291-early-onboarding-product-wireframe-plan.md`. M13-K ist
+ein reiner Early-Onboarding-Wireframe-Planungsblock. Die Waldlichtung bleibt
+Starter-/Testform. M13-K erzeugt keine neuen Assets, keine Bauzustaende, keine
+ThemeIsland-Bases, keine finale Onboarding-UI und keine App-Integration.
+`frame_started` bleibt blockiert. Daraus folgen keine PNGs, keine Tests, keine
+finale Startinsel, keine finale ThemeIsland-Roadmap, keine finale Datenstruktur,
+keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -365,11 +374,12 @@ Fuehrende Dokumente:
 - `docs/world_design/288-growth-timer-fairness-rules.md`
 - `docs/world_design/289-asset-prioritization-scope-gate.md`
 - `docs/world_design/290-m13-consolidated-readiness-review.md`
+- `docs/world_design/291-early-onboarding-product-wireframe-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-J Consolidated M13 Readiness Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-K Early Onboarding Product Wireframe Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -702,6 +712,14 @@ Fuehrende Dokumente:
     finale ThemeIsland-Roadmap, keine finale Startinsel, keine finale
     Onboarding-UI, keine finale Datenstruktur, keine Runtime-Konfiguration,
     keine App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM13K`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/291-early-onboarding-product-wireframe-plan.md`.
+    M13-K darf Early-Onboarding-Wireframes, UX-Zustaende, Foundation-Karten,
+    QA-/Device-Checklisten und textuelle Flows planen, aber keine PNGs, keine
+    Tests, keine App-Integration, keine finale Onboarding-UI, keine finale
+    Startinsel, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+    App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1621,6 +1639,17 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-J.
 - Keine Tests aus M13-J.
 - Kein `frame_started` oder Bauzustand aus M13-J.
+- Keine finale Onboarding-UI aus M13-K.
+- Keine App-Integration aus M13-K.
+- Keine Codefreigabe aus M13-K.
+- Keine Assetfreigabe aus M13-K.
+- Keine finale Startinsel aus M13-K.
+- Keine ThemeIsland-Umsetzung aus M13-K.
+- Keine finale Datenstruktur aus M13-K.
+- Keine Runtime-Konfiguration aus M13-K.
+- Keine PNG-Erzeugung aus M13-K.
+- Keine Tests aus M13-K.
+- Kein `frame_started` oder Bauzustand aus M13-K.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1873,10 +1902,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13HGrowthTimerFairnessStatus`: `started in docs/world_design/288-growth-timer-fairness-rules.md; fairness structure only; no growth implementation, no timer implementation, no retention implementation, no monetization rule, no runtime config`
 - `phase2GM13IAssetPrioritizationScopeGateStatus`: `started in docs/world_design/289-asset-prioritization-scope-gate.md; scope gate only; no asset production, no final asset list, no production release, no runtime config, no frame_started`
 - `phase2GM13JConsolidatedReadinessReviewStatus`: `started in docs/world_design/290-m13-consolidated-readiness-review.md; readiness review only; M13 chain usable as planning foundation; no code release, no asset release, no final roadmap, no runtime config, no frame_started`
+- `phase2GM13KEarlyOnboardingWireframeStatus`: `started in docs/world_design/291-early-onboarding-product-wireframe-plan.md; wireframe planning only; no final onboarding UI, no final start island, no app integration, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-J reviewen, M13-J nachbessern oder M13-K/M13-L/M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-K reviewen, M13-K nachbessern oder M13-L/M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2844,6 +2874,33 @@ Phase-2G-M13-J-Consolidated-M13-Readiness-Review gilt nur fuer:
 - keine finale Container-/Depth-UI,
 - keine finale Sensitive-Policy-Implementierung,
 - keine finale Growth-/Timer-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-K-Early-Onboarding-Product-Wireframe-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/291-early-onboarding-product-wireframe-plan.md`,
+- mobile-first Wireframe-Planung fuer Begruessung, Foundation-Karten,
+  Auswahl/Bestaetigung und Safe Exit,
+- UX-Zustaende fuer Lernfokus, spaetere Aenderbarkeit und
+  Codex-/Blueprint-/Backlog-Fallback,
+- textuelle Visualisierung mit ASCII-Wireframes, Mermaid-Flows,
+  Markdown-Tabellen, Product-Wireframe-Beschreibungen und QA-/Device-
+  Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale Onboarding-UI,
+- keine finale Startinsel,
+- keine finale ThemeIsland-Roadmap,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine neuen Assets,
