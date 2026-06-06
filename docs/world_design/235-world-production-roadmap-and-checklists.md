@@ -492,13 +492,23 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Assetproduktion, keine finale Assetliste, keine finale Produktionsfreigabe,
   keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
   Assetfreigabe, kein Code und kein `frame_started`.
+- Phase 2G-M13-J wurde als Consolidated M13 Readiness Review in
+  `docs/world_design/290-m13-consolidated-readiness-review.md` gestartet.
+  M13-J prueft nur M13-B bis M13-I als zusammenhaengende Planungsgrundlage.
+  Visualisierung bleibt textuell mit Mermaid, ASCII-Flows, Markdown-Tabellen,
+  Readiness-Matrix und Gate-/Decision-Flows. Daraus folgen keine PNGs, keine
+  Tests, keine App-Integration, keine Assetproduktion, keine finale Assetliste,
+  keine finale Produktionsfreigabe, keine finale ThemeIsland-Roadmap, keine
+  finale Startinsel, keine finale Onboarding-UI, keine finale Datenstruktur,
+  keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
-  M13-F-/M13-G-/M13-H-/M13-I-Bewertung.
+  M13-F-/M13-G-/M13-H-/M13-I-/M13-J-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -526,9 +536,10 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Container-Pagination-/Tap-Target-Regelplan dokumentarisch geprueft,
   M13-G als Sensitive-Content-Policy-Vertiefung dokumentarisch geprueft,
   M13-H als Growth-/Timer-Fairness-Regelplan dokumentarisch geprueft, M13-I
-  als Asset-Prioritization-/Scope-Gate-Planung dokumentarisch geprueft oder
+  als Asset-Prioritization-/Scope-Gate-Planung dokumentarisch geprueft, M13-J
+  als konsolidierte M13-Readiness-Grundlage dokumentarisch bestaetigt oder
   konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
-  Asset-Scope-Follow-ups geplant werden.
+  Asset-Scope-/Readiness-Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -639,6 +650,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M13-G | Sensitive Content Policy Deepening | `Planung gestartet / Policy textuell vertieft` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/287-sensitive-content-policy-deepening.md`. Vertieft Sensitive-Kategorien, Safe Representation Tiers, automatische Visualisierungsstopps, Tali/Vori-Verhalten, Privacy, User-Control, Policy-Matrizen und Gates. Visualisierung nur als Mermaid-Flow, ASCII-Flow und Markdown-Tabellen. Keine PNGs, keine Tests, keine finale Safety-Implementierung, keine Moderations-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine automatische Klassifikation, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-H | Growth And Timer Fairness Rules | `Planung gestartet / Fairness textuell vertieft` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/288-growth-timer-fairness-rules.md`. Vertieft Growth-Arten, Timer-Regeln, Streak-/Retention-Regeln, Tali/Vori-Erinnerungen, Fairness-Gates, harte Blocker und No-Decay-/No-Pay-to-Win-Leitplanken. Visualisierung nur als Mermaid-Flows, ASCII-Flow, Markdown-Tabellen und Fairness-/Timer-Matrizen. Keine PNGs, keine Tests, keine finale Growth-Implementierung, keine Timer-Implementierung, keine Retention-Implementierung, keine Monetarisierungsregel, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M13-I | Asset Prioritization Scope Gate | `Planung gestartet / Scope-Gate definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/289-asset-prioritization-scope-gate.md`. Vertieft Asset-Kategorien, Prioritaetslogik, Asset-Gates, harte Blocker und Entscheidungsflows, damit aus Taxonomy, Roadmap, Routing, Capability Sheets, Onboarding, Growth oder Sensitive Planning keine automatische Assetproduktion entsteht. Visualisierung nur als Mermaid-Flow, ASCII-Flow, Markdown-Tabellen und Scope-/Asset-Matrizen. Keine PNGs, keine Tests, keine Assetproduktion, keine finale Assetliste, keine finale Produktionsfreigabe, keine finale Datenstruktur, keine Runtime-Konfiguration, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M13-J | Consolidated M13 Readiness Review | `Review gestartet / M13-Kette als Planungsgrundlage brauchbar` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/290-m13-consolidated-readiness-review.md`. Konsolidiert M13-B bis M13-I: Hybrid-Onboarding, Capability Sheets, Word-to-Island UX, Device/Accessibility, Container/Tap Targets, Sensitive Policy, Growth/Timer Fairness und Asset Scope Gate. Ergebnis: Die Kette ist als Planungsgrundlage brauchbar, aber Code, Assets, App-Integration, finale Roadmap, finale Startinsel, finale Onboarding-UI, finale Datenstruktur, Runtime-Konfiguration, Assetfreigabe und `frame_started` bleiben blockiert. Visualisierung nur als Mermaid-Flow, ASCII-Flow, Markdown-Tabellen und Readiness-Matrix. Keine PNGs, keine Tests, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -870,11 +882,11 @@ Choice Review, M13-C ThemeIsland Capability Sheets, M13-D
 Word-to-Island-UX-Flow, M13-E Device And Accessibility Preview Plan,
 M13-F Container Pagination And Tap Target Rules oder M13-G Sensitive Content
 Policy Deepening, M13-H Growth And Timer Fairness Rules oder M13-I Asset
-Prioritization Scope Gate erlaubt. Keine finale ThemeIsland-Roadmap, keine
-ThemeIsland-Umsetzung, keine Implementierungsfreigabe, keine finale
-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung,
-keine App-/Assetfreigabe und kein `frame_started` duerfen aus M13 abgeleitet
-werden.
+Prioritization Scope Gate oder M13-J Consolidated M13 Readiness Review erlaubt.
+Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine
+Implementierungsfreigabe, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/
+Assetfreigabe und kein `frame_started` duerfen aus M13 abgeleitet werden.
 
 Phase 2G-M13-A2 bewertet den ThemeIsland Roadmap Draft visuell und inhaltlich
 als ersten brauchbaren Roadmap-Draft. Die Bestaetigung gilt nur fuer die
@@ -970,6 +982,17 @@ und Gate-/Decision-Flows. Er erzeugt keine PNGs, keine Tests, keine App-
 Integration, keine Assetproduktion, keine finale Assetliste, keine finale
 Produktionsfreigabe, keine finale Datenstruktur, keine Runtime-Konfiguration,
 keine App-/Assetfreigabe, keinen Code und kein `frame_started`.
+
+Phase 2G-M13-J startet Consolidated M13 Readiness Review als reinen
+Dokumentations- und Visualisierungsplanungsblock. M13-J prueft M13-B bis M13-I
+als zusammenhaengende Planungsgrundlage und dokumentiert, welche
+Folgebloecke weiterhin noetig bleiben. Der Block nutzt nur Mermaid,
+ASCII-Flows, Markdown-Tabellen, Readiness-Matrix und Gate-/Decision-Flows. Er
+erzeugt keine PNGs, keine Tests, keine App-Integration, keine Assetproduktion,
+keine finale Assetliste, keine finale Produktionsfreigabe, keine finale
+ThemeIsland-Roadmap, keine finale Startinsel, keine finale Onboarding-UI,
+keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/
+Assetfreigabe, keinen Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -1634,6 +1657,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Runtime-Konfiguration aus M13-I ableiten,
 - keine automatische Assetproduktion aus Taxonomy, Routing, Capability Sheets,
   Onboarding oder Roadmap ableiten,
+- keine Codefreigabe aus M13-J ableiten,
+- keine Assetfreigabe aus M13-J ableiten,
+- keine App-Integration aus M13-J ableiten,
+- keine finale ThemeIsland-Roadmap aus M13-J ableiten,
+- keine finale Startinsel aus M13-J ableiten,
+- keine finale Onboarding-UI aus M13-J ableiten,
+- keine finale Word-to-Island-Implementierung aus M13-J ableiten,
+- keine finale Container-/Depth-UI aus M13-J ableiten,
+- keine finale Sensitive-Policy-Implementierung aus M13-J ableiten,
+- keine finale Growth-/Timer-Implementierung aus M13-J ableiten,
+- keine finale Assetliste aus M13-J ableiten,
+- keine Runtime-Konfiguration aus M13-J ableiten,
+- keine PNG-Erzeugung aus M13-J ableiten,
+- keine Tests aus M13-J ableiten,
+- kein `frame_started` oder Bauzustand aus M13-J weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2318,6 +2356,21 @@ Ein Schritt wird gestoppt, wenn:
 - aus M13-I Runtime-Konfiguration abgeleitet wird,
 - aus Taxonomy, Routing, Capability Sheets, Onboarding oder Roadmap
   automatische Assetproduktion abgeleitet wird,
+- aus M13-J Codefreigabe abgeleitet wird,
+- aus M13-J Assetfreigabe abgeleitet wird,
+- aus M13-J App-Integration abgeleitet wird,
+- aus M13-J eine finale ThemeIsland-Roadmap abgeleitet wird,
+- aus M13-J eine finale Startinsel abgeleitet wird,
+- aus M13-J eine finale Onboarding-UI abgeleitet wird,
+- aus M13-J eine finale Word-to-Island-Implementierung abgeleitet wird,
+- aus M13-J eine finale Container-/Depth-UI abgeleitet wird,
+- aus M13-J eine finale Sensitive-Policy-Implementierung abgeleitet wird,
+- aus M13-J eine finale Growth-/Timer-Implementierung abgeleitet wird,
+- aus M13-J eine finale Assetliste abgeleitet wird,
+- aus M13-J Runtime-Konfiguration abgeleitet wird,
+- aus M13-J PNG-Erzeugung abgeleitet wird,
+- aus M13-J Tests abgeleitet werden,
+- `frame_started` oder Bauzustaende aus M13-J weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,

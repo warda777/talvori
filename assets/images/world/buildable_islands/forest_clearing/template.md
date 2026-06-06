@@ -301,6 +301,16 @@ Growth-Assets. `frame_started` bleibt blockiert. Daraus folgen keine PNGs,
 keine Tests, keine finale Assetliste, keine Produktionsfreigabe, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code
 und kein `frame_started`.
+Phase 2G-M13-J startet Consolidated M13 Readiness Review in
+`docs/world_design/290-m13-consolidated-readiness-review.md`. M13-J ist ein
+reiner Consolidated-Readiness-Review fuer M13-B bis M13-I. Die Waldlichtung
+bleibt Starter-/Testform. M13-J erzeugt keine neuen Assets, keine
+Bauzustaende, keine ThemeIsland-Bases und keine Container-/TinyObject-/
+Sensitive-/Companion-/Growth-Assets. `frame_started` bleibt blockiert. Daraus
+folgen keine PNGs, keine Tests, keine finale ThemeIsland-Roadmap, keine finale
+Startinsel, keine finale Onboarding-UI, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -354,11 +364,12 @@ Fuehrende Dokumente:
 - `docs/world_design/287-sensitive-content-policy-deepening.md`
 - `docs/world_design/288-growth-timer-fairness-rules.md`
 - `docs/world_design/289-asset-prioritization-scope-gate.md`
+- `docs/world_design/290-m13-consolidated-readiness-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-I Asset Prioritization Scope Gate gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-J Consolidated M13 Readiness Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -682,6 +693,15 @@ Fuehrende Dokumente:
     PNGs, keine Tests, keine Assetproduktion, keine finale Assetliste, keine
     finale Produktionsfreigabe, keine finale Datenstruktur, keine Runtime-
     Konfiguration, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM13J`: `false` fuer Code/Assets; erlaubt nur das
+    Reviewdokument
+    `docs/world_design/290-m13-consolidated-readiness-review.md`.
+    M13-J darf M13-B bis M13-I als zusammenhaengende Planungsgrundlage pruefen
+    und textuell visualisieren, aber keine PNGs, keine Tests, keine
+    App-Integration, keine Assetproduktion, keine finale Assetliste, keine
+    finale ThemeIsland-Roadmap, keine finale Startinsel, keine finale
+    Onboarding-UI, keine finale Datenstruktur, keine Runtime-Konfiguration,
+    keine App-/Assetfreigabe und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1586,6 +1606,21 @@ In diesem Template-Block gilt:
 - Keine Runtime-Konfiguration aus M13-I.
 - Keine automatische Assetproduktion aus Taxonomy, Routing, Capability Sheets,
   Onboarding oder Roadmap.
+- Keine Codefreigabe aus M13-J.
+- Keine Assetfreigabe aus M13-J.
+- Keine App-Integration aus M13-J.
+- Keine finale ThemeIsland-Roadmap aus M13-J.
+- Keine finale Startinsel aus M13-J.
+- Keine finale Onboarding-UI aus M13-J.
+- Keine finale Word-to-Island-Implementierung aus M13-J.
+- Keine finale Container-/Depth-UI aus M13-J.
+- Keine finale Sensitive-Policy-Implementierung aus M13-J.
+- Keine finale Growth-/Timer-Implementierung aus M13-J.
+- Keine finale Assetliste aus M13-J.
+- Keine Runtime-Konfiguration aus M13-J.
+- Keine PNG-Erzeugung aus M13-J.
+- Keine Tests aus M13-J.
+- Kein `frame_started` oder Bauzustand aus M13-J.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1837,10 +1872,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13GSensitivePolicyDeepeningStatus`: `started in docs/world_design/287-sensitive-content-policy-deepening.md; policy structure only; no safety implementation, no moderation implementation, no final data structure, no runtime config, no automatic classification`
 - `phase2GM13HGrowthTimerFairnessStatus`: `started in docs/world_design/288-growth-timer-fairness-rules.md; fairness structure only; no growth implementation, no timer implementation, no retention implementation, no monetization rule, no runtime config`
 - `phase2GM13IAssetPrioritizationScopeGateStatus`: `started in docs/world_design/289-asset-prioritization-scope-gate.md; scope gate only; no asset production, no final asset list, no production release, no runtime config, no frame_started`
+- `phase2GM13JConsolidatedReadinessReviewStatus`: `started in docs/world_design/290-m13-consolidated-readiness-review.md; readiness review only; M13 chain usable as planning foundation; no code release, no asset release, no final roadmap, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-I reviewen, M13-I nachbessern oder M13-J/M13-K als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-J reviewen, M13-J nachbessern oder M13-K/M13-L/M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2786,6 +2822,37 @@ Phase-2G-M13-I-Asset-Prioritization-Scope-Gate gilt nur fuer:
 - keine Runtime-Konfiguration,
 - keine App-/Assetfreigabe,
 - kein Code.
+
+Phase-2G-M13-J-Consolidated-M13-Readiness-Review gilt nur fuer:
+
+- Reviewdokument in
+  `docs/world_design/290-m13-consolidated-readiness-review.md`,
+- konsolidierte Pruefung von M13-B bis M13-I als Planungsgrundlage,
+- Readiness-Matrix, Gate-/Decision-Flows und Folgeblock-Vorschlaege,
+- textuelle Visualisierung mit Mermaid, ASCII-Flows, Markdown-Tabellen und
+  Readiness-Matrix,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine Assetproduktion,
+- keine finale Assetliste,
+- keine finale Produktionsfreigabe,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Startinsel,
+- keine finale Onboarding-UI,
+- keine finale Word-to-Island-Implementierung,
+- keine finale Container-/Depth-UI,
+- keine finale Sensitive-Policy-Implementierung,
+- keine finale Growth-/Timer-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
