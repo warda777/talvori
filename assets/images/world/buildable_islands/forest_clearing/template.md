@@ -220,6 +220,15 @@ Schule/Lernen und Garten/Natur nah. Daraus folgen keine finale Onboarding-UI,
 keine finale Startinsel, keine ThemeIsland-Umsetzung, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein
 Code und kein `frame_started`.
+Phase 2G-M13-B2 startet die visuelle Pruefung des Early Island Onboarding
+Choice Review in
+`docs/world_design/282-early-island-onboarding-choice-visual-review.md`.
+Ergebnis fuer den Review-Stand: M13-B ist als erste Onboarding-Choice-
+Planungsrichtung brauchbar; Hybrid bleibt nur Planungsrichtung. Daraus folgen
+keine finale Onboarding-UI, keine finale Startinsel, keine Onboarding-
+Implementierung, keine ThemeIsland-Umsetzung, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -265,11 +274,12 @@ Fuehrende Dokumente:
 - `docs/world_design/279-theme-island-roadmap-draft.md`
 - `docs/world_design/280-theme-island-roadmap-visual-review.md`
 - `docs/world_design/281-early-island-onboarding-choice-review.md`
+- `docs/world_design/282-early-island-onboarding-choice-visual-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-B Early Island Onboarding Choice gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-B2 Early Island Onboarding Choice Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -528,6 +538,14 @@ Fuehrende Dokumente:
     Onboarding-UI, keine finale Startinsel, keine ThemeIsland-Umsetzung, keine
     finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe
     und kein `frame_started` erzeugen.
+  - `phase2GM13B2`: `false` fuer Code/Assets; erlaubt nur den visuellen
+    Dokumentationsreview in
+    `docs/world_design/282-early-island-onboarding-choice-visual-review.md`.
+    M13-B2 darf Hybrid als erste Onboarding-Choice-Planungsrichtung bewerten,
+    aber keine finale Onboarding-UI, keine finale Startinsel, keine Onboarding-
+    Implementierung, keine ThemeIsland-Umsetzung, keine finale Datenstruktur,
+    keine Runtime-Konfiguration, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1310,6 +1328,22 @@ In diesem Template-Block gilt:
 - Kein Garten-/Growth-Start ohne Fairness-/Timer-Regeln.
 - Keine App- oder Assetfreigabe aus M13-B.
 - Kein `frame_started` oder Bauzustand aus M13-B.
+- Keine finale Onboarding-UI aus M13-B2.
+- Keine finale Startinsel aus M13-B2.
+- Keine Onboarding-Implementierung aus M13-B2.
+- Keine ThemeIsland-Umsetzung aus M13-B2.
+- Keine finale Datenstruktur aus M13-B2.
+- Keine Runtime-Konfiguration aus M13-B2.
+- Keine automatische Wortplatzierung aus M13-B2.
+- Keine Assets aus M13-B2.
+- Keine irreversible Erstwahl.
+- Kein Pflicht-Hausstart.
+- Kein Premium-/Paywall-Druck im Start-Onboarding.
+- Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
+- Keine Foundation-Insel ohne echte Device-/Accessibility-/Tap-Target-
+  Pruefung.
+- Keine App- oder Assetfreigabe aus M13-B/M13-B2.
+- Kein `frame_started` oder Bauzustand aus M13-B/M13-B2.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1543,10 +1577,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13ThemeIslandRoadmapDraftStatus`: `started in docs/world_design/279-theme-island-roadmap-draft.md; previews created under docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/; no final ThemeIsland roadmap, no implementation release, no final data structure, no runtime config`
 - `phase2GM13A2ThemeIslandRoadmapReviewStatus`: `started in docs/world_design/280-theme-island-roadmap-visual-review.md; first roadmap draft usable; no final ThemeIsland roadmap, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GM13BEarlyIslandOnboardingChoiceStatus`: `started in docs/world_design/281-early-island-onboarding-choice-review.md; previews created under docs/world_design/previews/phase2g_m13b_early_island_onboarding_choice/; hybrid choice recommended as planning direction; no final onboarding UI, no final start island, no implementation release`
+- `phase2GM13B2EarlyIslandOnboardingChoiceReviewStatus`: `started in docs/world_design/282-early-island-onboarding-choice-visual-review.md; hybrid usable as first onboarding choice planning direction; no final onboarding UI, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-B visuell pruefen, M13-B nachbessern oder M13-C/M13-D als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-B2 reviewen, M13-B/M13-B2 nachbessern oder M13-C/M13-D als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2300,6 +2335,26 @@ Phase-2G-M13-B-Early-Island-Onboarding-Choice-Review gilt nur fuer:
 - keine ThemeIsland-Umsetzung,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-B2-Early-Island-Onboarding-Choice-Visual-Review gilt nur fuer:
+
+- visuellen Dokumentationsreview in
+  `docs/world_design/282-early-island-onboarding-choice-visual-review.md`,
+- Pruefung der M13-B-Previews unter
+  `docs/world_design/previews/phase2g_m13b_early_island_onboarding_choice/`,
+- Bestaetigung, dass Hybrid als erste Onboarding-Choice-Planungsrichtung
+  brauchbar ist,
+- Bestaetigung, dass Zuhause/Alltag, Schule/Lernen und Garten/Natur nah nur
+  reversible Foundation-Fokusoptionen sind,
+- keine finale Onboarding-UI,
+- keine finale Startinsel,
+- keine Onboarding-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 
