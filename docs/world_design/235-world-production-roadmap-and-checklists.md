@@ -157,12 +157,16 @@ Aktueller Stand der Talvori-Welt-Produktion:
   eine abstrakte Capability-Greybox vor, die feste Variante-B-Rollenlabels
   durch neutrale Plot-Slots mit `allowedFunctions`, `isUserSelectable`,
   `unlockState`, Anchors, Sockets und Footprints ersetzt.
+- Phase 2G-M7-B wurde als reine Debug-/Dokumentations-Preview-Erzeugung
+  gestartet. Preview-Dateien liegen unter
+  `docs/world_design/previews/phase2g_m7_capability_greybox/` und sind keine
+  Spielassets, keine finale Kunst und keine Codefreigabe.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
-  Entscheidungslogik sowie des M7-Capability-Greybox-Plans. Danach duerfen
-  nur M7-Metadaten nachgebessert oder eine Debug-Capability-Greybox als
-  Dokumentationsmaterial geplant/erzeugt werden. Offen bleiben
-  ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
+  Entscheidungslogik sowie der M7-B-Capability-Greybox-Previews. Danach
+  duerfen nur die Capability-Greybox visuell geprueft, M7-Metadaten
+  nachgebessert oder eine vereinfachte Nutzer-/Produktansicht geplant werden.
+  Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
@@ -234,6 +238,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M6-E | Theme Islands / Personal Learning Archipelago | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Thematic Island And Archipelago Strategy, Candidate Theme Islands, First Island Choice, Island Roadmap, Word To Island Routing, Free/Paid-Prinzipien und Production Scope Control. Keine einzelne Insel darf alle Lernwelten erzwingen. Keine Themeninsel ohne Plot-Capabilities und Word-to-Island-Routing. Keine Monetarisierung ohne eigenes Dokument. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M6-F | Archipelago Navigation / Shared Backlog / Island Slots | `Planung vertieft / Pruefung offen` | Vertieft `docs/world_design/252-flexible-plot-placement-and-learning-semantics.md` um Archipelago Navigation, Shared Codex/Blueprint/Backlog, Cross-Island Word Routing, Multi-Home Words, Island Slot Lifecycle, Island Ownership/Identity und UX-Komplexitaetsschutz. Kein Multi-Island-System ohne Archipel-Navigation, kein Themeninsel-System ohne gemeinsamen Codex-/Blueprint-/Backlog-Plan, keine Social-/Showcase-Funktion ohne eigenes Privacy-/Social-Konzept. Kein finales Inselbild, kein Asset, kein Code. |
 | Phase 2G-M7 | Abstrakte Capability-Greybox | `Planung gestartet / keine Preview-PNGs` | Reiner Planungsblock in `docs/world_design/253-capability-greybox-plan.md`. Uebersetzt feste Variante-B-Labels in abstrakte Plot-Slots wie `core_plot_a`, `hub_capable_plot_a` und `edge_water_capable_plot_a`; definiert pro Plot `plotSize`, `allowedFunctions`, `isUserSelectable`, `unlockState`, `pathSockets`, `objectAnchors`, `buildingFootprint`, `requiredAdjacency` und Hinweise. Geplante Preview-Dateien werden nur dokumentiert, nicht erzeugt. Keine neue Greybox mit festen Gebaeude-Rollenlabels, keine Asset-Produktion, keine Codefreigabe. |
+| Phase 2G-M7-B | Debug-Capability-Greybox-Erzeugung | `Preview erzeugt / visuelle Pruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_capability_plot_overview.png`, `02_allowed_functions_overlay.png`, `03_anchor_socket_overlay.png`, `04_user_choice_flow_overlay.png` und `README.md` unter `docs/world_design/previews/phase2g_m7_capability_greybox/`. Die Preview-Dateien zeigen abstrakte Plot-Slots, `allowedFunctions`, Nutzerwaehlbarkeit, Anchors, Sockets, Footprints und Nutzerwahl-Flow. Sie sind keine Spielassets, keine finale Kunst und geben keine Code- oder Assetfreigabe. Naechster erlaubter Schritt: visuelle Pruefung der Capability-Greybox, danach bestaetigen oder nachbessern. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -308,12 +313,16 @@ M7 ersetzt feste Variante-B-Rollenlabels durch neutrale Plot-Slots und
 bereitet `allowedFunctions`, `isUserSelectable`, `unlockState`, Anchors,
 Sockets und Footprints fuer eine spaetere Debug-Greybox vor.
 
+Die Debug-Capability-Greybox wurde in Phase 2G-M7-B erzeugt:
+`docs/world_design/previews/phase2g_m7_capability_greybox/`.
+Die Preview-Dateien sind nur Dokumentations-/Debugmaterial.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die Pruefung des M7-Plans. Danach darf entweder die
-tatsaechliche Debug-Capability-Greybox als Dokumentationsmaterial erzeugt
-oder die M7-Metadaten nachgebessert werden. Die Preview-Dateien waeren nur
-Dokumentations-/Debugmaterial, kein finales Inselbild. `frame_started` bleibt
-gestoppt.
+Asset-Freigabe, sondern die visuelle Pruefung der M7-B-Capability-Greybox.
+Danach darf die Capability-Greybox bestaetigt oder nachgebessert werden. Eine
+vereinfachte Nutzer-/Produktansicht kann geplant werden, falls die technische
+Vollansicht zu dicht wirkt. Die Preview-Dateien sind kein finales Inselbild.
+`frame_started` bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -420,6 +429,10 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Debug-Preview-Erzeugung, eine moegliche einfache Nutzer-/Produktansicht
   neben der technischen Vollansicht und die Kompatibilitaet mit spaeteren
   ThemeIsland-Capabilities.
+- Phase 2G-M7-B hat die Debug-Capability-Greybox erzeugt. Offen bleiben die
+  manuelle visuelle Pruefung, die Frage, ob eine vereinfachte Nutzer-/
+  Produktansicht zusaetzlich noetig ist, und moegliche Nachbesserung der
+  Metadaten oder Layoutdichte.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
