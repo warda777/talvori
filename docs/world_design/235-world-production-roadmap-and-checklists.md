@@ -626,6 +626,18 @@ Aktueller Stand der Talvori-Welt-Produktion:
   DetailInteractionView-UI, keine Container-Implementierung, keine finale
   Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
   Implementierungsfreigabe, kein Code und kein `frame_started`.
+- M14-C2 wurde als Container QA Product Preview Visual Review in
+  `docs/world_design/302-container-qa-product-preview-visual-review.md`
+  gestartet. M14-C2 prueft nur M14-C visuell/textuell gegen Product-Wirkung,
+  Beispielpfade, QA-Zonen, Copy-Regeln, Product-States,
+  Device-/Accessibility-Regeln und Guardrails. Visualisierung bleibt textuell
+  mit ASCII-Review-Overlays, ASCII-Mobile-Frames,
+  ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/
+  Device-/Accessibility-/QA-Review-Checklisten. Daraus folgen keine PNGs,
+  keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine
+  finale DetailInteractionView-UI, keine Container-Implementierung, keine
+  finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
+  keine Implementierungsfreigabe, kein Code und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -633,7 +645,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-/M12-E2-/M12-F-,
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
   M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-/
-  M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-Bewertung.
+  M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-/M14-C2-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -674,6 +686,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M14-B-Word-to-Island-Product-Preview-Planung dokumentarisch geprueft,
   M14-B2-Word-to-Island-Product-Preview-Review dokumentarisch bestaetigt,
   M14-C-Container-QA-Product-Preview-Planung dokumentarisch geprueft,
+  M14-C2-Container-QA-Product-Preview-Review dokumentarisch bestaetigt,
   nachgebessert oder konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -799,6 +812,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M14-B | Word-to-Island Product Preview Plan | `Planung gestartet / Product-Preview textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/299-word-to-island-product-preview-plan.md`. Plant produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow, Beispielpfade und ASCII-Product-Previews fuer Word-to-Island. Visualisierung nur als ASCII-Product-Wireframes, ASCII-Mobile-Frames, ASCII-State-Previews, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Word-to-Island-UI, keine finale Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-B2 | Word-to-Island Product Preview Visual Review | `Review gestartet / M14-B als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/300-word-to-island-product-preview-visual-review.md`. Prueft den M14-B-Plan visuell/textuell gegen Product-Flow, Sense-/Route-Logik, Safety-/Clutter-Regeln, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-B ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale Word-to-Island-UI, keine Word-to-Island-Implementierung, keine finale Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-C | Container QA Product Preview Plan | `Planung gestartet / Product-Preview textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/301-container-qa-product-preview-plan.md`. Plant produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow, QA-Zonen, Beispielpfade und ASCII-Product-Previews fuer ContainerOpenView, DetailInteractionView und kleine Objektgruppen. Visualisierung nur als ASCII-Product-Wireframes, ASCII-QA-Overlays, ASCII-Mobile-Frames, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-C2 | Container QA Product Preview Visual Review | `Review gestartet / M14-C als Product-Preview-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/302-container-qa-product-preview-visual-review.md`. Prueft den M14-C-Plan visuell/textuell gegen Product-Wirkung, Beispielpfade, QA-Zonen, Copy-Regeln, Product-States, Device-/Accessibility-Regeln und Guardrails. Ergebnis: M14-C ist als Product-Preview-Plan grundsaetzlich brauchbar; kleine Copy-/Layout-/QA-Hinweise bleiben fuer spaetere Preview-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Mobile-Frames, ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-Review-Checklisten. Keine PNGs, keine Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine Container-Implementierung, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1274,6 +1288,18 @@ finale ContainerOpenView-UI, keine finale DetailInteractionView-UI, keine
 Container-Implementierung, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
 keinen Code und kein `frame_started`.
+
+M14-C2 startet den Container QA Product Preview Visual Review als reinen
+Dokumentations- und Visualisierungs-Reviewblock. M14-C2 prueft nur M14-C
+visuell/textuell gegen Product-Wirkung, Beispielpfade, QA-Zonen, Copy-Regeln,
+Product-States, Device-/Accessibility-Regeln und Guardrails. Der Block nutzt
+nur ASCII-Review-Overlays, ASCII-Mobile-Frames,
+ASCII-State-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Product-/
+Device-/Accessibility-/QA-Review-Checklisten. Er erzeugt keine PNGs, keine
+Tests, keine App-Integration, keine finale ContainerOpenView-UI, keine finale
+DetailInteractionView-UI, keine Container-Implementierung, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+Implementierungsfreigabe, keinen Code und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2093,6 +2119,19 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Tests aus M14-C ableiten,
 - keine Spielassets aus M14-C ableiten,
 - kein `frame_started` oder Bauzustand aus M14-C weiterbauen,
+- keine finale ContainerOpenView-UI aus M14-C2 ableiten,
+- keine finale DetailInteractionView-UI aus M14-C2 ableiten,
+- keine Container-Implementierung aus M14-C2 ableiten,
+- keine finale Datenstruktur aus M14-C2 ableiten,
+- keine Runtime-Konfiguration aus M14-C2 ableiten,
+- keine App-Integration aus M14-C2 ableiten,
+- keine Codefreigabe aus M14-C2 ableiten,
+- keine Implementierungsfreigabe aus M14-C2 ableiten,
+- keine Assetfreigabe aus M14-C2 ableiten,
+- keine PNG-Erzeugung aus M14-C2 ableiten,
+- keine Tests aus M14-C2 ableiten,
+- keine Spielassets aus M14-C2 ableiten,
+- kein `frame_started` oder Bauzustand aus M14-C2 weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -2932,6 +2971,19 @@ Ein Schritt wird gestoppt, wenn:
 - aus M14-C Tests abgeleitet werden,
 - aus M14-C Spielassets abgeleitet werden,
 - `frame_started` oder Bauzustaende aus M14-C weitergebaut werden,
+- aus M14-C2 eine finale ContainerOpenView-UI abgeleitet wird,
+- aus M14-C2 eine finale DetailInteractionView-UI abgeleitet wird,
+- aus M14-C2 eine Container-Implementierung abgeleitet wird,
+- aus M14-C2 eine finale Datenstruktur abgeleitet wird,
+- aus M14-C2 Runtime-Konfiguration abgeleitet wird,
+- aus M14-C2 App-Integration abgeleitet wird,
+- aus M14-C2 Codefreigabe abgeleitet wird,
+- aus M14-C2 Implementierungsfreigabe abgeleitet wird,
+- aus M14-C2 Assetfreigabe abgeleitet wird,
+- aus M14-C2 PNG-Erzeugung abgeleitet wird,
+- aus M14-C2 Tests abgeleitet werden,
+- aus M14-C2 Spielassets abgeleitet werden,
+- `frame_started` oder Bauzustaende aus M14-C2 weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
