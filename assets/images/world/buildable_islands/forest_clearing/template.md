@@ -404,6 +404,16 @@ automatische Wortplatzierung. `frame_started` bleibt blockiert. Daraus folgen
 keine PNGs, keine Tests, keine finale Routing-Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
 kein Code und kein `frame_started`.
+M14-C startet den Container QA Product Preview Plan in
+`docs/world_design/301-container-qa-product-preview-plan.md`. M14-C ist ein
+reiner Container-QA-Product-Preview-Plan. Die Waldlichtung bleibt Starter-/
+Testform. M14-C erzeugt keine neuen Assets, keine Bauzustaende, keine finale
+ContainerOpenView-UI, keine finale DetailInteractionView-UI und keine App-
+Integration. Product Preview bedeutet keine Umsetzung. Kleine Objekte bleiben
+ohne Container-/QA-/Device-Gates blockiert. `frame_started` bleibt blockiert.
+Daraus folgen keine PNGs, keine Tests, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
+kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -468,11 +478,12 @@ Fuehrende Dokumente:
 - `docs/world_design/298-foundation-choice-product-preview-visual-review.md`
 - `docs/world_design/299-word-to-island-product-preview-plan.md`
 - `docs/world_design/300-word-to-island-product-preview-visual-review.md`
+- `docs/world_design/301-container-qa-product-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-B2 Word-to-Island Product Preview Visual Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-C Container QA Product Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -906,6 +917,17 @@ Fuehrende Dokumente:
     Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische
     Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe
     und kein `frame_started` erzeugen.
+  - `m14C`: `false` fuer Code/Assets; erlaubt nur das Planungsdokument
+    `docs/world_design/301-container-qa-product-preview-plan.md`.
+    M14-C darf produktnahe Preview-Zustaende, Copy-Regeln, Product-Flow,
+    QA-Zonen, Beispielpfade, ASCII-Product-Previews und Product-/Device-/
+    Accessibility-/QA-Checklisten fuer ContainerOpenView,
+    DetailInteractionView und kleine Objektgruppen planen, aber keine PNGs,
+    keine Tests, keine App-Integration, keine finale ContainerOpenView-UI,
+    keine finale DetailInteractionView-UI, keine Container-Implementierung,
+    keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+    App-/Assetfreigabe, keine Implementierungsfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1952,6 +1974,19 @@ In diesem Template-Block gilt:
 - Keine Tests aus M14-B2.
 - Keine Spielassets aus M14-B2.
 - Kein `frame_started` oder Bauzustand aus M14-B2.
+- Keine finale ContainerOpenView-UI aus M14-C.
+- Keine finale DetailInteractionView-UI aus M14-C.
+- Keine Container-Implementierung aus M14-C.
+- Keine finale Datenstruktur aus M14-C.
+- Keine Runtime-Konfiguration aus M14-C.
+- Keine App-Integration aus M14-C.
+- Keine Codefreigabe aus M14-C.
+- Keine Implementierungsfreigabe aus M14-C.
+- Keine Assetfreigabe aus M14-C.
+- Keine PNG-Erzeugung aus M14-C.
+- Keine Tests aus M14-C.
+- Keine Spielassets aus M14-C.
+- Kein `frame_started` oder Bauzustand aus M14-C.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2214,10 +2249,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m14A2FoundationChoiceProductPreviewReviewStatus`: `started in docs/world_design/298-foundation-choice-product-preview-visual-review.md; visual/text review only; M14-A usable as product preview plan; no final Foundation Choice UI, no final onboarding UI, no final start island, no app integration, no code release, no asset release, no runtime config, no frame_started`
 - `m14BWordToIslandProductPreviewStatus`: `started in docs/world_design/299-word-to-island-product-preview-plan.md; product preview planning only; no final Word-to-Island UI, no Word-to-Island implementation, no routing data structure, no automatic placement, no app integration, no code release, no asset release, no runtime config, no frame_started`
 - `m14B2WordToIslandProductPreviewReviewStatus`: `started in docs/world_design/300-word-to-island-product-preview-visual-review.md; visual/text review only; M14-B usable as product preview plan; no final Word-to-Island UI, no Word-to-Island implementation, no routing data structure, no automatic placement, no app integration, no code release, no asset release, no runtime config, no frame_started`
+- `m14CContainerQAProductPreviewStatus`: `started in docs/world_design/301-container-qa-product-preview-plan.md; product preview planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M14-B2 reviewen, M14-B2 nachbessern oder M14-C/M14-B3/M14-A3 als reine Product-Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M14-C reviewen, M14-C nachbessern oder M14-C2/M14-B3/M14-A3 als reine Product-Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3485,6 +3521,35 @@ M14-B2-Word-to-Island-Product-Preview-Visual-Review gilt nur fuer:
 - keine finale Routing-Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine automatische Wortplatzierung,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- keine Implementierungsfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+M14-C-Container-QA-Product-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/301-container-qa-product-preview-plan.md`,
+- Product-Preview-Zustaende fuer Container Candidate, Preview Ready,
+  Focus Object Visible, Mini Challenge, Feedback, Pagination, Fallbacks und
+  QA Pass/Adjust/Blocked,
+- Copy-Regeln, QA-Zonen und Beispielpfade fuer Federmappe,
+  Kuechenschublade, Beet und Bootskiste,
+- ASCII-Product-Wireframes, ASCII-QA-Overlays und ASCII-Mobile-Frames,
+- Mermaid-Flows, Markdown-Tabellen und Product-/Device-/Accessibility-/QA-
+  Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale ContainerOpenView-UI,
+- keine finale DetailInteractionView-UI,
+- keine Container-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
 - keine neuen Assets,
 - keine Plot-Implementierung,
 - keine ThemeIsland-Umsetzung,
