@@ -250,6 +250,17 @@ Daraus folgen keine finale Word-to-Island-Implementierung, keine finale
 Routing-Datenstruktur, keine Runtime-Konfiguration, keine automatische
 Wortplatzierung, keine ThemeIsland-Umsetzung, keine App-/Assetfreigabe, kein
 Code und kein `frame_started`.
+Phase 2G-M13-E startet den Device And Accessibility Preview Plan in
+`docs/world_design/285-device-accessibility-preview-plan.md`. M13-E ist ein
+reiner Device-/Accessibility-/Preview-Pruefplan fuer spaetere Waldlichtung-,
+ThemeIsland-, Onboarding-, Container-, Word-to-Island- und
+Freigabeentscheidungen. Die Waldlichtung bleibt Starter-/Testform. Keine
+weitere Waldlichtung-, ThemeIsland-, Onboarding-, Container-, Word-to-Island-
+oder Freigabeentscheidung soll ohne passende visuelle, Device- oder
+Accessibility-Pruefung getroffen werden, wenn der Zustand visuell pruefbar
+ist. Daraus folgen keine neuen PNGs, keine Tests, keine finale UI, keine
+finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
+kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -298,11 +309,12 @@ Fuehrende Dokumente:
 - `docs/world_design/282-early-island-onboarding-choice-visual-review.md`
 - `docs/world_design/283-theme-island-capability-sheets.md`
 - `docs/world_design/284-word-to-island-ux-flow.md`
+- `docs/world_design/285-device-accessibility-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-D Word-to-Island UX Flow gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-E Device Accessibility Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -584,6 +596,14 @@ Fuehrende Dokumente:
     Datenstruktur, keine Runtime-Konfiguration, keine automatische
     Wortplatzierung, keine ThemeIsland-Umsetzung, keine App-/Assetfreigabe und
     kein `frame_started` erzeugen.
+  - `phase2GM13E`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/285-device-accessibility-preview-plan.md`.
+    M13-E darf Device-/Accessibility-/Preview-Pruefkategorien, Preview-Typen,
+    Checklisten, harte Blocker und Freigabegrade planen, aber keine Preview-
+    PNGs, keine Tests, keine finale UI, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1409,6 +1429,18 @@ In diesem Template-Block gilt:
 - Keine App- oder Assetfreigabe aus M13-D.
 - Kein Code aus M13-D.
 - Kein `frame_started` oder Bauzustand aus M13-D.
+- Keine UI-Implementierung aus M13-E.
+- Keine finalen Device-Regeln als Runtime-Konfiguration aus M13-E.
+- Keine finalen Accessibility-Regeln als Runtime-Konfiguration aus M13-E.
+- Keine Preview-PNG-Erzeugung aus M13-E.
+- Keine Tests aus M13-E.
+- Keine App- oder Assetfreigabe aus M13-E.
+- Kein Code aus M13-E.
+- Kein `frame_started` oder Bauzustand aus M13-E.
+- Keine finale Onboarding-UI aus M13-E.
+- Keine finale ThemeIsland-UI aus M13-E.
+- Keine finale Word-to-Island-UI aus M13-E.
+- Keine finale Container-/Depth-UI aus M13-E.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1655,10 +1687,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13B2EarlyIslandOnboardingChoiceReviewStatus`: `started in docs/world_design/282-early-island-onboarding-choice-visual-review.md; hybrid usable as first onboarding choice planning direction; no final onboarding UI, no final start island, no implementation release, no final data structure, no runtime config`
 - `phase2GM13CThemeIslandCapabilitySheetsStatus`: `started in docs/world_design/283-theme-island-capability-sheets.md; capability sheets only; no final roadmap, no final start island, no final data structure, no runtime config, no implementation release`
 - `phase2GM13DWordToIslandUXFlowStatus`: `started in docs/world_design/284-word-to-island-ux-flow.md; UX flow only; no final routing implementation, no final routing data structure, no runtime config, no automatic word placement`
+- `phase2GM13EDeviceAccessibilityPreviewPlanStatus`: `started in docs/world_design/285-device-accessibility-preview-plan.md; preview check plan only; no PNGs, no tests, no final UI, no final data structure, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-D reviewen, M13-D nachbessern oder M13-E/M13-F als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-E reviewen, M13-E nachbessern oder M13-F/M13-G als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2475,6 +2508,32 @@ Phase-2G-M13-D-Word-to-Island-UX-Flow gilt nur fuer:
 - keine ThemeIsland-Umsetzung,
 - keine Bauzustaende,
 - keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-E-Device-And-Accessibility-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/285-device-accessibility-preview-plan.md`,
+- Pruefkategorien fuer Device-Groessen, Orientierung, Tap-Ziele,
+  Text-Containment, Accessibility, Mobile-Clutter und UX-Komplexitaet,
+- Klassifikation spaeterer Preview-Typen,
+- Checklisten vor Preview-Erzeugung, nach Preview-Erzeugung und vor Commit,
+- harte Blocker fuer visuelle, mobile und accessibilitybezogene Freigaben,
+- Freigabegrade wie `planning-only`, `debug-preview-ok`,
+  `product-preview-ok`, `device-preview-required`,
+  `accessibility-review-required`, `blocked` und
+  `implementation-candidate`,
+- keine neuen PNGs,
+- keine Tests,
+- keine finale UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine App-/Assetfreigabe,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- kein Code,
 - kein `frame_started`.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
