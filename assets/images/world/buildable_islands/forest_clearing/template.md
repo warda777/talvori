@@ -329,6 +329,15 @@ Word-to-Island-UI und keine App-Integration. `frame_started` bleibt blockiert.
 Daraus folgen keine PNGs, keine Tests, keine finale Routing-Datenstruktur,
 keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
 `frame_started`.
+Phase 2G-M13-M startet Container QA Overlay Preview Plan in
+`docs/world_design/293-container-qa-overlay-preview-plan.md`. M13-M ist ein
+reiner Container-QA-Overlay-Preview-Planungsblock. Die Waldlichtung bleibt
+Starter-/Testform. M13-M erzeugt keine neuen Assets, keine Bauzustaende, keine
+Container-UI, keine DetailInteractionView und keine App-Integration. Kleine
+Objekte bleiben ohne Container-/QA-/Device-Gates blockiert. `frame_started`
+bleibt blockiert. Daraus folgen keine PNGs, keine Tests, keine finale
+Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein
+Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -385,11 +394,12 @@ Fuehrende Dokumente:
 - `docs/world_design/290-m13-consolidated-readiness-review.md`
 - `docs/world_design/291-early-onboarding-product-wireframe-plan.md`
 - `docs/world_design/292-word-to-island-product-ux-preview-plan.md`
+- `docs/world_design/293-container-qa-overlay-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-L Word-to-Island Product UX Preview Plan gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-M Container QA Overlay Preview Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -740,6 +750,17 @@ Fuehrende Dokumente:
     Word-to-Island-Implementierung, keine Routing-Datenstruktur, keine
     Runtime-Konfiguration, keine automatische Wortplatzierung, keine
     App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM13M`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/293-container-qa-overlay-preview-plan.md`.
+    M13-M darf Container-QA-Overlay-Ebenen, ASCII-QA-Wireframes,
+    Tap-Zonen, Label-Zonen, Safe Areas, Pagination-Zonen, Tali/Vori-
+    Exclusion-Zonen, QA-Entscheidungspunkte und Device-/Accessibility-
+    Checklisten planen, aber keine PNGs, keine Tests, keine App-Integration,
+    keine finale ContainerOpenView-UI, keine finale DetailInteractionView-UI,
+    keine Container-Implementierung, keine finale Datenstruktur, keine
+    Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1681,6 +1702,17 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-L.
 - Keine Tests aus M13-L.
 - Kein `frame_started` oder Bauzustand aus M13-L.
+- Keine finale ContainerOpenView-UI aus M13-M.
+- Keine finale DetailInteractionView-UI aus M13-M.
+- Keine Container-Implementierung aus M13-M.
+- Keine finale Datenstruktur aus M13-M.
+- Keine Runtime-Konfiguration aus M13-M.
+- Keine App-Integration aus M13-M.
+- Keine Codefreigabe aus M13-M.
+- Keine Assetfreigabe aus M13-M.
+- Keine PNG-Erzeugung aus M13-M.
+- Keine Tests aus M13-M.
+- Kein `frame_started` oder Bauzustand aus M13-M.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1935,10 +1967,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13JConsolidatedReadinessReviewStatus`: `started in docs/world_design/290-m13-consolidated-readiness-review.md; readiness review only; M13 chain usable as planning foundation; no code release, no asset release, no final roadmap, no runtime config, no frame_started`
 - `phase2GM13KEarlyOnboardingWireframeStatus`: `started in docs/world_design/291-early-onboarding-product-wireframe-plan.md; wireframe planning only; no final onboarding UI, no final start island, no app integration, no runtime config, no frame_started`
 - `phase2GM13LWordToIslandProductUXPreviewStatus`: `started in docs/world_design/292-word-to-island-product-ux-preview-plan.md; UX preview planning only; no final Word-to-Island UI, no implementation, no routing data structure, no automatic placement, no runtime config, no frame_started`
+- `phase2GM13MContainerQAOverlayPreviewStatus`: `started in docs/world_design/293-container-qa-overlay-preview-plan.md; QA overlay planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-L reviewen, M13-L nachbessern oder M13-M/M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-M reviewen, M13-M nachbessern oder M13-N als reine Preview-/Review-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2962,6 +2995,37 @@ Phase-2G-M13-L-Word-to-Island-Product-UX-Preview-Plan gilt nur fuer:
 - keine Routing-Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine automatische Wortplatzierung,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-M-Container-QA-Overlay-Preview-Plan gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/293-container-qa-overlay-preview-plan.md`,
+- QA-Overlay-Ebenen fuer Safe Area, Container Bounds, Focus Object Zone,
+  Secondary Object Zone, Label Zone, Tap Target Zone, Primary Button Zone,
+  Pagination Zone, Tali/Vori Exclusion Zone und Blocked/Overflow Zone,
+- ASCII-QA-Wireframes fuer gute ContainerOpenView, blockierte
+  ContainerOpenView, DetailInteractionView, Pagination-Fall und
+  Tali/Vori-Ueberdeckungsrisiko,
+- QA-Entscheidungspunkte fuer Passed, Layout Adjustment, Pagination, Codex,
+  Blueprint, Backlog, Device Preview, Clutter, Accessibility, Sensitive und
+  Growth,
+- textuelle Visualisierung mit ASCII-Wireframes, ASCII-QA-Overlays,
+  Mermaid-Flows, Markdown-Tabellen und QA-/Device-Checklisten,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale ContainerOpenView-UI,
+- keine finale DetailInteractionView-UI,
+- keine Container-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
 - keine neuen Assets,
 - keine Plot-Implementierung,
 - keine ThemeIsland-Umsetzung,
