@@ -36,6 +36,7 @@ Grundlagen:
 - `docs/world_design/265-multi-example-container-flow-visual-review.md`
 - `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`
 - `docs/world_design/267-world-content-taxonomy-review.md`
+- `docs/world_design/268-theme-island-prioritization.md`
 - `docs/220-talvori-world-professional-game-architecture-research.md`
 - `docs/221-talvori-world-build-and-expansion-architecture.md`
 - `docs/222-talvori-world-game-system-master-plan.md`
@@ -281,17 +282,31 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Gesundheits-/Notfallobjekte und sensible Kultur-/Politik-/
   Gesellschaftsbereiche bleiben Follow-ups. Keine finale ThemeIsland-Roadmap,
   keine Assetliste, kein Code, kein Asset und kein `frame_started`.
+- Phase 2G-M12 wurde als ThemeIsland Prioritization in
+  `docs/world_design/268-theme-island-prioritization.md` gestartet.
+  Preview-Dateien liegen unter
+  `docs/world_design/previews/phase2g_m12_theme_island_prioritization/`.
+  Ergebnis fuer den Planungsstand: Zuhause/Alltag, Schule/Lernen und
+  Garten/Natur nah sind die staerksten Early-Kandidaten. Kueste/Meer/Hafen,
+  Essen/Restaurant/Cafe, Einkauf/Versorgung und Land/Farm sind gute
+  Mid-Kandidaten. Stadt, Verkehr, Arbeit, Freizeit, Outdoor und Technik
+  bleiben spaeter; Gesundheit, Kultur/Gesellschaft/Verwaltung sowie
+  Religion/Politik/Gericht/Polizei bleiben bis zu Sensitive-Content-Regeln
+  blockiert. Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung,
+  keine Assetliste, kein Code, kein Asset und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
-  M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C- und M11-C2-Bewertung.
+  M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2- und M12-
+  Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
   erste Challenge-Empfehlung dokumentarisch bestaetigt, M10-C als erste
   Companion-Reaktionsrichtung dokumentarisch bestaetigt, M11 als Multi-Flow-
   Richtung dokumentarisch bestaetigt, der World-Content-Katalog als erste
-  Content-/Location-Grundlage bestaetigt oder konkrete Taxonomy-/Routing-
+  Content-/Location-Grundlage bestaetigt, M12 als erste ThemeIsland-
+  Priorisierung dokumentarisch bestaetigt oder konkrete Taxonomy-/Routing-
   Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
@@ -381,6 +396,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M11-B | Multi-Example Container Flow Visual Review | `Review gestartet / Multi-Flow-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/265-multi-example-container-flow-visual-review.md`. Bewertet die M11-Previews visuell. Ergebnis: Die drei Flows sind verstaendlich, Tap-Auswahl bleibt uebergreifend der staerkste MVP-Kandidat, Audio + Tap bleibt zweite Stufe, Matching/Sortieren bleiben spaeter sinnvoll und Mini-Sequenzen bleiben advanced. Schule/Federmappe und Garten/Beet sind besonders tragfaehig; Hafen/Bootskajute bleibt wertvoll, aber mobil/visuell riskanter. Keine finale Container-Systemarchitektur, keine Flow-Implementierung, kein Code, kein Asset. |
 | Phase 2G-M11-C | World Content Taxonomy / Location Catalog | `Taxonomy-Backlog gestartet` | Reiner Dokumentationsnachtrag in `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`. Strukturiert Wohnbereiche, Grundstueck/Aussenbereiche, Fahrzeuge/Parken, Strassen/Wege, Stadt/Dorfzentrum, Einkauf/Versorgung, Gastronomie/Freizeit, oeffentliche Gebaeude, Arbeit/Gewerbe/Industrie, Natur/Gruenflaechen, Freizeitflaechen draussen, Wasser/Hafen/Kueste, Landwirtschaft und Dekoration/Details. Der Katalog ist keine Assetfreigabe, keine Bau-Freigabe und keine finale ThemeIsland-Roadmap; er dient spaeter ThemeIsland-Routing, Plot-Capabilities, Depth-/Container-Planung und Asset-Priorisierung. |
 | Phase 2G-M11-C2 | World Content Taxonomy Review | `Review gestartet / erste Grundlage brauchbar` | Reiner Dokumentationsblock in `docs/world_design/267-world-content-taxonomy-review.md`. Bewertet den Katalog aus `266` als erste Content-/Location-Grundlage. Ergebnis: Die 14 Hauptkategorien sind sinnvoll und die Ebene ThemeIsland -> Zone -> Plot/Gebaeude -> Aussenbereich -> Innenraum -> Container/Fokusobjekt -> Detail/Deko ist brauchbar. Offen bleiben ThemeIsland-Priorisierung, Word-to-Island-Routing-Matrix, Plot-Capability-Ableitung, Sensitive-Content-Regeln und Mobile-/Clutter-Regeln fuer Kleinteile und Deko. Keine finale Roadmap, keine Assetliste, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M12 | ThemeIsland Prioritization | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/268-theme-island-prioritization.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12_theme_island_prioritization/`: `01_theme_island_priority_map.png`, `02_theme_island_decision_matrix.png`, `03_early_candidate_flow_examples.png`, `04_scope_risk_wave_plan.png` und `README.md`. Ergebnis fuer den Planungsstand: Zuhause/Alltag, Schule/Lernen und Garten/Natur nah als Early-Kandidaten; Kueste/Meer/Hafen, Essen/Restaurant/Cafe, Einkauf/Versorgung und Land/Farm als Mid-Kandidaten; Stadt, Verkehr, Arbeit, Freizeit, Outdoor und Technik spaeter; Gesundheit und Kultur/Gesellschaft/Verwaltung blockiert bis zu Sensitive-Content-Regeln. Keine finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -515,6 +531,13 @@ Word-to-Island-Routing-Matrix, Plot-Capability-Ableitung,
 Sensitive-Content-Regeln oder Mobile-/Clutter-Regeln erlaubt. Keine
 Taxonomy-Kategorie darf dadurch automatisch zur Asset-, Code- oder
 ThemeIsland-Umsetzung werden.
+
+Phase 2G-M12 priorisiert ThemeIsland-Kandidaten nur als Planungsgrundlage.
+Als naechster Schritt ist nur visuelle M12-Pruefung, M12-Nachbesserung,
+M12-B Word-to-Island Routing Matrix, M12-C Plot-Capability Derivation,
+M12-D Sensitive Content Representation Rules oder M12-E Mobile And Clutter
+Rules erlaubt. Keine ThemeIsland-Umsetzung, keine finale Roadmap und keine
+Assetproduktion duerfen aus M12 abgeleitet werden.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -668,6 +691,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Location-Grundlage grundsaetzlich brauchbar; offen bleiben ThemeIsland-
   Priorisierung, Word-to-Island-Routing-Matrix, Plot-Capability-Ableitung,
   Sensitive-Content-Regeln und Mobile-/Clutter-Regeln.
+  M12 startet die ThemeIsland-Priorisierung und erzeugt Preview-Dateien; offen
+  bleiben M12-Review, Word-to-Island-Routing-Matrix, Plot-Capability-
+  Ableitung, Sensitive-Content-Regeln und Mobile-/Clutter-Regeln.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -888,6 +914,17 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine technische, Verkehrs- oder Fahrzeuglogik ohne eigenes Systemkonzept
   planen,
 - keine Taxonomy-Begriffe als automatische Asset-Auftraege lesen,
+- keine ThemeIsland-Umsetzung aus M12 ableiten,
+- keine finale ThemeIsland-Roadmap aus M12 ableiten,
+- keine Assetproduktion aus M12 ableiten,
+- keine Kuesten-/Hafeninsel ohne Mobile-Komplexitaetspruefung planen,
+- keine Gesundheits-, Politik-, Religion-, Gerichts-, Polizei- oder
+  Krankenhausinsel ohne Sensitive-Content-Regeln planen,
+- keine Reise-/Verkehrsinsel ohne Connector-/Path-/Vehicle-Konzept planen,
+- keine Technik-/Digitalinsel ohne eigene Digital-Object-/UI-Abgrenzung
+  planen,
+- keine fruehe Insel planen, wenn sie zu viele neue Systeme gleichzeitig
+  erzwingt,
 - keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
@@ -1271,6 +1308,18 @@ Ein Schritt wird gestoppt, wenn:
 - technische, Verkehrs- oder Fahrzeuglogik ohne eigenes Systemkonzept geplant
   wird,
 - Taxonomy-Begriffe als automatische Asset-Auftraege gelesen werden,
+- aus M12 eine ThemeIsland-Umsetzung abgeleitet wird,
+- aus M12 eine finale ThemeIsland-Roadmap abgeleitet wird,
+- aus M12 Assetproduktion abgeleitet wird,
+- eine Kuesten- oder Hafeninsel ohne Mobile-Komplexitaetspruefung geplant
+  wird,
+- eine Gesundheits-, Politik-, Religion-, Gerichts-, Polizei- oder
+  Krankenhausinsel ohne Sensitive-Content-Regeln geplant wird,
+- eine Reise- oder Verkehrsinsel ohne Connector-/Path-/Vehicle-Konzept geplant
+  wird,
+- eine Technik- oder Digitalinsel ohne eigene Digital-Object-/UI-Abgrenzung
+  geplant wird,
+- eine fruehe Insel zu viele neue Systeme gleichzeitig erzwingt,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,

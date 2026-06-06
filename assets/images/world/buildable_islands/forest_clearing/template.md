@@ -116,6 +116,13 @@ Phase 2G-M11-C2 prueft diesen Katalog in
 Katalog ist als erste Content-/Location-Grundlage grundsaetzlich brauchbar,
 bleibt aber keine Assetliste, keine Bau-Freigabe, keine finale ThemeIsland-
 Roadmap und keine Codefreigabe.
+Phase 2G-M12 startet die ThemeIsland-Priorisierung in
+`docs/world_design/268-theme-island-prioritization.md` und erzeugt
+Dokumentationspreviews unter
+`docs/world_design/previews/phase2g_m12_theme_island_prioritization/`.
+M12 priorisiert Kandidaten nur als Planungsgrundlage. Daraus folgen keine
+finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine Assetfreigabe,
+keine App-Integration und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -147,11 +154,12 @@ Fuehrende Dokumente:
 - `docs/world_design/265-multi-example-container-flow-visual-review.md`
 - `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`
 - `docs/world_design/267-world-content-taxonomy-review.md`
+- `docs/world_design/268-theme-island-prioritization.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M11-C2 Taxonomy Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12 ThemeIsland Prioritization gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -291,6 +299,14 @@ Fuehrende Dokumente:
     brauchbar bewerten, aber keine finale ThemeIsland-Roadmap, keine
     Assetliste, keine Plot-Capability-Ableitung, keine Word-to-Island-Routing-
     Matrix, keine App-/Assetfreigabe und kein `frame_started` erzeugen.
+  - `phase2GM12`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument `docs/world_design/268-theme-island-prioritization.md`
+    und Dokumentations-/Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m12_theme_island_prioritization/`.
+    M12 darf ThemeIsland-Kandidaten in Early/Mid/Late/Special/Blocked
+    priorisieren, aber keine finale ThemeIsland-Roadmap, keine ThemeIsland-
+    Umsetzung, keine Assetproduktion, keine App-Integration und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -426,6 +442,15 @@ Location-Grundlage. Ergebnis: Die 14 Hauptkategorien und die Ebenenlogik sind
 brauchbar. Offen bleiben ThemeIsland-Priorisierung, Word-to-Island-Routing-
 Matrix, Plot-Capability-Ableitung, Sensitive-Content-Regeln und Mobile-/
 Clutter-Regeln. Die Waldlichtung darf dadurch nicht ueberladen werden.
+M12 priorisiert ThemeIsland-Kandidaten in
+`docs/world_design/268-theme-island-prioritization.md`. Die staerksten Early-
+Kandidaten sind Zuhause/Alltag, Schule/Lernen und Garten/Natur nah. Kueste/
+Meer/Hafen, Essen/Restaurant/Cafe, Einkauf/Versorgung und Land/Farm sind gute
+Mid-Kandidaten. Stadt, Verkehr, Arbeit, Freizeit, Outdoor und Technik bleiben
+spaeter. Gesundheit, Kultur/Gesellschaft/Verwaltung sowie
+Religion/Politik/Gericht/Polizei bleiben bis zu Sensitive-Content-Regeln
+blockiert. Die Waldlichtung bleibt Starter-/Testform und wird dadurch nicht zu
+einer vollstaendigen ThemeIsland-Roadmap.
 
 ## 2. Zweck Des Assets
 
@@ -863,6 +888,15 @@ In diesem Template-Block gilt:
 - Keine Deko-/Kleinteile-Produktion ohne Mobile-/Clutter-Regeln.
 - Keine technische, Verkehrs- oder Fahrzeuglogik ohne eigenes Systemkonzept.
 - Keine Taxonomy-Begriffe als automatische Asset-Auftraege lesen.
+- Keine ThemeIsland-Umsetzung aus M12 ableiten.
+- Keine finale ThemeIsland-Roadmap aus M12 ableiten.
+- Keine Assetproduktion aus M12 ableiten.
+- Keine Kuesten-/Hafeninsel ohne Mobile-Komplexitaetspruefung.
+- Keine Gesundheits-, Politik-, Religion-, Gerichts-, Polizei- oder
+  Krankenhausinsel ohne Sensitive-Content-Regeln.
+- Keine Reise-/Verkehrsinsel ohne Connector-/Path-/Vehicle-Konzept.
+- Keine Technik-/Digitalinsel ohne eigene Digital-Object-/UI-Abgrenzung.
+- Keine fruehe Insel, wenn sie zu viele neue Systeme gleichzeitig erzwingt.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1082,10 +1116,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM11BMultiFlowVisualReviewStatus`: `started in docs/world_design/265-multi-example-container-flow-visual-review.md; Multi-Flow direction usable; school/case and garden/bed strongest; harbor/cabin valuable but mobile-riskier; no final container-system architecture`
 - `phase2GM11CWorldContentTaxonomyStatus`: `started in docs/world_design/266-world-content-taxonomy-and-location-catalog.md; taxonomy backlog only; no asset list, no final ThemeIsland roadmap, no build release`
 - `phase2GM11C2WorldContentTaxonomyReviewStatus`: `started in docs/world_design/267-world-content-taxonomy-review.md; taxonomy catalog usable as first content/location foundation; follow-ups remain; no asset list, no final ThemeIsland roadmap, no build release`
+- `phase2GM12ThemeIslandPrioritizationStatus`: `started in docs/world_design/268-theme-island-prioritization.md; previews created under docs/world_design/previews/phase2g_m12_theme_island_prioritization/; early candidates are home/everyday, school/learning, garden/near nature; no final ThemeIsland roadmap or build release`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `ThemeIsland-Priorisierung, Word-to-Island-Routing, Plot-Capability, Sensitive-Content oder Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M12 visuell pruefen oder Word-to-Island-Routing, Plot-Capability, Sensitive-Content oder Mobile-/Clutter-Follow-up planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1560,6 +1595,29 @@ Phase-2G-M11-C2-World-Content-Taxonomy-Review gilt nur fuer:
   Darstellungs- und Safety-Regeln, Deko-/Kleinteile-Produktion ohne
   Mobile-/Clutter-Regeln, technische/Verkehrs-/Fahrzeuglogik ohne eigenes
   Systemkonzept und Taxonomy-Begriffe als automatische Asset-Auftraege.
+
+Phase-2G-M12-ThemeIsland-Prioritization gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/268-theme-island-prioritization.md`,
+- Dokumentations-/Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m12_theme_island_prioritization/`,
+- erste Priorisierung von ThemeIsland-Kandidaten in Early, Mid, Late und
+  Sensitive/Blocked,
+- Empfehlung von Zuhause/Alltag, Schule/Lernen und Garten/Natur nah als
+  staerkste Early-Kandidaten,
+- Einordnung von Kueste/Meer/Hafen, Essen/Restaurant/Cafe,
+  Einkauf/Versorgung und Land/Farm als gute Mid-Kandidaten,
+- Einordnung von Stadt, Verkehr, Arbeit, Freizeit, Outdoor und Technik als
+  spaetere Kandidaten,
+- Blockierung von Gesundheit, Kultur/Gesellschaft/Verwaltung sowie
+  Religion/Politik/Gericht/Polizei bis zu Sensitive-Content-Regeln,
+- Stop-Regeln gegen ThemeIsland-Umsetzung aus M12, finale ThemeIsland-Roadmap
+  aus M12, Assetproduktion aus M12, Kuesten-/Hafeninsel ohne Mobile-
+  Komplexitaetspruefung, sensible Inseln ohne Sensitive-Content-Regeln,
+  Reise-/Verkehrsinsel ohne Connector-/Path-/Vehicle-Konzept, Technik-/
+  Digitalinsel ohne Digital-Object-/UI-Abgrenzung und fruehe Inseln mit zu
+  vielen neuen Systemen gleichzeitig.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
