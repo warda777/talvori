@@ -356,6 +356,15 @@ App-Integration. Scope Freeze bedeutet nur Planungsstabilitaet, keine
 Umsetzung. `frame_started` bleibt blockiert. Daraus folgen keine PNGs, keine
 Tests, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
 App-/Assetfreigabe, kein Code und kein `frame_started`.
+Phase 2G-M13-P startet Implementation Candidate Gate in
+`docs/world_design/296-implementation-candidate-gate.md`. M13-P ist ein reiner
+Implementation-Candidate-Gate-Review. Die Waldlichtung bleibt Starter-/
+Testform. M13-P erzeugt keine neuen Assets, keine Bauzustaende, keine
+ThemeIsland-Bases, keine finale Roadmap, keine finale Startinsel und keine
+App-Integration. M13-P erzeugt keine Codefreigabe. `frame_started` bleibt
+blockiert. Daraus folgen keine PNGs, keine Tests, keine finale Datenstruktur,
+keine Runtime-Konfiguration, keine App-/Assetfreigabe, kein Code und kein
+`frame_started`.
 
 Fuehrende Dokumente:
 
@@ -415,11 +424,12 @@ Fuehrende Dokumente:
 - `docs/world_design/293-container-qa-overlay-preview-plan.md`
 - `docs/world_design/294-foundation-choice-device-preview-plan.md`
 - `docs/world_design/295-theme-island-roadmap-scope-freeze-review.md`
+- `docs/world_design/296-implementation-candidate-gate.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-O ThemeIsland Roadmap Scope Freeze Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-P Implementation Candidate Gate gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -801,6 +811,17 @@ Fuehrende Dokumente:
     Foundation-Choice-UI, keine finale Datenstruktur, keine
     Runtime-Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
     erzeugen.
+  - `phase2GM13P`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/296-implementation-candidate-gate.md`.
+    M13-P darf spaetere Product-/Review-Harness-/Implementation-Kandidaten,
+    Readiness-Level, Minimal-Slice-Kriterien und Blocker-Matrizen pruefen,
+    aber keine PNGs, keine Tests, keine App-Integration, keine finale
+    Implementierungsfreigabe, keine finale ThemeIsland-Roadmap, keine finale
+    Startinsel, keine finale Onboarding-UI, keine finale Foundation-Choice-UI,
+    keine finale Word-to-Island-UI, keine finale Container-UI, keine finale
+    Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe und
+    kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1777,6 +1798,21 @@ In diesem Template-Block gilt:
 - Keine PNG-Erzeugung aus M13-O.
 - Keine Tests aus M13-O.
 - Kein `frame_started` oder Bauzustand aus M13-O.
+- Keine Codefreigabe aus M13-P.
+- Keine Implementierung aus M13-P.
+- Keine Tests aus M13-P.
+- Keine App-Integration aus M13-P.
+- Keine Assetfreigabe aus M13-P.
+- Keine PNG-Erzeugung aus M13-P.
+- Keine finale ThemeIsland-Roadmap aus M13-P.
+- Keine finale Startinsel aus M13-P.
+- Keine finale Onboarding-UI aus M13-P.
+- Keine finale Foundation-Choice-UI aus M13-P.
+- Keine finale Word-to-Island-UI aus M13-P.
+- Keine finale Container-UI aus M13-P.
+- Keine finale Datenstruktur aus M13-P.
+- Keine Runtime-Konfiguration aus M13-P.
+- Kein `frame_started` oder Bauzustand aus M13-P.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2034,10 +2070,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13MContainerQAOverlayPreviewStatus`: `started in docs/world_design/293-container-qa-overlay-preview-plan.md; QA overlay planning only; no final ContainerOpenView UI, no final DetailInteractionView UI, no container implementation, no final data structure, no runtime config, no frame_started`
 - `phase2GM13NFoundationChoiceDevicePreviewStatus`: `started in docs/world_design/294-foundation-choice-device-preview-plan.md; device preview planning only; no final onboarding UI, no final Foundation Choice UI, no final start island, no final data structure, no runtime config, no frame_started`
 - `phase2GM13OThemeIslandRoadmapScopeFreezeStatus`: `started in docs/world_design/295-theme-island-roadmap-scope-freeze-review.md; scope freeze review only; planning stability only; no final ThemeIsland roadmap, no implementation, no asset release, no runtime config, no frame_started`
+- `phase2GM13PImplementationCandidateGateStatus`: `started in docs/world_design/296-implementation-candidate-gate.md; gate review only; no implementation release, no code release, no asset release, no final UI, no final data structure, no runtime config, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-O reviewen, M13-O nachbessern oder M13-P/M14-A als reine Review-/Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-P reviewen, M13-P nachbessern oder M14-A/M14-B/M14-C als reine Product-Preview-Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3149,6 +3186,41 @@ Phase-2G-M13-O-ThemeIsland-Roadmap-Scope-Freeze-Review gilt nur fuer:
 - keine finale Startinsel,
 - keine finale Onboarding-UI,
 - keine finale Foundation-Choice-UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-P-Implementation-Candidate-Gate gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/296-implementation-candidate-gate.md`,
+- Readiness-Level wie `not-a-candidate`, `planning-only`,
+  `preview-candidate-later`, `review-harness-candidate-later`,
+  `implementation-candidate-later` und `blocked`,
+- Pruefung spaeter denkbarer Kandidaten wie Foundation Choice Product Preview,
+  Word-to-Island Planning State UX, Container QA/Product Preview,
+  Device/Accessibility Review Harness, Documentation-only Preview Generator
+  und Existing Mock-Slice Review Extension,
+- ausdrueckliche Blockierung von `frame_started` / Rohbau,
+- textuelle Visualisierung mit Mermaid-Flows, ASCII-Gate-Flows,
+  Markdown-Tabellen, Implementation-Readiness-Matrizen und
+  Decision-/Blocker-Maps,
+- keine PNGs,
+- keine Tests,
+- keine App-Integration,
+- keine finale Implementierungsfreigabe,
+- keine finale ThemeIsland-Roadmap,
+- keine finale Startinsel,
+- keine finale Onboarding-UI,
+- keine finale Foundation-Choice-UI,
+- keine finale Word-to-Island-UI,
+- keine finale Container-UI,
 - keine finale Datenstruktur,
 - keine Runtime-Konfiguration,
 - keine neuen Assets,
