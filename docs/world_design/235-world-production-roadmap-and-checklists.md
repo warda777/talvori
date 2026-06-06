@@ -601,6 +601,14 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Phase-2G-Asset-Erzeugung oder Nachbesserung ohne Bezug auf
   Masterlayout-, Plot-, Anchor- und Footprint-Regeln,
 - kein Phase-2G-Code ohne Asset, Preview, Device-Check und Freigabe,
+- keine finale Freigabe nur auf Textbasis, wenn der Zustand visuell pruefbar
+  sein muss,
+- keine Asset- oder Layout-Entscheidung ohne passende Preview-, Greybox- oder
+  Overlay-Pruefung,
+- keine technische Debugansicht als Nutzeransicht verwenden,
+- keine komplexe Systementscheidung ohne Flow-/Diagrammpruefung, wenn die
+  Zusammenhaenge sonst unklar bleiben,
+- keine Spielasset-Erzeugung aus einer Dokumentationsvisualisierung ableiten,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
 ## 6. Dokument-Abhaengigkeiten
@@ -669,6 +677,48 @@ Vor jedem World-Codeprompt pruefen:
 
 Wenn der Prompt versucht, fehlende Assets durch Code zu kaschieren, wird der
 Prompt gestoppt oder auf Asset-/Planungsarbeit zurueckgefuehrt.
+
+## 8a. Visualisierungspflicht Fuer Entscheidungsrelevante Systeme
+
+Talvori-Entscheidungen sollen nicht nur textlich dokumentiert werden. Sobald
+ein Zustand, System, Flow, Layout, Bauzustand, Plot-System, Lernlogik,
+UI-Entscheidung, Retention-Loop oder eine Freigabe entscheidungsrelevant wird,
+muss geprueft werden, ob eine visuelle Darstellung noetig ist.
+
+Geeignete Visualisierungen:
+
+- Diagramm,
+- Flowchart,
+- Greybox,
+- Debug-Preview,
+- Statusbild,
+- Nutzerflow-Bild,
+- Vorher/Nachher-Bild,
+- Overlay-Pruefung,
+- einfache Produktansicht,
+- technische QA-Ansicht.
+
+Zweck:
+
+- fehlende Elemente frueh erkennen,
+- Ueberladung sichtbar machen,
+- falsche Annahmen pruefen,
+- unklare Zustaende klaeren,
+- falsche Reihenfolgen und nicht bedachte Abhaengigkeiten entdecken,
+- technische Debugsicht und spaetere Nutzer-/Produktansicht trennen.
+
+Regeln:
+
+- Bei finalen oder freigaberelevanten Entscheidungen braucht es mindestens
+  eine visuelle Pruefung oder eine dokumentierte Begruendung, warum keine
+  visuelle Darstellung noetig ist.
+- Technische Debugansichten und Nutzer-/Produktansichten muessen getrennt
+  werden, wenn die technische Ansicht zu komplex ist.
+- Dokumentations-/Preview-Bilder sind keine Spielassets.
+- Dokumentations-/Preview-Bilder geben keine automatische Code- oder
+  Assetfreigabe.
+- Eine Visualisierung darf eine Entscheidung pruefbar machen, aber nicht
+  heimlich neue Architektur, neue Assets oder App-Integration freigeben.
 
 ## 9. Phase-2E ToDo-Liste
 
@@ -821,6 +871,15 @@ Ein Schritt wird gestoppt, wenn:
 - ein Objekt sichtbar platziert wird, ohne Placement Requirements zu erfuellen,
 - ein abstraktes Wort ohne passenden Repraesentationstyp visualisiert wird,
 - eine Weltvisualisierung Mobile-Lesbarkeit ueberlaedt,
+- eine finale Freigabe nur textlich erfolgen soll, obwohl der Zustand visuell
+  pruefbar sein muss,
+- eine Asset- oder Layout-Entscheidung ohne passende Preview-, Greybox- oder
+  Overlay-Pruefung getroffen werden soll,
+- eine technische Debugansicht als Nutzeransicht verwendet werden soll,
+- eine komplexe Systementscheidung ohne Flow-/Diagrammpruefung getroffen
+  werden soll, obwohl die Zusammenhaenge sonst unklar bleiben,
+- aus einer Dokumentationsvisualisierung eine Spielasset-Erzeugung abgeleitet
+  werden soll,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
   Blueprints und Backlogs geplant wird,
 - eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,

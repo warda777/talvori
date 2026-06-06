@@ -208,6 +208,9 @@ mitdenken:
   Container- oder Detailansichten als direkt auf die Inseloberflaeche.
 - Nutzer sollen Objekte antippen, oeffnen, sortieren, zuordnen oder
   vervollstaendigen koennen.
+- Diese Nutzer-/Produktansicht soll spaeter visuell geprueft werden, z. B. als
+  Flowchart, Storyboard-Greybox oder einfache Preview fuer Ketten wie Kueche ->
+  Schublade -> Besteck.
 
 Diese Ergaenzung gibt weiterhin keine Freigabe fuer Assets, Code,
 `frame_started` oder produktive Bau-/Lernlogik.

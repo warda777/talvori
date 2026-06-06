@@ -611,6 +611,10 @@ Monetarisierung braucht spaeter ein eigenes Dokument mit:
 - Retention soll ueber sichtbaren Fortschritt, persoenliche Welt, Tagesimpuls,
   Container-Entdeckungen und Tali/Vori laufen, nicht ueber Druck.
 - Monetarisierung bleibt geplant, aber blockiert bis eigenes Dokument.
+- M7-D/M8 darf nicht nur textlich geplant werden. Depth-/Container-Flows wie
+  Kueche -> Schublade -> Besteck oder Schule -> Federmappe -> Stifte muessen
+  spaeter als Nutzerflow-Diagramm, Storyboard-Greybox oder Preview pruefbar
+  gemacht werden.
 
 ## 12. Weiterhin Blockiert
 
@@ -656,6 +660,8 @@ Nach M8 ist erlaubt:
 - M8 pruefen,
 - M7-D/M8 als vereinfachte Nutzer-/Produktansicht planen,
 - die Depth-/Container-Logik in eine Nutzerflow-Preview uebersetzen,
+- Depth-/Container-Beispiele als Flowchart, Storyboard-Greybox oder einfache
+  Produktansicht visuell pruefbar machen,
 - Gameplay-/Retention-Fragen weiter vertiefen.
 
 Weiterhin nicht erlaubt:

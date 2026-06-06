@@ -44,7 +44,10 @@ brauchbar, aber nicht als Nutzeransicht. Phase 2G-M8 startet den Research- und
 Planungsblock fuer World Depth, Zoom-/Container-System, Gameplay-Motivation,
 Retention und faire Monetarisierungsgrundlagen. M8 klaert, dass
 `objectAnchors` optionale technische Moeglichkeiten sind und nicht als
-Pflichtobjekte gelesen werden duerfen.
+Pflichtobjekte gelesen werden duerfen. Fuer weitere Waldlichtung-/
+StarterCorePlot-Entscheidungen gilt die Visualisierungspflicht: Bau-, Plot-,
+Anchor-, Container-, Depth-, Nutzerflow- und Freigabeentscheidungen brauchen
+nach Moeglichkeit eine passende Debug-, Preview-, Flow- oder QA-Darstellung.
 
 Fuehrende Dokumente:
 
@@ -534,6 +537,13 @@ In diesem Template-Block gilt:
 - Keine Retention-Mechanik ohne Fairness-/Ethikpruefung.
 - Keine Monetarisierung ohne eigenes Dokument.
 - Keine manipulative Pay-to-Win- oder Dark-Pattern-Mechanik.
+- Keine weitere Waldlichtung-/StarterCorePlot-Entscheidung nur auf Textbasis,
+  wenn sie als Preview, Flow, Greybox oder Overlay pruefbar sein muss.
+- Keine Bau-, Plot-, Anchor-, Container-, Depth-, Nutzerflow- oder
+  Freigabeentscheidung ohne passende Debug-/Preview-/Flow-Darstellung oder
+  dokumentierte Begruendung, warum sie nicht noetig ist.
+- Preview-Darstellungen bleiben Dokumentationsmaterial, solange keine
+  Assetfreigabe explizit erteilt wurde.
 
 ## 10. Device-/Preview-Check
 
