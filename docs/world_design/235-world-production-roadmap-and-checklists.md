@@ -24,6 +24,7 @@ Grundlagen:
 - `docs/world_design/253-capability-greybox-plan.md`
 - `docs/world_design/254-capability-greybox-visual-review.md`
 - `docs/world_design/255-world-depth-gameplay-retention-research.md`
+- `docs/world_design/256-depth-container-user-flow-preview-plan.md`
 - `docs/220-talvori-world-professional-game-architecture-research.md`
 - `docs/221-talvori-world-build-and-expansion-architecture.md`
 - `docs/222-talvori-world-game-system-master-plan.md`
@@ -175,13 +176,20 @@ Aktueller Stand der Talvori-Welt-Produktion:
   gestartet. M8 klaert World Depth, Zoom-/Container-System,
   Gameplay-Motivation, Retention und faire Monetarisierungsgrundlagen.
   `objectAnchors` sind technische Moeglichkeiten, keine Pflichtobjekte.
+- Phase 2G-M9 wurde als vereinfachte Nutzer-/Produktansicht fuer den Depth-/
+  Container-Flow gestartet. Das Planungsdokument liegt in
+  `docs/world_design/256-depth-container-user-flow-preview-plan.md`; die
+  Preview-Dateien liegen unter
+  `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`.
+  Sie zeigen den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck und sind
+  Dokumentationsmaterial, keine Spielassets und keine Codefreigabe.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
-  Entscheidungslogik sowie der M7-C-/M8-Bewertung. Danach duerfen nur M7-B als
-  technische Debug-Greybox bestaetigt, gezielt nachgebessert, M7-D/M8 als
-  vereinfachte Nutzer-/Produktansicht mit Depth-/Container-Flow geplant oder
-  Gameplay-/Retention-Fragen weiter vertieft werden. Offen bleiben
-  ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet, Depth-UX,
+  Entscheidungslogik sowie der M7-C-/M8-/M9-Bewertung. Danach duerfen nur M7-B
+  als technische Debug-Greybox bestaetigt, gezielt nachgebessert, M9 visuell
+  bestaetigt oder nachgebessert oder weitere Beispiel-Flows geplant werden.
+  Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
+  Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
   Persistenz-, Sound-/FX- oder Expansion-Architektur.
 
@@ -256,6 +264,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M7-B | Debug-Capability-Greybox-Erzeugung | `Preview erzeugt / visuelle Pruefung offen` | Reiner Dokumentations-/Debugblock. Erzeugt `01_capability_plot_overview.png`, `02_allowed_functions_overlay.png`, `03_anchor_socket_overlay.png`, `04_user_choice_flow_overlay.png` und `README.md` unter `docs/world_design/previews/phase2g_m7_capability_greybox/`. Die Preview-Dateien zeigen abstrakte Plot-Slots, `allowedFunctions`, Nutzerwaehlbarkeit, Anchors, Sockets, Footprints und Nutzerwahl-Flow. Sie sind keine Spielassets, keine finale Kunst und geben keine Code- oder Assetfreigabe. Naechster erlaubter Schritt: visuelle Pruefung der Capability-Greybox, danach bestaetigen oder nachbessern. |
 | Phase 2G-M7-C | Capability-Greybox Visual Review | `Review gestartet / M7-B technisch brauchbar` | Reiner Dokumentationsblock in `docs/world_design/254-capability-greybox-visual-review.md`. Bewertet die M7-B-Previews visuell. Ergebnis: alte Rollenlabels sind entfernt, abstrakte Plotnamen und Metadaten sind lesbar, `allowedFunctions` suggerieren keine feste Bauentscheidung, Anchors/Sockets/Footprints sind intern pruefbar und der Nutzerwahl-Flow ist verstaendlich. M7-B ist als technische Debug-Greybox brauchbar, aber nicht als Nutzeransicht. M7-D als vereinfachte Nutzer-/Produktansicht bleibt empfohlen. Keine Asset- oder Codefreigabe. |
 | Phase 2G-M8 | World Depth / Gameplay / Retention Research | `Research-/Planungsblock gestartet` | Reiner Research- und Planungsblock in `docs/world_design/255-world-depth-gameplay-retention-research.md`. Klaert Island-/Plot-/Building-/Interior-/Object-/Container-/Detail-Depth, Container-Objekte, Word-Type-to-Depth-Mapping, Anchor-Semantik, Interaction/Challenge Loop, Core/Meta Loop, Lessons aus erfolgreichen Spielen, faire Reward-Momente, Retention ohne Ausbeutung und Monetarisierungsgrundlagen. `objectAnchors` sind optionale technische Moeglichkeiten, keine Pflichtobjekte. Kein Asset, kein Code, keine App-Integration. |
+| Phase 2G-M9 | Depth-/Container User Flow Preview | `Preview erzeugt / visuelle Pruefung offen` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/256-depth-container-user-flow-preview-plan.md`. Erzeugt `01_depth_flow_storyboard.png`, `02_depth_level_stack.png`, `03_interaction_reward_loop.png` und `README.md` unter `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`. Die Preview zeigt den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck als vereinfachte Nutzer-/Produktansicht. Keine Spielassets, keine finale UI, keine Codefreigabe, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -347,13 +356,20 @@ kleine Woerter in Interior-, Object-, Container- und Detailansichten gehoeren
 koennen, und dass Talvori Aufgaben, Challenges, Rewards und Progression
 braucht, statt nur eine Museumsansicht zu sein.
 
+Die vereinfachte Depth-/Container-Nutzerflow-Preview wurde in Phase 2G-M9
+gestartet:
+`docs/world_design/256-depth-container-user-flow-preview-plan.md`.
+Die Preview-Dateien liegen unter
+`docs/world_design/previews/phase2g_m9_depth_container_user_flow/` und zeigen
+den Beispiel-Flow Haus/Kueche -> Schublade -> Besteck mit Storyboard,
+Depth-Level-Stack und Interaction-/Reward-Loop.
+
 Der naechste sinnvolle Schritt ist nicht Phase-2G-Code und nicht
-Asset-Freigabe, sondern die Pruefung der M7-C-/M8-Empfehlungen. Danach darf
-M7-B als technische Debug-Greybox bestaetigt oder gezielt nachgebessert
-werden. Alternativ darf M7-D/M8 als vereinfachte Nutzer-/Produktansicht mit
-Depth-/Container-Flow geplant oder Gameplay-/Retention weiter vertieft werden.
-Die Preview-Dateien sind kein finales Inselbild. `frame_started` bleibt
-gestoppt.
+Asset-Freigabe, sondern die visuelle Pruefung der M9-Preview. Danach darf der
+Flow bestaetigt oder nachgebessert werden. Weitere Beispiel-Flows wie
+Schule/Federmappe oder Hafen/Bootskajute duerfen geplant werden. Die Preview-
+Dateien sind kein finales Inselbild und keine Spielassets. `frame_started`
+bleibt gestoppt.
 
 Vor Phase 2G oder jedem weiteren Ausbau ausserhalb des abgeschlossenen lokalen
 2F-Mock-Slices muss erneut geprueft werden:
@@ -473,6 +489,10 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   Nutzer-/Produktansicht fuer Depth/Container, konkrete Container-UX,
   Interaction-Design, Fairness-Gates fuer Retention, eigenes Monetarisierungs-
   dokument und jede Implementierung.
+- Phase 2G-M9 hat eine erste vereinfachte Nutzer-/Produktansicht fuer den
+  Depth-/Container-Flow erzeugt. Offen bleiben visuelle Pruefung,
+  Nachbesserung oder Bestaetigung des Kueche-Schublade-Besteck-Flows sowie
+  weitere Beispiel-Flows wie Schule/Federmappe oder Hafen/Bootskajute.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -609,6 +629,11 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine komplexe Systementscheidung ohne Flow-/Diagrammpruefung, wenn die
   Zusammenhaenge sonst unklar bleiben,
 - keine Spielasset-Erzeugung aus einer Dokumentationsvisualisierung ableiten,
+- keine Depth-/Container-Logik ohne visuelle Nutzerflow-Pruefung,
+- keine Container-Ansicht als reine Objektliste ohne Challenge,
+- keine Nutzeransicht mit zu vielen technischen Labels,
+- keine Mini-Challenge ohne klares Feedback und Reward Moment,
+- keine Spielasset- oder Codefreigabe aus M9 ableiten,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
 
 ## 6. Dokument-Abhaengigkeiten
@@ -880,6 +905,11 @@ Ein Schritt wird gestoppt, wenn:
   werden soll, obwohl die Zusammenhaenge sonst unklar bleiben,
 - aus einer Dokumentationsvisualisierung eine Spielasset-Erzeugung abgeleitet
   werden soll,
+- Depth-/Container-Logik ohne visuelle Nutzerflow-Pruefung weiter geplant wird,
+- eine Container-Ansicht als reine Objektliste ohne Challenge geplant wird,
+- eine Nutzeransicht zu viele technische Labels zeigt,
+- eine Mini-Challenge kein klares Feedback und keinen Reward Moment hat,
+- aus M9 eine Spielasset- oder Codefreigabe abgeleitet wird,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
   Blueprints und Backlogs geplant wird,
 - eine Market-/Hub-Struktur als langer isolierter Schwanz geplant wird,

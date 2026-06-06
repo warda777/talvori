@@ -48,6 +48,9 @@ Pflichtobjekte gelesen werden duerfen. Fuer weitere Waldlichtung-/
 StarterCorePlot-Entscheidungen gilt die Visualisierungspflicht: Bau-, Plot-,
 Anchor-, Container-, Depth-, Nutzerflow- und Freigabeentscheidungen brauchen
 nach Moeglichkeit eine passende Debug-, Preview-, Flow- oder QA-Darstellung.
+Phase 2G-M9 erzeugt eine erste vereinfachte Nutzer-/Produktansicht fuer den
+Depth-/Container-Flow Haus/Kueche -> Schublade -> Besteck als
+Dokumentationspreview.
 
 Fuehrende Dokumente:
 
@@ -67,11 +70,12 @@ Fuehrende Dokumente:
 - `docs/world_design/253-capability-greybox-plan.md`
 - `docs/world_design/254-capability-greybox-visual-review.md`
 - `docs/world_design/255-world-depth-gameplay-retention-research.md`
+- `docs/world_design/256-depth-container-user-flow-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M8 World Depth Research gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M9 Depth Container Preview erzeugt`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -140,6 +144,11 @@ Fuehrende Dokumente:
   - `phase2GM8`: `false` fuer Code/Assets; erlaubt nur Research und Planung
     fuer World Depth, Zoom-/Container-System, Gameplay-Motivation, Retention
     und faire Monetarisierungsgrundlagen.
+  - `phase2GM9`: `false` fuer Code/Assets; erlaubt nur Dokumentations-/
+    Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m9_depth_container_user_flow/` und
+    das Planungsdokument
+    `docs/world_design/256-depth-container-user-flow-preview-plan.md`.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -544,6 +553,11 @@ In diesem Template-Block gilt:
   dokumentierte Begruendung, warum sie nicht noetig ist.
 - Preview-Darstellungen bleiben Dokumentationsmaterial, solange keine
   Assetfreigabe explizit erteilt wurde.
+- Keine Depth-/Container-Logik ohne visuelle Nutzerflow-Pruefung.
+- Keine Container-Ansicht als reine Objektliste ohne Challenge.
+- Keine Nutzeransicht mit zu vielen technischen Labels.
+- Keine Mini-Challenge ohne klares Feedback und Reward Moment.
+- Keine Spielasset- oder Codefreigabe aus M9 ableiten.
 
 ## 10. Device-/Preview-Check
 
@@ -747,10 +761,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM7BPreviewFilesAreGameAssets`: `false`
 - `phase2GM7CVisualReviewStatus`: `started in docs/world_design/254-capability-greybox-visual-review.md; M7-B usable as technical debug greybox; simplified product view recommended`
 - `phase2GM8WorldDepthGameplayRetentionStatus`: `started in docs/world_design/255-world-depth-gameplay-retention-research.md; objectAnchors are optional technical anchors, not required visible objects`
+- `phase2GM9DepthContainerUserFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m9_depth_container_user_flow/; documentation preview only`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M7-C-/M8-Empfehlungen pruefen; danach M7-B technisch bestaetigen/nachbessern, M7-D/M8 als vereinfachte Nutzer-/Produktansicht mit Depth-/Container-Flow planen oder Gameplay-/Retention weiter vertiefen`
+- `nextAllowedStep`: `M9-Preview visuell pruefen; Flow bestaetigen oder nachbessern; danach weitere Beispiel-Flows wie Schule/Federmappe oder Hafen/Bootskajute planen`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1009,6 +1024,21 @@ Phase-2G-M8-World-Depth-/Gameplay-/Retention-Research gilt nur fuer:
 - Planung von Interaction-/Challenge-Loops statt reiner Museumsansicht,
 - Research-informed Ableitungen aus erfolgreichen Spielen fuer faire
   Motivation, Retention und spaetere Monetarisierungsgrundlagen.
+
+Phase-2G-M9-Depth-/Container-User-Flow-Preview gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/256-depth-container-user-flow-preview-plan.md`,
+- Dokumentations-/Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m9_depth_container_user_flow/`,
+- `01_depth_flow_storyboard.png`,
+- `02_depth_level_stack.png`,
+- `03_interaction_reward_loop.png`,
+- `README.md`,
+- vereinfachte Nutzer-/Produktansicht fuer den Beispiel-Flow
+  Haus/Kueche -> Schublade -> Besteck,
+- Pruefung, ob Container den Flow ruhiger machen und eine Mini-Challenge mit
+  Feedback/Reward sichtbar ist.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 
