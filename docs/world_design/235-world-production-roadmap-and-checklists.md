@@ -674,6 +674,28 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
   Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung und
   kein `frame_started`.
+- M14-E2 wurde als Small Implementation Slice Candidate Visual Review in
+  `docs/world_design/306-small-implementation-slice-candidate-visual-review.md`
+  gestartet. M14-E2 prueft nur M14-E visuell/textuell gegen Readiness-Level,
+  Minimal-Slice-Kriterien, Kandidatenmatrix, Gate-Visualisierungen,
+  `frame_started`-Blockade, Harness-Gates und Misread-Risiken. Visualisierung
+  bleibt textuell mit ASCII-Review-Flows, ASCII-Decision-Maps, Mermaid-Flows,
+  Markdown-Tabellen und Readiness-/Blocker-/Scope-Matrizen. Daraus folgen
+  keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine
+  Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine
+  App-Integration, keine finale UI, keine finale Datenstruktur, keine
+  Runtime-Konfiguration, keine App-/Assetfreigabe, keine
+  Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung und
+  kein `frame_started`.
+- M14-V1 wurde als Visual Backfill For Docs 283-306 in
+  `docs/world_design/307-visual-backfill-283-306.md` gestartet. Echte PNG-
+  Dokumentationsvisualisierungen fuer `283` bis `306` wurden unter
+  `docs/world_design/previews/m14_visual_backfill_283_306/` ergaenzt. Diese
+  PNGs sind Dokumentationspreviews, keine finale UI, keine App-Screens und
+  keine Spielassets. Daraus folgen keine App-Integration, keine
+  Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine Screenshots,
+  keine Asset-Dateien unter `assets/`, keine Runtime-Konfiguration, keine
+  App-/Assetfreigabe, keine Implementierungsfreigabe und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -682,7 +704,7 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M13-, M13-A2-, M13-B-, M13-B2-, M13-C-, M13-D-, M13-E- und
   M13-F-/M13-G-/M13-H-/M13-I-/M13-J-/M13-K-/M13-L-/M13-M-/M13-N-/
   M13-O-/M13-P-/M14-A-/M14-A2-/M14-B-/M14-B2-/M14-C-/M14-C2-/M14-D-/
-  M14-D2-/M14-E-Bewertung.
+  M14-D2-/M14-E-/M14-E2-/M14-V1-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -728,6 +750,9 @@ Aktueller Stand der Talvori-Welt-Produktion:
   M14-D2-Device-/Accessibility-Review-Harness-Review dokumentarisch
   bestaetigt,
   M14-E-Small-Implementation-Slice-Candidate-Review dokumentarisch geprueft,
+  M14-E2-Small-Implementation-Slice-Candidate-Visual-Review dokumentarisch
+  bestaetigt,
+  M14-V1-Visual-Backfill fuer Dokumente 283-306 dokumentarisch geprueft,
   nachgebessert oder konkrete Taxonomy-/Routing-/Safety-/Mobile-/Accessibility-/ThemeIsland-/
   Asset-Scope-/Readiness-/Onboarding-/Word-to-Island-/Container-QA-Follow-ups
   geplant werden.
@@ -857,6 +882,8 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M14-D | Device/Accessibility Review Harness Plan | `Planung gestartet / Harness-Pruefung textuell definiert` | Reiner Dokumentations- und Visualisierungsplanungsblock in `docs/world_design/303-device-accessibility-review-harness-plan.md`. Plant nur spaetere Review-Harness-Pruefungen fuer Foundation Choice, Word-to-Island, Sense Selection, Fallbacks, ContainerOpenView, DetailInteractionView, Pagination, Tali/Vori-Bubbles, Safe Exit und Guardrail States. Visualisierung nur als ASCII-Harness-Flows, ASCII-Device-Frames, ASCII-QA-Check-Overlays, Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/Text-Containment-Checklisten. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-D2 | Device/Accessibility Review Harness Visual Review | `Review gestartet / M14-D als Harness-Plan bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/304-device-accessibility-review-harness-visual-review.md`. Prueft den M14-D-Plan visuell/textuell gegen Coverage, Device-/Accessibility-Kategorien, ASCII-Harness-Frames, Harness-States, Runtime-Misread-Prevention und Guardrails. Ergebnis: M14-D ist als Review-Harness-Plan grundsaetzlich brauchbar; kleine Hinweise zu `harness_passed`, spaeteren Review-/Testtypen und nicht-finalen Device-Werten bleiben fuer spaetere Gate-Bloecke. Visualisierung nur als ASCII-Review-Overlays, ASCII-Device-Frames, ASCII-Harness-Review-Skizzen, Mermaid-Flows, Markdown-Tabellen und Device-/Accessibility-/Tap-Target-/Text-Containment-Review-Checklisten. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
 | M14-E | Small Implementation Slice Candidate Review | `Gate gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Gate-Reviewblock in `docs/world_design/305-small-implementation-slice-candidate-review.md`. Prueft nur, ob spaetere kleine Slices fuer Foundation Choice, Word-to-Island, Sense Selection, Fallbacks, Container, Device/Accessibility Harness oder bestehende Mock-Slice-Erweiterungen denkbar waeren. Ergebnis: keine direkte Implementierungsfreigabe; spaetere Review-/Harness-Kandidaten sind denkbar; ein sehr kleiner spaeterer Foundation-Choice-Slice koennte nach weiterem Gate theoretisch geprueft werden. `frame_started`, neue Assets, Growth/Garden, Sensitive/Special, Runtime-Konfiguration und automatische Wortplatzierung bleiben blockiert. Visualisierung nur als ASCII-Gate-Flows, ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und Readiness-/Blocker-/Scope-Matrizen. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-E2 | Small Implementation Slice Candidate Visual Review | `Review gestartet / M14-E als Candidate Review bestaetigt` | Reiner Dokumentations- und Visualisierungs-Reviewblock in `docs/world_design/306-small-implementation-slice-candidate-visual-review.md`. Prueft nur M14-E visuell/textuell gegen Readiness-Level, Minimal-Slice-Kriterien, Kandidatenmatrix, Gate-Visualisierungen, `frame_started`-Blockade, Harness-Gates und Misread-Risiken. Ergebnis: M14-E ist als Candidate Review grundsaetzlich brauchbar; `implementation-candidate-later` bleibt aber ausdruecklich keine aktuelle Codefreigabe und braucht immer eigenes Gate, separaten Implementierungs-Prompt und ausdrueckliche Nutzerfreigabe. Visualisierung nur als ASCII-Review-Flows, ASCII-Decision-Maps, Mermaid-Flows, Markdown-Tabellen und Readiness-/Blocker-/Scope-Matrizen. Keine PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine automatische Wortplatzierung, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein Asset, kein `frame_started`. |
+| M14-V1 | Visual Backfill For Docs 283-306 | `Visual Backfill gestartet / PNG-Dokumentationspreviews erzeugt` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/307-visual-backfill-283-306.md`. Ergaenzt echte PNG-Dokumentationsvisualisierungen fuer `283` bis `306` unter `docs/world_design/previews/m14_visual_backfill_283_306/`, inklusive Kontaktuebersicht und Generator-Script. Die PNGs sind Dokumentationspreviews, keine finale UI, keine App-Screens, keine Spielassets und keine Asset-Dateien unter `assets/`. Keine App-Integration, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Screenshots, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1382,6 +1409,33 @@ Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine finale
 Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine
 Implementierungsfreigabe, keinen Code, keine automatische Wortplatzierung und
 kein `frame_started`.
+
+M14-E2 startet den Small Implementation Slice Candidate Visual Review als
+reinen Dokumentations- und Visualisierungs-Reviewblock. M14-E2 prueft nur
+M14-E visuell/textuell gegen Readiness-Level, Minimal-Slice-Kriterien,
+Kandidatenmatrix, Gate-Visualisierungen, `frame_started`-Blockade,
+Harness-Gates und Misread-Risiken. `implementation-candidate-later` bleibt
+ausdruecklich keine aktuelle Codefreigabe und braucht immer eigenes Gate,
+separaten Implementierungs-Prompt und ausdrueckliche Nutzerfreigabe. Der Block
+nutzt nur ASCII-Review-Flows, ASCII-Decision-Maps, Mermaid-Flows,
+Markdown-Tabellen und Readiness-/Blocker-/Scope-Matrizen. Er erzeugt keine
+PNGs, keine Screenshots, keine Tests, keine Widget-Tests, keine
+Test-Harness-Implementierung, keine Flutter-/Dart-Dateien, keine
+App-Integration, keine finale UI, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
+keinen Code, keine automatische Wortplatzierung und kein `frame_started`.
+
+M14-V1 startet den Visual Backfill For Docs 283-306 als reinen
+Dokumentations- und Visualisierungsblock. M14-V1 erzeugt echte PNG-
+Dokumentationsvisualisierungen unter
+`docs/world_design/previews/m14_visual_backfill_283_306/` und dokumentiert das
+Inventar in `docs/world_design/307-visual-backfill-283-306.md`. Die PNGs sind
+Dokumentationspreviews, keine finale UI, keine App-Screens, keine Spielassets
+und keine Asset-Dateien unter `assets/`. Es entsteht keine App-Integration,
+keine Flutter-/Dart-Datei, kein Test, kein Widget-Test, keine
+Test-Harness-Implementierung, kein Screenshot, keine Runtime-Konfiguration,
+keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code und kein
+`frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2260,6 +2314,36 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Spielassets aus M14-E ableiten,
 - keine automatische Wortplatzierung aus M14-E ableiten,
 - kein `frame_started` oder Bauzustand aus M14-E weiterbauen,
+- keine Implementierung aus M14-E2 ableiten,
+- keine Tests aus M14-E2 ableiten,
+- keine Widget-Tests aus M14-E2 ableiten,
+- keine Flutter-/Dart-Dateien aus M14-E2 ableiten,
+- keine App-Integration aus M14-E2 ableiten,
+- keine finale UI aus M14-E2 ableiten,
+- keine finale Datenstruktur aus M14-E2 ableiten,
+- keine Runtime-Konfiguration aus M14-E2 ableiten,
+- keine Codefreigabe aus M14-E2 ableiten,
+- keine Implementierungsfreigabe aus M14-E2 ableiten,
+- keine Assetfreigabe aus M14-E2 ableiten,
+- keine PNG-Erzeugung aus M14-E2 ableiten,
+- keine Screenshots aus M14-E2 ableiten,
+- keine Spielassets aus M14-E2 ableiten,
+- keine automatische Wortplatzierung aus M14-E2 ableiten,
+- kein `frame_started` oder Bauzustand aus M14-E2 weiterbauen,
+- keine App-Integration aus M14-V1 ableiten,
+- keine Flutter-/Dart-Dateien aus M14-V1 ableiten,
+- keine Tests aus M14-V1 ableiten,
+- keine Widget-Tests aus M14-V1 ableiten,
+- keine Test-Harness-Implementierung aus M14-V1 ableiten,
+- keine Screenshots aus M14-V1 ableiten,
+- keine Spielassets aus M14-V1 ableiten,
+- keine Asset-Dateien unter `assets/` aus M14-V1 ableiten,
+- keine finale UI aus M14-V1 ableiten,
+- keine Runtime-Konfiguration aus M14-V1 ableiten,
+- keine Codefreigabe aus M14-V1 ableiten,
+- keine Implementierungsfreigabe aus M14-V1 ableiten,
+- keine App-/Assetfreigabe aus M14-V1 ableiten,
+- kein `frame_started` oder Bauzustand aus M14-V1 weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3158,6 +3242,36 @@ Ein Schritt wird gestoppt, wenn:
 - aus M14-E Spielassets abgeleitet werden,
 - aus M14-E automatische Wortplatzierung abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M14-E weitergebaut werden,
+- aus M14-E2 eine Implementierung abgeleitet wird,
+- aus M14-E2 Tests abgeleitet werden,
+- aus M14-E2 Widget-Tests abgeleitet werden,
+- aus M14-E2 Flutter-/Dart-Dateien abgeleitet werden,
+- aus M14-E2 App-Integration abgeleitet wird,
+- aus M14-E2 eine finale UI abgeleitet wird,
+- aus M14-E2 eine finale Datenstruktur abgeleitet wird,
+- aus M14-E2 Runtime-Konfiguration abgeleitet wird,
+- aus M14-E2 Codefreigabe abgeleitet wird,
+- aus M14-E2 Implementierungsfreigabe abgeleitet wird,
+- aus M14-E2 Assetfreigabe abgeleitet wird,
+- aus M14-E2 PNG-Erzeugung abgeleitet wird,
+- aus M14-E2 Screenshots abgeleitet werden,
+- aus M14-E2 Spielassets abgeleitet werden,
+- aus M14-E2 automatische Wortplatzierung abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M14-E2 weitergebaut werden,
+- aus M14-V1 App-Integration abgeleitet wird,
+- aus M14-V1 Flutter-/Dart-Dateien abgeleitet werden,
+- aus M14-V1 Tests abgeleitet werden,
+- aus M14-V1 Widget-Tests abgeleitet werden,
+- aus M14-V1 Test-Harness-Implementierung abgeleitet wird,
+- aus M14-V1 Screenshots abgeleitet werden,
+- aus M14-V1 Spielassets abgeleitet werden,
+- aus M14-V1 Asset-Dateien unter `assets/` abgeleitet werden,
+- aus M14-V1 eine finale UI abgeleitet wird,
+- aus M14-V1 Runtime-Konfiguration abgeleitet wird,
+- aus M14-V1 Codefreigabe abgeleitet wird,
+- aus M14-V1 Implementierungsfreigabe abgeleitet wird,
+- aus M14-V1 App-/Assetfreigabe abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M14-V1 weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
