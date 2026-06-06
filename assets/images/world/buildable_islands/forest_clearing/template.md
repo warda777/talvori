@@ -56,6 +56,9 @@ aber nicht allein als allgemeines Container-System bestaetigt werden. Weitere
 Beispiel-Flows bleiben empfohlen. M9-B legt ausserdem verbindliche
 Follow-ups fest: emotionalere/spielnaehere Produktflow-Preview,
 Challenge-Artenvergleich, Tali/Vori-Reaktionsflow und mehrere Beispiel-Flows.
+Phase 2G-M10 erzeugt die emotionalere Produktflow-Preview als
+Dokumentationsmaterial unter
+`docs/world_design/previews/phase2g_m10_emotional_product_flow/`.
 
 Fuehrende Dokumente:
 
@@ -77,11 +80,12 @@ Fuehrende Dokumente:
 - `docs/world_design/255-world-depth-gameplay-retention-research.md`
 - `docs/world_design/256-depth-container-user-flow-preview-plan.md`
 - `docs/world_design/257-depth-container-user-flow-visual-review.md`
+- `docs/world_design/258-emotional-product-flow-preview-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M9-B Depth Container Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M10 Emotional Product Preview erzeugt`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -160,8 +164,11 @@ Fuehrende Dokumente:
     `docs/world_design/257-depth-container-user-flow-visual-review.md`.
     M9 darf als erster Beispiel-Flow bestaetigt werden, aber nicht als
     allgemeines Container-System fuer alle Themen.
-  - `phase2GM10`: `false` fuer Code/Assets; vorgemerkt fuer eine
-    emotionalere, spielnaehere Produktflow-Preview.
+  - `phase2GM10`: `false` fuer Code/Assets; erlaubt nur Planungsdokument und
+    Dokumentations-/Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m10_emotional_product_flow/`.
+    Die Dateien sind keine finale UI, keine Spielassets und keine
+    Codefreigabe.
   - `phase2GM10B`: `false` fuer Code/Assets; vorgemerkt fuer
     Challenge-Interaktionsvergleich: Tippen, Audio, Drag-and-drop,
     Zuordnung und moegliche Kombinationen.
@@ -231,6 +238,11 @@ wird. Die emotionalere Produktversion, die genaue Challenge-Art und die
 Tali/Vori-Reaktion sind offene Pflichtpruefungen. Keine allgemeine
 Depth-/Container-UX darf daraus abgeleitet werden, solange diese Follow-ups
 nicht geprueft oder bewusst begruendet zurueckgestellt wurden.
+M10 bearbeitet den emotionaleren Produktflow und erzeugt
+`01_emotional_storyboard.png`, `02_emotion_motivation_beats.png`,
+`03_tali_vori_light_reaction_concept.png` und `README.md` unter
+`docs/world_design/previews/phase2g_m10_emotional_product_flow/`. M10-B,
+M10-C und M11 bleiben offen.
 
 ## 2. Zweck Des Assets
 
@@ -601,6 +613,12 @@ In diesem Template-Block gilt:
 - Keine Challenge-Implementierung, bevor Challenge-Arten verglichen wurden.
 - Keine Companion-UX, bevor Tali/Vori-Reaktionsflow visualisiert wurde.
 - Keine offenen M9-/M9-B-Follow-ups stillschweigend ueberspringen.
+- Keine emotionale M10-Produktpreview als finale UI lesen.
+- Keine Sound-/FX-Implementierung aus M10 ableiten.
+- Keine Companion-Implementierung aus M10 ableiten.
+- Keine Challenge-Art final entscheiden, bevor M10-B erfolgt.
+- Keine allgemeine Container-UX bestaetigen, bevor M10-B, M10-C und M11
+  geprueft sind.
 
 ## 10. Device-/Preview-Check
 
@@ -807,10 +825,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM9DepthContainerUserFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m9_depth_container_user_flow/; documentation preview only`
 - `phase2GM9BDepthContainerUserFlowReviewStatus`: `started in docs/world_design/257-depth-container-user-flow-visual-review.md; M9 usable as first simplified user/product flow, not enough for general container-system confirmation`
 - `phase2GM9BRequiredFollowUps`: `M10 Emotional Product Flow Preview; M10-B Challenge Interaction Comparison; M10-C Companion Reaction Flow; M11 Multi-Example Container Flow Previews`
+- `phase2GM10EmotionalProductFlowPreviewStatus`: `created under docs/world_design/previews/phase2g_m10_emotional_product_flow/; review open; documentation preview only`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M9-B pruefen; M9 als ersten Beispiel-Flow bestaetigen; danach M10/M10-B/M10-C/M11-Follow-ups planen, bevor Code, Assets oder frame_started wieder erlaubt werden`
+- `nextAllowedStep`: `M10 emotional product preview visuell pruefen; danach M10-B/M10-C/M11-Follow-ups planen; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -1100,7 +1119,7 @@ Phase-2G-M9-B-Depth-/Container-User-Flow-Visual-Review gilt nur fuer:
 M9-B-Follow-ups sind verbindlich vorgemerkt:
 
 - `Phase 2G-M10 Emotional Product Flow Preview`: emotionale/spielnaehere
-  Produktversion der M9-Preview,
+  Produktversion der M9-Preview; Preview erzeugt, Review offen,
 - `Phase 2G-M10-B Challenge Interaction Comparison`: Vergleich von Tippen,
   Audio, Drag-and-drop, Zuordnung und Kombinationen,
 - `Phase 2G-M10-C Companion Reaction Flow`: Tali/Vori-Reaktionsflow als
@@ -1109,6 +1128,21 @@ M9-B-Follow-ups sind verbindlich vorgemerkt:
   Schule/Federmappe, Hafen/Bootskajute und Garten/Beet.
 
 Diese Follow-ups duerfen nicht stillschweigend uebersprungen werden.
+
+Phase-2G-M10-Emotional-Product-Flow-Preview gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/258-emotional-product-flow-preview-plan.md`,
+- Dokumentations-/Preview-Dateien unter
+  `docs/world_design/previews/phase2g_m10_emotional_product_flow/`,
+- `01_emotional_storyboard.png`,
+- `02_emotion_motivation_beats.png`,
+- `03_tali_vori_light_reaction_concept.png`,
+- `README.md`,
+- emotionalere, spielnaehere Ausarbeitung des bestehenden Kuechen-
+  Schubladen-Besteck-Flows,
+- leichte Tali/Vori-Praesenz als Vorgeschmack, nicht als M10-C-
+  Companion-Flow-Freigabe.
 
 Phase-2G-Planung und Prompt-Vorbereitung erlauben noch nicht:
 

@@ -219,7 +219,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 
 | Offener Punkt | Warum wichtig | Folgeblock | Status |
 | --- | --- | --- | --- |
-| Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | offen |
+| Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | Preview erzeugt / Review offen |
 | Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | offen |
 | Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | offen |
 | Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
@@ -230,3 +230,8 @@ Diese Follow-ups muessen entweder umgesetzt, geprueft oder bewusst mit
 Begruendung zurueckgestellt werden, bevor eine finale Depth-/Container-UX,
 Challenge-Implementierung oder allgemeine Container-Systementscheidung
 abgeleitet wird.
+
+M10 hat den ersten Follow-up-Punkt gestartet und Preview-Dateien unter
+`docs/world_design/previews/phase2g_m10_emotional_product_flow/` erzeugt.
+Die visuelle M10-Pruefung bleibt offen. M10-B, M10-C und M11 bleiben
+weiterhin offen.
