@@ -362,11 +362,21 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Implementierung, keine finale Datenstruktur, keine sensible ThemeIsland-
   Umsetzung, keine Assetfreigabe, kein Code, kein Asset und kein
   `frame_started`.
+- Phase 2G-M12-E wurde als Mobile And Clutter Rules For Small Objects in
+  `docs/world_design/276-mobile-clutter-rules-small-objects.md` gestartet.
+  Preview-Dateien liegen unter
+  `docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/`.
+  M12-E definiert erste Planungsregeln fuer kleine Objekte, Deko,
+  Container-Inhalte, Detailobjekte, Labels, Tap-Ziele und mobile Clutter-
+  Grenzen. Daraus folgen keine finale Mobile-UI, keine finale Datenstruktur,
+  keine Runtime-Konfiguration, keine Container-Implementierung, keine
+  ThemeIsland-Umsetzung, keine Assetfreigabe, kein Code, kein Asset und kein
+  `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
   M10-B2-, M10-C-, M10-C2-, M11-, M11-B-, M11-C-, M11-C2-, M12-, M12-A2- und
-  M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-Bewertung.
+  M12-B-/M12-B2-/M12-C-/M12-C2-/M12-D-/M12-D2-/M12-E-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
@@ -380,8 +390,9 @@ Aktueller Stand der Talvori-Welt-Produktion:
   dokumentarisch geprueft, M12-C2 als erste Plot-Capability-Planungsrichtung
   dokumentarisch bestaetigt, M12-D als Sensitive-Content-Regelgrundlage
   dokumentarisch geprueft, M12-D2 als erste Sensitive-Content-
-  Planungsrichtung dokumentarisch bestaetigt oder konkrete Taxonomy-/Routing-/
-  Safety-Follow-ups geplant werden.
+  Planungsrichtung dokumentarisch bestaetigt, M12-E als Mobile-/Clutter-
+  Regelgrundlage dokumentarisch geprueft oder konkrete Taxonomy-/Routing-/
+  Safety-/Mobile-Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -478,6 +489,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M12-C2 | Plot-Capability Visual Review | `Review gestartet / erste Capability-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/273-plot-capability-visual-review.md`. Bewertet die M12-C-Previews visuell. Ergebnis: Pipeline, Matrix, Early Theme Cards und Mid/Late/Special Limits sind als erste Plot-Capability-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln: `allowedFunctions` sind Erlaubnisse, `core_plot` ist nicht automatisch `home`, `hub_capable_plot` ist nicht automatisch Markt, und Water/Farm/Travel/Vehicle/Digital/Sensitive bleiben gated. Keine finale Plot-Datenstruktur, keine Runtime-Konfiguration, keine Plot-Implementierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-D | Sensitive Content Representation Rules | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/274-sensitive-content-representation-rules.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12d_sensitive_content_rules/`: `01_sensitive_content_decision_pipeline.png`, `02_sensitive_category_matrix.png`, `03_safe_representation_examples.png`, `04_blocked_until_rules_map.png` und `README.md`. Definiert erste neutrale Darstellungswege fuer sensible, abstrakte und gesellschaftlich heikle Begriffe: Codex, ContextCard, CompanionDialog, QuestWithoutSymbol, NeutralBlueprint, BacklogOnly, RequiresUserChoice und BlockedUntilRules. Keine finale Safety-Implementierung, keine Moderations-Implementierung, keine automatische Visualisierung, keine ThemeIsland-Umsetzung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2G-M12-D2 | Sensitive Content Visual Review | `Review gestartet / erste Sensitive-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/275-sensitive-content-visual-review.md`. Bewertet die M12-D-Previews visuell und inhaltlich. Ergebnis: Pipeline, Matrix, Beispielkarten und Blocked-Until-Rules Map sind als erste Sensitive-Content-Planungsrichtung brauchbar. Bestaetigt nur Planungsregeln gegen automatische Visualisierung, Gebaeude-/Symbol-/Assetproduktion, Reward-/Retention-Druck, Beratungslogik, sensible ThemeIsland-Umsetzung und Companion-Dramatisierung. Keine finale Safety-Implementierung, keine Moderations-Implementierung, keine finale Datenstruktur, kein Code, kein Asset, kein `frame_started`. |
+| Phase 2G-M12-E | Mobile And Clutter Rules For Small Objects | `Planung gestartet / Previews erzeugt` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/276-mobile-clutter-rules-small-objects.md`. Preview-Dateien liegen unter `docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/`: `01_mobile_clutter_depth_ladder.png`, `02_small_object_routing_matrix.png`, `03_container_clutter_examples.png`, `04_mobile_stop_gates.png` und `README.md`. Definiert erste Planungswerte und Stop-Gates fuer TinyObjects, SmallTools, ContainerItems, AmbientDecoration, InteractiveFocusObjects, BuildingParts, SequenceObjects und SensitiveSmallObjects. Keine finale Mobile-UI, keine finale Datenstruktur, keine Runtime-Konfiguration, keine Container-Implementierung, kein Code, kein Asset, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -672,6 +684,18 @@ finale Safety-Implementierung, keine Moderations-Implementierung, keine
 automatische Visualisierung sensibler Begriffe, keine sensible ThemeIsland-
 Umsetzung und keine Assetfreigabe duerfen aus M12-D2 abgeleitet werden.
 
+Phase 2G-M12-E startet Mobile And Clutter Rules For Small Objects als
+Planungs- und Previewgrundlage. Preview-Dateien liegen unter
+`docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/`. M12-E klaert
+erste Planungswerte und Stop-Gates fuer TinyObjects, SmallTools,
+ContainerItems, AmbientDecoration, InteractiveFocusObjects, BuildingParts,
+SequenceObjects und SensitiveSmallObjects. Als naechster Schritt ist nur
+M12-E-Review, M12-E-Nachbesserung oder ein begruendeter Folgeblock fuer
+Mobile-/Clutter-/Accessibility-Pruefung erlaubt. Keine finale Mobile-UI,
+keine finale Datenstruktur, keine Runtime-Konfiguration, keine Container-
+Implementierung, keine ThemeIsland-Umsetzung und keine Assetfreigabe duerfen
+aus M12-E abgeleitet werden.
+
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
 begruendet wurden.
@@ -843,7 +867,9 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   M12-D startet Sensitive-Content-Regeln und erzeugt Preview-Dateien; offen
   bleiben M12-D-Review und Mobile-/Clutter-Regeln.
   M12-D2 bewertet diese erste Sensitive-Content-Richtung als grundsaetzlich
-  brauchbar; offen bleiben Mobile-/Clutter-Regeln.
+  brauchbar. M12-E startet Mobile-/Clutter-Regeln und erzeugt Preview-
+  Dateien; offen bleiben M12-E-Review, echte Mobile-/Accessibility-Pruefung
+  und jede Umsetzung.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -1135,6 +1161,16 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Gebaeude-, Symbol- oder Assetproduktion fuer sensible Begriffe aus
   M12-D2 ableiten,
 - keine App- oder Assetfreigabe aus M12-D oder M12-D2 ableiten,
+- keine Kleinteile- oder Container-Implementierung aus M12-E ableiten,
+- keine finale Mobile-UI aus M12-E ableiten,
+- keine finalen Clutter-Grenzwerte als Runtime-Werte aus M12-E uebernehmen,
+- keine TinyObjects dauerhaft in IslandView platzieren,
+- keine ueberfuellten Container-Ansichten als Nutzeransicht freigeben,
+- keine Labels dauerhaft ueberall anzeigen,
+- keine Deko planen, die Lernobjekte verdeckt,
+- keine sensitiveSmallObjects ohne M12-D-Regeln platzieren,
+- keine App- oder Assetfreigabe aus M12-E ableiten,
+- keine automatische Wortplatzierung aus Clutter-Regeln ableiten,
 - keine ThemeIsland-Umsetzung aus M12 ableiten,
 - keine finale ThemeIsland-Roadmap aus M12 ableiten,
 - keine Assetproduktion aus M12 ableiten,
@@ -1613,6 +1649,16 @@ Ein Schritt wird gestoppt, wenn:
 - Gebaeude, Symbole oder Assets fuer sensible Begriffe aus M12-D2 abgeleitet
   werden,
 - aus M12-D oder M12-D2 App-, Code- oder Assetfreigabe abgeleitet wird,
+- aus M12-E eine Kleinteile- oder Container-Implementierung abgeleitet wird,
+- aus M12-E eine finale Mobile-UI abgeleitet wird,
+- M12-E-Planungswerte als finale Runtime-Grenzwerte uebernommen werden,
+- TinyObjects dauerhaft in IslandView platziert werden,
+- ueberfuellte Container-Ansichten als Nutzeransicht freigegeben werden,
+- Labels dauerhaft ueberall angezeigt werden,
+- Deko Lernobjekte verdeckt,
+- sensitiveSmallObjects ohne M12-D-Regeln platziert werden,
+- aus M12-E App-, Code- oder Assetfreigabe abgeleitet wird,
+- automatische Wortplatzierung aus Clutter-Regeln abgeleitet wird,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
