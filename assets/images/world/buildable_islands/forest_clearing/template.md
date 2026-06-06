@@ -271,6 +271,16 @@ gepresst werden. Container-, DetailInteraction- und QA-Overlay-Regeln muessen
 vor produktnaher Umsetzung visuell geprueft werden. Daraus folgen keine PNGs,
 keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-
 Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
+Phase 2G-M13-G startet Sensitive Content Policy Deepening in
+`docs/world_design/287-sensitive-content-policy-deepening.md`. M13-G ist ein
+reiner Sensitive-Content-Policy-Planungsblock fuer sensible, abstrakte,
+medizinische, juristische, politische, religioese, gesellschaftliche und
+belastende Begriffe. Die Waldlichtung bleibt Starter-/Testform. Solche
+Begriffe duerfen nicht automatisch in Waldlichtung, ThemeIsland, Gebaeude,
+Symbol, Quest, Reward oder Companion-Druck uebersetzt werden. Daraus folgen
+keine PNGs, keine Tests, keine finale Safety-Implementierung, keine
+Moderations-Implementierung, keine finale Datenstruktur, keine Runtime-
+Konfiguration, keine App-/Assetfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -321,11 +331,12 @@ Fuehrende Dokumente:
 - `docs/world_design/284-word-to-island-ux-flow.md`
 - `docs/world_design/285-device-accessibility-preview-plan.md`
 - `docs/world_design/286-container-pagination-and-tap-target-rules.md`
+- `docs/world_design/287-sensitive-content-policy-deepening.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-F Container Pagination And Tap Target Rules gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13-G Sensitive Content Policy Deepening gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -623,6 +634,15 @@ Fuehrende Dokumente:
     keine Tests, keine finale UI, keine finale Datenstruktur, keine Runtime-
     Konfiguration, keine Container-Implementierung, keine App-/Assetfreigabe
     und kein `frame_started` erzeugen.
+  - `phase2GM13G`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/287-sensitive-content-policy-deepening.md`.
+    M13-G darf Sensitive-Content-Policy-, Routing-, Darstellungs-,
+    Tali/Vori-, Privacy- und Gate-Regeln planen und textuell visualisieren,
+    aber keine Safety-Implementierung, keine Moderations-Implementierung,
+    keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+    automatische Klassifikation, keine App-/Assetfreigabe und kein
+    `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1474,6 +1494,23 @@ In diesem Template-Block gilt:
 - Keine TinyObject-Tap-Ziele ohne Container, Zoom oder DetailInteraction.
 - Keine Growth-/Timer-Mechanik ohne Fairness-Regeln.
 - Keine sensitiveSmallObjects ohne M12-D-Regeln.
+- Keine Safety-Implementierung aus M13-G.
+- Keine Moderations-Implementierung aus M13-G.
+- Keine finale Sensitive-Datenstruktur aus M13-G.
+- Keine Runtime-Konfiguration aus M13-G.
+- Keine automatische Klassifikation aus M13-G.
+- Keine automatische Visualisierung sensibler Begriffe.
+- Keine sensible ThemeIsland-Umsetzung aus M13-G.
+- Keine sensiblen Gebaeude, Symbole oder Assets aus M13-G.
+- Keine medizinische, juristische oder politische Beratung.
+- Keine Companion-Dramatisierung.
+- Keine Retention-/Streak-/Paywall-Mechanik mit sensiblen Begriffen.
+- Keine Social-/Showcase-Sichtbarkeit sensibler Inhalte.
+- Keine PNG-Erzeugung aus M13-G.
+- Keine Tests aus M13-G.
+- Keine App- oder Assetfreigabe aus M13-G.
+- Kein Code aus M13-G.
+- Kein `frame_started` oder Bauzustand aus M13-G.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -1722,10 +1759,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM13DWordToIslandUXFlowStatus`: `started in docs/world_design/284-word-to-island-ux-flow.md; UX flow only; no final routing implementation, no final routing data structure, no runtime config, no automatic word placement`
 - `phase2GM13EDeviceAccessibilityPreviewPlanStatus`: `started in docs/world_design/285-device-accessibility-preview-plan.md; preview check plan only; no PNGs, no tests, no final UI, no final data structure, no runtime config`
 - `phase2GM13FContainerPaginationTapTargetStatus`: `started in docs/world_design/286-container-pagination-and-tap-target-rules.md; textual visualization only; no PNGs, no tests, no final UI, no final data structure, no runtime config, no container implementation`
+- `phase2GM13GSensitivePolicyDeepeningStatus`: `started in docs/world_design/287-sensitive-content-policy-deepening.md; policy structure only; no safety implementation, no moderation implementation, no final data structure, no runtime config, no automatic classification`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M13-F reviewen, M13-F nachbessern oder M13-G/M13-H als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13-G reviewen, M13-G nachbessern oder M13-H/M13-I als reine Planung starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2591,6 +2629,32 @@ Phase-2G-M13-F-Container-Pagination-And-Tap-Target-Rules gilt nur fuer:
 - keine ThemeIsland-Umsetzung,
 - keine Bauzustaende,
 - keine Kleinteile dauerhaft in IslandView oder Waldlichtung,
+- keine App-/Assetfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+Phase-2G-M13-G-Sensitive-Content-Policy-Deepening gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/287-sensitive-content-policy-deepening.md`,
+- Sensitive-Content-Policy-, Routing-, Darstellungs-, Tali/Vori-, Privacy-
+  und Gate-Regeln,
+- textuelle Visualisierung mit Mermaid, ASCII-Flows, Markdown-Tabellen und
+  Policy-Matrizen,
+- keine automatische Uebersetzung sensibler Begriffe in Waldlichtung,
+  ThemeIsland, Gebaeude, Symbol, Quest, Reward oder Companion-Druck,
+- keine PNGs,
+- keine Tests,
+- keine finale Safety-Implementierung,
+- keine Moderations-Implementierung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Klassifikation,
+- keine sensiblen Gebaeude, Symbole oder Assets,
+- keine sensible ThemeIsland-Umsetzung,
+- keine neuen Assets,
+- keine Plot-Implementierung,
+- keine Bauzustaende,
 - keine App-/Assetfreigabe,
 - kein Code,
 - kein `frame_started`.
