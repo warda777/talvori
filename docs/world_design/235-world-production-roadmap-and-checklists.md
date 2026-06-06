@@ -33,6 +33,8 @@ Grundlagen:
 - `docs/world_design/262-companion-reaction-flow.md`
 - `docs/world_design/263-companion-reaction-visual-review.md`
 - `docs/world_design/264-multi-example-container-flow-previews.md`
+- `docs/world_design/265-multi-example-container-flow-visual-review.md`
+- `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`
 - `docs/220-talvori-world-professional-game-architecture-research.md`
 - `docs/221-talvori-world-build-and-expansion-architecture.md`
 - `docs/222-talvori-world-game-system-master-plan.md`
@@ -252,16 +254,34 @@ Aktueller Stand der Talvori-Welt-Produktion:
   und Garten/Beet/Samen-Giesskanne-Pflanze. Daraus folgen keine finale
   Container-Systemarchitektur, keine Flow-Implementierung, keine App-
   Integration, kein Code, kein Asset und kein `frame_started`.
+- Phase 2G-M11-B wurde als visuelle Pruefung in
+  `docs/world_design/265-multi-example-container-flow-visual-review.md`
+  gestartet. Ergebnis: M11 ist als Multi-Flow-Richtung grundsaetzlich
+  brauchbar. Schule/Federmappe und Garten/Beet sind besonders tragfaehig;
+  Hafen/Bootskajute bleibt wertvoll, aber mobil/visuell riskanter. Daraus
+  folgen keine finale Container-Systemarchitektur, keine Flow-Implementierung,
+  keine App-Integration, kein Code, kein Asset und kein `frame_started`.
+- Phase 2G-M11-C / World Content Taxonomy wurde als reiner
+  Dokumentationsnachtrag in
+  `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`
+  gestartet. Der Katalog sammelt Wohnbereiche, Aussenbereiche, Verkehr,
+  Stadt/Dorf, Einkauf, Freizeit, oeffentliche Gebaeude, Arbeit/Industrie,
+  Natur, Wasser/Kueste, Landwirtschaft und Dekoration als langfristiges
+  Taxonomy-Backlog. Er ist keine Assetfreigabe, keine finale ThemeIsland-
+  Roadmap und keine Bau-Freigabe. Er dient spaeter als Grundlage fuer
+  ThemeIsland-Routing, Plot-Capabilities, Container-/Depth-Planung und
+  Asset-Priorisierung.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
-  M10-B2-, M10-C-, M10-C2- und M11-Bewertung.
+  M10-B2-, M10-C-, M10-C2-, M11-, M11-B- und M11-C-Bewertung.
   Danach duerfen nur M7-B als technische Debug-Greybox bestaetigt, gezielt
   nachgebessert, M9 als erster Beispiel-Flow dokumentarisch bestaetigt, M10
   als emotionalere Produktflow-Preview dokumentarisch bestaetigt, M10-B als
   erste Challenge-Empfehlung dokumentarisch bestaetigt, M10-C als erste
-  Companion-Reaktionsrichtung dokumentarisch bestaetigt oder M11 visuell
-  geprueft und bestaetigt/nachgebessert werden.
+  Companion-Reaktionsrichtung dokumentarisch bestaetigt, M11 als Multi-Flow-
+  Richtung dokumentarisch bestaetigt, der World-Content-Katalog reviewt oder
+  konkrete Taxonomy-/Routing-Follow-ups geplant werden.
   Offen bleiben ThemeIsland-Roadmap, Mobile-Lesbarkeit, Inselkapazitaet,
   Depth-UX,
   Phase-2G-Code und jede groessere Bau-, Lern-, Reward-,
@@ -346,7 +366,9 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | Phase 2G-M10-B2 | Challenge Interaction Visual Review | `Review gestartet / erste Empfehlung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/261-challenge-interaction-visual-review.md`. Bewertet die M10-B-Previews visuell. Ergebnis: Die Matrix ist fuer interne Planung dicht, aber brauchbar; Tap-Auswahl ist als erster Prototype-Flow nachvollziehbar, Audio + Tap als zweite Stufe, Matching/Sortieren spaeter und Mini-Sequenzen fuer Aktionen. Keine finale Challenge-Systementscheidung ohne M11, keine Challenge-Implementierung, kein Code, kein Asset. |
 | Phase 2G-M10-C | Companion Reaction Flow | `gestartet / Preview erzeugt / durch M10-C2 geprueft` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/262-companion-reaction-flow.md`. Erzeugt `01_companion_reaction_timeline.png`, `02_success_error_idle_reactions.png`, `03_companion_boundaries.png` und `README.md` unter `docs/world_design/previews/phase2g_m10c_companion_reaction_flow/`. Ziel: Tali/Vori als emotionalen Motivationsanker pruefen, ohne Challenge zu loesen, Druck zu erzeugen oder finale Companion-UX freizugeben. Keine Companion-Implementierung, keine Voice-/Audio-/Animation-Freigabe, kein Code, kein Asset. |
 | Phase 2G-M10-C2 | Companion Reaction Visual Review | `Review gestartet / erste Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/263-companion-reaction-visual-review.md`. Bewertet die M10-C-Previews visuell. Ergebnis: Tali/Vori ist als sanfter Motivationsanker sichtbar, loest die Challenge nicht, erzeugt keinen Druck und bleibt begleitend. Die Text-Containment-Auffaelligkeit in `01_companion_reaction_timeline.png` ist nicht-blockierend und als Quality Note dokumentiert. Keine finale Companion-UX, keine Voice-/Audio-/Animation-/Rive-Freigabe, kein Code, kein Asset. |
-| Phase 2G-M11 | Multi-Example Container Flow Previews | `gestartet / Preview erzeugt / Review offen` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/264-multi-example-container-flow-previews.md`. Erzeugt `01_multi_flow_overview.png`, `02_flow_comparison_matrix.png`, `03_challenge_fit_by_flow.png`, `04_companion_moments_by_flow.png` und `README.md` unter `docs/world_design/previews/phase2g_m11_multi_example_container_flows/`. Ziel: Schule/Federmappe/Stifte, Hafen/Bootskajute/Kompass-Karte-Seil und Garten/Beet/Samen-Giesskanne-Pflanze pruefen, damit kein allgemeines Container-System aus nur einem Kuechenbeispiel abgeleitet wird. Keine Spielassets, keine finale UI, kein Code, keine finale Container-Systemarchitektur. |
+| Phase 2G-M11 | Multi-Example Container Flow Previews | `gestartet / Preview erzeugt / durch M11-B geprueft` | Reiner Planungs- und Visualisierungsblock in `docs/world_design/264-multi-example-container-flow-previews.md`. Erzeugt `01_multi_flow_overview.png`, `02_flow_comparison_matrix.png`, `03_challenge_fit_by_flow.png`, `04_companion_moments_by_flow.png` und `README.md` unter `docs/world_design/previews/phase2g_m11_multi_example_container_flows/`. Ziel: Schule/Federmappe/Stifte, Hafen/Bootskajute/Kompass-Karte-Seil und Garten/Beet/Samen-Giesskanne-Pflanze pruefen, damit kein allgemeines Container-System aus nur einem Kuechenbeispiel abgeleitet wird. M11-B bewertet die Multi-Flow-Richtung als brauchbar. Keine Spielassets, keine finale UI, kein Code, keine finale Container-Systemarchitektur. |
+| Phase 2G-M11-B | Multi-Example Container Flow Visual Review | `Review gestartet / Multi-Flow-Richtung brauchbar` | Reiner Dokumentationsblock in `docs/world_design/265-multi-example-container-flow-visual-review.md`. Bewertet die M11-Previews visuell. Ergebnis: Die drei Flows sind verstaendlich, Tap-Auswahl bleibt uebergreifend der staerkste MVP-Kandidat, Audio + Tap bleibt zweite Stufe, Matching/Sortieren bleiben spaeter sinnvoll und Mini-Sequenzen bleiben advanced. Schule/Federmappe und Garten/Beet sind besonders tragfaehig; Hafen/Bootskajute bleibt wertvoll, aber mobil/visuell riskanter. Keine finale Container-Systemarchitektur, keine Flow-Implementierung, kein Code, kein Asset. |
+| Phase 2G-M11-C | World Content Taxonomy / Location Catalog | `Taxonomy-Backlog gestartet` | Reiner Dokumentationsnachtrag in `docs/world_design/266-world-content-taxonomy-and-location-catalog.md`. Strukturiert Wohnbereiche, Grundstueck/Aussenbereiche, Fahrzeuge/Parken, Strassen/Wege, Stadt/Dorfzentrum, Einkauf/Versorgung, Gastronomie/Freizeit, oeffentliche Gebaeude, Arbeit/Gewerbe/Industrie, Natur/Gruenflaechen, Freizeitflaechen draussen, Wasser/Hafen/Kueste, Landwirtschaft und Dekoration/Details. Der Katalog ist keine Assetfreigabe, keine Bau-Freigabe und keine finale ThemeIsland-Roadmap; er dient spaeter ThemeIsland-Routing, Plot-Capabilities, Depth-/Container-Planung und Asset-Priorisierung. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -462,10 +484,17 @@ Phase 2G-M10-C2 bewertet M10-C als grundsaetzlich brauchbare erste
 Companion-Reaktionsrichtung. Phase 2G-M11 wurde danach als Multi-Example
 Container Flow Preview gestartet und erzeugt Preview-Dateien unter
 `docs/world_design/previews/phase2g_m11_multi_example_container_flows/`.
-Als naechster Schritt ist nur die visuelle M11-Pruefung erlaubt: M11
-bestaetigen, nachbessern oder weitere Flow-/Mobile-Pruefungen ableiten. Die
-Preview-Dateien sind kein finales Inselbild, keine finale UI und keine
-Spielassets. `frame_started` bleibt gestoppt.
+Phase 2G-M11-B bewertet diese Previews als grundsaetzlich brauchbare
+Multi-Flow-Richtung. Als naechster Schritt sind nur dokumentarische
+Folgepruefungen erlaubt: Mobile-Komplexitaet fuer Hafen/Bootskajute,
+Clutter-/Kleinteile fuer Schule/Federmappe, Fairness-/Timer fuer
+Gartenwachstum oder ein weiterer reiner Planungsblock fuer Container-
+Systemarchitektur. Phase 2G-M11-C hat zusaetzlich den World Content
+Taxonomy-/Location-Katalog gestartet. Als naechster Schritt ist nur Review
+oder weitere Strukturierung dieses Katalogs erlaubt. Die Preview-Dateien und
+der Katalog sind kein finales Inselbild, keine finale UI, keine Spielassets,
+keine Assetliste und keine finale ThemeIsland-Roadmap. `frame_started` bleibt
+gestoppt.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -611,8 +640,12 @@ Offene Punkte nach abgeschlossenem Phase-2F-Mock-Slice:
   erzeugt. M10-C2 bewertet die erste Companion-Richtung als brauchbar; finale
   Companion-UX, Implementierung, Voice/Audio/Animation/Rive, Personality-
   Varianten und Comeback-Erinnerungen bleiben offen. M11 hat mehrere
-  Beispiel-Flows sichtbar geplant; offen bleibt die M11-Review-Pruefung und
-  jede Entscheidung, ob weitere Flow-/Mobile-Previews noetig sind.
+  Beispiel-Flows sichtbar geplant; M11-B bewertet die Multi-Flow-Richtung als
+  brauchbar. Offen bleiben Mobile-Komplexitaet fuer Hafen/Bootskajute,
+  Clutter-/Kleinteile fuer Schule/Federmappe, Fairness-/Timer fuer
+  Gartenwachstum und jede finale Container-Systemarchitektur. M11-C nimmt den
+  World-Content-Katalog auf; offen bleiben Taxonomy-Review, ThemeIsland-
+  Priorisierung, Plot-Capability-Ableitung und Word-to-Island-Routing.
 - Es gibt kein echtes Bau-/Lern-/Reward-System.
 - Es gibt keine Persistenz.
 - Es gibt keine Ressourcenlogik.
@@ -806,6 +839,24 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Mini-Sequenzen implementieren, bevor Aktionen und Reihenfolgen separat
   geprueft sind,
 - keine App- oder Assetfreigabe aus M11 ableiten,
+- keine finale Container-Systemarchitektur aus M11-B ableiten,
+- keine Flow-Implementierung ohne spaetere UX-/Mobile-Pruefung ableiten,
+- keine Hafen-/Kajuten-UX ohne separate Mobile-Komplexitaetspruefung
+  bestaetigen,
+- keine Garten-Wachstumsmechanik ohne Fairness-/Timer-Pruefung planen,
+- keine Schulobjekt-Ansicht ohne Clutter-/Kleinteile-Pruefung als
+  Produktentscheidung behandeln,
+- keine App- oder Assetfreigabe aus M11 oder M11-B ableiten,
+- keine Umsetzung eines Katalogbegriffs ohne Routing-Entscheidung,
+- keine grosse Kategorie auf die Starterinsel pressen,
+- keine Assetproduktion aus dem Taxonomy-Katalog ableiten,
+- keine ThemeIsland-Umsetzung ohne Priorisierung und Scope-Gate starten,
+- keine Deko-Massenproduktion ohne Clutter-Regeln planen,
+- keine oeffentlichen, medizinischen, religioesen oder politischen Gebaeude
+  ohne sensible Darstellungspruefung planen,
+- keine Verkehrs-/Strassenlogik ohne eigenes Connector-/Path-Konzept
+  umsetzen,
+- keine Fahrzeug-/Parklogik ohne Groessen- und Interaktionsregeln planen,
 - keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen,
 - kein weiterer Bau-Code ausserhalb der abgeschlossenen lokalen Mock-Slices.
@@ -1161,6 +1212,25 @@ Ein Schritt wird gestoppt, wenn:
 - Mini-Sequenzen implementiert werden sollen, bevor Aktionen und Reihenfolgen
   separat geprueft sind,
 - aus M11 App-, Code- oder Assetfreigabe abgeleitet wird,
+- aus M11-B eine finale Container-Systemarchitektur abgeleitet werden soll,
+- Flow-Implementierung ohne spaetere UX-/Mobile-Pruefung geplant wird,
+- Hafen-/Kajuten-UX ohne separate Mobile-Komplexitaetspruefung bestaetigt
+  werden soll,
+- Garten-Wachstumsmechanik ohne Fairness-/Timer-Pruefung geplant oder
+  implementiert werden soll,
+- Schulobjekt-Ansicht ohne Clutter-/Kleinteile-Pruefung als Produktentscheidung
+  behandelt werden soll,
+- aus M11 oder M11-B App-, Code- oder Assetfreigabe abgeleitet wird,
+- ein Katalogbegriff ohne Routing-Entscheidung umgesetzt werden soll,
+- eine grosse Kategorie auf die Starterinsel gepresst werden soll,
+- aus dem Taxonomy-Katalog Assetproduktion abgeleitet wird,
+- eine ThemeIsland-Umsetzung ohne Priorisierung und Scope-Gate gestartet wird,
+- Deko-Massenproduktion ohne Clutter-Regeln geplant wird,
+- oeffentliche, medizinische, religioese oder politische Gebaeude ohne
+  sensible Darstellungspruefung geplant werden,
+- Verkehrs-/Strassenlogik ohne eigenes Connector-/Path-Konzept umgesetzt
+  werden soll,
+- Fahrzeug-/Parklogik ohne Groessen- und Interaktionsregeln geplant wird,
 - eine Preview committed werden soll, obwohl wichtige Texte aus Karten,
   Rahmen oder Panels herauslaufen,
 - Umbauen oder Verschieben ohne definierte Folgen fuer Wortobjekte,
