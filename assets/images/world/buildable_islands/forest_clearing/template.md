@@ -195,6 +195,15 @@ M12 bis M12-E2 sind als konsolidierte Planungsgrundlage brauchbar. Daraus
 folgen keine finale ThemeIsland-Roadmap, keine Implementierungsfreigabe, keine
 finale Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe,
 kein Code und kein `frame_started`.
+Phase 2G-M13 startet den ThemeIsland Roadmap Draft in
+`docs/world_design/279-theme-island-roadmap-draft.md` und erzeugt
+Dokumentationspreviews unter
+`docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`. M13
+ordnet ThemeIsland-Kandidaten in Foundation, Expansion Wave 1, Expansion Wave
+2, System-Heavy Wave und Sensitive/Special Wave. Daraus folgen keine finale
+ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine Implementierungs-
+freigabe, keine finale Datenstruktur, keine Runtime-Konfiguration, keine
+App-/Assetfreigabe, kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -237,11 +246,12 @@ Fuehrende Dokumente:
 - `docs/world_design/276-mobile-clutter-rules-small-objects.md`
 - `docs/world_design/277-mobile-clutter-visual-review.md`
 - `docs/world_design/278-m12-consolidated-readiness-review.md`
+- `docs/world_design/279-theme-island-roadmap-draft.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M12-F Consolidated Readiness Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / 2G-M13 ThemeIsland Roadmap Draft gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -474,6 +484,15 @@ Fuehrende Dokumente:
     finale ThemeIsland-Roadmap, keine Implementierungsfreigabe, keine finale
     Datenstruktur, keine Runtime-Konfiguration, keine App-/Assetfreigabe und
     kein `frame_started` erzeugen.
+  - `phase2GM13`: `false` fuer Code/Assets; erlaubt nur das
+    Planungsdokument `docs/world_design/279-theme-island-roadmap-draft.md`
+    und Dokumentations-/Preview-Dateien unter
+    `docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`.
+    M13 darf ThemeIsland-Kandidaten in Roadmap-Wellen ordnen, aber keine
+    finale ThemeIsland-Roadmap, keine ThemeIsland-Umsetzung, keine
+    Implementierungsfreigabe, keine finale Datenstruktur, keine Runtime-
+    Konfiguration, keine App-/Assetfreigabe und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -1211,6 +1230,21 @@ In diesem Template-Block gilt:
 - Keine Safety- oder Moderations-Implementierung aus M12-F.
 - Keine App-, Code- oder Assetfreigabe aus M12-F.
 - Kein `frame_started` oder Bauzustand aus M12-F.
+- Keine finale ThemeIsland-Roadmap aus M13.
+- Keine Implementierungsfreigabe aus M13.
+- Keine finale Datenstruktur aus M13.
+- Keine Runtime-Konfiguration aus M13.
+- Keine automatische Wortplatzierung aus M13.
+- Keine ThemeIsland-Umsetzung aus M13.
+- Keine Assets aus M13.
+- Keine Early-Insel ohne Onboarding-Choice-Review.
+- Keine Early-Insel ohne Device-/Accessibility-/Tap-Target-Pruefung.
+- Keine Garten-/Farm-Wachstumslogik ohne Fairness-/Timer-Regeln.
+- Keine Kuesten-/Hafeninsel ohne Water-/Dock-/Mobile-Komplexitaetspruefung.
+- Keine Stadt-/Verkehr-/Technikinsel ohne eigenes Systemkonzept.
+- Keine Sensitive-/Special-Insel ohne vertiefte Safety-/UX-/Policy-Regeln.
+- Keine App- oder Assetfreigabe aus M13.
+- Kein `frame_started` oder Bauzustand aus M13.
 - Keine Preview committen, wenn wichtige Texte aus Karten, Rahmen oder Panels
   herauslaufen.
 
@@ -1441,10 +1475,11 @@ Phase-2F-Preview-Ergaenzung:
 - `phase2GM12EMobileClutterRulesStatus`: `started in docs/world_design/276-mobile-clutter-rules-small-objects.md; previews created under docs/world_design/previews/phase2g_m12e_mobile_clutter_rules/; no final mobile UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM12E2MobileClutterReviewStatus`: `started in docs/world_design/277-mobile-clutter-visual-review.md; first mobile clutter planning direction usable; no final mobile UI, no final data structure, no runtime config, no container implementation`
 - `phase2GM12FConsolidatedReadinessReviewStatus`: `started in docs/world_design/278-m12-consolidated-readiness-review.md; M12 chain usable as consolidated planning foundation; no final roadmap, no implementation release, no final data structure, no runtime config`
+- `phase2GM13ThemeIslandRoadmapDraftStatus`: `started in docs/world_design/279-theme-island-roadmap-draft.md; previews created under docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/; no final ThemeIsland roadmap, no implementation release, no final data structure, no runtime config`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M12-F reviewen oder reinen M13-Folgeplanungsblock starten; Code, Assets und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M13 visuell pruefen oder M13-B/M13-C/M13-D als reinen Planungsblock starten; Code, Assets und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -2140,6 +2175,25 @@ Phase-2G-M12-F-Consolidated-Readiness-Review gilt nur fuer:
   Plot-/Container-Implementierung, Safety-/Moderations-Implementierung und
   App-/Assetfreigabe aus M12-F,
 - keine PNG-Erzeugung oder PNG-Aenderung,
+- keine App-, Code- oder Assetfreigabe,
+- kein `frame_started`.
+
+Phase-2G-M13-ThemeIsland-Roadmap-Draft gilt nur fuer:
+
+- Planungsdokument in
+  `docs/world_design/279-theme-island-roadmap-draft.md`,
+- Dokumentationspreviews unter
+  `docs/world_design/previews/phase2g_m13_theme_island_roadmap_draft/`,
+- erste Roadmap-Wellen fuer Foundation, Expansion Wave 1, Expansion Wave 2,
+  System-Heavy Wave und Sensitive/Special Wave,
+- Early-Kandidatenkarten fuer Zuhause/Alltag, Schule/Lernen und Garten/Natur
+  nah,
+- Gate-Dokumentation gegen Code, Assets, finale Roadmap, Runtime-
+  Konfiguration, ThemeIsland-Umsetzung und automatische Wortplatzierung,
+- keine finale ThemeIsland-Roadmap,
+- keine ThemeIsland-Umsetzung,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
 - keine App-, Code- oder Assetfreigabe,
 - kein `frame_started`.
 
