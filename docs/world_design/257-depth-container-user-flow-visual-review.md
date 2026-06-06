@@ -220,7 +220,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 | Offener Punkt | Warum wichtig | Folgeblock | Status |
 | --- | --- | --- | --- |
 | Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | geprueft / grundsaetzlich brauchbar |
-| Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | offen |
+| Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | gestartet / Preview erzeugt / Review offen |
 | Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | offen |
 | Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
 | Keine Code-/Assetfreigabe | M9/M9-B ist Dokumentation und visuelle Pruefung, keine Implementierung. | bleibt Stop-Regel | aktiv |
@@ -235,5 +235,14 @@ M10 hat den ersten Follow-up-Punkt gestartet und Preview-Dateien unter
 `docs/world_design/previews/phase2g_m10_emotional_product_flow/` erzeugt. Die
 visuelle M10-D-Pruefung liegt in
 `docs/world_design/259-emotional-product-flow-visual-review.md`. Ergebnis:
-M10 ist als emotionalere Produktflow-Preview grundsaetzlich brauchbar. M10-B,
-M10-C und M11 bleiben weiterhin offen.
+M10 ist als emotionalere Produktflow-Preview grundsaetzlich brauchbar.
+
+M10-B hat den Challenge-Interaktionsvergleich in
+`docs/world_design/260-challenge-interaction-comparison.md` gestartet und
+Preview-Dateien unter
+`docs/world_design/previews/phase2g_m10b_challenge_interaction_comparison/`
+erzeugt. Ergebnis fuer den Review-Stand: Tap-Auswahl ist die empfohlene erste
+Prototype-Challenge, Audio + Tap die zweite Stufe, Matching/Sortieren spaetere
+Varianten und Mini-Sequenzen spaeter fuer Aktionswoerter. Diese Empfehlung ist
+noch keine finale Challenge-Art-Freigabe. M10-C und M11 bleiben weiterhin
+offen.
