@@ -221,7 +221,7 @@ aber nicht als allgemeine Container-/Depth-Systemfreigabe gelten.
 | --- | --- | --- | --- |
 | Emotionale/spielerische Version der Preview | Die aktuelle Preview ist schematisch und zeigt noch wenig Atmosphaere, Neugier und Spielreiz. | `Phase 2G-M10 Emotional Product Flow Preview` | geprueft / grundsaetzlich brauchbar |
 | Challenge-Art entscheiden | Tap, Audio, Drag-and-drop und Zuordnung erzeugen unterschiedliche UX, Schwierigkeit, Barrierefreiheit und Entwicklungsaufwand. | `Phase 2G-M10-B Challenge Interaction Comparison` | geprueft / erste Empfehlung brauchbar |
-| Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | gestartet / Preview erzeugt / Review offen |
+| Tali/Vori Companion-Reaktion visualisieren | Tali/Vori ist ein wichtiger emotionaler Motivationsanker und darf nicht nur als Textzeile erscheinen. | `Phase 2G-M10-C Companion Reaction Flow` | geprueft / erste Richtung brauchbar |
 | Weitere Beispiel-Flows | Ein Kuechenflow reicht nicht fuer Schule, Hafen, Garten und andere Themen. | `Phase 2G-M11 Multi-Example Container Flow Previews` | offen |
 | Keine Code-/Assetfreigabe | M9/M9-B ist Dokumentation und visuelle Pruefung, keine Implementierung. | bleibt Stop-Regel | aktiv |
 | `frame_started` bleibt gestoppt | Bauassets sind weiterhin nicht freigegeben. | bleibt Stop-Regel | aktiv |
@@ -256,4 +256,8 @@ Dateien unter
 Der Flow visualisiert Curiosity Cue, Gentle Nudge, Challenge Support, Success
 Reaction, Correction Support, Idle Hint und optionale Next Goal Suggestion.
 Diese Preview ist keine finale Companion-UX, keine Voice-/Audio-/Animation-
-Freigabe und keine Implementierung. M11 bleibt weiterhin offen.
+Freigabe und keine Implementierung. Die visuelle M10-C2-Pruefung liegt in
+`docs/world_design/263-companion-reaction-visual-review.md`. Ergebnis: M10-C
+ist als erste Companion-Reaktionsrichtung grundsaetzlich brauchbar. Voice,
+Audio, Animation, Rive/FX, Personality-Varianten und Comeback-Erinnerungen
+bleiben spaeter separat zu pruefen. M11 bleibt weiterhin offen.
