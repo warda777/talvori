@@ -481,6 +481,19 @@ und keine App-Integration. `frame_started` bleibt blockiert. Daraus folgen
 keine Flutter-/Dart-Dateien, keine finale Datenstruktur, keine
 Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
 kein Code und kein `frame_started`.
+M14-V1-B startet den Visual Backfill Quality Review in
+`docs/world_design/308-visual-backfill-quality-review.md`. M14-V1-B ist ein
+reiner Reviewblock fuer bestehende PNG-Dokumentationspreviews. Die Waldlichtung
+bleibt Starter-/Testform. M14-V1-B erzeugt keine neuen PNGs und aendert keine
+PNGs. Die PNGs unter
+`docs/world_design/previews/m14_visual_backfill_283_306/` bleiben
+Dokumentationsmaterial, keine Spielassets, keine Asset-Dateien unter `assets/`,
+keine finale UI und keine App-Screens. M14-V1-B erzeugt keine neuen Assets,
+keine Bauzustaende, keine Tests, keine Widget-Tests, keine Harness-
+Implementierung und keine App-Integration. `frame_started` bleibt blockiert.
+Daraus folgen keine Flutter-/Dart-Dateien, keine finale Datenstruktur, keine
+Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
+kein Code und kein `frame_started`.
 
 Fuehrende Dokumente:
 
@@ -552,11 +565,12 @@ Fuehrende Dokumente:
 - `docs/world_design/305-small-implementation-slice-candidate-review.md`
 - `docs/world_design/306-small-implementation-slice-candidate-visual-review.md`
 - `docs/world_design/307-visual-backfill-283-306.md`
+- `docs/world_design/308-visual-backfill-quality-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-V1 Visual Backfill 283-306 gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M14-V1-B Visual Backfill Quality Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1061,6 +1075,15 @@ Fuehrende Dokumente:
     echte PNG-Dokumentationsdiagramme fuer Docs 283-306 erzeugen, aber keine
     App-Integration, keine Flutter-/Dart-Dateien, keine Tests, keine
     Widget-Tests, keine Screenshots, keine Spielassets, keine Asset-Dateien
+    unter `assets/`, keine finale UI, keine Runtime-Konfiguration, keine
+    App-/Assetfreigabe, keine Implementierungsfreigabe und kein
+    `frame_started` erzeugen.
+  - `m14V1B`: `false` fuer Code/App/Assets; erlaubt nur das Reviewdokument
+    `docs/world_design/308-visual-backfill-quality-review.md`. M14-V1-B darf
+    bestehende PNG-Dokumentationspreviews aus M14-V1 pruefen, aber keine PNGs
+    aendern, keine neuen PNGs erzeugen, keine Tests, keine Widget-Tests, keine
+    Test-Harness-Implementierung, keine Screenshots, keine Flutter-/Dart-
+    Dateien, keine App-Integration, keine Spielassets, keine Asset-Dateien
     unter `assets/`, keine finale UI, keine Runtime-Konfiguration, keine
     App-/Assetfreigabe, keine Implementierungsfreigabe und kein
     `frame_started` erzeugen.
@@ -2212,6 +2235,22 @@ In diesem Template-Block gilt:
 - Keine Implementierungsfreigabe aus M14-V1.
 - Keine App-/Assetfreigabe aus M14-V1.
 - Kein `frame_started` oder Bauzustand aus M14-V1.
+- Keine PNG-Aenderung aus M14-V1-B.
+- Keine neuen PNGs aus M14-V1-B.
+- Keine Implementierung aus M14-V1-B.
+- Keine Tests aus M14-V1-B.
+- Keine Widget-Tests aus M14-V1-B.
+- Keine Flutter-/Dart-Dateien aus M14-V1-B.
+- Keine App-Integration aus M14-V1-B.
+- Keine finale UI aus M14-V1-B.
+- Keine Runtime-Konfiguration aus M14-V1-B.
+- Keine Codefreigabe aus M14-V1-B.
+- Keine Implementierungsfreigabe aus M14-V1-B.
+- Keine Assetfreigabe aus M14-V1-B.
+- Keine Screenshots aus M14-V1-B.
+- Keine Spielassets aus M14-V1-B.
+- Keine Asset-Dateien unter `assets/` aus M14-V1-B.
+- Kein `frame_started` oder Bauzustand aus M14-V1-B.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2481,10 +2520,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m14ESmallImplementationSliceCandidateReviewStatus`: `started in docs/world_design/305-small-implementation-slice-candidate-review.md; gate review only; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14E2SmallImplementationSliceCandidateVisualReviewStatus`: `started in docs/world_design/306-small-implementation-slice-candidate-visual-review.md; visual/text review only; M14-E usable as candidate review; implementation-candidate-later is no current code release; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no final UI, no final data structure, no runtime config, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m14V1VisualBackfillStatus`: `started in docs/world_design/307-visual-backfill-283-306.md; documentation PNG previews generated under docs/world_design/previews/m14_visual_backfill_283_306; no Flutter or Dart files, no tests, no widget tests, no screenshots, no game assets, no asset files under assets, no final UI, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
+- `m14V1BVisualBackfillQualityReviewStatus`: `started in docs/world_design/308-visual-backfill-quality-review.md; review only; existing PNG documentation previews checked; no new PNGs, no PNG changes, no Flutter or Dart files, no tests, no widget tests, no screenshots, no game assets, no asset files under assets, no final UI, no runtime config, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M14-V1 reviewen, M14-V1 nachbessern, M14-E3/M15-A/M15-B/M15-C als reine Gate-Planung starten oder M14-F nur nach ausdruecklicher Nutzerfreigabe als separaten Implementierungs-Prompt pruefen; Code, Assets unter assets, Tests, Screenshots und frame_started bleiben blockiert`
+- `nextAllowedStep`: `M14-V1-B reviewen, optional M14-V1-C nur bei spaeterem explizitem Fix-Wunsch planen, M14-E3/M15-A/M15-B/M15-C als reine Gate-Planung starten oder M14-F nur nach ausdruecklicher Nutzerfreigabe als separaten Implementierungs-Prompt pruefen; Code, Assets unter assets, Tests, Screenshots und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -3957,6 +3997,36 @@ M14-V1-Visual-Backfill-For-Docs-283-306 gilt nur fuer:
   `docs/world_design/previews/m14_visual_backfill_283_306/`,
 - echte PNG-Dokumentationsdiagramme fuer die Dokumente `283` bis `306`,
 - Kontaktuebersicht `00_contact_sheet.png`,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine Tests,
+- keine Widget-Tests,
+- keine Test-Harness-Implementierung,
+- keine Screenshots,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- keine finale UI,
+- keine finale Datenstruktur,
+- keine Runtime-Konfiguration,
+- keine automatische Wortplatzierung,
+- keine Plot-Implementierung,
+- keine ThemeIsland-Umsetzung,
+- keine Bauzustaende,
+- keine App-/Assetfreigabe,
+- keine Implementierungsfreigabe,
+- kein Code,
+- kein `frame_started`.
+
+M14-V1-B-Visual-Backfill-Quality-Review gilt nur fuer:
+
+- Reviewdokument in
+  `docs/world_design/308-visual-backfill-quality-review.md`,
+- Sicht- und Qualitaetspruefung der bestehenden PNG-Dokumentationspreviews aus
+  `docs/world_design/previews/m14_visual_backfill_283_306/`,
+- Contact-Sheet-Pruefung,
+- kritische Einzelbildpruefung fuer `10`, `12`, `13` und `14`,
+- keine PNG-Aenderung,
+- keine neuen PNGs,
 - keine Flutter-/Dart-Dateien,
 - keine App-Integration,
 - keine Tests,
