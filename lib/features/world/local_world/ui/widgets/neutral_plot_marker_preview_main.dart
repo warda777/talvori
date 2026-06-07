@@ -10,5 +10,10 @@ import 'neutral_plot_marker_preview.dart';
 // automatic word placement, build states, or frame_started.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const NeutralPlotMarkerPreview());
+  runApp(
+    const Directionality(
+      textDirection: TextDirection.ltr,
+      child: NeutralPlotMarkerPreview(),
+    ),
+  );
 }
