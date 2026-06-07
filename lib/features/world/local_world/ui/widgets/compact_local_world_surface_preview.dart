@@ -164,6 +164,11 @@ class _SurfacePreviewCard extends StatelessWidget {
                         color: _surfaceCyan,
                       ),
                     ),
+                    if (isMarkerSelected)
+                      const Align(
+                        alignment: Alignment(-0.18, 0.2),
+                        child: _GhostPreviewSurface(),
+                      ),
                     Align(
                       alignment: const Alignment(0.12, -0.06),
                       child: _CompactPlotMarker(
@@ -328,7 +333,7 @@ class _MarkerSelectionPanel extends StatelessWidget {
         ? 'Preview-Auswahl aktiv'
         : 'Marker antippen';
     final body = isMarkerSelected
-        ? 'Dieser Ort ist nur lokal markiert. Keine Speicherung. Keine Platzierung.'
+        ? 'Dieser Ort ist nur lokal markiert. Eine abstrakte Vorschaufläche ist sichtbar. Keine Speicherung. Keine Platzierung.'
         : 'Tippe den neutralen Platz an, um ihn nur für diese Vorschau hervorzuheben.';
 
     return Container(
@@ -379,6 +384,67 @@ class _MarkerSelectionPanel extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GhostPreviewSurface extends StatelessWidget {
+  const _GhostPreviewSurface();
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: -0.08,
+      child: Container(
+        key: const Key('compact-local-world-ghost-preview-surface'),
+        width: 142,
+        padding: const EdgeInsets.fromLTRB(11, 10, 11, 9),
+        decoration: BoxDecoration(
+          color: _surfaceCyan.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: _surfaceCyan.withValues(alpha: 0.58),
+            width: 1.6,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _surfaceCyan.withValues(alpha: 0.2),
+              blurRadius: 24,
+              spreadRadius: -7,
+            ),
+          ],
+        ),
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
+            SizedBox(height: 5),
+            Text(
+              'Vorschaufläche',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                height: 1.12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
+            ),
+            SizedBox(height: 3),
+            Text(
+              'Nur Vorschau',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xCFFFFFFF),
+                fontSize: 10,
+                height: 1.1,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
