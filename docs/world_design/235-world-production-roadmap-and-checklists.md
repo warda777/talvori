@@ -768,6 +768,16 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-
   Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
   keine Assets, keine automatische Wortplatzierung und kein `frame_started`.
+- M15-D wurde als Foundation Choice Local Preview Harness Implementation Gate
+  in
+  `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`
+  gestartet. M15-D prueft nur, ob ein spaeterer isolierter Harness-Slice
+  freigabefaehig waere. PNG-Dokumentationspreviews liegen unter
+  `docs/world_design/previews/m15_d_foundation_choice_harness_implementation_gate/`.
+  Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine
+  Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-
+  Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
+  keine Assets, keine automatische Wortplatzierung und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -963,6 +973,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M15-A4 | Foundation Choice Final Pre-Implementation Checklist | `Checkliste gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Checklistenblock in `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`. Prueft nur, ob der spaetere Foundation-Choice-Minimal-Slice eng genug fuer ausdrueckliche Nutzerfreigabe waere. Ergebnis: `ready-for-explicit-user-approval`, aber Entry Point und Tests bleiben vor Code explizit zu bestaetigen. Dokumentiert die spaetere Freigabeformulierung, fuehrt sie aber nicht aus. Keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
 | M15-B | Foundation Choice Preview Code Review And Visual Harness Plan | `Code Review gestartet / keine Integration` | Enger Code-Review- und Visual-Harness-Planungsblock in `docs/world_design/313-foundation-choice-preview-code-review.md`. Prueft nur den isolierten Preview-Code in `lib/features/world/local_world/ui/widgets/foundation_choice_preview.dart`: nicht integriert, nicht geroutet, nicht exportiert, lokale In-Memory-Auswahl, Safe Exit und `spaeter aenderbar` sichtbar. Ergaenzt eine PNG-Dokumentationspreview unter `docs/world_design/previews/m15_b_foundation_choice_code_review/01_code_scope_review_map.png`. Ergebnis: Scope-konform, nur Minor Note zu `Lernfokus lokal merken` vor spaeterer Integration. Keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Persistenz, keine Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, keine Tests, keine Widget-Tests, keine Screenshots, kein Build-State, kein `frame_started`. |
 | M15-C | Foundation Choice Local Preview Harness Gate | `Harness Gate gestartet / keine Harness-Implementierung` | Reiner Dokumentations- und Gate-Planungsblock in `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`. Prueft nur, ob ein spaeterer isolierter lokaler Preview-Harness fuer `FoundationChoicePreview` sinnvoll und eng genug waere. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`: Harness Gate Map, Device Check Scope Map und Contact Sheet. Empfehlung: Ein spaeterer isolierter Preview-Harness ist theoretisch denkbar, aber nur nach eigenem Prompt und ausdruecklicher Freigabe. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
+| M15-D | Foundation Choice Local Preview Harness Implementation Gate | `Implementation Gate gestartet / keine Harness-Freigabe` | Reiner Dokumentations- und Gate-Block in `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`. Prueft nur, ob ein spaeterer isolierter Local Preview Harness fuer `FoundationChoicePreview` als sehr kleiner Implementierungs-Slice sauber freigabefaehig waere. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_d_foundation_choice_harness_implementation_gate/`: Harness Implementation Gate Map, Allowed vs Blocked Scope und Contact Sheet. Empfehlung: Ein spaeterer isolierter Harness-Slice ist theoretisch freigabefaehig, aber nur mit separatem Implementierungs-Prompt und ausdruecklicher Nutzerfreigabe. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1595,6 +1606,17 @@ Dokumentations- und Gate-Planungsblock. M15-C prueft nur, ob ein spaeterer
 isolierter lokaler Preview-Harness denkbar waere, und ergaenzt
 Dokumentationspreviews unter
 `docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`.
+Daraus folgen keine Harness-Implementierung, keine Flutter-/Dart-Dateien,
+keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration,
+keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-
+Konfiguration, keine Persistenz, keine Assets, keine automatische
+Wortplatzierung und kein `frame_started`.
+
+M15-D startet das Foundation Choice Local Preview Harness Implementation Gate
+als reinen Dokumentations- und Gate-Block. M15-D prueft nur, ob ein spaeterer
+isolierter Harness-Slice freigabefaehig waere, und ergaenzt
+Dokumentationspreviews unter
+`docs/world_design/previews/m15_d_foundation_choice_harness_implementation_gate/`.
 Daraus folgen keine Harness-Implementierung, keine Flutter-/Dart-Dateien,
 keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration,
 keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-
@@ -2638,6 +2660,23 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Assetfreigabe aus M15-C ableiten,
 - kein Build-State aus M15-C ableiten,
 - kein `frame_started` oder Bauzustand aus M15-C weiterbauen,
+- keine Harness-Implementierung aus M15-D ableiten,
+- keine Flutter-/Dart-Dateien aus M15-D ableiten,
+- keine App-Integration aus M15-D ableiten,
+- keine Home-/Onboarding-/World-Routing-Integration aus M15-D ableiten,
+- keine Tests aus M15-D ableiten,
+- keine Widget-Tests aus M15-D ableiten,
+- keine Screenshots aus M15-D ableiten,
+- keine Persistenz aus M15-D ableiten,
+- keine Runtime-Konfiguration aus M15-D ableiten,
+- keine Supabase Writes aus M15-D ableiten,
+- keine lokalen DB-Writes aus M15-D ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M15-D ableiten,
+- keine Reward Bridge aus M15-D ableiten,
+- keine automatische Wortplatzierung aus M15-D ableiten,
+- keine Assetfreigabe aus M15-D ableiten,
+- kein Build-State aus M15-D ableiten,
+- kein `frame_started` oder Bauzustand aus M15-D weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3693,6 +3732,21 @@ Ein Schritt wird gestoppt, wenn:
 - aus M15-C Assetfreigabe abgeleitet wird,
 - aus M15-C Build-State abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M15-C weitergebaut werden,
+- aus M15-D Harness-Implementierung abgeleitet wird,
+- aus M15-D Flutter-/Dart-Dateien abgeleitet werden,
+- aus M15-D App-Integration abgeleitet wird,
+- aus M15-D Home-/Onboarding-/World-Routing-Integration abgeleitet wird,
+- aus M15-D Tests oder Widget-Tests abgeleitet werden,
+- aus M15-D Screenshots abgeleitet werden,
+- aus M15-D Persistenz abgeleitet wird,
+- aus M15-D Runtime-Konfiguration abgeleitet wird,
+- aus M15-D Supabase Writes oder lokale DB-Writes abgeleitet werden,
+- aus M15-D SRS-/`word_progress`-Aenderungen abgeleitet werden,
+- aus M15-D eine Reward Bridge abgeleitet wird,
+- aus M15-D automatische Wortplatzierung abgeleitet wird,
+- aus M15-D Assetfreigabe abgeleitet wird,
+- aus M15-D Build-State abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M15-D weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
