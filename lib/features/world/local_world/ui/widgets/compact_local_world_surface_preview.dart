@@ -13,8 +13,17 @@ const _surfaceMint = Color(0xFF9FF7D5);
 const _surfaceGold = Color(0xFFFFD980);
 const _surfaceViolet = Color(0xFFB36BFF);
 
-class CompactLocalWorldSurfacePreview extends StatelessWidget {
+class CompactLocalWorldSurfacePreview extends StatefulWidget {
   const CompactLocalWorldSurfacePreview({super.key});
+
+  @override
+  State<CompactLocalWorldSurfacePreview> createState() =>
+      _CompactLocalWorldSurfacePreviewState();
+}
+
+class _CompactLocalWorldSurfacePreviewState
+    extends State<CompactLocalWorldSurfacePreview> {
+  bool _isMarkerSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +47,19 @@ class CompactLocalWorldSurfacePreview extends StatelessWidget {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 430),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _SurfaceNotice(),
-                      SizedBox(height: 14),
-                      _SurfacePreviewCard(),
-                      SizedBox(height: 12),
-                      _SurfaceGuardrailPanel(),
+                      const _SurfaceNotice(),
+                      const SizedBox(height: 14),
+                      _SurfacePreviewCard(
+                        isMarkerSelected: _isMarkerSelected,
+                        onMarkerTap: _toggleMarkerSelection,
+                      ),
+                      const SizedBox(height: 12),
+                      _SurfaceGuardrailPanel(
+                        isMarkerSelected: _isMarkerSelected,
+                      ),
                     ],
                   ),
                 ),
@@ -55,6 +69,12 @@ class CompactLocalWorldSurfacePreview extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _toggleMarkerSelection() {
+    setState(() {
+      _isMarkerSelected = !_isMarkerSelected;
+    });
   }
 }
 
@@ -87,7 +107,13 @@ class _SurfaceNotice extends StatelessWidget {
 }
 
 class _SurfacePreviewCard extends StatelessWidget {
-  const _SurfacePreviewCard();
+  const _SurfacePreviewCard({
+    required this.isMarkerSelected,
+    required this.onMarkerTap,
+  });
+
+  final bool isMarkerSelected;
+  final VoidCallback onMarkerTap;
 
   @override
   Widget build(BuildContext context) {
@@ -118,11 +144,11 @@ class _SurfacePreviewCard extends StatelessWidget {
               aspectRatio: 1.08,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
-                child: const Stack(
+                child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CustomPaint(painter: _WorldSurfacePainter()),
-                    Positioned(
+                    const CustomPaint(painter: _WorldSurfacePainter()),
+                    const Positioned(
                       top: 12,
                       left: 12,
                       child: _SurfaceStatusPill(
@@ -130,7 +156,7 @@ class _SurfacePreviewCard extends StatelessWidget {
                         color: _surfaceMint,
                       ),
                     ),
-                    Positioned(
+                    const Positioned(
                       top: 12,
                       right: 12,
                       child: _SurfaceStatusPill(
@@ -139,10 +165,13 @@ class _SurfacePreviewCard extends StatelessWidget {
                       ),
                     ),
                     Align(
-                      alignment: Alignment(0.12, -0.06),
-                      child: _CompactPlotMarker(),
+                      alignment: const Alignment(0.12, -0.06),
+                      child: _CompactPlotMarker(
+                        isSelected: isMarkerSelected,
+                        onTap: onMarkerTap,
+                      ),
                     ),
-                    Positioned(
+                    const Positioned(
                       left: 14,
                       right: 14,
                       bottom: 14,
@@ -152,6 +181,8 @@ class _SurfacePreviewCard extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            _MarkerSelectionPanel(isMarkerSelected: isMarkerSelected),
           ],
         ),
       ),
@@ -194,71 +225,161 @@ class _SurfaceHeader extends StatelessWidget {
 }
 
 class _CompactPlotMarker extends StatelessWidget {
-  const _CompactPlotMarker();
+  const _CompactPlotMarker({required this.isSelected, required this.onTap});
+
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          key: const Key('compact-local-world-plot-marker'),
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _surfaceMint.withValues(alpha: 0.14),
-            border: Border.all(color: _surfaceMint, width: 2.4),
-            boxShadow: [
-              BoxShadow(
-                color: _surfaceMint.withValues(alpha: 0.28),
-                blurRadius: 24,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.36),
+    final markerAccent = isSelected ? _surfaceGold : _surfaceMint;
+    final markerLabel = isSelected ? 'Lokal markiert' : 'Möglicher Lernplatz';
+
+    return Semantics(
+      button: true,
+      toggled: isSelected,
+      label:
+          '$markerLabel. Nur Vorschau. Keine Speicherung. Keine Platzierung.',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              key: const Key('compact-local-world-plot-marker'),
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: markerAccent.withValues(alpha: isSelected ? 0.2 : 0.14),
+                border: Border.all(
+                  color: markerAccent,
+                  width: isSelected ? 3.4 : 2.4,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: markerAccent.withValues(
+                      alpha: isSelected ? 0.42 : 0.28,
+                    ),
+                    blurRadius: isSelected ? 34 : 24,
+                    spreadRadius: isSelected ? -1 : -4,
                   ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.36),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_outline_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: Colors.white,
+                    size: isSelected ? 38 : 34,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFF07101A).withValues(alpha: 0.82),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: markerAccent.withValues(alpha: 0.42)),
+              ),
+              child: Text(
+                markerLabel,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  height: 1.15,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
                 ),
               ),
-              const Icon(
-                Icons.radio_button_unchecked_rounded,
-                color: Colors.white,
-                size: 34,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          decoration: BoxDecoration(
-            color: const Color(0xFF07101A).withValues(alpha: 0.82),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _surfaceMint.withValues(alpha: 0.38)),
+      ),
+    );
+  }
+}
+
+class _MarkerSelectionPanel extends StatelessWidget {
+  const _MarkerSelectionPanel({required this.isMarkerSelected});
+
+  final bool isMarkerSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isMarkerSelected ? _surfaceGold : _surfaceCyan;
+    final title = isMarkerSelected
+        ? 'Preview-Auswahl aktiv'
+        : 'Marker antippen';
+    final body = isMarkerSelected
+        ? 'Dieser Ort ist nur lokal markiert. Keine Speicherung. Keine Platzierung.'
+        : 'Tippe den neutralen Platz an, um ihn nur für diese Vorschau hervorzuheben.';
+
+    return Container(
+      key: const Key('compact-local-world-marker-info-panel'),
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.34)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isMarkerSelected
+                ? Icons.check_circle_outline_rounded
+                : Icons.touch_app_outlined,
+            color: color,
+            size: 20,
           ),
-          child: const Text(
-            'Möglicher Lernplatz',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    height: 1.2,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    color: Color(0xCFFFFFFF),
+                    fontSize: 12,
+                    height: 1.28,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -291,7 +412,9 @@ class _SurfaceLegend extends StatelessWidget {
 }
 
 class _SurfaceGuardrailPanel extends StatelessWidget {
-  const _SurfaceGuardrailPanel();
+  const _SurfaceGuardrailPanel({required this.isMarkerSelected});
+
+  final bool isMarkerSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -303,20 +426,29 @@ class _SurfaceGuardrailPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _GuardrailRow(
+            icon: isMarkerSelected
+                ? Icons.check_circle_outline_rounded
+                : Icons.radio_button_unchecked_rounded,
+            text: isMarkerSelected
+                ? 'Lokal markiert, nur in dieser Vorschau'
+                : 'Antippbar nur als lokale Vorschau',
+          ),
+          const SizedBox(height: 9),
+          const _GuardrailRow(
             icon: Icons.landscape_rounded,
             text: 'Abstrakte Fläche, kein Inselasset',
           ),
-          SizedBox(height: 9),
-          _GuardrailRow(
+          const SizedBox(height: 9),
+          const _GuardrailRow(
             icon: Icons.domain_disabled_rounded,
             text: 'Kein Gebäude und kein Bauzustand',
           ),
-          SizedBox(height: 9),
-          _GuardrailRow(
+          const SizedBox(height: 9),
+          const _GuardrailRow(
             icon: Icons.place_outlined,
             text: 'Keine Koordinaten und keine Platzierungslogik',
           ),
