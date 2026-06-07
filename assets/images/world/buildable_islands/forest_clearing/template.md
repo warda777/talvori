@@ -638,6 +638,56 @@ Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
 keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
 kein `frame_started`.
 
+M16-J startet den Village Plot Capacity Local Preview Scope in
+`docs/world_design/319-village-plot-capacity-local-preview-scope.md`. M16-J
+bleibt Planungs-/Visual-Scope. Waldlichtung und Compact Local World Surface
+sind weiterhin Starter-/Testformen. Eine echte ThemeIsland braucht Multi-Slot-
+Kapazitaet, Groessenklassen, Austauschbarkeit, Weg-/Platz-Verbindung und
+spaetere Wheel-Gates, bevor ein echter Insel-/Bau-Slice entstehen darf. M16-J
+erzeugt keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale
+UI, keine Tests, keine Screenshots und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m16_j_village_plot_capacity_local_preview/` sind
+Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
+M16-K startet die Global ThemeIsland Category Plot Capacity Matrix in
+`docs/world_design/320-global-theme-island-plot-capacity-matrix.md`. M16-K
+ordnet das Dorf-Beispiel aus M16-J global ein: Waldlichtung, Compact Local
+World Surface und Dorf/Zuhause/Alltag bleiben Starter-/Testformen, aber keine
+globale ThemeIsland-Grundlage. Wasser/Hafen/Kueste, Stadt, Verkehr,
+Landwirtschaft/Farm, Schule, Garten/Natur, Zuhause/Alltag, Essen/Einkauf,
+Technik/Digital, oeffentliche Gebaeude/Verwaltung, Gesundheit/Notfall,
+Kultur/Gesellschaft und sensible Bereiche brauchen eigene Plot-Familien,
+Groessenmixe, Connectoren, Depth-/Container-Profile und Gates. M16-K erzeugt
+keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale UI, keine
+Tests, keine Screenshots und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m16_k_global_theme_island_plot_capacity_matrix/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
+M16-L startet den Global World Semantics Consistency Audit in
+`docs/world_design/321-global-world-semantics-consistency-audit.md`. M16-L
+stellt klar, dass Waldlichtung, Compact Surface, Dorf-Beispiel und globale
+Kategorie-Matrix nur Teilgrundlagen sind. Vor weiteren World-/Plot-/Build-
+Wheel-/Word-/Container-/Sensitive-/Asset-Slices muessen Word-to-Island-
+Semantik, Multi-Home-Woerter, Sense/Context, Word-Type-Routing,
+Codex/Blueprint/Backlog-Fallbacks sowie Sensitive-/Mobile-/Depth-Gates
+beruecksichtigt werden. M16-L erzeugt keine neuen Assets im Asset-Ordner,
+keine Bauzustaende, keine finale UI, keine Tests, keine Screenshots und keine
+App-Integration. Die PNGs unter
+`docs/world_design/previews/m16_l_global_world_semantics_consistency_audit/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -1359,6 +1409,47 @@ Fuehrende Dokumente:
     Austauschbarkeit, Zoom-Bedarf und In-Place Build-Wheel nur planen, aber
     keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine
     neue Seite, keine Tests, keine Screenshots, keine Persistenz, keine
+    Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes,
+    keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
+    automatische Wortplatzierung, keine Assets oder Asset-Dateien unter
+    `assets/`, keinen Build-State und kein `frame_started` erzeugen.
+  - `m16J`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Scope-Dokument
+    `docs/world_design/319-village-plot-capacity-local-preview-scope.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_j_village_plot_capacity_local_preview/`.
+    M16-J darf einen spaeteren lokalen Multi-Slot-Preview-Slice fuer
+    Dorf/Zuhause/Alltag planen, aber keine Flutter-/Dart-Dateien, keine App-
+    Integration, keine Route, keine neue Seite, keine Tests, keine
+    Screenshots, keine Persistenz, keine Runtime-Konfiguration, keine Supabase
+    Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung,
+    keine Reward Bridge, keine automatische Wortplatzierung, keine Assets oder
+    Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
+    erzeugen.
+  - `m16K`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Matrix-Dokument
+    `docs/world_design/320-global-theme-island-plot-capacity-matrix.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_k_global_theme_island_plot_capacity_matrix/`.
+    M16-K darf globale ThemeIsland-Plot-Capacity-Profile fuer alle bereits
+    dokumentierten Kategorien sammeln und M16-J als Dorf-Beispiel einordnen,
+    aber keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
+    keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine
+    Screenshots, keine Persistenz, keine Runtime-Konfiguration, keine Supabase
+    Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung,
+    keine Reward Bridge, keine automatische Wortplatzierung, keine Assets oder
+    Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
+    erzeugen.
+  - `m16L`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Audit-Dokument
+    `docs/world_design/321-global-world-semantics-consistency-audit.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_l_global_world_semantics_consistency_audit/`.
+    M16-L darf bestehende Taxonomy-, Routing-, Capability-, Sensitive-,
+    Mobile-/Clutter-, Depth-/Container- und Asset-Scope-Regeln konsolidieren
+    und M16-I/J/K semantisch pruefen, aber keine Flutter-/Dart-Dateien, keine
+    App-Integration, keine Route, keine neue Seite, keine Build-Wheel-
+    Implementierung, keine Tests, keine Screenshots, keine Persistenz, keine
     Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes,
     keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
     automatische Wortplatzierung, keine Assets oder Asset-Dateien unter
@@ -2706,6 +2797,51 @@ In diesem Template-Block gilt:
 - Keine Assets oder Asset-Dateien unter `assets/` aus M16-I.
 - Kein Build-State aus M16-I.
 - Kein `frame_started` oder Bauzustand aus M16-I.
+- Keine Implementierung aus M16-J.
+- Keine Flutter-/Dart-Dateien aus M16-J.
+- Keine App-Integration aus M16-J.
+- Keine Route oder neue Seite aus M16-J.
+- Keine Build-Wheel-Implementierung aus M16-J.
+- Keine Tests oder Screenshots aus M16-J.
+- Keine Persistenz aus M16-J.
+- Keine Runtime-Konfiguration aus M16-J.
+- Keine Supabase Writes oder lokalen DB-Writes aus M16-J.
+- Keine SRS-/`word_progress`-Aenderung aus M16-J.
+- Keine Reward Bridge aus M16-J.
+- Keine automatische Wortplatzierung aus M16-J.
+- Keine Assets oder Asset-Dateien unter `assets/` aus M16-J.
+- Kein Build-State aus M16-J.
+- Kein `frame_started` oder Bauzustand aus M16-J.
+- Keine Implementierung aus M16-K.
+- Keine Flutter-/Dart-Dateien aus M16-K.
+- Keine App-Integration aus M16-K.
+- Keine Route oder neue Seite aus M16-K.
+- Keine Build-Wheel-Implementierung aus M16-K.
+- Keine Tests oder Screenshots aus M16-K.
+- Keine Persistenz aus M16-K.
+- Keine Runtime-Konfiguration aus M16-K.
+- Keine Supabase Writes oder lokalen DB-Writes aus M16-K.
+- Keine SRS-/`word_progress`-Aenderung aus M16-K.
+- Keine Reward Bridge aus M16-K.
+- Keine automatische Wortplatzierung aus M16-K.
+- Keine Assets oder Asset-Dateien unter `assets/` aus M16-K.
+- Kein Build-State aus M16-K.
+- Kein `frame_started` oder Bauzustand aus M16-K.
+- Keine Implementierung aus M16-L.
+- Keine Flutter-/Dart-Dateien aus M16-L.
+- Keine App-Integration aus M16-L.
+- Keine Route oder neue Seite aus M16-L.
+- Keine Build-Wheel-Implementierung aus M16-L.
+- Keine Tests oder Screenshots aus M16-L.
+- Keine Persistenz aus M16-L.
+- Keine Runtime-Konfiguration aus M16-L.
+- Keine Supabase Writes oder lokalen DB-Writes aus M16-L.
+- Keine SRS-/`word_progress`-Aenderung aus M16-L.
+- Keine Reward Bridge aus M16-L.
+- Keine automatische Wortplatzierung aus M16-L.
+- Keine Assets oder Asset-Dateien unter `assets/` aus M16-L.
+- Kein Build-State aus M16-L.
+- Kein `frame_started` oder Bauzustand aus M16-L.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
