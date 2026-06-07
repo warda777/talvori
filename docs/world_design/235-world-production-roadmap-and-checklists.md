@@ -1067,6 +1067,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M16-N | Word Semantics Decision Preview Scope | `Scope/Visualisierung gestartet / keine Implementierung` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/323-word-semantics-decision-preview-scope.md`. Konkretisiert die M16-M-Empfehlung `WordSemanticsDecisionPreview`: Word/User Intent -> Context/Sense -> Word-Type -> Safety -> Theme Candidates -> Plot/Depth -> Representation Decision -> User Choice -> Preview Only -> Later Gate. Beispielkarten fuer `Haus`, `Garage`, `Baum`, `schwimmen`, `Angst`, `lernen`, `Messer` und `Polizei` zeigen Multi-Home, Action, Emotion, Container, Sensitive und Policy Gates. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_n_word_semantics_decision_preview_scope/`: Pipeline, Example Cards, Representation Outputs, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-O | Word Semantics Preview Implementation Gate | `Implementation Gate gestartet / keine Implementierung` | Reiner Dokumentations- und Gate-Block in `docs/world_design/324-word-semantics-preview-implementation-gate.md`. Prueft, ob ein spaeterer minimaler isolierter `WordSemanticsDecisionPreview`-Code-Slice sinnvoll und sicher genug waere. Gate-Entscheidung: theoretisch spaeter moeglich, aber nur als isoliertes lokales Preview-Widget unter `lib/features/world/local_world/ui/widgets/`, ohne echte Routing-Implementierung, ohne finale Datenstruktur, ohne App-Integration, ohne Route, ohne Persistenz, ohne Assets, ohne automatische Wortplatzierung, ohne Build-State und ohne `frame_started`. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_o_word_semantics_preview_implementation_gate/`: Gate Scope Map, Allowed Later vs Blocked Now, File Boundary Map, Example Word Guardrail Map und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-P | Word Semantics Decision Preview Implementation Prompt Draft | `Prompt-Draft gestartet / keine Implementierung` | Reiner Dokumentations- und Prompt-Draft-Block in `docs/world_design/325-word-semantics-preview-implementation-prompt-draft.md`. Bereitet einen spaeteren Copy-&-Paste-Implementierungs-Prompt fuer einen minimalen isolierten `WordSemanticsDecisionPreview`-Code-Slice vor, fuehrt ihn aber nicht aus. Der spaetere Scope bleibt auf `lib/features/world/local_world/ui/widgets/word_semantics_decision_preview.dart` und optionalen Launch-Target nach separater Freigabe beschraenkt; Beispielwortkarten, lokale `setState`-Auswahl, Context/Sense, Word Type, Safety/Sensitive, Candidate ThemeIsland(s), Candidate Plot/Depth, Representation Decision und Preview Only/Later Gate sind nur als spaetere lokale Preview geplant. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_p_word_semantics_preview_prompt_draft/`: Prompt Scope Boundary, Later Prompt Execution Flow, Preview Widget Content Map, Stop Rules und Contact Sheet. Keine Flutter-/Dart-Dateien, keine neue Dart-Datei, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
+| M16-R | Scalable Word Semantics Architecture Plan | `Architekturplanung/Visualisierung gestartet / keine Implementierung` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/326-scalable-word-semantics-architecture-plan.md`. Klaert, dass `WordSemanticsDecisionPreview` mit acht Beispielwoertern nur ein lokaler Architektur-Prototyp ist und nicht das Massensystem fuer tausende oder 20.000+ Woerter. Zentrale Regel: 20.000 Woerter werden nicht zu 20.000 sichtbaren Karten, Weltobjekten, Grundstuecken oder Gebaeuden, sondern zu moeglichen Semantic Profiles, gefilterten Vorschlaegen, Safe Fallbacks und kleinen Review-Queues. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_r_scalable_word_semantics_architecture/`: Many Words Pipeline, Status Lifecycle, Mass Word UI Strategy, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1843,6 +1844,21 @@ Daraus folgen keine Flutter-/Dart-Dateien, keine neue Dart-Datei, keine App-
 Integration, keine Route, keine Tests, keine Screenshots, keine Runtime-
 Konfiguration, keine Persistenz, keine Assets, keine automatische
 Wortplatzierung, kein Build-State und kein `frame_started`.
+
+M16-R startet den Scalable Word Semantics Architecture Plan als reinen
+Dokumentations- und Visualisierungsblock. Ziel ist sicherzustellen, dass
+tausende oder 20.000+ Woerter nicht zu tausenden sichtbaren Karten,
+Weltobjekten, Grundstuecken oder Gebaeuden werden. `WordSemanticsDecisionPreview`
+bleibt ein Mini-Prototyp mit acht Beispielwoertern. Ein spaeteres System
+braucht Semantic Profiles, Statuswerte, Queues, Filter, Safe Fallbacks und
+eigene Gates fuer Datenmodell, Persistenz, Performance, AI/Classification,
+Privacy, Sensitive Review und App-Integration. Dokumentationspreviews liegen
+unter
+`docs/world_design/previews/m16_r_scalable_word_semantics_architecture/`.
+Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
+keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
+keine Assets, keine automatische Wortplatzierung, kein Build-State und kein
+`frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -3050,6 +3066,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Assets oder Asset-Dateien unter `assets/` aus M16-P ableiten,
 - kein Build-State aus M16-P ableiten,
 - kein `frame_started` oder Bauzustand aus M16-P weiterbauen,
+- keine Implementierung aus M16-R ableiten,
+- keine Flutter-/Dart-Dateien aus M16-R ableiten,
+- keine App-Integration aus M16-R ableiten,
+- keine Route oder neue Seite aus M16-R ableiten,
+- keine Tests oder Screenshots aus M16-R ableiten,
+- keine Persistenz aus M16-R ableiten,
+- keine Runtime-Konfiguration aus M16-R ableiten,
+- keine Supabase Writes oder lokalen DB-Writes aus M16-R ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M16-R ableiten,
+- keine Reward Bridge aus M16-R ableiten,
+- keine automatische Wortplatzierung aus M16-R ableiten,
+- keine Build-Wheel-Implementierung aus M16-R ableiten,
+- keine Assets oder Asset-Dateien unter `assets/` aus M16-R ableiten,
+- kein Build-State aus M16-R ableiten,
+- kein `frame_started` oder Bauzustand aus M16-R weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,

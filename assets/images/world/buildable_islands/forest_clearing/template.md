@@ -668,6 +668,24 @@ Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
 keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
 kein `frame_started`.
 
+M16-R startet den Scalable Word Semantics Architecture Plan in
+`docs/world_design/326-scalable-word-semantics-architecture-plan.md`. M16-R
+ist nur Architekturplanung: Waldlichtung, Compact Surface und
+`WordSemanticsDecisionPreview` bleiben Starter-/Testformen. Eine echte
+20.000+-Wort-Semantik braucht Semantic Profiles, Statuswerte, Queues, Filter,
+Safe Fallbacks, Batch-Verarbeitung und eigene Gates fuer Datenmodell,
+Persistenz, Performance, AI/Classification, Privacy, Sensitive Review,
+Device/Accessibility, Import, Sync, Undo und App-Integration. M16-R erzeugt
+keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale UI, keine
+Tests, keine Screenshots, keine Flutter-/Dart-Dateien und keine App-
+Integration. Die PNGs unter
+`docs/world_design/previews/m16_r_scalable_word_semantics_architecture/` sind
+Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
 M16-J startet den Village Plot Capacity Local Preview Scope in
 `docs/world_design/319-village-plot-capacity-local-preview-scope.md`. M16-J
 bleibt Planungs-/Visual-Scope. Waldlichtung und Compact Local World Surface
@@ -1567,6 +1585,21 @@ Fuehrende Dokumente:
     M16-P darf einen spaeteren `WordSemanticsDecisionPreview`-
     Implementierungs-Prompt vorbereiten, aber keine Flutter-/Dart-Dateien,
     keine neue Dart-Datei, keine App-Integration, keine Route, keine neue
+    Seite, keine Tests, keine Screenshots, keine Persistenz, keine Runtime-
+    Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine
+    SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische
+    Wortplatzierung, keine Build-Wheel-Implementierung, keine Assets oder
+    Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
+    erzeugen.
+  - `m16R`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Architektur-Dokument
+    `docs/world_design/326-scalable-word-semantics-architecture-plan.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_r_scalable_word_semantics_architecture/`.
+    M16-R darf klaeren, dass `WordSemanticsDecisionPreview` nur ein
+    Starter-/Testprototyp ist und echte 20.000+-Wort-Semantik spaeter
+    Semantic Profiles, Queues, Fallbacks und Gates braucht. M16-R darf keine
+    Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue
     Seite, keine Tests, keine Screenshots, keine Persistenz, keine Runtime-
     Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine
     SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische
