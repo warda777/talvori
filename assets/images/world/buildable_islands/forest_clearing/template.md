@@ -547,6 +547,21 @@ Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine
 Reward Bridge, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein
 Code, keine automatische Wortplatzierung und kein `frame_started`.
 
+M15-B startet den Foundation Choice Preview Code Review und Visual Harness Plan
+in `docs/world_design/313-foundation-choice-preview-code-review.md`. M15-B ist
+ein enger Code-Review- und Dokumentationsblock fuer den isolierten
+Foundation-Choice-Preview-Slice. Die Waldlichtung bleibt Starter-/Testform.
+M15-B erzeugt keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine
+finale UI, keine Tests, keine Widget-Tests, keine Screenshots, keine App-
+Integration und keine Home-/Onboarding-/World-Routing-Integration. Die PNG
+unter `docs/world_design/previews/m15_b_foundation_choice_code_review/` ist
+Dokumentationsmaterial, kein Screenshot, kein App-Screen und kein Spielasset.
+`frame_started` bleibt blockiert. Daraus folgen keine Persistenz, keine
+Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine
+SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe,
+keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
+`frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -622,11 +637,12 @@ Fuehrende Dokumente:
 - `docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md`
 - `docs/world_design/311-foundation-choice-prompt-visual-review.md`
 - `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`
+- `docs/world_design/313-foundation-choice-preview-code-review.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-A4 Foundation Choice Final Pre-Implementation Checklist gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-B Foundation Choice Preview Code Review gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1191,6 +1207,18 @@ Fuehrende Dokumente:
     keine Assetfreigabe, keine PNG-Erzeugung, keine PNG-Aenderung, keine
     Screenshots, keine Spielassets, keine Asset-Dateien unter `assets/`, keine
     automatische Wortplatzierung und kein `frame_started` erzeugen.
+  - `m15B`: `false` fuer App-Integration/Assets/Tests/Runtime; erlaubt nur das
+    Review-Dokument
+    `docs/world_design/313-foundation-choice-preview-code-review.md` und die
+    Dokumentationspreview unter
+    `docs/world_design/previews/m15_b_foundation_choice_code_review/`. M15-B
+    darf den isolierten Foundation-Choice-Preview-Code pruefen und einen
+    spaeteren Visual Harness planen, aber keine App-Integration, keine Home-/
+    Onboarding-/World-Routing-Integration, keine Persistenz, keine Runtime-
+    Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine
+    SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische
+    Wortplatzierung, keine Assetfreigabe, keine Tests, keine Widget-Tests,
+    keine Screenshots, keinen Build-State und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2437,6 +2465,21 @@ In diesem Template-Block gilt:
 - Keine Asset-Dateien unter `assets/` aus M15-A4.
 - Keine automatische Wortplatzierung aus M15-A4.
 - Kein `frame_started` oder Bauzustand aus M15-A4.
+- Keine App-Integration aus M15-B.
+- Keine Home-/Onboarding-/World-Routing-Integration aus M15-B.
+- Keine Persistenz aus M15-B.
+- Keine Runtime-Konfiguration aus M15-B.
+- Keine Supabase Writes aus M15-B.
+- Keine lokalen DB-Writes aus M15-B.
+- Keine SRS-/`word_progress`-Aenderung aus M15-B.
+- Keine Reward Bridge aus M15-B.
+- Keine automatische Wortplatzierung aus M15-B.
+- Keine Assetfreigabe aus M15-B.
+- Keine Tests aus M15-B.
+- Keine Widget-Tests aus M15-B.
+- Keine Screenshots aus M15-B.
+- Kein Build-State aus M15-B.
+- Kein `frame_started` oder Bauzustand aus M15-B.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -4359,6 +4402,35 @@ M15-A4-Foundation-Choice-Final-Pre-Implementation-Checklist gilt nur fuer:
 - keine Spielassets,
 - keine Asset-Dateien unter `assets/`,
 - keine automatische Wortplatzierung,
+- keine Bauzustaende,
+- kein `frame_started`.
+
+M15-B-Foundation-Choice-Preview-Code-Review-And-Visual-Harness-Plan gilt nur
+fuer:
+
+- Review-Dokument in
+  `docs/world_design/313-foundation-choice-preview-code-review.md`,
+- Dokumentationspreview unter
+  `docs/world_design/previews/m15_b_foundation_choice_code_review/`,
+- Code-Review des isolierten Preview-Slices
+  `lib/features/world/local_world/ui/widgets/foundation_choice_preview.dart`,
+- Planung eines spaeteren Visual Harness ohne Umsetzung,
+- keine App-Integration,
+- keine Home-/Onboarding-/World-Routing-Integration,
+- keine Persistenz,
+- keine Runtime-Konfiguration,
+- keine Supabase Writes,
+- keine lokalen DB-Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine automatische Wortplatzierung,
+- keine Assetfreigabe,
+- keine Tests,
+- keine Widget-Tests,
+- keine Screenshots,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- kein Build-State,
 - keine Bauzustaende,
 - kein `frame_started`.
 
