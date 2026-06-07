@@ -715,6 +715,16 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung,
   keine Reward Bridge, keine App-/Assetfreigabe, keine Implementierungsfreigabe,
   kein Code, keine automatische Wortplatzierung und kein `frame_started`.
+- M15-A2 wurde als Foundation Choice Minimal Slice Implementation Prompt Draft
+  in `docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md`
+  gestartet. M15-A2 erstellt nur einen spaeteren Implementierungs-Prompt als
+  Dokument und fuehrt ihn nicht aus. Daraus folgen keine Implementierung, keine
+  Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration,
+  keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine
+  Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge,
+  keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Assets, keine
+  App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine
+  automatische Wortplatzierung und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -905,6 +915,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M14-V1 | Visual Backfill For Docs 283-306 | `Visual Backfill gestartet / PNG-Dokumentationspreviews erzeugt` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/307-visual-backfill-283-306.md`. Ergaenzt echte PNG-Dokumentationsvisualisierungen fuer `283` bis `306` unter `docs/world_design/previews/m14_visual_backfill_283_306/`, inklusive Kontaktuebersicht und Generator-Script. Die PNGs sind Dokumentationspreviews, keine finale UI, keine App-Screens, keine Spielassets und keine Asset-Dateien unter `assets/`. Keine App-Integration, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine Test-Harness-Implementierung, keine Screenshots, keine Runtime-Konfiguration, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, kein `frame_started`. |
 | M14-V1-B | Visual Backfill Quality Review | `Review gestartet / PNG-Dokumentationspreviews geprueft` | Reiner Dokumentations- und Reviewblock in `docs/world_design/308-visual-backfill-quality-review.md`. Prueft nur die bestehenden M14-V1-PNGs unter `docs/world_design/previews/m14_visual_backfill_283_306/` auf Existenz, Dateigroesse, Titel, Untertitel, Footer, Text-Containment, Lesbarkeit, Ueberladung und Misread-Risiken. Ergebnis: Die Visuals sind als Dokumentationspreviews brauchbar; `13_small_implementation_candidate_gate.png` braucht nur eine kleine Kontextnote zu `implementation-candidate-later`. Keine neuen PNGs, keine PNG-Aenderungen, keine Tests, keine Widget-Tests, keine Screenshots, keine Flutter-/Dart-Dateien, keine App-Integration, keine Spielassets, keine Asset-Dateien unter `assets/`, keine finale UI, keine Runtime-Konfiguration, keine Implementierungsfreigabe, kein Code, kein `frame_started`. |
 | M15-A | Foundation Choice Implementation Gate | `Gate gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Gate-Reviewblock in `docs/world_design/309-foundation-choice-implementation-gate.md`. Prueft nur, ob ein spaeterer minimaler Foundation-Choice-Slice als lokale, nicht persistente, nicht finale Product Preview denkbar waere. Empfehlung: Option 3, ein minimaler spaeterer Slice ist theoretisch denkbar, aber nur mit separatem Implementierungs-Prompt und ausdruecklicher Nutzerfreigabe. Keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Tests, keine Widget-Tests, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
+| M15-A2 | Foundation Choice Minimal Slice Implementation Prompt Draft | `Prompt-Draft gestartet / keine Implementierung` | Reiner Dokumentations- und Prompt-Planungsblock in `docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md`. Erstellt nur einen spaeteren Copy-&-Paste-Implementierungs-Prompt als Entwurf und markiert ihn ausdruecklich als nicht freigegeben. Der Draft begrenzt einen moeglichen spaeteren Slice auf lokale Preview-/Demo-Darstellung, drei Foundation-Karten, Tali/Vori-Platzhalter, lokale In-Memory-Auswahl, Safe Exit und `spaeter aenderbar`. Keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1480,6 +1491,19 @@ PNG-Aenderungen, keine Screenshots, keine Tests, keine Widget-Tests, keine
 Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine
 Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine
 SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe,
+keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung
+und kein `frame_started`.
+
+M15-A2 startet den Foundation Choice Minimal Slice Implementation Prompt Draft
+als reinen Dokumentations- und Prompt-Planungsblock. M15-A2 erstellt nur einen
+spaeteren Implementierungs-Prompt als Dokument und fuehrt ihn nicht aus. Der
+Draft-Prompt bleibt nicht freigegeben und darf erst nach ausdruecklicher
+Nutzerfreigabe als separater Implementierungsblock verwendet werden. Es
+entstehen keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests,
+keine Widget-Tests, keine App-Integration, keine finale UI, keine
+Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine
+SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine
+PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe,
 keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung
 und kein `frame_started`.
 
@@ -2427,6 +2451,27 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Asset-Dateien unter `assets/` aus M15-A ableiten,
 - keine automatische Wortplatzierung aus M15-A ableiten,
 - kein `frame_started` oder Bauzustand aus M15-A weiterbauen,
+- keine Implementierung aus M15-A2 ableiten,
+- keine Flutter-/Dart-Dateien aus M15-A2 ableiten,
+- keine Tests aus M15-A2 ableiten,
+- keine Widget-Tests aus M15-A2 ableiten,
+- keine App-Integration aus M15-A2 ableiten,
+- keine finale UI aus M15-A2 ableiten,
+- keine Runtime-Konfiguration aus M15-A2 ableiten,
+- keine Persistenz aus M15-A2 ableiten,
+- keine Supabase Writes aus M15-A2 ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M15-A2 ableiten,
+- keine Reward Bridge aus M15-A2 ableiten,
+- keine Codefreigabe aus M15-A2 ableiten,
+- keine Implementierungsfreigabe aus M15-A2 ableiten,
+- keine Assetfreigabe aus M15-A2 ableiten,
+- keine PNG-Erzeugung aus M15-A2 ableiten,
+- keine PNG-Aenderung aus M15-A2 ableiten,
+- keine Screenshots aus M15-A2 ableiten,
+- keine Spielassets aus M15-A2 ableiten,
+- keine Asset-Dateien unter `assets/` aus M15-A2 ableiten,
+- keine automatische Wortplatzierung aus M15-A2 ableiten,
+- kein `frame_started` oder Bauzustand aus M15-A2 weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3392,6 +3437,27 @@ Ein Schritt wird gestoppt, wenn:
 - aus M15-A Asset-Dateien unter `assets/` abgeleitet werden,
 - aus M15-A automatische Wortplatzierung abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M15-A weitergebaut werden,
+- aus M15-A2 eine Implementierung abgeleitet wird,
+- aus M15-A2 Flutter-/Dart-Dateien abgeleitet werden,
+- aus M15-A2 Tests abgeleitet werden,
+- aus M15-A2 Widget-Tests abgeleitet werden,
+- aus M15-A2 App-Integration abgeleitet wird,
+- aus M15-A2 eine finale UI abgeleitet wird,
+- aus M15-A2 Runtime-Konfiguration abgeleitet wird,
+- aus M15-A2 Persistenz abgeleitet wird,
+- aus M15-A2 Supabase Writes abgeleitet werden,
+- aus M15-A2 SRS-/`word_progress`-Aenderungen abgeleitet werden,
+- aus M15-A2 eine Reward Bridge abgeleitet wird,
+- aus M15-A2 Codefreigabe abgeleitet wird,
+- aus M15-A2 Implementierungsfreigabe abgeleitet wird,
+- aus M15-A2 Assetfreigabe abgeleitet wird,
+- aus M15-A2 PNG-Erzeugung abgeleitet wird,
+- aus M15-A2 PNG-Aenderung abgeleitet wird,
+- aus M15-A2 Screenshots abgeleitet werden,
+- aus M15-A2 Spielassets abgeleitet werden,
+- aus M15-A2 Asset-Dateien unter `assets/` abgeleitet werden,
+- aus M15-A2 automatische Wortplatzierung abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M15-A2 weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
