@@ -2,11 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-const _surfaceBackground = Color(0xFF060A12);
-const _surfacePanel = Color(0xFF101927);
-const _surfaceOceanTop = Color(0xFF0A273B);
-const _surfaceOceanBottom = Color(0xFF07121E);
-const _surfaceLand = Color(0xFF243A2F);
+const _surfaceBackground = Color(0xFF050811);
+const _surfacePanel = Color(0xFF0E1724);
+const _surfaceOceanTop = Color(0xFF0B3147);
+const _surfaceOceanBottom = Color(0xFF06111D);
+const _surfaceLand = Color(0xFF23372D);
 const _surfaceLandEdge = Color(0xFF9FF7D5);
 const _surfaceCyan = Color(0xFF5DDCFF);
 const _surfaceMint = Color(0xFF9FF7D5);
@@ -44,7 +44,7 @@ class _CompactLocalWorldSurfacePreviewState
           color: _surfaceBackground,
           child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 22),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 430),
@@ -52,7 +52,7 @@ class _CompactLocalWorldSurfacePreviewState
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _SurfaceNotice(),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                       _SurfacePreviewCard(
                         isMarkerSelected: _isMarkerSelected,
                         isInfoOpen: _isInfoOpen,
@@ -60,7 +60,7 @@ class _CompactLocalWorldSurfacePreviewState
                         onInfoTap: _toggleInfo,
                         onResetTap: _resetPreview,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       _SurfaceGuardrailPanel(
                         isMarkerSelected: _isMarkerSelected,
                       ),
@@ -105,18 +105,18 @@ class _SurfaceNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('compact-local-world-surface-notice'),
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        color: _surfaceViolet.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: _surfaceViolet.withValues(alpha: 0.4)),
+        color: _surfaceViolet.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _surfaceViolet.withValues(alpha: 0.34)),
       ),
       child: const Text(
         'Lokale World-Fläche / keine Route / keine Speicherung',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 11,
           height: 1.25,
           fontWeight: FontWeight.w800,
           letterSpacing: 0,
@@ -148,15 +148,15 @@ class _SurfacePreviewCard extends StatelessWidget {
           'Kompakte lokale World Flaeche. Moeglicher Lernplatz. Noch kein Gebaeude. Keine Speicherung. Keine Platzierung.',
       child: Container(
         key: const Key('compact-local-world-surface-card'),
-        padding: const EdgeInsets.fromLTRB(15, 15, 15, 14),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 13),
         decoration: BoxDecoration(
           color: _surfacePanel,
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: _surfaceCyan.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: _surfaceCyan.withValues(alpha: 0.26)),
           boxShadow: [
             BoxShadow(
-              color: _surfaceCyan.withValues(alpha: 0.1),
-              blurRadius: 30,
+              color: _surfaceCyan.withValues(alpha: 0.08),
+              blurRadius: 26,
               spreadRadius: -12,
             ),
           ],
@@ -165,11 +165,11 @@ class _SurfacePreviewCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const _SurfaceHeader(),
-            const SizedBox(height: 13),
+            const SizedBox(height: 11),
             AspectRatio(
-              aspectRatio: 1.08,
+              aspectRatio: 1.03,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(22),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -212,17 +212,17 @@ class _SurfacePreviewCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             _MarkerSelectionPanel(isMarkerSelected: isMarkerSelected),
             if (isMarkerSelected) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
               _PreviewActionRow(
                 isInfoOpen: isInfoOpen,
                 onInfoTap: onInfoTap,
                 onResetTap: onResetTap,
               ),
               if (isInfoOpen) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 9),
                 const _PreviewInfoPanel(),
               ],
             ],
@@ -242,10 +242,10 @@ class _SurfaceHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Kompakte lokale World-Fläche',
+          'Kleine World-Fläche',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 19,
             height: 1.15,
             fontWeight: FontWeight.w900,
             letterSpacing: 0,
@@ -253,10 +253,10 @@ class _SurfaceHeader extends StatelessWidget {
         ),
         SizedBox(height: 6),
         Text(
-          'Ein sichtbarer Inselbereich mit einem neutralen Lernplatz. Noch kein Gebäude und keine echte Platzierung.',
+          'Ein neutraler Lernplatz in einer lokalen Vorschau. Noch kein Gebäude.',
           style: TextStyle(
             color: Color(0xB8FFFFFF),
-            fontSize: 13,
+            fontSize: 12,
             height: 1.32,
             fontWeight: FontWeight.w700,
             letterSpacing: 0,
@@ -290,8 +290,8 @@ class _CompactPlotMarker extends StatelessWidget {
           children: [
             Container(
               key: const Key('compact-local-world-plot-marker'),
-              width: 88,
-              height: 88,
+              width: 84,
+              height: 84,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: markerAccent.withValues(alpha: isSelected ? 0.2 : 0.14),
@@ -304,7 +304,7 @@ class _CompactPlotMarker extends StatelessWidget {
                     color: markerAccent.withValues(
                       alpha: isSelected ? 0.42 : 0.28,
                     ),
-                    blurRadius: isSelected ? 34 : 24,
+                    blurRadius: isSelected ? 30 : 22,
                     spreadRadius: isSelected ? -1 : -4,
                   ),
                 ],
@@ -313,8 +313,8 @@ class _CompactPlotMarker extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -327,14 +327,14 @@ class _CompactPlotMarker extends StatelessWidget {
                         ? Icons.check_circle_outline_rounded
                         : Icons.radio_button_unchecked_rounded,
                     color: Colors.white,
-                    size: isSelected ? 38 : 34,
+                    size: isSelected ? 36 : 32,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 7),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: const Color(0xFF07101A).withValues(alpha: 0.82),
                 borderRadius: BorderRadius.circular(999),
@@ -345,7 +345,7 @@ class _CompactPlotMarker extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   height: 1.15,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
@@ -371,12 +371,12 @@ class _MarkerSelectionPanel extends StatelessWidget {
         ? 'Preview-Auswahl aktiv'
         : 'Marker antippen';
     final body = isMarkerSelected
-        ? 'Dieser Ort ist nur lokal markiert. Eine abstrakte Vorschaufläche ist sichtbar. Keine Speicherung. Keine Platzierung.'
+        ? 'Nur lokal markiert. Vorschaufläche sichtbar. Keine Speicherung. Keine Platzierung.'
         : 'Tippe den neutralen Platz an, um ihn nur für diese Vorschau hervorzuheben.';
 
     return Container(
       key: const Key('compact-local-world-marker-info-panel'),
-      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(18),
@@ -401,7 +401,7 @@ class _MarkerSelectionPanel extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 13,
+                    fontSize: 12,
                     height: 1.2,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
@@ -412,7 +412,7 @@ class _MarkerSelectionPanel extends StatelessWidget {
                   body,
                   style: const TextStyle(
                     color: Color(0xCFFFFFFF),
-                    fontSize: 12,
+                    fontSize: 11,
                     height: 1.28,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0,
@@ -442,8 +442,8 @@ class _PreviewActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       key: const Key('compact-local-world-preview-actions'),
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 7,
+      runSpacing: 7,
       alignment: WrapAlignment.center,
       children: [
         _PreviewActionChip(
@@ -484,7 +484,7 @@ class _PreviewActionChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(999),
@@ -493,13 +493,13 @@ class _PreviewActionChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 17),
-              const SizedBox(width: 7),
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   height: 1.15,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
@@ -520,7 +520,7 @@ class _PreviewInfoPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('compact-local-world-preview-info-panel'),
-      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
       decoration: BoxDecoration(
         color: _surfaceCyan.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(18),
@@ -529,15 +529,15 @@ class _PreviewInfoPanel extends StatelessWidget {
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lightbulb_outline_rounded, color: _surfaceCyan, size: 19),
-          SizedBox(width: 9),
+          Icon(Icons.lightbulb_outline_rounded, color: _surfaceCyan, size: 18),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Dieser Ort ist nur eine Vorschau. Später könnte hier ein Lernbereich vorgeschlagen werden. Keine Speicherung. Keine Platzierung.',
+              'Nur Vorschau: Später könnte hier ein Lernbereich vorgeschlagen werden. Keine Speicherung. Keine Platzierung.',
               style: TextStyle(
                 color: Color(0xD9FFFFFF),
-                fontSize: 12,
-                height: 1.3,
+                fontSize: 11,
+                height: 1.28,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0,
               ),
@@ -558,19 +558,19 @@ class _GhostPreviewSurface extends StatelessWidget {
       angle: -0.08,
       child: Container(
         key: const Key('compact-local-world-ghost-preview-surface'),
-        width: 142,
-        padding: const EdgeInsets.fromLTRB(11, 10, 11, 9),
+        width: 132,
+        padding: const EdgeInsets.fromLTRB(10, 9, 10, 8),
         decoration: BoxDecoration(
-          color: _surfaceCyan.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(22),
+          color: _surfaceCyan.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: _surfaceCyan.withValues(alpha: 0.58),
-            width: 1.6,
+            color: _surfaceCyan.withValues(alpha: 0.5),
+            width: 1.4,
           ),
           boxShadow: [
             BoxShadow(
-              color: _surfaceCyan.withValues(alpha: 0.2),
-              blurRadius: 24,
+              color: _surfaceCyan.withValues(alpha: 0.18),
+              blurRadius: 20,
               spreadRadius: -7,
             ),
           ],
@@ -578,26 +578,26 @@ class _GhostPreviewSurface extends StatelessWidget {
         child: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
-            SizedBox(height: 5),
+            Icon(Icons.grid_view_rounded, color: Colors.white, size: 17),
+            SizedBox(height: 4),
             Text(
               'Vorschaufläche',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 11,
+                fontSize: 10,
                 height: 1.12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0,
               ),
             ),
-            SizedBox(height: 3),
+            SizedBox(height: 2),
             Text(
               'Nur Vorschau',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xCFFFFFFF),
-                fontSize: 10,
+                fontSize: 9,
                 height: 1.1,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0,
@@ -617,16 +617,16 @@ class _SurfaceLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('compact-local-world-surface-legend'),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF06101B).withValues(alpha: 0.82),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        color: const Color(0xFF06101B).withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
       child: const Wrap(
         alignment: WrapAlignment.center,
-        spacing: 8,
-        runSpacing: 8,
+        spacing: 6,
+        runSpacing: 6,
         children: [
           _SurfaceStatusPill(text: 'Noch kein Gebäude', color: _surfaceGold),
           _SurfaceStatusPill(text: 'Keine Speicherung', color: _surfaceCyan),
@@ -646,11 +646,11 @@ class _SurfaceGuardrailPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('compact-local-world-surface-guardrails'),
-      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
       decoration: BoxDecoration(
-        color: _surfacePanel,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+        color: _surfacePanel.withValues(alpha: 0.82),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -660,23 +660,23 @@ class _SurfaceGuardrailPanel extends StatelessWidget {
                 ? Icons.check_circle_outline_rounded
                 : Icons.radio_button_unchecked_rounded,
             text: isMarkerSelected
-                ? 'Lokal markiert, nur in dieser Vorschau'
-                : 'Antippbar nur als lokale Vorschau',
+                ? 'Lokal markiert, nur Vorschau'
+                : 'Antippbar, nur Vorschau',
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 8),
           const _GuardrailRow(
             icon: Icons.landscape_rounded,
-            text: 'Abstrakte Fläche, kein Inselasset',
+            text: 'Abstrakte Fläche, kein Asset',
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 8),
           const _GuardrailRow(
             icon: Icons.domain_disabled_rounded,
-            text: 'Kein Gebäude und kein Bauzustand',
+            text: 'Noch kein Gebäude',
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 8),
           const _GuardrailRow(
             icon: Icons.place_outlined,
-            text: 'Keine Koordinaten und keine Platzierungslogik',
+            text: 'Keine Platzierung',
           ),
         ],
       ),
@@ -760,14 +760,14 @@ class _WorldSurfacePainter extends CustomPainter {
 
     final ripplePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = Colors.white.withValues(alpha: 0.07);
+      ..strokeWidth = 1
+      ..color = Colors.white.withValues(alpha: 0.06);
     for (var i = 0; i < 5; i += 1) {
       final y = size.height * (0.18 + i * 0.13);
       final path = Path()..moveTo(size.width * 0.08, y);
       for (var step = 0; step <= 6; step += 1) {
         final x = size.width * (0.08 + step * 0.15);
-        final waveY = y + math.sin(step + i * 0.7) * 5;
+        final waveY = y + math.sin(step + i * 0.7) * 4;
         path.lineTo(x, waveY);
       }
       canvas.drawPath(path, ripplePaint);
@@ -810,36 +810,65 @@ class _WorldSurfacePainter extends CustomPainter {
       ..close();
 
     final islandShadow = Paint()
-      ..color = Colors.black.withValues(alpha: 0.24)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
+      ..color = Colors.black.withValues(alpha: 0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
     canvas.drawPath(islandPath.shift(const Offset(0, 10)), islandShadow);
 
     final islandPaint = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [_surfaceLandEdge, _surfaceLand],
+        colors: [Color(0xFFB8FFE0), _surfaceLandEdge, _surfaceLand],
+        stops: [0, 0.46, 1],
       ).createShader(oceanRect);
     canvas.drawPath(islandPath, islandPaint);
 
     final edgePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
-      ..color = _surfaceLandEdge.withValues(alpha: 0.46);
+      ..color = _surfaceLandEdge.withValues(alpha: 0.42);
     canvas.drawPath(islandPath, edgePaint);
 
     final innerPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = Colors.white.withValues(alpha: 0.12);
+      ..color = Colors.white.withValues(alpha: 0.1);
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(size.width * 0.53, size.height * 0.48),
-        width: size.width * 0.36,
-        height: size.height * 0.22,
+        width: size.width * 0.34,
+        height: size.height * 0.2,
       ),
       innerPaint,
     );
+
+    final meadowPaint = Paint()
+      ..color = const Color(0xFF7BEFB9).withValues(alpha: 0.16);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.42, size.height * 0.45),
+        width: size.width * 0.2,
+        height: size.height * 0.11,
+      ),
+      meadowPaint,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.62, size.height * 0.54),
+        width: size.width * 0.16,
+        height: size.height * 0.09,
+      ),
+      meadowPaint,
+    );
+
+    final lightDotPaint = Paint()..color = Colors.white.withValues(alpha: 0.12);
+    for (final point in [
+      Offset(size.width * 0.36, size.height * 0.34),
+      Offset(size.width * 0.69, size.height * 0.42),
+      Offset(size.width * 0.3, size.height * 0.58),
+    ]) {
+      canvas.drawCircle(point, 2.2, lightDotPaint);
+    }
   }
 
   @override
