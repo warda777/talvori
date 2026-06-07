@@ -562,6 +562,22 @@ SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe,
 keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
 `frame_started`.
 
+M15-C startet das Foundation Choice Local Preview Harness Gate in
+`docs/world_design/314-foundation-choice-local-preview-harness-gate.md`.
+M15-C ist ein reines Harness-Gate fuer den isolierten Foundation-Choice-
+Preview-Slice. Die Waldlichtung bleibt Starter-/Testform. M15-C erzeugt keine
+neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale UI, keine
+Tests, keine Widget-Tests, keine Screenshots, keine Harness-Implementierung
+und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine Home-/
+Onboarding-/World-Routing-Integration, keine Persistenz, keine Runtime-
+Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/
+`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe,
+keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
+`frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -638,11 +654,12 @@ Fuehrende Dokumente:
 - `docs/world_design/311-foundation-choice-prompt-visual-review.md`
 - `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`
 - `docs/world_design/313-foundation-choice-preview-code-review.md`
+- `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-B Foundation Choice Preview Code Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-C Foundation Choice Local Preview Harness Gate gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1219,6 +1236,19 @@ Fuehrende Dokumente:
     SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische
     Wortplatzierung, keine Assetfreigabe, keine Tests, keine Widget-Tests,
     keine Screenshots, keinen Build-State und kein `frame_started` erzeugen.
+  - `m15C`: `false` fuer Harness-Implementierung/App/Assets/Tests/Runtime;
+    erlaubt nur das Gate-Dokument
+    `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`
+    und Dokumentationspreviews unter
+    `docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`.
+    M15-C darf nur pruefen, ob ein spaeterer isolierter lokaler Preview-
+    Harness denkbar waere, aber keine Flutter-/Dart-Dateien, keine App-
+    Integration, keine Home-/Onboarding-/World-Routing-Integration, keine
+    Tests, keine Widget-Tests, keine Screenshots, keine Persistenz, keine
+    Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes,
+    keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
+    automatische Wortplatzierung, keine Assetfreigabe, keinen Build-State und
+    kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2480,6 +2510,23 @@ In diesem Template-Block gilt:
 - Keine Screenshots aus M15-B.
 - Kein Build-State aus M15-B.
 - Kein `frame_started` oder Bauzustand aus M15-B.
+- Keine Harness-Implementierung aus M15-C.
+- Keine Flutter-/Dart-Dateien aus M15-C.
+- Keine App-Integration aus M15-C.
+- Keine Home-/Onboarding-/World-Routing-Integration aus M15-C.
+- Keine Tests aus M15-C.
+- Keine Widget-Tests aus M15-C.
+- Keine Screenshots aus M15-C.
+- Keine Persistenz aus M15-C.
+- Keine Runtime-Konfiguration aus M15-C.
+- Keine Supabase Writes aus M15-C.
+- Keine lokalen DB-Writes aus M15-C.
+- Keine SRS-/`word_progress`-Aenderung aus M15-C.
+- Keine Reward Bridge aus M15-C.
+- Keine automatische Wortplatzierung aus M15-C.
+- Keine Assetfreigabe aus M15-C.
+- Kein Build-State aus M15-C.
+- Kein `frame_started` oder Bauzustand aus M15-C.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -4428,6 +4475,35 @@ fuer:
 - keine Tests,
 - keine Widget-Tests,
 - keine Screenshots,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- kein Build-State,
+- keine Bauzustaende,
+- kein `frame_started`.
+
+M15-C-Foundation-Choice-Local-Preview-Harness-Gate gilt nur fuer:
+
+- Gate-Dokument in
+  `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`,
+- Dokumentationspreviews unter
+  `docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`,
+- Pruefung, ob ein spaeterer isolierter lokaler Preview-Harness fuer
+  `FoundationChoicePreview` denkbar waere,
+- keine Harness-Implementierung,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine Home-/Onboarding-/World-Routing-Integration,
+- keine Tests,
+- keine Widget-Tests,
+- keine Screenshots,
+- keine Persistenz,
+- keine Runtime-Konfiguration,
+- keine Supabase Writes,
+- keine lokalen DB-Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine automatische Wortplatzierung,
+- keine Assetfreigabe,
 - keine Spielassets,
 - keine Asset-Dateien unter `assets/`,
 - kein Build-State,
