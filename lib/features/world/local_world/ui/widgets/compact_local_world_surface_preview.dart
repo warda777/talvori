@@ -24,6 +24,7 @@ class CompactLocalWorldSurfacePreview extends StatefulWidget {
 class _CompactLocalWorldSurfacePreviewState
     extends State<CompactLocalWorldSurfacePreview> {
   bool _isMarkerSelected = false;
+  bool _isInfoOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,10 @@ class _CompactLocalWorldSurfacePreviewState
                       const SizedBox(height: 14),
                       _SurfacePreviewCard(
                         isMarkerSelected: _isMarkerSelected,
+                        isInfoOpen: _isInfoOpen,
                         onMarkerTap: _toggleMarkerSelection,
+                        onInfoTap: _toggleInfo,
+                        onResetTap: _resetPreview,
                       ),
                       const SizedBox(height: 12),
                       _SurfaceGuardrailPanel(
@@ -74,6 +78,22 @@ class _CompactLocalWorldSurfacePreviewState
   void _toggleMarkerSelection() {
     setState(() {
       _isMarkerSelected = !_isMarkerSelected;
+      if (!_isMarkerSelected) {
+        _isInfoOpen = false;
+      }
+    });
+  }
+
+  void _toggleInfo() {
+    setState(() {
+      _isInfoOpen = !_isInfoOpen;
+    });
+  }
+
+  void _resetPreview() {
+    setState(() {
+      _isMarkerSelected = false;
+      _isInfoOpen = false;
     });
   }
 }
@@ -109,11 +129,17 @@ class _SurfaceNotice extends StatelessWidget {
 class _SurfacePreviewCard extends StatelessWidget {
   const _SurfacePreviewCard({
     required this.isMarkerSelected,
+    required this.isInfoOpen,
     required this.onMarkerTap,
+    required this.onInfoTap,
+    required this.onResetTap,
   });
 
   final bool isMarkerSelected;
+  final bool isInfoOpen;
   final VoidCallback onMarkerTap;
+  final VoidCallback onInfoTap;
+  final VoidCallback onResetTap;
 
   @override
   Widget build(BuildContext context) {
@@ -188,6 +214,18 @@ class _SurfacePreviewCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _MarkerSelectionPanel(isMarkerSelected: isMarkerSelected),
+            if (isMarkerSelected) ...[
+              const SizedBox(height: 10),
+              _PreviewActionRow(
+                isInfoOpen: isInfoOpen,
+                onInfoTap: onInfoTap,
+                onResetTap: onResetTap,
+              ),
+              if (isInfoOpen) ...[
+                const SizedBox(height: 10),
+                const _PreviewInfoPanel(),
+              ],
+            ],
           ],
         ),
       ),
@@ -381,6 +419,128 @@ class _MarkerSelectionPanel extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreviewActionRow extends StatelessWidget {
+  const _PreviewActionRow({
+    required this.isInfoOpen,
+    required this.onInfoTap,
+    required this.onResetTap,
+  });
+
+  final bool isInfoOpen;
+  final VoidCallback onInfoTap;
+  final VoidCallback onResetTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      key: const Key('compact-local-world-preview-actions'),
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: [
+        _PreviewActionChip(
+          icon: isInfoOpen ? Icons.expand_less_rounded : Icons.info_outline,
+          label: 'Mehr erfahren',
+          color: _surfaceCyan,
+          onTap: onInfoTap,
+        ),
+        _PreviewActionChip(
+          icon: Icons.restart_alt_rounded,
+          label: 'Vorschau zurücksetzen',
+          color: _surfaceViolet,
+          onTap: onResetTap,
+        ),
+      ],
+    );
+  }
+}
+
+class _PreviewActionChip extends StatelessWidget {
+  const _PreviewActionChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: '$label. Nur Vorschau. Keine Speicherung. Keine Platzierung.',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: color.withValues(alpha: 0.38)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 17),
+              const SizedBox(width: 7),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  height: 1.15,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewInfoPanel extends StatelessWidget {
+  const _PreviewInfoPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('compact-local-world-preview-info-panel'),
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      decoration: BoxDecoration(
+        color: _surfaceCyan.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _surfaceCyan.withValues(alpha: 0.28)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.lightbulb_outline_rounded, color: _surfaceCyan, size: 19),
+          SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              'Dieser Ort ist nur eine Vorschau. Später könnte hier ein Lernbereich vorgeschlagen werden. Keine Speicherung. Keine Platzierung.',
+              style: TextStyle(
+                color: Color(0xD9FFFFFF),
+                fontSize: 12,
+                height: 1.3,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
+              ),
             ),
           ),
         ],
