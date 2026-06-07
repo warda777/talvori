@@ -611,6 +611,18 @@ Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/
 keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
 `frame_started`.
 
+M16-A startet den First World Element Slice Scope And Visual Plan in
+`docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`.
+M16-A ist ein reiner Scope-/Visual-Plan fuer den ersten moeglichen Welt-
+Element-Slice. Die Waldlichtung bleibt Starter-/Testform. M16-A erzeugt keine
+neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale UI, keine
+Tests, keine Screenshots und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m16_a_first_world_element_slice/` sind
+Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung und kein `frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -690,11 +702,12 @@ Fuehrende Dokumente:
 - `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`
 - `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`
 - `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`
+- `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-D2 Foundation Choice Harness Implementation Prompt Draft gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M16-A First World Element Slice Scope And Visual Plan gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1310,6 +1323,18 @@ Fuehrende Dokumente:
     lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward
     Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, keinen
     Build-State und kein `frame_started` erzeugen.
+  - `m16A`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Scope-/Visual-Plan-Dokument
+    `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`
+    und Dokumentationspreviews unter
+    `docs/world_design/previews/m16_a_first_world_element_slice/`. M16-A darf
+    nur den ersten moeglichen Welt-Element-Slice planen, aber keine Flutter-/
+    Dart-Dateien, keine App-Integration, keine Tests, keine Screenshots, keine
+    Persistenz, keine Runtime-Konfiguration, keine Supabase Writes, keine
+    lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward
+    Bridge, keine automatische Wortplatzierung, keine neuen Spielassets, keine
+    Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2622,6 +2647,22 @@ In diesem Template-Block gilt:
 - Keine Assetfreigabe aus M15-D2.
 - Kein Build-State aus M15-D2.
 - Kein `frame_started` oder Bauzustand aus M15-D2.
+- Keine Flutter-/Dart-Dateien aus M16-A.
+- Keine App-Integration aus M16-A.
+- Keine Tests aus M16-A.
+- Keine Screenshots aus M16-A.
+- Keine Persistenz aus M16-A.
+- Keine Runtime-Konfiguration aus M16-A.
+- Keine Supabase Writes aus M16-A.
+- Keine lokalen DB-Writes aus M16-A.
+- Keine SRS-/`word_progress`-Aenderung aus M16-A.
+- Keine Reward Bridge aus M16-A.
+- Keine automatische Wortplatzierung aus M16-A.
+- Keine Assetfreigabe aus M16-A.
+- Keine neuen Spielassets aus M16-A.
+- Keine Asset-Dateien unter `assets/` aus M16-A.
+- Kein finales Inselbild aus M16-A.
+- Kein `frame_started` oder Bauzustand aus M16-A.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -4662,6 +4703,32 @@ M15-D2-Foundation-Choice-Harness-Implementation-Prompt-Draft gilt nur fuer:
 - keine Spielassets,
 - keine Asset-Dateien unter `assets/`,
 - kein Build-State,
+- keine Bauzustaende,
+- kein `frame_started`.
+
+M16-A-First-World-Element-Slice-Scope-And-Visual-Plan gilt nur fuer:
+
+- Scope-/Visual-Plan-Dokument in
+  `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`,
+- Dokumentationspreviews unter
+  `docs/world_design/previews/m16_a_first_world_element_slice/`,
+- Empfehlung eines spaeteren neutralen lokalen Plot-Markers als moeglichen
+  naechsten Code-Kandidaten,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine Tests,
+- keine Screenshots,
+- keine Persistenz,
+- keine Runtime-Konfiguration,
+- keine Supabase Writes,
+- keine lokalen DB-Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine automatische Wortplatzierung,
+- keine Assetfreigabe,
+- keine neuen Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- kein finales Inselbild,
 - keine Bauzustaende,
 - kein `frame_started`.
 

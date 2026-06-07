@@ -788,6 +788,16 @@ Aktueller Stand der Talvori-Welt-Produktion:
   keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-
   Konfiguration, keine Persistenz, keine Assets, keine automatische
   Wortplatzierung und kein `frame_started`.
+- M16-A wurde als First World Element Slice Scope And Visual Plan in
+  `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`
+  gestartet. Ziel ist ein schnellerer, aber sicherer Schritt Richtung
+  sichtbares Welt-Element. Empfehlung: naechster moeglicher Code-Kandidat ist
+  ein neutraler lokaler Plot-Marker, nicht Foundation Choice als Bau-Menue.
+  PNG-Dokumentationspreviews liegen unter
+  `docs/world_design/previews/m16_a_first_world_element_slice/`. Daraus
+  folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine
+  Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets,
+  keine automatische Wortplatzierung und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -985,6 +995,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M15-C | Foundation Choice Local Preview Harness Gate | `Harness Gate gestartet / keine Harness-Implementierung` | Reiner Dokumentations- und Gate-Planungsblock in `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`. Prueft nur, ob ein spaeterer isolierter lokaler Preview-Harness fuer `FoundationChoicePreview` sinnvoll und eng genug waere. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_c_foundation_choice_local_preview_harness_gate/`: Harness Gate Map, Device Check Scope Map und Contact Sheet. Empfehlung: Ein spaeterer isolierter Preview-Harness ist theoretisch denkbar, aber nur nach eigenem Prompt und ausdruecklicher Freigabe. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
 | M15-D | Foundation Choice Local Preview Harness Implementation Gate | `Implementation Gate gestartet / keine Harness-Freigabe` | Reiner Dokumentations- und Gate-Block in `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`. Prueft nur, ob ein spaeterer isolierter Local Preview Harness fuer `FoundationChoicePreview` als sehr kleiner Implementierungs-Slice sauber freigabefaehig waere. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_d_foundation_choice_harness_implementation_gate/`: Harness Implementation Gate Map, Allowed vs Blocked Scope und Contact Sheet. Empfehlung: Ein spaeterer isolierter Harness-Slice ist theoretisch freigabefaehig, aber nur mit separatem Implementierungs-Prompt und ausdruecklicher Nutzerfreigabe. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
 | M15-D2 | Foundation Choice Harness Implementation Prompt Draft | `Prompt-Draft gestartet / keine Harness-Implementierung` | Reiner Dokumentations- und Prompt-Planungsblock in `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`. Erstellt nur einen spaeteren Copy-&-Paste-Implementierungs-Prompt fuer einen minimalen isolierten `FoundationChoicePreview`-Harness als Entwurf und markiert ihn ausdruecklich als nicht freigegeben. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_d2_foundation_choice_harness_prompt_draft/`: Harness Prompt Scope Boundary, Harness Prompt Execution Flow und Contact Sheet. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
+| M16-A | First World Element Slice Scope And Visual Plan | `Scope-/Visual-Plan gestartet / keine Code- oder Assetfreigabe` | Beschleunigter, aber sicherer Planungs- und Visualisierungsblock in `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`. Prueft Kandidaten fuer den ersten sichtbaren Welt-/Bau-Element-Slice: neutraler Plot-Marker, Foundation-Fokus-Indikator, lokale Build-Preview-Flaeche, Grundstueck-/Bauplatz-Karte und Plot-/Anchor-Greybox. Empfehlung: neutraler lokaler Plot-Marker als naechster moeglicher Code-Kandidat; lokale Build-Preview-Flaeche als zweitbeste Option. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_a_first_world_element_slice/`: Candidate Map, Recommended Next Slice Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine neuen Spielassets, keine Asset-Dateien unter `assets/`, kein finales Inselbild, kein `frame_started`, keine Bauzustaende. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1644,6 +1655,16 @@ keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration,
 keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-
 Konfiguration, keine Persistenz, keine Assets, keine automatische
 Wortplatzierung und kein `frame_started`.
+
+M16-A startet den First World Element Slice Scope And Visual Plan als
+beschleunigten, aber sicheren Planungs- und Visualisierungsblock. Ziel ist der
+Uebergang vom trockenen Foundation-Choice-Harness zu einem ersten sichtbaren
+Welt-Element, ohne Architekturbruch. M16-A empfiehlt als naechsten moeglichen
+Code-Slice einen neutralen lokalen Plot-Marker. Dokumentationspreviews liegen
+unter `docs/world_design/previews/m16_a_first_world_element_slice/`. Daraus
+folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine
+Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets,
+keine automatische Wortplatzierung und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2716,6 +2737,22 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Assetfreigabe aus M15-D2 ableiten,
 - kein Build-State aus M15-D2 ableiten,
 - kein `frame_started` oder Bauzustand aus M15-D2 weiterbauen,
+- keine Flutter-/Dart-Dateien aus M16-A ableiten,
+- keine App-Integration aus M16-A ableiten,
+- keine Tests aus M16-A ableiten,
+- keine Screenshots aus M16-A ableiten,
+- keine Persistenz aus M16-A ableiten,
+- keine Runtime-Konfiguration aus M16-A ableiten,
+- keine Supabase Writes aus M16-A ableiten,
+- keine lokalen DB-Writes aus M16-A ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M16-A ableiten,
+- keine Reward Bridge aus M16-A ableiten,
+- keine automatische Wortplatzierung aus M16-A ableiten,
+- keine Assetfreigabe aus M16-A ableiten,
+- keine neuen Spielassets aus M16-A ableiten,
+- keine Asset-Dateien unter `assets/` aus M16-A ableiten,
+- kein finales Inselbild aus M16-A ableiten,
+- kein `frame_started` oder Bauzustand aus M16-A weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3801,6 +3838,21 @@ Ein Schritt wird gestoppt, wenn:
 - aus M15-D2 Assetfreigabe abgeleitet wird,
 - aus M15-D2 Build-State abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M15-D2 weitergebaut werden,
+- aus M16-A Flutter-/Dart-Dateien abgeleitet werden,
+- aus M16-A App-Integration abgeleitet wird,
+- aus M16-A Tests abgeleitet werden,
+- aus M16-A Screenshots abgeleitet werden,
+- aus M16-A Persistenz abgeleitet wird,
+- aus M16-A Runtime-Konfiguration abgeleitet wird,
+- aus M16-A Supabase Writes oder lokale DB-Writes abgeleitet werden,
+- aus M16-A SRS-/`word_progress`-Aenderungen abgeleitet werden,
+- aus M16-A eine Reward Bridge abgeleitet wird,
+- aus M16-A automatische Wortplatzierung abgeleitet wird,
+- aus M16-A Assetfreigabe abgeleitet wird,
+- aus M16-A neue Spielassets oder Asset-Dateien unter `assets/` abgeleitet
+  werden,
+- aus M16-A ein finales Inselbild abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M16-A weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
