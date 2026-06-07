@@ -396,7 +396,7 @@ class _FoundationChoiceActions extends StatelessWidget {
           ),
           icon: const Icon(Icons.check_rounded),
           label: const Text(
-            'Lernfokus lokal merken',
+            'Lernfokus lokal anzeigen',
             style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0),
           ),
         ),

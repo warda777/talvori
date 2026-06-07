@@ -6,6 +6,7 @@ const _harnessBackground = Color(0xFF0B1018);
 const _harnessPanel = Color(0xFF111D2B);
 const _harnessBorder = Color(0xFF4F6A7E);
 const _harnessAccent = Color(0xFF5DDCFF);
+const _harnessTopSafeGap = 64.0;
 
 class FoundationChoicePreviewHarness extends StatelessWidget {
   const FoundationChoicePreviewHarness({
@@ -32,7 +33,7 @@ class FoundationChoicePreviewHarness extends StatelessWidget {
         child: Material(
           color: _harnessBackground,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            padding: const EdgeInsets.fromLTRB(20, _harnessTopSafeGap, 20, 24),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
