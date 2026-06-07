@@ -847,6 +847,20 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Route, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine
   Persistenz, keine Assets, keine automatische Wortplatzierung, kein
   Build-State und kein `frame_started`.
+- M16-M wurde als Next Safe Preview Slice Decision Gate in
+  `docs/world_design/322-next-safe-preview-slice-decision-gate.md`
+  gestartet. Ziel ist, nach M16-I/J/K/L den naechsten kleinen lokalen Preview-
+  Slice zu entscheiden, ohne wieder zu frueh auf Dorf/Zuhause, Water/Dock,
+  Onboarding oder Build-Wheel zu verengen. Entscheidung: Als naechster
+  Preview-Kandidat wird `WordSemanticsDecisionPreview` empfohlen, weil er
+  M16-L sichtbar macht und automatische Wortplatzierung, falsche Build-State-
+  Ableitung und zu fruehe Kategorie-/Plot-Konkretisierung am besten
+  verhindert. PNG-Dokumentationspreviews liegen unter
+  `docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`.
+  Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine
+  Route, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine
+  Persistenz, keine Assets, keine automatische Wortplatzierung, kein
+  Build-State und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -1049,6 +1063,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M16-J | Village Plot Capacity Local Preview Scope | `Scope-/Visual-Plan gestartet / keine Implementierung` | Beschleunigter, aber sicherer Dokumentations- und Visualisierungsblock in `docs/world_design/319-village-plot-capacity-local-preview-scope.md`. Leitet aus M16-I einen spaeteren lokalen Multi-Slot-Preview-Kandidaten `VillagePlotCapacityPreview` fuer Dorf/Zuhause/Alltag ab. Slot-Struktur: Haus gross, Garage/Carport mittel, Garten gross/flexibel, Beet/Feld mittel/gross, Vorhof mittel, Baum/Natur klein/mittel, Weg/Platz verbindend, Erweiterung reserve. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_j_village_plot_capacity_local_preview/`: Slot Size Map, Slot Exchangeability Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-K | Global ThemeIsland Category Plot Capacity Matrix | `globale Matrix gestartet / M16-J eingeordnet` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/320-global-theme-island-plot-capacity-matrix.md`. Sammelt die bereits dokumentierten Kategorien aus Taxonomy, Priorisierung, Routing, Plot-Capability, Roadmap und Capability-Sheets: Zuhause/Alltag, Schule/Lernen, Garten/Natur, Kueste/Meer/Hafen/Strand, Essen/Restaurant/Cafe, Einkauf/Versorgung, Land/Farm, Stadt/Dorfzentrum, Verkehr/Reisen, Arbeit/Industrie, Freizeit/Outdoor/Sport, Technik/Digital, oeffentliche Gebaeude/Verwaltung, Gesundheit/Notfall, Kultur/Gesellschaft und sensible Bereiche. M16-J bleibt ein Dorf-Beispiel, nicht die globale Grundlage. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_k_global_theme_island_plot_capacity_matrix/`: Global Category Map, Size Mix Comparison, Coast/Harbor Example, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-L | Global World Semantics Consistency Audit | `Audit/Visualisierung gestartet / Pflichtfilter fuer Folgeprompts` | Reiner Dokumentations-, Audit- und Visualisierungsblock in `docs/world_design/321-global-world-semantics-consistency-audit.md`. Konsolidiert bestehende Regeln aus Taxonomy, Word-to-Island Routing, Plot-Capabilities, Sensitive Policy, Mobile/Clutter, Depth/Container, Asset Scope und M16-I/J/K. Ergebnis: M16-J bleibt brauchbares Dorf-Beispiel, aber nicht alleiniger Commit-/Code-Kandidat; M16-K bleibt brauchbare globale Kategorie-Matrix, muss aber durch Word-Type-Routing, Multi-Home, Representation Decision und Codex/Blueprint/Backlog-Fallbacks ergaenzt werden. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_l_global_world_semantics_consistency_audit/`: Semantics Decision Pipeline, Word Type Representation Map, Multi-Home Examples, M16-I/J/K Gap Map, Future Prompt Checklist und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
+| M16-M | Next Safe Preview Slice Decision Gate | `Entscheidungs-Gate gestartet / naechster Preview-Kandidat empfohlen` | Reiner Dokumentations- und Entscheidungsblock in `docs/world_design/322-next-safe-preview-slice-decision-gate.md`. Vergleicht `VillagePlotCapacityPreview`, `GlobalThemeIslandPreviewSelector`, `CoastHarborPlotCapacityPreview`, `WordSemanticsDecisionPreview` und `BuildWheelOverlayPreviewPlan` nach Architektur-Sicherheit, Spielnaehe, Misread-Risiko, M16-L-Naehe, Mobile-Lesbarkeit, Assetfreiheit, Auto-Placement-Risiko, Build-State-Risiko und naechstem Codewert. Entscheidung: `WordSemanticsDecisionPreview` ist der sicherste naechste Preview-Kandidat; Dorf bleibt zu eng, Global Selector wirkt zu stark wie Onboarding, Coast/Harbor ist wegen Water/Dock/Boat-Gates noch riskant, Build-Wheel ist zu frueh. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`: Candidate Matrix, Risk/Value Map, Recommended Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1769,6 +1784,20 @@ braucht Context/Sense, Word-Type-Routing, Safety, Representation Decision,
 User Choice und sichere Fallbacks wie Codex, Blueprint oder Backlog.
 Dokumentationspreviews liegen unter
 `docs/world_design/previews/m16_l_global_world_semantics_consistency_audit/`.
+Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
+keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
+keine Assets, keine automatische Wortplatzierung, kein Build-State und kein
+`frame_started`.
+
+M16-M startet das Next Safe Preview Slice Decision Gate als reinen
+Dokumentations- und Entscheidungsblock. Ziel ist, nach M16-I/J/K/L nicht
+direkt in Dorf, Kueste, globale Auswahl oder Build-Wheel zu springen, sondern
+den sichersten naechsten Preview-Slice zu bestimmen. M16-M empfiehlt
+`WordSemanticsDecisionPreview`, weil dieser Kandidat M16-L sichtbar macht:
+Context/Sense, Word-Type, Safety, Representation Decision, User Choice und
+Codex/Blueprint/Backlog-Fallbacks werden vor jeder sichtbaren Welt- oder
+Plot-Ableitung geprueft. Dokumentationspreviews liegen unter
+`docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`.
 Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
 keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
 keine Assets, keine automatische Wortplatzierung, kein Build-State und kein
@@ -2921,6 +2950,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Assets oder Asset-Dateien unter `assets/` aus M16-L ableiten,
 - kein Build-State aus M16-L ableiten,
 - kein `frame_started` oder Bauzustand aus M16-L weiterbauen,
+- keine Implementierung aus M16-M ableiten,
+- keine Flutter-/Dart-Dateien aus M16-M ableiten,
+- keine App-Integration aus M16-M ableiten,
+- keine Route oder neue Seite aus M16-M ableiten,
+- keine Build-Wheel-Implementierung aus M16-M ableiten,
+- keine Tests oder Screenshots aus M16-M ableiten,
+- keine Persistenz aus M16-M ableiten,
+- keine Runtime-Konfiguration aus M16-M ableiten,
+- keine Supabase Writes oder lokalen DB-Writes aus M16-M ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M16-M ableiten,
+- keine Reward Bridge aus M16-M ableiten,
+- keine automatische Wortplatzierung aus M16-M ableiten,
+- keine Assets oder Asset-Dateien unter `assets/` aus M16-M ableiten,
+- kein Build-State aus M16-M ableiten,
+- kein `frame_started` oder Bauzustand aus M16-M weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3061,6 +3105,9 @@ Regeln:
 - Karten, Panels und Flow-Knoten brauchen ausreichend Padding fuer lange Titel.
 - Lange Titel muessen umgebrochen, gekuerzt oder mit groesserer Box
   dargestellt werden.
+- Neue Dokumentationsdiagramme muessen zusaetzlich pruefen, dass Karten,
+  Labels, Pfeile, Titel, Footer, Legenden, Rahmen und Contact-Sheet-Kacheln
+  nicht ueberlappen und dass kein Inhalt abgeschnitten wird.
 - Vor Commit soll bei neuen Preview-PNGs eine kurze visuelle
   Text-Containment-Pruefung erfolgen.
 - Wenn eine unkritische Dokumentationsauffaelligkeit sichtbar ist, darf sie als

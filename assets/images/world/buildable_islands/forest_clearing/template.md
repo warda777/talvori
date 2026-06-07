@@ -688,6 +688,26 @@ Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
 keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
 kein `frame_started`.
 
+M16-M startet das Next Safe Preview Slice Decision Gate in
+`docs/world_design/322-next-safe-preview-slice-decision-gate.md`. M16-M ist
+ein Entscheidungs-Gate: Nach M16-I/J/K/L darf kein weiterer World-/Plot-/
+Wheel-/Word-Slice ohne M16-M-Entscheidung gestartet werden. M16-M empfiehlt
+`WordSemanticsDecisionPreview` als naechsten sicheren Preview-Kandidaten, weil
+Semantik, Context/Sense, Word-Type, Safety, Representation Decision, User
+Choice und Codex/Blueprint/Backlog-Fallbacks zuerst sichtbar werden muessen.
+M16-M erzeugt keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine
+finale UI, keine Tests, keine Screenshots und keine App-Integration. Die PNGs
+unter `docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+M16-M2 ergaenzt als Visual-Quality-Regel: Dokumentationsdiagramme muessen
+Text-Containment, Innenabstand, Abstand zwischen Karten, ueberlappungsfreie
+Karten, Labels, Pfeile, Titel, Footer, Legenden und Contact Sheets sowie nicht
+abgeschnittene Inhalte pruefen.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -1454,6 +1474,20 @@ Fuehrende Dokumente:
     keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
     automatische Wortplatzierung, keine Assets oder Asset-Dateien unter
     `assets/`, keinen Build-State und kein `frame_started` erzeugen.
+  - `m16M`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Entscheidungsdokument
+    `docs/world_design/322-next-safe-preview-slice-decision-gate.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`.
+    M16-M darf den naechsten sicheren Preview-Slice nach M16-I/J/K/L
+    entscheiden und `WordSemanticsDecisionPreview` als Kandidaten empfehlen,
+    aber keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
+    keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine
+    Screenshots, keine Persistenz, keine Runtime-Konfiguration, keine Supabase
+    Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung,
+    keine Reward Bridge, keine automatische Wortplatzierung, keine Assets oder
+    Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
+    erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2842,6 +2876,21 @@ In diesem Template-Block gilt:
 - Keine Assets oder Asset-Dateien unter `assets/` aus M16-L.
 - Kein Build-State aus M16-L.
 - Kein `frame_started` oder Bauzustand aus M16-L.
+- Keine Implementierung aus M16-M.
+- Keine Flutter-/Dart-Dateien aus M16-M.
+- Keine App-Integration aus M16-M.
+- Keine Route oder neue Seite aus M16-M.
+- Keine Build-Wheel-Implementierung aus M16-M.
+- Keine Tests oder Screenshots aus M16-M.
+- Keine Persistenz aus M16-M.
+- Keine Runtime-Konfiguration aus M16-M.
+- Keine Supabase Writes oder lokalen DB-Writes aus M16-M.
+- Keine SRS-/`word_progress`-Aenderung aus M16-M.
+- Keine Reward Bridge aus M16-M.
+- Keine automatische Wortplatzierung aus M16-M.
+- Keine Assets oder Asset-Dateien unter `assets/` aus M16-M.
+- Kein Build-State aus M16-M.
+- Kein `frame_started` oder Bauzustand aus M16-M.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
