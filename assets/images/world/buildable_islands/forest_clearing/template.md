@@ -534,6 +534,19 @@ Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge,
 keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine
 automatische Wortplatzierung und kein `frame_started`.
 
+M15-A4 startet die Foundation Choice Final Pre-Implementation Checklist in
+`docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`.
+M15-A4 ist ein reiner Dokumentations- und Checklistenblock. Die Waldlichtung
+bleibt Starter-/Testform. M15-A4 prueft nur, ob ein spaeterer Minimal-Slice
+bereit fuer ausdrueckliche Nutzerfreigabe waere. Checklist bedeutet keine
+Umsetzung. M15-A4 erzeugt keine neuen Assets, keine Bauzustaende, keine finale
+UI, keine Tests, keine Widget-Tests, keine Flutter-/Dart-Dateien und keine
+App-Integration. `frame_started` bleibt blockiert. Daraus folgen keine PNGs,
+keine PNG-Aenderungen, keine Screenshots, keine Runtime-Konfiguration, keine
+Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine
+Reward Bridge, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein
+Code, keine automatische Wortplatzierung und kein `frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -608,11 +621,12 @@ Fuehrende Dokumente:
 - `docs/world_design/309-foundation-choice-implementation-gate.md`
 - `docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md`
 - `docs/world_design/311-foundation-choice-prompt-visual-review.md`
+- `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-A3 Foundation Choice Prompt Visual Review gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-A4 Foundation Choice Final Pre-Implementation Checklist gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1165,6 +1179,18 @@ Fuehrende Dokumente:
     keine Implementierungsfreigabe, keine Assetfreigabe, keine Screenshots,
     keine Spielassets, keine Asset-Dateien unter `assets/`, keine automatische
     Wortplatzierung und kein `frame_started` erzeugen.
+  - `m15A4`: `false` fuer Code/App/Assets; erlaubt nur das Checklisten-
+    Dokument
+    `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`.
+    M15-A4 darf pruefen, ob ein spaeterer Minimal-Slice bereit fuer
+    ausdrueckliche Nutzerfreigabe waere, aber keine Implementierung, keine
+    Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine
+    App-Integration, keine finale UI, keine Runtime-Konfiguration, keine
+    Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung,
+    keine Reward Bridge, keine Codefreigabe, keine Implementierungsfreigabe,
+    keine Assetfreigabe, keine PNG-Erzeugung, keine PNG-Aenderung, keine
+    Screenshots, keine Spielassets, keine Asset-Dateien unter `assets/`, keine
+    automatische Wortplatzierung und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2390,6 +2416,27 @@ In diesem Template-Block gilt:
 - Keine Asset-Dateien unter `assets/` aus M15-A3.
 - Keine automatische Wortplatzierung aus M15-A3.
 - Kein `frame_started` oder Bauzustand aus M15-A3.
+- Keine Implementierung aus M15-A4.
+- Keine Flutter-/Dart-Dateien aus M15-A4.
+- Keine Tests aus M15-A4.
+- Keine Widget-Tests aus M15-A4.
+- Keine App-Integration aus M15-A4.
+- Keine finale UI aus M15-A4.
+- Keine Runtime-Konfiguration aus M15-A4.
+- Keine Persistenz aus M15-A4.
+- Keine Supabase Writes aus M15-A4.
+- Keine SRS-/`word_progress`-Aenderung aus M15-A4.
+- Keine Reward Bridge aus M15-A4.
+- Keine Codefreigabe aus M15-A4.
+- Keine Implementierungsfreigabe aus M15-A4.
+- Keine Assetfreigabe aus M15-A4.
+- Keine PNG-Erzeugung aus M15-A4.
+- Keine PNG-Aenderung aus M15-A4.
+- Keine Screenshots aus M15-A4.
+- Keine Spielassets aus M15-A4.
+- Keine Asset-Dateien unter `assets/` aus M15-A4.
+- Keine automatische Wortplatzierung aus M15-A4.
+- Kein `frame_started` oder Bauzustand aus M15-A4.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -2663,10 +2710,11 @@ Phase-2F-Preview-Ergaenzung:
 - `m15AFoundationChoiceImplementationGateStatus`: `started in docs/world_design/309-foundation-choice-implementation-gate.md; gate review only; later local non-persistent non-final preview theoretically possible only with separate implementation prompt and explicit user approval; no implementation, no tests, no widget tests, no Flutter or Dart files, no screenshots, no PNGs, no PNG changes, no game assets, no asset files under assets, no final UI, no runtime config, no persistence, no Supabase writes, no SRS or word_progress changes, no Reward Bridge, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m15A2FoundationChoicePromptDraftStatus`: `started in docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md; prompt draft only; no implementation, no Flutter or Dart files, no tests, no widget tests, no screenshots, no PNGs, no PNG changes, no game assets, no asset files under assets, no final UI, no runtime config, no persistence, no Supabase writes, no SRS or word_progress changes, no Reward Bridge, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `m15A3FoundationChoicePromptVisualReviewStatus`: `started in docs/world_design/311-foundation-choice-prompt-visual-review.md; prompt visual review only; documentation PNG previews created under docs/world_design/previews/m15_a3_foundation_choice_prompt_visual_review; no implementation, no Flutter or Dart files, no tests, no widget tests, no screenshots, no game assets, no asset files under assets, no final UI, no runtime config, no persistence, no Supabase writes, no SRS or word_progress changes, no Reward Bridge, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
+- `m15A4FoundationChoiceFinalPreImplementationChecklistStatus`: `started in docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md; checklist only; ready-for-explicit-user-approval means no implementation release; no implementation, no Flutter or Dart files, no tests, no widget tests, no screenshots, no PNGs, no PNG changes, no game assets, no asset files under assets, no final UI, no runtime config, no persistence, no Supabase writes, no SRS or word_progress changes, no Reward Bridge, no automatic placement, no app integration, no code release, no asset release, no implementation release, no frame_started`
 - `phase2GFrameStartedCandidateStatus`: `deleted, not released`
 - `phase2GAssetAllowed`: `false`
 - `phase2GCodeAllowed`: `false`
-- `nextAllowedStep`: `M15-A3 reviewen, optional M15-A4 Prompt Scope Refinement starten oder M14-F nur nach ausdruecklicher Nutzerfreigabe als separaten minimalen Implementierungs-Prompt pruefen; Code, Assets unter assets, Tests, Screenshots, Runtime-Konfiguration, Persistenz und frame_started bleiben blockiert`
+- `nextAllowedStep`: `nur nach ausdruecklicher Nutzerfreigabe einen separaten minimalen Foundation-Choice-Implementierungs-Prompt pruefen; alternativ M15-A5 Scope Refinement starten; Code, Assets unter assets, Tests, Screenshots, Runtime-Konfiguration, Persistenz und frame_started bleiben blockiert`
 
 Phase-2E-E-Freigabe gilt nur fuer:
 
@@ -4275,6 +4323,38 @@ M15-A3-Foundation-Choice-Prompt-Visual-Review gilt nur fuer:
 - keine Codefreigabe,
 - keine Implementierungsfreigabe,
 - keine Assetfreigabe,
+- keine Screenshots,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- keine automatische Wortplatzierung,
+- keine Bauzustaende,
+- kein `frame_started`.
+
+M15-A4-Foundation-Choice-Final-Pre-Implementation-Checklist gilt nur fuer:
+
+- Checklisten-Dokument in
+  `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`,
+- finale Go/No-Go-Pruefung vor einer moeglichen spaeteren Nutzerfreigabe,
+- Dokumentation der Freigabeformulierung als nicht ausgefuehrter Beispieltext,
+- Checkliste fuer Scope, Entry Point, lokale In-Memory-Auswahl, Persistenz,
+  Runtime-Konfiguration, Navigation, Assets, Tests, Wortplatzierung,
+  `frame_started` und Commit-Disziplin,
+- keine Implementierung,
+- keine Flutter-/Dart-Dateien,
+- keine Tests,
+- keine Widget-Tests,
+- keine App-Integration,
+- keine finale UI,
+- keine Runtime-Konfiguration,
+- keine Persistenz,
+- keine Supabase Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine Codefreigabe,
+- keine Implementierungsfreigabe,
+- keine Assetfreigabe,
+- keine PNG-Erzeugung,
+- keine PNG-Aenderung,
 - keine Screenshots,
 - keine Spielassets,
 - keine Asset-Dateien unter `assets/`,

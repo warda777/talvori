@@ -737,6 +737,16 @@ Aktueller Stand der Talvori-Welt-Produktion:
   Spielassets, keine Asset-Dateien unter `assets/`, keine App-/Assetfreigabe,
   keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung
   und kein `frame_started`.
+- M15-A4 wurde als Foundation Choice Final Pre-Implementation Checklist in
+  `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`
+  gestartet. M15-A4 prueft nur, ob ein spaeterer Minimal-Slice bereit fuer
+  ausdrueckliche Nutzerfreigabe waere. Daraus folgen keine Implementierung,
+  keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine
+  App-Integration, keine finale UI, keine Runtime-Konfiguration, keine
+  Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung,
+  keine Reward Bridge, keine PNGs, keine PNG-Aenderungen, keine Screenshots,
+  keine Assets, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein
+  Code, keine automatische Wortplatzierung und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -929,6 +939,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M15-A | Foundation Choice Implementation Gate | `Gate gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Gate-Reviewblock in `docs/world_design/309-foundation-choice-implementation-gate.md`. Prueft nur, ob ein spaeterer minimaler Foundation-Choice-Slice als lokale, nicht persistente, nicht finale Product Preview denkbar waere. Empfehlung: Option 3, ein minimaler spaeterer Slice ist theoretisch denkbar, aber nur mit separatem Implementierungs-Prompt und ausdruecklicher Nutzerfreigabe. Keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Tests, keine Widget-Tests, keine Flutter-/Dart-Dateien, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
 | M15-A2 | Foundation Choice Minimal Slice Implementation Prompt Draft | `Prompt-Draft gestartet / keine Implementierung` | Reiner Dokumentations- und Prompt-Planungsblock in `docs/world_design/310-foundation-choice-minimal-slice-prompt-draft.md`. Erstellt nur einen spaeteren Copy-&-Paste-Implementierungs-Prompt als Entwurf und markiert ihn ausdruecklich als nicht freigegeben. Der Draft begrenzt einen moeglichen spaeteren Slice auf lokale Preview-/Demo-Darstellung, drei Foundation-Karten, Tali/Vori-Platzhalter, lokale In-Memory-Auswahl, Safe Exit und `spaeter aenderbar`. Keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
 | M15-A3 | Foundation Choice Prompt Visual Review | `Visual Review gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/311-foundation-choice-prompt-visual-review.md`. Prueft nur den M15-A2-Prompt-Draft visuell/textuell und erzeugt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_a3_foundation_choice_prompt_visual_review/`: Scope Boundary, Later Prompt Gate Flow, Risk Map, Stop Rules Summary und Contact Sheet. Ergebnis: Prompt-Draft ist brauchbar, kleine Praezisierung zu spaeterem Einstiegspunkt/Testfreigabe bleibt fuer einen echten Implementierungsblock. Keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine Screenshots, keine Spielassets, keine Asset-Dateien unter `assets/`, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
+| M15-A4 | Foundation Choice Final Pre-Implementation Checklist | `Checkliste gestartet / keine Implementierungsfreigabe` | Reiner Dokumentations- und Checklistenblock in `docs/world_design/312-foundation-choice-final-pre-implementation-checklist.md`. Prueft nur, ob der spaetere Foundation-Choice-Minimal-Slice eng genug fuer ausdrueckliche Nutzerfreigabe waere. Ergebnis: `ready-for-explicit-user-approval`, aber Entry Point und Tests bleiben vor Code explizit zu bestaetigen. Dokumentiert die spaetere Freigabeformulierung, fuehrt sie aber nicht aus. Keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration, keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe, keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung, kein `frame_started`. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1530,6 +1541,19 @@ Flutter-/Dart-Dateien, keine Tests, keine Widget-Tests, keine App-Integration,
 keine finale UI, keine Runtime-Konfiguration, keine Persistenz, keine Supabase
 Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
 Screenshots, keine Asset-Dateien unter `assets/`, keine App-/Assetfreigabe,
+keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung
+und kein `frame_started`.
+
+M15-A4 startet die Foundation Choice Final Pre-Implementation Checklist als
+reinen Dokumentations- und Checklistenblock. M15-A4 prueft nur, ob ein
+spaeterer Minimal-Slice bereit fuer ausdrueckliche Nutzerfreigabe waere.
+Die Checkliste kommt zu `ready-for-explicit-user-approval`, aber nur fuer einen
+spaeteren separaten Implementierungs-Prompt nach ausdruecklicher Freigabe.
+Es entstehen keine Implementierung, keine Flutter-/Dart-Dateien, keine Tests,
+keine Widget-Tests, keine App-Integration, keine finale UI, keine
+Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine
+SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine PNGs, keine
+PNG-Aenderungen, keine Screenshots, keine Assets, keine App-/Assetfreigabe,
 keine Implementierungsfreigabe, kein Code, keine automatische Wortplatzierung
 und kein `frame_started`.
 
@@ -2517,6 +2541,27 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Asset-Dateien unter `assets/` aus M15-A3 ableiten,
 - keine automatische Wortplatzierung aus M15-A3 ableiten,
 - kein `frame_started` oder Bauzustand aus M15-A3 weiterbauen,
+- keine Implementierung aus M15-A4 ableiten,
+- keine Flutter-/Dart-Dateien aus M15-A4 ableiten,
+- keine Tests aus M15-A4 ableiten,
+- keine Widget-Tests aus M15-A4 ableiten,
+- keine App-Integration aus M15-A4 ableiten,
+- keine finale UI aus M15-A4 ableiten,
+- keine Runtime-Konfiguration aus M15-A4 ableiten,
+- keine Persistenz aus M15-A4 ableiten,
+- keine Supabase Writes aus M15-A4 ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M15-A4 ableiten,
+- keine Reward Bridge aus M15-A4 ableiten,
+- keine Codefreigabe aus M15-A4 ableiten,
+- keine Implementierungsfreigabe aus M15-A4 ableiten,
+- keine Assetfreigabe aus M15-A4 ableiten,
+- keine PNG-Erzeugung aus M15-A4 ableiten,
+- keine PNG-Aenderung aus M15-A4 ableiten,
+- keine Screenshots aus M15-A4 ableiten,
+- keine Spielassets aus M15-A4 ableiten,
+- keine Asset-Dateien unter `assets/` aus M15-A4 ableiten,
+- keine automatische Wortplatzierung aus M15-A4 ableiten,
+- kein `frame_started` oder Bauzustand aus M15-A4 weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
@@ -3522,6 +3567,27 @@ Ein Schritt wird gestoppt, wenn:
 - aus M15-A3 Asset-Dateien unter `assets/` abgeleitet werden,
 - aus M15-A3 automatische Wortplatzierung abgeleitet wird,
 - `frame_started` oder Bauzustaende aus M15-A3 weitergebaut werden,
+- aus M15-A4 eine Implementierung abgeleitet wird,
+- aus M15-A4 Flutter-/Dart-Dateien abgeleitet werden,
+- aus M15-A4 Tests abgeleitet werden,
+- aus M15-A4 Widget-Tests abgeleitet werden,
+- aus M15-A4 App-Integration abgeleitet wird,
+- aus M15-A4 eine finale UI abgeleitet wird,
+- aus M15-A4 Runtime-Konfiguration abgeleitet wird,
+- aus M15-A4 Persistenz abgeleitet wird,
+- aus M15-A4 Supabase Writes abgeleitet werden,
+- aus M15-A4 SRS-/`word_progress`-Aenderungen abgeleitet werden,
+- aus M15-A4 eine Reward Bridge abgeleitet wird,
+- aus M15-A4 Codefreigabe abgeleitet wird,
+- aus M15-A4 Implementierungsfreigabe abgeleitet wird,
+- aus M15-A4 Assetfreigabe abgeleitet wird,
+- aus M15-A4 PNG-Erzeugung abgeleitet wird,
+- aus M15-A4 PNG-Aenderung abgeleitet wird,
+- aus M15-A4 Screenshots abgeleitet werden,
+- aus M15-A4 Spielassets abgeleitet werden,
+- aus M15-A4 Asset-Dateien unter `assets/` abgeleitet werden,
+- aus M15-A4 automatische Wortplatzierung abgeleitet wird,
+- `frame_started` oder Bauzustaende aus M15-A4 weitergebaut werden,
 - eine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung geplant wird,
 - eine Garten- oder Growth-Mechanik ohne Fairness-/Timer-Regeln geplant wird,
