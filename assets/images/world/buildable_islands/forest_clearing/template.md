@@ -638,6 +638,21 @@ Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
 keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
 kein `frame_started`.
 
+M16-O startet das Word Semantics Preview Implementation Gate in
+`docs/world_design/324-word-semantics-preview-implementation-gate.md`. M16-O
+ist nur Gate/Planung: `WordSemanticsDecisionPreview` bleibt Semantik-Schutz
+vor World-/Plot-/Build-Slices. Ein spaeterer Code-Slice waere hoechstens als
+isoliertes lokales Preview-Widget nach separater ausdruecklicher Freigabe
+denkbar. M16-O erzeugt keine neuen Assets im Asset-Ordner, keine
+Bauzustaende, keine finale UI, keine Tests, keine Screenshots und keine App-
+Integration. Die PNGs unter
+`docs/world_design/previews/m16_o_word_semantics_preview_implementation_gate/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
 M16-J startet den Village Plot Capacity Local Preview Scope in
 `docs/world_design/319-village-plot-capacity-local-preview-scope.md`. M16-J
 bleibt Planungs-/Visual-Scope. Waldlichtung und Compact Local World Surface
@@ -1516,6 +1531,19 @@ Fuehrende Dokumente:
     Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine
     Assets oder Asset-Dateien unter `assets/`, keinen Build-State und kein
     `frame_started` erzeugen.
+  - `m16O`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Gate-Dokument
+    `docs/world_design/324-word-semantics-preview-implementation-gate.md` und
+    Dokumentationspreviews unter
+    `docs/world_design/previews/m16_o_word_semantics_preview_implementation_gate/`.
+    M16-O darf pruefen, ob ein spaeterer minimaler isolierter
+    `WordSemanticsDecisionPreview`-Code-Slice sinnvoll waere, aber keine
+    Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue
+    Seite, keine Tests, keine Screenshots, keine Persistenz, keine Runtime-
+    Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine
+    SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische
+    Wortplatzierung, keine Assets oder Asset-Dateien unter `assets/`, keinen
+    Build-State und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 

@@ -1065,6 +1065,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M16-L | Global World Semantics Consistency Audit | `Audit/Visualisierung gestartet / Pflichtfilter fuer Folgeprompts` | Reiner Dokumentations-, Audit- und Visualisierungsblock in `docs/world_design/321-global-world-semantics-consistency-audit.md`. Konsolidiert bestehende Regeln aus Taxonomy, Word-to-Island Routing, Plot-Capabilities, Sensitive Policy, Mobile/Clutter, Depth/Container, Asset Scope und M16-I/J/K. Ergebnis: M16-J bleibt brauchbares Dorf-Beispiel, aber nicht alleiniger Commit-/Code-Kandidat; M16-K bleibt brauchbare globale Kategorie-Matrix, muss aber durch Word-Type-Routing, Multi-Home, Representation Decision und Codex/Blueprint/Backlog-Fallbacks ergaenzt werden. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_l_global_world_semantics_consistency_audit/`: Semantics Decision Pipeline, Word Type Representation Map, Multi-Home Examples, M16-I/J/K Gap Map, Future Prompt Checklist und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-M | Next Safe Preview Slice Decision Gate | `Entscheidungs-Gate gestartet / naechster Preview-Kandidat empfohlen` | Reiner Dokumentations- und Entscheidungsblock in `docs/world_design/322-next-safe-preview-slice-decision-gate.md`. Vergleicht `VillagePlotCapacityPreview`, `GlobalThemeIslandPreviewSelector`, `CoastHarborPlotCapacityPreview`, `WordSemanticsDecisionPreview` und `BuildWheelOverlayPreviewPlan` nach Architektur-Sicherheit, Spielnaehe, Misread-Risiko, M16-L-Naehe, Mobile-Lesbarkeit, Assetfreiheit, Auto-Placement-Risiko, Build-State-Risiko und naechstem Codewert. Entscheidung: `WordSemanticsDecisionPreview` ist der sicherste naechste Preview-Kandidat; Dorf bleibt zu eng, Global Selector wirkt zu stark wie Onboarding, Coast/Harbor ist wegen Water/Dock/Boat-Gates noch riskant, Build-Wheel ist zu frueh. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_m_next_safe_preview_slice_decision_gate/`: Candidate Matrix, Risk/Value Map, Recommended Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | M16-N | Word Semantics Decision Preview Scope | `Scope/Visualisierung gestartet / keine Implementierung` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/323-word-semantics-decision-preview-scope.md`. Konkretisiert die M16-M-Empfehlung `WordSemanticsDecisionPreview`: Word/User Intent -> Context/Sense -> Word-Type -> Safety -> Theme Candidates -> Plot/Depth -> Representation Decision -> User Choice -> Preview Only -> Later Gate. Beispielkarten fuer `Haus`, `Garage`, `Baum`, `schwimmen`, `Angst`, `lernen`, `Messer` und `Polizei` zeigen Multi-Home, Action, Emotion, Container, Sensitive und Policy Gates. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_n_word_semantics_decision_preview_scope/`: Pipeline, Example Cards, Representation Outputs, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
+| M16-O | Word Semantics Preview Implementation Gate | `Implementation Gate gestartet / keine Implementierung` | Reiner Dokumentations- und Gate-Block in `docs/world_design/324-word-semantics-preview-implementation-gate.md`. Prueft, ob ein spaeterer minimaler isolierter `WordSemanticsDecisionPreview`-Code-Slice sinnvoll und sicher genug waere. Gate-Entscheidung: theoretisch spaeter moeglich, aber nur als isoliertes lokales Preview-Widget unter `lib/features/world/local_world/ui/widgets/`, ohne echte Routing-Implementierung, ohne finale Datenstruktur, ohne App-Integration, ohne Route, ohne Persistenz, ohne Assets, ohne automatische Wortplatzierung, ohne Build-State und ohne `frame_started`. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_o_word_semantics_preview_implementation_gate/`: Gate Scope Map, Allowed Later vs Blocked Now, File Boundary Map, Example Word Guardrail Map und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1811,6 +1812,18 @@ Word/User Intent -> Context/Sense -> Word-Type -> Safety -> Theme Candidates
 -> Plot/Depth -> Representation Decision -> User Choice -> Preview Only ->
 Later Gate. Dokumentationspreviews liegen unter
 `docs/world_design/previews/m16_n_word_semantics_decision_preview_scope/`.
+Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
+keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
+keine Assets, keine automatische Wortplatzierung, kein Build-State und kein
+`frame_started`.
+
+M16-O startet das Word Semantics Preview Implementation Gate als reinen
+Dokumentations- und Gate-Block. Ziel ist zu pruefen, ob ein spaeterer
+minimaler isolierter `WordSemanticsDecisionPreview`-Code-Slice ueberhaupt
+sinnvoll und sicher waere. Gate-Entscheidung: spaeter theoretisch moeglich,
+aber nur als isoliertes lokales Preview-Widget nach separatem Prompt und
+ausdruecklicher Nutzerfreigabe. Dokumentationspreviews liegen unter
+`docs/world_design/previews/m16_o_word_semantics_preview_implementation_gate/`.
 Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Route,
 keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz,
 keine Assets, keine automatische Wortplatzierung, kein Build-State und kein
@@ -2992,6 +3005,20 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Assets oder Asset-Dateien unter `assets/` aus M16-N ableiten,
 - kein Build-State aus M16-N ableiten,
 - kein `frame_started` oder Bauzustand aus M16-N weiterbauen,
+- keine Implementierung aus M16-O ableiten,
+- keine Flutter-/Dart-Dateien aus M16-O ableiten,
+- keine App-Integration aus M16-O ableiten,
+- keine Route oder neue Seite aus M16-O ableiten,
+- keine Tests oder Screenshots aus M16-O ableiten,
+- keine Persistenz aus M16-O ableiten,
+- keine Runtime-Konfiguration aus M16-O ableiten,
+- keine Supabase Writes oder lokalen DB-Writes aus M16-O ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M16-O ableiten,
+- keine Reward Bridge aus M16-O ableiten,
+- keine automatische Wortplatzierung aus M16-O ableiten,
+- keine Assets oder Asset-Dateien unter `assets/` aus M16-O ableiten,
+- kein Build-State aus M16-O ableiten,
+- kein `frame_started` oder Bauzustand aus M16-O weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
