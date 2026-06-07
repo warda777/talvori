@@ -595,6 +595,22 @@ Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/
 keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
 `frame_started`.
 
+M15-D2 startet den Foundation Choice Harness Implementation Prompt Draft in
+`docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`.
+M15-D2 ist reiner Prompt-Draft fuer einen spaeteren isolierten Foundation-
+Choice-Preview-Harness. Die Waldlichtung bleibt Starter-/Testform. M15-D2
+erzeugt keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale
+UI, keine Tests, keine Widget-Tests, keine Screenshots, keine Harness-
+Implementierung und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m15_d2_foundation_choice_harness_prompt_draft/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine Home-/
+Onboarding-/World-Routing-Integration, keine Persistenz, keine Runtime-
+Konfiguration, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/
+`word_progress`-Aenderung, keine Reward Bridge, keine App-/Assetfreigabe,
+keine Implementierungsfreigabe, keine automatische Wortplatzierung und kein
+`frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -673,11 +689,12 @@ Fuehrende Dokumente:
 - `docs/world_design/313-foundation-choice-preview-code-review.md`
 - `docs/world_design/314-foundation-choice-local-preview-harness-gate.md`
 - `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`
+- `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`
 
 ## 1. Template-Identitaet
 
 - `templateId`: `buildable_forest_clearing`
-- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-D Foundation Choice Local Preview Harness Implementation Gate gestartet`
+- `status`: `2E-E bestanden / 2F bestanden / 2G gestoppt / M15-D2 Foundation Choice Harness Implementation Prompt Draft gestartet`
 - `phase`: `2E-B / 2E-C / 2E-D / 2E-E / 2F abgeschlossen / 2G gestoppt / 2G-M6 flexible Plot Placement`
 - `role`: `Island View Core/Base with foundation_started and foundation_complete overlay metadata; current forest clearing is StarterCorePlot, not full island master layout`
 - `assetPaths`:
@@ -1280,6 +1297,19 @@ Fuehrende Dokumente:
     keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
     automatische Wortplatzierung, keine Assetfreigabe, keinen Build-State und
     kein `frame_started` erzeugen.
+  - `m15D2`: `false` fuer Harness-Implementierung/App/Assets/Tests/Runtime;
+    erlaubt nur das Prompt-Draft-Dokument
+    `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`
+    und Dokumentationspreviews unter
+    `docs/world_design/previews/m15_d2_foundation_choice_harness_prompt_draft/`.
+    M15-D2 darf nur einen spaeteren Harness-Implementierungs-Prompt als
+    nicht freigegebenes Dokument vorbereiten, aber keine Flutter-/Dart-
+    Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-
+    Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine
+    Persistenz, keine Runtime-Konfiguration, keine Supabase Writes, keine
+    lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward
+    Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, keinen
+    Build-State und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2575,6 +2605,23 @@ In diesem Template-Block gilt:
 - Keine Assetfreigabe aus M15-D.
 - Kein Build-State aus M15-D.
 - Kein `frame_started` oder Bauzustand aus M15-D.
+- Keine Harness-Implementierung aus M15-D2.
+- Keine Flutter-/Dart-Dateien aus M15-D2.
+- Keine App-Integration aus M15-D2.
+- Keine Home-/Onboarding-/World-Routing-Integration aus M15-D2.
+- Keine Tests aus M15-D2.
+- Keine Widget-Tests aus M15-D2.
+- Keine Screenshots aus M15-D2.
+- Keine Persistenz aus M15-D2.
+- Keine Runtime-Konfiguration aus M15-D2.
+- Keine Supabase Writes aus M15-D2.
+- Keine lokalen DB-Writes aus M15-D2.
+- Keine SRS-/`word_progress`-Aenderung aus M15-D2.
+- Keine Reward Bridge aus M15-D2.
+- Keine automatische Wortplatzierung aus M15-D2.
+- Keine Assetfreigabe aus M15-D2.
+- Kein Build-State aus M15-D2.
+- Kein `frame_started` oder Bauzustand aus M15-D2.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.
@@ -4568,6 +4615,35 @@ fuer:
 - Pruefung, ob ein spaeterer isolierter Local Preview Harness fuer
   `FoundationChoicePreview` als sehr kleiner Implementierungs-Slice
   freigabefaehig waere,
+- keine Harness-Implementierung,
+- keine Flutter-/Dart-Dateien,
+- keine App-Integration,
+- keine Home-/Onboarding-/World-Routing-Integration,
+- keine Tests,
+- keine Widget-Tests,
+- keine Screenshots,
+- keine Persistenz,
+- keine Runtime-Konfiguration,
+- keine Supabase Writes,
+- keine lokalen DB-Writes,
+- keine SRS-/`word_progress`-Aenderung,
+- keine Reward Bridge,
+- keine automatische Wortplatzierung,
+- keine Assetfreigabe,
+- keine Spielassets,
+- keine Asset-Dateien unter `assets/`,
+- kein Build-State,
+- keine Bauzustaende,
+- kein `frame_started`.
+
+M15-D2-Foundation-Choice-Harness-Implementation-Prompt-Draft gilt nur fuer:
+
+- Prompt-Draft-Dokument in
+  `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`,
+- Dokumentationspreviews unter
+  `docs/world_design/previews/m15_d2_foundation_choice_harness_prompt_draft/`,
+- Vorbereitung eines spaeteren Copy-&-Paste-Prompts fuer einen isolierten
+  `FoundationChoicePreview`-Harness,
 - keine Harness-Implementierung,
 - keine Flutter-/Dart-Dateien,
 - keine App-Integration,
