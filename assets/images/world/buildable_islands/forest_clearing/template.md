@@ -623,6 +623,21 @@ Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
 Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
 keine Persistenz, keine automatische Wortplatzierung und kein `frame_started`.
 
+M16-I startet den Theme Island Plot Capacity And In-Place Build Wheel Plan in
+`docs/world_design/318-theme-island-plot-capacity-and-build-wheel-plan.md`.
+M16-I klaert, dass Waldlichtung und kompakte World-Flaeche nur Starter-/
+Testformen sind. Eine echte ThemeIsland muss vorher Themenbedarf,
+Grundstuecksanzahl, Grundstuecksgroessen, Austauschbarkeit, Zoom-Bedarf und
+ein spaeteres In-Place Build-Wheel als Overlay-Konzept klaeren. M16-I erzeugt
+keine neuen Assets im Asset-Ordner, keine Bauzustaende, keine finale UI, keine
+Tests, keine Screenshots und keine App-Integration. Die PNGs unter
+`docs/world_design/previews/m16_i_theme_island_plot_capacity_build_wheel/`
+sind Dokumentationsmaterial, keine Screenshots, keine App-Screens und keine
+Spielassets. `frame_started` bleibt blockiert. Daraus folgen keine App-/
+Assetfreigabe, keine Implementierungsfreigabe, keine Runtime-Konfiguration,
+keine Persistenz, keine automatische Wortplatzierung, kein Build-State und
+kein `frame_started`.
+
 Fuehrende Dokumente:
 
 - `docs/world_design/235-world-production-roadmap-and-checklists.md`
@@ -1335,6 +1350,19 @@ Fuehrende Dokumente:
     Bridge, keine automatische Wortplatzierung, keine neuen Spielassets, keine
     Asset-Dateien unter `assets/`, keinen Build-State und kein `frame_started`
     erzeugen.
+  - `m16I`: `false` fuer Code/App/Assets/Tests/Runtime; erlaubt nur das
+    Planungsdokument
+    `docs/world_design/318-theme-island-plot-capacity-and-build-wheel-plan.md`
+    und Dokumentationspreviews unter
+    `docs/world_design/previews/m16_i_theme_island_plot_capacity_build_wheel/`.
+    M16-I darf ThemeIsland-Kapazitaet, Grundstuecksgroessen,
+    Austauschbarkeit, Zoom-Bedarf und In-Place Build-Wheel nur planen, aber
+    keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine
+    neue Seite, keine Tests, keine Screenshots, keine Persistenz, keine
+    Runtime-Konfiguration, keine Supabase Writes, keine lokalen DB-Writes,
+    keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine
+    automatische Wortplatzierung, keine Assets oder Asset-Dateien unter
+    `assets/`, keinen Build-State und kein `frame_started` erzeugen.
 
 Dieses Template ist code-freigegeben fuer:
 
@@ -2663,6 +2691,21 @@ In diesem Template-Block gilt:
 - Keine Asset-Dateien unter `assets/` aus M16-A.
 - Kein finales Inselbild aus M16-A.
 - Kein `frame_started` oder Bauzustand aus M16-A.
+- Keine Implementierung aus M16-I.
+- Keine Flutter-/Dart-Dateien aus M16-I.
+- Keine App-Integration aus M16-I.
+- Keine Route oder neue Seite aus M16-I.
+- Keine Build-Wheel-Implementierung aus M16-I.
+- Keine Tests oder Screenshots aus M16-I.
+- Keine Persistenz aus M16-I.
+- Keine Runtime-Konfiguration aus M16-I.
+- Keine Supabase Writes oder lokalen DB-Writes aus M16-I.
+- Keine SRS-/`word_progress`-Aenderung aus M16-I.
+- Keine Reward Bridge aus M16-I.
+- Keine automatische Wortplatzierung aus M16-I.
+- Keine Assets oder Asset-Dateien unter `assets/` aus M16-I.
+- Kein Build-State aus M16-I.
+- Kein `frame_started` oder Bauzustand aus M16-I.
 - Keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung.
 - Keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln.

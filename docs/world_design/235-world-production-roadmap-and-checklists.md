@@ -798,6 +798,17 @@ Aktueller Stand der Talvori-Welt-Produktion:
   folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine
   Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets,
   keine automatische Wortplatzierung und kein `frame_started`.
+- M16-I wurde als Theme Island Plot Capacity And In-Place Build Wheel Plan in
+  `docs/world_design/318-theme-island-plot-capacity-and-build-wheel-plan.md`
+  gestartet. Ziel ist, Inselgroesse, Grundstuecksanzahl und
+  Grundstuecksgroessen aus dem Theme-Bedarf abzuleiten. Der In-Place
+  Build-Wheel bleibt nur Overlay-/Popup-Planung. PNG-
+  Dokumentationspreviews liegen unter
+  `docs/world_design/previews/m16_i_theme_island_plot_capacity_build_wheel/`.
+  Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine
+  Route, keine neue Seite, keine Tests, keine Screenshots, keine Runtime-
+  Konfiguration, keine Persistenz, keine Assets, keine automatische
+  Wortplatzierung, kein Build-State und kein `frame_started`.
 - Der naechste Blocker betrifft die Pruefung dieser flexiblen
   Plot-/Learning-Semantics-Planung und ihrer M6-B-/M6-C-/M6-D-/M6-E-/M6-F-
   Entscheidungslogik sowie der M7-C-, M8-, M9-, M9-B-, M10-, M10-D-, M10-B-
@@ -996,6 +1007,7 @@ von `base.png` + `foundation_started.png` oder `base.png` +
 | M15-D | Foundation Choice Local Preview Harness Implementation Gate | `Implementation Gate gestartet / keine Harness-Freigabe` | Reiner Dokumentations- und Gate-Block in `docs/world_design/315-foundation-choice-local-preview-harness-implementation-gate.md`. Prueft nur, ob ein spaeterer isolierter Local Preview Harness fuer `FoundationChoicePreview` als sehr kleiner Implementierungs-Slice sauber freigabefaehig waere. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_d_foundation_choice_harness_implementation_gate/`: Harness Implementation Gate Map, Allowed vs Blocked Scope und Contact Sheet. Empfehlung: Ein spaeterer isolierter Harness-Slice ist theoretisch freigabefaehig, aber nur mit separatem Implementierungs-Prompt und ausdruecklicher Nutzerfreigabe. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
 | M15-D2 | Foundation Choice Harness Implementation Prompt Draft | `Prompt-Draft gestartet / keine Harness-Implementierung` | Reiner Dokumentations- und Prompt-Planungsblock in `docs/world_design/316-foundation-choice-harness-implementation-prompt-draft.md`. Erstellt nur einen spaeteren Copy-&-Paste-Implementierungs-Prompt fuer einen minimalen isolierten `FoundationChoicePreview`-Harness als Entwurf und markiert ihn ausdruecklich als nicht freigegeben. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m15_d2_foundation_choice_harness_prompt_draft/`: Harness Prompt Scope Boundary, Harness Prompt Execution Flow und Contact Sheet. Keine Harness-Implementierung, keine Flutter-/Dart-Dateien, keine App-Integration, keine Home-/Onboarding-/World-Routing-Integration, keine Tests, keine Widget-Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine Assetfreigabe, kein Build-State, kein `frame_started`. |
 | M16-A | First World Element Slice Scope And Visual Plan | `Scope-/Visual-Plan gestartet / keine Code- oder Assetfreigabe` | Beschleunigter, aber sicherer Planungs- und Visualisierungsblock in `docs/world_design/317-first-world-element-slice-scope-and-visual-plan.md`. Prueft Kandidaten fuer den ersten sichtbaren Welt-/Bau-Element-Slice: neutraler Plot-Marker, Foundation-Fokus-Indikator, lokale Build-Preview-Flaeche, Grundstueck-/Bauplatz-Karte und Plot-/Anchor-Greybox. Empfehlung: neutraler lokaler Plot-Marker als naechster moeglicher Code-Kandidat; lokale Build-Preview-Flaeche als zweitbeste Option. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_a_first_world_element_slice/`: Candidate Map, Recommended Next Slice Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Supabase Writes, keine lokalen DB-Writes, keine SRS-/`word_progress`-Aenderung, keine Reward Bridge, keine automatische Wortplatzierung, keine neuen Spielassets, keine Asset-Dateien unter `assets/`, kein finales Inselbild, kein `frame_started`, keine Bauzustaende. |
+| M16-I | Theme Island Plot Capacity And In-Place Build Wheel Plan | `Planung/Visualisierung gestartet / keine Implementierung` | Reiner Dokumentations- und Visualisierungsblock in `docs/world_design/318-theme-island-plot-capacity-and-build-wheel-plan.md`. Schaerft die ThemeIsland-Regel: Theme analysieren, benoetigte Grundstuecke ableiten, Groessen bestimmen, Inselkapazitaet/Layout ableiten, austauschbare Slots platzieren und spaeter ein In-Place Build-Wheel als Overlay planen. Ergaenzt PNG-Dokumentationspreviews unter `docs/world_design/previews/m16_i_theme_island_plot_capacity_build_wheel/`: Theme-to-Plot Pipeline, Village Plot Capacity Map, In-Place Build Wheel Flow, Allowed vs Blocked Scope und Contact Sheet. Keine Flutter-/Dart-Dateien, keine App-Integration, keine Route, keine neue Seite, keine Build-Wheel-Implementierung, keine Tests, keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets, keine automatische Wortplatzierung, kein Build-State, kein `frame_started`, keine Bauzustaende. |
 | Phase 2H | `building_level_1` | `geplant` / spaeter | Erst nach Rohbau-Qualitaet und Balancing. |
 
 Aktuell erlaubter naechster Schritt:
@@ -1665,6 +1677,18 @@ unter `docs/world_design/previews/m16_a_first_world_element_slice/`. Daraus
 folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests, keine
 Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine Assets,
 keine automatische Wortplatzierung und kein `frame_started`.
+
+M16-I startet den Theme Island Plot Capacity And In-Place Build Wheel Plan als
+reinen Dokumentations- und Visualisierungsblock. Ziel ist, ThemeIslands nicht
+als kleine feste Inseln mit wenigen Slots zu planen, sondern Inselgroesse,
+Grundstuecksanzahl und Grundstuecksgroessen aus dem jeweiligen Themenbedarf
+abzuleiten. Das Build-Wheel bleibt ein spaeteres In-Place-Overlay-Konzept:
+kein neuer Screen, keine Route, keine Persistenz, kein Build-State.
+Dokumentationspreviews liegen unter
+`docs/world_design/previews/m16_i_theme_island_plot_capacity_build_wheel/`.
+Daraus folgen keine Flutter-/Dart-Dateien, keine App-Integration, keine Tests,
+keine Screenshots, keine Runtime-Konfiguration, keine Persistenz, keine
+Assets, keine automatische Wortplatzierung und kein `frame_started`.
 
 Kein Uebergang zu Code, Assets oder `frame_started` ist erlaubt, solange die
 offenen M9-/M9-B-Fragen nicht geprueft oder bewusst zurueckgestellt und
@@ -2753,6 +2777,21 @@ Aktuell nicht erlaubt / weiterhin blockiert:
 - keine Asset-Dateien unter `assets/` aus M16-A ableiten,
 - kein finales Inselbild aus M16-A ableiten,
 - kein `frame_started` oder Bauzustand aus M16-A weiterbauen,
+- keine Implementierung aus M16-I ableiten,
+- keine Flutter-/Dart-Dateien aus M16-I ableiten,
+- keine App-Integration aus M16-I ableiten,
+- keine Route oder neue Seite aus M16-I ableiten,
+- keine Build-Wheel-Implementierung aus M16-I ableiten,
+- keine Tests oder Screenshots aus M16-I ableiten,
+- keine Persistenz aus M16-I ableiten,
+- keine Runtime-Konfiguration aus M16-I ableiten,
+- keine Supabase Writes oder lokalen DB-Writes aus M16-I ableiten,
+- keine SRS-/`word_progress`-Aenderung aus M16-I ableiten,
+- keine Reward Bridge aus M16-I ableiten,
+- keine automatische Wortplatzierung aus M16-I ableiten,
+- keine Assets oder Asset-Dateien unter `assets/` aus M16-I ableiten,
+- kein Build-State aus M16-I ableiten,
+- kein `frame_started` oder Bauzustand aus M16-I weiterbauen,
 - keine Foundation-Insel ohne spaetere Device-/Accessibility-/Tap-Target-
   Pruefung planen,
 - keine Garten-/Growth-Mechanik ohne Fairness-/Timer-Regeln planen,
