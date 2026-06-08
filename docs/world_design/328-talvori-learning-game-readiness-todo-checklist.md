@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AL`
+Aktive Sprint-ID: `M16-AM`
 
 Sprint Goal:
 
-> Non-Learning-Game-Patterns tief auswerten und in Play-First-Learning-Regeln uebersetzen.
+> Ersten play-first gedachten MVP-Loop als konkrete Spielminute fachlich festlegen.
 
 ### 0.1 Gesamtfortschritt
 
@@ -567,6 +567,18 @@ M16-AL erledigt:
 M16-AL vertieft, bleibt teilweise vorbereitet:
 
 - M16T-PLAY-008
+
+M16-AM konkretisiert, bleibt teilweise vorbereitet:
+
+- M16T-PLAY-008
+- M16T-PROD-003
+- M16T-CORE-003
+- M16T-L2W-003
+- M16T-SCALE-001
+- M16T-WORLD-002
+- M16T-WHEEL-003
+- M16T-SENS-003
+- M16T-ASSET-002
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst

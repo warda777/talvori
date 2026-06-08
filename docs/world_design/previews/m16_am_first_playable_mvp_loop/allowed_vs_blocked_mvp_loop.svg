@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2650" viewBox="0 0 3400 2650">
+<rect width="3400" height="2650" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2574" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Allowed Vs Blocked MVP Loop Scope</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">M16-AM decides the first loop shape, but keeps implementation and production mechanics blocked.</text>
+<line x1="92" y1="2538" x2="3308" y2="2538" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2590" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation gate only / no implementation / no app integration / no SRS write / no BuildState / no frame_started</text>
+<rect x="160" y="350" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="350" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="414" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Meaning Puzzle</text>
+<text x="188" y="476" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="560" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="560" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="624" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Context Door</text>
+<text x="188" y="686" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="770" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="770" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="834" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Bank example</text>
+<text x="188" y="896" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="980" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="980" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1044" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Tali/Vori optional hint</text>
+<text x="188" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="1190" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1190" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1254" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">ContextCard</text>
+<text x="188" y="1316" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="1400" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1400" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Codex Discovery</text>
+<text x="188" y="1526" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="1610" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1610" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1674" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">World Hint as preview</text>
+<text x="188" y="1736" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="160" y="1820" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1820" width="1350" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1884" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Later / Codex / Backlog / Change</text>
+<text x="188" y="1946" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as documentation/planning.</text>
+<rect x="1890" y="350" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="350" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="414" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Flutter/Dart code</text>
+<text x="1918" y="476" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="560" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="560" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="624" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Route or new page</text>
+<text x="1918" y="686" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="770" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="770" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="834" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Persistence / DB writes</text>
+<text x="1918" y="896" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="980" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="980" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="1044" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">SRS or word_progress write</text>
+<text x="1918" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="1190" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="1190" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="1254" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Auto placement</text>
+<text x="1918" y="1316" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="1400" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="1400" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">BuildState / frame_started</text>
+<text x="1918" y="1526" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="1610" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="1610" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="1674" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Assets under assets/</text>
+<text x="1918" y="1736" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="1890" y="1820" width="1350" height="135" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1890" y="1820" width="1350" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1918" y="1884" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#1e2b28">Timer / XP / social / gacha</text>
+<text x="1918" y="1946" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked until separate explicit gate.</text>
+<rect x="580" y="2130" width="2240" height="220" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="580" y="2130" width="2240" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="608" y="2199" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Hard boundary</text>
+<text x="608" y="2258" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">The first MVP loop may feel playable in documentation, but it remains a gate. No productive mechanic is released.</text>
+</svg>

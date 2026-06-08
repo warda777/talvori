@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2750" viewBox="0 0 3400 2750">
+<rect width="3400" height="2750" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2674" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">First Minute Sequence</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">Sixty seconds of play-first meaning clarity with no forced follow-up.</text>
+<line x1="92" y1="2638" x2="3308" y2="2638" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2690" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation gate only / no implementation / no app integration / no SRS write / no BuildState / no frame_started</text>
+<rect x="160" y="340" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="340" width="360" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="188" y="406" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">0-5s</text>
+<text x="188" y="468" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Start</text>
+<rect x="680" y="340" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="340" width="2500" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="708" y="406" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Start</text>
+<text x="708" y="468" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">User opens tiny optional moment.</text>
+<text x="708" y="495" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Can leave with no loss.</text>
+<line x1="500" y1="516" x2="500" y2="588" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,588 482,560 518,560" fill="#93a39c"/>
+<rect x="160" y="600" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="600" width="360" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="188" y="666" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">5-12s</text>
+<text x="188" y="728" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Scene</text>
+<rect x="680" y="600" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="600" width="2500" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="708" y="666" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Scene</text>
+<text x="708" y="728" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Tali/Vori gives one Bank scene.</text>
+<text x="708" y="755" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Companion stays optional.</text>
+<line x1="500" y1="776" x2="500" y2="848" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,848 482,820 518,820" fill="#93a39c"/>
+<rect x="160" y="860" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="860" width="360" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="188" y="926" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">12-25s</text>
+<text x="188" y="988" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Doors</text>
+<rect x="680" y="860" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="860" width="2500" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="708" y="926" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Doors</text>
+<text x="708" y="988" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Bench / finance / river edge.</text>
+<text x="708" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Context beats surface.</text>
+<line x1="500" y1="1036" x2="500" y2="1108" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,1108 482,1080 518,1080" fill="#93a39c"/>
+<rect x="160" y="1120" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1120" width="360" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1186" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">25-40s</text>
+<text x="188" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Choice</text>
+<rect x="680" y="1120" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="1120" width="2500" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="708" y="1186" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Choice</text>
+<text x="708" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">User picks a door.</text>
+<text x="708" y="1275" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Change and Later stay visible.</text>
+<line x1="500" y1="1296" x2="500" y2="1368" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,1368 482,1340 518,1340" fill="#93a39c"/>
+<rect x="160" y="1380" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1380" width="360" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="188" y="1446" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">40-50s</text>
+<text x="188" y="1508" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Feedback</text>
+<rect x="680" y="1380" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="1380" width="2500" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="708" y="1446" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Feedback</text>
+<text x="708" y="1508" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Meaning is clarified.</text>
+<text x="708" y="1535" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">No score or SRS write.</text>
+<line x1="500" y1="1556" x2="500" y2="1628" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,1628 482,1600 518,1600" fill="#93a39c"/>
+<rect x="160" y="1640" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1640" width="360" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="188" y="1706" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">50-58s</text>
+<text x="188" y="1768" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Signal</text>
+<rect x="680" y="1640" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="1640" width="2500" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="708" y="1706" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Signal</text>
+<text x="708" y="1768" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Codex Discovery or World Hint.</text>
+<text x="708" y="1795" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Preview/fallback only.</text>
+<line x1="500" y1="1816" x2="500" y2="1888" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="500,1888 482,1860 518,1860" fill="#93a39c"/>
+<rect x="160" y="1900" width="360" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="160" y="1900" width="360" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="188" y="1966" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">58-60s</text>
+<text x="188" y="2028" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Exit</text>
+<rect x="680" y="1900" width="2500" height="170" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="680" y="1900" width="2500" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="708" y="1966" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1e2b28">Exit</text>
+<text x="708" y="2028" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">One more, Codex, Later or end.</text>
+<text x="708" y="2055" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">No duty.</text>
+</svg>

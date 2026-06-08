@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4300" height="4500" viewBox="0 0 4300 4500">
+<rect width="4300" height="4500" fill="#f8f9f4"/>
+<text x="120" y="150" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#1e2b28">M16-AM First Playable MVP Loop Contact Sheet</text>
+<rect x="130" y="260" width="1820" height="1100" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<image href="first_playable_loop_flow.png" x="406" y="305" width="1267" height="950"/>
+<text x="180" y="1316" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">first_playable_loop_flow.png</text>
+<rect x="2200" y="260" width="1820" height="1100" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<image href="play_first_check_for_mvp_loop.png" x="2512" y="305" width="1196" height="950"/>
+<text x="2250" y="1316" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">play_first_check_for_mvp_loop.png</text>
+<rect x="130" y="1480" width="1820" height="1100" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<image href="first_minute_sequence.png" x="452" y="1525" width="1175" height="950"/>
+<text x="180" y="2536" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">first_minute_sequence.png</text>
+<rect x="2200" y="1480" width="1820" height="1100" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<image href="game_moment_to_learning_mapping.png" x="2543" y="1525" width="1133" height="950"/>
+<text x="2250" y="2536" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">game_moment_to_learning_mapping.png</text>
+<rect x="1120" y="2700" width="1820" height="1100" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<image href="allowed_vs_blocked_mvp_loop.png" x="1420" y="2745" width="1219" height="950"/>
+<text x="1170" y="3756" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">allowed_vs_blocked_mvp_loop.png</text>
+<line x1="120" y1="4345" x2="4180" y2="4345" stroke="#d7dfd8" stroke-width="2"/>
+<text x="120" y="4418" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#65726d">docs-only contact sheet / no app screen / no screenshot / PNG plus SVG</text>
+</svg>
