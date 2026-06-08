@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AP`
+Aktive Sprint-ID: `M16-AS`
 
 Sprint Goal:
 
-> Lokalen Bank Preview Launch als isolierten Folge-Slice rahmen, ohne App-Integration.
+> Bank Meaning Puzzle als Island-First-Spielmoment reframen und Regel dauerhaft verankern.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 127 |
+| Gesamtanzahl M16-T-Items | 128 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 103 |
+| Erledigt `[x]` | 104 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 85.8 % |
+| Gewichteter Fortschritt | 85.9 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -87,7 +87,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
-| Play-First Learning | M16T-PLAY | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regel anwenden. |
+| Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -608,6 +608,14 @@ M16-AP konkretisiert, bleibt blockiert/teilweise:
 - M16T-DOC-003
 - M16T-GIT-003
 
+M16-AS erledigt:
+
+- M16T-PLAY-009
+
+M16-AS wendet weiter an:
+
+- M16T-PLAY-008
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -682,7 +690,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..008, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-Gefuehl und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -805,6 +813,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-PLAY-006 | [x] | Benchmark-Games ohne Lernfokus analysieren | Talvori muss auch von reinen Spielen lernen, nicht nur von Lernapps. | Minecraft, Roblox, Puzzle-, Runner-, Match-, Card- und MOBA-Patterns als Research-Quellen tief ausgewertet und in Talvori-Regeln uebersetzt sind. | Blindes Kopieren, Social-/FOMO-/Gacha-/Timer-Druck. | nein |
 | M16T-PLAY-007 | [x] | MVP-Playtest-Kriterien fuer Spielgefuehl | Spaetere MVP-Tests muessen fragen, ob sich Talvori wirklich wie Spiel anfuehlt. | Playtest-Fragen zu Spielgefuehl, Neugier, Freiwilligkeit, Stress, Fehlern und Weltreaktion existieren. | MVP ohne Spielgefuehl-Pruefung. | nein |
 | M16T-PLAY-008 | [x] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
+| M16T-PLAY-009 | [x] | Island-First Play Rule | Talvori-Aufgaben duerfen nicht als separate Lernfenster dominieren. | Regel dokumentiert ist und die Bank Meaning Puzzle Preview als Insel-/Plot-/Flussufer-Szene statt Lernfenster angewendet ist. | Karten/Fenster als Hauptspielraum, Welt nur als Deko. | nein |
 
 ### M16T-SOCIAL
 

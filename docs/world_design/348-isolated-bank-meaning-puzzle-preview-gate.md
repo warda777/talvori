@@ -58,6 +58,13 @@ Die spaetere Preview soll einen einzigen kleinen Spielmoment pruefbar machen:
 Am Fluss macht Tali kurz Pause.
 ```
 
+M16-AS-Ergaenzung:
+
+Die Preview soll diesen Moment als Flussufer-/Insel-/Plot-Szene zeigen, nicht
+als separates Lernfenster. Bedeutungen werden als Orte, Wege, Schilder oder
+Objekte in der Szene angeboten; Safe Exits, Companion-Hinweis und Codex-Erklaerung
+bleiben HUD/Sprechblase/Overlay.
+
 Das Wort `Bank` erscheint nicht als Vokabelabfrage, sondern als kleine
 Situation. Die Nutzerentscheidung ist eine Meaning Puzzle / Context Door:
 

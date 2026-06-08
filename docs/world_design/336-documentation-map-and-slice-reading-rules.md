@@ -193,18 +193,19 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Learning Loop Slice | `328`, `345`, `327`, `330`, `331`, `332`, `335`, `329` |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
 | Reward / Queue Slice | `328`, `330`, `331`, `332`, `334`, `327`, `326` |
-| Gameplay / Quest / Challenge Slice | `328`, `345`, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
+| Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `345`, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Container / Depth Slice | `328`, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
 | Build-Wheel Slice | `328`, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
-| UI / MVP Screen Slice | `328`, `345`, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
-| App-Integration Slice | `328`, `345`, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
+| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
@@ -221,6 +222,10 @@ Research, Visuals oder Review muss enthalten:
 - Pflichtlektuere,
 - Play-First-Rule aus `345`, wenn MVP, Gameplay, Quest, Challenge, World,
   Companion, UI oder Implementierung betroffen ist,
+- Island-First Play Rule aus `345`, wenn MVP, Gameplay, Quest, Challenge,
+  World, UI, App-Integration oder Implementierung betroffen ist,
+- Antwort auf: Wo auf der Insel, auf dem Plot oder in der Welt-Szene passiert
+  der Spielmoment?,
 - erwartete Dateien,
 - Non-Goals,
 - Stop-Regeln,

@@ -72,16 +72,17 @@ Talvori geeignet ist.
 
 ## 4. Betroffene und neue M16-T-IDs
 
-| ID | M16-AK Entscheidung |
+| ID | M16-AK / M16-AS Entscheidung |
 | --- | --- |
 | `M16T-PLAY-001` | `[x]` Play-First Learning Doctrine ist als verbindlicher Produktgrundsatz dokumentiert. |
 | `M16T-PLAY-002` | `[x]` Lernen als Nebenprodukt des Spielens ist definiert. |
 | `M16T-PLAY-003` | `[x]` Spielmechanik-zu-Lernnutzen-Matrix ist dokumentiert. |
 | `M16T-PLAY-004` | `[x]` Neugier-/Challenge-/Flow-Regeln sind festgelegt. |
 | `M16T-PLAY-005` | `[x]` Verbotene Uebungsgefuehle und "Uebung darf sich nicht wie Uebung anfuehlen" sind dokumentiert. |
-| `M16T-PLAY-006` | `[~]` Games ohne Lernfokus sind als Benchmark-Pattern vorbereitet, aber noch nicht tief researched. |
+| `M16T-PLAY-006` | `[x]` Games ohne Lernfokus sind mit M16-AL tief researched und in Talvori-Regeln uebersetzt. |
 | `M16T-PLAY-007` | `[x]` MVP-Playtest-Kriterien fuer Spielgefuehl sind definiert. |
-| `M16T-PLAY-008` | `[~]` Play-First-Check ist als Pflichtregel definiert, muss aber in spaeteren Implementierungen angewendet werden. |
+| `M16T-PLAY-008` | `[x]` Play-First-Check ist als Pflichtregel definiert und in M16-AO/M16-AP praktisch angewendet. |
+| `M16T-PLAY-009` | `[x]` Island-First Play Rule ist mit M16-AS als harte Ergaenzung dokumentiert und in der Bank Preview angewendet. |
 
 Referenzierte bestehende IDs:
 
@@ -140,7 +141,41 @@ Stop-Regel:
 
 Kein App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung.
 
-## 7. Game Pattern Benchmarks
+## 7. Island-First Play Rule
+
+M16-AS ergaenzt die Play-First Doctrine um eine harte Island-First-Regel:
+
+```text
+Talvori-Spielaufgaben passieren primaer in der Welt.
+UI-Karten erklaeren nur, sie sind nicht der Hauptspielraum.
+```
+
+Verbindliche Regeln:
+
+- Jede Talvori-Spielaufgabe findet primaer in der Welt statt: Insel, Plot,
+  Weg, Tuer, Objekt, Figur, Szene, Container oder Codex-Ort.
+- UI-Karten sind nur unterstuetzend: Sprechblase, HUD, Schild, Codex-Overlay
+  oder Safe-Exit-Leiste.
+- Keine Lernaufgabe darf primaer wie ein separates Lernfenster wirken.
+- Karten/Fenster duerfen nicht das Hauptgefuehl der Uebung sein.
+- Die Spielwelt oder Szene traegt die Aufgabe; UI erklaert nur.
+
+Jede kuenftige MVP-/Gameplay-/Quest-/Challenge-/World-/UI-/
+Implementierungsarbeit muss beantworten:
+
+| Frage | Pflichtantwort |
+| --- | --- |
+| Wo auf der Insel oder auf dem Plot passiert der Spielmoment? | Konkreter Weltort, z. B. Flussufer, Weg, Container, Haus, Schild, Figur oder Codex-Ort. |
+| Welche Figur, welches Objekt, welcher Weg oder welche Tuer traegt die Aufgabe? | Das interaktive Element muss in der Szene verankert sein. |
+| Welche UI-Elemente sind nur HUD/Sprechblase/Schild? | Karten duerfen nur erklaeren, nicht den Spielraum ersetzen. |
+| Warum fuehlt sich das nicht wie ein Lernfenster an? | Die Handlung muss als Weltmoment lesbar sein, nicht als Formular oder Quizkarte. |
+
+Stop-Regel:
+
+Kein App-Code fuer Lernuebungen, wenn der Hauptspielraum ein separates
+Lernfenster ist.
+
+## 8. Game Pattern Benchmarks
 
 Diese Matrix ist Research Prep. Sie benennt Hypothesen und
 Ableitungsfragen, aber keine finalen Research-Ergebnisse.
@@ -161,7 +196,7 @@ Ableitungsfragen, aber keine finalen Research-Ergebnisse.
 | Brilliant | interaktives Verstehen | Aha-Momente, direkte Rueckmeldung | Problem loesen | Konzept klarer verstehen | ContextCard / Meaning Puzzle | reine Problem-UI statt Welt | hoch | mittel |
 | Duolingo | kurze Lektionen und Habit | kleine Einheiten, Feedback | Sprache ueben | XP, Streak, Path | Micro Session und klare Rueckmeldung | Streak-Schuld, League-Druck | hoch als Warnung | mittel |
 
-## 8. Spielmechanik-zu-Lernnutzen-Matrix
+## 9. Spielmechanik-zu-Lernnutzen-Matrix
 
 | Spielmechanik | Lernnutzen | Talvori-Form | Blockiert |
 | --- | --- | --- | --- |
@@ -176,7 +211,7 @@ Ableitungsfragen, aber keine finalen Research-Ergebnisse.
 | Fehler korrigieren | Feedback ohne Strafe | ruhiger Retry, ContextCard, Tali/Vori optional | Beschaemung, Weltverlust |
 | Challenge waehlen | freiwillige Review | Choice Fork mit Later/Codex/Backlog | Review-Zwang |
 
-## 9. Uebung darf sich nicht wie Uebung anfuehlen
+## 10. Uebung darf sich nicht wie Uebung anfuehlen
 
 Verbotene Hauptgefuehle:
 
@@ -211,7 +246,7 @@ Nicht: "Waehle die richtige Uebersetzung."
 Stattdessen: "Welche Tuer passt zu diesem Satz? Eine fuehrt in die Kueche,
 eine in den Hafen, eine bleibt im Codex."
 
-## 10. Talvori-Spielmoment-Typen
+## 11. Talvori-Spielmoment-Typen
 
 | Typ | Spielgefuehl | Lernnutzen | Beispiel | Erlaubtes Feedback | Blockiert |
 | --- | --- | --- | --- | --- | --- |
@@ -226,7 +261,7 @@ eine in den Hafen, eine bleibt im Codex."
 | Choice Fork | kleine freiwillige Entscheidung | Outcome/Fallback verstehen | Confirm/Change/Later | sichere Optionen | Pflichtreview |
 | Tiny Mystery | kleine Neugier ohne Druck | Kontext suchen | "Wo wuerde dieses Ding spaeter liegen?" | Later/Backlog | Hidden Pflichtobjekt |
 
-## 11. Curiosity / Challenge / Flow Regeln
+## 12. Curiosity / Challenge / Flow Regeln
 
 Pflichtregeln:
 
@@ -250,7 +285,7 @@ eine Bedeutung klarer sieht und freiwillig weitergehen moechte.
 Flow bricht, wenn der Nutzer Formulare, Pflichtlisten, Verlustdrohung,
 Review-Schulden, Rangdruck oder Textwuesen erlebt.
 
-## 12. Playtest-Kriterien
+## 13. Playtest-Kriterien
 
 Spaetere MVP-/Gameplay-/UI-Tests muessen mindestens diese Fragen enthalten:
 
@@ -270,13 +305,16 @@ Spaetere MVP-/Gameplay-/UI-Tests muessen mindestens diese Fragen enthalten:
 MVP-Playtest darf keine Analytics-Implementierung, keine produktive Metrik und
 keine Persistenz ableiten. Es ist eine spaetere Research-/QA-Aktivitaet.
 
-## 13. Dauerhafte Pflichtregel
+## 14. Dauerhafte Pflichtregel
 
 Ab M16-AK gilt:
 
 - Jeder kuenftige MVP-/Gameplay-/Quest-/Challenge-/World-/UI-/
-  Implementierungs-Slice muss die Play-First Rule nennen.
+  Implementierungs-Slice muss die Play-First Rule und Island-First Play Rule
+  nennen.
 - Kein App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung.
+- Kein App-Code fuer Lernuebungen ohne Antwort, wo auf Insel, Plot oder
+  Welt-Szene der Spielmoment passiert.
 - Kein MVP-Screen ohne Playtest-Fragen.
 - Kein Reward ohne Spielnutzen.
 - Kein Review ohne Spielkontext.
@@ -294,9 +332,12 @@ Kurzform fuer kuenftige Prompts:
 Play-First Check:
 Spielmoment? Neugier? Challenge? Belohnendes Feedback?
 Lernnutzen? Kein Uebungsgefuehl? Kein Druck? Safe Defaults sichtbar?
+Island-First Check:
+Welcher Insel-/Plot-Ort? Welche Figur, welches Objekt, welcher Weg?
+Welche UI ist nur HUD/Sprechblase/Schild? Warum kein Lernfenster?
 ```
 
-## 14. Visualisierungen
+## 15. Visualisierungen
 
 M16-AK erzeugt Dokumentationsvisualisierungen unter:
 
@@ -324,7 +365,7 @@ Visual-QA:
 - Keine abgeschnittenen Inhalte.
 - SVG-Dateien muessen XML-parsebar sein.
 
-## 15. Stop-Regeln
+## 16. Stop-Regeln
 
 M16-AK gibt nicht frei:
 

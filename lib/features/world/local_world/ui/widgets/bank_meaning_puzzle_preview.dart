@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 const _bankPreviewBackground = Color(0xFF041017);
 const _bankPreviewPanel = Color(0xFF0A1A26);
-const _bankPreviewSurface = Color(0xFF102838);
 const _bankPreviewCyan = Color(0xFF5DDCFF);
 const _bankPreviewMint = Color(0xFF9FF7D5);
 const _bankPreviewViolet = Color(0xFFB36BFF);
@@ -24,25 +23,29 @@ class _BankMeaningPuzzlePreviewState extends State<BankMeaningPuzzlePreview> {
   static const _options = [
     _BankMeaningOption(
       id: _BankMeaningOptionId.bench,
+      doorLabel: 'Uferplatz',
       title: 'Sitzbank',
-      hint: 'Ein Ort zum Sitzen.',
-      detail: 'Das waere moeglich, aber die Szene sagt nicht, dass Tali sitzt.',
+      hint: 'Objekt am Ufer.',
+      detail:
+          'Das waere ein anderer Weg: Die Szene sagt nicht, dass Tali sich auf eine Sitzbank setzt.',
       icon: Icons.chair_alt_rounded,
     ),
     _BankMeaningOption(
       id: _BankMeaningOptionId.institution,
+      doorLabel: 'Stadtschild',
       title: 'Geldinstitut',
-      hint: 'Ein Ort fuer Geld.',
+      hint: 'Weg in die Stadt.',
       detail:
-          'Das passt hier nicht gut: In der Szene geht es um einen Fluss, nicht um Geld.',
+          'Ruhig nochmal schauen: In dieser Szene geht es um einen Fluss, nicht um Geld.',
       icon: Icons.account_balance_rounded,
     ),
     _BankMeaningOption(
       id: _BankMeaningOptionId.riverEdge,
+      doorLabel: 'Wasserweg',
       title: 'Flussufer',
-      hint: 'Der Rand am Wasser.',
+      hint: 'Kante am Wasser.',
       detail:
-          'Genau: Am Fluss meint Bank hier das Ufer. Kontext entscheidet die Bedeutung.',
+          'Genau: Am Fluss oeffnet Bank die Tuer zum Ufer. Kontext entscheidet die Bedeutung.',
       icon: Icons.water_rounded,
     ),
   ];
@@ -84,7 +87,7 @@ class _BankMeaningPuzzlePreviewState extends State<BankMeaningPuzzlePreview> {
           color: _bankPreviewBackground,
           child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 58),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
@@ -92,24 +95,18 @@ class _BankMeaningPuzzlePreviewState extends State<BankMeaningPuzzlePreview> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const _PreviewStatusBanner(),
-                      const SizedBox(height: 14),
-                      const _BankSceneCard(),
-                      const SizedBox(height: 14),
-                      _MeaningOptionGrid(
-                        selectedOption: _selectedOption,
-                        onSelect: _selectOption,
-                      ),
-                      const SizedBox(height: 14),
-                      _MeaningFeedbackPanel(
+                      const SizedBox(height: 10),
+                      _IslandPlotScene(
                         selectedOption: _selectedOption,
                         hasCorrectSelection: _hasCorrectSelection,
+                        onSelect: _selectOption,
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                       _SafeExitPanel(
                         selectedSafeExit: _selectedSafeExit,
                         onSelect: _selectSafeExit,
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                       const _GuardrailPanel(),
                     ],
                   ),
@@ -130,6 +127,7 @@ enum _SafeExitId { later, codex, backlog, change }
 class _BankMeaningOption {
   const _BankMeaningOption({
     required this.id,
+    required this.doorLabel,
     required this.title,
     required this.hint,
     required this.detail,
@@ -137,6 +135,7 @@ class _BankMeaningOption {
   });
 
   final _BankMeaningOptionId id;
+  final String doorLabel;
   final String title;
   final String hint;
   final String detail;
@@ -162,7 +161,7 @@ class _PreviewStatusBanner extends StatelessWidget {
           border: Border.all(color: _bankPreviewViolet.withValues(alpha: 0.42)),
         ),
         child: const Text(
-          'Lokale Context-Door-Preview / keine Route / nichts wird gespeichert',
+          'Lokale Island-First Preview / keine Route / nichts wird gespeichert',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: _bankPreviewInk,
@@ -177,103 +176,121 @@ class _PreviewStatusBanner extends StatelessWidget {
   }
 }
 
-class _BankSceneCard extends StatelessWidget {
-  const _BankSceneCard();
+class _IslandPlotScene extends StatelessWidget {
+  const _IslandPlotScene({
+    required this.selectedOption,
+    required this.hasCorrectSelection,
+    required this.onSelect,
+  });
+
+  final _BankMeaningOptionId? selectedOption;
+  final bool hasCorrectSelection;
+  final ValueChanged<_BankMeaningOptionId> onSelect;
 
   @override
   Widget build(BuildContext context) {
+    final selected = selectedOption == null
+        ? null
+        : _BankMeaningPuzzlePreviewState._options.firstWhere(
+            (option) => option.id == selectedOption,
+          );
+
     return Container(
-      key: const Key('bank-meaning-puzzle-scene'),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),
+      key: const Key('bank-meaning-island-plot-scene'),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _bankPreviewPanel,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _bankPreviewCyan.withValues(alpha: 0.32)),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: _bankPreviewCyan.withValues(alpha: 0.28)),
         boxShadow: [
           BoxShadow(
-            color: _bankPreviewCyan.withValues(alpha: 0.1),
-            blurRadius: 28,
-            spreadRadius: -10,
+            color: _bankPreviewCyan.withValues(alpha: 0.11),
+            blurRadius: 30,
+            spreadRadius: -12,
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _bankPreviewCyan.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _bankPreviewCyan.withValues(alpha: 0.44),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: _bankPreviewCyan,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tali/Vori Micro Scene',
-                      style: TextStyle(
-                        color: _bankPreviewInk,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                    SizedBox(height: 7),
-                    Text(
-                      'Am Fluss macht Tali kurz Pause.',
-                      style: TextStyle(
-                        color: _bankPreviewInk,
-                        fontSize: 16,
-                        height: 1.3,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
-            decoration: BoxDecoration(
-              color: _bankPreviewSurface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _bankPreviewMint.withValues(alpha: 0.2),
-              ),
-            ),
-            child: const Text.rich(
-              TextSpan(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            const Positioned.fill(child: _RiverbankBackdrop()),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextSpan(text: 'Context Door: '),
-                  TextSpan(
-                    text: 'Welche Bedeutung von "Bank" passt zur Szene?',
-                    style: TextStyle(color: _bankPreviewMint),
+                  const _SceneTopHud(),
+                  const SizedBox(height: 12),
+                  _CompanionSceneBubble(selectedOption: selectedOption),
+                  const SizedBox(height: 16),
+                  _MeaningObjectGrid(
+                    selectedOption: selectedOption,
+                    onSelect: onSelect,
+                  ),
+                  const SizedBox(height: 14),
+                  _WorldFeedbackBubble(
+                    selected: selected,
+                    hasCorrectSelection: hasCorrectSelection,
                   ),
                 ],
               ),
-              style: TextStyle(
-                color: _bankPreviewInk,
-                fontSize: 15,
-                height: 1.35,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RiverbankBackdrop extends StatelessWidget {
+  const _RiverbankBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF123D36), Color(0xFF0A2A2F), Color(0xFF073250)],
+          stops: [0, 0.58, 1],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: -40,
+            right: -30,
+            bottom: -16,
+            height: 122,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: _bankPreviewCyan.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -24,
+            right: 86,
+            bottom: 78,
+            height: 58,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: _bankPreviewMint.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 92,
+            width: 76,
+            height: 22,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: _bankPreviewGold.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
           ),
@@ -283,8 +300,117 @@ class _BankSceneCard extends StatelessWidget {
   }
 }
 
-class _MeaningOptionGrid extends StatelessWidget {
-  const _MeaningOptionGrid({
+class _SceneTopHud extends StatelessWidget {
+  const _SceneTopHud();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: _bankPreviewCyan.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _bankPreviewCyan.withValues(alpha: 0.4)),
+          ),
+          child: const Icon(Icons.terrain_rounded, color: _bankPreviewCyan),
+        ),
+        const SizedBox(width: 10),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Flussufer-Plot',
+                style: TextStyle(
+                  color: _bankPreviewInk,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Am Fluss macht Tali kurz Pause. Welcher Ort meint hier "Bank"?',
+                style: TextStyle(
+                  color: _bankPreviewInk,
+                  fontSize: 14,
+                  height: 1.25,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompanionSceneBubble extends StatelessWidget {
+  const _CompanionSceneBubble({required this.selectedOption});
+
+  final _BankMeaningOptionId? selectedOption;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = selectedOption == null
+        ? 'Tali zeigt drei Orte am Plot. Tippe den Ort, der zur Flussszene passt.'
+        : 'Tali bleibt ruhig: Kontext entscheidet, nicht Punkte.';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: _bankPreviewViolet.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _bankPreviewViolet.withValues(alpha: 0.4),
+            ),
+          ),
+          child: const Icon(
+            Icons.auto_awesome_rounded,
+            color: _bankPreviewViolet,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+            decoration: BoxDecoration(
+              color: _bankPreviewPanel.withValues(alpha: 0.82),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: _bankPreviewViolet.withValues(alpha: 0.26),
+              ),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.86),
+                fontSize: 13,
+                height: 1.28,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MeaningObjectGrid extends StatelessWidget {
+  const _MeaningObjectGrid({
     required this.selectedOption,
     required this.onSelect,
   });
@@ -297,8 +423,8 @@ class _MeaningOptionGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 430;
-        final cards = _BankMeaningPuzzlePreviewState._options.map((option) {
-          return _MeaningOptionCard(
+        final markers = _BankMeaningPuzzlePreviewState._options.map((option) {
+          return _MeaningObjectMarker(
             option: option,
             selected: selectedOption == option.id,
             onTap: () => onSelect(option.id),
@@ -307,22 +433,22 @@ class _MeaningOptionGrid extends StatelessWidget {
 
         if (compact) {
           return Column(
-            key: const Key('bank-meaning-options-column'),
+            key: const Key('bank-meaning-island-options-column'),
             children: [
-              for (final card in cards) ...[
-                card,
-                if (card != cards.last) const SizedBox(height: 10),
+              for (final marker in markers) ...[
+                marker,
+                if (marker != markers.last) const SizedBox(height: 9),
               ],
             ],
           );
         }
 
         return Row(
-          key: const Key('bank-meaning-options-row'),
+          key: const Key('bank-meaning-island-options-row'),
           children: [
-            for (final card in cards) ...[
-              Expanded(child: card),
-              if (card != cards.last) const SizedBox(width: 10),
+            for (final marker in markers) ...[
+              Expanded(child: marker),
+              if (marker != markers.last) const SizedBox(width: 9),
             ],
           ],
         );
@@ -331,8 +457,8 @@ class _MeaningOptionGrid extends StatelessWidget {
   }
 }
 
-class _MeaningOptionCard extends StatelessWidget {
-  const _MeaningOptionCard({
+class _MeaningObjectMarker extends StatelessWidget {
+  const _MeaningObjectMarker({
     required this.option,
     required this.selected,
     required this.onTap,
@@ -353,44 +479,63 @@ class _MeaningOptionCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          key: Key('bank-meaning-option-${option.id.name}'),
+          key: Key('bank-meaning-island-option-${option.id.name}'),
           borderRadius: BorderRadius.circular(20),
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
+            padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
             decoration: BoxDecoration(
-              color: selected
-                  ? _bankPreviewMint.withValues(alpha: 0.13)
-                  : _bankPreviewPanel,
+              color: _bankPreviewPanel.withValues(alpha: selected ? 0.86 : 0.7),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: accent.withValues(alpha: selected ? 0.62 : 0.24),
-                width: selected ? 1.4 : 1,
+                color: accent.withValues(alpha: selected ? 0.7 : 0.28),
+                width: selected ? 1.5 : 1,
               ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(option.icon, color: accent, size: 28),
-                const SizedBox(height: 9),
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: selected ? 0.2 : 0.12),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: accent.withValues(alpha: 0.34)),
+                  ),
+                  child: Icon(option.icon, color: accent, size: 26),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  option.doorLabel,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 11,
+                    height: 1.1,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
                   option.title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: _bankPreviewInk,
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 Text(
                   option.hint,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.68),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
-                    height: 1.25,
+                    height: 1.2,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0,
                   ),
@@ -404,88 +549,85 @@ class _MeaningOptionCard extends StatelessWidget {
   }
 }
 
-class _MeaningFeedbackPanel extends StatelessWidget {
-  const _MeaningFeedbackPanel({
-    required this.selectedOption,
+class _WorldFeedbackBubble extends StatelessWidget {
+  const _WorldFeedbackBubble({
+    required this.selected,
     required this.hasCorrectSelection,
   });
 
-  final _BankMeaningOptionId? selectedOption;
+  final _BankMeaningOption? selected;
   final bool hasCorrectSelection;
 
   @override
   Widget build(BuildContext context) {
-    final selected = selectedOption == null
-        ? null
-        : _BankMeaningPuzzlePreviewState._options.firstWhere(
-            (option) => option.id == selectedOption,
-          );
-    final accent = selectedOption == null
+    final hasSelection = selected != null;
+    final accent = !hasSelection
         ? _bankPreviewCyan
         : hasCorrectSelection
         ? _bankPreviewMint
         : _bankPreviewGold;
-    final title = selectedOption == null
-        ? 'Kleine Bedeutungstuer'
+    final title = !hasSelection
+        ? 'Plot-Hinweis'
         : hasCorrectSelection
-        ? 'ContextCard / Codex Discovery'
-        : 'Calm Retry';
-    final body = selectedOption == null
-        ? 'Waehle eine Bedeutung. Es geht nicht um Punkte, sondern darum, die Szene zu verstehen.'
+        ? 'Codex Discovery am Ufer'
+        : 'Calm Retry am Plot';
+    final body = !hasSelection
+        ? 'Die Insel zeigt drei Orte. Kontext oeffnet den passenden Weg.'
         : selected!.detail;
-    final support = selectedOption == null
-        ? 'Feedback ist Bedeutungsklarheit, kein Score.'
+    final support = !hasSelection
+        ? 'Kein Score: du liest die Szene.'
         : hasCorrectSelection
-        ? 'Kein Build, kein Placement, kein SRS-Write.'
-        : 'Schau ruhig noch einmal auf den Kontext "am Fluss". Kein Verlust, keine Strafe.';
+        ? 'Bank = Flussufer in dieser Szene. Kein Build, kein Placement, kein SRS-Write.'
+        : 'Kein Verlust. Tali schaut mit dir nochmal auf "am Fluss".';
 
     return Container(
-      key: const Key('bank-meaning-feedback-panel'),
-      padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+      key: const Key('bank-meaning-world-feedback'),
+      padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
       decoration: BoxDecoration(
-        color: _bankPreviewPanel,
-        borderRadius: BorderRadius.circular(22),
+        color: _bankPreviewPanel.withValues(alpha: 0.84),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: accent.withValues(alpha: 0.36)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                hasCorrectSelection
-                    ? Icons.travel_explore_rounded
-                    : Icons.lightbulb_outline_rounded,
-                color: accent,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
+          Icon(
+            hasCorrectSelection
+                ? Icons.travel_explore_rounded
+                : Icons.tips_and_updates_rounded,
+            color: accent,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   title,
                   style: const TextStyle(
                     color: _bankPreviewInk,
-                    fontSize: 17,
+                    fontSize: 15,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            body,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.77),
-              fontSize: 14,
-              height: 1.38,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0,
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.82),
+                    fontSize: 13,
+                    height: 1.3,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _SoftCallout(text: support, color: accent),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          _SoftCallout(text: support, color: accent),
         ],
       ),
     );
@@ -505,36 +647,57 @@ class _SafeExitPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('bank-meaning-safe-exits'),
-      padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        color: _bankPreviewSurface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        color: Colors.black.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _bankPreviewViolet.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Safe Defaults bleiben sichtbar',
-            style: TextStyle(
-              color: _bankPreviewInk,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
-            ),
+          Row(
+            children: [
+              const Icon(
+                Icons.exit_to_app_rounded,
+                color: _bankPreviewMint,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'HUD: Safe Exits',
+                  style: TextStyle(
+                    color: _bankPreviewInk,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+              Text(
+                'lokal',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.58),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 7),
           Text(
-            'Du musst nichts bauen, speichern oder sofort entscheiden.',
+            'Toolbelt ohne Side Effects: kein Build, keine Speicherung.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 13,
-              height: 1.35,
+              fontSize: 12,
+              height: 1.3,
               fontWeight: FontWeight.w600,
               letterSpacing: 0,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -566,7 +729,7 @@ class _SafeExitPanel extends StatelessWidget {
             ],
           ),
           if (selectedSafeExit != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             _SoftCallout(
               text: _safeExitMessage(selectedSafeExit!),
               color: _bankPreviewViolet,
@@ -607,27 +770,31 @@ class _SafeExitChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected ? _bankPreviewMint : _bankPreviewCyan;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: Key('bank-meaning-safe-exit-${id.name}'),
-        borderRadius: BorderRadius.circular(999),
-        onTap: () => onTap(id),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: selected ? 0.18 : 0.1),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color.withValues(alpha: 0.36)),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: _bankPreviewInk,
-              fontSize: 12,
-              height: 1.1,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: Key('bank-meaning-safe-exit-${id.name}'),
+          borderRadius: BorderRadius.circular(999),
+          onTap: () => onTap(id),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: selected ? 0.18 : 0.1),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: color.withValues(alpha: 0.36)),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: _bankPreviewInk,
+                fontSize: 12,
+                height: 1.1,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
             ),
           ),
         ),
@@ -672,25 +839,25 @@ class _GuardrailPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('bank-meaning-guardrails'),
-      padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.22),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _bankPreviewGold.withValues(alpha: 0.22)),
+        color: Colors.black.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _bankPreviewGold.withValues(alpha: 0.16)),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Ende ohne Pflicht',
+            'Safety Footer',
             style: TextStyle(
               color: _bankPreviewInk,
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: FontWeight.w900,
               letterSpacing: 0,
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -702,6 +869,7 @@ class _GuardrailPanel extends StatelessWidget {
               _GuardrailBadge(text: 'kein Build'),
               _GuardrailBadge(text: 'kein Placement'),
               _GuardrailBadge(text: 'kein SRS-Write'),
+              _GuardrailBadge(text: 'keine Speicherung'),
             ],
           ),
         ],

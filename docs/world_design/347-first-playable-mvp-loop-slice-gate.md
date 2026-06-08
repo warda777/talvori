@@ -93,6 +93,13 @@ Die erste Talvori-Spielminute ist:
 Ein kleines Meaning Puzzle mit Context Door fuer das Wort `Bank`.
 ```
 
+M16-AS-Ergaenzung:
+
+Der erste Bank-Loop muss als kleine Flussufer-/Insel-/Plot-Szene verstanden
+werden. Die Bedeutungswahl passiert an Orten, Wegen, Schildern oder Objekten
+in der Szene; UI-Karten duerfen nur HUD, Sprechblase, Schild oder Codex-Hinweis
+sein und nicht das Hauptgefuehl eines separaten Lernfensters erzeugen.
+
 Ablauf in einem Satz:
 
 > Tali/Vori zeigt eine kleine Situation mit drei moeglichen Bedeutungs-Tueren;
