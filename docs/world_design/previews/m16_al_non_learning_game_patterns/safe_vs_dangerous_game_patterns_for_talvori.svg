@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2600" viewBox="0 0 3400 2600">
+<rect width="3400" height="2600" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2524" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Safe Vs Dangerous Game Patterns For Talvori</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">Play-first learning keeps the fun, but removes pressure and monetization traps.</text>
+<line x1="92" y1="2488" x2="3308" y2="2488" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2540" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation deep research only / no implementation / no app integration / no FOMO or gacha / no BuildState / no frame_started</text>
+<rect x="170" y="360" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="360" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="425" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Meaning Puzzle</text>
+<text x="198" y="482" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="565" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="565" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="630" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Context Door</text>
+<text x="198" y="687" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="770" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="770" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="835" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Container Hunt</text>
+<text x="198" y="892" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="975" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="975" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="1040" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Action Moment</text>
+<text x="198" y="1097" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="1180" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="1180" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="1245" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Codex Discovery</text>
+<text x="198" y="1302" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="1385" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="1385" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="1450" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Calm Retry</text>
+<text x="198" y="1507" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="1590" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="1590" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="1655" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Choice Fork</text>
+<text x="198" y="1712" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="170" y="1795" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="170" y="1795" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="198" y="1860" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">World Hint</text>
+<text x="198" y="1917" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Allowed only as pressure-free learning play.</text>
+<rect x="1960" y="360" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="360" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="425" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">FOMO event</text>
+<text x="1988" y="482" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="565" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="565" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="630" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Gacha pull</text>
+<text x="1988" y="687" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="770" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="770" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="835" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Pay-to-progress</text>
+<text x="1988" y="892" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="975" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="975" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1040" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">PvP ranking</text>
+<text x="1988" y="1097" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="1180" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="1180" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1245" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Clan duty</text>
+<text x="1988" y="1302" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="1385" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="1385" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1450" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Timer pressure</text>
+<text x="1988" y="1507" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="1590" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="1590" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1655" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Booster frustration</text>
+<text x="1988" y="1712" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="1960" y="1795" width="1270" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="1795" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1860" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Mechanic without learning</text>
+<text x="1988" y="1917" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">Blocked for MVP and not a productive mechanic.</text>
+<rect x="760" y="2150" width="1880" height="210" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="760" y="2150" width="1880" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="788" y="2220" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Boundary</text>
+<text x="788" y="2274" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">A pattern is safe only if it names learning value, preserves Later/Codex/Backlog/ContextCard, and cannot create BuildState or pressure.</text>
+</svg>

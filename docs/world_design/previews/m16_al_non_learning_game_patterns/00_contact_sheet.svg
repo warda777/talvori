@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4300" height="4500" viewBox="0 0 4300 4500">
+<rect width="4300" height="4500" fill="#f8f9f4"/>
+<text x="120" y="152" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">M16-AL Non-Learning Game Patterns Contact Sheet</text>
+<rect x="136" y="236" width="1888" height="1186" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<text x="160" y="1364" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">non_learning_game_pattern_matrix.png</text>
+<rect x="2176" y="236" width="1888" height="1186" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<text x="2200" y="1364" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">curiosity_challenge_flow_map.png</text>
+<rect x="136" y="1596" width="1888" height="1186" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<text x="160" y="2724" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">session_hook_pattern_map.png</text>
+<rect x="2176" y="1596" width="1888" height="1186" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<text x="2200" y="2724" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">safe_vs_dangerous_game_patterns_for_talvori.png</text>
+<rect x="1156" y="2956" width="1888" height="1186" rx="24" ry="24" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<text x="1180" y="4084" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#65726d">talvori_play_first_translation_matrix.png</text>
+<line x1="120" y1="4350" x2="4180" y2="4350" stroke="#d7dfd8" stroke-width="2"/>
+<text x="120" y="4413" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#65726d">docs-only contact sheet / no app screen / no screenshot / no asset / PNG plus SVG</text>
+</svg>

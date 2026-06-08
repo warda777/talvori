@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AK`
+Aktive Sprint-ID: `M16-AL`
 
 Sprint Goal:
 
-> Play-First Learning Doctrine verbindlich machen und Spielmuster mit Lernnutzen verbinden.
+> Non-Learning-Game-Patterns tief auswerten und in Play-First-Learning-Regeln uebersetzen.
 
 ### 0.1 Gesamtfortschritt
 
@@ -20,11 +20,11 @@ Sprint Goal:
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 127 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 101 |
+| Teilweise erledigt `[~]` | 13 |
+| Erledigt `[x]` | 102 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 85.0 % |
+| Gewichteter Fortschritt | 85.4 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -32,7 +32,6 @@ Naechste empfohlene IDs:
 - M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
-- M16T-PLAY-006
 - M16T-PLAY-008
 - M16T-WORLD-002
 - M16T-WHEEL-003
@@ -85,7 +84,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
-| Play-First Learning | M16T-PLAY | 8 | 6 | 2 | 0 | 0 | 87.5 % | `█████████░` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices anwenden; Non-Learning-Game-Benchmarks spaeter vertiefen. |
+| Play-First Learning | M16T-PLAY | 8 | 7 | 1 | 0 | 0 | 93.8 % | `█████████░` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices anwenden; Pflichtcheck in spaeteren Implementierungen nachweisen. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -561,6 +560,14 @@ M16-AK teilweise vorbereitet:
 - M16T-PLAY-006
 - M16T-PLAY-008
 
+M16-AL erledigt:
+
+- M16T-PLAY-006
+
+M16-AL vertieft, bleibt teilweise vorbereitet:
+
+- M16T-PLAY-008
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -755,7 +762,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-PLAY-003 | [x] | Spielmechanik-zu-Lernnutzen-Matrix | Jede Mechanik muss Lernnutzen haben, ohne Lernpflicht zu wirken. | Matrix von Puzzle, Weg, Container, Aktion, Weltbereich, Codex und Review zu Lernnutzen existiert. | Mechanik ohne Lernanker. | nein |
 | M16T-PLAY-004 | [x] | Neugier-/Challenge-/Flow-Regeln | Spielgefuehl entsteht aus klaren Zielen, kleiner Herausforderung und sicherem Feedback. | Curiosity-, Challenge- und Flow-Regeln mit Safe Defaults dokumentiert sind. | Druck, Sackgassen, Ueberladung. | nein |
 | M16T-PLAY-005 | [x] | Uebung darf sich nicht wie Uebung anfuehlen | Klassische Uebungs- und Fragebogenmuster wuerden das Produktgefuehl brechen. | Verbotene Uebungsgefuehle und Play-Alternativen dokumentiert sind. | Multiple-Choice als Hauptgefuehl, Textwand, XP-Grind. | nein |
-| M16T-PLAY-006 | [~] | Benchmark-Games ohne Lernfokus analysieren | Talvori muss auch von reinen Spielen lernen, nicht nur von Lernapps. | Minecraft, Roblox, Puzzle-, Runner-, Match-, Card- und MOBA-Patterns als Research-Kandidaten dokumentiert und spaeter vertieft sind. | Blindes Kopieren, Social-/FOMO-/Gacha-/Timer-Druck. | nein |
+| M16T-PLAY-006 | [x] | Benchmark-Games ohne Lernfokus analysieren | Talvori muss auch von reinen Spielen lernen, nicht nur von Lernapps. | Minecraft, Roblox, Puzzle-, Runner-, Match-, Card- und MOBA-Patterns als Research-Quellen tief ausgewertet und in Talvori-Regeln uebersetzt sind. | Blindes Kopieren, Social-/FOMO-/Gacha-/Timer-Druck. | nein |
 | M16T-PLAY-007 | [x] | MVP-Playtest-Kriterien fuer Spielgefuehl | Spaetere MVP-Tests muessen fragen, ob sich Talvori wirklich wie Spiel anfuehlt. | Playtest-Fragen zu Spielgefuehl, Neugier, Freiwilligkeit, Stress, Fehlern und Weltreaktion existieren. | MVP ohne Spielgefuehl-Pruefung. | nein |
 | M16T-PLAY-008 | [~] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
 

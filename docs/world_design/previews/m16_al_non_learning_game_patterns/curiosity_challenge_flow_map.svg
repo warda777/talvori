@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Curiosity Challenge Flow Map</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">The play loop must start with curiosity and end with safe learning feedback.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation deep research only / no implementation / no app integration / no FOMO or gacha / no BuildState / no frame_started</text>
+<rect x="180" y="440" width="460" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="180" y="440" width="460" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="208" y="510" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Hook</text>
+<text x="208" y="564" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">What is this?</text>
+<text x="208" y="591" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">What fits here?</text>
+<rect x="800" y="440" width="460" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="800" y="440" width="460" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="828" y="510" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Tiny challenge</text>
+<text x="828" y="564" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Choose, place, dodge,</text>
+<text x="828" y="591" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">match, explore.</text>
+<rect x="1420" y="440" width="460" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1420" y="440" width="460" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="1448" y="510" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Meaning</text>
+<text x="1448" y="564" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Sense, context,</text>
+<text x="1448" y="591" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">outcome, action.</text>
+<rect x="2040" y="440" width="460" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2040" y="440" width="460" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="2068" y="510" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Feedback</text>
+<text x="2068" y="564" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Visible result,</text>
+<text x="2068" y="591" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">not BuildState.</text>
+<rect x="2660" y="440" width="460" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2660" y="440" width="460" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="2688" y="510" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Exit</text>
+<text x="2688" y="564" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Later, Codex,</text>
+<text x="2688" y="591" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Backlog, Change.</text>
+<line x1="640" y1="610" x2="800" y2="610" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="800,610 772,592 772,628" fill="#93a39c"/>
+<line x1="1260" y1="610" x2="1420" y2="610" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1420,610 1392,592 1392,628" fill="#93a39c"/>
+<line x1="1880" y1="610" x2="2040" y2="610" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2040,610 2012,592 2012,628" fill="#93a39c"/>
+<line x1="2500" y1="610" x2="2660" y2="610" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2660,610 2632,592 2632,628" fill="#93a39c"/>
+<rect x="240" y="1050" width="1290" height="390" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="240" y="1050" width="1290" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="268" y="1120" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">What keeps it playful</text>
+<text x="268" y="1174" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">The user acts before reading too much, sees feedback quickly, and can try again without shame.</text>
+<rect x="1870" y="1050" width="1290" height="390" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1870" y="1050" width="1290" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1898" y="1120" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">What breaks it</text>
+<text x="1898" y="1174" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Questionnaire feeling, text wall, forced review, timer pressure, ranking and hidden monetization pressure.</text>
+<rect x="640" y="1740" width="2120" height="270" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="640" y="1740" width="2120" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="668" y="1810" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Talvori rule</text>
+<text x="668" y="1864" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">A learning moment is playable when curiosity drives a small safe action and the learning value appears as the consequence.</text>
+</svg>

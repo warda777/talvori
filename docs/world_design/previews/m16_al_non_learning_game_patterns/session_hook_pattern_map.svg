@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2650" viewBox="0 0 3400 2650">
+<rect width="3400" height="2650" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2574" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Session Hook Pattern Map</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">One more round comes from clarity, curiosity and voluntary retry, not pressure.</text>
+<line x1="92" y1="2538" x2="3308" y2="2538" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2590" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation deep research only / no implementation / no app integration / no FOMO or gacha / no BuildState / no frame_started</text>
+<rect x="190" y="380" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="190" y="380" width="840" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="218" y="450" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Short run</text>
+<text x="218" y="504" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Subway Surfers, Block Blast</text>
+<text x="218" y="531" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">quick start and retry</text>
+<text x="218" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: micro moment</text>
+<rect x="1220" y="380" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1220" y="380" width="840" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="1248" y="450" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Level goal</text>
+<text x="1248" y="504" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Candy Crush</text>
+<text x="1248" y="531" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">clear board target</text>
+<text x="1248" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: one sense goal</text>
+<rect x="2250" y="380" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2250" y="380" width="840" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="2278" y="450" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Open idea</text>
+<text x="2278" y="504" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Minecraft</text>
+<text x="2278" y="531" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">self-chosen next step</text>
+<text x="2278" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: world hint</text>
+<rect x="190" y="940" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="190" y="940" width="840" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="218" y="1010" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Collection</text>
+<text x="218" y="1064" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Pokemon TCG Pocket</text>
+<text x="218" y="1091" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">new card curiosity</text>
+<text x="218" y="1118" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: Codex discovery</text>
+<rect x="1220" y="940" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1220" y="940" width="840" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1248" y="1010" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Tactical choice</text>
+<text x="1248" y="1064" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Clash Royale</text>
+<text x="1248" y="1091" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">one decision matters</text>
+<text x="1248" y="1118" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: Choice Fork</text>
+<rect x="2250" y="940" width="840" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2250" y="940" width="840" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="2278" y="1010" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Role clarity</text>
+<text x="2278" y="1064" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Honor of Kings</text>
+<text x="2278" y="1091" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">know your role</text>
+<text x="2278" y="1118" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Talvori: word role</text>
+<rect x="430" y="1680" width="1010" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="430" y="1680" width="1010" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="458" y="1750" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Safe hook</text>
+<text x="458" y="1804" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">I want to see one more meaning, context or discovery because it is interesting.</text>
+<rect x="1960" y="1680" width="1010" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1960" y="1680" width="1010" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1988" y="1750" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Unsafe hook</text>
+<text x="1988" y="1804" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">I must come back or I lose rank, packs, streak, event rewards or social standing.</text>
+</svg>

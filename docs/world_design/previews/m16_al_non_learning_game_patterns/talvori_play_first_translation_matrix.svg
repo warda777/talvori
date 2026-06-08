@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2700" viewBox="0 0 3400 2700">
+<rect width="3400" height="2700" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2624" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Talvori Play-First Translation Matrix</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">Game pattern -&gt; Talvori play moment -&gt; learning value -&gt; blocked traps.</text>
+<line x1="92" y1="2588" x2="3308" y2="2588" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2640" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation deep research only / no implementation / no app integration / no FOMO or gacha / no BuildState / no frame_started</text>
+<rect x="120" y="330" width="640" height="140" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="330" width="640" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="148" y="395" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Pattern</text>
+<text x="148" y="452" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="330" width="660" height="140" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="330" width="660" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="908" y="395" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Talvori moment</text>
+<text x="908" y="452" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="330" width="660" height="140" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="330" width="660" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="1688" y="395" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Learning value</text>
+<text x="1688" y="452" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="330" width="720" height="140" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="330" width="720" height="16" rx="9" ry="9" fill="#8f9d98"/>
+<text x="2468" y="395" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#1e2b28">Blocked trap</text>
+<text x="2468" y="452" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="540" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="540" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="603" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Sandbox</text>
+<text x="148" y="662" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="540" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="540" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="603" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">World Hint</text>
+<text x="908" y="662" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="540" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="540" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="603" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Theme and meaning orientation</text>
+<text x="1688" y="662" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="540" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="540" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="603" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No auto-build</text>
+<text x="2468" y="662" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="755" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="755" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="818" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Puzzle</text>
+<text x="148" y="877" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="755" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="755" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="818" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Meaning Puzzle</text>
+<text x="908" y="877" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="755" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="755" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="818" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Sense and context</text>
+<text x="1688" y="877" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="755" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="755" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="818" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No quiz skin</text>
+<text x="2468" y="877" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="970" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="970" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="1033" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Runner</text>
+<text x="148" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="970" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="970" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="1033" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Action Moment</text>
+<text x="908" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="970" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="970" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="1033" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Verb/action understanding</text>
+<text x="1688" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="970" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="970" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="1033" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No timer pressure</text>
+<text x="2468" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="1185" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="1185" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Match level</text>
+<text x="148" y="1307" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="1185" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="1185" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Context Door</text>
+<text x="908" y="1307" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="1185" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="1185" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Goal-based context choice</text>
+<text x="1688" y="1307" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="1185" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="1185" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="1248" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No booster FOMO</text>
+<text x="2468" y="1307" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="1400" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="1400" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="1463" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Card collection</text>
+<text x="148" y="1522" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="1400" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="1400" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="1463" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Codex Discovery</text>
+<text x="908" y="1522" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="1400" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="1400" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="1463" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Recall and ownership</text>
+<text x="1688" y="1522" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="1400" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="1400" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="1463" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No gacha</text>
+<text x="2468" y="1522" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="1615" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="1615" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="1678" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Tactical duel</text>
+<text x="148" y="1737" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="1615" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="1615" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="1678" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Choice Fork</text>
+<text x="908" y="1737" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="1615" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="1615" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="1678" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Outcome/fallback judgment</text>
+<text x="1688" y="1737" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="1615" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="1615" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="1678" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No PvP/rank</text>
+<text x="2468" y="1737" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="1830" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="1830" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="1893" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">MOBA role</text>
+<text x="148" y="1952" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="1830" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="1830" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="1893" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Word Role</text>
+<text x="908" y="1952" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="1830" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="1830" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="1893" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Word type clarity</text>
+<text x="1688" y="1952" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="1830" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="1830" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="1893" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No team pressure</text>
+<text x="2468" y="1952" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="120" y="2045" width="640" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="2045" width="640" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="148" y="2108" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Social variety</text>
+<text x="148" y="2167" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="880" y="2045" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="880" y="2045" width="660" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="908" y="2108" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Mini experience</text>
+<text x="908" y="2167" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="1660" y="2045" width="660" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1660" y="2045" width="660" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1688" y="2108" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">Different safe play moments</text>
+<text x="1688" y="2167" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="2440" y="2045" width="720" height="145" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2440" y="2045" width="720" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2468" y="2108" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1e2b28">No UGC/social drift</text>
+<text x="2468" y="2167" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d"></text>
+<rect x="520" y="2260" width="2360" height="190" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="520" y="2260" width="2360" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="548" y="2330" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" fill="#1e2b28">Implementation prompt rule</text>
+<text x="548" y="2384" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#65726d">Every future code slice must name the game pattern, the Talvori play moment, the learning value and the blocked pressure traps.</text>
+</svg>
