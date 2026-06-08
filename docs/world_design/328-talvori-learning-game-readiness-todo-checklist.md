@@ -8,30 +8,28 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-Z`
+Aktive Sprint-ID: `M16-AA`
 
 Sprint Goal:
 
-> Companion-, Pausen- und Sensitive-Copy-Regeln fuer den MVP festlegen.
+> Minimale Lernzustaende und SRS-/word_progress-Boundary fuer den MVP festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 39 |
-| Teilweise erledigt `[~]` | 11 |
-| Erledigt `[x]` | 55 |
+| Offen `[ ]` | 35 |
+| Teilweise erledigt `[~]` | 14 |
+| Erledigt `[x]` | 56 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 50.8 % |
-| Fortschrittsbalken | `██████████░░░░░░░░░░` |
+| Gewichteter Fortschritt | 52.9 % |
+| Fortschrittsbalken | `███████████░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-AI-002
-- M16T-AI-004
-- M16T-LEARN-001
+- M16T-LEARN-002
 - M16T-DOC-001
 - M16T-DOC-002
 - M16T-MOBILE-001
@@ -39,6 +37,8 @@ Naechste empfohlene IDs:
 - M16T-DEPTH-001
 - M16T-WORLD-001
 - M16T-UNDO-001
+- M16T-DATA-004
+- M16T-ASSET-003
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -72,7 +72,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Produktanker / Spielziel | M16T-PROD | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Welt-dient-Lernen-Regel in kommenden World-Slices anwenden. |
 | Core Loop | M16T-CORE | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | UI-Event-Regel in spaeteren Implementierungs-Slices als Stop-Regel fuehren. |
 | Learning-to-World Contract | M16T-L2W | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Weltreif-Kriterien spaeter mit Daten-/Review-Gate operationalisieren. |
-| Lernzustaende / Lernloop | M16T-LEARN | 2 | 0 | 0 | 2 | 0 | 0.0 % | `░░░░░░░░░░` | Minimale Lernzustaende ohne SRS-Mutation definieren. |
+| Lernzustaende / Lernloop | M16T-LEARN | 2 | 1 | 1 | 0 | 0 | 75.0 % | `████████░░` | Eigenes SRS-/Migration-/Test-Gate fuer produktive Lernstandslogik planen. |
 | Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Outcome-Regeln in kuenftigen Semantik-/Preview-Slices anwenden. |
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
@@ -86,7 +86,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
-| Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 0 | 2 | 0 | 50.0 % | `█████░░░░░` | Provider-Governance und Privacy-Regeln fuer Klassifikation klaeren. |
+| Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
@@ -179,8 +179,8 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-LEARN-001 | [ ] | Minimale Lernzustaende definieren | Lernfortschritt muss sauber von Weltfortschritt getrennt bleiben. | Min-Zustaende fuer gelernt, wiederholt, unsicher, importiert, kontextreich dokumentiert sind. | Reward-/World-Mutation ohne Lernzustandsvertrag. | nein |
-| M16T-LEARN-002 | [ ] | Keine SRS-/`word_progress`-Aenderung ohne Gate | Bestehende Lernlogik bleibt geschuetzt. | Ein eigenes SRS-/`word_progress`-Gate mit Migration/Testplan existiert. | Jede SRS-/`word_progress`-Aenderung. | nein |
+| M16T-LEARN-001 | [x] | Minimale Lernzustaende definieren | Lernfortschritt muss sauber von Weltfortschritt getrennt bleiben. | Min-Zustaende fuer gelernt, wiederholt, unsicher, importiert, kontextreich dokumentiert sind. | Reward-/World-Mutation ohne Lernzustandsvertrag. | nein |
+| M16T-LEARN-002 | [~] | Keine SRS-/`word_progress`-Aenderung ohne Gate | Bestehende Lernlogik bleibt geschuetzt. | Ein eigenes SRS-/`word_progress`-Gate mit Migration/Testplan existiert. | Jede SRS-/`word_progress`-Aenderung. | nein |
 
 ## 9. Minimal Word Outcome Taxonomy
 
@@ -307,9 +307,9 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-AI-001 | [x] | Confidence-Bands | Automatische Klassifikation braucht Unsicherheitsausgaenge. | Confidence-Bands und Ausgaenge dokumentiert sind. | Auto-Entscheidung bei Unsicherheit. | nein |
-| M16T-AI-002 | [ ] | AI-/Classification-Provider-Governance | Provider duerfen Privacy, Bias und Kosten nicht ungeplant beeinflussen. | Provider-, Privacy-, Bias- und Fallback-Regeln dokumentiert sind. | Produktive AI-Klassifikation. | nein |
+| M16T-AI-002 | [~] | AI-/Classification-Provider-Governance | Provider duerfen Privacy, Bias und Kosten nicht ungeplant beeinflussen. | Provider-, Privacy-, Bias- und Fallback-Regeln dokumentiert sind. | Produktive AI-Klassifikation. | nein |
 | M16T-AI-003 | [x] | Low confidence landet in `NeedsUserChoice`/`Backlog`/`Codex` | Unsicherheit darf nicht sichtbar platzieren. | Low-confidence-Regel in Semantik-Gates uebernommen ist. | Low-confidence Placement. | nein |
-| M16T-AI-004 | [ ] | Privacy-Regeln fuer Wort-/Kontextklassifikation | Satz- und Importkontext kann privat sein. | Welche Daten lokal bleiben und was spaeter gesendet werden darf dokumentiert ist. | Klassifikation ohne Privacy-Gate. | nein |
+| M16T-AI-004 | [~] | Privacy-Regeln fuer Wort-/Kontextklassifikation | Satz- und Importkontext kann privat sein. | Welche Daten lokal bleiben und was spaeter gesendet werden darf dokumentiert ist. | Klassifikation ohne Privacy-Gate. | nein |
 
 ## 23. Review Queue
 
@@ -445,6 +445,16 @@ M16-Z erledigt:
 - M16T-COMP-004
 - M16T-SENS-001
 - M16T-SENS-002
+
+M16-AA erledigt:
+
+- M16T-LEARN-001
+
+M16-AA teilweise vorbereitet:
+
+- M16T-LEARN-002
+- M16T-AI-002
+- M16T-AI-004
 
 M16-U in eigene Detail-Gates ausgelagert:
 
