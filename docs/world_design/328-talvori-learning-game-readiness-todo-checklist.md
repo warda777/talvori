@@ -8,35 +8,35 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-V`
+Aktive Sprint-ID: `M16-W`
 
 Sprint Goal:
 
-> Minimal spielbaren Lernloop fachlich als Contract definieren.
+> Minimal Word Outcome Taxonomy als Detail-Gate konkretisieren.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 67 |
+| Offen `[ ]` | 58 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 26 |
+| Erledigt `[x]` | 35 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 26.9 % |
-| Fortschrittsbalken | `█████░░░░░░░░░░░░░░░` |
+| Gewichteter Fortschritt | 34.5 % |
+| Fortschrittsbalken | `███████░░░░░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-WOT-002
-- M16T-WOT-003
-- M16T-WOT-004
-- M16T-WOT-005
 - M16T-REWARD-002
-- M16T-REWARD-003
 - M16T-QUEUE-002
-- M16T-QUEUE-003
+- M16T-QUEUE-004
+- M16T-SEM-001
+- M16T-SEM-002
+- M16T-SEM-003
+- M16T-COMP-001
+- M16T-SENS-001
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -71,10 +71,10 @@ ihrem Detail-Gate Fortschritt bei.
 | Core Loop | M16T-CORE | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | UI-Event-Regel in spaeteren Implementierungs-Slices als Stop-Regel fuehren. |
 | Learning-to-World Contract | M16T-L2W | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Weltreif-Kriterien spaeter mit Daten-/Review-Gate operationalisieren. |
 | Lernzustaende / Lernloop | M16T-LEARN | 2 | 0 | 0 | 2 | 0 | 0.0 % | `░░░░░░░░░░` | Minimale Lernzustaende ohne SRS-Mutation definieren. |
-| Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 1 | 0 | 7 | 0 | 12.5 % | `█░░░░░░░░░` | Einzel-Outcomes CodexOnly bis NeedsUserChoice vertiefen. |
+| Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Outcome-Regeln in kuenftigen Semantik-/Preview-Slices anwenden. |
 | Semantik-System | M16T-SEM | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Minimal Semantic Profile und Konfliktprioritaeten klaeren. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Review-Queue-Budget und Safe Defaults vertiefen. |
-| Reward ohne Druck | M16T-REWARD | 5 | 1 | 0 | 4 | 0 | 20.0 % | `██░░░░░░░░` | Reward-Budget und Trennung Reward/Vorschlag/BuildState vertiefen. |
+| Reward ohne Druck | M16T-REWARD | 5 | 2 | 0 | 3 | 0 | 40.0 % | `████░░░░░░` | Reward-Budget, Rueckkehr-nach-Pause und Sensitive-Trigger vertiefen. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
 | Container / Depth | M16T-DEPTH | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Depth-Modell und Suchbarkeit verschachtelter Objekte klaeren. |
 | Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
@@ -85,7 +85,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Confidence-Bands und Privacy-Regeln definieren. |
-| Review Queue | M16T-QUEUE | 4 | 1 | 0 | 3 | 0 | 25.0 % | `███░░░░░░░` | Session-Budget, Queue-Ausgaenge und Priorisierung definieren. |
+| Review Queue | M16T-QUEUE | 4 | 2 | 0 | 2 | 0 | 50.0 % | `█████░░░░░` | Session-Budget und Priorisierung nach Risiko/Lernrelevanz definieren. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 0 | 0 | 2 | 1 | 0.0 % | `░░░░░░░░░░` | Status-/Scope-/Commit-Freigabe-Regel operationalisieren. |
@@ -185,13 +185,13 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-WOT-001 | [x] | Minimal Word Outcome Taxonomy finalisieren | Woerter brauchen begrenzte, sichere Ausgaenge. | Outcome-Liste als fuehrende Taxonomy freigegeben ist. | Produktive Routing-Ausgaenge. | nein |
-| M16T-WOT-002 | [ ] | `CodexOnly` | Viele Woerter sollen neutral lernbar bleiben. | CodexOnly-Kriterium mit Beispielen und UI-Regeln dokumentiert ist. | Sichtbare Platzierung fuer CodexOnly. | nein |
-| M16T-WOT-003 | [ ] | `WorldCandidate` | Weltkandidaten duerfen nicht automatisch gebaut werden. | WorldCandidate User Choice, Gate und Fallback nennt. | Auto-Placement. | nein |
-| M16T-WOT-004 | [ ] | `ContainerItem` | Kleinteile brauchen Depth/Container statt Inselplatzierung. | ContainerItem-Grenzen, Clutter-Regeln und Fallbacks dokumentiert sind. | TinyObjects in IslandView. | nein |
-| M16T-WOT-005 | [ ] | `ActionChallenge` | Verben und Aktionen sind keine statischen Objekte. | ActionChallenge als eigener Ausgang mit Beispielen dokumentiert ist. | Verb als Gebaeude/Objekt. | nein |
-| M16T-WOT-006 | [ ] | `ContextCard` | Abstrakte oder kontextarme Begriffe brauchen Erklaerraum. | ContextCard-Regeln fuer Sense, Beispiel und Fallback dokumentiert sind. | Symbolpflicht fuer abstrakte Begriffe. | nein |
-| M16T-WOT-007 | [ ] | `SensitiveGated` | Sensitive Inhalte brauchen Policy und Opt-in. | SensitiveGated mit Policy- und Privacy-Gates dokumentiert ist. | Sensitive Visualisierung ohne Gate. | nein |
-| M16T-WOT-008 | [ ] | `NeedsUserChoice` | Multi-Home und Unsicherheit brauchen aktive Entscheidung. | NeedsUserChoice-Kriterien und Queue-Ausgang dokumentiert sind. | Falsche Default-Kategorie. | nein |
+| M16T-WOT-002 | [x] | `CodexOnly` | Viele Woerter sollen neutral lernbar bleiben. | CodexOnly-Kriterium mit Beispielen und UI-Regeln dokumentiert ist. | Sichtbare Platzierung fuer CodexOnly. | nein |
+| M16T-WOT-003 | [x] | `WorldCandidate` | Weltkandidaten duerfen nicht automatisch gebaut werden. | WorldCandidate User Choice, Gate und Fallback nennt. | Auto-Placement. | nein |
+| M16T-WOT-004 | [x] | `ContainerItem` | Kleinteile brauchen Depth/Container statt Inselplatzierung. | ContainerItem-Grenzen, Clutter-Regeln und Fallbacks dokumentiert sind. | TinyObjects in IslandView. | nein |
+| M16T-WOT-005 | [x] | `ActionChallenge` | Verben und Aktionen sind keine statischen Objekte. | ActionChallenge als eigener Ausgang mit Beispielen dokumentiert ist. | Verb als Gebaeude/Objekt. | nein |
+| M16T-WOT-006 | [x] | `ContextCard` | Abstrakte oder kontextarme Begriffe brauchen Erklaerraum. | ContextCard-Regeln fuer Sense, Beispiel und Fallback dokumentiert sind. | Symbolpflicht fuer abstrakte Begriffe. | nein |
+| M16T-WOT-007 | [x] | `SensitiveGated` | Sensitive Inhalte brauchen Policy und Opt-in. | SensitiveGated mit Policy- und Privacy-Gates dokumentiert ist. | Sensitive Visualisierung ohne Gate. | nein |
+| M16T-WOT-008 | [x] | `NeedsUserChoice` | Multi-Home und Unsicherheit brauchen aktive Entscheidung. | NeedsUserChoice-Kriterien und Queue-Ausgang dokumentiert sind. | Falsche Default-Kategorie. | nein |
 
 ## 10. Semantik-System
 
@@ -217,7 +217,7 @@ ausdruecklich freigegeben werden.
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-REWARD-001 | [x] | Reward-Prinzip ohne Druck | Motivation darf nicht in Schuld oder Zwang kippen. | Reward-Regeln keine Strafe, kein Verfall, keine Pflichtentscheidung enthalten. | Produktive Reward Bridge. | nein |
 | M16T-REWARD-002 | [ ] | Reward-Budget | Weltfeedback soll dosiert und nicht manipulativ sein. | Pro Session/Loop Grenzen fuer Vorschlaege und Feedback dokumentiert sind. | Dauer-Belohnung oder Druck. | nein |
-| M16T-REWARD-003 | [ ] | Trennung Reward/Vorschlag/PlacementCandidate/BuildState | Reward darf kein Bauen ausloesen. | Begriffe und erlaubte Uebergaenge getrennt sind. | Reward -> BuildState. | nein |
+| M16T-REWARD-003 | [x] | Trennung Reward/Vorschlag/PlacementCandidate/BuildState | Reward darf kein Bauen ausloesen. | Begriffe und erlaubte Uebergaenge getrennt sind. | Reward -> BuildState. | nein |
 | M16T-REWARD-004 | [ ] | Rueckkehr-nach-Pause-Regel | Pausen sollen sanft aufgefangen werden. | Comeback-Regeln ohne Strafe, Schuld oder Weltverfall dokumentiert sind. | Retention-Druck. | nein |
 | M16T-REWARD-005 | [ ] | Sensitive-Themen nicht als Retention-Trigger | Emotionale/sensible Inhalte duerfen nicht manipulativ wirken. | Sensitive/Emotion-Woerter fuer Retention explizit blockiert sind. | Sensitive Reward/Druck. | nein |
 
@@ -315,7 +315,7 @@ ausdruecklich freigegeben werden.
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-QUEUE-001 | [x] | Review-Queue-Konzept | Viele Woerter brauchen geordnete Entscheidungspfade. | Queue-Typen, Filter, Prioritaeten und Ausgaenge dokumentiert sind. | Massenentscheidungs-UI. | nein |
 | M16T-QUEUE-002 | [ ] | Session-Budget | Nutzer darf nur wenige Entscheidungen pro Sitzung sehen. | Session-Budget als Planungsregel existiert. | Review-Zwang. | nein |
-| M16T-QUEUE-003 | [ ] | Queue-Ausgaenge | Review muss sichere Ausgaenge haben. | Confirm, Change, Later, Codex, Backlog, Blueprint, Hide dokumentiert sind. | Sackgassen-Review. | nein |
+| M16T-QUEUE-003 | [x] | Queue-Ausgaenge | Review muss sichere Ausgaenge haben. | Confirm, Change, Later, Codex, Backlog, Blueprint, Hide dokumentiert sind. | Sackgassen-Review. | nein |
 | M16T-QUEUE-004 | [ ] | Queue-Prioritaet nach Risiko und Lernrelevanz | Nicht jedes Wort ist gleich wichtig. | Risiko/Lernrelevanz/Confidence/Nutzerziel priorisiert sind. | FIFO ohne Risiko. | nein |
 
 ## 24. Technische Architektur / App-Integration
@@ -402,6 +402,18 @@ M16-V teilweise vorbereitet:
 - M16T-PROD-003
 - M16T-CORE-003
 - M16T-L2W-003
+
+M16-W erledigt:
+
+- M16T-WOT-002
+- M16T-WOT-003
+- M16T-WOT-004
+- M16T-WOT-005
+- M16T-WOT-006
+- M16T-WOT-007
+- M16T-WOT-008
+- M16T-QUEUE-003
+- M16T-REWARD-003
 
 M16-U in eigene Detail-Gates ausgelagert:
 
