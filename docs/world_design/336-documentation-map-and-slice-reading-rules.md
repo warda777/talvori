@@ -159,8 +159,18 @@ Non-Goals:
 | --- | --- |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Research-Gates leiten Prinzipien ab, kopieren aber keine Mechaniken blind. |
 | `328-talvori-learning-game-readiness-todo-checklist.md` | `M16T-RESEARCH-002` und `M16T-RESEARCH-003` sind eigene Detail-Gates. |
+| `345-play-first-learning-experience-doctrine.md` | Game-Patterns muessen in Play-First-Regeln uebersetzt werden, bevor Mechaniken entstehen. |
 
-### 4.14 Visual-QA / Preview-Diagramme
+### 4.14 Play-First / Gameplay Doctrine
+
+| Dokument | Kernregel |
+| --- | --- |
+| `345-play-first-learning-experience-doctrine.md` | Talvori ist kein Vokabeltrainer mit Spieldeko, sondern ein Spiel, dessen Spielhandlungen Lernnutzen erzeugen. |
+| `340-gameplay-pillars-and-mvp-quest-loop-research-prep.md` | Gameplay Pillars, Quest-/Challenge-Loop und Spass ohne Lernschaden. |
+| `343-habit-motivation-pressure-free-retention-research.md` | Motivation und Retention ohne Druck, Streak-Schuld oder Pflicht. |
+| `344-supercell-clash-progression-social-pressure-research.md` | Aufbaufortschritt und Social/Competition-Risiken ohne MVP-Freigabe. |
+
+### 4.15 Visual-QA / Preview-Diagramme
 
 | Dokument | Kernregel |
 | --- | --- |
@@ -180,20 +190,22 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
-| Learning Loop Slice | `328`, `327`, `330`, `331`, `332`, `335`, `329` |
+| Learning Loop Slice | `328`, `345`, `327`, `330`, `331`, `332`, `335`, `329` |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
 | Reward / Queue Slice | `328`, `330`, `331`, `332`, `334`, `327`, `326` |
+| Gameplay / Quest / Challenge Slice | `328`, `345`, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `328`, `345`, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Container / Depth Slice | `328`, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
 | Build-Wheel Slice | `328`, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
-| App-Integration Slice | `328`, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Research / Benchmark Slice | `328`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
+| UI / MVP Screen Slice | `328`, `345`, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
+| App-Integration Slice | `328`, `345`, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
 
@@ -207,6 +219,8 @@ Research, Visuals oder Review muss enthalten:
 - Ziel,
 - betroffene M16-T-IDs,
 - Pflichtlektuere,
+- Play-First-Rule aus `345`, wenn MVP, Gameplay, Quest, Challenge, World,
+  Companion, UI oder Implementierung betroffen ist,
 - erwartete Dateien,
 - Non-Goals,
 - Stop-Regeln,

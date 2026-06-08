@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2550" viewBox="0 0 3200 2550">
+<rect width="3200" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3104" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Talvori Play Moment Types</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">MVP-near play moments turn learning into choice, discovery and safe feedback.</text>
+<line x1="92" y1="2438" x2="3108" y2="2438" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation research prep only / no implementation / no app integration / no auto placement / no BuildState / no frame_started</text>
+<rect x="130" y="340" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="130" y="340" width="500" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="158" y="407" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Meaning Puzzle</text>
+<text x="158" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Resolve sense.</text>
+<text x="158" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Example: Bank meaning.</text>
+<text x="158" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No default building.</text>
+<rect x="730" y="340" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="730" y="340" width="500" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="758" y="407" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Context Door</text>
+<text x="758" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Sentence opens direction.</text>
+<text x="758" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Example: home vs coast.</text>
+<text x="758" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No route.</text>
+<rect x="1330" y="340" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1330" y="340" width="500" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="1358" y="407" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Micro Quest</text>
+<text x="1358" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Tali/Vori asks optional question.</text>
+<text x="1358" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No pressure.</text>
+<rect x="1930" y="340" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1930" y="340" width="500" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1958" y="407" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Container Hunt</text>
+<text x="1958" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Find where tiny item belongs.</text>
+<text x="1958" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No island clutter.</text>
+<rect x="2530" y="340" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2530" y="340" width="500" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="2558" y="407" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Action Moment</text>
+<text x="2558" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Verb becomes action idea.</text>
+<text x="2558" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No forced quest.</text>
+<rect x="130" y="990" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="130" y="990" width="500" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="158" y="1057" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">World Hint</text>
+<text x="158" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Small safe response.</text>
+<text x="158" y="1143" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No BuildState.</text>
+<rect x="730" y="990" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="730" y="990" width="500" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="758" y="1057" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Codex Discovery</text>
+<text x="758" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Collection with explanation.</text>
+<text x="758" y="1143" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No 20k cards.</text>
+<rect x="1330" y="990" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1330" y="990" width="500" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="1358" y="1057" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Calm Comeback</text>
+<text x="1358" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Return without guilt.</text>
+<text x="1358" y="1143" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No streak loss.</text>
+<rect x="1930" y="990" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1930" y="990" width="500" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="1958" y="1057" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Choice Fork</text>
+<text x="1958" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Confirm, Change, Later.</text>
+<text x="1958" y="1143" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No Pflichtreview.</text>
+<rect x="2530" y="990" width="500" height="465" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2530" y="990" width="500" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="2558" y="1057" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#1e2b28">Tiny Mystery</text>
+<text x="2558" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Small curiosity hook.</text>
+<text x="2558" y="1143" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No hidden required object.</text>
+<rect x="420" y="1760" width="2360" height="330" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="420" y="1760" width="2360" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="448" y="1832" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Every play moment needs exits</text>
+<text x="448" y="1885" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Later, Codex, Backlog, ContextCard, Hide and SensitiveGated are part of the play design. They are not failure states.</text>
+</svg>

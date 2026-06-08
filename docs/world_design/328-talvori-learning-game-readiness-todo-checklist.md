@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AJ`
+Aktive Sprint-ID: `M16-AK`
 
 Sprint Goal:
 
-> Supercell-/Clash-Progression, Social Play, Competition-Risiken und druckfreie Talvori-Grenzen aus Deep Research ableiten.
+> Play-First Learning Doctrine verbindlich machen und Spielmuster mit Lernnutzen verbinden.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 119 |
+| Gesamtanzahl M16-T-Items | 127 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 95 |
+| Teilweise erledigt `[~]` | 14 |
+| Erledigt `[x]` | 101 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 84.9 % |
+| Gewichteter Fortschritt | 85.0 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -32,6 +32,8 @@ Naechste empfohlene IDs:
 - M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
+- M16T-PLAY-006
+- M16T-PLAY-008
 - M16T-WORLD-002
 - M16T-WHEEL-003
 - M16T-SENS-003
@@ -59,7 +61,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer bestehende 23 Bereiche
+### 0.3 Bereichs-Dashboard fuer 24 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -83,6 +85,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
+| Play-First Learning | M16T-PLAY | 8 | 6 | 2 | 0 | 0 | 87.5 % | `█████████░` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices anwenden; Non-Learning-Game-Benchmarks spaeter vertiefen. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -544,6 +547,20 @@ M16-AJ bewusst unveraendert:
 - M16T-WORLD-002
 - M16T-WHEEL-003
 
+M16-AK erledigt:
+
+- M16T-PLAY-001
+- M16T-PLAY-002
+- M16T-PLAY-003
+- M16T-PLAY-004
+- M16T-PLAY-005
+- M16T-PLAY-007
+
+M16-AK teilweise vorbereitet:
+
+- M16T-PLAY-006
+- M16T-PLAY-008
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -618,7 +635,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..008, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-Gefuehl und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -681,7 +698,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 23 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden 23 Bereiche steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je 24 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -728,6 +745,19 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-GAME-002 | [x] | Level-/Quest-/Challenge-Loop planen | Lernen braucht wiederkehrende, aber faire Spielmomente. | Loop fuer Level, Quest und Challenge ohne Druck dokumentiert ist. | Quest-/Level-Code. | nein |
 | M16T-GAME-003 | [x] | Lernlogik und Spielaufbau harmonisieren | Spiel darf Lernlogik nicht korrumpieren. | Reward, Challenge und Weltfeedback getrennt, aber verbunden sind. | Reward Bridge ohne Contract. | nein |
 | M16T-GAME-004 | [x] | Spass/Spannung ohne Lernschaden definieren | Engagement darf Retention-Druck nicht ueber Lernen stellen. | Spannung, Risiko, Belohnung und Pause als faire Prinzipien dokumentiert sind. | Druckmechaniken. | nein |
+
+### M16T-PLAY
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-PLAY-001 | [x] | Play-First Learning Doctrine | Talvori darf nicht wie ein Vokabeltrainer mit Spieldeko wirken. | Verbindliche Doctrine dokumentiert ist: Talvori ist ein Spiel, dessen Spielhandlungen Lernnutzen erzeugen. | Implementierung ohne Spielmoment. | nein |
+| M16T-PLAY-002 | [x] | Lernen als Nebenprodukt des Spielens | Nutzer sollen Neugier, Entscheidung und Weltfortschritt spuerbar erleben. | Lernen als Wirkung von Spielhandlung, Challenge, Entdeckung und Feedback dokumentiert ist. | Pflichtlernen als Hauptgefuehl. | nein |
+| M16T-PLAY-003 | [x] | Spielmechanik-zu-Lernnutzen-Matrix | Jede Mechanik muss Lernnutzen haben, ohne Lernpflicht zu wirken. | Matrix von Puzzle, Weg, Container, Aktion, Weltbereich, Codex und Review zu Lernnutzen existiert. | Mechanik ohne Lernanker. | nein |
+| M16T-PLAY-004 | [x] | Neugier-/Challenge-/Flow-Regeln | Spielgefuehl entsteht aus klaren Zielen, kleiner Herausforderung und sicherem Feedback. | Curiosity-, Challenge- und Flow-Regeln mit Safe Defaults dokumentiert sind. | Druck, Sackgassen, Ueberladung. | nein |
+| M16T-PLAY-005 | [x] | Uebung darf sich nicht wie Uebung anfuehlen | Klassische Uebungs- und Fragebogenmuster wuerden das Produktgefuehl brechen. | Verbotene Uebungsgefuehle und Play-Alternativen dokumentiert sind. | Multiple-Choice als Hauptgefuehl, Textwand, XP-Grind. | nein |
+| M16T-PLAY-006 | [~] | Benchmark-Games ohne Lernfokus analysieren | Talvori muss auch von reinen Spielen lernen, nicht nur von Lernapps. | Minecraft, Roblox, Puzzle-, Runner-, Match-, Card- und MOBA-Patterns als Research-Kandidaten dokumentiert und spaeter vertieft sind. | Blindes Kopieren, Social-/FOMO-/Gacha-/Timer-Druck. | nein |
+| M16T-PLAY-007 | [x] | MVP-Playtest-Kriterien fuer Spielgefuehl | Spaetere MVP-Tests muessen fragen, ob sich Talvori wirklich wie Spiel anfuehlt. | Playtest-Fragen zu Spielgefuehl, Neugier, Freiwilligkeit, Stress, Fehlern und Weltreaktion existieren. | MVP ohne Spielgefuehl-Pruefung. | nein |
+| M16T-PLAY-008 | [~] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
 
 ### M16T-SOCIAL
 

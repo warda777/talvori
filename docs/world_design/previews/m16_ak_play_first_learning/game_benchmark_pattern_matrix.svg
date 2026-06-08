@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2500" viewBox="0 0 3200 2500">
+<rect width="3200" height="2500" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3104" height="2424" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Game Benchmark Pattern Matrix</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">Non-learning games are research candidates for play feeling, not mechanics to copy.</text>
+<line x1="92" y1="2388" x2="3108" y2="2388" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2440" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation research prep only / no implementation / no app integration / no auto placement / no BuildState / no frame_started</text>
+<rect x="120" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="120" y="340" width="430" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="148" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Sandbox</text>
+<text x="148" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Minecraft, Roblox</text>
+<text x="148" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">World, creation, social variety</text>
+<text x="148" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: discovery and ownership</text>
+<text x="148" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: endless scope, unsafe UGC</text>
+<rect x="625" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="625" y="340" width="430" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="653" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Puzzle</text>
+<text x="653" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Block Blast, Candy Crush</text>
+<text x="653" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Pattern, level goal, quick retry</text>
+<text x="653" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: meaning puzzle</text>
+<text x="653" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: grind, pay/FOMO</text>
+<rect x="1130" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1130" y="340" width="430" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="1158" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Action</text>
+<text x="1158" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Subway Surfers</text>
+<text x="1158" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Flow, reflex, short round</text>
+<text x="1158" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: action moment</text>
+<text x="1158" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: timer stress</text>
+<rect x="1635" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1635" y="340" width="430" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="1663" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Progression</text>
+<text x="1663" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Clash of Clans</text>
+<text x="1663" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Base, choices, long goals</text>
+<text x="1663" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: world possibility</text>
+<text x="1663" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: timers, war pressure</text>
+<rect x="2140" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2140" y="340" width="430" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2168" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Competition</text>
+<text x="2168" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Clash Royale, Honor of Kings</text>
+<text x="2168" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Skill, rank, team role</text>
+<text x="2168" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: later fairness research</text>
+<text x="2168" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: ranking shame</text>
+<rect x="2645" y="340" width="430" height="690" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2645" y="340" width="430" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="2673" y="408" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#1e2b28">Collection</text>
+<text x="2673" y="465" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Pokemon TCG Pocket</text>
+<text x="2673" y="493" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Collection, deck, surprise</text>
+<text x="2673" y="521" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Talvori: Codex discovery</text>
+<text x="2673" y="549" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Avoid: gacha and FOMO</text>
+<rect x="180" y="1260" width="1330" height="410" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="180" y="1260" width="1330" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="208" y="1332" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">MVP relevant patterns</text>
+<text x="208" y="1385" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Meaning Puzzle, Context Door, Codex Discovery, Calm Comeback and Choice Fork can support play-first learning without social or</text>
+<text x="208" y="1413" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">economy scope.</text>
+<rect x="1690" y="1260" width="1330" height="410" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1690" y="1260" width="1330" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1718" y="1332" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Post-MVP or blocked patterns</text>
+<text x="1718" y="1385" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Competitive ranking, clans, gacha, timers, economy and social pressure remain research-only until their own gates exist.</text>
+<rect x="460" y="1920" width="2280" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="460" y="1920" width="2280" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="488" y="1992" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Research prep status</text>
+<text x="488" y="2045" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">M16-AK names patterns and questions. It does not complete deep research for all games, and it does not approve runtime mechanics.</text>
+</svg>

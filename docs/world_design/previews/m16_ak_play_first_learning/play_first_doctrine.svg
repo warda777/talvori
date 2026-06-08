@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2350" viewBox="0 0 3200 2350">
+<rect width="3200" height="2350" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3104" height="2274" rx="30" ry="30" fill="#f8f9f4" stroke="#d7dfd8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Play-First Learning Doctrine</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#65726d">Talvori is a game whose play actions create learning value.</text>
+<line x1="92" y1="2238" x2="3108" y2="2238" stroke="#d7dfd8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2290" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#65726d">documentation research prep only / no implementation / no app integration / no auto placement / no BuildState / no frame_started</text>
+<rect x="150" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="150" y="370" width="360" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="178" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Play</text>
+<text x="178" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Curiosity, challenge, discovery,</text>
+<text x="178" y="523" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">choice.</text>
+<rect x="660" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="660" y="370" width="360" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="688" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Meaning</text>
+<text x="688" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Sense and context become</text>
+<text x="688" y="523" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">visible.</text>
+<rect x="1170" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1170" y="370" width="360" height="16" rx="9" ry="9" fill="#59b7aa"/>
+<text x="1198" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Choice</text>
+<text x="1198" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">User can confirm, change or</text>
+<text x="1198" y="523" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">choose Later.</text>
+<rect x="1680" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1680" y="370" width="360" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1708" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Feedback</text>
+<text x="1708" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Small safe response, no</text>
+<text x="1708" y="523" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">pressure.</text>
+<rect x="2190" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2190" y="370" width="360" height="16" rx="9" ry="9" fill="#d6b95a"/>
+<text x="2218" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">World</text>
+<text x="2218" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Possibility, not placement.</text>
+<rect x="2700" y="370" width="360" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="2700" y="370" width="360" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2728" y="442" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Learning</text>
+<text x="2728" y="495" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Benefit happens through play.</text>
+<line x1="510" y1="545" x2="650" y2="545" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="650,545 622,527 622,563" fill="#93a39c"/>
+<line x1="1020" y1="545" x2="1160" y2="545" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1160,545 1132,527 1132,563" fill="#93a39c"/>
+<line x1="1530" y1="545" x2="1670" y2="545" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1670,545 1642,527 1642,563" fill="#93a39c"/>
+<line x1="2040" y1="545" x2="2180" y2="545" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2180,545 2152,527 2152,563" fill="#93a39c"/>
+<line x1="2550" y1="545" x2="2690" y2="545" stroke="#93a39c" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2690,545 2662,527 2662,563" fill="#93a39c"/>
+<rect x="210" y="950" width="1270" height="380" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="210" y="950" width="1270" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="238" y="1022" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Not a vocabulary trainer with game decoration</text>
+<text x="238" y="1075" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">Every exercise needs a play moment. Every play moment needs a learning anchor. The user should feel curiosity first, not</text>
+<text x="238" y="1103" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">homework first.</text>
+<rect x="1720" y="950" width="1270" height="380" rx="20" ry="20" fill="#ffffff" stroke="#d7dfd8" stroke-width="2"/>
+<rect x="1720" y="950" width="1270" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1748" y="1022" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1e2b28">Hard stop rules</text>
+<text x="1748" y="1075" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#65726d">No auto placement, no BuildState, no frame_started, no persistence, no timer pressure, no streak guilt, no forced review.</text>
+<rect x="350" y="1590" width="570" height="72" rx="28" ry="28" fill="#8979c7"/>
+<text x="376" y="1628" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Game moment?</text>
+<rect x="970" y="1590" width="570" height="72" rx="28" ry="28" fill="#67a7cb"/>
+<text x="996" y="1628" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Curiosity?</text>
+<rect x="1590" y="1590" width="570" height="72" rx="28" ry="28" fill="#59b7aa"/>
+<text x="1616" y="1628" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Small challenge?</text>
+<rect x="2210" y="1590" width="570" height="72" rx="28" ry="28" fill="#69ad78"/>
+<text x="2236" y="1628" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Rewarding feedback?</text>
+<rect x="350" y="1710" width="570" height="72" rx="28" ry="28" fill="#8979c7"/>
+<text x="376" y="1748" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Learning value?</text>
+<rect x="970" y="1710" width="570" height="72" rx="28" ry="28" fill="#67a7cb"/>
+<text x="996" y="1748" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">No exercise feeling?</text>
+<rect x="1590" y="1710" width="570" height="72" rx="28" ry="28" fill="#59b7aa"/>
+<text x="1616" y="1748" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">No pressure?</text>
+<rect x="2210" y="1710" width="570" height="72" rx="28" ry="28" fill="#69ad78"/>
+<text x="2236" y="1748" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Safe exits?</text>
+</svg>
