@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AG`
+Aktive Sprint-ID: `M16-AH`
 
 Sprint Goal:
 
-> Breite Benchmark-Landkarte fuer Lern-, Habit-, Flashcard-, Interactive-Learning-, Aufbau-, Social-, Challenge- und Metrics-Systeme vorbereiten.
+> Asset-Lizenz-/Quelle-/Benennung-Regeln und Offline-/Sync-Konfliktregeln als reine Planung schliessen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 2 |
+| Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 18 |
-| Erledigt `[x]` | 85 |
+| Erledigt `[x]` | 87 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 79.0 % |
+| Gewichteter Fortschritt | 80.7 % |
 | Fortschrittsbalken | `████████████████░░░░` |
 
 Naechste empfohlene IDs:
@@ -37,8 +37,12 @@ Naechste empfohlene IDs:
 - M16T-METRICS-001
 - M16T-METRICS-002
 - M16T-METRICS-003
-- M16T-DATA-004
-- M16T-ASSET-004
+- M16T-AI-002
+- M16T-AI-004
+- M16T-WORLD-002
+- M16T-WHEEL-003
+- M16T-SENS-003
+- M16T-ASSET-002
 
 ### 0.2 Progress-Formel
 
@@ -82,8 +86,8 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 4 | 1 | 1 | 1 | 1 | 37.5 % | `████░░░░░░` | Asset-Scope bleibt blockiert; Lizenz-/Quelle-/Benennung-Regeln separat klaeren. |
-| Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
+| Asset Scope | M16T-ASSET | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Asset-Scope bleibt blockiert; Lizenz-/Quelle-/Benennung-Regeln in spaeteren Asset-Slices anwenden. |
+| Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
@@ -288,7 +292,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-001 | [!] | Asset-Scope-Gate | Echte Spielassets brauchen eigenes Gate. | Asset-Familien, Quellen, Qualitaet und Verwendung separat freigegeben sind. | Asset-Dateien unter `assets/`. | nein |
 | M16T-ASSET-002 | [~] | Kein Wort erzeugt automatisch ein Asset | Semantik ist kein Asset-Generator. | Jeder Word-/World-Slice diese Regel nennt. | Auto-Asset aus Wort. | nein |
 | M16T-ASSET-003 | [x] | Sensitive-safe Asset-Regeln | Sensitive Themen brauchen besonders neutrale Visualisierung. | Sensitive Asset Policy dokumentiert ist. | Symbolik ohne Policy. | nein |
-| M16T-ASSET-004 | [ ] | Lizenz-/Quelle-/Benennung-Regeln | Assets muessen rechtlich und strukturell sauber bleiben. | Naming, Quellen, Lizenzen und Review fuer Assets dokumentiert sind. | Unklare Asset-Herkunft. | nein |
+| M16T-ASSET-004 | [x] | Lizenz-/Quelle-/Benennung-Regeln | Assets muessen rechtlich und strukturell sauber bleiben. | Naming, Quellen, Lizenzen und Review fuer Assets dokumentiert sind. | Unklare Asset-Herkunft. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -297,7 +301,7 @@ ausdruecklich freigegeben werden.
 | M16T-DATA-001 | [!] | Datenmodell-Gate | Konzepte wie SemanticProfile sind noch keine Datenstruktur. | Eigenes Datenmodell-Gate mit Non-Goals und Tests existiert. | Finale Datenstruktur. | nein |
 | M16T-DATA-002 | [!] | Persistence-Gate | Speicherung betrifft Datenschutz, Undo und Migration. | Persistenz-Gate mit lokaler/remote Strategie existiert. | Jede Persistenz. | nein |
 | M16T-DATA-003 | [!] | Migration-Gate | Bestehende Daten duerfen nicht beschaedigt werden. | Migration- und Rollback-Plan inklusive Tests existiert. | DB-/SRS-Migration. | nein |
-| M16T-DATA-004 | [ ] | Offline/Sync-Konfliktregeln | Offline-first und spaetere Cloud brauchen Konfliktmodell. | Konfliktloesung fuer lokale und remote Entscheidungen dokumentiert ist. | Sync ohne Konfliktregel. | nein |
+| M16T-DATA-004 | [x] | Offline/Sync-Konfliktregeln | Offline-first und spaetere Cloud brauchen Konfliktmodell. | Konfliktloesung fuer lokale und remote Entscheidungen dokumentiert ist. | Sync ohne Konfliktregel. | nein |
 | M16T-DATA-005 | [!] | Supabase-Writes weiter blockieren | Backend-Writes brauchen explizite Freigabe. | Supabase-Write-Gate separat eroeffnet und freigegeben ist. | Supabase Writes. | nein |
 
 ## 22. Confidence Scoring / AI Governance
@@ -514,6 +518,15 @@ M16-AG teilweise vorbereitet:
 M16-AG vertieft, bleibt aber teilweise vorbereitet:
 
 - M16T-RESEARCH-004
+
+M16-AH erledigt:
+
+- M16T-ASSET-004
+- M16T-DATA-004
+
+Damit bleiben keine normalen offenen `[ ]` M16-T-Items. Blockierte,
+teilweise erledigte und ausgelagerte Gates bleiben bewusst bestehen und
+duerfen nicht nebenbei als Implementierungsfreigabe gelesen werden.
 
 M16-U in eigene Detail-Gates ausgelagert:
 
