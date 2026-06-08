@@ -8,34 +8,35 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-U`
+Aktive Sprint-ID: `M16-V`
 
 Sprint Goal:
 
-> M16-T steuerbar machen: Dashboard, Prozentfortschritt, Scrum-lite, MVP-
-> Roadmap, Change Intake und Research Gates dokumentieren.
+> Minimal spielbaren Lernloop fachlich als Contract definieren.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 79 |
-| Teilweise erledigt `[~]` | 10 |
-| Erledigt `[x]` | 16 |
+| Offen `[ ]` | 67 |
+| Teilweise erledigt `[~]` | 12 |
+| Erledigt `[x]` | 26 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 17.6 % |
-| Fortschrittsbalken | `████░░░░░░░░░░░░░░░░` |
+| Gewichteter Fortschritt | 26.9 % |
+| Fortschrittsbalken | `█████░░░░░░░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-MVP-004
-- M16T-CORE-001
-- M16T-L2W-001
-- M16T-WOT-001
-- M16T-REWARD-001
-- M16T-QUEUE-001
+- M16T-WOT-002
+- M16T-WOT-003
+- M16T-WOT-004
+- M16T-WOT-005
+- M16T-REWARD-002
+- M16T-REWARD-003
+- M16T-QUEUE-002
+- M16T-QUEUE-003
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -66,14 +67,14 @@ ihrem Detail-Gate Fortschritt bei.
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Meta-/Prozess-Gates | M16T-META | 4 | 1 | 0 | 3 | 0 | 25.0 % | `███░░░░░░░` | Prompt-/Output-Regel mit ID-Abgleich verbindlich machen. |
-| Produktanker / Spielziel | M16T-PROD | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Produktanker und Lernziel/Spielziel trennen. |
-| Core Loop | M16T-CORE | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Minimalen Core Loop als Contract-Gate formulieren. |
-| Learning-to-World Contract | M16T-L2W | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Lernereignis -> Weltreaktion vertraglich trennen. |
+| Produktanker / Spielziel | M16T-PROD | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Welt-dient-Lernen-Regel in kommenden World-Slices anwenden. |
+| Core Loop | M16T-CORE | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | UI-Event-Regel in spaeteren Implementierungs-Slices als Stop-Regel fuehren. |
+| Learning-to-World Contract | M16T-L2W | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Weltreif-Kriterien spaeter mit Daten-/Review-Gate operationalisieren. |
 | Lernzustaende / Lernloop | M16T-LEARN | 2 | 0 | 0 | 2 | 0 | 0.0 % | `░░░░░░░░░░` | Minimale Lernzustaende ohne SRS-Mutation definieren. |
-| Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 0 | 0 | 8 | 0 | 0.0 % | `░░░░░░░░░░` | Outcome-Taxonomy finalisieren. |
+| Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 1 | 0 | 7 | 0 | 12.5 % | `█░░░░░░░░░` | Einzel-Outcomes CodexOnly bis NeedsUserChoice vertiefen. |
 | Semantik-System | M16T-SEM | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Minimal Semantic Profile und Konfliktprioritaeten klaeren. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Review-Queue-Budget und Safe Defaults vertiefen. |
-| Reward ohne Druck | M16T-REWARD | 5 | 0 | 0 | 5 | 0 | 0.0 % | `░░░░░░░░░░` | Reward Bridge fachlich ohne Druck abgrenzen. |
+| Reward ohne Druck | M16T-REWARD | 5 | 1 | 0 | 4 | 0 | 20.0 % | `██░░░░░░░░` | Reward-Budget und Trennung Reward/Vorschlag/BuildState vertiefen. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
 | Container / Depth | M16T-DEPTH | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Depth-Modell und Suchbarkeit verschachtelter Objekte klaeren. |
 | Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
@@ -84,7 +85,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Confidence-Bands und Privacy-Regeln definieren. |
-| Review Queue | M16T-QUEUE | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Queue-Konzept als MVP-kritisches Gate starten. |
+| Review Queue | M16T-QUEUE | 4 | 1 | 0 | 3 | 0 | 25.0 % | `███░░░░░░░` | Session-Budget, Queue-Ausgaenge und Priorisierung definieren. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 0 | 0 | 2 | 1 | 0.0 % | `░░░░░░░░░░` | Status-/Scope-/Commit-Freigabe-Regel operationalisieren. |
@@ -152,25 +153,25 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-PROD-001 | [ ] | Produktanker formulieren | "Meine Woerter bauen eine Welt" muss in Systementscheidungen uebersetzt werden. | Ein kurzer verbindlicher Produktanker fuer World-/Learning-Slices dokumentiert ist. | Produkt-Slices ohne klaren North Star. | nein |
-| M16T-PROD-002 | [ ] | Unterschied Lernziel/Spielziel | Lernen darf nicht vom Spielziel verschluckt werden. | Lernziel, Spielziel und gemeinsame Schnittmenge getrennt beschrieben sind. | Weltfortschritt als Ersatz fuer Lernen. | nein |
-| M16T-PROD-003 | [ ] | Welt dient dem Lernen, ersetzt den Lernloop nicht | Die Welt soll Motivation und Kontext geben, nicht SRS/Training ersetzen. | Jeder World-Slice seinen Bezug zum Lernloop und seine Grenzen nennt. | Renderer oder World UI erzeugt Lernfortschritt. | nein |
+| M16T-PROD-001 | [x] | Produktanker formulieren | "Meine Woerter bauen eine Welt" muss in Systementscheidungen uebersetzt werden. | Ein kurzer verbindlicher Produktanker fuer World-/Learning-Slices dokumentiert ist. | Produkt-Slices ohne klaren North Star. | nein |
+| M16T-PROD-002 | [x] | Unterschied Lernziel/Spielziel | Lernen darf nicht vom Spielziel verschluckt werden. | Lernziel, Spielziel und gemeinsame Schnittmenge getrennt beschrieben sind. | Weltfortschritt als Ersatz fuer Lernen. | nein |
+| M16T-PROD-003 | [~] | Welt dient dem Lernen, ersetzt den Lernloop nicht | Die Welt soll Motivation und Kontext geben, nicht SRS/Training ersetzen. | Jeder World-Slice seinen Bezug zum Lernloop und seine Grenzen nennt. | Renderer oder World UI erzeugt Lernfortschritt. | nein |
 
 ## 6. Core Loop
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-CORE-001 | [ ] | Core Loop dokumentieren | Lernen, Vorschlag, Entscheidung und Weltfeedback brauchen eine gemeinsame Reihenfolge. | Ein verbindlicher Loop als Dokument/Diagramm mit Stop-Regeln existiert. | Produktive Loop-Implementierung. | nein |
-| M16T-CORE-002 | [ ] | Lernereignis/Semantikereignis/Reward-Ereignis/Welt-Ereignis/Persistenz-Ereignis trennen | Ereignistypen duerfen nicht heimlich dasselbe werden. | Ein Event-Kontrakt die fuenf Ereignisarten und erlaubte Uebergaenge trennt. | UI-Events, die Fortschritt oder Persistenz ausloesen. | nein |
-| M16T-CORE-003 | [ ] | UI-Events duerfen keinen Fortschritt erzeugen | Tap, Hover oder Preview duerfen kein Lernen, Reward oder Build-State schreiben. | UI-Event-Regel als Stop-Regel in relevanten Slices steht. | Jede produktive Fortschrittsmutation aus UI-only Code. | nein |
+| M16T-CORE-001 | [x] | Core Loop dokumentieren | Lernen, Vorschlag, Entscheidung und Weltfeedback brauchen eine gemeinsame Reihenfolge. | Ein verbindlicher Loop als Dokument/Diagramm mit Stop-Regeln existiert. | Produktive Loop-Implementierung. | nein |
+| M16T-CORE-002 | [x] | Lernereignis/Semantikereignis/Reward-Ereignis/Welt-Ereignis/Persistenz-Ereignis trennen | Ereignistypen duerfen nicht heimlich dasselbe werden. | Ein Event-Kontrakt die fuenf Ereignisarten und erlaubte Uebergaenge trennt. | UI-Events, die Fortschritt oder Persistenz ausloesen. | nein |
+| M16T-CORE-003 | [~] | UI-Events duerfen keinen Fortschritt erzeugen | Tap, Hover oder Preview duerfen kein Lernen, Reward oder Build-State schreiben. | UI-Event-Regel als Stop-Regel in relevanten Slices steht. | Jede produktive Fortschrittsmutation aus UI-only Code. | nein |
 
 ## 7. Learning-to-World Contract
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-L2W-001 | [ ] | Learning-to-World Contract ausarbeiten | Lernereignisse brauchen sichere, begrenzte Weltreaktionen. | Ein eigener Contract Lernereignis, Semantikvorschlag, Reward-Vorschlag und Weltreaktion trennt. | Reward Bridge, Build-State, Persistenz. | nein |
-| M16T-L2W-002 | [ ] | Lernfortschritt erzeugt Moeglichkeit, keine automatische Platzierung | Lernen soll Vorschlaege oeffnen, keine Objekte setzen. | Contract sagt explizit: Lernfortschritt erzeugt Candidate/Fallback, nicht Placement. | Automatische Wortplatzierung. | nein |
-| M16T-L2W-003 | [ ] | "weltreif" definieren | Nicht jedes Wort darf Weltwirkung haben. | Kriterien fuer weltreif dokumentiert sind: Sense, Safety, User Choice, Clutter, Gate. | Sichtbare Weltreaktion ohne Weltreife. | nein |
+| M16T-L2W-001 | [x] | Learning-to-World Contract ausarbeiten | Lernereignisse brauchen sichere, begrenzte Weltreaktionen. | Ein eigener Contract Lernereignis, Semantikvorschlag, Reward-Vorschlag und Weltreaktion trennt. | Reward Bridge, Build-State, Persistenz. | nein |
+| M16T-L2W-002 | [x] | Lernfortschritt erzeugt Moeglichkeit, keine automatische Platzierung | Lernen soll Vorschlaege oeffnen, keine Objekte setzen. | Contract sagt explizit: Lernfortschritt erzeugt Candidate/Fallback, nicht Placement. | Automatische Wortplatzierung. | nein |
+| M16T-L2W-003 | [~] | "weltreif" definieren | Nicht jedes Wort darf Weltwirkung haben. | Kriterien fuer weltreif dokumentiert sind: Sense, Safety, User Choice, Clutter, Gate. | Sichtbare Weltreaktion ohne Weltreife. | nein |
 
 ## 8. Lernzustaende / Lernloop
 
@@ -183,7 +184,7 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-WOT-001 | [ ] | Minimal Word Outcome Taxonomy finalisieren | Woerter brauchen begrenzte, sichere Ausgaenge. | Outcome-Liste als fuehrende Taxonomy freigegeben ist. | Produktive Routing-Ausgaenge. | nein |
+| M16T-WOT-001 | [x] | Minimal Word Outcome Taxonomy finalisieren | Woerter brauchen begrenzte, sichere Ausgaenge. | Outcome-Liste als fuehrende Taxonomy freigegeben ist. | Produktive Routing-Ausgaenge. | nein |
 | M16T-WOT-002 | [ ] | `CodexOnly` | Viele Woerter sollen neutral lernbar bleiben. | CodexOnly-Kriterium mit Beispielen und UI-Regeln dokumentiert ist. | Sichtbare Platzierung fuer CodexOnly. | nein |
 | M16T-WOT-003 | [ ] | `WorldCandidate` | Weltkandidaten duerfen nicht automatisch gebaut werden. | WorldCandidate User Choice, Gate und Fallback nennt. | Auto-Placement. | nein |
 | M16T-WOT-004 | [ ] | `ContainerItem` | Kleinteile brauchen Depth/Container statt Inselplatzierung. | ContainerItem-Grenzen, Clutter-Regeln und Fallbacks dokumentiert sind. | TinyObjects in IslandView. | nein |
@@ -214,7 +215,7 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-REWARD-001 | [ ] | Reward-Prinzip ohne Druck | Motivation darf nicht in Schuld oder Zwang kippen. | Reward-Regeln keine Strafe, kein Verfall, keine Pflichtentscheidung enthalten. | Produktive Reward Bridge. | nein |
+| M16T-REWARD-001 | [x] | Reward-Prinzip ohne Druck | Motivation darf nicht in Schuld oder Zwang kippen. | Reward-Regeln keine Strafe, kein Verfall, keine Pflichtentscheidung enthalten. | Produktive Reward Bridge. | nein |
 | M16T-REWARD-002 | [ ] | Reward-Budget | Weltfeedback soll dosiert und nicht manipulativ sein. | Pro Session/Loop Grenzen fuer Vorschlaege und Feedback dokumentiert sind. | Dauer-Belohnung oder Druck. | nein |
 | M16T-REWARD-003 | [ ] | Trennung Reward/Vorschlag/PlacementCandidate/BuildState | Reward darf kein Bauen ausloesen. | Begriffe und erlaubte Uebergaenge getrennt sind. | Reward -> BuildState. | nein |
 | M16T-REWARD-004 | [ ] | Rueckkehr-nach-Pause-Regel | Pausen sollen sanft aufgefangen werden. | Comeback-Regeln ohne Strafe, Schuld oder Weltverfall dokumentiert sind. | Retention-Druck. | nein |
@@ -312,7 +313,7 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-QUEUE-001 | [ ] | Review-Queue-Konzept | Viele Woerter brauchen geordnete Entscheidungspfade. | Queue-Typen, Filter, Prioritaeten und Ausgaenge dokumentiert sind. | Massenentscheidungs-UI. | nein |
+| M16T-QUEUE-001 | [x] | Review-Queue-Konzept | Viele Woerter brauchen geordnete Entscheidungspfade. | Queue-Typen, Filter, Prioritaeten und Ausgaenge dokumentiert sind. | Massenentscheidungs-UI. | nein |
 | M16T-QUEUE-002 | [ ] | Session-Budget | Nutzer darf nur wenige Entscheidungen pro Sitzung sehen. | Session-Budget als Planungsregel existiert. | Review-Zwang. | nein |
 | M16T-QUEUE-003 | [ ] | Queue-Ausgaenge | Review muss sichere Ausgaenge haben. | Confirm, Change, Later, Codex, Backlog, Blueprint, Hide dokumentiert sind. | Sackgassen-Review. | nein |
 | M16T-QUEUE-004 | [ ] | Queue-Prioritaet nach Risiko und Lernrelevanz | Nicht jedes Wort ist gleich wichtig. | Risiko/Lernrelevanz/Confidence/Nutzerziel priorisiert sind. | FIFO ohne Risiko. | nein |
@@ -379,9 +380,28 @@ M16-U selbst erledigt:
 - M16T-CHANGE-003
 - M16T-RESEARCH-001
 
-M16-U teilweise vorbereitet:
+M16-U teilweise vorbereitet (historisch, durch M16-V abgeschlossen):
 
 - M16T-MVP-004
+
+M16-V erledigt:
+
+- M16T-MVP-004
+- M16T-PROD-001
+- M16T-PROD-002
+- M16T-CORE-001
+- M16T-CORE-002
+- M16T-L2W-001
+- M16T-L2W-002
+- M16T-WOT-001
+- M16T-REWARD-001
+- M16T-QUEUE-001
+
+M16-V teilweise vorbereitet:
+
+- M16T-PROD-003
+- M16T-CORE-003
+- M16T-L2W-003
 
 M16-U in eigene Detail-Gates ausgelagert:
 
@@ -535,7 +555,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-MVP-001 | [x] | Erste lauffaehige Version als Produktziel definieren | M16-T braucht eine steuerbare Zielrichtung. | "kleiner, spielbarer Lernloop" als MVP-Ziel dokumentiert ist. | Endlose Gate-Kette ohne MVP-Ziel. | nein |
 | M16T-MVP-002 | [x] | MVP-kritische M16-T-IDs markieren | Nicht alle Items sind vor MVP gleich wichtig. | MVP-kritische IDs in 328 markiert sind. | Alles wird MVP-blockierend. | nein |
 | M16T-MVP-003 | [x] | Nicht-MVP-kritische Themen parken | Scope muss klein bleiben. | Nach-MVP und blockierte Themen klassifiziert sind. | Zu grosses MVP. | nein |
-| M16T-MVP-004 | [~] | Minimal spielbaren Lernloop definieren | Der erste lauffaehige Loop braucht konkrete Grenzen. | Lernaktion, Semantikvorschlag, freiwillige Entscheidung und Weltfeedback als Minimal-Loop detailliert sind. | MVP-Code ohne Loop-Contract. | nein |
+| M16T-MVP-004 | [x] | Minimal spielbaren Lernloop definieren | Der erste lauffaehige Loop braucht konkrete Grenzen. | Lernaktion, Semantikvorschlag, freiwillige Entscheidung und Weltfeedback als Minimal-Loop detailliert sind. | MVP-Code ohne Loop-Contract. | nein |
 
 ### M16T-CHANGE
 
