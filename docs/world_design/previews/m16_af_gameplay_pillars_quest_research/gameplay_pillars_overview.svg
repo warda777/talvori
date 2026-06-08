@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1800" viewBox="0 0 2400 1800">
+<rect width="2400" height="1800" fill="#f7f8f4"/>
+<rect x="45" y="35" width="2310" height="1730" rx="28" ry="28" fill="#f7f8f4" stroke="#d6dfd7" stroke-width="2"/>
+<text x="80" y="146" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#20302c">Gameplay Pillars Overview</text>
+<text x="80" y="193" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="400" fill="#64736e">Game feeling is allowed only when learning, safety, choice and reversible world feedback stay intact.</text>
+<line x1="80" y1="1700" x2="2320" y2="1700" stroke="#d6dfd7" stroke-width="2" stroke-linecap="round"/>
+<text x="80" y="1754" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#64736e">documentation preview only / no code / no app route / no screenshots / no assets / no persistence / no social runtime</text>
+<rect x="135" y="300" width="630" height="280" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="135" y="300" width="630" height="13" rx="8" ry="8" fill="#63ad7d"/>
+<text x="161" y="372" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">Learning opens options</text>
+<text x="161" y="424" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">Learning can unlock a suggestion, not</text>
+<text x="161" y="460" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">automatic placement or BuildState.</text>
+<rect x="850" y="300" width="630" height="280" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="850" y="300" width="630" height="13" rx="8" ry="8" fill="#58b7ad"/>
+<text x="876" y="372" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">Meaning before world</text>
+<text x="876" y="424" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">Sense, word type, safety, clutter and</text>
+<text x="876" y="460" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">confidence come before any visible reaction.</text>
+<rect x="1565" y="300" width="630" height="280" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="1565" y="300" width="630" height="13" rx="8" ry="8" fill="#68a6ca"/>
+<text x="1591" y="372" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">Small choices</text>
+<text x="1591" y="424" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">Few relevant decisions beat mandatory lists</text>
+<text x="1591" y="460" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">and mass review.</text>
+<rect x="320" y="710" width="710" height="300" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="320" y="710" width="710" height="13" rx="8" ry="8" fill="#d8b64f"/>
+<text x="346" y="782" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">Visible progress, no pressure</text>
+<text x="346" y="834" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">World feedback can motivate, but never punish,</text>
+<text x="346" y="870" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">decay or demand.</text>
+<rect x="1370" y="710" width="680" height="300" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="1370" y="710" width="680" height="13" rx="8" ry="8" fill="#8e7ac8"/>
+<text x="1396" y="782" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">Tali/Vori guides</text>
+<text x="1396" y="834" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">Companion explains and calms. It never decides,</text>
+<text x="1396" y="870" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">places, stores or pressures.</text>
+<rect x="360" y="1190" width="1680" height="255" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<rect x="360" y="1190" width="1680" height="13" rx="8" ry="8" fill="#dc6f6a"/>
+<text x="386" y="1262" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" fill="#20302c">MVP interpretation</text>
+<text x="386" y="1314" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">A playful moment is safe only if Later, Codex, Backlog, Change and Hide remain available. The loop may feel alive, but it must not</text>
+<text x="386" y="1350" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="400" fill="#64736e">become a runtime quest engine, social pressure system, timer or build pipeline.</text>
+<rect x="510" y="1540" width="240" height="42" rx="21" ry="21" fill="#dc6f6a"/>
+<text x="531" y="1572" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" fill="#ffffff">no auto placement</text>
+<rect x="900" y="1540" width="185" height="42" rx="21" ry="21" fill="#dc6f6a"/>
+<text x="921" y="1572" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" fill="#ffffff">no BuildState</text>
+<rect x="1260" y="1540" width="223" height="42" rx="21" ry="21" fill="#dc6f6a"/>
+<text x="1281" y="1572" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" fill="#ffffff">no social runtime</text>
+<rect x="1680" y="1540" width="194" height="42" rx="21" ry="21" fill="#dc6f6a"/>
+<text x="1701" y="1572" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" fill="#ffffff">no SRS writes</text>
+</svg>

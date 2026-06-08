@@ -167,6 +167,12 @@ Non-Goals:
 | `322-next-safe-preview-slice-decision-gate.md` | Visual-QA prueft Text-Containment, Innenabstand, Kartenabstand, Footer und Contact Sheet. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
+Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
+PNG fuer schnelle Vorschau, SVG fuer verlustfreie Zoom- und
+Dokumentationsqualitaet. Text-Containment, ausreichender Innenabstand,
+lesbare Contact Sheets und keine Ueberlappungen von Karten, Labels, Pfeilen,
+Titeln, Footern oder Legenden sind harte Commit-Voraussetzungen.
+
 ## 5. Slice-Typen mit Pflichtlektuere
 
 Jeder Slice darf zusaetzliche Docs nennen. Die folgende Liste ist die
@@ -188,7 +194,7 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
 | App-Integration Slice | `328`, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
 | Research / Benchmark Slice | `328`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
-| Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner. |
+| Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
 
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts

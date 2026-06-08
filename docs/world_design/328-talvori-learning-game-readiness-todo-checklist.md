@@ -8,36 +8,37 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AE`
+Aktive Sprint-ID: `M16-AF`
 
 Sprint Goal:
 
-> ThemeIsland-Resizing, Capability-Stop-Regel, TinyObject-/Container-Grenzen und sensitive-safe Asset-Regeln fachlich schliessen.
+> Gameplay Pillars, MVP Quest-/Challenge-Loop und Research-Fragen fuer Lern-/Aufbauspiele fachlich vorbereiten.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 13 |
-| Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 80 |
+| Offen `[ ]` | 8 |
+| Teilweise erledigt `[~]` | 13 |
+| Erledigt `[x]` | 84 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 72.3 % |
-| Fortschrittsbalken | `██████████████░░░░░░` |
+| Gewichteter Fortschritt | 76.1 % |
+| Fortschrittsbalken | `███████████████░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-WORLD-002
-- M16T-WHEEL-003
-- M16T-ASSET-002
-- M16T-DATA-004
-- M16T-ASSET-004
-- M16T-GAME-001
-- M16T-GAME-002
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
+- M16T-RESEARCH-004
+- M16T-SOCIAL-001
+- M16T-SOCIAL-002
+- M16T-SOCIAL-003
+- M16T-METRICS-001
+- M16T-METRICS-002
+- M16T-DATA-004
+- M16T-ASSET-004
 
 ### 0.2 Progress-Formel
 
@@ -487,6 +488,17 @@ M16-AE erledigt:
 - M16T-DEPTH-003
 - M16T-ASSET-003
 
+M16-AF erledigt:
+
+- M16T-GAME-001
+- M16T-GAME-002
+- M16T-GAME-003
+- M16T-GAME-004
+
+M16-AF teilweise vorbereitet:
+
+- M16T-RESEARCH-004
+
 M16-U in eigene Detail-Gates ausgelagert:
 
 - M16T-RESEARCH-002
@@ -656,16 +668,16 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-RESEARCH-001 | [x] | Benchmark-Gate fuer erfolgreiche Lern-/Spiel-Apps definieren | Talvori soll von bewaehrten Prinzipien lernen. | Research-Gate in 328 steht. | Produktive Mechanik ohne Benchmark. | nein |
 | M16T-RESEARCH-002 | [>] | Duolingo-Research fuer Habit/XP/Streaks/Leagues planen | Habit-Mechaniken sind stark, aber druckgefaehrlich. | Eigenes Research-Dokument Prinzipien und Risiken ableitet. | Blindes Kopieren von Streak/League-Druck. | nein |
 | M16T-RESEARCH-003 | [>] | Clash/Supercell-Research fuer Progression/Social/Competition planen | Aufbau- und Sozialspiel braucht Balance-Wissen. | Eigenes Research-Dokument Progression, Trade-offs, Social und Risiken ableitet. | Pay-to-win, FOMO, Competition-Druck. | nein |
-| M16T-RESEARCH-004 | [ ] | Research-Ergebnisse in Talvori-Prinzipien uebersetzen | Research ist nur nuetzlich, wenn es Talvori-Regeln erzeugt. | Abgeleitete Prinzipien in M16-T/MVP-Gates eingearbeitet sind. | Research bleibt Sammlung. | nein |
+| M16T-RESEARCH-004 | [~] | Research-Ergebnisse in Talvori-Prinzipien uebersetzen | Research ist nur nuetzlich, wenn es Talvori-Regeln erzeugt. | Abgeleitete Prinzipien in M16-T/MVP-Gates eingearbeitet sind. | Research bleibt Sammlung. | nein |
 
 ### M16T-GAME
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-GAME-001 | [ ] | Gameplay Pillars definieren | Talvori braucht klare Spielsaeulen. | 3-5 Gameplay Pillars mit Lernbezug dokumentiert sind. | Mechaniken ohne Richtung. | nein |
-| M16T-GAME-002 | [ ] | Level-/Quest-/Challenge-Loop planen | Lernen braucht wiederkehrende, aber faire Spielmomente. | Loop fuer Level, Quest und Challenge ohne Druck dokumentiert ist. | Quest-/Level-Code. | nein |
-| M16T-GAME-003 | [ ] | Lernlogik und Spielaufbau harmonisieren | Spiel darf Lernlogik nicht korrumpieren. | Reward, Challenge und Weltfeedback getrennt, aber verbunden sind. | Reward Bridge ohne Contract. | nein |
-| M16T-GAME-004 | [ ] | Spass/Spannung ohne Lernschaden definieren | Engagement darf Retention-Druck nicht ueber Lernen stellen. | Spannung, Risiko, Belohnung und Pause als faire Prinzipien dokumentiert sind. | Druckmechaniken. | nein |
+| M16T-GAME-001 | [x] | Gameplay Pillars definieren | Talvori braucht klare Spielsaeulen. | 3-5 Gameplay Pillars mit Lernbezug dokumentiert sind. | Mechaniken ohne Richtung. | nein |
+| M16T-GAME-002 | [x] | Level-/Quest-/Challenge-Loop planen | Lernen braucht wiederkehrende, aber faire Spielmomente. | Loop fuer Level, Quest und Challenge ohne Druck dokumentiert ist. | Quest-/Level-Code. | nein |
+| M16T-GAME-003 | [x] | Lernlogik und Spielaufbau harmonisieren | Spiel darf Lernlogik nicht korrumpieren. | Reward, Challenge und Weltfeedback getrennt, aber verbunden sind. | Reward Bridge ohne Contract. | nein |
+| M16T-GAME-004 | [x] | Spass/Spannung ohne Lernschaden definieren | Engagement darf Retention-Druck nicht ueber Lernen stellen. | Spannung, Risiko, Belohnung und Pause als faire Prinzipien dokumentiert sind. | Druckmechaniken. | nein |
 
 ### M16T-SOCIAL
 
