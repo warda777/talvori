@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AH`
+Aktive Sprint-ID: `M16-AI`
 
 Sprint Goal:
 
-> Asset-Lizenz-/Quelle-/Benennung-Regeln und Offline-/Sync-Konfliktregeln als reine Planung schliessen.
+> Habit-, Motivation-, Micro-Session-, Recall- und druckfreie Retention-Prinzipien aus Deep Research ableiten.
 
 ### 0.1 Gesamtfortschritt
 
@@ -20,23 +20,19 @@ Sprint Goal:
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 18 |
-| Erledigt `[x]` | 87 |
+| Teilweise erledigt `[~]` | 14 |
+| Erledigt `[x]` | 92 |
 | Blockiert `[!]` | 12 |
-| Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 80.7 % |
-| Fortschrittsbalken | `████████████████░░░░` |
+| Ausgelagert `[>]` | 1 |
+| Gewichteter Fortschritt | 83.2 % |
+| Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-RESEARCH-002
 - M16T-RESEARCH-003
-- M16T-RESEARCH-004
 - M16T-SOCIAL-002
 - M16T-SOCIAL-003
-- M16T-METRICS-001
-- M16T-METRICS-002
-- M16T-METRICS-003
+- M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
 - M16T-WORLD-002
@@ -524,13 +520,26 @@ M16-AH erledigt:
 - M16T-ASSET-004
 - M16T-DATA-004
 
+M16-AI erledigt:
+
+- M16T-RESEARCH-002
+- M16T-RESEARCH-004
+- M16T-METRICS-001
+- M16T-METRICS-002
+- M16T-METRICS-003
+
+M16-AI bewusst unveraendert teilweise vorbereitet:
+
+- M16T-LEARN-002
+- M16T-AI-002
+- M16T-AI-004
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items. Blockierte,
 teilweise erledigte und ausgelagerte Gates bleiben bewusst bestehen und
 duerfen nicht nebenbei als Implementierungsfreigabe gelesen werden.
 
 M16-U in eigene Detail-Gates ausgelagert:
 
-- M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
 Alle anderen Punkte bleiben offen, blockiert oder muessen in eigene
@@ -695,9 +704,9 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-RESEARCH-001 | [x] | Benchmark-Gate fuer erfolgreiche Lern-/Spiel-Apps definieren | Talvori soll von bewaehrten Prinzipien lernen. | Research-Gate in 328 steht. | Produktive Mechanik ohne Benchmark. | nein |
-| M16T-RESEARCH-002 | [>] | Duolingo-Research fuer Habit/XP/Streaks/Leagues planen | Habit-Mechaniken sind stark, aber druckgefaehrlich. | Eigenes Research-Dokument Prinzipien und Risiken ableitet. | Blindes Kopieren von Streak/League-Druck. | nein |
+| M16T-RESEARCH-002 | [x] | Duolingo-Research fuer Habit/XP/Streaks/Leagues planen | Habit-Mechaniken sind stark, aber druckgefaehrlich. | Eigenes Research-Dokument Prinzipien und Risiken ableitet. | Blindes Kopieren von Streak/League-Druck. | nein |
 | M16T-RESEARCH-003 | [>] | Clash/Supercell-Research fuer Progression/Social/Competition planen | Aufbau- und Sozialspiel braucht Balance-Wissen. | Eigenes Research-Dokument Progression, Trade-offs, Social und Risiken ableitet. | Pay-to-win, FOMO, Competition-Druck. | nein |
-| M16T-RESEARCH-004 | [~] | Research-Ergebnisse in Talvori-Prinzipien uebersetzen | Research ist nur nuetzlich, wenn es Talvori-Regeln erzeugt. | Abgeleitete Prinzipien in M16-T/MVP-Gates eingearbeitet sind. | Research bleibt Sammlung. | nein |
+| M16T-RESEARCH-004 | [x] | Research-Ergebnisse in Talvori-Prinzipien uebersetzen | Research ist nur nuetzlich, wenn es Talvori-Regeln erzeugt. | Abgeleitete Prinzipien in M16-T/MVP-Gates eingearbeitet sind. | Research bleibt Sammlung. | nein |
 
 ### M16T-GAME
 
@@ -720,9 +729,9 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-METRICS-001 | [~] | Erfolgsmessung fuer Lernerfolg definieren | Produktfortschritt muss Lernen messen, nicht nur Nutzung. | Lernmetriken ohne SRS-Mutation definiert sind. | Analytics ohne Lernziel. | nein |
-| M16T-METRICS-002 | [~] | Erfolgsmessung fuer Motivation/Retention definieren | Motivation soll beobachtbar, aber nicht manipulativ werden. | Motivations-/Retention-Metriken mit Fairness-Grenzen dokumentiert sind. | Druckmetriken. | nein |
-| M16T-METRICS-003 | [~] | Privacy-Gate fuer spaetere Analytics definieren | Messung darf private Wort-/Kontextdaten nicht gefaehrden. | Analytics-Privacy-Gate dokumentiert ist. | Analytics ohne Privacy. | nein |
+| M16T-METRICS-001 | [x] | Erfolgsmessung fuer Lernerfolg definieren | Produktfortschritt muss Lernen messen, nicht nur Nutzung. | Lernmetriken ohne SRS-Mutation definiert sind. | Analytics ohne Lernziel. | nein |
+| M16T-METRICS-002 | [x] | Erfolgsmessung fuer Motivation/Retention definieren | Motivation soll beobachtbar, aber nicht manipulativ werden. | Motivations-/Retention-Metriken mit Fairness-Grenzen dokumentiert sind. | Druckmetriken. | nein |
+| M16T-METRICS-003 | [x] | Privacy-Gate fuer spaetere Analytics definieren | Messung darf private Wort-/Kontextdaten nicht gefaehrden. | Analytics-Privacy-Gate dokumentiert ist. | Analytics ohne Privacy. | nein |
 
 ## 33. M16-U Dokumentationsvisualisierungen
 

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="2200" viewBox="0 0 3000 2200">
+<rect width="3000" height="2200" fill="#f8f9f4"/>
+<rect x="48" y="38" width="2904" height="2124" rx="30" ry="30" fill="#f8f9f4" stroke="#d8e0d8" stroke-width="2"/>
+<text x="92" y="150" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700" fill="#1f2c2a">Duolingo Risk Translation</text>
+<text x="92" y="207" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="400" fill="#66736d">Duolingo is useful as a pressure audit: Talvori translates value, not pressure mechanics.</text>
+<line x1="92" y1="2090" x2="2908" y2="2090" stroke="#d8e0d8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2142" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#66736d">documentation research preview only / no implementation / no analytics / no push retention / no SRS or word_progress write / no BuildState / no frame_started</text>
+<rect x="130" y="350" width="640" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="130" y="350" width="640" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="158" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">XP</text>
+<text x="158" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Fast feedback and completion signal.</text>
+<line x1="820" y1="478" x2="940" y2="478" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,478 912,460 912,496" fill="#95a59f"/>
+<rect x="980" y="350" width="1890" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="980" y="350" width="1890" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="1008" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Talvori translation</text>
+<text x="1008" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Avoid XP chase. Use learning-quality feedback only.</text>
+<rect x="130" y="665" width="640" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="130" y="665" width="640" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="158" y="737" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Streak</text>
+<text x="158" y="791" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Habit visibility and return rhythm.</text>
+<line x1="820" y1="793" x2="940" y2="793" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,793 912,775 912,811" fill="#95a59f"/>
+<rect x="980" y="665" width="1890" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="980" y="665" width="1890" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="1008" y="737" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Talvori translation</text>
+<text x="1008" y="791" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No streak loss, guilt or repair economy in MVP.</text>
+<rect x="130" y="980" width="640" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="130" y="980" width="640" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="158" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Leagues</text>
+<text x="158" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Competition and social comparison.</text>
+<line x1="820" y1="1108" x2="940" y2="1108" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,1108 912,1090 912,1126" fill="#95a59f"/>
+<rect x="980" y="980" width="1890" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="980" y="980" width="1890" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="1008" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Talvori translation</text>
+<text x="1008" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No leaderboard or ranking in MVP.</text>
+<rect x="130" y="1295" width="640" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="130" y="1295" width="640" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="158" y="1367" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Daily goals</text>
+<text x="158" y="1421" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Tiny start point and routine.</text>
+<line x1="820" y1="1423" x2="940" y2="1423" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,1423 912,1405 912,1441" fill="#95a59f"/>
+<rect x="980" y="1295" width="1890" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="980" y="1295" width="1890" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="1008" y="1367" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Talvori translation</text>
+<text x="1008" y="1421" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Micro session yes. Daily duty no.</text>
+<rect x="130" y="1610" width="640" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="130" y="1610" width="640" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="158" y="1682" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Streak freeze</text>
+<text x="158" y="1736" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Protection against broken habit.</text>
+<line x1="820" y1="1738" x2="940" y2="1738" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,1738 912,1720 912,1756" fill="#95a59f"/>
+<rect x="980" y="1610" width="1890" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="980" y="1610" width="1890" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="1008" y="1682" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Talvori translation</text>
+<text x="1008" y="1736" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Talvori treats pause as neutral by design.</text>
+</svg>

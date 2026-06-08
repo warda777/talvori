@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3800" height="3550" viewBox="0 0 3800 3550">
+<rect width="3800" height="3550" fill="#f8f9f4"/>
+<text x="96" y="156" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700" fill="#1f2c2a">M16-AI Habit Motivation Research Visuals</text>
+<text x="96" y="226" font-family="Arial, Helvetica, sans-serif" font-size="31" fill="#66736d">Contact sheet with full-size documentation previews. PNG + SVG are generated for each diagram.</text>
+<rect x="106" y="306" width="1698" height="984" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="habit_motivation_benchmark_matrix.png" x="130" y="330" width="1650" height="880" preserveAspectRatio="xMidYMid meet"/>
+<text x="130" y="1268" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">habit_motivation_benchmark_matrix.png</text>
+<rect x="1966" y="306" width="1698" height="984" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="pressure_free_retention_principles.png" x="1990" y="330" width="1650" height="880" preserveAspectRatio="xMidYMid meet"/>
+<text x="1990" y="1268" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">pressure_free_retention_principles.png</text>
+<rect x="106" y="1306" width="1698" height="984" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="duolingo_risk_translation.png" x="130" y="1330" width="1650" height="880" preserveAspectRatio="xMidYMid meet"/>
+<text x="130" y="2268" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">duolingo_risk_translation.png</text>
+<rect x="1966" y="1306" width="1698" height="984" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="brilliant_quizlet_learning_patterns.png" x="1990" y="1330" width="1650" height="880" preserveAspectRatio="xMidYMid meet"/>
+<text x="1990" y="2268" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">brilliant_quizlet_learning_patterns.png</text>
+<rect x="1016" y="2306" width="1698" height="984" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="talvori_mvp_motivation_rules.png" x="1040" y="2330" width="1650" height="880" preserveAspectRatio="xMidYMid meet"/>
+<text x="1040" y="3268" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">talvori_mvp_motivation_rules.png</text>
+<line x1="96" y1="3430" x2="3704" y2="3430" stroke="#d8e0d8" stroke-width="2"/>
+<text x="96" y="3490" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#66736d">documentation research preview only / no implementation / no analytics / no push retention / no SRS or word_progress write / no BuildState / no frame_started</text>
+</svg>
