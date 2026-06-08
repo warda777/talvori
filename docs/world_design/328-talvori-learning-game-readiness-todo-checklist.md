@@ -8,37 +8,38 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AA`
+Aktive Sprint-ID: `M16-AB`
 
 Sprint Goal:
 
-> Minimale Lernzustaende und SRS-/word_progress-Boundary fuer den MVP festlegen.
+> Dokumentenlandkarte und Pflichtlektuere-Regeln pro Slice-Typ verbindlich machen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 35 |
+| Offen `[ ]` | 27 |
 | Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 56 |
+| Erledigt `[x]` | 64 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 52.9 % |
-| Fortschrittsbalken | `███████████░░░░░░░░░` |
+| Gewichteter Fortschritt | 59.7 % |
+| Fortschrittsbalken | `████████████░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-LEARN-002
-- M16T-DOC-001
-- M16T-DOC-002
 - M16T-MOBILE-001
 - M16T-MOBILE-002
 - M16T-DEPTH-001
+- M16T-DEPTH-002
 - M16T-WORLD-001
+- M16T-WORLD-003
 - M16T-UNDO-001
 - M16T-DATA-004
 - M16T-ASSET-003
+- M16T-GAME-001
+- M16T-GAME-002
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -68,7 +69,7 @@ ihrem Detail-Gate Fortschritt bei.
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Meta-/Prozess-Gates | M16T-META | 4 | 1 | 0 | 3 | 0 | 25.0 % | `███░░░░░░░` | Prompt-/Output-Regel mit ID-Abgleich verbindlich machen. |
+| Meta-/Prozess-Gates | M16T-META | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | ID-, Prompt- und Output-Regeln in jedem kuenftigen Slice anwenden. |
 | Produktanker / Spielziel | M16T-PROD | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Welt-dient-Lernen-Regel in kommenden World-Slices anwenden. |
 | Core Loop | M16T-CORE | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | UI-Event-Regel in spaeteren Implementierungs-Slices als Stop-Regel fuehren. |
 | Learning-to-World Contract | M16T-L2W | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Weltreif-Kriterien spaeter mit Daten-/Review-Gate operationalisieren. |
@@ -89,8 +90,8 @@ ihrem Detail-Gate Fortschritt bei.
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
-| Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
-| Commit-/Review-Hygiene | M16T-GIT | 3 | 0 | 0 | 2 | 1 | 0.0 % | `░░░░░░░░░░` | Status-/Scope-/Commit-Freigabe-Regel operationalisieren. |
+| Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
+| Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
 
 ## 1. Zweck
 
@@ -147,9 +148,9 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-META-001 | [x] | Readiness-ToDo-Liste als verbindliche Folge-Liste | M16-S darf nicht als einmaliges Review versanden. | Diese Datei existiert und wird als Folge-Liste referenziert. | Kein Folge-Slice ohne Abgleich. | nein |
-| M16T-META-002 | [ ] | Jeder neue Prompt muss offene IDs nennen | Offene Gates sollen nicht unsichtbar bleiben. | Prompt-Vorlagen verlangen relevante M16-T-IDs. | Prompts ohne ID-Abgleich. | nein |
-| M16T-META-003 | [ ] | Nach jedem Slice muss die Liste aktualisiert werden | Fortschritt und neue Risiken bleiben nachvollziehbar. | Jeder Slice berichtet geaenderte, erledigte und neue IDs. | Commits ohne Checklisten-Update. | nein |
-| M16T-META-004 | [ ] | M16-S + M16-T gemeinsam pruefen | Review und ToDo-Liste gehoeren zusammen. | Kuenftige Readiness-/Gate-Prompts nennen beide Dokumente. | Slices, die nur alte Einzelregeln lesen. | nein |
+| M16T-META-002 | [x] | Jeder neue Prompt muss offene IDs nennen | Offene Gates sollen nicht unsichtbar bleiben. | Prompt-Vorlagen verlangen relevante M16-T-IDs. | Prompts ohne ID-Abgleich. | nein |
+| M16T-META-003 | [x] | Nach jedem Slice muss die Liste aktualisiert werden | Fortschritt und neue Risiken bleiben nachvollziehbar. | Jeder Slice berichtet geaenderte, erledigte und neue IDs. | Commits ohne Checklisten-Update. | nein |
+| M16T-META-004 | [x] | M16-S + M16-T gemeinsam pruefen | Review und ToDo-Liste gehoeren zusammen. | Kuenftige Readiness-/Gate-Prompts nennen beide Dokumente. | Slices, die nur alte Einzelregeln lesen. | nein |
 
 ## 5. Produktanker / Spielziel
 
@@ -333,8 +334,8 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-DOC-001 | [ ] | Dokumentationslandkarte | Die vielen Docs muessen auffindbar bleiben. | Dokumentenkarte M16-S/T und relevante Gates verlinkt. | Prompts lesen falsche Grundlage. | nein |
-| M16T-DOC-002 | [ ] | Pflichtlektuere-Regel pro Slice-Typ | Unterschiedliche Slice-Typen brauchen andere Pflichtdocs. | Slice-Typen mit Pflichtlektuerelisten dokumentiert sind. | Unvollstaendige Quellenlage. | nein |
+| M16T-DOC-001 | [x] | Dokumentationslandkarte | Die vielen Docs muessen auffindbar bleiben. | Dokumentenkarte M16-S/T und relevante Gates verlinkt. | Prompts lesen falsche Grundlage. | nein |
+| M16T-DOC-002 | [x] | Pflichtlektuere-Regel pro Slice-Typ | Unterschiedliche Slice-Typen brauchen andere Pflichtdocs. | Slice-Typen mit Pflichtlektuerelisten dokumentiert sind. | Unvollstaendige Quellenlage. | nein |
 | M16T-DOC-003 | [~] | Visual-QA-Regel | Diagramme muessen lesbar und ueberlappungsfrei bleiben. | Text-Containment, Innenabstand, Kartenabstand, Footer, Contact Sheet geprueft werden. | Unlesbare Visuals. | nein |
 | M16T-DOC-004 | [!] | Keine Screenshots als Repo-Artefakte | Screenshots koennen App-Screens oder falsche Freigabe suggerieren. | Dokumentationsvisuals bleiben generiert/gezeichnet, nicht Screenshot-Artefakte. | Screenshot-Dateien. | nein |
 
@@ -342,8 +343,8 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-GIT-001 | [ ] | `git status` vor Commit | Unbeabsichtigte Dateien sollen sichtbar bleiben. | Jeder Abschluss `git status --short` berichtet. | Commit ohne Status. | nein |
-| M16T-GIT-002 | [ ] | Scope gegen Stop-Regeln pruefen | Stop-Regeln verhindern Drift. | Jede Abschlussausgabe Stop-Regeln bestaetigt. | Drift in App/Assets/Persistenz. | nein |
+| M16T-GIT-001 | [x] | `git status` vor Commit | Unbeabsichtigte Dateien sollen sichtbar bleiben. | Jeder Abschluss `git status --short` berichtet. | Commit ohne Status. | nein |
+| M16T-GIT-002 | [x] | Scope gegen Stop-Regeln pruefen | Stop-Regeln verhindern Drift. | Jede Abschlussausgabe Stop-Regeln bestaetigt. | Drift in App/Assets/Persistenz. | nein |
 | M16T-GIT-003 | [!] | Commit erst nach separater Freigabe | Review kann vor Commit noch korrigieren. | Nutzer gibt Commit explizit frei. | Automatischer Commit. | nein |
 
 ## 27. Aktueller Stand nach Erstellung
@@ -455,6 +456,17 @@ M16-AA teilweise vorbereitet:
 - M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
+
+M16-AB erledigt:
+
+- M16T-DOC-001
+- M16T-DOC-002
+- M16T-DASH-004
+- M16T-META-002
+- M16T-META-003
+- M16T-META-004
+- M16T-GIT-001
+- M16T-GIT-002
 
 M16-U in eigene Detail-Gates ausgelagert:
 
@@ -589,7 +601,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
 | M16T-DASH-003 | [x] | Bereichsfortschritt je 23 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden 23 Bereiche steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
-| M16T-DASH-004 | [ ] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
+| M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
 
