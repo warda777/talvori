@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // Island-First + Candidate check:
 // - Later play moments happen on spatial plot candidates.
 // - Plot families and capabilities are permission frames, not placements.
-// - Markers can be moved locally in layout mode; nothing is saved.
+// - Markers move locally only through their layout handle; nothing is saved.
 // - UI only explains through HUD, bubbles, or small signs.
 // - This preview is not a separate learning-window flow.
 class StarterIslandPlotBoardPreview extends StatefulWidget {
@@ -18,7 +18,7 @@ class StarterIslandPlotBoardPreview extends StatefulWidget {
 
 class _StarterIslandPlotBoardPreviewState
     extends State<StarterIslandPlotBoardPreview> {
-  static const _boardSize = Size(1100, 900);
+  static const _boardSize = Size(1280, 1280);
   static const _canvasPadding = 24.0;
   static const _snapRadius = 128.0;
 
@@ -30,6 +30,10 @@ class _StarterIslandPlotBoardPreviewState
   _PlotSlotId _selectedSlotId = _PlotSlotId.hub;
   bool _initialViewSet = false;
   bool _layoutMode = false;
+  bool _detailsExpanded = false;
+  bool _bankEncounterActive = false;
+  _BankMeaningOptionId? _selectedBankOption;
+  _BankSafeExitId? _selectedBankSafeExit;
   String _snapNotice =
       'Kandidaten snappen nur auf passende lokale Anchor-Zonen.';
 
@@ -66,6 +70,9 @@ class _StarterIslandPlotBoardPreviewState
 
   void _selectSlot(_PlotSlotId id) {
     setState(() {
+      if (_selectedSlotId != id) {
+        _detailsExpanded = false;
+      }
       _selectedSlotId = id;
     });
   }
@@ -81,13 +88,51 @@ class _StarterIslandPlotBoardPreviewState
       _slotPositions = _initialSlotPositions();
       _slotAnchorIds = _initialSlotAnchors();
       _selectedSlotId = _PlotSlotId.hub;
+      _detailsExpanded = false;
+      _bankEncounterActive = false;
+      _selectedBankOption = null;
+      _selectedBankSafeExit = null;
       _snapNotice = 'Layout zurueckgesetzt: Start-Anker sind wieder aktiv.';
+    });
+  }
+
+  void _startBankEncounter() {
+    setState(() {
+      _selectedSlotId = _PlotSlotId.river;
+      _detailsExpanded = false;
+      _layoutMode = false;
+      _bankEncounterActive = true;
+      _selectedBankOption = null;
+      _selectedBankSafeExit = null;
+    });
+  }
+
+  void _selectBankOption(_BankMeaningOptionId option) {
+    setState(() {
+      _selectedSlotId = _PlotSlotId.river;
+      _detailsExpanded = false;
+      _bankEncounterActive = true;
+      _selectedBankOption = option;
+      _selectedBankSafeExit = null;
+    });
+  }
+
+  void _selectBankSafeExit(_BankSafeExitId exit) {
+    setState(() {
+      _selectedSlotId = _PlotSlotId.river;
+      _detailsExpanded = false;
+      _bankEncounterActive = true;
+      _selectedBankSafeExit = exit;
+      if (exit == _BankSafeExitId.change) {
+        _selectedBankOption = null;
+      }
     });
   }
 
   void _beginMoveSlot(_PlotSlot slot) {
     setState(() {
       _selectedSlotId = slot.id;
+      _detailsExpanded = false;
       _dragStartPositions[slot.id] =
           _slotPositions[slot.id] ??
           _topLeftForAnchor(slot, _anchorById(slot.initialAnchorId));
@@ -168,6 +213,12 @@ class _StarterIslandPlotBoardPreviewState
     return nearest;
   }
 
+  void _toggleDetails() {
+    setState(() {
+      _detailsExpanded = !_detailsExpanded;
+    });
+  }
+
   void _scheduleInitialView(Size viewportSize) {
     if (_initialViewSet || viewportSize.isEmpty) {
       return;
@@ -179,9 +230,9 @@ class _StarterIslandPlotBoardPreviewState
         return;
       }
 
-      final scale = viewportSize.width < 430 ? 0.58 : 0.72;
+      final scale = viewportSize.width < 430 ? 0.68 : 0.78;
       final dx = (viewportSize.width - _boardSize.width * scale) / 2;
-      final dy = (viewportSize.height - _boardSize.height * scale) / 2 - 24;
+      final dy = (viewportSize.height - _boardSize.height * scale) / 2 - 18;
 
       _mapController.value = Matrix4.fromList([
         scale,
@@ -239,6 +290,11 @@ class _StarterIslandPlotBoardPreviewState
                       onBeginMoveSlot: _beginMoveSlot,
                       onMoveSlot: _moveSlot,
                       onFinishMoveSlot: _finishMoveSlot,
+                      bankEncounterActive: _bankEncounterActive,
+                      selectedBankOption: _selectedBankOption,
+                      selectedBankSafeExit: _selectedBankSafeExit,
+                      onSelectBankOption: _selectBankOption,
+                      onSelectBankSafeExit: _selectBankSafeExit,
                     ),
                   ),
                   Positioned(
@@ -253,11 +309,6 @@ class _StarterIslandPlotBoardPreviewState
                   ),
                   Positioned(
                     left: 12,
-                    top: 150,
-                    child: _CandidateRuleBadge(layoutMode: _layoutMode),
-                  ),
-                  Positioned(
-                    left: 12,
                     right: 12,
                     bottom: 12,
                     child: _SelectedPlotHud(
@@ -265,6 +316,10 @@ class _StarterIslandPlotBoardPreviewState
                       anchor: _selectedAnchor,
                       layoutMode: _layoutMode,
                       snapNotice: _snapNotice,
+                      bankEncounterActive: _bankEncounterActive,
+                      detailsExpanded: _detailsExpanded,
+                      onToggleDetails: _toggleDetails,
+                      onStartBankEncounter: _startBankEncounter,
                     ),
                   ),
                 ],
@@ -288,6 +343,11 @@ class _PannableIslandMap extends StatelessWidget {
     required this.onBeginMoveSlot,
     required this.onMoveSlot,
     required this.onFinishMoveSlot,
+    required this.bankEncounterActive,
+    required this.selectedBankOption,
+    required this.selectedBankSafeExit,
+    required this.onSelectBankOption,
+    required this.onSelectBankSafeExit,
   });
 
   final Size boardSize;
@@ -299,19 +359,36 @@ class _PannableIslandMap extends StatelessWidget {
   final ValueChanged<_PlotSlot> onBeginMoveSlot;
   final void Function(_PlotSlot slot, DragUpdateDetails details) onMoveSlot;
   final ValueChanged<_PlotSlot> onFinishMoveSlot;
+  final bool bankEncounterActive;
+  final _BankMeaningOptionId? selectedBankOption;
+  final _BankSafeExitId? selectedBankSafeExit;
+  final ValueChanged<_BankMeaningOptionId> onSelectBankOption;
+  final ValueChanged<_BankSafeExitId> onSelectBankSafeExit;
 
   @override
   Widget build(BuildContext context) {
+    final riverSlot = _slotById(_PlotSlotId.river);
+    final riverPosition =
+        slotPositions[_PlotSlotId.river] ??
+        _topLeftForAnchor(riverSlot, _anchorById(riverSlot.initialAnchorId));
+    final bankBubbleLeft = (riverPosition.dx + 20)
+        .clamp(24.0, boardSize.width - 360)
+        .toDouble();
+    final bankBubbleTop = (riverPosition.dy + riverSlot.markerSize.height + 14)
+        .clamp(24.0, boardSize.height - 360)
+        .toDouble();
+
     return ColoredBox(
       color: const Color(0xFF071B1F),
       child: InteractiveViewer(
         transformationController: controller,
         constrained: false,
-        boundaryMargin: const EdgeInsets.all(260),
-        minScale: 0.48,
+        boundaryMargin: const EdgeInsets.all(420),
+        minScale: 0.52,
         maxScale: 1.8,
-        panEnabled: !layoutMode,
-        scaleEnabled: !layoutMode,
+        panAxis: PanAxis.free,
+        panEnabled: true,
+        scaleEnabled: true,
         child: SizedBox(
           width: boardSize.width,
           height: boardSize.height,
@@ -346,6 +423,18 @@ class _PannableIslandMap extends StatelessWidget {
                     onDragStart: () => onBeginMoveSlot(slot),
                     onDragUpdate: (details) => onMoveSlot(slot, details),
                     onDragEnd: () => onFinishMoveSlot(slot),
+                  ),
+                ),
+              if (bankEncounterActive)
+                Positioned(
+                  left: bankBubbleLeft,
+                  top: bankBubbleTop,
+                  width: 340,
+                  child: _BankEncounterBubble(
+                    selectedOption: selectedBankOption,
+                    selectedSafeExit: selectedBankSafeExit,
+                    onSelectOption: onSelectBankOption,
+                    onSelectSafeExit: onSelectBankSafeExit,
                   ),
                 ),
             ],
@@ -575,88 +664,413 @@ class _PlotMarker extends StatelessWidget {
             const Color(0xDD10251F),
           );
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onPanStart: layoutMode ? (_) => onDragStart() : null,
-      onPanUpdate: layoutMode ? onDragUpdate : null,
-      onPanEnd: layoutMode ? (_) => onDragEnd() : null,
-      onPanCancel: layoutMode ? onDragEnd : null,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: fill,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: isSelected
-                    ? slot.accent
-                    : slot.accent.withValues(alpha: 0.62),
-                width: isSelected ? 3 : 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: slot.accent.withValues(
-                    alpha: isSelected ? 0.34 : 0.14,
-                  ),
-                  blurRadius: isSelected ? 20 : 10,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected
+                  ? slot.accent
+                  : slot.accent.withValues(alpha: 0.62),
+              width: isSelected ? 3 : 1.5,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+            boxShadow: [
+              BoxShadow(
+                color: slot.accent.withValues(alpha: isSelected ? 0.34 : 0.14),
+                blurRadius: isSelected ? 20 : 10,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(slot.icon, color: slot.accent, size: 20),
-                    const SizedBox(width: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(slot.icon, color: slot.accent, size: 20),
+                        const SizedBox(width: 6),
+                        Text(
+                          slot.slotCode,
+                          style: TextStyle(
+                            color: slot.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
                     Text(
-                      slot.slotCode,
-                      style: TextStyle(
-                        color: slot.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
+                      slot.mapName,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFFF1FFF6),
+                        fontSize: 13,
+                        height: 1.08,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  slot.mapName,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFFF1FFF6),
-                    fontSize: 13,
-                    height: 1.08,
-                    fontWeight: FontWeight.w800,
+              ),
+              if (layoutMode)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: _MarkerDragHandle(
+                    accent: slot.accent,
+                    onDragStart: onDragStart,
+                    onDragUpdate: onDragUpdate,
+                    onDragEnd: onDragEnd,
                   ),
                 ),
-                if (layoutMode) ...[
-                  const SizedBox(height: 4),
-                  const Text(
-                    'drag',
-                    style: TextStyle(
-                      color: Color(0xFFCFE4D8),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MarkerDragHandle extends StatelessWidget {
+  const _MarkerDragHandle({
+    required this.accent,
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
+
+  final Color accent;
+  final VoidCallback onDragStart;
+  final GestureDragUpdateCallback onDragUpdate;
+  final VoidCallback onDragEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onPanStart: (_) => onDragStart(),
+      onPanUpdate: onDragUpdate,
+      onPanEnd: (_) => onDragEnd(),
+      onPanCancel: onDragEnd,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF071614).withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: accent, width: 1.4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(Icons.open_with_rounded, color: accent, size: 15),
+        ),
+      ),
+    );
+  }
+}
+
+class _BankEncounterBubble extends StatelessWidget {
+  const _BankEncounterBubble({
+    required this.selectedOption,
+    required this.selectedSafeExit,
+    required this.onSelectOption,
+    required this.onSelectSafeExit,
+  });
+
+  final _BankMeaningOptionId? selectedOption;
+  final _BankSafeExitId? selectedSafeExit;
+  final ValueChanged<_BankMeaningOptionId> onSelectOption;
+  final ValueChanged<_BankSafeExitId> onSelectSafeExit;
+
+  bool get _hasCorrectSelection =>
+      selectedOption == _BankMeaningOptionId.riverEdge;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = selectedOption == null
+        ? null
+        : _bankOptions.firstWhere((option) => option.id == selectedOption);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B1D20).withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF6BC8F2), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6BC8F2).withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.water_rounded, color: Color(0xFF6BC8F2), size: 22),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'P-01 Bank-Spielmoment',
+                        style: TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Am Fluss macht Tali kurz Pause. Welche Bedeutung passt?',
+                        style: TextStyle(fontSize: 12.2, height: 1.22),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in _bankOptions)
+                  _BankOptionChip(
+                    option: option,
+                    isSelected: selectedOption == option.id,
+                    onTap: () => onSelectOption(option.id),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _BankFeedbackPanel(
+              selected: selected,
+              selectedSafeExit: selectedSafeExit,
+              hasCorrectSelection: _hasCorrectSelection,
+            ),
+            const SizedBox(height: 9),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final exit in _bankSafeExits)
+                  _SafeExitChip(
+                    exit: exit,
+                    isSelected: selectedSafeExit == exit.id,
+                    onTap: () => onSelectSafeExit(exit.id),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _MiniStatusPill(label: 'kein Build'),
+                _MiniStatusPill(label: 'kein Placement'),
+                _MiniStatusPill(label: 'kein SRS-Write'),
+                _MiniStatusPill(label: 'keine Speicherung'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BankOptionChip extends StatelessWidget {
+  const _BankOptionChip({
+    required this.option,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _BankMeaningOption option;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = option.isCorrect
+        ? const Color(0xFF6BC8F2)
+        : const Color(0xFFD6F18C);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        width: 98,
+        constraints: const BoxConstraints(minHeight: 76),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? accent.withValues(alpha: 0.22)
+              : const Color(0xFF102D2D).withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? accent : const Color(0xFF31594F),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(option.icon, color: accent, size: 20),
+            const SizedBox(height: 5),
+            Text(
+              option.title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11.4,
+                height: 1.08,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              option.sceneLabel,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 9.8, color: Color(0xFFCFE4D8)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BankFeedbackPanel extends StatelessWidget {
+  const _BankFeedbackPanel({
+    required this.selected,
+    required this.selectedSafeExit,
+    required this.hasCorrectSelection,
+  });
+
+  final _BankMeaningOption? selected;
+  final _BankSafeExitId? selectedSafeExit;
+  final bool hasCorrectSelection;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = _feedbackText;
+    final icon = hasCorrectSelection
+        ? Icons.auto_stories_rounded
+        : Icons.tips_and_updates_rounded;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF071614),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: hasCorrectSelection
+              ? const Color(0xFF95E6B8)
+              : const Color(0xFFD6F18C).withValues(alpha: 0.62),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              color: hasCorrectSelection
+                  ? const Color(0xFF95E6B8)
+                  : const Color(0xFFD6F18C),
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(fontSize: 11.8, height: 1.22),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String get _feedbackText {
+    if (selectedSafeExit != null) {
+      return switch (selectedSafeExit!) {
+        _BankSafeExitId.later =>
+          'Later: Der P-01-Spielmoment bleibt lokal offen. Kein Verlust, keine Pflicht.',
+        _BankSafeExitId.codex =>
+          'Codex: Bank kann Sitzbank, Geldinstitut oder Flussufer bedeuten. Kontext entscheidet.',
+        _BankSafeExitId.backlog =>
+          'Backlog: Der Bedeutungsfall wird nur simuliert geparkt. Nichts wird gespeichert.',
+        _BankSafeExitId.change =>
+          'Change: Waehle ruhig neu. Die Szene am Fluss bleibt dein Hinweis.',
+      };
+    }
+
+    if (selected == null) {
+      return 'Tali schaut auf den Wasserweg. Das Wort Bank ist mehrdeutig; der Ort gibt den Hinweis.';
+    }
+
+    if (selected!.isCorrect) {
+      return 'ContextCard / Codex Discovery: Genau, am Fluss meint Bank das Flussufer. Kein Build, kein Placement.';
+    }
+
+    return 'Calm Retry: Schau nochmal auf den Kontext "am Fluss". Keine Strafe, kein Verlust, kein Score.';
+  }
+}
+
+class _SafeExitChip extends StatelessWidget {
+  const _SafeExitChip({
+    required this.exit,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _BankSafeExit exit;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(exit.icon, size: 15),
+      label: Text(exit.label),
+      onPressed: onTap,
+      visualDensity: VisualDensity.compact,
+      side: BorderSide(
+        color: isSelected ? const Color(0xFF95E6B8) : const Color(0xFF31594F),
+      ),
+      backgroundColor: isSelected
+          ? const Color(0xFF244C3F)
+          : const Color(0xFF0A1A16),
+      labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
     );
   }
 }
@@ -742,8 +1156,7 @@ class _TopHud extends StatelessWidget {
                       ),
                       SizedBox(height: 3),
                       Text(
-                        'Pan/Zoom im Kartenmodus. Layout-Modus verschiebt '
-                        'Kandidaten; beim Loslassen snappt nur ein passender Anchor.',
+                        'Insel bewegen, Plot waehlen, Kandidaten nur per Handle verschieben.',
                         style: TextStyle(fontSize: 12.5, height: 1.2),
                       ),
                     ],
@@ -764,14 +1177,59 @@ class _TopHud extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onResetLayout,
                   icon: const Icon(Icons.restart_alt_rounded, size: 17),
-                  label: const Text('Layout zuruecksetzen'),
+                  label: const Text('Reset'),
                   style: OutlinedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: const Color(0xFFEAF7EF),
                     side: const BorderSide(color: Color(0xFF4B8F78)),
                   ),
                 ),
+                if (layoutMode) ...[
+                  const _HudHintPill(
+                    icon: Icons.open_with_rounded,
+                    label: 'Marker per Handle verschieben',
+                  ),
+                  const _HudHintPill(
+                    icon: Icons.anchor_rounded,
+                    label: 'Snap auf passende Anchor',
+                  ),
+                ],
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HudHintPill extends StatelessWidget {
+  const _HudHintPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF17322B).withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFF4B8F78)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: const Color(0xFF95E6B8), size: 14),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11.2,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
         ),
@@ -817,58 +1275,26 @@ class _LayoutModeChip extends StatelessWidget {
   }
 }
 
-class _CandidateRuleBadge extends StatelessWidget {
-  const _CandidateRuleBadge({required this.layoutMode});
-
-  final bool layoutMode;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF17322B).withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF4B8F78)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              layoutMode ? Icons.open_with_rounded : Icons.explore_rounded,
-              color: const Color(0xFF95E6B8),
-              size: 15,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              layoutMode
-                  ? 'Drag: snappt auf passende Anchor-Zone'
-                  : 'Candidate, kein Placement',
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SelectedPlotHud extends StatelessWidget {
   const _SelectedPlotHud({
     required this.slot,
     required this.anchor,
     required this.layoutMode,
     required this.snapNotice,
+    required this.bankEncounterActive,
+    required this.detailsExpanded,
+    required this.onToggleDetails,
+    required this.onStartBankEncounter,
   });
 
   final _PlotSlot slot;
   final _PlotAnchor anchor;
   final bool layoutMode;
   final String snapNotice;
+  final bool bankEncounterActive;
+  final bool detailsExpanded;
+  final VoidCallback onToggleDetails;
+  final VoidCallback onStartBankEncounter;
 
   @override
   Widget build(BuildContext context) {
@@ -886,7 +1312,7 @@ class _SelectedPlotHud extends StatelessWidget {
         ],
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 286),
+        constraints: BoxConstraints(maxHeight: detailsExpanded ? 324 : 202),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -911,38 +1337,85 @@ class _SelectedPlotHud extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              const _CandidateStatement(),
-              _InfoLine(label: 'Snap-Status', value: snapNotice),
-              _InfoLine(
-                label: 'Aktueller Anchor',
-                value:
-                    '${anchor.id} / ${anchor.zone} / erlaubt: ${anchor.allowedFamilies.join(', ')}',
+              Text(
+                slot.boardSummary,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.8, height: 1.22),
               ),
-              _InfoLine(
-                label: 'Erlaubte Anchor-Zonen',
-                value: slot.allowedAnchorZones.join(', '),
+              if (layoutMode) ...[
+                const SizedBox(height: 8),
+                _SnapNoticeLine(text: snapNotice),
+              ],
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (slot.id == _PlotSlotId.river)
+                    FilledButton.icon(
+                      onPressed: onStartBankEncounter,
+                      icon: const Icon(Icons.water_rounded, size: 18),
+                      label: Text(
+                        bankEncounterActive ? 'Bank neu' : 'Bank testen',
+                      ),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: const Color(0xFF1B6F82),
+                        foregroundColor: const Color(0xFFEAF7EF),
+                      ),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: onToggleDetails,
+                    icon: Icon(
+                      detailsExpanded
+                          ? Icons.expand_more_rounded
+                          : Icons.info_outline_rounded,
+                      size: 18,
+                    ),
+                    label: Text(detailsExpanded ? 'Weniger' : 'Details'),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      foregroundColor: const Color(0xFFEAF7EF),
+                      side: const BorderSide(color: Color(0xFF4B8F78)),
+                    ),
+                  ),
+                ],
               ),
-              _InfoLine(label: 'Plot-Familie', value: slot.family),
-              _InfoLine(label: 'Beispiel-Woerter', value: slot.examples),
-              _InfoLine(label: 'Spielmomente', value: slot.allowedMoments),
-              _InfoLine(label: 'Blockiert', value: slot.blocked),
-              _InfoLine(label: 'Flex-Regel', value: slot.flexRule),
-              _InfoLine(
-                label: 'Modus',
-                value: layoutMode
-                    ? 'Layout-Modus aktiv: Drag/Snap auf passende Anchor.'
-                    : 'Kartenmodus aktiv: Insel ist pannbar und zoombar.',
-              ),
-              const SizedBox(height: 8),
+              if (detailsExpanded) ...[
+                const SizedBox(height: 10),
+                const Divider(color: Color(0xFF31594F), height: 1),
+                const SizedBox(height: 8),
+                _InfoLine(label: 'Plot-Familie', value: slot.family),
+                _InfoLine(label: 'Beispiel-Woerter', value: slot.examples),
+                _InfoLine(label: 'Spielmomente', value: slot.allowedMoments),
+                _InfoLine(
+                  label: 'Anchor jetzt',
+                  value:
+                      '${anchor.id} / ${anchor.zone} / erlaubt: ${anchor.allowedFamilies.join(', ')}',
+                ),
+                _InfoLine(
+                  label: 'Erlaubte Anchor-Zonen',
+                  value: slot.allowedAnchorZones.join(', '),
+                ),
+                _InfoLine(label: 'Blockiert', value: slot.blocked),
+                _InfoLine(label: 'Flex-Regel', value: slot.flexRule),
+                _InfoLine(
+                  label: 'Modus',
+                  value: layoutMode
+                      ? 'Layout: Handle verschiebt, Karte bleibt pannbar.'
+                      : 'Karte: Pan/Zoom und Plot-Auswahl.',
+                ),
+              ],
+              const SizedBox(height: 10),
               const Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  _MiniStatusPill(label: 'lokaler Candidate'),
-                  _MiniStatusPill(label: 'kein Placement'),
-                  _MiniStatusPill(label: 'kein BuildState'),
-                  _MiniStatusPill(label: 'keine Speicherung'),
-                  _MiniStatusPill(label: 'keine Assets'),
+                  _MiniStatusPill(label: 'kein Build'),
+                  _MiniStatusPill(label: 'keine Persistenz'),
+                  _MiniStatusPill(label: 'kein SRS-Write'),
                   _MiniStatusPill(label: 'keine Route'),
                 ],
               ),
@@ -954,24 +1427,39 @@ class _SelectedPlotHud extends StatelessWidget {
   }
 }
 
-class _CandidateStatement extends StatelessWidget {
-  const _CandidateStatement();
+class _SnapNoticeLine extends StatelessWidget {
+  const _SnapNoticeLine({required this.text});
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1A16),
+        color: const Color(0xFF0A1A16).withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFF31594F)),
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(9),
-        child: Text(
-          'Dies ist ein lokaler Plot-Kandidat, kein Placement. '
-          'Kandidaten snappen nur auf passende lokale Anchor-Zonen. '
-          'Capability = Moeglichkeit, kein Build. Ungueltige Plaetze werden nicht uebernommen.',
-          style: TextStyle(fontSize: 12.3, height: 1.22),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.anchor_rounded,
+              color: Color(0xFF95E6B8),
+              size: 16,
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                text,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11.6, height: 1.18),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1032,6 +1520,82 @@ class _MiniStatusPill extends StatelessWidget {
   }
 }
 
+enum _BankMeaningOptionId { bench, institution, riverEdge }
+
+enum _BankSafeExitId { later, codex, backlog, change }
+
+class _BankMeaningOption {
+  const _BankMeaningOption({
+    required this.id,
+    required this.title,
+    required this.sceneLabel,
+    required this.icon,
+  });
+
+  final _BankMeaningOptionId id;
+  final String title;
+  final String sceneLabel;
+  final IconData icon;
+
+  bool get isCorrect => id == _BankMeaningOptionId.riverEdge;
+}
+
+class _BankSafeExit {
+  const _BankSafeExit({
+    required this.id,
+    required this.label,
+    required this.icon,
+  });
+
+  final _BankSafeExitId id;
+  final String label;
+  final IconData icon;
+}
+
+const _bankOptions = [
+  _BankMeaningOption(
+    id: _BankMeaningOptionId.bench,
+    title: 'Sitzbank',
+    sceneLabel: 'Uferplatz',
+    icon: Icons.chair_alt_rounded,
+  ),
+  _BankMeaningOption(
+    id: _BankMeaningOptionId.institution,
+    title: 'Geldinstitut',
+    sceneLabel: 'Stadtschild',
+    icon: Icons.account_balance_rounded,
+  ),
+  _BankMeaningOption(
+    id: _BankMeaningOptionId.riverEdge,
+    title: 'Flussufer',
+    sceneLabel: 'Wasserweg',
+    icon: Icons.water_rounded,
+  ),
+];
+
+const _bankSafeExits = [
+  _BankSafeExit(
+    id: _BankSafeExitId.later,
+    label: 'Later',
+    icon: Icons.schedule_rounded,
+  ),
+  _BankSafeExit(
+    id: _BankSafeExitId.codex,
+    label: 'Codex',
+    icon: Icons.menu_book_rounded,
+  ),
+  _BankSafeExit(
+    id: _BankSafeExitId.backlog,
+    label: 'Backlog',
+    icon: Icons.inventory_2_rounded,
+  ),
+  _BankSafeExit(
+    id: _BankSafeExitId.change,
+    label: 'Change',
+    icon: Icons.swap_horiz_rounded,
+  ),
+];
+
 enum _PlotSlotId {
   hub,
   river,
@@ -1069,6 +1633,7 @@ class _PlotSlot {
     required this.slotCode,
     required this.name,
     required this.mapName,
+    required this.boardSummary,
     required this.family,
     required this.examples,
     required this.allowedMoments,
@@ -1085,6 +1650,7 @@ class _PlotSlot {
   final String slotCode;
   final String name;
   final String mapName;
+  final String boardSummary;
   final String family;
   final String examples;
   final String allowedMoments;
@@ -1099,6 +1665,10 @@ class _PlotSlot {
 
 _PlotAnchor _anchorById(String id) {
   return _plotAnchors.firstWhere((anchor) => anchor.id == id);
+}
+
+_PlotSlot _slotById(_PlotSlotId id) {
+  return _plotSlots.firstWhere((slot) => slot.id == id);
 }
 
 Offset _topLeftForAnchor(_PlotSlot slot, _PlotAnchor anchor) {
@@ -1253,6 +1823,7 @@ const _plotSlots = [
     slotCode: 'P-00',
     name: 'Hub / Startplatz Candidate',
     mapName: 'Hub',
+    boardSummary: 'Start- und Rueckkehrpunkt fuer ruhige Weltmomente.',
     family: 'hub / orientation',
     examples: 'heute, weiter, Pause',
     allowedMoments: 'Calm Comeback, World Hint, erste Wegwahl.',
@@ -1270,6 +1841,8 @@ const _plotSlots = [
     slotCode: 'P-01',
     name: 'Flussufer / Wasser Candidate',
     mapName: 'Flussufer',
+    boardSummary:
+        'Der Wasser-Plot traegt Kontext fuer Bank, Hafen und Bewegung.',
     family: 'water / coast / movement',
     examples: 'Bank, schwimmen, Hafen',
     allowedMoments: 'Meaning Puzzle, Context Door, Action Moment.',
@@ -1286,6 +1859,7 @@ const _plotSlots = [
     slotCode: 'P-02',
     name: 'Zuhause / Alltag Candidate',
     mapName: 'Zuhause',
+    boardSummary: 'Alltagsort fuer spaetere BuildChoice-Ideen, nicht gebaut.',
     family: 'dwelling / home / daily life',
     examples: 'Haus, Garage, Garten als spaetere BuildChoice-Kandidaten.',
     allowedMoments: 'Home-nahe Context Door, Choice Fork, Codex Discovery.',
@@ -1303,6 +1877,7 @@ const _plotSlots = [
     slotCode: 'P-03',
     name: 'Garten / Natur Candidate',
     mapName: 'Garten',
+    boardSummary: 'Naturzone fuer kleine sichere Welt-Hinweise.',
     family: 'garden / nature',
     examples: 'Baum, Blume, Samen',
     allowedMoments: 'World Hint, Tiny Mystery, ContextCard.',
@@ -1320,6 +1895,7 @@ const _plotSlots = [
     slotCode: 'P-04',
     name: 'Lernen / Wissen Candidate',
     mapName: 'Wissen',
+    boardSummary: 'Wissensort fuer Kontext, Codex und Denkaufgaben.',
     family: 'learning / school / knowledge',
     examples: 'lernen, Schule, Frage',
     allowedMoments: 'ContextCard Challenge, Codex Discovery.',
@@ -1336,6 +1912,7 @@ const _plotSlots = [
     slotCode: 'P-05',
     name: 'Markt / Kueche / Essen Candidate',
     mapName: 'Markt',
+    boardSummary: 'Moeglicher Essens- und Handlungsort, kein Shop-System.',
     family: 'food / kitchen / restaurant',
     examples: 'kochen, Brot, Markt/Kueche/Essen als moegliche Spielmomente.',
     allowedMoments: 'Choice Fork, Action Moment, Container Hint.',
@@ -1352,6 +1929,7 @@ const _plotSlots = [
     slotCode: 'P-06',
     name: 'Werkstatt / Arbeit Candidate',
     mapName: 'Werkstatt',
+    boardSummary: 'Craft-Zone als Vorschlag, kein Produktionszustand.',
     family: 'work / craft / production',
     examples: 'arbeiten, Werkzeug, Werkstatt-Familie.',
     allowedMoments: 'ActionChallenge, Meaning Puzzle, World Hint.',
@@ -1368,6 +1946,7 @@ const _plotSlots = [
     slotCode: 'P-07',
     name: 'Container / Tasche / Lager Candidate',
     mapName: 'Lager',
+    boardSummary: 'Auffindbarer Ort fuer kleine Objekte und Container-Ideen.',
     family: 'container / storage / depth',
     examples: 'Schluessel, Messer, Tasse',
     allowedMoments: 'Container Hunt, Codex Link, Findability Hint.',
@@ -1385,6 +1964,7 @@ const _plotSlots = [
     slotCode: 'P-08',
     name: 'Codex / Kontext Candidate',
     mapName: 'Codex',
+    boardSummary: 'Ruhiger Kontextort fuer abstrakte oder mehrdeutige Woerter.',
     family: 'abstract / context / codex',
     examples: 'Freiheit, lernen, Bedeutung',
     allowedMoments: 'Codex Discovery, ContextCard, Tali/Vori-Erklaerung.',
@@ -1401,6 +1981,8 @@ const _plotSlots = [
     slotCode: 'P-09',
     name: 'Later / Backlog / Sensitive Candidate',
     mapName: 'Safe Rand',
+    boardSummary:
+        'Geschuetzter Rand fuer Later, Backlog und sensitive Defaults.',
     family: 'safe fallback / sensitive gate',
     examples: 'Angst, Polizei, unklar',
     allowedMoments: 'Later, Backlog, Hide, SensitiveGated.',
