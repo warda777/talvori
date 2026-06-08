@@ -8,35 +8,35 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AF`
+Aktive Sprint-ID: `M16-AG`
 
 Sprint Goal:
 
-> Gameplay Pillars, MVP Quest-/Challenge-Loop und Research-Fragen fuer Lern-/Aufbauspiele fachlich vorbereiten.
+> Breite Benchmark-Landkarte fuer Lern-, Habit-, Flashcard-, Interactive-Learning-, Aufbau-, Social-, Challenge- und Metrics-Systeme vorbereiten.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 8 |
-| Teilweise erledigt `[~]` | 13 |
-| Erledigt `[x]` | 84 |
+| Offen `[ ]` | 2 |
+| Teilweise erledigt `[~]` | 18 |
+| Erledigt `[x]` | 85 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 76.1 % |
-| Fortschrittsbalken | `███████████████░░░░░` |
+| Gewichteter Fortschritt | 79.0 % |
+| Fortschrittsbalken | `████████████████░░░░` |
 
 Naechste empfohlene IDs:
 
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 - M16T-RESEARCH-004
-- M16T-SOCIAL-001
 - M16T-SOCIAL-002
 - M16T-SOCIAL-003
 - M16T-METRICS-001
 - M16T-METRICS-002
+- M16T-METRICS-003
 - M16T-DATA-004
 - M16T-ASSET-004
 
@@ -499,6 +499,22 @@ M16-AF teilweise vorbereitet:
 
 - M16T-RESEARCH-004
 
+M16-AG erledigt:
+
+- M16T-SOCIAL-001
+
+M16-AG teilweise vorbereitet:
+
+- M16T-SOCIAL-002
+- M16T-SOCIAL-003
+- M16T-METRICS-001
+- M16T-METRICS-002
+- M16T-METRICS-003
+
+M16-AG vertieft, bleibt aber teilweise vorbereitet:
+
+- M16T-RESEARCH-004
+
 M16-U in eigene Detail-Gates ausgelagert:
 
 - M16T-RESEARCH-002
@@ -683,17 +699,17 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-SOCIAL-001 | [ ] | Social/Competition als spaeteres Gate aufnehmen | Social kann motivieren, aber auch Druck erzeugen. | Social/Competition als eigenes Gate in Roadmap/Backlog steht. | Produktive Social-Mechanik. | nein |
-| M16T-SOCIAL-002 | [ ] | Gegen-andere-antreten nur nach Fairness-/Safety-Gate | Wettbewerb kann Lernen verzerren. | Fairness, Safety, Alters-/Privacy- und Anti-Druck-Regeln dokumentiert sind. | Competition ohne Gate. | nein |
-| M16T-SOCIAL-003 | [ ] | Clan-/Team-/Freunde-Ideen als Research-Thema aufnehmen | Teams und Freunde koennen spaeter Talvori staerken. | Clan/Freunde/Team-Research mit Talvori-Prinzipien existiert. | Social Scope Drift. | nein |
+| M16T-SOCIAL-001 | [x] | Social/Competition als spaeteres Gate aufnehmen | Social kann motivieren, aber auch Druck erzeugen. | Social/Competition als eigenes Gate in Roadmap/Backlog steht. | Produktive Social-Mechanik. | nein |
+| M16T-SOCIAL-002 | [~] | Gegen-andere-antreten nur nach Fairness-/Safety-Gate | Wettbewerb kann Lernen verzerren. | Fairness, Safety, Alters-/Privacy- und Anti-Druck-Regeln dokumentiert sind. | Competition ohne Gate. | nein |
+| M16T-SOCIAL-003 | [~] | Clan-/Team-/Freunde-Ideen als Research-Thema aufnehmen | Teams und Freunde koennen spaeter Talvori staerken. | Clan/Freunde/Team-Research mit Talvori-Prinzipien existiert. | Social Scope Drift. | nein |
 
 ### M16T-METRICS
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-METRICS-001 | [ ] | Erfolgsmessung fuer Lernerfolg definieren | Produktfortschritt muss Lernen messen, nicht nur Nutzung. | Lernmetriken ohne SRS-Mutation definiert sind. | Analytics ohne Lernziel. | nein |
-| M16T-METRICS-002 | [ ] | Erfolgsmessung fuer Motivation/Retention definieren | Motivation soll beobachtbar, aber nicht manipulativ werden. | Motivations-/Retention-Metriken mit Fairness-Grenzen dokumentiert sind. | Druckmetriken. | nein |
-| M16T-METRICS-003 | [ ] | Privacy-Gate fuer spaetere Analytics definieren | Messung darf private Wort-/Kontextdaten nicht gefaehrden. | Analytics-Privacy-Gate dokumentiert ist. | Analytics ohne Privacy. | nein |
+| M16T-METRICS-001 | [~] | Erfolgsmessung fuer Lernerfolg definieren | Produktfortschritt muss Lernen messen, nicht nur Nutzung. | Lernmetriken ohne SRS-Mutation definiert sind. | Analytics ohne Lernziel. | nein |
+| M16T-METRICS-002 | [~] | Erfolgsmessung fuer Motivation/Retention definieren | Motivation soll beobachtbar, aber nicht manipulativ werden. | Motivations-/Retention-Metriken mit Fairness-Grenzen dokumentiert sind. | Druckmetriken. | nein |
+| M16T-METRICS-003 | [~] | Privacy-Gate fuer spaetere Analytics definieren | Messung darf private Wort-/Kontextdaten nicht gefaehrden. | Analytics-Privacy-Gate dokumentiert ist. | Analytics ohne Privacy. | nein |
 
 ## 33. M16-U Dokumentationsvisualisierungen
 

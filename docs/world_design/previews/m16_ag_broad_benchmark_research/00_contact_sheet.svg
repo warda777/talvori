@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="3900" viewBox="0 0 3400 3900">
+<rect width="3400" height="3900" fill="#f7f8f4"/>
+<rect x="45" y="35" width="3310" height="3830" rx="28" ry="28" fill="#f7f8f4" stroke="#d6dfd7" stroke-width="2"/>
+<text x="80" y="146" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#20302c">M16-AG Broad Benchmark Research</text>
+<text x="80" y="195" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="400" fill="#64736e">Contact sheet for generated documentation visuals. No app screens, screenshots or assets.</text>
+<line x1="80" y1="3795" x2="3320" y2="3795" stroke="#d6dfd7" stroke-width="2" stroke-linecap="round"/>
+<text x="80" y="3849" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#64736e">documentation preview only / no code / no app route / no screenshots / no assets / no persistence / no social runtime / no analytics runtime</text>
+<rect x="132" y="302" width="1376" height="1098" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<image href="benchmark_category_map.png" x="160" y="330" width="1320" height="965"/>
+<text x="160" y="1345" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#20302c">benchmark_category_map.png / benchmark_category_map.svg</text>
+<rect x="1892" y="302" width="1376" height="1098" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<image href="benchmark_candidate_matrix.png" x="1920" y="330" width="1320" height="965"/>
+<text x="1920" y="1345" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#20302c">benchmark_candidate_matrix.png / benchmark_candidate_matrix.svg</text>
+<rect x="132" y="1392" width="1376" height="1098" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<image href="research_to_talvori_principles_flow.png" x="160" y="1420" width="1320" height="965"/>
+<text x="160" y="2435" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#20302c">research_to_talvori_principles_flow.png / research_to_talvori_principles_flow.svg</text>
+<rect x="1892" y="1392" width="1376" height="1098" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<image href="social_competition_gate_map.png" x="1920" y="1420" width="1320" height="965"/>
+<text x="1920" y="2435" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#20302c">social_competition_gate_map.png / social_competition_gate_map.svg</text>
+<rect x="132" y="2482" width="1376" height="1098" rx="18" ry="18" fill="#ffffff" stroke="#d6dfd7" stroke-width="2"/>
+<image href="metrics_privacy_gate_map.png" x="160" y="2510" width="1320" height="965"/>
+<text x="160" y="3525" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#20302c">metrics_privacy_gate_map.png / metrics_privacy_gate_map.svg</text>
+<text x="120" y="3777" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#64736e">Visual-QA: PNG and SVG generated, text containment checked, contact sheet readable, no overlaps or clipping intended.</text>
+</svg>
