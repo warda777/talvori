@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AI`
+Aktive Sprint-ID: `M16-AJ`
 
 Sprint Goal:
 
-> Habit-, Motivation-, Micro-Session-, Recall- und druckfreie Retention-Prinzipien aus Deep Research ableiten.
+> Supercell-/Clash-Progression, Social Play, Competition-Risiken und druckfreie Talvori-Grenzen aus Deep Research ableiten.
 
 ### 0.1 Gesamtfortschritt
 
@@ -20,18 +20,15 @@ Sprint Goal:
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 92 |
+| Teilweise erledigt `[~]` | 12 |
+| Erledigt `[x]` | 95 |
 | Blockiert `[!]` | 12 |
-| Ausgelagert `[>]` | 1 |
-| Gewichteter Fortschritt | 83.2 % |
+| Ausgelagert `[>]` | 0 |
+| Gewichteter Fortschritt | 84.9 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-RESEARCH-003
-- M16T-SOCIAL-002
-- M16T-SOCIAL-003
 - M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
@@ -534,16 +531,31 @@ M16-AI bewusst unveraendert teilweise vorbereitet:
 - M16T-AI-002
 - M16T-AI-004
 
-Damit bleiben keine normalen offenen `[ ]` M16-T-Items. Blockierte,
-teilweise erledigte und ausgelagerte Gates bleiben bewusst bestehen und
-duerfen nicht nebenbei als Implementierungsfreigabe gelesen werden.
-
-M16-U in eigene Detail-Gates ausgelagert:
+M16-AJ erledigt:
 
 - M16T-RESEARCH-003
+- M16T-SOCIAL-002
+- M16T-SOCIAL-003
 
-Alle anderen Punkte bleiben offen, blockiert oder muessen in eigene
-Detail-Gates ausgelagert werden.
+M16-AJ bewusst unveraendert:
+
+- M16T-GAME-003
+- M16T-GAME-004
+- M16T-WORLD-002
+- M16T-WHEEL-003
+
+Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
+`[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
+bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
+werden.
+
+M16-U Detail-Gates inzwischen geschlossen:
+
+- M16T-RESEARCH-002
+- M16T-RESEARCH-003
+
+Alle verbleibenden Punkte bleiben teilweise vorbereitet oder blockiert und
+brauchen eigene Folge-Gates, bevor daraus Implementierung entstehen darf.
 
 ## 28. Scrum-lite Operating Model
 
@@ -705,7 +717,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-RESEARCH-001 | [x] | Benchmark-Gate fuer erfolgreiche Lern-/Spiel-Apps definieren | Talvori soll von bewaehrten Prinzipien lernen. | Research-Gate in 328 steht. | Produktive Mechanik ohne Benchmark. | nein |
 | M16T-RESEARCH-002 | [x] | Duolingo-Research fuer Habit/XP/Streaks/Leagues planen | Habit-Mechaniken sind stark, aber druckgefaehrlich. | Eigenes Research-Dokument Prinzipien und Risiken ableitet. | Blindes Kopieren von Streak/League-Druck. | nein |
-| M16T-RESEARCH-003 | [>] | Clash/Supercell-Research fuer Progression/Social/Competition planen | Aufbau- und Sozialspiel braucht Balance-Wissen. | Eigenes Research-Dokument Progression, Trade-offs, Social und Risiken ableitet. | Pay-to-win, FOMO, Competition-Druck. | nein |
+| M16T-RESEARCH-003 | [x] | Clash/Supercell-Research fuer Progression/Social/Competition planen | Aufbau- und Sozialspiel braucht Balance-Wissen. | Eigenes Research-Dokument Progression, Trade-offs, Social und Risiken ableitet. | Pay-to-win, FOMO, Competition-Druck. | nein |
 | M16T-RESEARCH-004 | [x] | Research-Ergebnisse in Talvori-Prinzipien uebersetzen | Research ist nur nuetzlich, wenn es Talvori-Regeln erzeugt. | Abgeleitete Prinzipien in M16-T/MVP-Gates eingearbeitet sind. | Research bleibt Sammlung. | nein |
 
 ### M16T-GAME
@@ -722,8 +734,8 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-SOCIAL-001 | [x] | Social/Competition als spaeteres Gate aufnehmen | Social kann motivieren, aber auch Druck erzeugen. | Social/Competition als eigenes Gate in Roadmap/Backlog steht. | Produktive Social-Mechanik. | nein |
-| M16T-SOCIAL-002 | [~] | Gegen-andere-antreten nur nach Fairness-/Safety-Gate | Wettbewerb kann Lernen verzerren. | Fairness, Safety, Alters-/Privacy- und Anti-Druck-Regeln dokumentiert sind. | Competition ohne Gate. | nein |
-| M16T-SOCIAL-003 | [~] | Clan-/Team-/Freunde-Ideen als Research-Thema aufnehmen | Teams und Freunde koennen spaeter Talvori staerken. | Clan/Freunde/Team-Research mit Talvori-Prinzipien existiert. | Social Scope Drift. | nein |
+| M16T-SOCIAL-002 | [x] | Gegen-andere-antreten nur nach Fairness-/Safety-Gate | Wettbewerb kann Lernen verzerren. | Fairness, Safety, Alters-/Privacy- und Anti-Druck-Regeln dokumentiert sind. | Competition ohne Gate. | nein |
+| M16T-SOCIAL-003 | [x] | Clan-/Team-/Freunde-Ideen als Research-Thema aufnehmen | Teams und Freunde koennen spaeter Talvori staerken. | Clan/Freunde/Team-Research mit Talvori-Prinzipien existiert. | Social Scope Drift. | nein |
 
 ### M16T-METRICS
 

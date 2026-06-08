@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3100" height="2250" viewBox="0 0 3100 2250">
+<rect width="3100" height="2250" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3004" height="2174" rx="30" ry="30" fill="#f8f9f4" stroke="#d8e0d8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1f2c2a">Progression Without Pressure Rules</text>
+<text x="92" y="204" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#66736d">Talvori can feel like growth without borrowing timers, economy or competitive pressure.</text>
+<line x1="92" y1="2138" x2="3008" y2="2138" stroke="#d8e0d8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#66736d">documentation research preview only / no implementation / no economy / no timers / no social or competition release / no BuildState / no frame_started</text>
+<rect x="120" y="380" width="480" height="320" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="120" y="380" width="480" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="148" y="452" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Learn</text>
+<text x="148" y="506" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">A word or context is practiced.</text>
+<line x1="600" y1="540" x2="680" y2="540" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="680,540 652,522 652,558" fill="#95a59f"/>
+<rect x="720" y="380" width="480" height="320" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="720" y="380" width="480" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="748" y="452" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Meaning</text>
+<text x="748" y="506" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Sense and outcome become clearer.</text>
+<line x1="1200" y1="540" x2="1280" y2="540" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1280,540 1252,522 1252,558" fill="#95a59f"/>
+<rect x="1320" y="380" width="480" height="320" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1320" y="380" width="480" height="16" rx="9" ry="9" fill="#5bb8aa"/>
+<text x="1348" y="452" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Candidate</text>
+<text x="1348" y="506" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">A safe optional world possibility appears.</text>
+<line x1="1800" y1="540" x2="1880" y2="540" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1880,540 1852,522 1852,558" fill="#95a59f"/>
+<rect x="1920" y="380" width="480" height="320" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1920" y="380" width="480" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="1948" y="452" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Choice</text>
+<text x="1948" y="506" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Later, Codex, Backlog, Change or Preview.</text>
+<line x1="2400" y1="540" x2="2480" y2="540" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2480,540 2452,522 2452,558" fill="#95a59f"/>
+<rect x="2520" y="380" width="480" height="320" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2520" y="380" width="480" height="16" rx="9" ry="9" fill="#8977c7"/>
+<text x="2548" y="452" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Gate</text>
+<text x="2548" y="506" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Build, persistence and assets stay</text>
+<text x="2548" y="535" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">separate.</text>
+<rect x="170" y="980" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="170" y="980" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="198" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No timer</text>
+<text x="198" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No upgrade countdown or return deadline.</text>
+<rect x="1080" y="980" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1080" y="980" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="1108" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No economy</text>
+<text x="1108" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No resource scarcity as learning throttle.</text>
+<rect x="1990" y="980" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1990" y="980" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="2018" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No decay</text>
+<text x="2018" y="1106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">World does not punish pauses.</text>
+<rect x="170" y="1320" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="170" y="1320" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="198" y="1392" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No auto-build</text>
+<text x="198" y="1446" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Candidate is never BuildState.</text>
+<rect x="1080" y="1320" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1080" y="1320" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="1108" y="1392" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No pay-to-win</text>
+<text x="1108" y="1446" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Money cannot replace learning.</text>
+<rect x="1990" y="1320" width="780" height="255" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1990" y="1320" width="780" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="2018" y="1392" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No social pressure</text>
+<text x="2018" y="1446" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No team blame or ranking.</text>
+</svg>

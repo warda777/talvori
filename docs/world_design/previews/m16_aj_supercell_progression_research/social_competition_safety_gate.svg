@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3100" height="2250" viewBox="0 0 3100 2250">
+<rect width="3100" height="2250" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3004" height="2174" rx="30" ry="30" fill="#f8f9f4" stroke="#d8e0d8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1f2c2a">Social Competition Safety Gate</text>
+<text x="92" y="204" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#66736d">Social can help belonging later. It must first pass privacy, fairness, safety and anti-pressure gates.</text>
+<line x1="92" y1="2138" x2="3008" y2="2138" stroke="#d8e0d8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#66736d">documentation research preview only / no implementation / no economy / no timers / no social or competition release / no BuildState / no frame_started</text>
+<rect x="120" y="350" width="1060" height="300" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="120" y="350" width="1060" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="148" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Potential value</text>
+<text x="148" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Friends, voluntary showcase, small reactions, private help, co-op without ranking.</text>
+<rect x="120" y="740" width="1060" height="300" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="120" y="740" width="1060" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="148" y="812" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Learning risk</text>
+<text x="148" y="866" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Tempo beats understanding, errors become public, pauses look like failure.</text>
+<rect x="120" y="1130" width="1060" height="300" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="120" y="1130" width="1060" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="148" y="1202" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Privacy risk</text>
+<text x="148" y="1256" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Words, context hints, sensitive flags and review choices can be private.</text>
+<rect x="1390" y="350" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1390" y="350" width="650" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="1418" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Opt-in</text>
+<text x="1418" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Nothing visible by default.</text>
+<rect x="2170" y="350" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2170" y="350" width="650" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="2198" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Privacy</text>
+<text x="2198" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No private word or context sharing.</text>
+<rect x="1390" y="700" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1390" y="700" width="650" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="1418" y="772" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Fairness</text>
+<text x="1418" y="826" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No ranking by time, age or prior skill.</text>
+<rect x="2170" y="700" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2170" y="700" width="650" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="2198" y="772" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Safety</text>
+<text x="2198" y="826" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Sensitive terms never compete.</text>
+<rect x="1390" y="1050" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1390" y="1050" width="650" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="1418" y="1122" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Moderation</text>
+<text x="1418" y="1176" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Social spaces need abuse controls.</text>
+<rect x="2170" y="1050" width="650" height="260" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2170" y="1050" width="650" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="2198" y="1122" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Anti-pressure</text>
+<text x="2198" y="1176" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No team guilt, no war duty.</text>
+<rect x="600" y="1580" width="1900" height="300" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="600" y="1580" width="1900" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="628" y="1652" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">MVP decision</text>
+<text x="628" y="1706" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No clans, wars, leaderboards, leagues, PvP, social ranking or group pressure. Social remains after MVP and gated.</text>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3900" height="3600" viewBox="0 0 3900 3600">
+<rect width="3900" height="3600" fill="#f8f9f4"/>
+<text x="96" y="154" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1f2c2a">M16-AJ Supercell Progression Research Visuals</text>
+<text x="96" y="226" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#66736d">Contact sheet with full-size documentation previews. PNG + SVG are generated for each diagram.</text>
+<rect x="106" y="306" width="1748" height="996" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="supercell_progression_pattern_matrix.png" x="130" y="330" width="1700" height="890" preserveAspectRatio="xMidYMid meet"/>
+<text x="130" y="1280" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">supercell_progression_pattern_matrix.png</text>
+<rect x="1996" y="306" width="1748" height="996" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="clash_risk_translation_to_talvori.png" x="2020" y="330" width="1700" height="890" preserveAspectRatio="xMidYMid meet"/>
+<text x="2020" y="1280" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">clash_risk_translation_to_talvori.png</text>
+<rect x="106" y="1316" width="1748" height="996" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="progression_without_pressure_rules.png" x="130" y="1340" width="1700" height="890" preserveAspectRatio="xMidYMid meet"/>
+<text x="130" y="2290" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">progression_without_pressure_rules.png</text>
+<rect x="1996" y="1316" width="1748" height="996" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="social_competition_safety_gate.png" x="2020" y="1340" width="1700" height="890" preserveAspectRatio="xMidYMid meet"/>
+<text x="2020" y="2290" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">social_competition_safety_gate.png</text>
+<rect x="1051" y="2326" width="1748" height="996" rx="24" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<image href="talvori_post_mvp_social_boundary.png" x="1075" y="2350" width="1700" height="890" preserveAspectRatio="xMidYMid meet"/>
+<text x="1075" y="3300" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#1f2c2a">talvori_post_mvp_social_boundary.png</text>
+<line x1="96" y1="3480" x2="3804" y2="3480" stroke="#d8e0d8" stroke-width="2"/>
+<text x="96" y="3540" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#66736d">documentation research preview only / no implementation / no economy / no timers / no social or competition release / no BuildState / no frame_started</text>
+</svg>

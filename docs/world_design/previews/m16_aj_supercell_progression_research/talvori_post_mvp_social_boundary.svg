@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3100" height="2250" viewBox="0 0 3100 2250">
+<rect width="3100" height="2250" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3004" height="2174" rx="30" ry="30" fill="#f8f9f4" stroke="#d8e0d8" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1f2c2a">Talvori Post-MVP Social Boundary</text>
+<text x="92" y="204" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#66736d">The safe path is friends and belonging first, competition much later and only after explicit gates.</text>
+<line x1="92" y1="2138" x2="3008" y2="2138" stroke="#d8e0d8" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#66736d">documentation research preview only / no implementation / no economy / no timers / no social or competition release / no BuildState / no frame_started</text>
+<rect x="150" y="350" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="150" y="350" width="610" height="16" rx="9" ry="9" fill="#68ad7a"/>
+<text x="178" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">MVP</text>
+<text x="178" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Solo learning loop, optional review, small world</text>
+<text x="178" y="505" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">feedback, no social pressure.</text>
+<line x1="760" y1="535" x2="900" y2="535" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="900,535 872,517 872,553" fill="#95a59f"/>
+<rect x="940" y="350" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="940" y="350" width="610" height="16" rx="9" ry="9" fill="#68a6ca"/>
+<text x="968" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">After MVP</text>
+<text x="968" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Voluntary friends, reactions, showcase, privacy controls</text>
+<text x="968" y="505" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">and no ranking.</text>
+<line x1="1550" y1="535" x2="1690" y2="535" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1690,535 1662,517 1662,553" fill="#95a59f"/>
+<rect x="1730" y="350" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1730" y="350" width="610" height="16" rx="9" ry="9" fill="#d7ba59"/>
+<text x="1758" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Later gate</text>
+<text x="1758" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Team or co-op ideas only after fairness, safety,</text>
+<text x="1758" y="505" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">moderation and privacy.</text>
+<line x1="2340" y1="535" x2="2480" y2="535" stroke="#95a59f" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2480,535 2452,517 2452,553" fill="#95a59f"/>
+<rect x="2520" y="350" width="510" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2520" y="350" width="510" height="16" rx="9" ry="9" fill="#d86f68"/>
+<text x="2548" y="422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Still blocked</text>
+<text x="2548" y="476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Clan wars, PvP, leagues, ranking, pressure</text>
+<text x="2548" y="505" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">and sensitive competition.</text>
+<rect x="180" y="1010" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="180" y="1010" width="820" height="16" rx="9" ry="9" fill="#8977c7"/>
+<text x="208" y="1082" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">Private by default</text>
+<text x="208" y="1136" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Words, mistakes, context hints and pauses stay private.</text>
+<rect x="1110" y="1010" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1110" y="1010" width="820" height="16" rx="9" ry="9" fill="#8977c7"/>
+<text x="1138" y="1082" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No weaker learner shame</text>
+<text x="1138" y="1136" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">No ranking by speed, volume or error count.</text>
+<rect x="2040" y="1010" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2040" y="1010" width="820" height="16" rx="9" ry="9" fill="#8977c7"/>
+<text x="2068" y="1082" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No team penalty</text>
+<text x="2068" y="1136" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Pause or Later cannot hurt friends or groups.</text>
+<rect x="180" y="1350" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="180" y="1350" width="820" height="16" rx="9" ry="9" fill="#5bb8aa"/>
+<text x="208" y="1422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No sensitive sharing</text>
+<text x="208" y="1476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">SensitiveGated stays out of social surfaces.</text>
+<rect x="1110" y="1350" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="1110" y="1350" width="820" height="16" rx="9" ry="9" fill="#5bb8aa"/>
+<text x="1138" y="1422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No paid advantage</text>
+<text x="1138" y="1476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Money cannot buy learning or social rank.</text>
+<rect x="2040" y="1350" width="820" height="250" rx="20" ry="20" fill="#ffffff" stroke="#d8e0d8" stroke-width="2"/>
+<rect x="2040" y="1350" width="820" height="16" rx="9" ry="9" fill="#5bb8aa"/>
+<text x="2068" y="1422" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1f2c2a">No BuildState shortcut</text>
+<text x="2068" y="1476" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#66736d">Social cannot trigger build, placement or frame_started.</text>
+</svg>
