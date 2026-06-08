@@ -8,35 +8,36 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-W`
+Aktive Sprint-ID: `M16-X`
 
 Sprint Goal:
 
-> Minimal Word Outcome Taxonomy als Detail-Gate konkretisieren.
+> Reward-Budget und Review-Queue-Dosierung fuer den MVP festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 58 |
+| Offen `[ ]` | 52 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 35 |
+| Erledigt `[x]` | 41 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 34.5 % |
-| Fortschrittsbalken | `███████░░░░░░░░░░░░░` |
+| Gewichteter Fortschritt | 39.5 % |
+| Fortschrittsbalken | `████████░░░░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-REWARD-002
-- M16T-QUEUE-002
-- M16T-QUEUE-004
+- M16T-REWARD-004
+- M16T-REWARD-005
 - M16T-SEM-001
 - M16T-SEM-002
 - M16T-SEM-003
+- M16T-SEM-004
 - M16T-COMP-001
 - M16T-SENS-001
+- M16T-SENS-002
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -73,8 +74,8 @@ ihrem Detail-Gate Fortschritt bei.
 | Lernzustaende / Lernloop | M16T-LEARN | 2 | 0 | 0 | 2 | 0 | 0.0 % | `░░░░░░░░░░` | Minimale Lernzustaende ohne SRS-Mutation definieren. |
 | Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Outcome-Regeln in kuenftigen Semantik-/Preview-Slices anwenden. |
 | Semantik-System | M16T-SEM | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Minimal Semantic Profile und Konfliktprioritaeten klaeren. |
-| 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Review-Queue-Budget und Safe Defaults vertiefen. |
-| Reward ohne Druck | M16T-REWARD | 5 | 2 | 0 | 3 | 0 | 40.0 % | `████░░░░░░` | Reward-Budget, Rueckkehr-nach-Pause und Sensitive-Trigger vertiefen. |
+| 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
+| Reward ohne Druck | M16T-REWARD | 5 | 3 | 0 | 2 | 0 | 60.0 % | `██████░░░░` | Rueckkehr-nach-Pause und Sensitive-Trigger vertiefen. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
 | Container / Depth | M16T-DEPTH | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Depth-Modell und Suchbarkeit verschachtelter Objekte klaeren. |
 | Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
@@ -85,7 +86,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Confidence-Bands und Privacy-Regeln definieren. |
-| Review Queue | M16T-QUEUE | 4 | 2 | 0 | 2 | 0 | 50.0 % | `█████░░░░░` | Session-Budget und Priorisierung nach Risiko/Lernrelevanz definieren. |
+| Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 0 | 0 | 2 | 1 | 0.0 % | `░░░░░░░░░░` | Status-/Scope-/Commit-Freigabe-Regel operationalisieren. |
@@ -207,16 +208,16 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-SCALE-001 | [~] | 20.000+-Skalierungsprinzip | Viele Woerter duerfen nicht viele sichtbare Objekte werden. | M16-R-Prinzip in kuenftige Semantik-/World-Gates uebernommen ist. | 20.000 Karten/Objekte/Plots. | nein |
-| M16T-SCALE-002 | [ ] | Review-Queue-Budget | Nutzer darf nicht mit Entscheidungen ueberlastet werden. | Pro Session/Tag ein Planungsbudget fuer Reviewentscheidungen existiert. | Pflichtentscheidung nach jedem Wort. | nein |
-| M16T-SCALE-003 | [ ] | Safe Defaults | Sichere Standardausgaenge verhindern Druck und Fehlplatzierung. | Codex, Backlog, Blueprint, ContextCard als Defaults definiert sind. | Sichtbarkeit als Default. | nein |
-| M16T-SCALE-004 | [ ] | Queue-Priorisierung | Nur relevante/risikoreiche Woerter sollen aktiv auftauchen. | Priorisierung nach Risiko, Lernrelevanz, Confidence und Nutzerziel dokumentiert ist. | FIFO-Massenreview. | nein |
+| M16T-SCALE-002 | [x] | Review-Queue-Budget | Nutzer darf nicht mit Entscheidungen ueberlastet werden. | Pro Session/Tag ein Planungsbudget fuer Reviewentscheidungen existiert. | Pflichtentscheidung nach jedem Wort. | nein |
+| M16T-SCALE-003 | [x] | Safe Defaults | Sichere Standardausgaenge verhindern Druck und Fehlplatzierung. | CodexOnly, Backlog, ContextCard, Later, Hide, ContainerItem und SensitiveGated als Defaults definiert sind. | Sichtbarkeit als Default. | nein |
+| M16T-SCALE-004 | [x] | Queue-Priorisierung | Nur relevante/risikoreiche Woerter sollen aktiv auftauchen. | Priorisierung nach Risiko, Lernrelevanz, Confidence und Nutzerziel dokumentiert ist. | FIFO-Massenreview. | nein |
 
 ## 12. Reward ohne Druck
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-REWARD-001 | [x] | Reward-Prinzip ohne Druck | Motivation darf nicht in Schuld oder Zwang kippen. | Reward-Regeln keine Strafe, kein Verfall, keine Pflichtentscheidung enthalten. | Produktive Reward Bridge. | nein |
-| M16T-REWARD-002 | [ ] | Reward-Budget | Weltfeedback soll dosiert und nicht manipulativ sein. | Pro Session/Loop Grenzen fuer Vorschlaege und Feedback dokumentiert sind. | Dauer-Belohnung oder Druck. | nein |
+| M16T-REWARD-002 | [x] | Reward-Budget | Weltfeedback soll dosiert und nicht manipulativ sein. | Pro Session/Loop Grenzen fuer Vorschlaege und Feedback dokumentiert sind. | Dauer-Belohnung oder Druck. | nein |
 | M16T-REWARD-003 | [x] | Trennung Reward/Vorschlag/PlacementCandidate/BuildState | Reward darf kein Bauen ausloesen. | Begriffe und erlaubte Uebergaenge getrennt sind. | Reward -> BuildState. | nein |
 | M16T-REWARD-004 | [ ] | Rueckkehr-nach-Pause-Regel | Pausen sollen sanft aufgefangen werden. | Comeback-Regeln ohne Strafe, Schuld oder Weltverfall dokumentiert sind. | Retention-Druck. | nein |
 | M16T-REWARD-005 | [ ] | Sensitive-Themen nicht als Retention-Trigger | Emotionale/sensible Inhalte duerfen nicht manipulativ wirken. | Sensitive/Emotion-Woerter fuer Retention explizit blockiert sind. | Sensitive Reward/Druck. | nein |
@@ -314,9 +315,9 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-QUEUE-001 | [x] | Review-Queue-Konzept | Viele Woerter brauchen geordnete Entscheidungspfade. | Queue-Typen, Filter, Prioritaeten und Ausgaenge dokumentiert sind. | Massenentscheidungs-UI. | nein |
-| M16T-QUEUE-002 | [ ] | Session-Budget | Nutzer darf nur wenige Entscheidungen pro Sitzung sehen. | Session-Budget als Planungsregel existiert. | Review-Zwang. | nein |
+| M16T-QUEUE-002 | [x] | Session-Budget | Nutzer darf nur wenige Entscheidungen pro Sitzung sehen. | Session-Budget als Planungsregel existiert. | Review-Zwang. | nein |
 | M16T-QUEUE-003 | [x] | Queue-Ausgaenge | Review muss sichere Ausgaenge haben. | Confirm, Change, Later, Codex, Backlog, Blueprint, Hide dokumentiert sind. | Sackgassen-Review. | nein |
-| M16T-QUEUE-004 | [ ] | Queue-Prioritaet nach Risiko und Lernrelevanz | Nicht jedes Wort ist gleich wichtig. | Risiko/Lernrelevanz/Confidence/Nutzerziel priorisiert sind. | FIFO ohne Risiko. | nein |
+| M16T-QUEUE-004 | [x] | Queue-Prioritaet nach Risiko und Lernrelevanz | Nicht jedes Wort ist gleich wichtig. | Risiko/Lernrelevanz/Confidence/Nutzerziel priorisiert sind. | FIFO ohne Risiko. | nein |
 
 ## 24. Technische Architektur / App-Integration
 
@@ -414,6 +415,15 @@ M16-W erledigt:
 - M16T-WOT-008
 - M16T-QUEUE-003
 - M16T-REWARD-003
+
+M16-X erledigt:
+
+- M16T-REWARD-002
+- M16T-QUEUE-002
+- M16T-QUEUE-004
+- M16T-SCALE-002
+- M16T-SCALE-003
+- M16T-SCALE-004
 
 M16-U in eigene Detail-Gates ausgelagert:
 
