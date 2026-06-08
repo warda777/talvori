@@ -8,37 +8,37 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-Y`
+Aktive Sprint-ID: `M16-Z`
 
 Sprint Goal:
 
-> Minimal Semantic Profile und Routing-Prioritaeten fuer den MVP festlegen.
+> Companion-, Pausen- und Sensitive-Copy-Regeln fuer den MVP festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 47 |
+| Offen `[ ]` | 39 |
 | Teilweise erledigt `[~]` | 11 |
-| Erledigt `[x]` | 47 |
+| Erledigt `[x]` | 55 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 44.1 % |
-| Fortschrittsbalken | `█████████░░░░░░░░░░░` |
+| Gewichteter Fortschritt | 50.8 % |
+| Fortschrittsbalken | `██████████░░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-REWARD-004
-- M16T-REWARD-005
 - M16T-AI-002
 - M16T-AI-004
-- M16T-COMP-001
-- M16T-COMP-002
 - M16T-LEARN-001
-- M16T-SENS-001
-- M16T-SENS-002
 - M16T-DOC-001
+- M16T-DOC-002
+- M16T-MOBILE-001
+- M16T-MOBILE-002
+- M16T-DEPTH-001
+- M16T-WORLD-001
+- M16T-UNDO-001
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -76,14 +76,14 @@ ihrem Detail-Gate Fortschritt bei.
 | Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Outcome-Regeln in kuenftigen Semantik-/Preview-Slices anwenden. |
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
-| Reward ohne Druck | M16T-REWARD | 5 | 3 | 0 | 2 | 0 | 60.0 % | `██████░░░░` | Rueckkehr-nach-Pause und Sensitive-Trigger vertiefen. |
+| Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
 | Container / Depth | M16T-DEPTH | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Depth-Modell und Suchbarkeit verschachtelter Objekte klaeren. |
 | Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
 | Undo / Reversibility | M16T-UNDO | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Undo-Modell fuer Semantik und Weltentscheidungen planen. |
-| Tali/Vori Companion | M16T-COMP | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Companion-Policy fuer Vorschlaege, Fehler und Sensitive definieren. |
+| Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Dichtebudgets und A11y-Gate planen. |
-| Sensitive / Policy | M16T-SENS | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Darstellungsleiter und Opt-in-Regeln vertiefen. |
+| Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 0 | 2 | 0 | 50.0 % | `█████░░░░░` | Provider-Governance und Privacy-Regeln fuer Klassifikation klaeren. |
@@ -220,8 +220,8 @@ ausdruecklich freigegeben werden.
 | M16T-REWARD-001 | [x] | Reward-Prinzip ohne Druck | Motivation darf nicht in Schuld oder Zwang kippen. | Reward-Regeln keine Strafe, kein Verfall, keine Pflichtentscheidung enthalten. | Produktive Reward Bridge. | nein |
 | M16T-REWARD-002 | [x] | Reward-Budget | Weltfeedback soll dosiert und nicht manipulativ sein. | Pro Session/Loop Grenzen fuer Vorschlaege und Feedback dokumentiert sind. | Dauer-Belohnung oder Druck. | nein |
 | M16T-REWARD-003 | [x] | Trennung Reward/Vorschlag/PlacementCandidate/BuildState | Reward darf kein Bauen ausloesen. | Begriffe und erlaubte Uebergaenge getrennt sind. | Reward -> BuildState. | nein |
-| M16T-REWARD-004 | [ ] | Rueckkehr-nach-Pause-Regel | Pausen sollen sanft aufgefangen werden. | Comeback-Regeln ohne Strafe, Schuld oder Weltverfall dokumentiert sind. | Retention-Druck. | nein |
-| M16T-REWARD-005 | [ ] | Sensitive-Themen nicht als Retention-Trigger | Emotionale/sensible Inhalte duerfen nicht manipulativ wirken. | Sensitive/Emotion-Woerter fuer Retention explizit blockiert sind. | Sensitive Reward/Druck. | nein |
+| M16T-REWARD-004 | [x] | Rueckkehr-nach-Pause-Regel | Pausen sollen sanft aufgefangen werden. | Comeback-Regeln ohne Strafe, Schuld oder Weltverfall dokumentiert sind. | Retention-Druck. | nein |
+| M16T-REWARD-005 | [x] | Sensitive-Themen nicht als Retention-Trigger | Emotionale/sensible Inhalte duerfen nicht manipulativ wirken. | Sensitive/Emotion-Woerter fuer Retention explizit blockiert sind. | Sensitive Reward/Druck. | nein |
 
 ## 13. World / Island / Plot
 
@@ -261,10 +261,10 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-COMP-001 | [ ] | Companion-Policy | Tali/Vori darf helfen, aber nicht entscheiden oder draengen. | Companion Policy fuer Vorschlaege, Fallbacks und Grenzen dokumentiert ist. | Companion erzwingt Entscheidungen. | nein |
-| M16T-COMP-002 | [ ] | Companion-Sprechmomente | Zu viele Hinweise stoeren Lernen und Weltgefuehl. | Sprechmomente fuer Kontext, Unsicherheit, Erfolg, Pause und Sensitive definiert sind. | Permanente Companion-Texte. | nein |
-| M16T-COMP-003 | [ ] | Companion-Regeln fuer Fehler/Pausen | Fehler und Pausen brauchen sanfte Sprache. | Keine Schuld, keine Angst, keine Weltstrafe als Copy-Regel dokumentiert ist. | Retention-Druck. | nein |
-| M16T-COMP-004 | [ ] | Companion-Regeln fuer sensitive/abstrakte Woerter | Tali/Vori darf sensible Themen nicht dramatisieren. | Neutrale ContextCard/Codex/Backlog-Sprache dokumentiert ist. | Sensitive Drama/Advice. | nein |
+| M16T-COMP-001 | [x] | Companion-Policy | Tali/Vori darf helfen, aber nicht entscheiden oder draengen. | Companion Policy fuer Vorschlaege, Fallbacks und Grenzen dokumentiert ist. | Companion erzwingt Entscheidungen. | nein |
+| M16T-COMP-002 | [x] | Companion-Sprechmomente | Zu viele Hinweise stoeren Lernen und Weltgefuehl. | Sprechmomente fuer Kontext, Unsicherheit, Erfolg, Pause und Sensitive definiert sind. | Permanente Companion-Texte. | nein |
+| M16T-COMP-003 | [x] | Companion-Regeln fuer Fehler/Pausen | Fehler und Pausen brauchen sanfte Sprache. | Keine Schuld, keine Angst, keine Weltstrafe als Copy-Regel dokumentiert ist. | Retention-Druck. | nein |
+| M16T-COMP-004 | [x] | Companion-Regeln fuer sensitive/abstrakte Woerter | Tali/Vori darf sensible Themen nicht dramatisieren. | Neutrale ContextCard/Codex/Backlog-Sprache dokumentiert ist. | Sensitive Drama/Advice. | nein |
 
 ## 18. Mobile / Clutter / Accessibility
 
@@ -279,8 +279,8 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-SENS-001 | [ ] | Sensitive-Darstellungsleiter | Sensitive Inhalte brauchen abgestufte sichere Ausgaenge. | Codex, ContextCard, CompanionDialog, Backlog, BlockedUntilRules priorisiert sind. | Sensitive Objekt/Gebaeude. | nein |
-| M16T-SENS-002 | [ ] | Sensitive-Opt-in-Regel | Nutzer muss sensible Themen freiwillig behandeln koennen. | Opt-in, Later und Backlog als Optionen dokumentiert sind. | Pflichtquest fuer sensitive Inhalte. | nein |
+| M16T-SENS-001 | [x] | Sensitive-Darstellungsleiter | Sensitive Inhalte brauchen abgestufte sichere Ausgaenge. | Codex, ContextCard, CompanionDialog, Backlog, BlockedUntilRules priorisiert sind. | Sensitive Objekt/Gebaeude. | nein |
+| M16T-SENS-002 | [x] | Sensitive-Opt-in-Regel | Nutzer muss sensible Themen freiwillig behandeln koennen. | Opt-in, Later und Backlog als Optionen dokumentiert sind. | Pflichtquest fuer sensitive Inhalte. | nein |
 | M16T-SENS-003 | [~] | Sensitive Inhalte sind keine Deko und kein Reward | Kein sensibles Thema als Belohnung oder Stimmungsmittel. | Reward/Asset/World-Regeln sensitive Inhalte blockieren. | Sensitive Reward/Deko. | nein |
 
 ## 20. Asset Scope
@@ -434,6 +434,17 @@ M16-Y erledigt:
 - M16T-SEM-004
 - M16T-AI-001
 - M16T-AI-003
+
+M16-Z erledigt:
+
+- M16T-REWARD-004
+- M16T-REWARD-005
+- M16T-COMP-001
+- M16T-COMP-002
+- M16T-COMP-003
+- M16T-COMP-004
+- M16T-SENS-001
+- M16T-SENS-002
 
 M16-U in eigene Detail-Gates ausgelagert:
 
