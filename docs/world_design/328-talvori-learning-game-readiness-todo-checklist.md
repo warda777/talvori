@@ -8,33 +8,30 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AC`
+Aktive Sprint-ID: `M16-AD`
 
 Sprint Goal:
 
-> Mobile-Dichte, Accessibility-Pflichten und Container-/Depth-Grenzen fuer den MVP planen.
+> World Loop, generische Plot-Familien, BuildChoice und Undo/Reversibility fachlich abgrenzen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 21 |
+| Offen `[ ]` | 15 |
 | Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 70 |
+| Erledigt `[x]` | 76 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 64.7 % |
-| Fortschrittsbalken | `█████████████░░░░░░░` |
+| Gewichteter Fortschritt | 69.7 % |
+| Fortschrittsbalken | `██████████████░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-WORLD-001
-- M16T-WORLD-003
-- M16T-WHEEL-002
-- M16T-WHEEL-004
-- M16T-UNDO-001
-- M16T-UNDO-002
+- M16T-WORLD-004
+- M16T-UNDO-003
+- M16T-DEPTH-003
 - M16T-DATA-004
 - M16T-ASSET-003
 - M16T-GAME-001
@@ -77,10 +74,10 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
+| World / Island / Plot | M16T-WORLD | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | Capability-Regel in kuenftigen Plot-Slices aktiv als Stop-Regel anwenden. |
 | Container / Depth | M16T-DEPTH | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices anwenden. |
-| Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
-| Undo / Reversibility | M16T-UNDO | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Undo-Modell fuer Semantik und Weltentscheidungen planen. |
+| Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
+| Undo / Reversibility | M16T-UNDO | 3 | 2 | 0 | 1 | 0 | 66.7 % | `███████░░░` | ThemeIsland-Resizing als eigenes Gate planen. |
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
@@ -227,9 +224,9 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-WORLD-001 | [ ] | World/Island Loop | Weltfortschritt braucht einen eigenen Loop. | Island/Plot/Preview/Build/Persist-Schritte getrennt dokumentiert sind. | Build-State ohne Loop-Gate. | nein |
+| M16T-WORLD-001 | [x] | World/Island Loop | Weltfortschritt braucht einen eigenen Loop. | Island/Plot/Preview/Build/Persist-Schritte getrennt dokumentiert sind. | Build-State ohne Loop-Gate. | nein |
 | M16T-WORLD-002 | [~] | ThemeIsland-/Plot-Capacity-Regeln | Inselgroesse entsteht aus Theme-Bedarf, nicht aus fixer Mini-Insel. | M16-I/K-Regeln in spaetere Preview-/Code-Gates uebernommen sind. | Dorf als globale Grundlage. | nein |
-| M16T-WORLD-003 | [ ] | Generische Plot-Familien | Kategorien brauchen wiederverwendbare Plot-Familien. | Plot-Familien fuer Water, Path, Residential, Garden, Hub, Container, Edge usw. dokumentiert sind. | Feste Gebaeudelisten. | nein |
+| M16T-WORLD-003 | [x] | Generische Plot-Familien | Kategorien brauchen wiederverwendbare Plot-Familien. | Plot-Familien fuer Water, Path, Residential, Garden, Hub, Container, Edge usw. dokumentiert sind. | Feste Gebaeudelisten. | nein |
 | M16T-WORLD-004 | [~] | Plot-Capability ist Erlaubnis, keine Pflichtbelegung | Capabilities duerfen keine automatische Belegung erzeugen. | Jeder Plot-Slice diese Regel als Stop-Regel nennt. | Capability -> Placement. | nein |
 
 ## 14. Container / Depth
@@ -245,16 +242,16 @@ ausdruecklich freigegeben werden.
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-WHEEL-001 | [!] | Build-Wheel weiter blockiert halten | Wheel wirkt schnell wie Bau- oder Assetfreigabe. | Kein Wheel-Code entsteht, bis Plot/Semantik/BuildChoice-Gates erledigt sind. | Build-Wheel-Code. | nein |
-| M16T-WHEEL-002 | [ ] | `BuildChoice`-Begriff definieren | Wahl, Preview, Candidate und Build duerfen nicht verschwimmen. | BuildChoice als nicht-persistente Auswahl vor Build-State dokumentiert ist. | Candidate -> BuildState. | nein |
+| M16T-WHEEL-002 | [x] | `BuildChoice`-Begriff definieren | Wahl, Preview, Candidate und Build duerfen nicht verschwimmen. | BuildChoice als nicht-persistente Auswahl vor Build-State dokumentiert ist. | Candidate -> BuildState. | nein |
 | M16T-WHEEL-003 | [~] | In-Place-Wheel-Regeln | Wheel soll Overlay sein, keine Route oder neue Seite. | In-place, cancel, deselect, no-route-Regeln als Detail-Gate dokumentiert sind. | Route/neue Seite. | nein |
-| M16T-WHEEL-004 | [ ] | Undo-/Reversibility-Anforderung fuer Build-Entscheidungen | Bauentscheidungen muessen spaeter korrigierbar sein. | BuildChoice/BuildState braucht Undo- und Aenderbarkeitsregeln. | Irreversible Builds. | nein |
+| M16T-WHEEL-004 | [x] | Undo-/Reversibility-Anforderung fuer Build-Entscheidungen | Bauentscheidungen muessen spaeter korrigierbar sein. | BuildChoice/BuildState braucht Undo- und Aenderbarkeitsregeln. | Irreversible Builds. | nein |
 
 ## 16. Undo / Reversibility
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-UNDO-001 | [ ] | Undo-/Reversibility-Modell | Semantik- und Weltentscheidungen koennen spaeter falsch sein. | Undo/Aendern fuer Sense, Theme, Plot, Outcome und Preview dokumentiert ist. | Persistente Entscheidungen ohne Undo. | nein |
-| M16T-UNDO-002 | [ ] | Geaenderte Semantik | Nutzer oder Kontext kann Bedeutung aendern. | Reclassification-Regeln ohne Datenverlust beschrieben sind. | Einmalige finale Sense. | nein |
+| M16T-UNDO-001 | [x] | Undo-/Reversibility-Modell | Semantik- und Weltentscheidungen koennen spaeter falsch sein. | Undo/Aendern fuer Sense, Theme, Plot, Outcome und Preview dokumentiert ist. | Persistente Entscheidungen ohne Undo. | nein |
+| M16T-UNDO-002 | [x] | Geaenderte Semantik | Nutzer oder Kontext kann Bedeutung aendern. | Reclassification-Regeln ohne Datenverlust beschrieben sind. | Einmalige finale Sense. | nein |
 | M16T-UNDO-003 | [ ] | ThemeIsland-Resizing | Theme-Bedarf kann wachsen oder sich aendern. | Resize/Reserve/Move-Regeln fuer ThemeIslands geplant sind. | Fixe Inselkapazitaet. | nein |
 
 ## 17. Tali/Vori Companion
@@ -475,6 +472,15 @@ M16-AC erledigt:
 - M16T-MOBILE-004
 - M16T-DEPTH-001
 - M16T-DEPTH-002
+
+M16-AD erledigt:
+
+- M16T-WORLD-001
+- M16T-WORLD-003
+- M16T-WHEEL-002
+- M16T-WHEEL-004
+- M16T-UNDO-001
+- M16T-UNDO-002
 
 M16-U in eigene Detail-Gates ausgelagert:
 
