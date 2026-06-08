@@ -8,36 +8,37 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-X`
+Aktive Sprint-ID: `M16-Y`
 
 Sprint Goal:
 
-> Reward-Budget und Review-Queue-Dosierung fuer den MVP festlegen.
+> Minimal Semantic Profile und Routing-Prioritaeten fuer den MVP festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 52 |
-| Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 41 |
+| Offen `[ ]` | 47 |
+| Teilweise erledigt `[~]` | 11 |
+| Erledigt `[x]` | 47 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 39.5 % |
-| Fortschrittsbalken | `████████░░░░░░░░░░░░` |
+| Gewichteter Fortschritt | 44.1 % |
+| Fortschrittsbalken | `█████████░░░░░░░░░░░` |
 
 Naechste empfohlene IDs:
 
 - M16T-REWARD-004
 - M16T-REWARD-005
-- M16T-SEM-001
-- M16T-SEM-002
-- M16T-SEM-003
-- M16T-SEM-004
+- M16T-AI-002
+- M16T-AI-004
 - M16T-COMP-001
+- M16T-COMP-002
+- M16T-LEARN-001
 - M16T-SENS-001
 - M16T-SENS-002
+- M16T-DOC-001
 - M16T-RESEARCH-002
 - M16T-RESEARCH-003
 
@@ -73,7 +74,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Learning-to-World Contract | M16T-L2W | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Weltreif-Kriterien spaeter mit Daten-/Review-Gate operationalisieren. |
 | Lernzustaende / Lernloop | M16T-LEARN | 2 | 0 | 0 | 2 | 0 | 0.0 % | `░░░░░░░░░░` | Minimale Lernzustaende ohne SRS-Mutation definieren. |
 | Minimal Word Outcome Taxonomy | M16T-WOT | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Outcome-Regeln in kuenftigen Semantik-/Preview-Slices anwenden. |
-| Semantik-System | M16T-SEM | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Minimal Semantic Profile und Konfliktprioritaeten klaeren. |
+| Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 3 | 0 | 2 | 0 | 60.0 % | `██████░░░░` | Rueckkehr-nach-Pause und Sensitive-Trigger vertiefen. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
@@ -85,7 +86,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Sensitive / Policy | M16T-SENS | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Darstellungsleiter und Opt-in-Regeln vertiefen. |
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
-| Confidence Scoring / AI Governance | M16T-AI | 4 | 0 | 1 | 3 | 0 | 12.5 % | `█░░░░░░░░░` | Confidence-Bands und Privacy-Regeln definieren. |
+| Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 0 | 2 | 0 | 50.0 % | `█████░░░░░` | Provider-Governance und Privacy-Regeln fuer Klassifikation klaeren. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Pflichtlektuere- und Dokumentenlandkarte bauen. |
@@ -198,10 +199,10 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-SEM-001 | [ ] | Minimal Semantic Profile definieren | Profile sind noetig, aber noch keine Datenstruktur. | Minimalfelder und Nicht-Ziele als Konzept freigegeben sind. | Persistenz oder finale Datenstruktur. | nein |
-| M16T-SEM-002 | [ ] | Context/Sense-Regeln | Woerter koennen mehrere Bedeutungen haben. | Satzkontext, Nutzerziel, Multi-Home und Unsicherheit priorisiert sind. | Sichtbare Route ohne Sense. | nein |
-| M16T-SEM-003 | [ ] | Word-Type-Routing | Nomen, Verb, Emotion, TinyObject und Sensitive brauchen unterschiedliche Wege. | Word-Type-Routing als Pflichtfilter vor ThemeIsland/Plot dokumentiert ist. | Ein-Weg-Routing fuer alle Woerter. | nein |
-| M16T-SEM-004 | [ ] | Konfliktprioritaeten | Safety, Clutter, Sense und User Choice koennen kollidieren. | Prioritaet Safety > Sense > Clutter > Capability > User Convenience dokumentiert ist. | Falsche Reihung bei Konflikten. | nein |
+| M16T-SEM-001 | [x] | Minimal Semantic Profile definieren | Profile sind noetig, aber noch keine Datenstruktur. | Minimalfelder und Nicht-Ziele als Konzept freigegeben sind. | Persistenz oder finale Datenstruktur. | nein |
+| M16T-SEM-002 | [x] | Context/Sense-Regeln | Woerter koennen mehrere Bedeutungen haben. | Satzkontext, Nutzerziel, Multi-Home und Unsicherheit priorisiert sind. | Sichtbare Route ohne Sense. | nein |
+| M16T-SEM-003 | [x] | Word-Type-Routing | Nomen, Verb, Emotion, TinyObject und Sensitive brauchen unterschiedliche Wege. | Word-Type-Routing als Pflichtfilter vor ThemeIsland/Plot dokumentiert ist. | Ein-Weg-Routing fuer alle Woerter. | nein |
+| M16T-SEM-004 | [x] | Konfliktprioritaeten | Safety, Clutter, Sense und User Choice koennen kollidieren. | Prioritaet Safety > Sense > Word Type > Clutter > Confidence > User Choice > Capability > Reward dokumentiert ist. | Falsche Reihung bei Konflikten. | nein |
 
 ## 11. 20.000+-Wort-Skalierung
 
@@ -305,9 +306,9 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-AI-001 | [ ] | Confidence-Bands | Automatische Klassifikation braucht Unsicherheitsausgaenge. | Confidence-Bands und Ausgaenge dokumentiert sind. | Auto-Entscheidung bei Unsicherheit. | nein |
+| M16T-AI-001 | [x] | Confidence-Bands | Automatische Klassifikation braucht Unsicherheitsausgaenge. | Confidence-Bands und Ausgaenge dokumentiert sind. | Auto-Entscheidung bei Unsicherheit. | nein |
 | M16T-AI-002 | [ ] | AI-/Classification-Provider-Governance | Provider duerfen Privacy, Bias und Kosten nicht ungeplant beeinflussen. | Provider-, Privacy-, Bias- und Fallback-Regeln dokumentiert sind. | Produktive AI-Klassifikation. | nein |
-| M16T-AI-003 | [~] | Low confidence landet in `NeedsUserChoice`/`Backlog`/`Codex` | Unsicherheit darf nicht sichtbar platzieren. | Low-confidence-Regel in Semantik-Gates uebernommen ist. | Low-confidence Placement. | nein |
+| M16T-AI-003 | [x] | Low confidence landet in `NeedsUserChoice`/`Backlog`/`Codex` | Unsicherheit darf nicht sichtbar platzieren. | Low-confidence-Regel in Semantik-Gates uebernommen ist. | Low-confidence Placement. | nein |
 | M16T-AI-004 | [ ] | Privacy-Regeln fuer Wort-/Kontextklassifikation | Satz- und Importkontext kann privat sein. | Welche Daten lokal bleiben und was spaeter gesendet werden darf dokumentiert ist. | Klassifikation ohne Privacy-Gate. | nein |
 
 ## 23. Review Queue
@@ -424,6 +425,15 @@ M16-X erledigt:
 - M16T-SCALE-002
 - M16T-SCALE-003
 - M16T-SCALE-004
+
+M16-Y erledigt:
+
+- M16T-SEM-001
+- M16T-SEM-002
+- M16T-SEM-003
+- M16T-SEM-004
+- M16T-AI-001
+- M16T-AI-003
 
 M16-U in eigene Detail-Gates ausgelagert:
 
