@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3600" height="3900" viewBox="0 0 3600 3900">
+<rect width="3600" height="3900" fill="#f8f9f4"/>
+<rect x="50" y="40" width="3500" height="3820" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="95" y="152" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">M16-AP Visual Contact Sheet</text>
+<text x="95" y="204" font-family="Arial, Helvetica, sans-serif" font-size="29" fill="#64736d">PNG + SVG documentation previews for the Bank preview launch gate.</text>
+<rect x="144" y="314" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="launch_option_matrix.png" x="293" y="340" width="1253" height="940"/>
+<text x="170" y="1328" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">1. launch_option_matrix</text>
+<rect x="1904" y="314" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="isolated_launch_boundary.png" x="2053" y="340" width="1253" height="940"/>
+<text x="1930" y="1328" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">2. isolated_launch_boundary</text>
+<rect x="144" y="1434" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="allowed_vs_blocked_launch_files.png" x="293" y="1460" width="1253" height="940"/>
+<text x="170" y="2448" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">3. allowed_vs_blocked_launch_files</text>
+<rect x="1904" y="1434" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="launch_acceptance_gate.png" x="2053" y="1460" width="1253" height="940"/>
+<text x="1930" y="2448" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">4. launch_acceptance_gate</text>
+<rect x="144" y="2554" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="play_first_launch_check.png" x="293" y="2580" width="1253" height="940"/>
+<text x="170" y="3568" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">5. play_first_launch_check</text>
+<text x="95" y="3842" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#64736d">M16-AP launch gate only / no code / no route / no app integration / no persistence / no BuildState / no frame_started</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Allowed vs Blocked Launch Files</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#64736d">The future launch slice has one possible file and many hard no-go paths.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d6ded7" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">M16-AP launch gate only / no code / no route / no app integration / no persistence / no BuildState / no frame_started</text>
+<rect x="170" y="360" width="1370" height="460" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="360" width="1370" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="200" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Already exists</text>
+<text x="200" y="486" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">lib/features/world/local_world/ui/widgets/bank_meaning_puzzle_preview.dart</text>
+<text x="200" y="511" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d"></text>
+<text x="200" y="536" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">Do not alter unless the later prompt explicitly allows it.</text>
+<rect x="1860" y="360" width="1370" height="460" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1860" y="360" width="1370" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1890" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Future allowed file</text>
+<text x="1890" y="486" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">lib/features/world/local_world/ui/widgets/bank_meaning_puzzle_preview_main.dart</text>
+<text x="1890" y="511" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d"></text>
+<text x="1890" y="536" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">Only after separate implementation approval.</text>
+<rect x="170" y="1130" width="1370" height="440" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="1130" width="1370" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="200" y="1199" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Blocked lib paths</text>
+<text x="200" y="1258" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">lib/main.dart</text>
+<text x="200" y="1285" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">App router</text>
+<text x="200" y="1312" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Home screen</text>
+<text x="200" y="1339" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Navigation</text>
+<text x="200" y="1366" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Provider</text>
+<text x="200" y="1393" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Data layer</text>
+<text x="200" y="1420" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Supabase access</text>
+<rect x="1860" y="1130" width="1370" height="440" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1860" y="1130" width="1370" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1890" y="1199" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Blocked non-lib paths</text>
+<text x="1890" y="1258" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">assets/</text>
+<text x="1890" y="1285" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">test/</text>
+<text x="1890" y="1312" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">integration_test/</text>
+<text x="1890" y="1339" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Screenshots</text>
+<text x="1890" y="1366" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Runtime config</text>
+<text x="1890" y="1393" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Persistence files</text>
+<rect x="680" y="1840" width="2040" height="270" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="680" y="1840" width="2040" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="710" y="1909" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Scope check</text>
+<text x="710" y="1968" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">A later launch slice should show exactly one new Dart file plus clean assets/test/integration_test status.</text>
+</svg>

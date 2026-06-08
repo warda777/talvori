@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AN`
+Aktive Sprint-ID: `M16-AP`
 
 Sprint Goal:
 
-> Bank Meaning Puzzle Preview als isolierten Folge-Prompt und Boundary-Gate festlegen.
+> Lokalen Bank Preview Launch als isolierten Folge-Slice rahmen, ohne App-Integration.
 
 ### 0.1 Gesamtfortschritt
 
@@ -20,16 +20,15 @@ Sprint Goal:
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 127 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 13 |
-| Erledigt `[x]` | 102 |
+| Teilweise erledigt `[~]` | 12 |
+| Erledigt `[x]` | 103 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 85.4 % |
+| Gewichteter Fortschritt | 85.8 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-PLAY-008
 - M16T-CORE-003
 - M16T-L2W-003
 - M16T-ARCH-001
@@ -88,7 +87,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
-| Play-First Learning | M16T-PLAY | 8 | 7 | 1 | 0 | 0 | 93.8 % | `█████████░` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices anwenden; Pflichtcheck in spaeteren Implementierungen nachweisen. |
+| Play-First Learning | M16T-PLAY | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First-Regel in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regel anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -596,6 +595,19 @@ M16-AN konkretisiert, bleibt unveraendert teilweise/blockiert:
 - M16T-DOC-003
 - M16T-GIT-003
 
+M16-AO angewendet und durch M16-AP als erledigt nachgewiesen:
+
+- M16T-PLAY-008
+
+M16-AP konkretisiert, bleibt blockiert/teilweise:
+
+- M16T-ARCH-001
+- M16T-ARCH-002
+- M16T-ARCH-003
+- M16T-ARCH-004
+- M16T-DOC-003
+- M16T-GIT-003
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -792,7 +804,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-PLAY-005 | [x] | Uebung darf sich nicht wie Uebung anfuehlen | Klassische Uebungs- und Fragebogenmuster wuerden das Produktgefuehl brechen. | Verbotene Uebungsgefuehle und Play-Alternativen dokumentiert sind. | Multiple-Choice als Hauptgefuehl, Textwand, XP-Grind. | nein |
 | M16T-PLAY-006 | [x] | Benchmark-Games ohne Lernfokus analysieren | Talvori muss auch von reinen Spielen lernen, nicht nur von Lernapps. | Minecraft, Roblox, Puzzle-, Runner-, Match-, Card- und MOBA-Patterns als Research-Quellen tief ausgewertet und in Talvori-Regeln uebersetzt sind. | Blindes Kopieren, Social-/FOMO-/Gacha-/Timer-Druck. | nein |
 | M16T-PLAY-007 | [x] | MVP-Playtest-Kriterien fuer Spielgefuehl | Spaetere MVP-Tests muessen fragen, ob sich Talvori wirklich wie Spiel anfuehlt. | Playtest-Fragen zu Spielgefuehl, Neugier, Freiwilligkeit, Stress, Fehlern und Weltreaktion existieren. | MVP ohne Spielgefuehl-Pruefung. | nein |
-| M16T-PLAY-008 | [~] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
+| M16T-PLAY-008 | [x] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
 
 ### M16T-SOCIAL
 

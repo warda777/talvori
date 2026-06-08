@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Play-First Launch Check</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#64736d">The launch must preserve the game moment already proven in the widget.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d6ded7" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">M16-AP launch gate only / no code / no route / no app integration / no persistence / no BuildState / no frame_started</text>
+<rect x="170" y="430" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="430" width="910" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="200" y="499" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Scene</text>
+<text x="200" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Am Fluss macht Tali kurz Pause.</text>
+<rect x="1240" y="430" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1240" y="430" width="910" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="1270" y="499" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Choices</text>
+<text x="1270" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Sitzbank, Geldinstitut, Flussufer.</text>
+<rect x="2310" y="430" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="2310" y="430" width="910" height="16" rx="9" ry="9" fill="#58b8aa"/>
+<text x="2340" y="499" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Local action</text>
+<text x="2340" y="558" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">User chooses the meaning door locally.</text>
+<rect x="170" y="1040" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="1040" width="910" height="16" rx="9" ry="9" fill="#d7b95b"/>
+<text x="200" y="1109" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Feedback</text>
+<text x="200" y="1168" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Context clarity, not score or XP.</text>
+<rect x="1240" y="1040" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1240" y="1040" width="910" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="1270" y="1109" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Safe exits</text>
+<text x="1270" y="1168" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Later, Codex, Backlog, Change.</text>
+<rect x="2310" y="1040" width="910" height="420" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="2310" y="1040" width="910" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2340" y="1109" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">No pressure</text>
+<text x="2340" y="1168" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">No timer, streak, review duty or vocabulary-test framing.</text>
+<rect x="520" y="1780" width="2360" height="330" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="520" y="1780" width="2360" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="550" y="1849" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">M16T-PLAY-008 decision</text>
+<text x="550" y="1908" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">The Play-First check was applied in M16-AO and is now required for any local launch, so the ID can move to done.</text>
+</svg>
