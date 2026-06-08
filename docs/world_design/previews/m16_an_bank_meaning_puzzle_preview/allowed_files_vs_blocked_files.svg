@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Allowed Files vs Blocked Files</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#64736d">M16-AN names future candidates but creates documentation only.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d6ded7" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">M16-AN gate only / no implementation / no route / no persistence / no SRS write / no BuildState / no frame_started</text>
+<rect x="170" y="360" width="1370" height="460" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="360" width="1370" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="200" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Changed in this slice</text>
+<text x="200" y="486" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">docs/world_design/348-isolated-bank-meaning-puzzle-preview-gate.md</text>
+<text x="200" y="511" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md</text>
+<text x="200" y="536" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">docs/world_design/previews/m16_an_bank_meaning_puzzle_preview/</text>
+<rect x="1860" y="360" width="1370" height="460" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1860" y="360" width="1370" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="1890" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Future file candidate only</text>
+<text x="1890" y="486" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">lib/features/world/local_world/ui/widgets/bank_meaning_puzzle_preview.dart</text>
+<text x="1890" y="511" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d"></text>
+<text x="1890" y="536" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">May be created only by a later explicit implementation prompt.</text>
+<rect x="170" y="1110" width="1370" height="450" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="170" y="1110" width="1370" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="200" y="1179" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Blocked paths now</text>
+<text x="200" y="1238" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">lib/</text>
+<text x="200" y="1265" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">assets/</text>
+<text x="200" y="1292" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">test/</text>
+<text x="200" y="1319" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">integration_test/</text>
+<text x="200" y="1346" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">App routes</text>
+<text x="200" y="1373" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Home screen</text>
+<text x="200" y="1400" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Data layer</text>
+<rect x="1860" y="1110" width="1370" height="450" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1860" y="1110" width="1370" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1890" y="1179" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Blocked effects</text>
+<text x="1890" y="1238" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">No navigation, route, persistence, provider, Supabase, local DB, SRS write, asset, BuildState or frame_started.</text>
+<rect x="610" y="1840" width="2180" height="270" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="610" y="1840" width="2180" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="640" y="1909" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Rule</text>
+<text x="640" y="1968" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">A later isolated preview can be interactive. M16-AN itself stays documentation, prompt draft and Visual-QA.</text>
+</svg>

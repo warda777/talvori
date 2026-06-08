@@ -8,11 +8,11 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AM`
+Aktive Sprint-ID: `M16-AN`
 
 Sprint Goal:
 
-> Ersten play-first gedachten MVP-Loop als konkrete Spielminute fachlich festlegen.
+> Bank Meaning Puzzle Preview als isolierten Folge-Prompt und Boundary-Gate festlegen.
 
 ### 0.1 Gesamtfortschritt
 
@@ -29,14 +29,18 @@ Sprint Goal:
 
 Naechste empfohlene IDs:
 
+- M16T-PLAY-008
+- M16T-CORE-003
+- M16T-L2W-003
+- M16T-ARCH-001
+- M16T-ARCH-002
+- M16T-ARCH-003
+- M16T-ARCH-004
+- M16T-DOC-003
+- M16T-GIT-003
 - M16T-LEARN-002
 - M16T-AI-002
 - M16T-AI-004
-- M16T-PLAY-008
-- M16T-WORLD-002
-- M16T-WHEEL-003
-- M16T-SENS-003
-- M16T-ASSET-002
 
 ### 0.2 Progress-Formel
 
@@ -579,6 +583,18 @@ M16-AM konkretisiert, bleibt teilweise vorbereitet:
 - M16T-WHEEL-003
 - M16T-SENS-003
 - M16T-ASSET-002
+
+M16-AN konkretisiert, bleibt unveraendert teilweise/blockiert:
+
+- M16T-PLAY-008
+- M16T-CORE-003
+- M16T-L2W-003
+- M16T-ARCH-001
+- M16T-ARCH-002
+- M16T-ARCH-003
+- M16T-ARCH-004
+- M16T-DOC-003
+- M16T-GIT-003
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst

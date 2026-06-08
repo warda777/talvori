@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Isolated Preview Boundary</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#64736d">M16-AN prepares the Bank preview prompt, but does not create app code.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d6ded7" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">M16-AN gate only / no implementation / no route / no persistence / no SRS write / no BuildState / no frame_started</text>
+<rect x="150" y="360" width="970" height="400" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="150" y="360" width="970" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="180" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Now: documentation gate</text>
+<text x="180" y="488" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Create rules, acceptance criteria, prompt draft and visuals only. No Flutter or Dart files in this slice.</text>
+<rect x="1230" y="360" width="970" height="400" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1230" y="360" width="970" height="16" rx="9" ry="9" fill="#58b8aa"/>
+<text x="1260" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Later: isolated preview</text>
+<text x="1260" y="488" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">A separately approved widget preview may show local Bank choice states with setState only.</text>
+<rect x="2310" y="360" width="940" height="400" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="2310" y="360" width="940" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="2340" y="429" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Still blocked</text>
+<text x="2340" y="488" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Route, navigation, persistence, SRS, assets, BuildState, frame_started and product mechanics.</text>
+<line x1="1130" y1="560" x2="1210" y2="560" stroke="#8fa19a" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1210,560 1182,542 1182,578" fill="#8fa19a"/>
+<line x1="2210" y1="560" x2="2290" y2="560" stroke="#8fa19a" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2290,560 2262,542 2262,578" fill="#8fa19a"/>
+<rect x="250" y="1060" width="1310" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="250" y="1060" width="1310" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="280" y="1129" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Allowed in M16-AN</text>
+<text x="280" y="1188" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">348 gate doc, documentation diagrams, PNG + SVG, Visual-QA, status and scope checks.</text>
+<rect x="1840" y="1060" width="1310" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1840" y="1060" width="1310" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="1870" y="1129" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Not allowed in M16-AN</text>
+<text x="1870" y="1188" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">No lib/, assets/, test/, integration_test/, route file, app entry, DB write or runtime configuration.</text>
+<rect x="640" y="1720" width="2120" height="330" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="640" y="1720" width="2120" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="670" y="1789" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Boundary sentence</text>
+<text x="670" y="1848" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">A documented gate is not an implementation approval. Code needs a separate prompt and explicit release.</text>
+</svg>

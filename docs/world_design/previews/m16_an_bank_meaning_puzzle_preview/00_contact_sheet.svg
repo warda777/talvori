@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3600" height="3900" viewBox="0 0 3600 3900">
+<rect width="3600" height="3900" fill="#f8f9f4"/>
+<rect x="50" y="40" width="3500" height="3820" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="95" y="152" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">M16-AN Visual Contact Sheet</text>
+<text x="95" y="204" font-family="Arial, Helvetica, sans-serif" font-size="29" fill="#64736d">PNG + SVG documentation previews for the isolated Bank Meaning Puzzle gate.</text>
+<rect x="144" y="314" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="isolated_preview_boundary.png" x="293" y="340" width="1253" height="940"/>
+<text x="170" y="1328" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">1. isolated_preview_boundary</text>
+<rect x="1904" y="314" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="bank_meaning_puzzle_state_flow.png" x="2053" y="340" width="1253" height="940"/>
+<text x="1930" y="1328" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">2. bank_meaning_puzzle_state_flow</text>
+<rect x="144" y="1434" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="play_first_preview_check.png" x="293" y="1460" width="1253" height="940"/>
+<text x="170" y="2448" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">3. play_first_preview_check</text>
+<rect x="1904" y="1434" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="allowed_files_vs_blocked_files.png" x="2053" y="1460" width="1253" height="940"/>
+<text x="1930" y="2448" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">4. allowed_files_vs_blocked_files</text>
+<rect x="144" y="2554" width="1552" height="1060" rx="24" ry="24" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<image href="implementation_readiness_gate.png" x="293" y="2580" width="1253" height="940"/>
+<text x="170" y="3568" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#1e2b28">5. implementation_readiness_gate</text>
+<text x="95" y="3842" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#64736d">M16-AN gate only / no implementation / no route / no persistence / no SRS write / no BuildState / no frame_started</text>
+</svg>

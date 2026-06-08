@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2550" viewBox="0 0 3400 2550">
+<rect width="3400" height="2550" fill="#f8f9f4"/>
+<rect x="48" y="38" width="3304" height="2474" rx="30" ry="30" fill="#f8f9f4" stroke="#d6ded7" stroke-width="2"/>
+<text x="92" y="148" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" fill="#1e2b28">Bank Meaning Puzzle State Flow</text>
+<text x="92" y="203" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="400" fill="#64736d">One scene, three meanings, safe exits, no build or placement.</text>
+<line x1="92" y1="2438" x2="3308" y2="2438" stroke="#d6ded7" stroke-width="2" stroke-linecap="round"/>
+<text x="92" y="2490" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#64736d">M16-AN gate only / no implementation / no route / no persistence / no SRS write / no BuildState / no frame_started</text>
+<rect x="180" y="390" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="180" y="390" width="610" height="16" rx="9" ry="9" fill="#67a7cb"/>
+<text x="210" y="459" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Start</text>
+<text x="210" y="518" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Tali pauses at the river.</text>
+<text x="210" y="545" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">The word Bank appears in context.</text>
+<line x1="800" y1="570" x2="940" y2="570" stroke="#8fa19a" stroke-width="6" stroke-linecap="round"/>
+<polygon points="940,570 912,552 912,588" fill="#8fa19a"/>
+<rect x="970" y="390" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="970" y="390" width="610" height="16" rx="9" ry="9" fill="#58b8aa"/>
+<text x="1000" y="459" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Choose Door</text>
+<text x="1000" y="518" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Sitzbank</text>
+<text x="1000" y="545" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Geldinstitut</text>
+<text x="1000" y="572" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Flussufer</text>
+<line x1="1590" y1="570" x2="1730" y2="570" stroke="#8fa19a" stroke-width="6" stroke-linecap="round"/>
+<polygon points="1730,570 1702,552 1702,588" fill="#8fa19a"/>
+<rect x="1760" y="390" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1760" y="390" width="610" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1790" y="459" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Context Result</text>
+<text x="1790" y="518" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Correct sense opens a ContextCard, Codex Discovery or tiny</text>
+<text x="1790" y="545" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">World Hint.</text>
+<line x1="2380" y1="570" x2="2520" y2="570" stroke="#8fa19a" stroke-width="6" stroke-linecap="round"/>
+<polygon points="2520,570 2492,552 2492,588" fill="#8fa19a"/>
+<rect x="2550" y="390" width="610" height="370" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="2550" y="390" width="610" height="16" rx="9" ry="9" fill="#d7b95b"/>
+<text x="2580" y="459" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Safe Exit</text>
+<text x="2580" y="518" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Later, Codex, Backlog or Change.</text>
+<text x="2580" y="545" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">End without duty.</text>
+<rect x="430" y="1080" width="1110" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="430" y="1080" width="1110" height="16" rx="9" ry="9" fill="#8979c7"/>
+<text x="460" y="1149" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Calm Retry</text>
+<text x="460" y="1208" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">A wrong choice says: the scene gives another clue. No shame, no loss, no world punishment.</text>
+<rect x="1860" y="1080" width="1110" height="350" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="1860" y="1080" width="1110" height="16" rx="9" ry="9" fill="#69ad78"/>
+<text x="1890" y="1149" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Meaning learned</text>
+<text x="1890" y="1208" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">Bank is not one fixed object. Context decides whether it is bench, institution or river edge.</text>
+<rect x="720" y="1710" width="1960" height="340" rx="20" ry="20" fill="#ffffff" stroke="#d6ded7" stroke-width="2"/>
+<rect x="720" y="1710" width="1960" height="16" rx="9" ry="9" fill="#d96d67"/>
+<text x="750" y="1779" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#1e2b28">Hard boundary</text>
+<text x="750" y="1838" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#64736d">The result is semantic clarity only: no SRS write, no placement, no BuildState, no asset, no frame_started.</text>
+</svg>
