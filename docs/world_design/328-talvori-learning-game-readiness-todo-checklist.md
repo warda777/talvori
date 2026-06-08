@@ -8,34 +8,33 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AB`
+Aktive Sprint-ID: `M16-AC`
 
 Sprint Goal:
 
-> Dokumentenlandkarte und Pflichtlektuere-Regeln pro Slice-Typ verbindlich machen.
+> Mobile-Dichte, Accessibility-Pflichten und Container-/Depth-Grenzen fuer den MVP planen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 27 |
+| Offen `[ ]` | 21 |
 | Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 64 |
+| Erledigt `[x]` | 70 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 59.7 % |
-| Fortschrittsbalken | `████████████░░░░░░░░` |
+| Gewichteter Fortschritt | 64.7 % |
+| Fortschrittsbalken | `█████████████░░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-MOBILE-001
-- M16T-MOBILE-002
-- M16T-DEPTH-001
-- M16T-DEPTH-002
 - M16T-WORLD-001
 - M16T-WORLD-003
+- M16T-WHEEL-002
+- M16T-WHEEL-004
 - M16T-UNDO-001
+- M16T-UNDO-002
 - M16T-DATA-004
 - M16T-ASSET-003
 - M16T-GAME-001
@@ -79,11 +78,11 @@ ihrem Detail-Gate Fortschritt bei.
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
 | World / Island / Plot | M16T-WORLD | 4 | 0 | 2 | 2 | 0 | 25.0 % | `███░░░░░░░` | Generische Plot-Familien und World Loop definieren. |
-| Container / Depth | M16T-DEPTH | 3 | 0 | 1 | 2 | 0 | 16.7 % | `██░░░░░░░░` | Depth-Modell und Suchbarkeit verschachtelter Objekte klaeren. |
+| Container / Depth | M16T-DEPTH | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | BuildChoice definieren, Wheel-Code blockiert halten. |
 | Undo / Reversibility | M16T-UNDO | 3 | 0 | 0 | 3 | 0 | 0.0 % | `░░░░░░░░░░` | Undo-Modell fuer Semantik und Weltentscheidungen planen. |
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
-| Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 0 | 0 | 4 | 0 | 0.0 % | `░░░░░░░░░░` | Dichtebudgets und A11y-Gate planen. |
+| Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
 | Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
@@ -237,8 +236,8 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-DEPTH-001 | [ ] | Container-/Depth-Modell | Kleine Objekte und Interiors brauchen Ebenen. | Depth-Modell fuer Island, Plot, Interior, Container, Detail dokumentiert ist. | Container-Implementierung. | nein |
-| M16T-DEPTH-002 | [ ] | Suchbarkeit versteckter/verschachtelter Objekte | Versteckte Woerter duerfen nicht verloren wirken. | Such-/Codex-/Backlog-Regeln fuer verschachtelte Objekte existieren. | Unsichtbare Lernobjekte ohne Auffindbarkeit. | nein |
+| M16T-DEPTH-001 | [x] | Container-/Depth-Modell | Kleine Objekte und Interiors brauchen Ebenen. | Depth-Modell fuer Island, Plot, Interior, Container, Detail dokumentiert ist. | Container-Implementierung. | nein |
+| M16T-DEPTH-002 | [x] | Suchbarkeit versteckter/verschachtelter Objekte | Versteckte Woerter duerfen nicht verloren wirken. | Such-/Codex-/Backlog-Regeln fuer verschachtelte Objekte existieren. | Unsichtbare Lernobjekte ohne Auffindbarkeit. | nein |
 | M16T-DEPTH-003 | [~] | Kleine Objekte bekommen nicht automatisch eigene Grundstuecke | Clutter und Plot-Inflation werden verhindert. | TinyObject/ContainerItem-Regel in allen Plot-Slices genutzt wird. | TinyObject-Plot. | nein |
 
 ## 15. Build-Wheel
@@ -271,10 +270,10 @@ ausdruecklich freigegeben werden.
 
 | ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
 | --- | --- | --- | --- | --- | --- | --- |
-| M16T-MOBILE-001 | [ ] | Mobile-Dichtebudgets | Kleine Screens begrenzen Objekte, Labels und Entscheidungen. | Dichtebudgets pro Ebene/Screen als Planungswerte dokumentiert sind. | Objekt-/Labelwolken. | nein |
-| M16T-MOBILE-002 | [ ] | Landmarken-vor-Kleinteilen | Weltlesbarkeit braucht grosse Orientierungspunkte. | Landmark-/Focus-Regel vor Detailobjekten dokumentiert ist. | TinyObject-first UI. | nein |
-| M16T-MOBILE-003 | [ ] | Text-/Overlay-Regeln | Overlays duerfen Welt und Interaktion nicht verdecken. | Text-Containment, Tap-Ziele, Footer/Legend/Overlay-Regeln dokumentiert sind. | Unlesbare Mobile-UI. | nein |
-| M16T-MOBILE-004 | [ ] | Accessibility Gate | Produktive UI braucht A11y-Pruefung. | Accessibility-Gate fuer Textgroesse, Kontrast, Semantics, Tap-Ziele existiert. | Produktive UI ohne A11y. | nein |
+| M16T-MOBILE-001 | [x] | Mobile-Dichtebudgets | Kleine Screens begrenzen Objekte, Labels und Entscheidungen. | Dichtebudgets pro Ebene/Screen als Planungswerte dokumentiert sind. | Objekt-/Labelwolken. | nein |
+| M16T-MOBILE-002 | [x] | Landmarken-vor-Kleinteilen | Weltlesbarkeit braucht grosse Orientierungspunkte. | Landmark-/Focus-Regel vor Detailobjekten dokumentiert ist. | TinyObject-first UI. | nein |
+| M16T-MOBILE-003 | [x] | Text-/Overlay-Regeln | Overlays duerfen Welt und Interaktion nicht verdecken. | Text-Containment, Tap-Ziele, Footer/Legend/Overlay-Regeln dokumentiert sind. | Unlesbare Mobile-UI. | nein |
+| M16T-MOBILE-004 | [x] | Accessibility Gate | Produktive UI braucht A11y-Pruefung. | Accessibility-Gate fuer Textgroesse, Kontrast, Semantics, Tap-Ziele existiert. | Produktive UI ohne A11y. | nein |
 
 ## 19. Sensitive / Policy
 
@@ -467,6 +466,15 @@ M16-AB erledigt:
 - M16T-META-004
 - M16T-GIT-001
 - M16T-GIT-002
+
+M16-AC erledigt:
+
+- M16T-MOBILE-001
+- M16T-MOBILE-002
+- M16T-MOBILE-003
+- M16T-MOBILE-004
+- M16T-DEPTH-001
+- M16T-DEPTH-002
 
 M16-U in eigene Detail-Gates ausgelagert:
 
