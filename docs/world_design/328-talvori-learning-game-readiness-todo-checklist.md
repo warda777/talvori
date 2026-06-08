@@ -8,32 +8,32 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-08
 
-Aktive Sprint-ID: `M16-AD`
+Aktive Sprint-ID: `M16-AE`
 
 Sprint Goal:
 
-> World Loop, generische Plot-Familien, BuildChoice und Undo/Reversibility fachlich abgrenzen.
+> ThemeIsland-Resizing, Capability-Stop-Regel, TinyObject-/Container-Grenzen und sensitive-safe Asset-Regeln fachlich schliessen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
 | Gesamtanzahl M16-T-Items | 119 |
-| Offen `[ ]` | 15 |
-| Teilweise erledigt `[~]` | 14 |
-| Erledigt `[x]` | 76 |
+| Offen `[ ]` | 13 |
+| Teilweise erledigt `[~]` | 12 |
+| Erledigt `[x]` | 80 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 2 |
-| Gewichteter Fortschritt | 69.7 % |
+| Gewichteter Fortschritt | 72.3 % |
 | Fortschrittsbalken | `██████████████░░░░░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-WORLD-004
-- M16T-UNDO-003
-- M16T-DEPTH-003
+- M16T-WORLD-002
+- M16T-WHEEL-003
+- M16T-ASSET-002
 - M16T-DATA-004
-- M16T-ASSET-003
+- M16T-ASSET-004
 - M16T-GAME-001
 - M16T-GAME-002
 - M16T-RESEARCH-002
@@ -74,14 +74,14 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | Capability-Regel in kuenftigen Plot-Slices aktiv als Stop-Regel anwenden. |
-| Container / Depth | M16T-DEPTH | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices anwenden. |
+| World / Island / Plot | M16T-WORLD | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | ThemeIsland-/Plot-Capacity in konkreten spaeteren Slices anwenden. |
+| Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
-| Undo / Reversibility | M16T-UNDO | 3 | 2 | 0 | 1 | 0 | 66.7 % | `███████░░░` | ThemeIsland-Resizing als eigenes Gate planen. |
+| Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 4 | 0 | 1 | 2 | 1 | 12.5 % | `█░░░░░░░░░` | Asset-Scope-Gate bleibt blockiert, Policy/Naming vorbereiten. |
+| Asset Scope | M16T-ASSET | 4 | 1 | 1 | 1 | 1 | 37.5 % | `████░░░░░░` | Asset-Scope bleibt blockiert; Lizenz-/Quelle-/Benennung-Regeln separat klaeren. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 0 | 0 | 1 | 4 | 0.0 % | `░░░░░░░░░░` | Data/Persistence/Migration weiter blockiert halten. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
@@ -227,7 +227,7 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-001 | [x] | World/Island Loop | Weltfortschritt braucht einen eigenen Loop. | Island/Plot/Preview/Build/Persist-Schritte getrennt dokumentiert sind. | Build-State ohne Loop-Gate. | nein |
 | M16T-WORLD-002 | [~] | ThemeIsland-/Plot-Capacity-Regeln | Inselgroesse entsteht aus Theme-Bedarf, nicht aus fixer Mini-Insel. | M16-I/K-Regeln in spaetere Preview-/Code-Gates uebernommen sind. | Dorf als globale Grundlage. | nein |
 | M16T-WORLD-003 | [x] | Generische Plot-Familien | Kategorien brauchen wiederverwendbare Plot-Familien. | Plot-Familien fuer Water, Path, Residential, Garden, Hub, Container, Edge usw. dokumentiert sind. | Feste Gebaeudelisten. | nein |
-| M16T-WORLD-004 | [~] | Plot-Capability ist Erlaubnis, keine Pflichtbelegung | Capabilities duerfen keine automatische Belegung erzeugen. | Jeder Plot-Slice diese Regel als Stop-Regel nennt. | Capability -> Placement. | nein |
+| M16T-WORLD-004 | [x] | Plot-Capability ist Erlaubnis, keine Pflichtbelegung | Capabilities duerfen keine automatische Belegung erzeugen. | Jeder Plot-Slice diese Regel als Stop-Regel nennt. | Capability -> Placement. | nein |
 
 ## 14. Container / Depth
 
@@ -235,7 +235,7 @@ ausdruecklich freigegeben werden.
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DEPTH-001 | [x] | Container-/Depth-Modell | Kleine Objekte und Interiors brauchen Ebenen. | Depth-Modell fuer Island, Plot, Interior, Container, Detail dokumentiert ist. | Container-Implementierung. | nein |
 | M16T-DEPTH-002 | [x] | Suchbarkeit versteckter/verschachtelter Objekte | Versteckte Woerter duerfen nicht verloren wirken. | Such-/Codex-/Backlog-Regeln fuer verschachtelte Objekte existieren. | Unsichtbare Lernobjekte ohne Auffindbarkeit. | nein |
-| M16T-DEPTH-003 | [~] | Kleine Objekte bekommen nicht automatisch eigene Grundstuecke | Clutter und Plot-Inflation werden verhindert. | TinyObject/ContainerItem-Regel in allen Plot-Slices genutzt wird. | TinyObject-Plot. | nein |
+| M16T-DEPTH-003 | [x] | Kleine Objekte bekommen nicht automatisch eigene Grundstuecke | Clutter und Plot-Inflation werden verhindert. | TinyObject/ContainerItem-Regel in allen Plot-Slices genutzt wird. | TinyObject-Plot. | nein |
 
 ## 15. Build-Wheel
 
@@ -252,7 +252,7 @@ ausdruecklich freigegeben werden.
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-UNDO-001 | [x] | Undo-/Reversibility-Modell | Semantik- und Weltentscheidungen koennen spaeter falsch sein. | Undo/Aendern fuer Sense, Theme, Plot, Outcome und Preview dokumentiert ist. | Persistente Entscheidungen ohne Undo. | nein |
 | M16T-UNDO-002 | [x] | Geaenderte Semantik | Nutzer oder Kontext kann Bedeutung aendern. | Reclassification-Regeln ohne Datenverlust beschrieben sind. | Einmalige finale Sense. | nein |
-| M16T-UNDO-003 | [ ] | ThemeIsland-Resizing | Theme-Bedarf kann wachsen oder sich aendern. | Resize/Reserve/Move-Regeln fuer ThemeIslands geplant sind. | Fixe Inselkapazitaet. | nein |
+| M16T-UNDO-003 | [x] | ThemeIsland-Resizing | Theme-Bedarf kann wachsen oder sich aendern. | Resize/Reserve/Move-Regeln fuer ThemeIslands geplant sind. | Fixe Inselkapazitaet. | nein |
 
 ## 17. Tali/Vori Companion
 
@@ -286,7 +286,7 @@ ausdruecklich freigegeben werden.
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-ASSET-001 | [!] | Asset-Scope-Gate | Echte Spielassets brauchen eigenes Gate. | Asset-Familien, Quellen, Qualitaet und Verwendung separat freigegeben sind. | Asset-Dateien unter `assets/`. | nein |
 | M16T-ASSET-002 | [~] | Kein Wort erzeugt automatisch ein Asset | Semantik ist kein Asset-Generator. | Jeder Word-/World-Slice diese Regel nennt. | Auto-Asset aus Wort. | nein |
-| M16T-ASSET-003 | [ ] | Sensitive-safe Asset-Regeln | Sensitive Themen brauchen besonders neutrale Visualisierung. | Sensitive Asset Policy dokumentiert ist. | Symbolik ohne Policy. | nein |
+| M16T-ASSET-003 | [x] | Sensitive-safe Asset-Regeln | Sensitive Themen brauchen besonders neutrale Visualisierung. | Sensitive Asset Policy dokumentiert ist. | Symbolik ohne Policy. | nein |
 | M16T-ASSET-004 | [ ] | Lizenz-/Quelle-/Benennung-Regeln | Assets muessen rechtlich und strukturell sauber bleiben. | Naming, Quellen, Lizenzen und Review fuer Assets dokumentiert sind. | Unklare Asset-Herkunft. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
@@ -353,8 +353,6 @@ Teilweise vorbereitet durch M16-S/M16-R/M16-L und fruehere Dokumente:
 
 - M16T-SCALE-001
 - M16T-WORLD-002
-- M16T-WORLD-004
-- M16T-DEPTH-003
 - M16T-WHEEL-003
 - M16T-SENS-003
 - M16T-ASSET-002
@@ -481,6 +479,13 @@ M16-AD erledigt:
 - M16T-WHEEL-004
 - M16T-UNDO-001
 - M16T-UNDO-002
+
+M16-AE erledigt:
+
+- M16T-WORLD-004
+- M16T-UNDO-003
+- M16T-DEPTH-003
+- M16T-ASSET-003
 
 M16-U in eigene Detail-Gates ausgelagert:
 
