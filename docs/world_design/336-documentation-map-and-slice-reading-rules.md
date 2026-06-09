@@ -120,6 +120,7 @@ Non-Goals:
 | `318-theme-island-plot-capacity-and-build-wheel-plan.md` | Thema -> Plotbedarf -> Groessenmix -> Island Capacity -> Slot-Auswahl -> spaeteres In-place Wheel. |
 | `320-global-theme-island-plot-capacity-matrix.md` | Dorf ist nur ein Beispiel; Kategorien brauchen eigene Plot-Familien. |
 | `272-plot-capability-derivation.md` | Plot-Capability ist Erlaubnis, keine Pflichtbelegung. |
+| `351-starter-island-infrastructure-strategy-gate.md` | Starter-Insel-Infrastruktur trennt fixe Grundform, freie Slots, Kategorie-Templates, Varianten, Unlocks und BuildChoice. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -204,15 +205,15 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Container / Depth Slice | `328`, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
-| Build-Wheel Slice | `328`, `350`, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
+| Build-Wheel Slice | `328`, `350`, `351`, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
-| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
-| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
+| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
+| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
@@ -238,6 +239,13 @@ Research, Visuals oder Review muss enthalten:
 - Antwort auf: Welche UI-Art wird genutzt, warum passt sie zur Aktion, warum
   ist sie nicht zu gross oder zu klein und welche Alternative wurde bewusst
   nicht gewaehlt?,
+- Starter Island Infrastructure Strategy aus `351`, wenn World, Island, Plot,
+  UI, BuildChoice, Unlock, Kategorie-Template oder Starter-Insel-Preview
+  betroffen ist,
+- Antwort auf: Welche Infrastruktur-Ebene wird beruehrt, ist es fixe
+  Infrastruktur, freier Slot, Kategorie-Template, Variante, Unlock oder
+  BuildChoice, wird Terrain veraendert oder nur ein Slot genutzt und ist es
+  MVP, nach MVP oder blockiert?,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen

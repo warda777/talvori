@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-AZ`
+Aktive Sprint-ID: `M16-BA`
 
 Sprint Goal:
 
-> Starter-Island-Board visuell beruhigen und unklare UI-/Spielaufbau-Entscheidungen research-gated machen.
+> Starter-Insel-Infrastruktur fachlich festlegen und fixe Infrastruktur von freier Gestaltung trennen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 134 |
+| Gesamtanzahl M16-T-Items | 140 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 110 |
+| Erledigt `[x]` | 116 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 86.6 % |
+| Gewichteter Fortschritt | 87.1 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -63,7 +63,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 25 Bereiche
+### 0.3 Bereichs-Dashboard fuer 26 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -89,6 +89,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
+| Starter Island Infrastructure | M16T-INFRA | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur aus 351 in kommenden World-/Island-/Plot-/BuildChoice-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -643,6 +644,26 @@ M16-AZ operationalisiert fuer kuenftige Slices:
 - Gepruefte Muster, gewaehltes Muster, passende Spiel-/UI-Logik und bewusst
   verworfene Alternativen berichten.
 
+M16-BA erledigt:
+
+- M16T-INFRA-001
+- M16T-INFRA-002
+- M16T-INFRA-003
+- M16T-INFRA-004
+- M16T-INFRA-005
+- M16T-INFRA-006
+
+M16-BA operationalisiert fuer kuenftige Slices:
+
+- Starter-Insel-Grundform, freie Slots, Kategorie-Templates,
+  Terrain-Varianten, Unlocks und BuildChoice als getrennte Ebenen behandeln.
+- Fixe Infrastruktur darf Orientierung geben, aber Kategorien nicht hart
+  blockieren.
+- 8-12 sichtbare freie Slots, 4-6 sofort nutzbare Slots und 4-6 spaeter
+  sichtbare Erweiterungsslots als Starter-Planungswert verwenden.
+- Muenzen/Unlocks bleiben fachlich und druckfrei; keine Economy-, Timer-,
+  Pay-to-Win- oder BuildState-Freigabe.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -717,7 +738,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -780,7 +801,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 25 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY und M16T-INTERACT steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je 26 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT und M16T-INFRA steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -852,6 +873,17 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-INTERACT-004 | [x] | Showcase-Seite fuer grosse visuelle Auswahl | Manche Entscheidungen brauchen Vergleich und Vorschau statt Mini-Menue. | Showcase-Regel fuer BuildChoice, Companion, Style, Biome und groessere visuelle Auswahl dokumentiert ist. | Grosse Auswahl in kleinen Chips erzwingen. | nein |
 | M16T-INTERACT-005 | [x] | Drag/Drop nicht als Standard-Nutzerflow | Freies Dragging kann mobil unpraezise und zu technisch wirken. | Drag/Drop als Dev-/Layout-Modus oder spaetere Editierfunktion eingeordnet ist. | Drag als Hauptflow fuer normale Spielentscheidungen. | nein |
 | M16T-INTERACT-006 | [x] | Research-/Benchmark-Check vor unklaren UI-Entscheidungen | Unklare UI- und Spielaufbau-Entscheidungen sollen von erfolgreichen Spielmustern lernen, statt aus Gewohnheit gebaut zu werden. | `350-interaction-pattern-decision-matrix.md` verlangt vor Umsetzung einen kurzen Benchmark-/Research-Check mit gewaehltem Muster, Passung, Vorbildlogik und verworfenen Alternativen. | UI-Entscheidung ohne Pattern- oder Benchmark-Abgleich. | nein |
+
+### M16T-INFRA
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-INFRA-001 | [x] | Starter Island Infrastructure Strategy | Weitere Insel-, Wheel-, BuildChoice- und Spielmoment-Slices brauchen eine gemeinsame Inselgrundlage. | `351-starter-island-infrastructure-strategy-gate.md` definiert Terrain, Slots, Templates, Varianten, Unlocks und Stop-Regeln. | Code ohne Infrastruktur-Gate. | nein |
+| M16T-INFRA-002 | [x] | Fixed vs Player-Editable Infrastructure | Talvori braucht Orientierung, ohne Nutzerkreativitaet zu bevormunden. | Kueste, Wasser, Hauptwege, Slots, Kategorie, Variante, BuildChoice und Terrain-Modifikation getrennt sind. | Fixe Kategorieplaetze, Terrain-Editor im MVP. | nein |
+| M16T-INFRA-003 | [x] | Starter Slot Count and Unlock Strategy | Mobile-Dichte und Neugier brauchen begrenzte, aber sichtbare freie Flaechen. | 8-12 sichtbare Slots, 4-6 Startslots, 4-6 spaetere Erweiterungsslots als Planungswert definiert sind. | ueberladene Insel, zu viele Pflichtentscheidungen. | nein |
+| M16T-INFRA-004 | [x] | Category Template and Terrain Variant Rules | Kategorien sollen kreativ mehrfach nutzbar sein, statt einmalig oder hart platziert zu wirken. | Kategorien als Templates und Slot + Kategorie + Terrain als Variante ohne BuildState dokumentiert sind. | Kategorie erzeugt Gebaeude, Asset oder Placement. | nein |
+| M16T-INFRA-005 | [x] | Path/River/Bridge Strategy | Wege und Wasser muessen Orientierung geben, duerfen aber keinen produktiven Pfadbau ausloesen. | Fluss/Wasser, Hauptwege, Nebenwege und Bruecken als Grund-Infrastruktur bzw. spaetere Gates eingeordnet sind. | freie Fluss-/Pfadbearbeitung oder Bridge-Code im MVP. | nein |
+| M16T-INFRA-006 | [x] | Coin/Unlock Strategy without Economy Implementation | Unlocks koennen Neugier erzeugen, duerfen aber keinen Druck oder Economy-Scope starten. | Muenzen/Unlocks fachlich, druckfrei und ohne Economy-, Timer-, Pay-to-Win- oder Persistenzfreigabe dokumentiert sind. | Economy, Timer, Kaufdruck, Pay-to-Win. | nein |
 
 ### M16T-SOCIAL
 
