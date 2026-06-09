@@ -27,6 +27,14 @@ M16-BA definiert keine finale Grafik, keinen Art Style, keine Assets, keine
 Runtime-Konfiguration und keine Persistenz. Der Slice ist ein Gate fuer
 kommende Planungs- und Implementierungs-Prompts, nicht die Umsetzung selbst.
 
+Nachtrag M16-BD:
+
+`353-starter-island-identity-biome-and-category-scope-gate.md` konkretisiert
+auf Basis von M16-BA die erste Starter-Insel als `Uferhain`: eine
+Kuestenhain-/Flussufer-Starterinsel mit Kategorie-Scope, Terrain-Varianten und
+Future-Island-Grenzen. M16-BA bleibt die Ebenenstrategie; M16-BD ist die
+konkrete Identitaets- und Biome-Entscheidung fuer die erste Starter-Insel.
+
 ## 2. Non-Goals und Stop-Regeln
 
 M16-BA erzeugt nicht:
