@@ -38,6 +38,14 @@ Fundament-Candidate -> Bauteile-sortieren-Lernhandlung -> lokales
 Fundament-Feedback. M16-BJ bleibt ein Prompt-Gate und gibt weiterhin keinen
 BuildState, keine Persistenz, keine Assets und keine App-Integration frei.
 
+Nachtrag M16-BN:
+
+`358-fun-adventure-curiosity-reward-gameplay-spine-gate.md` legt den
+Fun-/Adventure-/Curiosity-Layer ueber diesen Construction-Spine. Kuenftige
+Construction-Slices muessen deshalb nicht nur Spine-Stufe, Bauhandlung und
+Lernnutzen nennen, sondern auch Player Hook, kleine Huerde, Belohnung als neue
+Moeglichkeit und naechsten freiwilligen Hook.
+
 ## 2. Non-Goals und Stop-Regeln
 
 M16-BI erzeugt nicht:

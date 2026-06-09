@@ -25,6 +25,14 @@ M16-BL gibt keinen Code, keine App-Integration, keine Route, keine Navigation,
 keine Persistenz, keine Assets, keine Tests, keine BuildChoice-
 Implementierung, keinen BuildState und keine Produktivmechanik frei.
 
+Nachtrag M16-BN:
+
+`358-fun-adventure-curiosity-reward-gameplay-spine-gate.md` ergaenzt diesen
+Kamera-/Showcase-Flow um den Fun-/Hook-Layer. Ein Slice kann visuell wie
+Showcase, Weltansicht und Bauplatz aufgebaut sein und trotzdem noch zu schwach
+sein, wenn Neugier-Hook, kleine Huerde, Weltreaktion, Belohnung als neue
+Moeglichkeit und naechster freiwilliger Hook fehlen.
+
 ## 2. Non-Goals und Stop-Regeln
 
 Dieser Slice erzeugt nicht:

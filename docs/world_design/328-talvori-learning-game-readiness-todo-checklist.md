@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BL`
+Aktive Sprint-ID: `M16-BN`
 
 Sprint Goal:
 
-> Game-like Island Showcase, Kamera-Zoom und Bauplatz-Flow fuer den ersten Construction-Learning-Slice festlegen.
+> Fun-/Adventure-/Curiosity-/Reward-Spine als hoechste Spielspass-Regel fuer kuenftige Bau-, Lern-, Insel-, Quest-, Container- und Implementierungs-Slices festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 161 |
+| Gesamtanzahl M16-T-Items | 167 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 137 |
+| Erledigt `[x]` | 143 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 88.8 % |
+| Gewichteter Fortschritt | 89.2 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -67,7 +67,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 27 Bereiche
+### 0.3 Bereichs-Dashboard fuer 28 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -95,6 +95,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
 | Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
+| Fun / Adventure / Curiosity | M16T-FUN | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -773,6 +774,30 @@ M16-BL operationalisiert fuer kuenftige Slices:
 - Empfohlener Folge-Code-Slice ist M16-BM Game-like Island Showcase to
   Foundation Camera Preview mit neuer isolierter Preview-Datei.
 
+M16-BN erledigt:
+
+- M16T-FUN-001
+- M16T-FUN-002
+- M16T-FUN-003
+- M16T-FUN-004
+- M16T-FUN-005
+- M16T-FUN-006
+
+M16-BN operationalisiert fuer kuenftige Slices:
+
+- Jeder Gameplay-, World-, UI-, BuildChoice-, Learning- oder
+  Implementierungs-Slice muss Player Hook, kleine Huerde, Spielhandlung,
+  Belohnung/neue Moeglichkeit und naechsten freiwilligen Hook nennen.
+- Erfolgreiche Spielmuster duerfen als Prinzipien uebertragen werden, aber
+  nicht blind kopiert werden.
+- Druckmuster wie Timer, Streak-Schuld, FOMO, Pay-to-Win, Lootbox/Gacha,
+  Pflichtreview, Verlustangst und PvP/Leaderboard im MVP bleiben blockiert.
+- Belohnung bedeutet in Talvori primaer neue Moeglichkeit: neuer Bauabschnitt,
+  Blueprint-Idee, Fundstueck, Container, Tali/Vori-Hilfe, Archiv-Eintrag oder
+  lokale Faehigkeit als Preview.
+- M16-BM-FIX wird als technische Basis gelesen, braucht aber vor Commit oder
+  naechstem Gate M16-BO Game-like Construction Hook Polish.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -847,7 +872,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -910,7 +935,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 27 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT, M16T-INFRA und M16T-SPINE steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je 28 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT, M16T-INFRA, M16T-SPINE und M16T-FUN steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -1019,6 +1044,17 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-SPINE-013 | [x] | Construction task must happen on build site | Lernen soll Bauhandlung am Ort sein, nicht Fragekarte neben der Welt. | Fundament-/Bauteile-Aufgabe muss direkt am Bauplatz passieren; Text darf nur helfen. | Quizkarte mit drei Textbuttons als Hauptflaeche. | nein |
 | M16T-SPINE-014 | [x] | Minimal HUD for construction-learning flow | Spielraum muss dominieren, nicht HUD/Debug/Guardrails. | HUD-Regeln mit einem Hauptziel, kurzen Bubbles, kompakten Safe Actions und ohne permanente Debug-/Guardrail-Chips dokumentiert sind. | Footer, Phasenleiste, Textwand, technisches HUD im normalen Spielbild. | nein |
 | M16T-SPINE-015 | [x] | M16-BM prompt readiness | Der naechste Code-Slice braucht den korrigierten Game-like Flow und neue Datei-Grenzen. | M16-BM Game-like Island Showcase to Foundation Camera Preview mit empfohlenen Dateien und Akzeptanzkriterien vorbereitet ist. | alte M16-BK-Dateien weiterfuehren, Starter-Island-Board ueberladen, Code ohne 357. | nein |
+
+### M16T-FUN
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-FUN-001 | [x] | Fun/Adventure/Curiosity Spine | Talvori darf nicht nur technisch korrekt und lehrreich sein, sondern muss freiwilliges Weiterspielen ausloesen. | `358-fun-adventure-curiosity-reward-gameplay-spine-gate.md` definiert den Fun-/Adventure-/Curiosity-Layer ueber dem Construction-Spine. | Bau-/Lernflow ohne Spielspass- oder Neugieranker. | nein |
+| M16T-FUN-002 | [x] | Every slice must define player hook | Jeder Slice braucht eine klare Antwort, warum der Spieler weitermachen will. | Kuenftige Prompts muessen Player Hook, kleine Huerde, naechsten Schritt und uebertragenes Spielmuster nennen. | Implementierung ohne Hook/Neugier/Weiter-Spiel-Impuls. | nein |
+| M16T-FUN-003 | [x] | Construction task must include playful tension | Bauaufgaben brauchen spielerische Spannung statt technischer Abfolge. | Erlaubte Spannungen wie oeffnen, finden, reparieren, bauen, retten, sammeln, kombinieren und Geheimnis entdecken dokumentiert sind. | Bauhandlung als Formular, Checkliste oder reine Textphase. | nein |
+| M16T-FUN-004 | [x] | Reward means new possibility, not pressure | Belohnung soll Moeglichkeit und Ownership erzeugen, nicht Retention-Druck. | Reward-Regel definiert neue Bauabschnitte, Blueprint-Ideen, Fundstuecke, Container, Tali/Vori-Hilfe oder Archiv-Eintrag ohne Economy/Persistenz. | XP-/Timer-/Streak-/FOMO-/Pay-to-Win-Reward. | nein |
+| M16T-FUN-005 | [x] | Safe danger/repair/discovery patterns | Spannung wie Gefahr oder Vernichtung muss in sichere Talvori-Formen uebersetzt werden. | Nebel vertreiben, Weg reparieren, Ort aufraeumen, Objekt finden, Flaeche beleuchten und Bauplatz stabilisieren als druckfreie Muster dokumentiert sind. | Weltverlust, Zeitdruck, Bestrafung, Angst oder sensible Inhalte als Drama. | nein |
+| M16T-FUN-006 | [x] | M16-BO Hook Polish readiness | M16-BM braucht vor Commit/naechstem Gate mehr Hook, Weltreaktion und Belohnung als neue Moeglichkeit. | M16-BO Game-like Construction Hook Polish mit erlaubten M16-BM-Dateien, Scope und Ziel vorbereitet ist. | M16-BM als rein technischer Greybox-Stand ohne Fun-/Hook-Polish weitertragen. | nein |
 
 ### M16T-SOCIAL
 

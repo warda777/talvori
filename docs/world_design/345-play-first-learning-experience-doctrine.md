@@ -193,6 +193,48 @@ M16-AX ergaenzt Play-First und Island-First um eine UI-Muster-Regel:
   welche UI-Art gewaehlt wurde und welche Alternative bewusst nicht gewaehlt
   wurde.
 
+### 7.2 Fun / Adventure / Curiosity Rule
+
+M16-BN ergaenzt Play-First, Island-First und Interaction Pattern um eine
+harte Fun-/Hook-Regel:
+
+```text
+Talvori muss Spass, Neugier, Entdeckung, Baufortschritt und neue
+Moeglichkeiten erzeugen.
+Lernen darf nie das sichtbare Pflichtgefuehl sein.
+```
+
+Verbindliche Regeln:
+
+- Jede Implementierung braucht einen Fun-/Hook-Check.
+- Jede Bau-, Lern-, Insel-, Quest-, Container-, Objekt- oder
+  Implementierungsentscheidung muss beantworten, warum der Spieler freiwillig
+  weitermachen will.
+- Spass, Neugier, Entdeckung, Baufortschritt, Sammeln, Oeffnen, Reparieren und
+  neue Moeglichkeiten sind harte Produktprioritaet.
+- Belohnung bedeutet neue Moeglichkeit, nicht Druck.
+- Erfolgreiche Spielmuster duerfen als Prinzipien uebertragen werden, aber
+  nicht blind kopiert werden.
+- Timer-Druck, Streak-Schuld, FOMO, Pay-to-Win, Lootbox-/Gacha-Druck,
+  Pflichtreview, bestrafende Fehler und PvP/Leaderboard im MVP bleiben
+  blockiert.
+
+Jede kuenftige Gameplay-/World-/BuildChoice-/Learning-/UI-/
+Implementierungsarbeit muss beantworten:
+
+| Frage | Pflichtantwort |
+| --- | --- |
+| Was ist der Player Hook? | Warum will der Spieler freiwillig anfangen oder weitermachen? |
+| Was ist die kleine Huerde? | Was macht die Handlung interessant, ohne Druck zu erzeugen? |
+| Welche Spielhandlung entsteht? | Was wird gebaut, geoeffnet, gefunden, gesammelt, repariert, gerettet, kombiniert oder verbessert? |
+| Welche Belohnung oder neue Moeglichkeit entsteht? | Neuer Bauabschnitt, Blueprint-Idee, Fundstueck, Container, Tali/Vori-Hilfe, Archiv-Eintrag oder lokaler Faehigkeits-Hinweis. |
+| Warum fuehlt es sich nicht wie Lernen an? | Die Welt-, Bauplatz-, Objekt- oder Containerhandlung traegt den Moment. |
+| Welche Druckmuster sind verworfen? | Keine Timer, Streak-Schuld, FOMO, Pay-to-Win, Lootbox, Pflichtreview, Verlustangst oder MVP-PvP. |
+
+Stop-Regel:
+
+Kein App-Code fuer Lern-, Bau- oder Weltaktionen ohne Fun-/Hook-Check.
+
 ## 8. Game Pattern Benchmarks
 
 Diese Matrix ist Research Prep. Sie benennt Hypothesen und
