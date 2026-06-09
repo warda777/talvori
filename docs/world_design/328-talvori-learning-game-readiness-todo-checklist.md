@@ -1,30 +1,30 @@
 # M16-T: Talvori Learning Game Readiness ToDo Checklist
 
-Stand: 2026-06-08
+Stand: 2026-06-09
 
 Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 ## 0. Product Delivery Dashboard
 
-Letzte Aktualisierung: 2026-06-08
+Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-AS`
+Aktive Sprint-ID: `M16-AX`
 
 Sprint Goal:
 
-> Bank Meaning Puzzle als Island-First-Spielmoment reframen und Regel dauerhaft verankern.
+> Interaktionsmuster je Aktion bewusst waehlen und Wheel, Drag, HUD, Bottom-Sheet, Showcase und Seiten sauber abgrenzen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 128 |
+| Gesamtanzahl M16-T-Items | 133 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 104 |
+| Erledigt `[x]` | 109 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 85.9 % |
+| Gewichteter Fortschritt | 86.5 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -63,7 +63,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 24 Bereiche
+### 0.3 Bereichs-Dashboard fuer 25 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -88,6 +88,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
+| Interaction Patterns | M16T-INTERACT | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -616,6 +617,21 @@ M16-AS wendet weiter an:
 
 - M16T-PLAY-008
 
+M16-AX erledigt:
+
+- M16T-INTERACT-001
+- M16T-INTERACT-002
+- M16T-INTERACT-003
+- M16T-INTERACT-004
+- M16T-INTERACT-005
+
+M16-AX operationalisiert fuer kuenftige Slices:
+
+- UI-Art pro Aktion nennen.
+- Passung zu Aktion, Risiko, Informationsmenge und Spielkontext begruenden.
+- Bewusst nicht gewaehlte Alternative nennen, z. B. kein Wheel, kein Drag,
+  kein Popup oder keine neue Seite.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -753,7 +769,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 24 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je 25 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY und M16T-INTERACT steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -814,6 +830,16 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-PLAY-007 | [x] | MVP-Playtest-Kriterien fuer Spielgefuehl | Spaetere MVP-Tests muessen fragen, ob sich Talvori wirklich wie Spiel anfuehlt. | Playtest-Fragen zu Spielgefuehl, Neugier, Freiwilligkeit, Stress, Fehlern und Weltreaktion existieren. | MVP ohne Spielgefuehl-Pruefung. | nein |
 | M16T-PLAY-008 | [x] | Play-First-Check fuer jede Implementierung | Die Doctrine muss in spaeterem Code-Scope aktiv geprueft werden. | Play-First-Check als Pflichtregel dokumentiert und in spaeteren Implementierungs-Prompts angewendet wird. | App-Code fuer Lernuebungen ohne Spielmoment-Beschreibung. | nein |
 | M16T-PLAY-009 | [x] | Island-First Play Rule | Talvori-Aufgaben duerfen nicht als separate Lernfenster dominieren. | Regel dokumentiert ist und die Bank Meaning Puzzle Preview als Insel-/Plot-/Flussufer-Szene statt Lernfenster angewendet ist. | Karten/Fenster als Hauptspielraum, Welt nur als Deko. | nein |
+
+### M16T-INTERACT
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-INTERACT-001 | [x] | Interaction Pattern Decision Matrix | Talvori darf Wheel, Drag, Popup oder neue Seite nicht pauschal einsetzen. | `350-interaction-pattern-decision-matrix.md` definiert Muster, Kriterien und Regeln. | UI-Muster nach Gewohnheit statt Aktionstyp. | nein |
+| M16T-INTERACT-002 | [x] | UI-Muster pro Aktion waehlen | Jede Aktion braucht die passende Groesse und Dichte. | Kuenftige Prompts muessen UI-Art, Passung, Groesse und verworfene Alternative nennen. | Wheel/Popup/Seite ohne Begruendung. | nein |
+| M16T-INTERACT-003 | [x] | Wheel nur fuer kurze In-place-Auswahl | Ein zu grosses Wheel fuehlt sich wie Fenster statt Spielobjekt an. | Wheel ist auf wenige Optionen mit Icon + Kurzname begrenzt; Details wandern in HUD/Bottom-Sheet/Showcase. | Wheel fuer lange Texte oder komplexe Vergleiche. | nein |
+| M16T-INTERACT-004 | [x] | Showcase-Seite fuer grosse visuelle Auswahl | Manche Entscheidungen brauchen Vergleich und Vorschau statt Mini-Menue. | Showcase-Regel fuer BuildChoice, Companion, Style, Biome und groessere visuelle Auswahl dokumentiert ist. | Grosse Auswahl in kleinen Chips erzwingen. | nein |
+| M16T-INTERACT-005 | [x] | Drag/Drop nicht als Standard-Nutzerflow | Freies Dragging kann mobil unpraezise und zu technisch wirken. | Drag/Drop als Dev-/Layout-Modus oder spaetere Editierfunktion eingeordnet ist. | Drag als Hauptflow fuer normale Spielentscheidungen. | nein |
 
 ### M16T-SOCIAL
 

@@ -175,6 +175,24 @@ Stop-Regel:
 Kein App-Code fuer Lernuebungen, wenn der Hauptspielraum ein separates
 Lernfenster ist.
 
+### 7.1 Interaction Pattern Rule
+
+M16-AX ergaenzt Play-First und Island-First um eine UI-Muster-Regel:
+
+- Das UI-Muster muss zum Spielmoment passen.
+- Weltaktion, Kontextmenue, kompaktes In-place-Wheel, HUD, Bottom-Sheet,
+  Showcase-Seite, Werkbank, Inventar/Codex oder Reward-Toast werden je nach
+  Aktionstyp, Risiko, Informationsmenge und Spielkontext gewaehlt.
+- Island-First bedeutet nicht, dass nie eine eigene Seite erlaubt ist; grosse
+  visuelle Auswahl darf eine spielartige Showcase- oder Werkbank-Ansicht
+  bekommen.
+- Wheel ist nur fuer kurze In-place-Auswahl mit Icon + Kurzname geeignet.
+- Drag/Drop ist nicht der Standard-Nutzerflow, sondern Dev-/Layout-Modus oder
+  spaetere Editierfunktion, wenn ein eigenes Gate sie erlaubt.
+- Jede kuenftige UI-/World-/Gameplay-/Implementierungsarbeit muss nennen,
+  welche UI-Art gewaehlt wurde und welche Alternative bewusst nicht gewaehlt
+  wurde.
+
 ## 8. Game Pattern Benchmarks
 
 Diese Matrix ist Research Prep. Sie benennt Hypothesen und
@@ -324,6 +342,8 @@ Ab M16-AK gilt:
 - Kein Companion-Slice ohne Antwort, wie Tali/Vori Neugier foerdert, ohne
   Pflicht, Schuld oder Beratung zu erzeugen.
 - Kein UI-Slice ohne Mobile-Dichte- und Safe-Exit-Pruefung.
+- Kein UI-/World-/Gameplay-/Implementierungs-Slice ohne begruendete
+  Interaction-Pattern-Entscheidung aus `350`.
 - Kein Implementierungs-Prompt darf diese Doctrine als Codefreigabe lesen.
 
 Kurzform fuer kuenftige Prompts:
