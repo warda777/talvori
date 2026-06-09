@@ -50,17 +50,32 @@ class _StarterIslandPlotBoardPreviewState
     super.dispose();
   }
 
-  void _openCategoryWheel(_PlotAnchor anchor) {
+  void _handleAnchorTap(_PlotAnchor anchor) {
+    if (anchor.state == _PlotAnchorState.reserved) {
+      return;
+    }
+
     final existingCategoryId = _anchorCategoryIds[anchor.id];
     final category = existingCategoryId == null
         ? null
         : _wheelCategoryById(existingCategoryId);
+    final isStartSlot = anchor.state == _PlotAnchorState.start;
+    final restoredCategories = Map<String, String>.from(
+      _wheelCategorySnapshot ?? _anchorCategoryIds,
+    );
 
     setState(() {
-      _activeWheelAnchorId = anchor.id;
+      if (!isStartSlot) {
+        _anchorCategoryIds
+          ..clear()
+          ..addAll(restoredCategories);
+      }
+      _activeWheelAnchorId = isStartSlot ? anchor.id : null;
       _selectedAnchorId = anchor.id;
       _wheelSelectedCategoryId = null;
-      _wheelCategorySnapshot = Map<String, String>.from(_anchorCategoryIds);
+      _wheelCategorySnapshot = isStartSlot
+          ? Map<String, String>.from(_anchorCategoryIds)
+          : null;
       _detailsExpanded = false;
       _bankEncounterActive = false;
       _selectedBankOption = null;
@@ -135,12 +150,25 @@ class _StarterIslandPlotBoardPreviewState
 
   void _restoreWheelSnapshot() {
     final snapshot = _wheelCategorySnapshot;
-    _anchorCategoryIds
-      ..clear()
-      ..addAll(snapshot ?? const <String, String>{});
+    if (snapshot != null) {
+      _anchorCategoryIds
+        ..clear()
+        ..addAll(snapshot);
+    }
     _activeWheelAnchorId = null;
     _wheelSelectedCategoryId = null;
     _wheelCategorySnapshot = null;
+  }
+
+  void _clearBoardSelection() {
+    setState(() {
+      _restoreWheelSnapshot();
+      _selectedAnchorId = null;
+      _detailsExpanded = false;
+      _bankEncounterActive = false;
+      _selectedBankOption = null;
+      _selectedBankSafeExit = null;
+    });
   }
 
   void _startBankEncounter() {
@@ -258,7 +286,8 @@ class _StarterIslandPlotBoardPreviewState
                       anchorCategoryIds: _anchorCategoryIds,
                       activeWheelAnchorId: _activeWheelAnchorId,
                       wheelSelectedCategoryId: _wheelSelectedCategoryId,
-                      onOpenCategoryWheel: _openCategoryWheel,
+                      onTapMap: _clearBoardSelection,
+                      onTapAnchor: _handleAnchorTap,
                       onSelectWheelCategory: _selectWheelCategory,
                       bankEncounterActive: _bankEncounterActive,
                       selectedBankOption: _selectedBankOption,
@@ -273,27 +302,30 @@ class _StarterIslandPlotBoardPreviewState
                     right: 12,
                     child: const _TopHud(),
                   ),
-                  Positioned(
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    child: _SelectedPlotHud(
-                      slot: _selectedSlot,
-                      anchor: _selectedAnchor,
-                      focusAnchor: hudAnchor,
-                      wheelCandidate: hudCandidate,
-                      hasPendingWheelCandidate:
-                          _wheelSelectedCategoryId != null,
-                      bankEncounterActive: _bankEncounterActive,
-                      detailsExpanded: _detailsExpanded,
-                      onToggleDetails: _toggleDetails,
-                      onConfirmWheelCandidate: _confirmWheelCandidate,
-                      onChangeWheelCandidate: _changeWheelCandidate,
-                      onCancelWheelCandidate: _cancelWheelCandidate,
-                      onLaterWheelCandidate: _laterWheelCandidate,
-                      onStartBankEncounter: _startBankEncounter,
+                  if (hudAnchor != null ||
+                      hudCandidate != null ||
+                      _bankEncounterActive)
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: _SelectedPlotHud(
+                        slot: _selectedSlot,
+                        anchor: _selectedAnchor,
+                        focusAnchor: hudAnchor,
+                        wheelCandidate: hudCandidate,
+                        hasPendingWheelCandidate:
+                            _wheelSelectedCategoryId != null,
+                        bankEncounterActive: _bankEncounterActive,
+                        detailsExpanded: _detailsExpanded,
+                        onToggleDetails: _toggleDetails,
+                        onConfirmWheelCandidate: _confirmWheelCandidate,
+                        onChangeWheelCandidate: _changeWheelCandidate,
+                        onCancelWheelCandidate: _cancelWheelCandidate,
+                        onLaterWheelCandidate: _laterWheelCandidate,
+                        onStartBankEncounter: _startBankEncounter,
+                      ),
                     ),
-                  ),
                 ],
               );
             },
@@ -311,7 +343,8 @@ class _PannableIslandMap extends StatelessWidget {
     required this.anchorCategoryIds,
     required this.activeWheelAnchorId,
     required this.wheelSelectedCategoryId,
-    required this.onOpenCategoryWheel,
+    required this.onTapMap,
+    required this.onTapAnchor,
     required this.onSelectWheelCategory,
     required this.bankEncounterActive,
     required this.selectedBankOption,
@@ -325,7 +358,8 @@ class _PannableIslandMap extends StatelessWidget {
   final Map<String, String> anchorCategoryIds;
   final String? activeWheelAnchorId;
   final String? wheelSelectedCategoryId;
-  final ValueChanged<_PlotAnchor> onOpenCategoryWheel;
+  final VoidCallback onTapMap;
+  final ValueChanged<_PlotAnchor> onTapAnchor;
   final ValueChanged<String> onSelectWheelCategory;
   final bool bankEncounterActive;
   final _BankMeaningOptionId? selectedBankOption;
@@ -379,13 +413,21 @@ class _PannableIslandMap extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               const Positioned.fill(child: _IslandCanvas()),
-              for (final entry in anchorCategoryIds.entries)
-                _PlotShapePreviewPositioned(
-                  anchor: _anchorById(entry.key),
-                  category: _wheelCategoryById(entry.value),
-                  isActive: entry.key == activeWheelAnchorId,
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: onTapMap,
+                  child: const SizedBox.expand(),
                 ),
-              for (final anchor in _plotAnchors)
+              ),
+              for (final entry in anchorCategoryIds.entries)
+                if (_anchorById(entry.key).isVisible)
+                  _PlotShapePreviewPositioned(
+                    anchor: _anchorById(entry.key),
+                    category: _wheelCategoryById(entry.value),
+                    isActive: entry.key == activeWheelAnchorId,
+                  ),
+              for (final anchor in _visiblePlotAnchors)
                 Positioned(
                   left: anchor.center.dx - anchor.radius - 14,
                   top: anchor.center.dy - anchor.radius - 14,
@@ -395,7 +437,7 @@ class _PannableIslandMap extends StatelessWidget {
                     anchor: anchor,
                     isActive: anchor.id == activeWheelAnchorId,
                     hasCandidate: anchorCategoryIds.containsKey(anchor.id),
-                    onTap: () => onOpenCategoryWheel(anchor),
+                    onTap: () => onTapAnchor(anchor),
                   ),
                 ),
               const Positioned(left: 528, top: 378, child: _CompanionMarker()),
@@ -582,30 +624,31 @@ class _IslandCanvasPainter extends CustomPainter {
   }
 
   void _drawAnchorZones(Canvas canvas) {
-    for (final anchor in _plotAnchors) {
+    for (final anchor in _visiblePlotAnchors) {
+      final isExpansion = anchor.state == _PlotAnchorState.expansion;
       final fillPaint = Paint()
-        ..color = anchor.color.withValues(alpha: 0.16)
+        ..color = anchor.color.withValues(alpha: isExpansion ? 0.06 : 0.16)
         ..style = PaintingStyle.fill;
       final strokePaint = Paint()
-        ..color = anchor.color.withValues(alpha: 0.62)
+        ..color = anchor.color.withValues(alpha: isExpansion ? 0.32 : 0.62)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3;
+        ..strokeWidth = isExpansion ? 2 : 3;
       final pointPaint = Paint()
-        ..color = anchor.color.withValues(alpha: 0.9)
+        ..color = anchor.color.withValues(alpha: isExpansion ? 0.42 : 0.9)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(anchor.center, anchor.radius, fillPaint);
       canvas.drawCircle(anchor.center, anchor.radius, strokePaint);
-      canvas.drawCircle(anchor.center, 5, pointPaint);
+      canvas.drawCircle(anchor.center, isExpansion ? 3.5 : 5, pointPaint);
 
       final textPainter = TextPainter(
         text: TextSpan(
           text: _anchorDisplayId(anchor),
           style: TextStyle(
             color: anchor.color.withValues(alpha: 0.9),
-            fontSize: 10.5,
+            fontSize: isExpansion ? 9.5 : 10.5,
             height: 1.0,
-            fontWeight: FontWeight.w800,
+            fontWeight: isExpansion ? FontWeight.w700 : FontWeight.w800,
           ),
         ),
         textAlign: TextAlign.center,
@@ -745,23 +788,27 @@ class _AnchorTapTarget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isExpansion = anchor.state == _PlotAnchorState.expansion;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onTap,
       child: Center(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
-          width: isActive ? 38 : 30,
-          height: isActive ? 38 : 30,
+          width: isActive ? 38 : 32,
+          height: isActive ? 38 : 32,
           decoration: BoxDecoration(
             color: hasCandidate
                 ? anchor.color.withValues(alpha: 0.34)
+                : isExpansion
+                ? const Color(0xFF061511).withValues(alpha: 0.36)
                 : const Color(0xFF061511).withValues(alpha: 0.50),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: isActive
                   ? const Color(0xFFEAF7EF)
-                  : anchor.color.withValues(alpha: 0.88),
+                  : anchor.color.withValues(alpha: isExpansion ? 0.48 : 0.88),
               width: isActive ? 2.4 : 1.6,
             ),
           ),
@@ -769,16 +816,20 @@ class _AnchorTapTarget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                hasCandidate ? Icons.check_rounded : Icons.add_rounded,
+                hasCandidate
+                    ? Icons.check_rounded
+                    : isExpansion
+                    ? Icons.lock_clock_rounded
+                    : Icons.add_rounded,
                 color: anchor.color,
                 size: isActive ? 17 : 14,
               ),
               if (!hasCandidate)
                 Text(
-                  'frei',
+                  isExpansion ? 'spaeter' : 'frei',
                   style: TextStyle(
                     color: anchor.color,
-                    fontSize: 7,
+                    fontSize: isExpansion ? 6.2 : 7,
                     height: 0.9,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1063,17 +1114,6 @@ class _BankEncounterBubble extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 8),
-            const Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                _MiniStatusPill(label: 'kein Build'),
-                _MiniStatusPill(label: 'kein Placement'),
-                _MiniStatusPill(label: 'kein SRS-Write'),
-                _MiniStatusPill(label: 'keine Speicherung'),
-              ],
-            ),
           ],
         ),
       ),
@@ -1219,7 +1259,7 @@ class _BankFeedbackPanel extends StatelessWidget {
     }
 
     if (selected!.isCorrect) {
-      return 'ContextCard / Codex Discovery: Genau, am Fluss meint Bank das Flussufer. Kein Build, kein Placement.';
+      return 'ContextCard / Codex Discovery: Genau, am Fluss meint Bank das Flussufer. Kontext entscheidet.';
     }
 
     return 'Calm Retry: Schau nochmal auf den Kontext "am Fluss". Keine Strafe, kein Verlust, kein Score.';
@@ -1410,6 +1450,7 @@ class _SelectedPlotHud extends StatelessWidget {
     final candidate = wheelCandidate;
     final focus = focusAnchor;
     final activeAnchor = focus ?? anchor;
+    final isExpansion = activeAnchor.state == _PlotAnchorState.expansion;
     final focusLabel = focus == null
         ? null
         : '${_anchorDisplayId(focus)} ${_anchorTerrainLabel(focus)}';
@@ -1418,25 +1459,36 @@ class _SelectedPlotHud extends StatelessWidget {
         : '${candidate.shortLabel} ${_anchorVariantLabel(activeAnchor)}';
     final title =
         candidateVariant ??
-        (focus != null ? 'Freier Slot $focusLabel' : 'Freie Slots');
+        (focus != null
+            ? isExpansion
+                  ? 'Erweiterung $focusLabel'
+                  : 'Freier Slot $focusLabel'
+            : 'Freie Startslots');
     final summary = candidate != null
         ? 'Lokaler Candidate, kein Placement.'
         : focus != null
-        ? 'Freier Slot - waehle eine Kategorie.'
-        : 'Freien Slot antippen. Kategorien sind Templates.';
+        ? isExpansion
+              ? 'Spaeter freischaltbarer Slot.'
+              : 'Freier Slot - Kategorie waehlen.'
+        : 'Startslot antippen. Kategorien sind Templates.';
     final titleIcon = candidate != null
         ? candidate.icon
         : focus != null
-        ? Icons.add_location_alt_rounded
+        ? isExpansion
+              ? Icons.lock_clock_rounded
+              : Icons.add_location_alt_rounded
         : Icons.add_location_alt_rounded;
     final titleColor = candidate != null
         ? _slotById(candidate.slotId).accent
         : focus?.color ?? const Color(0xFF95E6B8);
+    final hudBorderColor = candidate != null
+        ? _slotById(candidate.slotId).accent
+        : activeAnchor.color;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: const Color(0xFF10231E).withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: slot.accent.withValues(alpha: 0.78)),
+        border: Border.all(color: hudBorderColor.withValues(alpha: 0.78)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.28),
@@ -1501,7 +1553,7 @@ class _SelectedPlotHud extends StatelessWidget {
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (slot.id == _PlotSlotId.river)
+                  if (!isExpansion && slot.id == _PlotSlotId.river)
                     FilledButton.icon(
                       onPressed: onStartBankEncounter,
                       icon: const Icon(Icons.water_rounded, size: 18),
@@ -1562,8 +1614,23 @@ class _SelectedPlotHud extends StatelessWidget {
                         'Gelaende kann spaeter die Variante beeinflussen, blockiert aber keine Kategorie.',
                   ),
                   _InfoLine(
-                    label: 'Blockiert',
-                    value: 'kein Build, kein Placement, keine Persistenz.',
+                    label: 'Preview',
+                    value: 'Lokale Preview, nichts wird gespeichert.',
+                  ),
+                ] else if (isExpansion) ...[
+                  _InfoLine(
+                    label: 'Status',
+                    value:
+                        'Spaeter sichtbar, aber in dieser Preview nicht normal waehlbar.',
+                  ),
+                  const _InfoLine(
+                    label: 'Unlock-Regel',
+                    value:
+                        'Kein Wheel, keine Muenzen-Implementierung, kein Timer und kein Druck.',
+                  ),
+                  const _InfoLine(
+                    label: 'Preview',
+                    value: 'Lokale Preview, nichts wird gespeichert.',
                   ),
                 ] else ...[
                   _InfoLine(label: 'Slot', value: focusLabel ?? 'freie Slots'),
@@ -1577,8 +1644,8 @@ class _SelectedPlotHud extends StatelessWidget {
                     value: 'Gelaende kann spaeter die Variante beeinflussen.',
                   ),
                   const _InfoLine(
-                    label: 'Blockiert',
-                    value: 'kein Build, kein Placement, keine Speicherung.',
+                    label: 'Preview',
+                    value: 'Lokale Preview, nichts wird gespeichert.',
                   ),
                 ],
                 _InfoLine(
@@ -1586,17 +1653,6 @@ class _SelectedPlotHud extends StatelessWidget {
                   value: 'Karte: Pan/Zoom, Slot-Tap und Kategorieauswahl.',
                 ),
               ],
-              const SizedBox(height: 7),
-              const Wrap(
-                spacing: 5,
-                runSpacing: 5,
-                children: [
-                  _MiniStatusPill(label: 'kein Build'),
-                  _MiniStatusPill(label: 'kein Save'),
-                  _MiniStatusPill(label: 'kein SRS'),
-                  _MiniStatusPill(label: 'keine Route'),
-                ],
-              ),
             ],
           ),
         ),
@@ -1744,33 +1800,11 @@ class _InfoLine extends StatelessWidget {
   }
 }
 
-class _MiniStatusPill extends StatelessWidget {
-  const _MiniStatusPill({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A1A16),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF31594F)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 10.8, color: Color(0xFFBFE5D2)),
-        ),
-      ),
-    );
-  }
-}
-
 enum _BankMeaningOptionId { bench, institution, riverEdge }
 
 enum _BankSafeExitId { later, codex, backlog, change }
+
+enum _PlotAnchorState { start, expansion, reserved }
 
 enum _PlotShapeKind { small, medium, large, waterEdge, protected }
 
@@ -1987,6 +2021,7 @@ class _PlotAnchor {
   const _PlotAnchor({
     required this.id,
     required this.center,
+    required this.state,
     required this.zone,
     required this.allowedFamilies,
     required this.radius,
@@ -1995,10 +2030,13 @@ class _PlotAnchor {
 
   final String id;
   final Offset center;
+  final _PlotAnchorState state;
   final String zone;
   final List<String> allowedFamilies;
   final double radius;
   final Color color;
+
+  bool get isVisible => state != _PlotAnchorState.reserved;
 }
 
 class _PlotSlot {
@@ -2041,6 +2079,11 @@ _PlotAnchor _anchorById(String id) {
   return _plotAnchors.firstWhere((anchor) => anchor.id == id);
 }
 
+List<_PlotAnchor> get _visiblePlotAnchors => [
+  for (final anchor in _plotAnchors)
+    if (anchor.isVisible) anchor,
+];
+
 _PlotSlot _slotById(_PlotSlotId id) {
   return _plotSlots.firstWhere((slot) => slot.id == id);
 }
@@ -2053,7 +2096,8 @@ Offset _topLeftForAnchor(_PlotSlot slot, _PlotAnchor anchor) {
 }
 
 String _anchorDisplayId(_PlotAnchor anchor) {
-  final index = _plotAnchors.indexWhere((item) => item.id == anchor.id);
+  final anchors = anchor.isVisible ? _visiblePlotAnchors : _plotAnchors;
+  final index = anchors.indexWhere((item) => item.id == anchor.id);
   return 'A-${(index + 1).toString().padLeft(2, '0')}';
 }
 
@@ -2096,6 +2140,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-HUB-C',
     center: Offset(565, 465),
+    state: _PlotAnchorState.start,
     zone: 'hub',
     allowedFamilies: ['hub', 'home', 'market'],
     radius: 56,
@@ -2104,6 +2149,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-WATER-W',
     center: Offset(310, 341),
+    state: _PlotAnchorState.start,
     zone: 'water',
     allowedFamilies: ['water', 'coast'],
     radius: 58,
@@ -2112,6 +2158,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-WATER-E',
     center: Offset(840, 256),
+    state: _PlotAnchorState.reserved,
     zone: 'coast',
     allowedFamilies: ['water', 'coast'],
     radius: 54,
@@ -2120,6 +2167,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-HOME-W',
     center: Offset(334, 477),
+    state: _PlotAnchorState.start,
     zone: 'home',
     allowedFamilies: ['home', 'hub-near'],
     radius: 54,
@@ -2128,6 +2176,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-HOME-HUB',
     center: Offset(444, 386),
+    state: _PlotAnchorState.reserved,
     zone: 'hub-near',
     allowedFamilies: ['home', 'hub'],
     radius: 50,
@@ -2136,6 +2185,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-NATURE-S',
     center: Offset(273, 651),
+    state: _PlotAnchorState.start,
     zone: 'nature',
     allowedFamilies: ['nature', 'edge'],
     radius: 58,
@@ -2144,6 +2194,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-NATURE-W',
     center: Offset(182, 522),
+    state: _PlotAnchorState.reserved,
     zone: 'edge',
     allowedFamilies: ['nature', 'safe'],
     radius: 50,
@@ -2152,6 +2203,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-LEARN-N',
     center: Offset(527, 209),
+    state: _PlotAnchorState.start,
     zone: 'learning',
     allowedFamilies: ['learning', 'codex'],
     radius: 56,
@@ -2160,6 +2212,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-MARKET-HUB',
     center: Offset(640, 470),
+    state: _PlotAnchorState.expansion,
     zone: 'market',
     allowedFamilies: ['market', 'hub'],
     radius: 56,
@@ -2168,6 +2221,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-MARKET-SE',
     center: Offset(737, 610),
+    state: _PlotAnchorState.reserved,
     zone: 'market',
     allowedFamilies: ['market', 'food'],
     radius: 58,
@@ -2176,6 +2230,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-CRAFT-SE',
     center: Offset(874, 707),
+    state: _PlotAnchorState.expansion,
     zone: 'craft',
     allowedFamilies: ['craft', 'edge'],
     radius: 58,
@@ -2184,6 +2239,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-CRAFT-E',
     center: Offset(930, 558),
+    state: _PlotAnchorState.reserved,
     zone: 'edge',
     allowedFamilies: ['craft', 'safe'],
     radius: 50,
@@ -2192,6 +2248,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-STORAGE-E',
     center: Offset(762, 385),
+    state: _PlotAnchorState.expansion,
     zone: 'storage',
     allowedFamilies: ['container', 'hub-near'],
     radius: 52,
@@ -2200,6 +2257,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-CODEX-NE',
     center: Offset(792, 223),
+    state: _PlotAnchorState.expansion,
     zone: 'codex',
     allowedFamilies: ['codex', 'quiet'],
     radius: 58,
@@ -2208,6 +2266,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-CODEX-Q',
     center: Offset(618, 166),
+    state: _PlotAnchorState.reserved,
     zone: 'quiet',
     allowedFamilies: ['codex', 'learning'],
     radius: 48,
@@ -2216,6 +2275,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-SAFE-E',
     center: Offset(956, 430),
+    state: _PlotAnchorState.expansion,
     zone: 'safe',
     allowedFamilies: ['safe', 'edge'],
     radius: 56,
@@ -2224,6 +2284,7 @@ const _plotAnchors = [
   _PlotAnchor(
     id: 'A-SAFE-S',
     center: Offset(760, 770),
+    state: _PlotAnchorState.reserved,
     zone: 'edge',
     allowedFamilies: ['safe', 'craft', 'nature'],
     radius: 50,
