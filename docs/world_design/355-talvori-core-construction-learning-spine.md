@@ -29,6 +29,15 @@ M16-BI ist ein Strategie-Gate. Es gibt keinen Code, keine App-Integration,
 keine Route, keine Persistenz, keine Assets, keine Economy, keinen BuildState
 und keine produktive Mechanik frei.
 
+Nachtrag M16-BJ:
+
+`356-first-local-construction-learning-vertical-slice-gate.md` konkretisiert
+den ersten lokalen Anwendungspunkt dieses Spines: Uferhain -> Startslot ->
+Kategorie Zuhause -> BuildChoice Haus -> Grundstueckszoom ->
+Fundament-Candidate -> Bauteile-sortieren-Lernhandlung -> lokales
+Fundament-Feedback. M16-BJ bleibt ein Prompt-Gate und gibt weiterhin keinen
+BuildState, keine Persistenz, keine Assets und keine App-Integration frei.
+
 ## 2. Non-Goals und Stop-Regeln
 
 M16-BI erzeugt nicht:

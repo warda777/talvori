@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BI`
+Aktive Sprint-ID: `M16-BJ`
 
 Sprint Goal:
 
-> Core Construction Learning Spine als fuehrenden Bau-/Lern-Produkt-Ruecken festlegen.
+> Ersten lokalen Construction-Learning-Vertical-Slice fuer Haus/Fundament als Prompt-Gate festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 151 |
+| Gesamtanzahl M16-T-Items | 156 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 127 |
+| Erledigt `[x]` | 132 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 88.1 % |
+| Gewichteter Fortschritt | 88.5 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -94,7 +94,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
-| Core Construction Spine | M16T-SPINE | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Core Construction Learning Spine aus 355 in jedem World-/BuildChoice-/Gameplay-/Implementierungs-Slice als fuehrenden Produkt-Ruecken anwenden. |
+| Core Construction Spine | M16T-SPINE | 10 | 10 | 0 | 0 | 0 | 100.0 % | `██████████` | First Local Foundation Construction Preview Gate aus 356 fuer M16-BK anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -725,6 +725,30 @@ M16-BI operationalisiert fuer kuenftige Slices:
   Zuhause -> BuildChoice Haus -> Grundstueckszoom -> Fundament-Candidate ->
   spielerische Lernaufgabe -> lokales Feedback, ohne Persistenz.
 
+M16-BJ erledigt:
+
+- M16T-SPINE-006
+- M16T-SPINE-007
+- M16T-SPINE-008
+- M16T-SPINE-009
+- M16T-SPINE-010
+
+M16-BJ operationalisiert fuer kuenftige Slices:
+
+- Erster lokaler Vertical Slice ist verbindlich: Uferhain -> Startslot nahe
+  zentraler Lichtung/Hub -> Kategorie Zuhause -> BuildChoice Haus ->
+  Grundstueckszoom -> Fundament-Candidate -> Bauteile-sortieren-Lernhandlung
+  -> lokales Fundament-Feedback.
+- Grundstueckszoom ist nur lokale Preview-Ebene, keine Route, keine neue App-
+  Seite, keine Navigation und kein Persistenzwechsel.
+- Haus und Fundament bleiben Candidates/Previews; kein BuildState, kein
+  `foundation_started`, keine Assets und keine Persistenz.
+- Bank wird als isolierter naechster Code-Slice geparkt, bis der Moment in
+  einen Bau-, Ufer-, Terrassen- oder Gartenauftrag eingebettet ist.
+- Empfohlener Folge-Code-Slice ist M16-BK First Local Foundation Construction
+  Preview, bevorzugt als isolierte lokale Preview-Datei statt weiterer
+  Ueberladung des Starter-Island-Boards.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -799,7 +823,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..005, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -961,6 +985,11 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-SPINE-003 | [x] | Learning task must serve build/world action | Lernen soll Motor des Aufbaus sein, nicht separates Quiz neben der Welt. | Jede Lernaufgabe muss eine Bau-, Ausbau-, Welt-, Raum- oder Containeraktion unterstuetzen. | Lernfenster, Quizkarte oder Meaning Puzzle ohne Weltauftrag. | nein |
 | M16T-SPINE-004 | [x] | First vertical construction-learning slice | Der naechste MVP-Schritt braucht einen End-to-End-Beweis fuer Spiel = Bauen = Lernen. | Erstes empfohlenes Vertical Slice ist Uferhain -> Startslot -> Zuhause -> Haus -> Grundstueckszoom -> Fundament-Candidate -> spielerische Lernaufgabe -> lokales Feedback. | direkt produktiver Build, Persistenz, Asset oder App-Integration. | nein |
 | M16T-SPINE-005 | [x] | No isolated learning moments without world/build purpose | Einzelne Lernmomente koennen das Play-First-Versprechen verfehlen. | Kuenftige Prompts muessen Spine-Stufe, Bau-/Weltaktion, sichtbaren Fortschritt und Lernhandlung nennen. | "Wort X"-Slice ohne Bau-/Ausbau-/Weltbezug. | nein |
+| M16T-SPINE-006 | [x] | First Local Construction-Learning Vertical Slice Gate | Der erste Code-Schritt braucht ein praezises Prompt-Gate statt vager Build-Idee. | `356-first-local-construction-learning-vertical-slice-gate.md` definiert Uferhain -> Startslot -> Zuhause -> Haus -> Grundstueckszoom -> Fundament-Candidate -> Lernhandlung -> lokales Feedback. | Code ohne Gate, isolierte Lernmomente, Bank-/Quiz-Fokus. | nein |
+| M16T-SPINE-007 | [x] | Grundstueckszoom Preview Boundary | Der Zoom darf nicht heimlich Route, neue Seite oder Persistenz werden. | Grundstueckszoom als lokale Preview-Ebene ohne Navigation, Route, App-Seite oder Persistenzwechsel dokumentiert ist. | Router, Home-/App-Umbau, gespeicherter Zoom-/Plotzustand. | nein |
+| M16T-SPINE-008 | [x] | Foundation Candidate Construction Step | Der erste Bauabschnitt braucht sichtbares Baugefuehl ohne BuildState. | Fundament-Ghost/Skizze/Markierung als Candidate ohne `foundation_started`, Bauzustand, Asset oder Persistenz definiert ist. | produktiver BuildState, Asset, gespeichertes Fundament. | nein |
+| M16T-SPINE-009 | [x] | Learning Action as Build Action | Lernen muss den Bau antreiben, nicht als Quizfenster daneben stehen. | Bauteile-sortieren am Grundstueck als erste Lernhandlung mit Fundament/Fenster/Dach und ruhigem Feedback definiert ist. | Score, Timer, XP, Review-Zwang, isolierter Quizscreen. | nein |
+| M16T-SPINE-010 | [x] | M16-BK Implementation Prompt Readiness | Der naechste Code-Slice braucht klare Dateien, Scope und Akzeptanzkriterien. | M16-BK First Local Foundation Construction Preview mit empfohlener isolierter Datei-Strategie und Checks vorbereitet ist. | Code-Slice ohne Stop-Regeln, BuildChoice-Implementierung, Persistenz oder App-Integration. | nein |
 
 ### M16T-SOCIAL
 

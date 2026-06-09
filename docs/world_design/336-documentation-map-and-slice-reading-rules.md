@@ -123,6 +123,7 @@ Non-Goals:
 | `351-starter-island-infrastructure-strategy-gate.md` | Starter-Insel-Infrastruktur trennt fixe Grundform, freie Slots, Kategorie-Templates, Varianten, Unlocks und BuildChoice. |
 | `353-starter-island-identity-biome-and-category-scope-gate.md` | Uferhain-Identitaet, Starter-Biome, Kategorie-Scope, Terrain-Varianten und Future-Island-Grenzen fuer die erste Starter-Insel. |
 | `355-talvori-core-construction-learning-spine.md` | Fuehrender Construction-Learning-Spine: Insel, Slot, Kategorie, BuildChoice, Bauphase, Lernhandlung, Ausbau, Raum und Container gehoeren zusammen. |
+| `356-first-local-construction-learning-vertical-slice-gate.md` | Erstes lokales Construction-Learning-Vertical-Slice-Gate: Uferhain -> Zuhause -> Haus -> Grundstueckszoom -> Fundament-Candidate -> Lernhandlung -> lokales Feedback. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -200,22 +201,22 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
-| Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
+| Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `356` wenn der erste Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
 | Reward / Queue Slice | `328`, `330`, `331`, `332`, `334`, `327`, `326` |
-| Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `355`, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
+| Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `355`, `356` wenn erster Construction-Learning-Vertical-Slice, Haus/Fundament oder M16-BK betroffen ist, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Container / Depth Slice | `328`, `355` wenn Container als Ausbau-/Lernspine betroffen ist, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
-| Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
+| Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
-| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
-| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
+| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
+| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
@@ -265,6 +266,14 @@ Research, Visuals oder Review muss enthalten:
   Weltaktion wird unterstuetzt, welcher sichtbare Fortschritt entsteht, welche
   Lernhandlung erzeugt oder erklaert diesen Fortschritt und warum ist es kein
   isoliertes Lernfenster?,
+- First Local Construction-Learning Vertical Slice Gate aus `356`, wenn der
+  erste Foundation-/Haus-Vertical-Slice, M16-BK, Grundstueckszoom,
+  Fundament-Candidate oder die erste Bauteile-sortieren-Lernhandlung betroffen
+  ist,
+- Antwort auf: Ist es Insel, Slot, Kategorie, BuildChoice, Grundstueckszoom,
+  Bauphase, Lernhandlung oder Feedback, welche sichtbare Bauhandlung entsteht,
+  warum ist es kein Lernfenster und welche Stop-Regeln verhindern BuildState,
+  Persistenz, Assets, Route und App-Integration?,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen
