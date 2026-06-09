@@ -23,6 +23,15 @@ M16-BJ gibt keine Implementierung, keine App-Integration, keine Route, keine
 Persistenz, keine Assets, keine Tests, keine BuildChoice-Implementierung, keine
 BuildState-Freigabe und keine Economy frei.
 
+Nachtrag M16-BL:
+
+M16-BJ definiert fachlich den ersten Foundation-Slice. M16-BL praezisiert die
+Umsetzungsrichtung: Der erste Code-Beweis darf nicht als UI-Flow-Karte mit
+vielen Textflaechen entstehen, sondern muss als Game-like Showcase-/Kamera-/
+Bauplatz-Preview gedacht werden. Die M16-BK-Preview war technisch moeglich,
+aber zu UI-lastig; der empfohlene naechste Code-Slice ist deshalb M16-BM
+Game-like Island Showcase to Foundation Camera Preview.
+
 ## 2. Non-Goals und Stop-Regeln
 
 Dieser Slice erzeugt nicht:
@@ -302,43 +311,58 @@ Bis dahin gilt:
 
 ## 15. Empfohlener Folge-Code-Slice
 
-Naechster Code-Slice:
+Urspruenglicher Folge-Code-Slice:
 
 ```text
 M16-BK First Local Foundation Construction Preview
 ```
 
-Ziel:
+Korrektur nach M16-BL:
 
-- Startslot waehlen,
-- `Zuhause` waehlen,
-- `Haus` als BuildChoice lokal andeuten,
-- Grundstueckszoom lokal zeigen,
-- Fundament-Candidate zeigen,
-- eine kleine Bauteile-sortieren-Lernhandlung ausfuehren,
-- lokales Feedback zeigen,
+M16-BK bleibt als technischer Zwischenbeweis lesbar, wird aber nicht als
+naechste Produkt-Richtung weitergefuehrt. Der neue empfohlene Folge-Code-Slice
+ist:
+
+```text
+M16-BM Game-like Island Showcase to Foundation Camera Preview
+```
+
+Ziel fuer M16-BM:
+
+- Insel-Showcase mit Uferhain im Zentrum,
+- Insel betreten,
+- Slot im Weltbild antippen,
+- Kamera/Zoom ins Grundstueck,
+- Haus/Fundament als visuelle Bauidee,
+- Bauteil-Auswahl direkt am Bauplatz,
+- Fundament wird sichtbar staerker,
+- minimale HUD/Bubbles,
 - kein BuildState,
 - keine Persistenz,
 - keine Assets,
 - keine Route.
 
-Empfohlene erlaubte Datei-Strategie fuer M16-BK:
+Urspruengliche erlaubte Datei-Strategie fuer M16-BK, inzwischen durch M16-BL
+abgeloest:
 
 | Option | Dateien | Bewertung |
 | --- | --- | --- |
 | Option A | `lib/features/world/local_world/ui/widgets/starter_island_plot_board_preview.dart` | Naheliegend, aber riskanter: Die bestehende Board-Preview kann wieder mit Spielmoment-, BuildChoice- und Lernlogik ueberladen werden. |
 | Option B | `lib/features/world/local_world/ui/widgets/local_foundation_construction_spine_preview.dart` plus optional `lib/features/world/local_world/ui/widgets/local_foundation_construction_spine_preview_main.dart` | Empfohlen: isoliert, klar startbar, prueft den Spine ohne die Uferhain-Board-Preview weiter aufzublaehen. |
 
-Empfehlung:
+Historische Empfehlung aus M16-BJ:
 
-Option B. Der erste Foundation-Vertical-Slice sollte als isolierte lokale
-Preview entstehen. Er darf Uferhain-Sprache und Board-Prinzipien verwenden,
-soll aber die bestehende Starter-Island-Preview nicht weiter zum Mischsystem
-aus Board, Kategorieauswahl, Bank-Moment und Bauphase machen.
+Option B. Diese Empfehlung war fuer den ersten technischen Foundation-Beweis
+brauchbar, aber nach M16-BL nicht mehr die fuehrende Produkt-Richtung. Fuer
+den naechsten Code-Slice gilt stattdessen die M16-BM-Dateiempfehlung aus
+`357-game-like-island-selection-and-construction-camera-flow-gate.md`.
 
-## 16. M16-BK-Akzeptanzkriterien
+## 16. Historische M16-BK-Akzeptanzkriterien
 
-M16-BK ist erst gruen, wenn:
+Diese Kriterien bleiben als Lernpunkt erhalten. Fuer den naechsten Code-Slice
+gelten jedoch die strengeren M16-BM-Akzeptanzkriterien aus `357`.
+
+M16-BK waere erst gruen, wenn:
 
 - Nutzer erkennt: "Ich baue ein Haus/Fundament."
 - Lernen wirkt als Bauhandlung.

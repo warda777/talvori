@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BJ`
+Aktive Sprint-ID: `M16-BL`
 
 Sprint Goal:
 
-> Ersten lokalen Construction-Learning-Vertical-Slice fuer Haus/Fundament als Prompt-Gate festlegen.
+> Game-like Island Showcase, Kamera-Zoom und Bauplatz-Flow fuer den ersten Construction-Learning-Slice festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 156 |
+| Gesamtanzahl M16-T-Items | 161 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 132 |
+| Erledigt `[x]` | 137 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 88.5 % |
+| Gewichteter Fortschritt | 88.8 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -94,7 +94,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
-| Core Construction Spine | M16T-SPINE | 10 | 10 | 0 | 0 | 0 | 100.0 % | `██████████` | First Local Foundation Construction Preview Gate aus 356 fuer M16-BK anwenden. |
+| Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -749,6 +749,30 @@ M16-BJ operationalisiert fuer kuenftige Slices:
   Preview, bevorzugt als isolierte lokale Preview-Datei statt weiterer
   Ueberladung des Starter-Island-Boards.
 
+M16-BL erledigt:
+
+- M16T-SPINE-011
+- M16T-SPINE-012
+- M16T-SPINE-013
+- M16T-SPINE-014
+- M16T-SPINE-015
+
+M16-BL operationalisiert fuer kuenftige Slices:
+
+- M16-BK hat den Spine technisch pruefbar gemacht, war aber visuell zu
+  UI-lastig; die Preview wird nicht als naechste Richtung committet oder
+  weitergefuehrt.
+- Fuehrender Game-Flow ist jetzt: Insel-Showcase -> Insel betreten ->
+  Grundstueck im Weltbild antippen -> Kamera/Fokus ins Grundstueck ->
+  BuildChoice visuell waehlen -> Bauabschnitt im Grundstueck -> Lernhandlung
+  als Bauaktion -> lokales Baufeedback.
+- BuildChoice wie Haus/Garage/Terrasse/Teich braucht visuelle Vorschau,
+  nicht ein kleines Wheel als Hauptentscheidung.
+- Die erste Fundament-Lernhandlung muss am Bauplatz stattfinden; Text hilft
+  nur, das Spielfeld traegt die Aufgabe.
+- Empfohlener Folge-Code-Slice ist M16-BM Game-like Island Showcase to
+  Foundation Camera Preview mit neuer isolierter Preview-Datei.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -823,7 +847,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -989,7 +1013,12 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-SPINE-007 | [x] | Grundstueckszoom Preview Boundary | Der Zoom darf nicht heimlich Route, neue Seite oder Persistenz werden. | Grundstueckszoom als lokale Preview-Ebene ohne Navigation, Route, App-Seite oder Persistenzwechsel dokumentiert ist. | Router, Home-/App-Umbau, gespeicherter Zoom-/Plotzustand. | nein |
 | M16T-SPINE-008 | [x] | Foundation Candidate Construction Step | Der erste Bauabschnitt braucht sichtbares Baugefuehl ohne BuildState. | Fundament-Ghost/Skizze/Markierung als Candidate ohne `foundation_started`, Bauzustand, Asset oder Persistenz definiert ist. | produktiver BuildState, Asset, gespeichertes Fundament. | nein |
 | M16T-SPINE-009 | [x] | Learning Action as Build Action | Lernen muss den Bau antreiben, nicht als Quizfenster daneben stehen. | Bauteile-sortieren am Grundstueck als erste Lernhandlung mit Fundament/Fenster/Dach und ruhigem Feedback definiert ist. | Score, Timer, XP, Review-Zwang, isolierter Quizscreen. | nein |
-| M16T-SPINE-010 | [x] | M16-BK Implementation Prompt Readiness | Der naechste Code-Slice braucht klare Dateien, Scope und Akzeptanzkriterien. | M16-BK First Local Foundation Construction Preview mit empfohlener isolierter Datei-Strategie und Checks vorbereitet ist. | Code-Slice ohne Stop-Regeln, BuildChoice-Implementierung, Persistenz oder App-Integration. | nein |
+| M16T-SPINE-010 | [x] | M16-BK Implementation Prompt Readiness | Der erste Foundation-Codebeweis brauchte klare Dateien, Scope und Akzeptanzkriterien. | M16-BK First Local Foundation Construction Preview mit isolierter Datei-Strategie und Checks vorbereitet wurde; M16-BL korrigiert danach die visuelle Richtung. | Code-Slice ohne Stop-Regeln, BuildChoice-Implementierung, Persistenz oder App-Integration. | nein |
+| M16T-SPINE-011 | [x] | Game-like island selection and camera flow | Der erste Bau-/Lernbeweis muss wie Spielwelt wirken, nicht wie UI-Flow-Karten. | `357-game-like-island-selection-and-construction-camera-flow-gate.md` definiert Insel-Showcase -> Insel betreten -> Kamera-Zoom -> Bauplatz -> Feedback als fuehrenden Game-Flow. | Textpanel-Flow, Formular, Flow-Chart oder Lernfenster als Hauptgefuehl. | nein |
+| M16T-SPINE-012 | [x] | Showcase pattern for island/buildchoice selection | Insel- und BuildChoice-Auswahl brauchen visuelle Ownership statt kleiner Textwahl. | Inselwahl als Showcase/Carousel und BuildChoice als visuelle Preview/Showcase/Werkbank-Muster dokumentiert sind. | BuildChoice im kleinen Wheel, lange Textliste, produktive Showcase-Route. | nein |
+| M16T-SPINE-013 | [x] | Construction task must happen on build site | Lernen soll Bauhandlung am Ort sein, nicht Fragekarte neben der Welt. | Fundament-/Bauteile-Aufgabe muss direkt am Bauplatz passieren; Text darf nur helfen. | Quizkarte mit drei Textbuttons als Hauptflaeche. | nein |
+| M16T-SPINE-014 | [x] | Minimal HUD for construction-learning flow | Spielraum muss dominieren, nicht HUD/Debug/Guardrails. | HUD-Regeln mit einem Hauptziel, kurzen Bubbles, kompakten Safe Actions und ohne permanente Debug-/Guardrail-Chips dokumentiert sind. | Footer, Phasenleiste, Textwand, technisches HUD im normalen Spielbild. | nein |
+| M16T-SPINE-015 | [x] | M16-BM prompt readiness | Der naechste Code-Slice braucht den korrigierten Game-like Flow und neue Datei-Grenzen. | M16-BM Game-like Island Showcase to Foundation Camera Preview mit empfohlenen Dateien und Akzeptanzkriterien vorbereitet ist. | alte M16-BK-Dateien weiterfuehren, Starter-Island-Board ueberladen, Code ohne 357. | nein |
 
 ### M16T-SOCIAL
 
