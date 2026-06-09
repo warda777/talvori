@@ -25,6 +25,13 @@ M16-BD ist grobe Welt-, Biome- und Kategorie-Strategie. Es ist kein finaler
 Art Style, keine Assetfreigabe, kein Runtime-Modell und keine
 Implementierungsfreigabe.
 
+Nachtrag M16-BI:
+
+`355-talvori-core-construction-learning-spine.md` definiert den fuehrenden
+Bau-/Lern-Spine, der auf den Uferhain angewendet wird. M16-BD beschreibt also
+die Starter-Insel-Identitaet; M16-BI beschreibt, wie Lernen dort Bau,
+Ausbau, Raum-, Container- und Weltfortschritt spielerisch antreibt.
+
 ## 2. Non-Goals und Stop-Regeln
 
 M16-BD erzeugt nicht:

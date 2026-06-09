@@ -8,32 +8,32 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BF`
+Aktive Sprint-ID: `M16-BI`
 
 Sprint Goal:
 
-> Nutzerfreundliche Kategorienamen und BuildChoice-Hierarchie fuer die Starter-Insel festlegen.
+> Core Construction Learning Spine als fuehrenden Bau-/Lern-Produkt-Ruecken festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 146 |
+| Gesamtanzahl M16-T-Items | 151 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 122 |
+| Erledigt `[x]` | 127 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 87.7 % |
+| Gewichteter Fortschritt | 88.1 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
 
-- M16T-WORLD-002
-- M16T-WHEEL-003
 - M16T-PROD-003
 - M16T-CORE-003
 - M16T-L2W-003
+- M16T-WORLD-002
+- M16T-WHEEL-003
 - M16T-SCALE-001
 - M16T-ARCH-001
 - M16T-ARCH-002
@@ -67,7 +67,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 26 Bereiche
+### 0.3 Bereichs-Dashboard fuer 27 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -94,6 +94,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
+| Core Construction Spine | M16T-SPINE | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Core Construction Learning Spine aus 355 in jedem World-/BuildChoice-/Gameplay-/Implementierungs-Slice als fuehrenden Produkt-Ruecken anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -703,6 +704,27 @@ M16-BF operationalisiert fuer kuenftige Slices:
   Unterideen bleiben BuildChoice-/Showcase-Kandidaten unter Hauptkategorien,
   nicht Eintraege im ersten Kategorie-Wheel.
 
+M16-BI erledigt:
+
+- M16T-SPINE-001
+- M16T-SPINE-002
+- M16T-SPINE-003
+- M16T-SPINE-004
+- M16T-SPINE-005
+
+M16-BI operationalisiert fuer kuenftige Slices:
+
+- Talvori ist ein Aufbau-Spiel, dessen sichtbares Ziel Welt-, Grundstuecks-,
+  Gebaeude-, Raum-, Container- und Detailausbau ist.
+- Lernen ist der Motor des Aufbaus, aber nicht das sichtbare Pflichtgefuehl.
+- Jeder kuenftige Lernspiel-Slice muss nennen, welche Bau-/Ausbau-/Welt-,
+  Raum- oder Containeraktion die Lernhandlung unterstuetzt.
+- Isolierte Lernmomente ohne Welt-/Bauzweck sind ab jetzt keine ausreichende
+  Slice-Begruendung.
+- Erstes empfohlenes Vertical Slice: Uferhain -> Startslot -> Kategorie
+  Zuhause -> BuildChoice Haus -> Grundstueckszoom -> Fundament-Candidate ->
+  spielerische Lernaufgabe -> lokales Feedback, ohne Persistenz.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -777,7 +799,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..005, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -840,7 +862,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 26 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT und M16T-INFRA steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je 27 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT, M16T-INFRA und M16T-SPINE steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -929,6 +951,16 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-INFRA-010 | [x] | Future Island Family Roadmap | Spaetere Biome sollen sichtbar geplant, aber vom MVP getrennt bleiben. | Wuesten-, Berg-/Schnee-, Hafen-/Meer-, Wald-/Natur-, Stadt-/Dorf-, Wissens-/Archiv- und Werkstatt-/Technik-Inseln als Roadmap abgegrenzt sind. | Future-Island-Scope im Starter-MVP. | nein |
 | M16T-INFRA-011 | [x] | Player-editable Terrain Boundary | Nutzerfreiheit braucht Grenzen zwischen freier Kategorie und fixer Infrastruktur. | MVP fixiert Kueste, Fluss, Hauptwege, Hub und Landmarken; Nutzer waehlen Kategorie/Variante, Terrainmodifikation bleibt Gate. | Terrain-Editor, freie Fluss-/Pfadbearbeitung oder Persistenz ohne Gate. | nein |
 | M16T-INFRA-012 | [x] | User-facing category naming and BuildChoice hierarchy | Nutzer sollen keine internen Systembegriffe oder ueberladenen Unterauswahlen im ersten Wheel sehen. | `353-starter-island-identity-biome-and-category-scope-gate.md` trennt interne Begriffe von sichtbaren Nutzerkategorien und ordnet Garage, Terrasse, Pool, Teich usw. als spaetere BuildChoice-/Showcase-Kandidaten ein. | Codex/Safe als Spielerbegriffe, alle Unterideen im ersten Wheel, BuildChoice-Code ohne Gate. | nein |
+
+### M16T-SPINE
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-SPINE-001 | [x] | Core Construction Learning Spine | Talvori darf nicht zu einem Insel-Menue mit einzelnen Lernraetseln werden. | `355-talvori-core-construction-learning-spine.md` definiert Insel -> Slot -> Kategorie -> BuildChoice -> Bauphase -> Lernhandlung -> Ausbau -> Raum -> Container als fuehrenden Loop. | isolierte Mini-Lernmomente ohne Bau-/Weltzweck. | nein |
+| M16T-SPINE-002 | [x] | BuildChoice hierarchy from category to object/detail | Hauptkategorie, konkrete Bauidee, Raum und Container duerfen nicht in einem Wheel verschwimmen. | Hierarchie von Kategorie zu BuildChoice, Bauabschnitt, Interior und Container/Depth dokumentiert ist. | Garage, Terrasse, Pool, Teich usw. als erste Kategorie; BuildChoice-Code ohne Gate. | nein |
+| M16T-SPINE-003 | [x] | Learning task must serve build/world action | Lernen soll Motor des Aufbaus sein, nicht separates Quiz neben der Welt. | Jede Lernaufgabe muss eine Bau-, Ausbau-, Welt-, Raum- oder Containeraktion unterstuetzen. | Lernfenster, Quizkarte oder Meaning Puzzle ohne Weltauftrag. | nein |
+| M16T-SPINE-004 | [x] | First vertical construction-learning slice | Der naechste MVP-Schritt braucht einen End-to-End-Beweis fuer Spiel = Bauen = Lernen. | Erstes empfohlenes Vertical Slice ist Uferhain -> Startslot -> Zuhause -> Haus -> Grundstueckszoom -> Fundament-Candidate -> spielerische Lernaufgabe -> lokales Feedback. | direkt produktiver Build, Persistenz, Asset oder App-Integration. | nein |
+| M16T-SPINE-005 | [x] | No isolated learning moments without world/build purpose | Einzelne Lernmomente koennen das Play-First-Versprechen verfehlen. | Kuenftige Prompts muessen Spine-Stufe, Bau-/Weltaktion, sichtbaren Fortschritt und Lernhandlung nennen. | "Wort X"-Slice ohne Bau-/Ausbau-/Weltbezug. | nein |
 
 ### M16T-SOCIAL
 
