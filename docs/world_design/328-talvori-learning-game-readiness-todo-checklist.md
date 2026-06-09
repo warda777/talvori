@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BD`
+Aktive Sprint-ID: `M16-BF`
 
 Sprint Goal:
 
-> Starter-Insel-Identitaet, Biome, Kategorie-Scope und Terrain-Varianten fachlich festlegen.
+> Nutzerfreundliche Kategorienamen und BuildChoice-Hierarchie fuer die Starter-Insel festlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 145 |
+| Gesamtanzahl M16-T-Items | 146 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 121 |
+| Erledigt `[x]` | 122 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 87.6 % |
+| Gewichteter Fortschritt | 87.7 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -93,7 +93,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
-| Starter Island Infrastructure | M16T-INFRA | 11 | 11 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur aus 351 und Uferhain-Identitaet aus 353 in kommenden World-/Island-/Plot-/BuildChoice-Slices anwenden. |
+| Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -683,12 +683,25 @@ M16-BD operationalisiert fuer kuenftige Slices:
   Kueste, Flussarm, Hain, zentraler Lichtung, leichten Hoehen und ruhigen
   Randbereichen.
 - Starter-Kategorie-Templates bleiben Zuhause, Garten, Markt, Werkstatt,
-  Lager/Container, Wissen, Codex, Safe/Later/Backlog und Ufer/Wasser.
+  Lager/Container, Wissen, Archiv/Wortarchiv, Spaeter/Ablage/Ruheort und
+  Ufer/Wasser.
 - Terrain erzeugt lokale Varianten wie `Markt am Ufer` oder `Zuhause im
   Hain`, blockiert Kategorien aber nicht hart.
 - Future Island Families wie Wueste, Berg/Schnee, Hafen/Meer, Wald/Natur,
-  Stadt/Dorf, Wissen/Codex und Werkstatt/Technik bleiben nach MVP oder eigene
+  Stadt/Dorf, Wissen/Archiv und Werkstatt/Technik bleiben nach MVP oder eigene
   Gates.
+
+M16-BF erledigt:
+
+- M16T-INFRA-012
+
+M16-BF operationalisiert fuer kuenftige Slices:
+
+- Sichtbare Nutzerkategorien verwenden Archiv/Wortarchiv statt Codex und
+  Spaeter/Ablage/Ruheort statt Safe/Later/Backlog.
+- Garage, Vorhof, Terrasse, Pool, Teich, Outdoor-Sauna und aehnliche
+  Unterideen bleiben BuildChoice-/Showcase-Kandidaten unter Hauptkategorien,
+  nicht Eintraege im ersten Kategorie-Wheel.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
@@ -764,7 +777,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..011, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -913,8 +926,9 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-INFRA-007 | [x] | Starter Island Identity / Biome | Die erste Insel braucht ein klares Spielraum-Gefuehl statt generischer Greybox. | `353-starter-island-identity-biome-and-category-scope-gate.md` entscheidet Uferhain/Kuestenhain/Flussufer als MVP-Starter-Identitaet. | weitere Board-/BuildChoice-Slices ohne Inselidentitaet. | nein |
 | M16T-INFRA-008 | [x] | Starter Island Category Scope | Der MVP braucht klare Kategorien und klare Nicht-Kategorien. | Starter-Templates und nicht im Starter-Scope liegende Kategorien dokumentiert sind. | Arena, Hafen, Stadt, Labor oder Social/PvP im Starter-Scope. | nein |
 | M16T-INFRA-009 | [x] | Terrain-to-Variant Mapping | Terrain soll Kreativitaet unterstuetzen, aber Kategorien nicht hart blockieren. | Ufer-, Wald-, Huegel-, Zentrum- und Rand-Varianten als lokale Namen/Previews ohne BuildState dokumentiert sind. | Terrain erzwingt Kategorie oder Placement. | nein |
-| M16T-INFRA-010 | [x] | Future Island Family Roadmap | Spaetere Biome sollen sichtbar geplant, aber vom MVP getrennt bleiben. | Wuesten-, Berg-/Schnee-, Hafen-/Meer-, Wald-/Natur-, Stadt-/Dorf-, Wissens-/Codex- und Werkstatt-/Technik-Inseln als Roadmap abgegrenzt sind. | Future-Island-Scope im Starter-MVP. | nein |
+| M16T-INFRA-010 | [x] | Future Island Family Roadmap | Spaetere Biome sollen sichtbar geplant, aber vom MVP getrennt bleiben. | Wuesten-, Berg-/Schnee-, Hafen-/Meer-, Wald-/Natur-, Stadt-/Dorf-, Wissens-/Archiv- und Werkstatt-/Technik-Inseln als Roadmap abgegrenzt sind. | Future-Island-Scope im Starter-MVP. | nein |
 | M16T-INFRA-011 | [x] | Player-editable Terrain Boundary | Nutzerfreiheit braucht Grenzen zwischen freier Kategorie und fixer Infrastruktur. | MVP fixiert Kueste, Fluss, Hauptwege, Hub und Landmarken; Nutzer waehlen Kategorie/Variante, Terrainmodifikation bleibt Gate. | Terrain-Editor, freie Fluss-/Pfadbearbeitung oder Persistenz ohne Gate. | nein |
+| M16T-INFRA-012 | [x] | User-facing category naming and BuildChoice hierarchy | Nutzer sollen keine internen Systembegriffe oder ueberladenen Unterauswahlen im ersten Wheel sehen. | `353-starter-island-identity-biome-and-category-scope-gate.md` trennt interne Begriffe von sichtbaren Nutzerkategorien und ordnet Garage, Terrasse, Pool, Teich usw. als spaetere BuildChoice-/Showcase-Kandidaten ein. | Codex/Safe als Spielerbegriffe, alle Unterideen im ersten Wheel, BuildChoice-Code ohne Gate. | nein |
 
 ### M16T-SOCIAL
 

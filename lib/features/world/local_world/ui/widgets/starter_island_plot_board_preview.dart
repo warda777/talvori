@@ -11,6 +11,10 @@ import 'package:flutter/material.dart';
 // - Chosen: direct world action + compact category picker + reduced HUD.
 // - Rejected: large window, drag as standard flow, permanent rule text,
 //   showcase page for this small category choice.
+// Uferhain identity check:
+// - The board reads as coast/river/hain starter island.
+// - Terrain labels describe Ufer, Lichtung, Hain, Huegel, and Rand.
+// - Terrain creates local variant names, never hard category blocking.
 class StarterIslandPlotBoardPreview extends StatefulWidget {
   const StarterIslandPlotBoardPreview({super.key});
 
@@ -1244,13 +1248,13 @@ class _BankFeedbackPanel extends StatelessWidget {
     if (selectedSafeExit != null) {
       return switch (selectedSafeExit!) {
         _BankSafeExitId.later =>
-          'Later: Der P-01-Spielmoment bleibt lokal offen. Kein Verlust, keine Pflicht.',
+          'Spaeter: Der P-01-Spielmoment bleibt lokal offen. Kein Verlust, keine Pflicht.',
         _BankSafeExitId.codex =>
-          'Codex: Bank kann Sitzbank, Geldinstitut oder Flussufer bedeuten. Kontext entscheidet.',
+          'Archiv: Bank kann Sitzbank, Geldinstitut oder Flussufer bedeuten. Kontext entscheidet.',
         _BankSafeExitId.backlog =>
-          'Backlog: Der Bedeutungsfall wird nur simuliert geparkt. Nichts wird gespeichert.',
+          'Ablage: Der Bedeutungsfall wird nur simuliert geparkt. Nichts wird gespeichert.',
         _BankSafeExitId.change =>
-          'Change: Waehle ruhig neu. Die Szene am Fluss bleibt dein Hinweis.',
+          'Aendern: Waehle ruhig neu. Die Szene am Fluss bleibt dein Hinweis.',
       };
     }
 
@@ -1259,7 +1263,7 @@ class _BankFeedbackPanel extends StatelessWidget {
     }
 
     if (selected!.isCorrect) {
-      return 'ContextCard / Codex Discovery: Genau, am Fluss meint Bank das Flussufer. Kontext entscheidet.';
+      return 'ContextCard / Archiv-Fund: Genau, am Fluss meint Bank das Flussufer. Kontext entscheidet.';
     }
 
     return 'Calm Retry: Schau nochmal auf den Kontext "am Fluss". Keine Strafe, kein Verlust, kein Score.';
@@ -1356,14 +1360,14 @@ class _TopHud extends StatelessWidget {
                 ),
                 SizedBox(width: 6),
                 Text(
-                  'Starter-Insel',
+                  'Uferhain',
                   style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900),
                 ),
               ],
             ),
             const _HudHintPill(
               icon: Icons.touch_app_rounded,
-              label: 'Slot tippen',
+              label: 'Starter-Insel: Slot tippen',
             ),
           ],
         ),
@@ -1456,7 +1460,7 @@ class _SelectedPlotHud extends StatelessWidget {
         : '${_anchorDisplayId(focus)} ${_anchorTerrainLabel(focus)}';
     final candidateVariant = candidate == null
         ? null
-        : '${candidate.shortLabel} ${_anchorVariantLabel(activeAnchor)}';
+        : _candidateVariantLabel(candidate, activeAnchor);
     final title =
         candidateVariant ??
         (focus != null
@@ -1553,7 +1557,7 @@ class _SelectedPlotHud extends StatelessWidget {
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (!isExpansion && slot.id == _PlotSlotId.river)
+                  if (!isExpansion && _isBankExampleAnchor(activeAnchor))
                     FilledButton.icon(
                       onPressed: onStartBankEncounter,
                       icon: const Icon(Icons.water_rounded, size: 18),
@@ -1606,12 +1610,17 @@ class _SelectedPlotHud extends StatelessWidget {
                   const _InfoLine(
                     label: 'Template-Regel',
                     value:
-                        '9 Kategorien sind Templates fuer 17 freie Slots und duerfen mehrfach als lokale Varianten erscheinen.',
+                        '9 Kategorien sind Templates fuer freie Uferhain-Slots und duerfen mehrfach als lokale Varianten erscheinen.',
                   ),
                   _InfoLine(
                     label: 'Gelaende-Hinweis',
                     value:
-                        'Gelaende kann spaeter die Variante beeinflussen, blockiert aber keine Kategorie.',
+                        'Ufer, Lichtung, Hain, Huegel oder Rand beeinflussen nur den lokalen Variantennamen.',
+                  ),
+                  const _InfoLine(
+                    label: 'BuildChoice spaeter',
+                    value:
+                        'Garage, Terrasse, Pool oder Teich gehoeren erst in einen Showcase-Schritt.',
                   ),
                   _InfoLine(
                     label: 'Preview',
@@ -1641,7 +1650,8 @@ class _SelectedPlotHud extends StatelessWidget {
                   ),
                   const _InfoLine(
                     label: 'Hinweis',
-                    value: 'Gelaende kann spaeter die Variante beeinflussen.',
+                    value:
+                        'Gelaende macht nur eine Uferhain-Variante, keine Vorgabe.',
                   ),
                   const _InfoLine(
                     label: 'Preview',
@@ -1683,7 +1693,7 @@ class _WheelDecisionHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final slot = _slotById(category.slotId);
-    final variant = '${category.shortLabel} ${_anchorVariantLabel(anchor)}';
+    final variant = _candidateVariantLabel(category, anchor);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -1750,7 +1760,7 @@ class _WheelDecisionHud extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onLater,
                   icon: const Icon(Icons.schedule_rounded, size: 15),
-                  label: const Text('Later'),
+                  label: const Text('Spaeter'),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: const Color(0xFFEAF7EF),
@@ -1892,22 +1902,22 @@ const _bankOptions = [
 const _bankSafeExits = [
   _BankSafeExit(
     id: _BankSafeExitId.later,
-    label: 'Later',
+    label: 'Spaeter',
     icon: Icons.schedule_rounded,
   ),
   _BankSafeExit(
     id: _BankSafeExitId.codex,
-    label: 'Codex',
+    label: 'Archiv',
     icon: Icons.menu_book_rounded,
   ),
   _BankSafeExit(
     id: _BankSafeExitId.backlog,
-    label: 'Backlog',
+    label: 'Ablage',
     icon: Icons.inventory_2_rounded,
   ),
   _BankSafeExit(
     id: _BankSafeExitId.change,
-    label: 'Change',
+    label: 'Aendern',
     icon: Icons.swap_horiz_rounded,
   ),
 ];
@@ -1915,7 +1925,7 @@ const _bankSafeExits = [
 const _wheelCategories = [
   _WheelCategory(
     id: 'water_plot',
-    label: 'Wasser / Ufer',
+    label: 'Ufer / Wasser',
     shortLabel: 'Ufer',
     slotId: _PlotSlotId.river,
     shape: _PlotShapeKind.waterEdge,
@@ -1978,8 +1988,8 @@ const _wheelCategories = [
   ),
   _WheelCategory(
     id: 'codex_context',
-    label: 'Codex / Kontext',
-    shortLabel: 'Codex',
+    label: 'Archiv / Wortarchiv',
+    shortLabel: 'Archiv',
     slotId: _PlotSlotId.codex,
     shape: _PlotShapeKind.medium,
     summary: 'Ruhiger Kontextort fuer abstrakte oder unsichere Woerter.',
@@ -1987,8 +1997,8 @@ const _wheelCategories = [
   ),
   _WheelCategory(
     id: 'safe_backlog',
-    label: 'Later / Backlog / Sensitive-safe',
-    shortLabel: 'Safe',
+    label: 'Spaeter / Ablage',
+    shortLabel: 'Spaeter',
     slotId: _PlotSlotId.backlog,
     shape: _PlotShapeKind.protected,
     summary: 'Geschuetzter Fallback, keine sensitive Deko.',
@@ -2103,37 +2113,60 @@ String _anchorDisplayId(_PlotAnchor anchor) {
 
 String _anchorTerrainLabel(_PlotAnchor anchor) {
   return switch (anchor.id) {
-    'A-HUB-C' => 'Freier Platz',
+    'A-HUB-C' => 'zentrale Lichtung',
     'A-WATER-W' => 'Uferplatz',
     'A-WATER-E' => 'Wassernahe Flaeche',
-    'A-HOME-W' => 'Freier Platz',
-    'A-HOME-HUB' => 'Zentraler Platz',
+    'A-HOME-W' => 'Waldlichtung',
+    'A-HOME-HUB' => 'zentrale Lichtung',
     'A-NATURE-S' => 'Waldlichtung',
-    'A-NATURE-W' => 'Randplatz',
+    'A-NATURE-W' => 'ruhiger Rand',
     'A-LEARN-N' => 'Huegelplatz',
-    'A-MARKET-HUB' => 'Zentraler Platz',
-    'A-MARKET-SE' => 'Freier Platz',
-    'A-CRAFT-SE' => 'Randplatz',
-    'A-CRAFT-E' => 'Randplatz',
-    'A-STORAGE-E' => 'Freier Platz',
-    'A-CODEX-NE' => 'Ruhiger Platz',
-    'A-CODEX-Q' => 'Ruhiger Platz',
-    'A-SAFE-E' => 'Randplatz',
-    'A-SAFE-S' => 'Randplatz',
-    _ => 'Freier Platz',
+    'A-MARKET-HUB' => 'zentrale Lichtung',
+    'A-MARKET-SE' => 'Weglichtung',
+    'A-CRAFT-SE' => 'ruhiger Rand',
+    'A-CRAFT-E' => 'ruhiger Rand',
+    'A-STORAGE-E' => 'Wassernahe Flaeche',
+    'A-CODEX-NE' => 'Huegelplatz',
+    'A-CODEX-Q' => 'ruhiger Platz',
+    'A-SAFE-E' => 'ruhiger Rand',
+    'A-SAFE-S' => 'ruhiger Rand',
+    _ => 'freie Flaeche',
   };
 }
 
 String _anchorVariantLabel(_PlotAnchor anchor) {
   return switch (anchor.id) {
-    'A-WATER-W' || 'A-WATER-E' => 'am Ufer',
-    'A-HUB-C' || 'A-HOME-HUB' || 'A-MARKET-HUB' => 'zentral',
-    'A-NATURE-S' || 'A-NATURE-W' => 'in der Waldlichtung',
-    'A-LEARN-N' => 'am Huegel',
-    'A-CODEX-NE' || 'A-CODEX-Q' => 'am ruhigen Platz',
+    'A-WATER-W' || 'A-WATER-E' || 'A-STORAGE-E' => 'am Ufer',
+    'A-HUB-C' || 'A-HOME-HUB' || 'A-MARKET-HUB' => 'an der Lichtung',
+    'A-HOME-W' || 'A-NATURE-S' || 'A-NATURE-W' => 'im Hain',
+    'A-LEARN-N' || 'A-CODEX-NE' => 'am Huegel',
+    'A-CODEX-Q' => 'im Uferhain',
     'A-SAFE-E' || 'A-SAFE-S' || 'A-CRAFT-E' || 'A-CRAFT-SE' => 'am Rand',
-    _ => 'am freien Platz',
+    _ => 'im Uferhain',
   };
+}
+
+String _candidateVariantLabel(_WheelCategory category, _PlotAnchor anchor) {
+  final suffix = _anchorVariantLabel(anchor);
+
+  return switch (category.slotId) {
+    _PlotSlotId.river =>
+      suffix == 'am Ufer' ? 'Ufer/Wasser am Flussarm' : 'Ufer/Wasser $suffix',
+    _PlotSlotId.home => 'Zuhause $suffix',
+    _PlotSlotId.garden => 'Garten $suffix',
+    _PlotSlotId.market => 'Markt $suffix',
+    _PlotSlotId.workshop => 'Werkstatt $suffix',
+    _PlotSlotId.container => 'Lager $suffix',
+    _PlotSlotId.learning => 'Wissen $suffix',
+    _PlotSlotId.codex =>
+      suffix == 'im Uferhain' ? 'Archiv im Uferhain' : 'Archiv $suffix',
+    _PlotSlotId.backlog => 'Spaeter $suffix',
+    _PlotSlotId.hub => 'Uferhain-Hub $suffix',
+  };
+}
+
+bool _isBankExampleAnchor(_PlotAnchor anchor) {
+  return anchor.id == 'A-WATER-W' || anchor.id == 'A-WATER-E';
 }
 
 const _plotAnchors = [
@@ -2337,7 +2370,7 @@ const _plotSlots = [
     boardSummary: 'Alltagsort fuer spaetere BuildChoice-Ideen, nicht gebaut.',
     family: 'dwelling / home / daily life',
     examples: 'Haus, Garage, Garten als spaetere BuildChoice-Kandidaten.',
-    allowedMoments: 'Home-nahe Context Door, Choice Fork, Codex Discovery.',
+    allowedMoments: 'Home-nahe Context Door, Choice Fork, Archiv-Fund.',
     blocked: 'Haus, Garage und Garten sind hier nicht fest gebaut.',
     flexRule:
         'Alltags-Capability bleibt Vorschlag; Nutzer kann spaeter abwaehlen.',
@@ -2370,10 +2403,10 @@ const _plotSlots = [
     slotCode: 'P-04',
     name: 'Lernen / Wissen Candidate',
     mapName: 'Wissen',
-    boardSummary: 'Wissensort fuer Kontext, Codex und Denkaufgaben.',
+    boardSummary: 'Wissensort fuer Kontext, Archiv und Denkaufgaben.',
     family: 'learning / school / knowledge',
     examples: 'lernen, Schule, Frage',
-    allowedMoments: 'ContextCard Challenge, Codex Discovery.',
+    allowedMoments: 'ContextCard Challenge, Archiv-Fund.',
     blocked: 'kein Vokabeltest-Fenster als Hauptspielraum.',
     flexRule: 'Wissensort ist Candidate; keine Pflichtschule, kein Testmodus.',
     allowedAnchorZones: ['learning', 'codex', 'quiet'],
@@ -2424,7 +2457,7 @@ const _plotSlots = [
     boardSummary: 'Auffindbarer Ort fuer kleine Objekte und Container-Ideen.',
     family: 'container / storage / depth',
     examples: 'Schluessel, Messer, Tasse',
-    allowedMoments: 'Container Hunt, Codex Link, Findability Hint.',
+    allowedMoments: 'Container Hunt, Archiv-Link, Findability Hint.',
     blocked: 'TinyObjects bekommen kein eigenes Grundstueck.',
     flexRule:
         'Container-Pfad bleibt auffindbarer Candidate, kein Inventar-Dump.',
@@ -2437,14 +2470,14 @@ const _plotSlots = [
   _PlotSlot(
     id: _PlotSlotId.codex,
     slotCode: 'P-08',
-    name: 'Codex / Kontext Candidate',
-    mapName: 'Codex',
+    name: 'Archiv / Wortarchiv Candidate',
+    mapName: 'Archiv',
     boardSummary: 'Ruhiger Kontextort fuer abstrakte oder mehrdeutige Woerter.',
-    family: 'abstract / context / codex',
+    family: 'abstract / context / archive',
     examples: 'Freiheit, lernen, Bedeutung',
-    allowedMoments: 'Codex Discovery, ContextCard, Tali/Vori-Erklaerung.',
+    allowedMoments: 'Archiv-Fund, ContextCard, Tali/Vori-Erklaerung.',
     blocked: 'keine Symbolpflicht, kein Zwang zur Weltform.',
-    flexRule: 'Abstraktes bleibt Codex/Context-Candidate, kein Objektzwang.',
+    flexRule: 'Abstraktes bleibt Archiv/Context-Candidate, kein Objektzwang.',
     allowedAnchorZones: ['codex', 'quiet', 'learning'],
     initialAnchorId: 'A-CODEX-NE',
     markerSize: Size(184, 94),
@@ -2454,13 +2487,12 @@ const _plotSlots = [
   _PlotSlot(
     id: _PlotSlotId.backlog,
     slotCode: 'P-09',
-    name: 'Later / Backlog / Sensitive Candidate',
-    mapName: 'Safe Rand',
-    boardSummary:
-        'Geschuetzter Rand fuer Later, Backlog und sensitive Defaults.',
+    name: 'Spaeter / Ablage Candidate',
+    mapName: 'Spaeter',
+    boardSummary: 'Ruhiger Rand fuer Spaeter, Ablage und sichere Defaults.',
     family: 'safe fallback / sensitive gate',
     examples: 'Angst, Polizei, unklar',
-    allowedMoments: 'Later, Backlog, Hide, SensitiveGated.',
+    allowedMoments: 'Spaeter, Ablage, Hide, SensitiveGated.',
     blocked: 'keine sensitive Deko, kein Reward-Trigger.',
     flexRule:
         'geschuetzter Randbereich bleibt Fallback-Candidate, kein Symbol.',

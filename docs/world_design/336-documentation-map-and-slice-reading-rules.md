@@ -253,6 +253,10 @@ Research, Visuals oder Review muss enthalten:
 - Antwort auf: Welche Inselidentitaet gilt, welche Kategorie-Templates sind im
   Scope, welche Terrain-Variante wird erzeugt und ist die Entscheidung MVP,
   nach MVP oder blockiert?,
+- wenn Kategorie- oder BuildChoice-Scope betroffen ist: Antwort auf, welche
+  sichtbaren Nutzerbegriffe gelten, welche internen Systembegriffe dahinter
+  liegen, was Hauptkategorie ist und was nur spaetere BuildChoice-Unterauswahl
+  bleibt,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen

@@ -110,7 +110,7 @@ Entscheidung:
 | Berginsel | starke Hoehen und Aussicht. | kann schwer, abgeschieden oder spaeter nach Bergbau/Schnee wirken. | nach MVP |
 | Wuesteninsel | markant und eigenstaendig. | falscher Starterton, wenig Alltag/Wasser, hoher Asset-/Biome-Scope. | blockiert fuer MVP |
 | Stadt-/Dorfinsel | viele Alltags- und Marktmoeglichkeiten. | wirkt schnell wie City-Scope, Gebaeudeliste oder BuildState. | spaeter als Familie |
-| Gemischte Kuestenhain-/Flussufer-Starterinsel | Wasser, Hain, Hub, Alltag, Natur, Wissen und Safe-Orte zugleich. | braucht klare Grenzen, damit es nicht alles auf einmal wird. | MVP-Entscheidung |
+| Gemischte Kuestenhain-/Flussufer-Starterinsel | Wasser, Hain, Hub, Alltag, Natur, Wissen und Ruheorte zugleich. | braucht klare Grenzen, damit es nicht alles auf einmal wird. | MVP-Entscheidung |
 
 MVP-Entscheidung:
 
@@ -167,12 +167,12 @@ Der Uferhain besteht aus diesen Grundelementen:
 | --- | --- | --- |
 | Kueste | aeusserer Rand, Weltform, Blick in spaetere Inselwelt. | fix im MVP, nicht frei bearbeitbar. |
 | Fluss / Wasserarm | starke Landmarke, Bank-/Ufer-/Wasser-Kontexte. | fix im MVP; keine freie Flusskonstruktion. |
-| Hain / Waldzone | ruhige Naturzone, Garten-/Safe-/Alltagsvarianten. | fix als Biome-Gefuehl, nicht als Baumobjekt-Masse. |
+| Hain / Waldzone | ruhige Naturzone, Garten-/Ruhe-/Alltagsvarianten. | fix als Biome-Gefuehl, nicht als Baumobjekt-Masse. |
 | Zentrale Lichtung / Hub | sicherer Startpunkt und Orientierung. | fix als Startlesart; keine Pflichtkategorie. |
 | 1-2 Hauptwege | Orientierung zwischen Hub, Ufer und Hain. | teilweise fix; keine Pflichtpfade. |
 | 2-3 Nebenwege | neugierige Verbindung zu Erweiterungsslots. | spaeter erweiterbar, kein Pfadbau im MVP. |
-| Leichte Huegel / Hoehen | Ueberblick, Wissen/Codex-/Aussicht-Varianten. | fixe Gelaende-Andeutung, kein Bergbau-Scope. |
-| Ruhige Randbereiche | Safe/Later/Backlog und Erweiterung. | sichtbar, aber nicht als sensitive Deko. |
+| Leichte Huegel / Hoehen | Ueberblick, Wissen/Archiv-/Aussicht-Varianten. | fixe Gelaende-Andeutung, kein Bergbau-Scope. |
+| Ruhige Randbereiche | Spaeter/Ablage/Ruheort und Erweiterung. | sichtbar, aber nicht als sensitive Deko. |
 | Bruecke | spaetere Verbindung / Unlock-Idee. | nach MVP eigenes Gate. |
 | Hafenansatz | kleine Uferidee, kein Hafen-System. | nach MVP eigenes Gate. |
 | Wasserfall / Aussichtspunkt | staerkerer Landmark-Ausbau. | nach MVP oder eigener Visual-/World-Gate. |
@@ -181,13 +181,13 @@ Der Uferhain besteht aus diesen Grundelementen:
 
 | Bereich | Sichtbare Gelaendeidee | Passende Weltobjekt-Ideen spaeter | Lernwortfelder | Moegliche Spielmomente |
 | --- | --- | --- | --- | --- |
-| Wasser / Ufer | Flusskante, Uferplatz, Wasserweg. | Bank, Fluss, Steg-Idee, Boot spaeter, Hafen spaeter. | Wasser, Bewegung, Orte, Mehrdeutigkeit. | `Bank` Context Door, `schwimmen` ActionChallenge, Ufer-Codex. |
+| Wasser / Ufer | Flusskante, Uferplatz, Wasserweg. | Bank, Fluss, Steg-Idee, Boot spaeter, Hafen spaeter. | Wasser, Bewegung, Orte, Mehrdeutigkeit. | `Bank` Context Door, `schwimmen` ActionChallenge, Ufer-Archiv. |
 | Zuhause / Alltag | ruhige freie Flaeche nahe Hub oder Hain. | Haus-Idee, Zimmer-Idee, Garage-Idee, Garten-Idee. | Alltag, Raum, Familie, Gegenstaende. | Meaning Puzzle, Container-Hunt, Choice Fork. |
 | Natur | Hain, Lichtung, Baumgruppen als Landmarken. | Baum, Blume, Samen, Tier spaeter. | Natur, Farben, Wachstum, Beobachtung. | Tiny Mystery, Container/Garten-Fund, ContextCard. |
 | Markt / Kueche | zentraler oder wasser-/hubnaher Slot. | Marktstand-Idee, Brot, Kochen, Kaufen. | Essen, Einkaufen, Handlungen. | Action Moment, kurze Wahl, Context Door. |
 | Werkstatt | Rand-/Hain-/Wasser-nahe Flaeche. | Werkzeug, Reparieren, Bauen, Bootswerkstatt-Idee. | Verben, Tools, Ursache/Wirkung. | ActionChallenge, Container Findability. |
-| Wissen / Codex | Huegel, ruhige Lichtung oder Codex-Ort. | Frage, Bedeutung, Karte, Buch, Schild. | Sense, Kontext, abstrakte Begriffe. | Codex Discovery, ContextCard Challenge. |
-| Safe / Later | ruhiger Randbereich oder geschuetzte Lichtung. | Angst, unklar, Polizei, sensible Begriffe parken. | Safety, Mehrdeutigkeit, Unsicherheit. | Later, Hide, Backlog, ruhiger Companion-Hinweis. |
+| Wissen / Archiv | Huegel, ruhige Lichtung oder Archiv-Ort. | Frage, Bedeutung, Karte, Buch, Schild. | Sense, Kontext, abstrakte Begriffe. | Archiv-Fund, ContextCard Challenge. |
+| Spaeter / Ablage | ruhiger Randbereich oder geschuetzte Lichtung. | Angst, unklar, Polizei, sensible Begriffe parken. | Safety, Mehrdeutigkeit, Unsicherheit. | Spaeter, Hide, Ablage, ruhiger Companion-Hinweis. |
 
 Alle Weltobjekt-Ideen sind spaeterer Scope. M16-BD erzeugt keine Assets,
 keine Objekte und keine Bauzustaende.
@@ -203,9 +203,9 @@ Starter-Kategorie-Templates:
 | Markt | Hub und Wege erlauben Versorgung und Begegnung. | Brot, kaufen, verkaufen, Tasche, Kueche. | Markt zentral, Hafenmarkt-Idee, Waldstand. | Economy, Shop, Kaufdruck, Warenlisten. |
 | Werkstatt | Rand- und Wassernaehe geben Machen/Reparieren-Raum. | Werkzeug, bauen, reparieren, Messer, Schluessel. | Aussenwerkstatt, Bootswerkstatt-Idee, Waldwerkbank. | Produktion, Crafting-System, Tool-Clutter. |
 | Lager/Container | TinyObjects brauchen Depth statt Inselobjektwolke. | Tasche, Kiste, Schluessel, Stift, Werkzeug. | Tasche am Hub, Kiste am Ufer, Lager am Rand. | Inventar-Dump, TinyObject-Plot, Persistenz. |
-| Wissen | Hoehen, Lichtung und Codex-Ort tragen Bedeutung. | lernen, Frage, Bedeutung, Sprache, Karte. | Wissen am Huegel, Lernplatz zentral, Wasserwissen. | Schulpflicht, Testfenster, Textwand. |
-| Codex | Mehrdeutige und abstrakte Begriffe brauchen ruhigen Ort. | Bank, Freiheit, Kontext, Beispiel, Sinn. | Codex-Lichtung, stilles Archiv, Ufer-Schild. | Symbolzwang, permanente Lernkarte. |
-| Safe/Later/Backlog | Unsichere und sensitive Begriffe brauchen sichere Ausgaenge. | Angst, Polizei, Krankheit, unklar, spaeter. | Rueckzugsort am Rand, Later-Lichtung. | sensitive Deko, Reward, Retention-Trigger. |
+| Wissen | Hoehen, Lichtung und Archiv-Ort tragen Bedeutung. | lernen, Frage, Bedeutung, Sprache, Karte. | Wissen am Huegel, Lernplatz zentral, Wasserwissen. | Schulpflicht, Testfenster, Textwand. |
+| Archiv / Wortarchiv | Mehrdeutige und abstrakte Begriffe brauchen einen ruhigen, wiederauffindbaren Ort. | Bank, Freiheit, Kontext, Beispiel, Sinn. | Archiv-Lichtung, stilles Wortarchiv, Ufer-Schild. | Symbolzwang, permanente Lernkarte. |
+| Spaeter / Ablage / Ruheort | Unsichere und sensitive Begriffe brauchen sichere Ausgaenge. | Angst, Polizei, Krankheit, unklar, spaeter. | Rueckzugsort am Rand, Spaeter-Lichtung. | sensitive Deko, Reward, Retention-Trigger. |
 | Ufer/Wasser | Der Flussarm ist die starke Starter-Landmarke. | Fluss, Ufer, schwimmen, Bank, Boot spaeter. | Uferplatz, Wasserweg, kleiner Steg. | Bootssystem, Hafen-System, freie Wasserbearbeitung. |
 
 Regeln:
@@ -217,7 +217,56 @@ Regeln:
 - Terrain darf beschreiben, aber nicht hart blockieren.
 - BuildChoice, Asset, Persistenz und BuildState bleiben eigene Gates.
 
-## 10. Kategorien ausserhalb des Starter-Scopes
+## 10. User-facing Naming
+
+Interne Systembegriffe duerfen in Fachdocs, Code-IDs oder Gates weiter
+praezise bleiben. Die sichtbare Nutzeroberflaeche soll aber keine internen
+Systembegriffe als normale Kategorie zeigen.
+
+| Interner Fachbegriff | Sichtbarer Nutzerbegriff | Warum |
+| --- | --- | --- |
+| Codex | Archiv / Wortarchiv | Verstaendlicher als Systembegriff und naeher am Sammel-/Wiederfinden-Gefuehl. |
+| Safe / Later / Backlog | Spaeter / Ablage / Ruheort | Ruhiger, weniger technisch und weniger nach Fehler-Queue klingend. |
+| BuildChoice | Auswahl / Bauidee / Vorschau | BuildChoice bleibt Fachbegriff; Nutzer sieht eine spielartige Auswahl. |
+| Candidate | Vorschlag / lokale Vorschau | Candidate ist technisch; Nutzer soll Freiheit, nicht Statuslogik spueren. |
+
+Regeln:
+
+- Kategorie-Wheels zeigen Hauptkategorien mit Icon + Kurzname.
+- Das erste Wheel zeigt keine internen Begriffe wie Codex, Safe oder Backlog.
+- Sichtbare Texte bevorzugen Archiv, Wortarchiv, Spaeter, Ablage oder Ruheort.
+- Fachbegriffe duerfen im Details-/Dev-Kontext kurz erklaert werden, aber nicht
+  das Hauptspielbild dominieren.
+
+## 11. BuildChoice-Hierarchie unter Hauptkategorien
+
+Die erste Kategorieauswahl bleibt flach. Detaillierte Bauideen werden spaeter
+als BuildChoice-/Showcase-Kandidaten unter passenden Hauptkategorien behandelt.
+Sie gehoeren nicht alle in das erste Kategorie-Wheel.
+
+| Hauptkategorie | Spaetere BuildChoice-/Showcase-Kandidaten |
+| --- | --- |
+| Zuhause | Haus, Zimmer, Garage, Vorhof, Terrasse |
+| Garten | Gartenbereich, Teich, Pool, Outdoor-Sauna, Blumenbereich |
+| Ufer/Wasser | Steg, Uferplatz, Wasserweg, kleiner Bootsort |
+| Werkstatt | Werkbank, Garage-Werkstatt, Bootswerkstatt |
+| Markt | Marktstand, Laden, Hafenmarkt-Idee |
+| Lager | Kiste, Tasche, Schuppen, Vorratsplatz |
+| Wissen | Lernort, Aussichtspunkt, Bibliothek-Idee |
+| Archiv | Wortarchiv, Erinnerungsort, Bedeutungssammlung |
+| Spaeter | Ablage, Rueckzugsort, unsichere Woerter |
+
+Grenzen:
+
+- Diese Unterideen sind BuildChoice-/Showcase-Kandidaten, keine Kategorien im
+  ersten Wheel.
+- Keine Implementierungsfreigabe.
+- Kein BuildState.
+- Keine Assets.
+- Keine Persistenz.
+- Keine produktive Auswahlseite ohne eigenes BuildChoice-/Showcase-Gate.
+
+## 12. Kategorien ausserhalb des Starter-Scopes
 
 | Kategorie / System | Warum nicht im MVP-Starter-Scope | Spaeterer Weg |
 | --- | --- | --- |
@@ -231,7 +280,7 @@ Regeln:
 | Social / PvP | Druck, Privacy, Safety und Moderation. | nach MVP, eigenes Social-/Competition-Gate. |
 | Voller Crafting-/Economy-Loop | Materialgrind, Timer, Kaufdruck. | nach MVP, Werkbank-/Economy-Gate. |
 
-## 11. Variantenlogik pro Terrain
+## 13. Variantenlogik pro Terrain
 
 Varianten sind lokale Namen oder Preview-Lesarten. Sie sind keine Assets, kein
 Build, kein Placement und keine Persistenz.
@@ -244,12 +293,12 @@ Build, kein Placement und keine Persistenz.
 | Ufer + Garten | Ufergarten | Natur + Wasser, ruhige Beobachtung. | Growth-/Timerlogik. |
 | Wald + Zuhause | Waldhaus | ruhiges Zuhause, Alltag im Hain. | Pflicht-Hausstart. |
 | Wald + Garten | Waldgarten | Naturworte, Pflanzen und kleine Funde. | Deko-/Objektwolke. |
-| Wald + Safe | Rueckzugslichtung | sichere Ausgaenge und sensitive Fallbacks. | sensitive Deko. |
-| Huegel + Wissen | Aussichtspunkt / Bibliothek / Turm-Idee | Ueberblick, Bedeutung, Codex. | Turm-Asset, Lerngebaeude als Pflicht. |
-| Huegel + Codex | stiller Codex-Ort | Bedeutung und Kontext auffindbar. | Textwand als Hauptspielraum. |
+| Wald + Spaeter | Rueckzugslichtung | sichere Ausgaenge und sensitive Fallbacks. | sensitive Deko. |
+| Huegel + Wissen | Aussichtspunkt / Bibliothek / Turm-Idee | Ueberblick, Bedeutung, Archiv. | Turm-Asset, Lerngebaeude als Pflicht. |
+| Huegel + Archiv | stiller Archiv-Ort | Bedeutung und Kontext auffindbar. | Textwand als Hauptspielraum. |
 | Zentrum + Markt | Dorfmarkt | einfache Begegnung und Versorgung. | Economy, Shop. |
 | Zentrum + Lager | Hub-Tasche / Kistenpunkt | TinyObjects auffindbar machen. | Inventar-Dump. |
-| Rand + Safe | Rueckzugsort | Later/Backlog/Hide ohne Druck. | Retention-Trigger. |
+| Rand + Spaeter | Rueckzugsort | Spaeter/Ablage/Hide ohne Druck. | Retention-Trigger. |
 | Rand + Werkstatt | Aussenwerkstatt | Machen am Rand, weniger Clutter im Hub. | Produktionssystem. |
 
 Formel:
@@ -261,7 +310,7 @@ freier Slot + Kategorie-Template + Terrain-Charakter
 != Build / Placement / Persistenz / Asset
 ```
 
-## 12. Slot-Positionierungslogik
+## 14. Slot-Positionierungslogik
 
 Slot-Positionierung ist Gelaendelogik, keine harte Kategorie-Vorgabe.
 
@@ -286,7 +335,7 @@ Regeln:
 - Keine Lage sagt: "Hier muss Markt hin."
 - Keine Lage blockiert eine freigegebene Starter-Kategorie hart.
 
-## 13. Fixe Infrastruktur vs. spaetere Spielerfreiheit
+## 15. Fixe Infrastruktur vs. spaetere Spielerfreiheit
 
 | Ebene | MVP fix | MVP frei | Nach MVP / Gate |
 | --- | --- | --- | --- |
@@ -297,10 +346,10 @@ Regeln:
 | Landmarken | Wasser, Hain, Huegel, Rand. | dienen nur Orientierung. | groessere Landmarken/Assets nach Gate. |
 | Sichtbare Slots | 8-12 freie/ruhige Flaechen. | 4-6 Startslots waehlbar. | 4-6 Erweiterungsslots freischaltbar. |
 | Kategorien | Starter-Templates im Scope. | Kategorie pro Startslot frei waehlen. | neue Templates nach Gate. |
-| Varianten | Name/Preview aus Terrain + Kategorie. | Change, Cancel, Later. | BuildChoice/Showcase nach Gate. |
+| Varianten | Name/Preview aus Terrain + Kategorie. | Change, Cancel, Spaeter. | BuildChoice/Showcase nach Gate. |
 | Terrainmodifikation | blockiert. | keine freie Bearbeitung. | eigenes Terrain-/Undo-/Persistenz-Gate. |
 
-## 14. Unlock-/Muenzen-Strategie nur fachlich
+## 16. Unlock-/Muenzen-Strategie nur fachlich
 
 M16-BD bestaetigt die M16-BA-Regeln:
 
@@ -324,16 +373,16 @@ Erweiterung ist sichtbar als Zukunft.
 Sie fordert jetzt nichts und verkauft nichts.
 ```
 
-## 15. Future Island Families
+## 17. Future Island Families
 
 | Inseltyp | Charakter | Moegliche Wortfelder | Moegliche Kategorien | Warum nicht MVP |
 | --- | --- | --- | --- | --- |
-| Wuesteninsel | trocken, weit, Oasen, Ruinen-Idee. | Hitze, Sand, Reise, Orientierung. | Reise, Safe, Wissen, Natur spaeter. | falscher Starterton, eigenes Asset-/Biome-Scope. |
-| Berg-/Schneeinsel | Hoehe, Kaelte, Aussicht, schwierige Wege. | Schnee, Berg, klettern, Schutz. | Wissen, Werkstatt, Safe, Natur. | Terrain-/Safety-/Path-Scope. |
+| Wuesteninsel | trocken, weit, Oasen, Ruinen-Idee. | Hitze, Sand, Reise, Orientierung. | Reise, Spaeter, Wissen, Natur spaeter. | falscher Starterton, eigenes Asset-/Biome-Scope. |
+| Berg-/Schneeinsel | Hoehe, Kaelte, Aussicht, schwierige Wege. | Schnee, Berg, klettern, Schutz. | Wissen, Werkstatt, Spaeter, Natur. | Terrain-/Safety-/Path-Scope. |
 | Hafen-/Meerinsel | Hafen, Pier, Boote, Handel, Kueste. | Boot, Hafen, Fisch, Reise, Wasser. | Ufer, Markt, Werkstatt, Lager. | Wasser-/Travel-/Commerce-System zu frueh. |
-| Wald-/Naturinsel | dichter Hain, Tiere, Pfade, Pflanzen. | Baum, Tier, Blatt, laufen, suchen. | Garten, Safe, Container, Wissen. | Clutter-/Tier-/Nature-Scope braucht Gate. |
+| Wald-/Naturinsel | dichter Hain, Tiere, Pfade, Pflanzen. | Baum, Tier, Blatt, laufen, suchen. | Garten, Spaeter, Container, Wissen. | Clutter-/Tier-/Nature-Scope braucht Gate. |
 | Stadt-/Dorfinsel | Platz, Strassen, Services, mehrere Gebaeude. | kaufen, arbeiten, Schule, Verwaltung. | Markt, Zuhause, Civic, Wissen. | zu viele Systeme und Gebaeudeerwartungen. |
-| Wissens-/Codex-Insel | Archiv, Turm, Raeume, Bedeutung. | Sinn, Frage, Beispiel, erinnern. | Codex, Wissen, Safe, Container. | kann zu Lernformular wirken, braucht Play-First-Gate. |
+| Wissens-/Archiv-Insel | Archiv, Turm, Raeume, Bedeutung. | Sinn, Frage, Beispiel, erinnern. | Archiv, Wissen, Spaeter, Container. | kann zu Lernformular wirken, braucht Play-First-Gate. |
 | Werkstatt-/Technikinsel | Bauen, Reparieren, Geraete, Werkbank. | Werkzeug, reparieren, Maschine, digital. | Werkstatt, Lager, Wissen, Technik. | Crafting-/Production-/Asset-Scope. |
 
 Roadmap-Regel:
@@ -341,7 +390,7 @@ Roadmap-Regel:
 Future Island Families duerfen Inspiration geben, aber keine Starter-Insel
 ueberladen. Neue Inseltypen brauchen eigene Gates.
 
-## 16. Konsequenz fuer die aktuelle Starter-Island-Preview
+## 18. Konsequenz fuer die aktuelle Starter-Island-Preview
 
 Die aktuelle Preview muss sich fachlich an `Uferhain` ausrichten.
 
@@ -374,7 +423,7 @@ Empfohlene Folge-Code-Anpassung, falls noetig:
 Dieser Folge-Code ist durch M16-BD nicht freigegeben. Er braucht einen eigenen
 Implementierungs-Prompt.
 
-## 17. M16-T-ID-Entscheidung
+## 19. M16-T-ID-Entscheidung
 
 | ID | Status | Entscheidung |
 | --- | --- | --- |
@@ -383,8 +432,9 @@ Implementierungs-Prompt.
 | `M16T-INFRA-009` | `[x]` | Terrain-to-Variant Mapping ist als lokale Variantenlogik ohne Build/Placement/Persistenz dokumentiert. |
 | `M16T-INFRA-010` | `[x]` | Future Island Family Roadmap ist fachlich vorbereitet und vom MVP abgegrenzt. |
 | `M16T-INFRA-011` | `[x]` | Player-editable Terrain Boundary ist geklaert: MVP fixiert Grundterrain, Spieler waehlen Kategorien/Varianten. |
+| `M16T-INFRA-012` | `[x]` | User-facing category naming and BuildChoice hierarchy trennt interne Begriffe von sichtbaren Kategorien und ordnet Unterideen dem spaeteren Showcase-/BuildChoice-Schritt zu. |
 
-## 18. Prompt-Regel fuer kuenftige Slices
+## 20. Prompt-Regel fuer kuenftige Slices
 
 Kuenftige World-/Island-/Plot-/UI-/BuildChoice-/Implementierungs-Slices
 muessen M16-BD lesen, wenn Starter-Insel, Biome, Kategorie-Scope,
@@ -403,10 +453,10 @@ Jeder solche Prompt muss beantworten:
 - Wird Terrain veraendert oder nur ein Slot genutzt?
 - Ist die Entscheidung MVP, nach MVP oder blockiert?
 - Welche Interaction-Pattern-Entscheidung aus `350` passt?
-- Welche Safe Defaults bleiben sichtbar: Cancel, Change, Later, Codex,
-  Backlog oder ContextCard?
+- Welche Safe Defaults bleiben sichtbar: Cancel, Change, Spaeter, Archiv,
+  Ablage oder ContextCard?
 
-## 19. Entscheidung
+## 21. Entscheidung
 
 M16-BD entscheidet:
 
