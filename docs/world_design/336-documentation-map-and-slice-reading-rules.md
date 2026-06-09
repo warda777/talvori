@@ -175,6 +175,7 @@ Non-Goals:
 | Dokument | Kernregel |
 | --- | --- |
 | `350-interaction-pattern-decision-matrix.md` | Wheel, Drag, Popup, HUD, Bottom-Sheet, Showcase, Werkbank, Codex-Seite und Map/Board werden nach Aktionstyp, Risiko, Informationsmenge und Spielkontext bewusst gewaehlt. |
+| `350-interaction-pattern-decision-matrix.md` Research-Check | Bei unklarer UI-/Spielaufbau-Entscheidung muss vor Umsetzung ein kurzer Benchmark-/Research-Check gegen erfolgreiche Spiel-/UI-Muster erfolgen. |
 
 ### 4.16 Visual-QA / Preview-Diagramme
 
@@ -237,6 +238,10 @@ Research, Visuals oder Review muss enthalten:
 - Antwort auf: Welche UI-Art wird genutzt, warum passt sie zur Aktion, warum
   ist sie nicht zu gross oder zu klein und welche Alternative wurde bewusst
   nicht gewaehlt?,
+- wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
+  noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
+  als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen
+  verworfen wurden,
 - erwartete Dateien,
 - Non-Goals,
 - Stop-Regeln,
@@ -263,6 +268,9 @@ Jede kuenftige Codex-Ausgabe muss berichten:
 - Stop-Regel-Nachweis,
 - Ergebnis von `git diff --check`,
 - Ergebnis von `git status --short`,
+- bei unklaren UI-/Spielaufbau-Entscheidungen: ob Research noetig war,
+  welche Benchmark-Muster geprueft wurden, warum das gewaehlte Muster passt
+  und warum Alternativen verworfen wurden,
 - Scope-Check gegen `lib/`, `assets/`, `test/` und `integration_test/`, wenn
   der Slice Docs-only bleiben muss.
 

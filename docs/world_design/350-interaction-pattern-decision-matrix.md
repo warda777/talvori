@@ -182,7 +182,41 @@ Auch eine Showcase-Seite bleibt ein Gate-Konzept: Sie erzeugt keine Route,
 keinen BuildState, kein Asset, keine Persistenz und keine produktive
 Mechanikfreigabe.
 
-## 10. Prompt-Regel fuer kuenftige Slices
+## 10. Research-/Benchmark-Check bei unklaren UI-Entscheidungen
+
+Bei unklarer UI-, Spielaufbau- oder Interaktionsentscheidung muss vor der
+Umsetzung ein kurzer Benchmark-/Research-Check erfolgen. Das gilt besonders,
+wenn unklar ist, ob Talvori eine direkte Weltaktion, ein kleines Kontextmenue,
+ein In-place-Wheel, ein Bottom-HUD, eine Showcase-Seite, eine Werkbank-/
+Crafting-Seite, eine Inventar-/Codex-Seite, einen Questtracker oder einen
+Reward-Toast nutzen soll.
+
+Pflichtfragen:
+
+| Frage | Erwartetes Ergebnis |
+| --- | --- |
+| Welche erfolgreichen Spiel-/UI-Muster wurden geprueft? | z. B. direkte Weltaktion, Kontextmenue, HUD, Wheel, Bottom-Sheet, Showcase, Werkbank, Inventar/Codex, Questtracker, Toast. |
+| Welche Spiel-/UI-Logik dient als Vorbild? | Prinzip benennen, keine blinde Kopie eines Produkts. |
+| Welches Muster wird gewaehlt? | Konkrete UI-Art nennen. |
+| Warum passt dieses Muster? | Aktionstyp, Risiko, Informationsmenge, Wiederholung und Spielkontext begruenden. |
+| Welche Alternativen wurden bewusst verworfen? | z. B. kein grosses Fenster, kein Drag als Standard, keine Showcase-Seite fuer kleine Auswahl. |
+| Welche Talvori-Regeln schuetzen die Umsetzung? | Play-First, Island-First, Safe Defaults, kein BuildState, keine Persistenz, kein Druck. |
+
+Regel:
+
+```text
+Unsichere UI-Entscheidung
+-> kurzer Benchmark-/Research-Check
+-> Pattern bewusst waehlen
+-> Alternativen begruendet verwerfen
+-> erst dann Implementierung.
+```
+
+Dieser Check ist keine Mechanikfreigabe. Er verhindert nur, dass Talvori
+UI-Muster aus Gewohnheit baut, statt von erfolgreichen Spielmustern zu lernen
+und sie passend zu Talvori zu uebersetzen.
+
+## 11. Prompt-Regel fuer kuenftige Slices
 
 Jeder kuenftige UI-, MVP-, Gameplay-, Quest-, Challenge-, World-, BuildChoice-,
 App-Integrations- oder Implementierungs-Slice muss beantworten:
@@ -194,8 +228,9 @@ App-Integrations- oder Implementierungs-Slice muss beantworten:
 | Warum ist sie nicht zu gross oder zu klein? | Wheel nicht fuer Vergleich; Showcase nicht fuer einfachen Tap. |
 | Welche Alternative wurde bewusst nicht gewaehlt? | z. B. kein Drag, kein Popup, keine neue Seite, kein Wheel. |
 | Wo bleibt Island-First sichtbar? | Weltort oder Spielmodus muss die Handlung tragen. |
+| War ein Research-/Benchmark-Check noetig? | Wenn ja: Muster, Vorbildlogik, Entscheidung und verworfene Alternativen nennen. |
 
-## 11. M16-T-ID-Entscheidung
+## 12. M16-T-ID-Entscheidung
 
 | ID | Status | Entscheidung |
 | --- | --- | --- |
@@ -204,12 +239,12 @@ App-Integrations- oder Implementierungs-Slice muss beantworten:
 | M16T-INTERACT-003 | [x] | Wheel ist auf kurze In-place-Auswahl mit Icon + Kurzname begrenzt. |
 | M16T-INTERACT-004 | [x] | Showcase-Seiten sind fuer grosse visuelle Auswahl fachlich erlaubt, aber keine Implementierungsfreigabe. |
 | M16T-INTERACT-005 | [x] | Drag/Drop wird als Dev-/Layout- oder spaetere Editierfunktion eingeordnet, nicht als Standard-Nutzerflow. |
+| M16T-INTERACT-006 | [x] | Unsichere UI-/Spielaufbau-Entscheidungen brauchen vor Umsetzung einen kurzen Benchmark-/Research-Check. |
 
-## 12. Visualisierungen
+## 13. Visualisierungen
 
 In diesem Slice wurden keine Preview-Visuals erzeugt. Die Matrix ist textuell
 verbindlich dokumentiert. Ein spaeterer Visual-Slice kann optional Diagramme
 unter `docs/world_design/previews/m16_ax_interaction_pattern_matrix/`
 erzeugen, bleibt aber ebenfalls ohne App-, Route-, Persistenz-, Asset- oder
 Codefreigabe.
-

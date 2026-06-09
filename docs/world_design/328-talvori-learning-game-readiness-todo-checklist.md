@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-AX`
+Aktive Sprint-ID: `M16-AZ`
 
 Sprint Goal:
 
-> Interaktionsmuster je Aktion bewusst waehlen und Wheel, Drag, HUD, Bottom-Sheet, Showcase und Seiten sauber abgrenzen.
+> Starter-Island-Board visuell beruhigen und unklare UI-/Spielaufbau-Entscheidungen research-gated machen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 133 |
+| Gesamtanzahl M16-T-Items | 134 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 109 |
+| Erledigt `[x]` | 110 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 86.5 % |
+| Gewichteter Fortschritt | 86.6 % |
 | Fortschrittsbalken | `█████████████████░░░` |
 
 Naechste empfohlene IDs:
@@ -88,7 +88,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
 | Play-First Learning | M16T-PLAY | 9 | 9 | 0 | 0 | 0 | 100.0 % | `██████████` | Play-First- und Island-First-Regeln in MVP-/Gameplay-/UI-/Implementierungs-Slices weiter als harte Stop-Regeln anwenden. |
-| Interaction Patterns | M16T-INTERACT | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
+| Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -632,6 +632,17 @@ M16-AX operationalisiert fuer kuenftige Slices:
 - Bewusst nicht gewaehlte Alternative nennen, z. B. kein Wheel, kein Drag,
   kein Popup oder keine neue Seite.
 
+M16-AZ erledigt:
+
+- M16T-INTERACT-006
+
+M16-AZ operationalisiert fuer kuenftige Slices:
+
+- Bei unklarer UI-/Spielaufbau-Entscheidung vor Umsetzung kurzen
+  Benchmark-/Research-Check durchfuehren.
+- Gepruefte Muster, gewaehltes Muster, passende Spiel-/UI-Logik und bewusst
+  verworfene Alternativen berichten.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -840,6 +851,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-INTERACT-003 | [x] | Wheel nur fuer kurze In-place-Auswahl | Ein zu grosses Wheel fuehlt sich wie Fenster statt Spielobjekt an. | Wheel ist auf wenige Optionen mit Icon + Kurzname begrenzt; Details wandern in HUD/Bottom-Sheet/Showcase. | Wheel fuer lange Texte oder komplexe Vergleiche. | nein |
 | M16T-INTERACT-004 | [x] | Showcase-Seite fuer grosse visuelle Auswahl | Manche Entscheidungen brauchen Vergleich und Vorschau statt Mini-Menue. | Showcase-Regel fuer BuildChoice, Companion, Style, Biome und groessere visuelle Auswahl dokumentiert ist. | Grosse Auswahl in kleinen Chips erzwingen. | nein |
 | M16T-INTERACT-005 | [x] | Drag/Drop nicht als Standard-Nutzerflow | Freies Dragging kann mobil unpraezise und zu technisch wirken. | Drag/Drop als Dev-/Layout-Modus oder spaetere Editierfunktion eingeordnet ist. | Drag als Hauptflow fuer normale Spielentscheidungen. | nein |
+| M16T-INTERACT-006 | [x] | Research-/Benchmark-Check vor unklaren UI-Entscheidungen | Unklare UI- und Spielaufbau-Entscheidungen sollen von erfolgreichen Spielmustern lernen, statt aus Gewohnheit gebaut zu werden. | `350-interaction-pattern-decision-matrix.md` verlangt vor Umsetzung einen kurzen Benchmark-/Research-Check mit gewaehltem Muster, Passung, Vorbildlogik und verworfenen Alternativen. | UI-Entscheidung ohne Pattern- oder Benchmark-Abgleich. | nein |
 
 ### M16T-SOCIAL
 
