@@ -347,6 +347,16 @@ Erlaubte erste Umsetzung:
 - Richtige Wahl rastet ein.
 - Falsche Wahl wackelt ruhig oder gibt kurzen Hinweis.
 
+Ergaenzung durch 360:
+
+- Bei passenden Bau-, Reparatur-, Sammel-, Container- oder Objektaktionen soll
+  geprueft werden, ob eine Figur, ein Worker, Tali/Vori oder ein Weltobjekt
+  den Auftrag sichtbar ausfuehrt.
+- Character-assisted Action kann das object-first Puzzle staerken, weil der
+  Spieler nicht nur auswaehlt, sondern eine sichtbare Weltarbeit anstoesst.
+- MVP-Default bleibt indirekte Steuerung: Auftrag geben, nicht freie
+  Avatarbewegung.
+
 Keine Pflicht fuer die erste Preview:
 
 - echte Drag-Physik,

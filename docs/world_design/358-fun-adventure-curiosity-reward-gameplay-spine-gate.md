@@ -335,6 +335,9 @@ Die Play-First Doctrine wird durch dieses Gate erweitert:
 - 358 definiert den Fun-/Adventure-/Curiosity-Layer, der ueber beiden liegt.
 - 359 uebersetzt erfolgreiche Spielmuster in konkrete object-first
   Bauplatz-, Puzzle-, Belohnungs- und Button-Quiz-Abgrenzungsregeln.
+- 360 ergaenzt fuer passende Weltaktionen die Character-assisted Action-Regel:
+  Figur/Worker/Tali/Vori oder Weltobjekt kann Auftrag, Arbeitsbewegung und
+  sichtbare Weltveraenderung lebendiger machen.
 
 Ein Slice kann den Spine technisch korrekt treffen und trotzdem noch falsch
 sein, wenn Hook, Neugier, Belohnung und Spielhandlung fehlen.

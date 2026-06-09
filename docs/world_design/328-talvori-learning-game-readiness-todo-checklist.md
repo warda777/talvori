@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BP`
+Aktive Sprint-ID: `M16-BR`
 
 Sprint Goal:
 
-> Erfolgreiche Spielmuster konkret in Talvori-Bauplatzregeln uebersetzen und M16-BQ als object-first Buildsite-Puzzle vorbereiten.
+> Character-assisted World Actions als verbindliche Regel fuer Bau-, Reparatur-, Container- und Objektmomente dokumentieren.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 172 |
+| Gesamtanzahl M16-T-Items | 177 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 148 |
+| Erledigt `[x]` | 153 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 89.5 % |
+| Gewichteter Fortschritt | 89.8 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -95,7 +95,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
 | Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
-| Fun / Adventure / Curiosity | M16T-FUN | 11 | 11 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358 und object-first Bauplatzregeln aus 359 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
+| Fun / Adventure / Curiosity | M16T-FUN | 16 | 16 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358, object-first Bauplatzregeln aus 359 und character-assisted Action-Regeln aus 360 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -821,6 +821,31 @@ M16-BP operationalisiert fuer kuenftige Slices:
   Puzzle Preview, bevorzugt als neue isolierte Preview-Datei statt weiterer
   Ueberladung des M16-BM Multi-Island-Flows.
 
+M16-BR erledigt:
+
+- M16T-FUN-012
+- M16T-FUN-013
+- M16T-FUN-014
+- M16T-FUN-015
+- M16T-FUN-016
+
+M16-BR operationalisiert fuer kuenftige Slices:
+
+- Character-assisted World Actions sind als Pflichtpruefung fuer passende
+  Bau-, Reparatur-, Sammel-, Container-, Werkstatt-, Objekt- und Weltaktionen
+  dokumentiert.
+- MVP-Default ist indirekte Steuerung: Spieler waehlt Ziel, Werkzeug,
+  Material, Reihenfolge oder Objekt; Figur/Worker fuehrt sichtbar aus.
+- Direkte Avatar-/Joystick-Steuerung bleibt bis eigenem UX-/Control-Gate
+  blockiert.
+- Worker-Loop ist definiert: Auftrag sichtbar -> Figur laeuft zum Ort ->
+  sichtbare Arbeit -> Weltveraenderung -> neue Moeglichkeit -> naechster Hook.
+- M16-BQ-FIX ist in der richtigen Richtung, braucht aber vor Commit die
+  Pruefung, ob Worker-Bewegung und Arbeitsgeste wirklich Arbeitsloop und
+  sichtbaren Construction Progress erzeugen.
+- Empfohlener Folge-Code-Fix ist M16-BQ-FIX-2 Worker Task Loop and Visible
+  Construction Progress.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -895,7 +920,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..011, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..016, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -1083,6 +1108,11 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-FUN-009 | [x] | Buildsite puzzle must change the world | Eine Foundation-Aufgabe darf nicht nur richtige Antwort markieren. | Object-Based Buildsite Puzzle definiert Bodenproblem, Bauteile, Einrasten/Wackeln und sichtbare Veraenderung. | Bauteile als Buttons, Quizkarte, keine Weltreaktion. | nein |
 | M16T-FUN-010 | [x] | Reward as next visible possibility | Belohnung soll als naechste Moeglichkeit im Raum erscheinen. | Aussenwand-Schatten, neuer Bauabschnitt oder Blueprint-Hook als Belohnung ohne Punkte/XP/Muenzen dokumentiert ist. | Reward als Text, Punkte, XP, Muenzen oder echtes System ohne Gate. | nein |
 | M16T-FUN-011 | [x] | M16-BQ implementation readiness | Der naechste Code-Slice braucht klare object-first Akzeptanzkriterien. | M16-BQ Object-Based Foundation Buildsite Puzzle Preview mit empfohlenen Dateien, Scope und Kriterien vorbereitet ist. | M16-BO Button-Flow weiter polishen, statt Bauplatzproblem objektbasiert zu testen. | nein |
+| M16T-FUN-012 | [x] | Character-assisted world action rule | Passende Weltaktionen sollen sich wie lebendige Arbeit im Raum anfuehlen, nicht nur wie UI-Bestaetigung. | `360-character-assisted-world-action-rule.md` dokumentiert die Pflichtpruefung fuer Figur/Worker/Tali/Vori oder sichtbares Weltobjekt bei Bau-, Reparatur-, Sammel-, Container- und Objektaktionen. | Code-Slice mit Button-Feedback, obwohl sichtbare Figur/Worker-Handlung den Moment klarer machen wuerde. | nein |
+| M16T-FUN-013 | [x] | Indirect worker control as MVP default | MVP muss spielerisch, aber scope-klein bleiben. | Regel dokumentiert ist: Spieler gibt Ziel/Werkzeug/Material/Reihenfolge/Objekt vor; Figur/Worker fuehrt sichtbar aus. | Joystick-/Avatarsteuerung als impliziter Standard. | nein |
+| M16T-FUN-014 | [x] | Direct avatar control requires own gate | Direkte Steuerung oeffnet Mobile-, Kamera-, Pathfinding-, Kollision- und Accessibility-Scope. | Eigenes UX-/Control-Gate als Voraussetzung fuer direkte Figurensteuerung dokumentiert ist. | Direkte Steuerung nebenbei in Preview- oder Gameplay-Code. | nein |
+| M16T-FUN-015 | [x] | Worker task loop and visible construction progress | Worker darf nicht nur dekorativ stehen oder teleportieren. | Worker-Loop Auftrag -> Figur laeuft -> sichtbare Arbeit -> Weltveraenderung -> neue Moeglichkeit -> Hook dokumentiert ist. | Figur zeigt nur Positionswechsel ohne Arbeitsbewegung oder sichtbaren Fortschritt. | nein |
+| M16T-FUN-016 | [x] | M16-BQ-FIX-2 readiness | M16-BQ-FIX braucht vor Commit Pruefung auf echten Arbeitsloop und sichtbaren Construction Progress. | Folge-Code-Fix M16-BQ-FIX-2 Worker Task Loop and Visible Construction Progress mit Scope und Ziel vorbereitet ist. | M16-BQ-FIX als final ansehen, obwohl Worker-Arbeitsbewegung noch zu schwach ist. | nein |
 
 ### M16T-SOCIAL
 

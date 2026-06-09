@@ -235,6 +235,27 @@ Stop-Regel:
 
 Kein App-Code fuer Lern-, Bau- oder Weltaktionen ohne Fun-/Hook-Check.
 
+### 7.3 Character-Assisted World Action Rule
+
+M16-BR ergaenzt Play-First um eine Figuren-/Worker-Regel:
+
+- Wo sinnvoll, soll eine sichtbare Figur, ein Worker, Tali/Vori oder ein
+  Weltobjekt Spielhandlungen lebendig machen.
+- Nutzer steuern im MVP primaer Auftraege, Ziele, Werkzeuge, Materialien,
+  Reihenfolgen oder Objekte, nicht freie Avatarbewegung.
+- Eine sichtbare Arbeitsbewegung ist staerker als reine UI-Bestaetigung:
+  Figur laeuft hin, graebt, traegt, legt, oeffnet, sortiert, repariert oder
+  zeigt.
+- Direkte Avatar-/Joystick-Steuerung bleibt bis zu eigenem UX-/Control-Gate
+  blockiert.
+- Nicht jede Aktion braucht eine Figur; passende Bau-, Reparatur-, Sammel-,
+  Container-, Werkstatt- und Objektaktionen muessen die Option aber pruefen.
+
+Stop-Regel:
+
+Kein App-Code fuer freie Figurensteuerung, Pathfinding, Kollision oder
+Movement-Systeme ohne eigenes Gate.
+
 ## 8. Game Pattern Benchmarks
 
 Diese Matrix ist Research Prep. Sie benennt Hypothesen und
