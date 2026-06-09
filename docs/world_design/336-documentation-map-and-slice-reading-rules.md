@@ -175,6 +175,7 @@ Non-Goals:
 | `343-habit-motivation-pressure-free-retention-research.md` | Motivation und Retention ohne Druck, Streak-Schuld oder Pflicht. |
 | `344-supercell-clash-progression-social-pressure-research.md` | Aufbaufortschritt und Social/Competition-Risiken ohne MVP-Freigabe. |
 | `358-fun-adventure-curiosity-reward-gameplay-spine-gate.md` | Hoechste Fun-/Adventure-/Curiosity-/Reward-Regel: jeder relevante Slice braucht Player Hook, kleine Huerde, Spielhandlung, Belohnung als neue Moeglichkeit und Anti-Druck-Abgrenzung. |
+| `359-successful-game-pattern-translation-for-talvori-construction-play.md` | Uebersetzt erfolgreiche Spielmuster in object-first Bauplatzregeln: sichtbares Problem vor Text, manipuliertes Objekt, sichtbare Weltveraenderung, naechste Moeglichkeit. |
 
 ### 4.15 Interaction Patterns / UI-Entscheidung
 
@@ -203,22 +204,22 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
-| Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `356` wenn der erste Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `358` wenn Spielhandlung, Hook, Mission, Reward oder Motivation betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
+| Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `356` wenn der erste Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `358` wenn Spielhandlung, Hook, Mission, Reward oder Motivation betroffen ist, `359` wenn Bauaufgabe, Puzzle, objektbasierte Lernhandlung oder Belohnung als Weltveraenderung betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
 | Reward / Queue Slice | `328`, `330`, `331`, `332`, `334`, `327`, `326` |
-| Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `355`, `356` wenn erster Construction-Learning-Vertical-Slice, Haus/Fundament oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, BuildChoice oder M16-BM betroffen ist, `358` fuer Player Hook, kleine Huerde, Spielspannung, Belohnung/neue Moeglichkeit und Anti-Druck-Abgrenzung, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
+| Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `355`, `356` wenn erster Construction-Learning-Vertical-Slice, Haus/Fundament oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, BuildChoice oder M16-BM betroffen ist, `358` fuer Player Hook, kleine Huerde, Spielspannung, Belohnung/neue Moeglichkeit und Anti-Druck-Abgrenzung, `359` fuer sichtbares Problem, manipuliertes Objekt, Weltveraenderung und kein Button-Quiz, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `359` wenn Bauplatzproblem, Objektmanipulation oder sichtbare Weltveraenderung betroffen ist, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Container / Depth Slice | `328`, `355` wenn Container als Ausbau-/Lernspine betroffen ist, `358` wenn Oeffnen, Finden, Sammeln, Container-Hook oder Belohnung als neue Moeglichkeit betroffen ist, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
-| Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `357` wenn BuildChoice visuell, Showcase oder Bauplatz-Kamera betroffen ist, `358` wenn Bauhandlung, Spielspannung, Belohnung oder naechster Hook betroffen ist, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
+| Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `357` wenn BuildChoice visuell, Showcase oder Bauplatz-Kamera betroffen ist, `358` wenn Bauhandlung, Spielspannung, Belohnung oder naechster Hook betroffen ist, `359` wenn BuildChoice in Bauplatz-Puzzle, Objekt- oder Weltveraenderung uebersetzt wird, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
-| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `357` wenn Showcase, Weltansicht, Kamera-Zoom, Bauplatz, Bauphase oder minimales HUD betroffen ist, `358` wenn Player Hook, UI-Reward, Spielspannung, Mission oder Textreduktion fuer Spielgefuehl betroffen ist, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
+| UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `357` wenn Showcase, Weltansicht, Kamera-Zoom, Bauplatz, Bauphase oder minimales HUD betroffen ist, `358` wenn Player Hook, UI-Reward, Spielspannung, Mission oder Textreduktion fuer Spielgefuehl betroffen ist, `359` wenn Text durch sichtbares Problem, Objektmanipulation und Weltveraenderung ersetzt werden muss, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
 | App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `357` wenn Kamera-/Showcase-Flow betroffen ist, `358` wenn Gameplay-Hook, Reward/neue Moeglichkeit oder Mission in App-Flow ueberfuehrt wuerde, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
+| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
@@ -290,6 +291,12 @@ Research, Visuals oder Review muss enthalten:
   Spielhandlung entsteht, welche Belohnung oder neue Moeglichkeit entsteht,
   warum will der Spieler weitermachen, welche erfolgreichen Spielmuster wurden
   uebertragen und welche Druck-/FOMO-/Pay-to-Win-Muster wurden verworfen?,
+- Successful Game Pattern Translation for Talvori Construction Play aus `359`,
+  wenn Spielhandlung, Bauaufgabe, Puzzle, Mission, Belohnung, Object-first-Flow
+  oder Button-Quiz-Risiko betroffen ist,
+- Antwort auf: Was sieht der Spieler vor dem Text, was ist das sichtbare
+  Problem, welches Objekt wird manipuliert, was veraendert sich sichtbar,
+  welche neue Moeglichkeit entsteht und warum ist es kein Button-Quiz?,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen
@@ -326,6 +333,9 @@ Jede kuenftige Codex-Ausgabe muss berichten:
 - bei Gameplay-/World-/BuildChoice-/Learning- oder Implementierungs-Slices:
   Player Hook, kleine Huerde, Spielhandlung, Belohnung/neue Moeglichkeit,
   naechster freiwilliger Hook und blockierte Druckmuster,
+- bei Bauaufgaben, Puzzles, Missionen oder Belohnungen: sichtbares Problem vor
+  Text, manipuliertes Objekt, sichtbare Weltveraenderung, neue Moeglichkeit und
+  Button-Quiz-Abgrenzung,
 - Scope-Check gegen `lib/`, `assets/`, `test/` und `integration_test/`, wenn
   der Slice Docs-only bleiben muss.
 

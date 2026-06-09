@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BN`
+Aktive Sprint-ID: `M16-BP`
 
 Sprint Goal:
 
-> Fun-/Adventure-/Curiosity-/Reward-Spine als hoechste Spielspass-Regel fuer kuenftige Bau-, Lern-, Insel-, Quest-, Container- und Implementierungs-Slices festlegen.
+> Erfolgreiche Spielmuster konkret in Talvori-Bauplatzregeln uebersetzen und M16-BQ als object-first Buildsite-Puzzle vorbereiten.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 167 |
+| Gesamtanzahl M16-T-Items | 172 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 143 |
+| Erledigt `[x]` | 148 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 89.2 % |
+| Gewichteter Fortschritt | 89.5 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -95,7 +95,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Interaction Patterns | M16T-INTERACT | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Interaction Pattern Decision Matrix und Research-/Benchmark-Check in kuenftigen UI-/World-/Gameplay-/Implementierungs-Slices anwenden. |
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
 | Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
-| Fun / Adventure / Curiosity | M16T-FUN | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
+| Fun / Adventure / Curiosity | M16T-FUN | 11 | 11 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358 und object-first Bauplatzregeln aus 359 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -798,6 +798,29 @@ M16-BN operationalisiert fuer kuenftige Slices:
 - M16-BM-FIX wird als technische Basis gelesen, braucht aber vor Commit oder
   naechstem Gate M16-BO Game-like Construction Hook Polish.
 
+M16-BP erledigt:
+
+- M16T-FUN-007
+- M16T-FUN-008
+- M16T-FUN-009
+- M16T-FUN-010
+- M16T-FUN-011
+
+M16-BP operationalisiert fuer kuenftige Slices:
+
+- Erfolgreiche Spielmuster werden konkret uebersetzt: Puzzle-Feld,
+  Tactile-Order, Aufbau/Ownership, Sammeln/Oeffnen, Perspektivraetsel,
+  Bedeutung-durch-Kontext, Mission/Action und Showcase/Identitaet.
+- Object-first gilt fuer Bau-/Lernmomente: erst sichtbares Problem, Objekt und
+  Ort, dann Text.
+- Eine Foundation-Aufgabe muss ein Bauplatzproblem zeigen und durch die
+  richtige Handlung sichtbar veraendern.
+- Belohnung ist der naechste sichtbare Moeglichkeits-Hook, z. B.
+  Aussenwand-Schatten statt Punkte/XP/Muenzen.
+- Empfohlener Folge-Code-Slice ist M16-BQ Object-Based Foundation Buildsite
+  Puzzle Preview, bevorzugt als neue isolierte Preview-Datei statt weiterer
+  Ueberladung des M16-BM Multi-Island-Flows.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -872,7 +895,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..011, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -1055,6 +1078,11 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-FUN-004 | [x] | Reward means new possibility, not pressure | Belohnung soll Moeglichkeit und Ownership erzeugen, nicht Retention-Druck. | Reward-Regel definiert neue Bauabschnitte, Blueprint-Ideen, Fundstuecke, Container, Tali/Vori-Hilfe oder Archiv-Eintrag ohne Economy/Persistenz. | XP-/Timer-/Streak-/FOMO-/Pay-to-Win-Reward. | nein |
 | M16T-FUN-005 | [x] | Safe danger/repair/discovery patterns | Spannung wie Gefahr oder Vernichtung muss in sichere Talvori-Formen uebersetzt werden. | Nebel vertreiben, Weg reparieren, Ort aufraeumen, Objekt finden, Flaeche beleuchten und Bauplatz stabilisieren als druckfreie Muster dokumentiert sind. | Weltverlust, Zeitdruck, Bestrafung, Angst oder sensible Inhalte als Drama. | nein |
 | M16T-FUN-006 | [x] | M16-BO Hook Polish readiness | M16-BM braucht vor Commit/naechstem Gate mehr Hook, Weltreaktion und Belohnung als neue Moeglichkeit. | M16-BO Game-like Construction Hook Polish mit erlaubten M16-BM-Dateien, Scope und Ziel vorbereitet ist. | M16-BM als rein technischer Greybox-Stand ohne Fun-/Hook-Polish weitertragen. | nein |
+| M16T-FUN-007 | [x] | Successful Game Pattern Translation | Talvori soll erfolgreiche Spielmuster als Prinzipien uebersetzen, nicht technisch korrekte UI-Greyboxes bauen. | `359-successful-game-pattern-translation-for-talvori-construction-play.md` uebersetzt Puzzle-, Ordnung-, Aufbau-, Sammel-, Perspektiv-, Sprach-, Mission- und Showcase-Muster in Talvori-Regeln. | Blindes Kopieren oder Code ohne Pattern-Uebersetzung. | nein |
+| M16T-FUN-008 | [x] | Object-first before text | Spielhandlungen muessen vor Text sichtbar sein. | Regel dokumentiert ist: erst sichtbares Problem, Objekt und Ort, dann kurze Erklaerung. | Text erklaert die Aufgabe, bevor der Ort sie zeigt. | nein |
+| M16T-FUN-009 | [x] | Buildsite puzzle must change the world | Eine Foundation-Aufgabe darf nicht nur richtige Antwort markieren. | Object-Based Buildsite Puzzle definiert Bodenproblem, Bauteile, Einrasten/Wackeln und sichtbare Veraenderung. | Bauteile als Buttons, Quizkarte, keine Weltreaktion. | nein |
+| M16T-FUN-010 | [x] | Reward as next visible possibility | Belohnung soll als naechste Moeglichkeit im Raum erscheinen. | Aussenwand-Schatten, neuer Bauabschnitt oder Blueprint-Hook als Belohnung ohne Punkte/XP/Muenzen dokumentiert ist. | Reward als Text, Punkte, XP, Muenzen oder echtes System ohne Gate. | nein |
+| M16T-FUN-011 | [x] | M16-BQ implementation readiness | Der naechste Code-Slice braucht klare object-first Akzeptanzkriterien. | M16-BQ Object-Based Foundation Buildsite Puzzle Preview mit empfohlenen Dateien, Scope und Kriterien vorbereitet ist. | M16-BO Button-Flow weiter polishen, statt Bauplatzproblem objektbasiert zu testen. | nein |
 
 ### M16T-SOCIAL
 

@@ -333,6 +333,8 @@ Die Play-First Doctrine wird durch dieses Gate erweitert:
 - 355 definiert den Construction Learning Spine.
 - 357 definiert den Game-like Kamera-/Showcase-Flow.
 - 358 definiert den Fun-/Adventure-/Curiosity-Layer, der ueber beiden liegt.
+- 359 uebersetzt erfolgreiche Spielmuster in konkrete object-first
+  Bauplatz-, Puzzle-, Belohnungs- und Button-Quiz-Abgrenzungsregeln.
 
 Ein Slice kann den Spine technisch korrekt treffen und trotzdem noch falsch
 sein, wenn Hook, Neugier, Belohnung und Spielhandlung fehlen.
