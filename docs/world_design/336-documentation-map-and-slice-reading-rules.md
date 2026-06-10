@@ -35,6 +35,7 @@ Non-Goals:
 
 | Dokument | Rolle fuer M16-AB |
 | --- | --- |
+| `docs/world_design/talvori_game_bible.md` | Primaere Produkt-, Game-, Lern- und Sprachreferenz fuer Talvori Welt. |
 | `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md` | Fuehrendes M16-T-Backlog, Dashboard, Statuslegende und ID-System. |
 | `docs/world_design/327-talvori-learning-game-logic-readiness-review.md` | Readiness Review, Staerken, Blocker und produktive System-Gates. |
 | `docs/world_design/329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Scrum-lite-Modell, Definition of Ready/Done, MVP-Roadmap und Research-Gate. |
@@ -65,6 +66,7 @@ Non-Goals:
 | Dokument | Wann fuehrend? |
 | --- | --- |
 | `327-talvori-learning-game-logic-readiness-review.md` | Bei Readiness-, Audit-, Risiko- und Produktlogik-Entscheidungen. |
+| `talvori_game_bible.md` | Bei Produktidentitaet, Sprachschicht, Language Passport, Zielsprachen, Internal Corpus, Optional Capture, Context Before Vocabulary und Talvori-Welt-Grundlogik. |
 | `328-talvori-learning-game-readiness-todo-checklist.md` | Bei jedem Slice mit M16-T-IDs, Dashboard, Status oder Fortschritt. |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Bei Scrum-lite, MVP-Roadmap, Change-/Idea-Intake und Research-Gates. |
 | `336-documentation-map-and-slice-reading-rules.md` | Bei jedem neuen World-/Learning-/Semantics-/Docs-/Commit-Slice als Lese-Kompass. |
@@ -75,6 +77,7 @@ Non-Goals:
 | --- | --- |
 | `330-minimal-playable-learning-loop-contract.md` | Lernen erzeugt Moeglichkeit, keine automatische Platzierung. |
 | `335-learning-states-and-srs-boundary-gate.md` | Lernzustaende bleiben fachlich und schreiben nicht SRS/`word_progress`. |
+| `talvori_game_bible.md` | Building creates context; learning uses context; language grows from words into sentences, pronunciation and conversations. |
 
 ### 4.3 Word Outcomes
 
@@ -207,13 +210,14 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
 | Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `356` wenn der erste Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `358` wenn Spielhandlung, Hook, Mission, Reward oder Motivation betroffen ist, `359` wenn Bauaufgabe, Puzzle, objektbasierte Lernhandlung oder Belohnung als Weltveraenderung betroffen ist, `360` wenn Figur/Worker/Tali/Vori, sichtbare Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen oder Container betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
+| Language Layer / Onboarding Slice | `talvori_game_bible.md`, `328`, `336`, `345`, `330`, `331`, `333`, `335` und betroffene Feature-Docs; Pflicht wenn Produktidentitaet, Sprachschicht, aktive Zielsprache, UI language, Companion language, Language Passport, Level/Scaffolding, Internal Corpus, Optional Capture, Import/Sharing oder Context Before Vocabulary betroffen sind. |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
 | Reward / Queue Slice | `328`, `330`, `331`, `332`, `334`, `327`, `326` |
 | Gameplay / Quest / Challenge Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `355`, `356` wenn erster Construction-Learning-Vertical-Slice, Haus/Fundament oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, BuildChoice oder M16-BM betroffen ist, `358` fuer Player Hook, kleine Huerde, Spielspannung, Belohnung/neue Moeglichkeit und Anti-Druck-Abgrenzung, `359` fuer sichtbares Problem, manipuliertes Objekt, Weltveraenderung und kein Button-Quiz, `360` fuer Character-assisted Action, indirekte Worker-Steuerung, Arbeitsbewegung und Movement-/Pathfinding-Abgrenzung, `340`, `330`, `331`, `332`, `333`, `334`, `337` |
 | Semantics / AI Slice | `328`, `321`, `323`, `326`, `333`, `335`, `274`, `276`, `284` |
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
-| World / Island / Plot Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `359` wenn Bauplatzproblem, Objektmanipulation oder sichtbare Weltveraenderung betroffen ist, `360` wenn eine Figur, ein Worker, Tali/Vori oder ein Weltobjekt eine Weltaktion sichtbar tragen koennte, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
+| World / Island / Plot Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachanker oder Context Before Vocabulary betroffen ist, `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `359` wenn Bauplatzproblem, Objektmanipulation oder sichtbare Weltveraenderung betroffen ist, `360` wenn eine Figur, ein Worker, Tali/Vori oder ein Weltobjekt eine Weltaktion sichtbar tragen koennte, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
 | Construction Rejoin / Buildsite Preview Slice | `328`, `336`, `345`, `350`, `351`, `353`, `355`, `356`, `357`, `358`, `359`, `360`, `361`; jeder Rejoin-Slice muss klaeren, welcher isolierte Proof verbunden wird, was Preview bleibt, welche Datei geaendert werden darf, ob BQ als Muster/Kopie/Import/Referenz genutzt wird und warum keine App-Integration, Route, Navigation, Persistenz oder BuildState entsteht. |
 | Container / Depth Slice | `328`, `355` wenn Container als Ausbau-/Lernspine betroffen ist, `358` wenn Oeffnen, Finden, Sammeln, Container-Hook oder Belohnung als neue Moeglichkeit betroffen ist, `360` wenn Figur/Worker/Tali/Vori oder Objektaktion das Oeffnen, Sortieren, Tragen, Bergen oder Einsammeln sichtbarer machen koennte, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
 | Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `357` wenn BuildChoice visuell, Showcase oder Bauplatz-Kamera betroffen ist, `358` wenn Bauhandlung, Spielspannung, Belohnung oder naechster Hook betroffen ist, `359` wenn BuildChoice in Bauplatz-Puzzle, Objekt- oder Weltveraenderung uebersetzt wird, `360` wenn BuildChoice oder Bauabschnitt durch Worker-/Figurenhandlung lebendiger werden koennte, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
@@ -221,8 +225,8 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
 | UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `357` wenn Showcase, Weltansicht, Kamera-Zoom, Bauplatz, Bauphase oder minimales HUD betroffen ist, `358` wenn Player Hook, UI-Reward, Spielspannung, Mission oder Textreduktion fuer Spielgefuehl betroffen ist, `359` wenn Text durch sichtbares Problem, Objektmanipulation und Weltveraenderung ersetzt werden muss, `360` wenn sichtbare Figuren-/Worker-Handlung UI-Bestaetigung ersetzen oder staerken koennte, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
-| App-Integration Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `357` wenn Kamera-/Showcase-Flow betroffen ist, `358` wenn Gameplay-Hook, Reward/neue Moeglichkeit oder Mission in App-Flow ueberfuehrt wuerde, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Implementierungs-Slice | `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
+| App-Integration Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary in App-Flow ueberfuehrt wuerde, `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `357` wenn Kamera-/Showcase-Flow betroffen ist, `358` wenn Gameplay-Hook, Reward/neue Moeglichkeit oder Mission in App-Flow ueberfuehrt wuerde, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
+| Implementierungs-Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Zielsprachen, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary betroffen sind, `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
@@ -237,6 +241,17 @@ Research, Visuals oder Review muss enthalten:
 - Ziel,
 - betroffene M16-T-IDs,
 - Pflichtlektuere,
+- Talvori Game Bible aus `talvori_game_bible.md`, wenn
+  Produktidentitaet, Sprachschicht, aktive Zielsprache, UI language,
+  Companion language, Language Passport, Level/Scaffolding, Internal Corpus,
+  Optional Capture, Import/Sharing oder Context Before Vocabulary betroffen
+  sind,
+- Antwort auf: Welcher Weltkontext wird gebaut oder veraendert, welche
+  Sprachschicht und aktive Zielsprache gelten, wie bleiben UI language, target
+  language und Companion language getrennt, welche Language-Passport- oder
+  Skill-Profil-Annahme gilt, ist Internal Corpus oder Optional Capture
+  betroffen, was ist Weltfortschritt vs. Sprachfortschritt und wie werden
+  fortgeschrittene Nutzer nicht durch offensichtliche Basics gezwungen?,
 - Play-First-Rule aus `345`, wenn MVP, Gameplay, Quest, Challenge, World,
   Companion, UI oder Implementierung betroffen ist,
 - Island-First Play Rule aus `345`, wenn MVP, Gameplay, Quest, Challenge,
@@ -348,6 +363,11 @@ Jede kuenftige Codex-Ausgabe muss berichten:
 - bei unklaren UI-/Spielaufbau-Entscheidungen: ob Research noetig war,
   welche Benchmark-Muster geprueft wurden, warum das gewaehlte Muster passt
   und warum Alternativen verworfen wurden,
+- bei Produktidentitaet, Sprachschicht, aktiver Zielsprache, Language
+  Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary:
+  relevanter Game-Bible-Bezug, aktive Zielsprache, UI-/target-/Companion-
+  Sprachtrennung, Weltfortschritt-vs-Sprachfortschritt und Scaffolding fuer
+  Beginner, Advanced oder Very Advanced,
 - bei Gameplay-/World-/BuildChoice-/Learning- oder Implementierungs-Slices:
   Player Hook, kleine Huerde, Spielhandlung, Belohnung/neue Moeglichkeit,
   naechster freiwilliger Hook und blockierte Druckmuster,

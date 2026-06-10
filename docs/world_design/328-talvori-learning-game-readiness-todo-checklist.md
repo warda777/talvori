@@ -8,23 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-09
 
-Aktive Sprint-ID: `M16-BS`
+Aktive Sprint-ID: `M16-BU`
 
 Sprint Goal:
 
-> Local Construction Preview Boundary und Flow-Rejoin nach M16-BQ dokumentieren.
+> AGENTS.md als kurze Codex-Verfassung schaerfen und Talvori Game Bible als
+> Produkt-/Game-/Lern-/Sprachreferenz anlegen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 180 |
+| Gesamtanzahl M16-T-Items | 186 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 156 |
+| Erledigt `[x]` | 162 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 90.0 % |
+| Gewichteter Fortschritt | 90.3 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -67,7 +68,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 28 Bereiche
+### 0.3 Bereichs-Dashboard fuer 29 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -96,6 +97,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Starter Island Infrastructure | M16T-INFRA | 12 | 12 | 0 | 0 | 0 | 100.0 % | `██████████` | Starter-Insel-Infrastruktur, Uferhain-Identitaet und user-facing Kategorie-/BuildChoice-Regeln aus 351/353 anwenden. |
 | Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
 | Fun / Adventure / Curiosity | M16T-FUN | 19 | 19 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358, object-first Bauplatzregeln aus 359, character-assisted Action-Regeln aus 360 und Flow-Rejoin-Grenzen aus 361 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
+| Language Layer / Game Bible | M16T-LANGUAGE | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Talvori Game Bible, Language Layer, Language Passport, Internal Corpus und Context-before-Vocabulary-Regeln in kuenftigen World-/Learning-/Onboarding-/Language-Slices anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -867,6 +869,34 @@ M16-BS operationalisiert fuer kuenftige Slices:
 - Empfohlener Folge-Code-Slice ist M16-BT Local Uferhain-to-Buildsite Rejoin
   Preview mit neuer isolierter Preview-Datei.
 
+M16-BU erledigt:
+
+- M16T-LANGUAGE-001
+- M16T-LANGUAGE-002
+- M16T-LANGUAGE-003
+- M16T-LANGUAGE-004
+- M16T-LANGUAGE-005
+- M16T-LANGUAGE-006
+
+M16-BU operationalisiert fuer kuenftige Slices:
+
+- `AGENTS.md` ist die kurze Codex-Verfassung; ausfuehrliche Produkt-, Game-,
+  Lern- und Sprachlogik lebt in `docs/world_design/talvori_game_bible.md`.
+- Neue North Star: "Baue deine Welt. Lerne Sprache im Kontext. Sammle
+  Woerter, Saetze und echte Sprachmomente. Wachse mit Tali, Vori und
+  Freunden."
+- Building creates context; learning uses context; language grows from words
+  into sentences, pronunciation and conversations.
+- World progress und language progress bleiben getrennte Systeme.
+- Jede normale Session hat eine aktive Zielsprache; UI language, target
+  language und Companion language sind getrennt.
+- Interner kuratierter Content ist primaer; importierte/geteilte Woerter sind
+  optionale persoenliche Entdeckungen.
+- Kuenftige World-/Learning-/Onboarding-/Language-/App-Integration-Slices
+  muessen die Game Bible lesen, wenn Produktidentitaet, Sprachschicht,
+  Language Passport, Level/Scaffolding, Internal Corpus, Optional Capture oder
+  Context Before Vocabulary betroffen sind.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -941,7 +971,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
@@ -1137,6 +1167,17 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-FUN-017 | [x] | Local construction preview flow rejoin boundary | Der gruene Bauplatz-Proof muss in den Talvori-Spine zurueck, ohne App-/Route-/BuildState-Scope zu oeffnen. | `361-local-construction-preview-boundary-and-flow-rejoin-gate.md` definiert Rejoin als lokale Preview-Verbindung von Uferhain, Slot, BuildChoice, Kamera/Fokus und BQ-Muster. | BQ weiter polishen oder Aussenwaende bauen, bevor Flow-/Boundary-Fragen geklaert sind. | nein |
 | M16T-FUN-018 | [x] | BQ as object-based buildsite pattern | M16-BQ soll Muster bleiben, nicht automatisch Produktmodul werden. | BQ als lokale Referenz fuer object-first Worker-Bauplatz, Arbeitsloop und neue Moeglichkeit abgegrenzt ist. | BQ direkt als produktives Widget, Provider, Datenmodell oder BuildState-Quelle lesen. | nein |
 | M16T-FUN-019 | [x] | M16-BT rejoin preview readiness | Der naechste Code-Slice braucht klare Dateien, Akzeptanzkriterien und Stop-Regeln. | M16-BT Local Uferhain-to-Buildsite Rejoin Preview mit Option-A-Dateien und Akzeptanzkriterien vorbereitet ist. | Rejoin-Code ohne klare Datei-/Import-Grenze oder App-Integration-Verbot. | nein |
+
+### M16T-LANGUAGE
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-LANGUAGE-001 | [x] | Talvori Game Bible as primary product reference | AGENTS.md soll kurz bleiben; Produkt-, Game-, Lern- und Sprachlogik brauchen eine dauerhafte Referenz. | `docs/world_design/talvori_game_bible.md` als saubere Game Bible angelegt und in AGENTS/336 verlinkt ist. | Codex entscheidet nur aus AGENTS.md oder verstreuten Chatnotizen. | nein |
+| M16T-LANGUAGE-002 | [x] | Corrected core formula and layer separation | Talvori darf nicht auf "Wort wird Objekt" reduziert werden. | Game Bible definiert Building creates context, Learning uses context, Language grows into sentences/pronunciation/conversations sowie World-Building, Language Anchor und Language Use Layer. | Wortimport als einzige Weltbauquelle oder jedes UI-Wort als Lerninhalt. | nein |
+| M16T-LANGUAGE-003 | [x] | Active target language and Language Passport model | Mehrsprachigkeit braucht klare Sessions statt Mischsprache im normalen Flow. | Game Bible trennt aktive Zielsprache, UI language, Companion language und Language Passport pro Zielsprache. | Freies Mischen mehrerer Zielsprachen oder Sprachwechsel mit Datenmutation ohne Gate. | nein |
+| M16T-LANGUAGE-004 | [x] | Skill profile and adaptive scaffolding | Ein linearer Levelwert reicht fuer echte Sprachfaehigkeit nicht. | Skill-Dimensionen und Beginner/Advanced/Very Advanced Experience sind dokumentiert. | Fortgeschrittene Nutzer durch offensichtliche Basics zwingen. | nein |
+| M16T-LANGUAGE-005 | [x] | Internal corpus primary and optional capture | Talvori muss ohne Nutzerimport spielbar sein, ohne persoenliche Funde zu verlieren. | Internal Corpus Primary Rule und Optional Capture Rule sind in AGENTS und Game Bible dokumentiert. | User-imported/shared words als Pflichtquelle oder automatische Wortplatzierung. | nein |
+| M16T-LANGUAGE-006 | [x] | AI/DeepL/Tali/Vori language boundaries | KI und DeepL duerfen helfen, aber nicht didaktische oder produktive Wahrheit allein entscheiden. | Game Bible grenzt DeepL, KI und Companion an Szene, Level, aktive Sprache, bekannte Inhalte und deterministische Regeln. | KI/DeepL als alleinige Wahrheit fuer Level, Kontext, Persistenz oder Produktfortschritt. | nein |
 
 ### M16T-SOCIAL
 
