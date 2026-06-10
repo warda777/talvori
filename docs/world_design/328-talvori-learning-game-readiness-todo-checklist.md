@@ -1,31 +1,31 @@
 # M16-T: Talvori Learning Game Readiness ToDo Checklist
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
 Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 ## 0. Product Delivery Dashboard
 
-Letzte Aktualisierung: 2026-06-09
+Letzte Aktualisierung: 2026-06-10
 
-Aktive Sprint-ID: `M16-BU`
+Aktive Sprint-ID: `M16-BV`
 
 Sprint Goal:
 
-> AGENTS.md als kurze Codex-Verfassung schaerfen und Talvori Game Bible als
-> Produkt-/Game-/Lern-/Sprachreferenz anlegen.
+> Notion, Linear, GitHub und Repo-Dokumente als Projektmanagement-Struktur
+> mappen, ohne doppelte Wahrheit oder externe Writes zu erzeugen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 186 |
+| Gesamtanzahl M16-T-Items | 190 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 162 |
+| Erledigt `[x]` | 166 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 90.3 % |
+| Gewichteter Fortschritt | 90.5 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -68,7 +68,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 29 Bereiche
+### 0.3 Bereichs-Dashboard fuer 30 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -98,6 +98,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Core Construction Spine | M16T-SPINE | 15 | 15 | 0 | 0 | 0 | 100.0 % | `██████████` | Game-like Island Showcase / Camera Flow aus 357 fuer M16-BM anwenden. |
 | Fun / Adventure / Curiosity | M16T-FUN | 19 | 19 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358, object-first Bauplatzregeln aus 359, character-assisted Action-Regeln aus 360 und Flow-Rejoin-Grenzen aus 361 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Language Layer / Game Bible | M16T-LANGUAGE | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Talvori Game Bible, Language Layer, Language Passport, Internal Corpus und Context-before-Vocabulary-Regeln in kuenftigen World-/Learning-/Onboarding-/Language-Slices anwenden. |
+| Project Management / External Tool Sync | M16T-MGMT | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Repo bleibt Source of Truth; Notion/Linear/GitHub duerfen nur Spiegel, Aufgaben oder technische Review-Strukturen nach Freigabe sein. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -897,6 +898,32 @@ M16-BU operationalisiert fuer kuenftige Slices:
   Language Passport, Level/Scaffolding, Internal Corpus, Optional Capture oder
   Context Before Vocabulary betroffen sind.
 
+M16-BV erledigt:
+
+- M16T-MGMT-001
+- M16T-MGMT-002
+- M16T-MGMT-003
+- M16T-MGMT-004
+
+M16-BV operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/362-notion-linear-project-management-mapping.md`
+  definiert Repo, Notion, Linear und GitHub als getrennte Projektmanagement-
+  Rollen.
+- Das Repository bleibt Source of Truth fuer AGENTS.md, Game Bible,
+  M16-Dokumente, Code, technische Entscheidungen, Stop-Regeln und Commits.
+- Notion ist ein lesbarer Produkt-/Roadmap-/Research-/Decision-Spiegel, aber
+  kein Ersatz fuer 328, 336 oder Repo-Gates.
+- Linear ist ein Arbeits- und Slice-Tracking-Spiegel fuer Sprints, Bugs,
+  Reviews, Visual-QA und Blocker, aber keine Produktfreigabe.
+- GitHub traegt Code, Commits, Branches, PRs, technische Issues und spaetere
+  Releases.
+- Externe Writes in Notion, Linear, GitHub, Supabase, API-Key-Systemen oder
+  anderen Plugins bleiben explizit freigabepflichtig.
+- Empfohlener Produktschritt bleibt M16-BT Local Uferhain-to-Buildsite Rejoin
+  Preview; M16-BW Notion Project Dashboard Draft ist sinnvoll, sobald
+  externer Management-Sync wirklich gestartet werden soll.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -974,7 +1001,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003 | Noetig fuer echte Produktqualitaet, Release, Daten- und Asset-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
@@ -1178,6 +1205,15 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-LANGUAGE-004 | [x] | Skill profile and adaptive scaffolding | Ein linearer Levelwert reicht fuer echte Sprachfaehigkeit nicht. | Skill-Dimensionen und Beginner/Advanced/Very Advanced Experience sind dokumentiert. | Fortgeschrittene Nutzer durch offensichtliche Basics zwingen. | nein |
 | M16T-LANGUAGE-005 | [x] | Internal corpus primary and optional capture | Talvori muss ohne Nutzerimport spielbar sein, ohne persoenliche Funde zu verlieren. | Internal Corpus Primary Rule und Optional Capture Rule sind in AGENTS und Game Bible dokumentiert. | User-imported/shared words als Pflichtquelle oder automatische Wortplatzierung. | nein |
 | M16T-LANGUAGE-006 | [x] | AI/DeepL/Tali/Vori language boundaries | KI und DeepL duerfen helfen, aber nicht didaktische oder produktive Wahrheit allein entscheiden. | Game Bible grenzt DeepL, KI und Companion an Szene, Level, aktive Sprache, bekannte Inhalte und deterministische Regeln. | KI/DeepL als alleinige Wahrheit fuer Level, Kontext, Persistenz oder Produktfortschritt. | nein |
+
+### M16T-MGMT
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-MGMT-001 | [x] | Repo as source of truth for project management | Notion, Linear und GitHub duerfen keine zweite Wahrheit neben Repo-Dokumenten erzeugen. | `362-notion-linear-project-management-mapping.md` definiert das Repo als Quelle fuer AGENTS.md, Game Bible, M16-Dokumente, Code, technische Entscheidungen, Stop-Regeln und Commits. | Entscheidungen gelten nur, weil sie in Notion oder Linear stehen. | nein |
+| M16T-MGMT-002 | [x] | Notion as product overview mirror | Notion ist stark fuer lesbare Uebersichten, aber gefaehrlich als unversionierte Produktwahrheit. | Notion-Rolle als Kurzfassung, Roadmap, Decisions, Research, offene Fragen und visuelle Uebersicht ohne Freigabecharakter dokumentiert ist. | Notion ersetzt 328/336/Game Bible oder schreibt produktive Entscheidungen. | nein |
+| M16T-MGMT-003 | [x] | Linear as work tracking mirror | Linear soll Arbeit steuerbar machen, ohne Fachentscheidungen aus dem Repo zu ziehen. | Linear-Rolle fuer Arbeitspakete, Sprints, Bugs, Review, Visual-QA, Blocker und M16-Slice-Tracking dokumentiert ist. | Linear-Issue gilt als Featurefreigabe ohne Repo-Gate. | nein |
+| M16T-MGMT-004 | [x] | External write approval rule | Plugin-Writes koennen externe Wahrheit, Daten oder Tickets veraendern. | Notion-/Linear-/GitHub-/Supabase-/API-Key- und andere externe Writes als explizit freigabepflichtig dokumentiert sind. | Externe Writes, Issues, PRs, Daten- oder API-Key-Aenderungen ohne Freigabe. | nein |
 
 ### M16T-SOCIAL
 

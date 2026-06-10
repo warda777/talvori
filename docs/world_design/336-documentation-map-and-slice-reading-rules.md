@@ -35,6 +35,7 @@ Non-Goals:
 
 | Dokument | Rolle fuer M16-AB |
 | --- | --- |
+| `AGENTS.md` | Kurze Codex-Verfassung, Plugin-/Skill-Routing und externe Write-Grenzen. |
 | `docs/world_design/talvori_game_bible.md` | Primaere Produkt-, Game-, Lern- und Sprachreferenz fuer Talvori Welt. |
 | `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md` | Fuehrendes M16-T-Backlog, Dashboard, Statuslegende und ID-System. |
 | `docs/world_design/327-talvori-learning-game-logic-readiness-review.md` | Readiness Review, Staerken, Blocker und produktive System-Gates. |
@@ -66,6 +67,7 @@ Non-Goals:
 | Dokument | Wann fuehrend? |
 | --- | --- |
 | `327-talvori-learning-game-logic-readiness-review.md` | Bei Readiness-, Audit-, Risiko- und Produktlogik-Entscheidungen. |
+| `362-notion-linear-project-management-mapping.md` | Bei Projektmanagement-, Notion-, Linear-, GitHub-, externer Tool-Sync- oder Plugin-Write-Grenzen. |
 | `talvori_game_bible.md` | Bei Produktidentitaet, Sprachschicht, Language Passport, Zielsprachen, Internal Corpus, Optional Capture, Context Before Vocabulary und Talvori-Welt-Grundlogik. |
 | `328-talvori-learning-game-readiness-todo-checklist.md` | Bei jedem Slice mit M16-T-IDs, Dashboard, Status oder Fortschritt. |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Bei Scrum-lite, MVP-Roadmap, Change-/Idea-Intake und Research-Gates. |
@@ -228,6 +230,7 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | App-Integration Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary in App-Flow ueberfuehrt wuerde, `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `357` wenn Kamera-/Showcase-Flow betroffen ist, `358` wenn Gameplay-Hook, Reward/neue Moeglichkeit oder Mission in App-Flow ueberfuehrt wuerde, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
 | Implementierungs-Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Zielsprachen, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary betroffen sind, `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
+| Project Management / External Tool Sync Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `362` und betroffene Tool-/Plugin-Regeln; keine Notion-, Linear-, GitHub-, Supabase-, API-Key- oder sonstigen externen Writes ohne ausdrueckliche Freigabe. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
 
@@ -241,6 +244,10 @@ Research, Visuals oder Review muss enthalten:
 - Ziel,
 - betroffene M16-T-IDs,
 - Pflichtlektuere,
+- wenn Notion, Linear, GitHub, Supabase, API-Keys oder externe Plugins
+  betroffen sind: Source-of-Truth-Regel aus `362`, geplante externe Rolle,
+  ob nur gelesen/geplant oder geschrieben wird, und ausdrueckliche
+  No-Write-Grenze ohne Freigabe,
 - Talvori Game Bible aus `talvori_game_bible.md`, wenn
   Produktidentitaet, Sprachschicht, aktive Zielsprache, UI language,
   Companion language, Language Passport, Level/Scaffolding, Internal Corpus,
@@ -363,6 +370,10 @@ Jede kuenftige Codex-Ausgabe muss berichten:
 - bei unklaren UI-/Spielaufbau-Entscheidungen: ob Research noetig war,
   welche Benchmark-Muster geprueft wurden, warum das gewaehlte Muster passt
   und warum Alternativen verworfen wurden,
+- bei Projektmanagement-/External-Tool-Sync-Slices: Source-of-Truth-Regel,
+  Notion-/Linear-/GitHub-Mapping, Plugin-Write-Regeln, ob externe Writes
+  blockiert blieben und welcher Repo-Commit oder welches Repo-Dokument die
+  Wahrheit traegt,
 - bei Produktidentitaet, Sprachschicht, aktiver Zielsprache, Language
   Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary:
   relevanter Game-Bible-Bezug, aktive Zielsprache, UI-/target-/Companion-
