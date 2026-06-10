@@ -131,6 +131,7 @@ Non-Goals:
 | `356-first-local-construction-learning-vertical-slice-gate.md` | Erstes lokales Construction-Learning-Vertical-Slice-Gate: Uferhain -> Zuhause -> Haus -> Grundstueckszoom -> Fundament-Candidate -> Lernhandlung -> lokales Feedback. |
 | `357-game-like-island-selection-and-construction-camera-flow-gate.md` | Korrigiert den ersten Construction-Learning-Codepfad zu Game-like Insel-Showcase, Insel betreten, Kamera-Zoom, Bauplatz, visueller BuildChoice und minimalem HUD. |
 | `361-local-construction-preview-boundary-and-flow-rejoin-gate.md` | Boundary fuer den Flow-Rejoin nach M16-BQ: lokale Preview verbindet Uferhain, Slot, BuildChoice, Kamera/Fokus und object-based Worker-Bauplatz, ohne App-Integration, Route, Persistenz oder BuildState. |
+| `363-professional-island-build-flow-design-gate.md` | Design-before-Code-Gate nach gestopptem M16-BT: komplexe Inselbau-, Slot-, Kamera- und BuildChoice-Flows brauchen Research, Wireflow, visuelle Preview und Visual-QA vor weiterem Flutter-Code. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -189,6 +190,7 @@ Non-Goals:
 | Dokument | Kernregel |
 | --- | --- |
 | `350-interaction-pattern-decision-matrix.md` | Wheel, Drag, Popup, HUD, Bottom-Sheet, Showcase, Werkbank, Codex-Seite und Map/Board werden nach Aktionstyp, Risiko, Informationsmenge und Spielkontext bewusst gewaehlt. |
+| `363-professional-island-build-flow-design-gate.md` | Komplexe Island-/Slot-/BuildChoice-/Kamera-Flows brauchen Flow, Wireflow, Visual-Konzept, Interaktionsregeln und Visual-QA vor Code. |
 | `350-interaction-pattern-decision-matrix.md` Research-Check | Bei unklarer UI-/Spielaufbau-Entscheidung muss vor Umsetzung ein kurzer Benchmark-/Research-Check gegen erfolgreiche Spiel-/UI-Muster erfolgen. |
 
 ### 4.16 Visual-QA / Preview-Diagramme
@@ -220,7 +222,8 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
 | World / Island / Plot Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachanker oder Context Before Vocabulary betroffen ist, `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `359` wenn Bauplatzproblem, Objektmanipulation oder sichtbare Weltveraenderung betroffen ist, `360` wenn eine Figur, ein Worker, Tali/Vori oder ein Weltobjekt eine Weltaktion sichtbar tragen koennte, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
-| Construction Rejoin / Buildsite Preview Slice | `328`, `336`, `345`, `350`, `351`, `353`, `355`, `356`, `357`, `358`, `359`, `360`, `361`; jeder Rejoin-Slice muss klaeren, welcher isolierte Proof verbunden wird, was Preview bleibt, welche Datei geaendert werden darf, ob BQ als Muster/Kopie/Import/Referenz genutzt wird und warum keine App-Integration, Route, Navigation, Persistenz oder BuildState entsteht. |
+| Construction Rejoin / Buildsite Preview Slice | `328`, `336`, `345`, `350`, `351`, `353`, `355`, `356`, `357`, `358`, `359`, `360`, `361`, `363` wenn Inselbau-Flow, Slot-Freiheit, BuildChoice-Pattern, Kamera/Pan/Zoom oder komplexe Layout-Entscheidung betroffen ist; jeder Rejoin-Slice muss klaeren, welcher isolierte Proof verbunden wird, was Preview bleibt, welche Datei geaendert werden darf, ob BQ als Muster/Kopie/Import/Referenz genutzt wird und warum keine App-Integration, Route, Navigation, Persistenz oder BuildState entsteht. |
+| Professional Design / UX Gate Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `350`, `351`, `353`, `355`, `357`, `358`, `359`, `360`, `361`, `363` und betroffene Fachdocs; komplexe World-/UI-/BuildChoice-/Kamera- oder Inselbau-Entscheidungen muessen Flow, Wireflow, Pattern-Entscheidung, Kamera-/Gestenmodell, Copy, Visual-QA und erlaubte Folge-Dateien klaeren, bevor neuer Code entsteht. |
 | Container / Depth Slice | `328`, `355` wenn Container als Ausbau-/Lernspine betroffen ist, `358` wenn Oeffnen, Finden, Sammeln, Container-Hook oder Belohnung als neue Moeglichkeit betroffen ist, `360` wenn Figur/Worker/Tali/Vori oder Objektaktion das Oeffnen, Sortieren, Tragen, Bergen oder Einsammeln sichtbarer machen koennte, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
 | Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `357` wenn BuildChoice visuell, Showcase oder Bauplatz-Kamera betroffen ist, `358` wenn Bauhandlung, Spielspannung, Belohnung oder naechster Hook betroffen ist, `359` wenn BuildChoice in Bauplatz-Puzzle, Objekt- oder Weltveraenderung uebersetzt wird, `360` wenn BuildChoice oder Bauabschnitt durch Worker-/Figurenhandlung lebendiger werden koennte, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
@@ -337,6 +340,13 @@ Research, Visuals oder Review muss enthalten:
   was bleibt blockiert, welche Datei darf geaendert werden, wird BQ als
   Muster, Kopie, Import oder Referenz genutzt, warum entsteht keine
   App-Integration, Route, Navigation, Persistenz oder BuildState?,
+- Professional Island Build Flow Design Gate aus `363`, wenn komplexer
+  Island-/World-/Slot-/BuildChoice-/Kamera-Code, ein Rejoin-Flow, ein
+  Build-Wheel, eine Karte mit Pan/Zoom oder ein visueller Island-Build-Flow
+  betroffen ist,
+- Antwort auf: Ist Flow, Wireflow, BuildChoice-Pattern, Kamera-/Gestenmodell,
+  Slotanzahl, Copy, Visual-QA und erlaubter Folge-Datei-Scope vor Code
+  geklaert; wenn nein, muss zuerst ein Design-/Wireflow-Slice entstehen?,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen

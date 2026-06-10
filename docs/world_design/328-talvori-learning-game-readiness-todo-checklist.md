@@ -8,24 +8,25 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-10
 
-Aktive Sprint-ID: `M16-BV`
+Aktive Sprint-ID: `M16-BW`
 
 Sprint Goal:
 
-> Notion, Linear, GitHub und Repo-Dokumente als Projektmanagement-Struktur
-> mappen, ohne doppelte Wahrheit oder externe Writes zu erzeugen.
+> Professionellen Design-before-Code-Prozess fuer den Inselbau-Flow festlegen,
+> damit Flow, Layout, Kamera, Slot-System und BuildChoice-Pattern vor weiterem
+> Flutter-Code visuell geklaert werden.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 190 |
+| Gesamtanzahl M16-T-Items | 194 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 166 |
+| Erledigt `[x]` | 170 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 90.5 % |
+| Gewichteter Fortschritt | 90.7 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -68,7 +69,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 30 Bereiche
+### 0.3 Bereichs-Dashboard fuer 31 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -99,6 +100,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Fun / Adventure / Curiosity | M16T-FUN | 19 | 19 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358, object-first Bauplatzregeln aus 359, character-assisted Action-Regeln aus 360 und Flow-Rejoin-Grenzen aus 361 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Language Layer / Game Bible | M16T-LANGUAGE | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Talvori Game Bible, Language Layer, Language Passport, Internal Corpus und Context-before-Vocabulary-Regeln in kuenftigen World-/Learning-/Onboarding-/Language-Slices anwenden. |
 | Project Management / External Tool Sync | M16T-MGMT | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Repo bleibt Source of Truth; Notion/Linear/GitHub duerfen nur Spiegel, Aufgaben oder technische Review-Strukturen nach Freigabe sein. |
+| Professional Design / UX Gates | M16T-DESIGN | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Kein komplexer Island-/World-/BuildChoice-Code ohne Flow-, Wireflow-, Kamera-, Slot- und Visual-QA-Klaerung vorab. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -920,9 +922,37 @@ M16-BV operationalisiert fuer kuenftige Slices:
   Releases.
 - Externe Writes in Notion, Linear, GitHub, Supabase, API-Key-Systemen oder
   anderen Plugins bleiben explizit freigabepflichtig.
-- Empfohlener Produktschritt bleibt M16-BT Local Uferhain-to-Buildsite Rejoin
-  Preview; M16-BW Notion Project Dashboard Draft ist sinnvoll, sobald
-  externer Management-Sync wirklich gestartet werden soll.
+- Empfohlener Produktschritt war M16-BT Local Uferhain-to-Buildsite Rejoin
+  Preview; nach dem gestoppten M16-BT-WIP gilt M16-BW nun als professionelles
+  Design-Gate vor weiterem Code. Ein spaeterer Notion Project Dashboard Draft
+  bleibt sinnvoll, sobald externer Management-Sync wirklich gestartet werden
+  soll.
+
+M16-BW erledigt:
+
+- M16T-DESIGN-001
+- M16T-DESIGN-002
+- M16T-DESIGN-003
+- M16T-DESIGN-004
+
+M16-BW operationalisiert fuer kuenftige Slices:
+
+- M16-BT wurde gestoppt und als `wip m16-bt rejoin preview iterations`
+  gestashed, weil direkter Code-Polish ohne freigegebenes Flow-/Layout-/
+  UX-Modell zu unproduktiven Wiederholungen fuehrte.
+- `docs/world_design/363-professional-island-build-flow-design-gate.md`
+  definiert den professionellen Prozess Research/Benchmark -> schriftlicher
+  Flow -> Low-Fidelity-Wireflow -> visuelle PNG/SVG- oder Figma-Konzeptphase
+  -> Interaktionsregeln -> Visual-QA -> erst danach Code.
+- Der Ziel-Flow bleibt Insel auswaehlen -> Insel betreten -> Map mit nativen
+  Gesten bewegen/zoomen -> neutralen Slot frei waehlen -> BuildChoice direkt
+  am Slot -> Grundstueck fokussieren -> Bauphase -> spaetere Tiefe in Haus,
+  Raum, Moebel und Container.
+- Starter-Insel-Designwert: ca. 12 sichtbare Slots im MVP, 6 sofort nutzbar,
+  6 spaeter, langfristige Reserve ca. 16-20 Slots; Slots bleiben neutral und
+  Terrain blockiert Kategorien nicht hart.
+- Empfohlener naechster Schritt vor Flutter-Code ist M16-BX Low-Fidelity
+  Island Build Flow Wireflow als repo-nativer Visual-/Design-Gate-Slice.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
@@ -998,7 +1028,7 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
 | Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Commit- und Projektmanagement-Sicherheit. |
@@ -1061,7 +1091,7 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | --- | --- | --- | --- | --- | --- | --- |
 | M16T-DASH-001 | [x] | Progress Dashboard ergaenzen | Fortschritt muss sichtbar steuerbar sein. | Gesamtzahlen, Prozent und Balken in 328 stehen. | Dashboard fehlt. | nein |
 | M16T-DASH-002 | [x] | Prozentformel definieren | Fortschritt braucht reproduzierbare Berechnung. | Gewichte fuer `[x]`, `[~]`, `[ ]`, `[!]`, `[>]` dokumentiert sind. | Unklare Fortschrittsberechnung. | nein |
-| M16T-DASH-003 | [x] | Bereichsfortschritt je 28 Bereiche anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche plus M16T-PLAY, M16T-INTERACT, M16T-INFRA, M16T-SPINE und M16T-FUN steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
+| M16T-DASH-003 | [x] | Bereichsfortschritt je Bereich anzeigen | Schwache Bereiche muessen sichtbar bleiben. | Bereichs-Dashboard fuer die bestehenden Bereiche inklusive Play, Interaction, Infra, Spine, Fun, Language, Management und Design steht. | Nur Gesamtzahl ohne Bereichssicht. | nein |
 | M16T-DASH-004 | [x] | Dashboard nach jedem Slice aktualisieren | Fortschritt darf nicht veralten. | Jeder spaetere Slice Zahlen, Balken und Empfehlungen aktualisiert. | Veraltetes Dashboard. | nein |
 
 ### M16T-SCRUM
@@ -1214,6 +1244,15 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-MGMT-002 | [x] | Notion as product overview mirror | Notion ist stark fuer lesbare Uebersichten, aber gefaehrlich als unversionierte Produktwahrheit. | Notion-Rolle als Kurzfassung, Roadmap, Decisions, Research, offene Fragen und visuelle Uebersicht ohne Freigabecharakter dokumentiert ist. | Notion ersetzt 328/336/Game Bible oder schreibt produktive Entscheidungen. | nein |
 | M16T-MGMT-003 | [x] | Linear as work tracking mirror | Linear soll Arbeit steuerbar machen, ohne Fachentscheidungen aus dem Repo zu ziehen. | Linear-Rolle fuer Arbeitspakete, Sprints, Bugs, Review, Visual-QA, Blocker und M16-Slice-Tracking dokumentiert ist. | Linear-Issue gilt als Featurefreigabe ohne Repo-Gate. | nein |
 | M16T-MGMT-004 | [x] | External write approval rule | Plugin-Writes koennen externe Wahrheit, Daten oder Tickets veraendern. | Notion-/Linear-/GitHub-/Supabase-/API-Key- und andere externe Writes als explizit freigabepflichtig dokumentiert sind. | Externe Writes, Issues, PRs, Daten- oder API-Key-Aenderungen ohne Freigabe. | nein |
+
+### M16T-DESIGN
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-DESIGN-001 | [x] | Professional design-before-code rule | Komplexe World-/UI-Flows duerfen nicht direkt im Preview-Code gesucht werden. | `363-professional-island-build-flow-design-gate.md` definiert Research/Benchmark, schriftlichen Flow, Wireflow, visuelle Preview, Interaktionsregeln und Visual-QA vor Code. | Neuer komplexer Island-/BuildChoice-Code ohne Designphase. | nein |
+| M16T-DESIGN-002 | [x] | Island build flow wireflow required before code | Der Inselbau-Flow braucht eine visuelle Reihenfolge, bevor Flutter-Layout entsteht. | M16-BW verlangt Low-Fidelity-Wireflow fuer Inselauswahl, Insel betreten, Karte bewegen/zoomen, Slot, BuildChoice, Grundstueck und Bauphase. | Flutter-Preview als Ersatz fuer fehlenden Wireflow. | nein |
+| M16T-DESIGN-003 | [x] | BuildChoice interaction pattern must be visually approved | BuildChoice kippt schnell in Bottom-Sheet, Label-Wolke oder technisches Menue. | M16-BW legt fest, dass In-World-Wheel, Werkbank, Showcase oder Companion/Worker-Vorschlag vor Code visuell entschieden werden muessen. | BuildChoice-Wheel oder BuildChoice-Panel ohne visuelle Freigabe. | nein |
+| M16T-DESIGN-004 | [x] | Pan/zoom/slot focus design gate | Mobile-Kamera, Slot-Fokus und Erreichbarkeit bestimmen das Spielgefuehl. | M16-BW dokumentiert native Pan/Pinch-Zoom-Erwartung, Slot-Tap-Fokus, Toolbelt-Grenzen und spaetere Kamera-/Map-Engine als eigenes Gate. | Dev-Pfeile, Zoom-Buttons, ungeregeltes Clamping oder verdeckte BuildChoice-Ghosts. | nein |
 
 ### M16T-SOCIAL
 
