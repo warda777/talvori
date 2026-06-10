@@ -8,25 +8,25 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-10
 
-Aktive Sprint-ID: `M16-BW`
+Aktive Sprint-ID: `M16-BZ`
 
 Sprint Goal:
 
-> Professionellen Design-before-Code-Prozess fuer den Inselbau-Flow festlegen,
-> damit Flow, Layout, Kamera, Slot-System und BuildChoice-Pattern vor weiterem
-> Flutter-Code visuell geklaert werden.
+> KI-gestuetzte Art-Produktion, Style-Konsistenz, Referenzbild-Grenzen und
+> Engine-ready Exportregeln klaeren, bevor Talvori Spielassets oder
+> High-Fidelity-Flows erzeugt.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 194 |
+| Gesamtanzahl M16-T-Items | 202 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 170 |
+| Erledigt `[x]` | 178 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 90.7 % |
+| Gewichteter Fortschritt | 91.1 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -69,7 +69,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 31 Bereiche
+### 0.3 Bereichs-Dashboard fuer 32 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -90,6 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
 | Asset Scope | M16T-ASSET | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Asset-Scope bleibt blockiert; Lizenz-/Quelle-/Benennung-Regeln in spaeteren Asset-Slices anwenden. |
+| AI Art / Asset Pipeline | M16T-ART | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Kontrollierte KI-Art-Pipeline, Style Bible, Master References und Engine-ready Exportregeln vor Spielassets anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
@@ -100,7 +101,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Fun / Adventure / Curiosity | M16T-FUN | 19 | 19 | 0 | 0 | 0 | 100.0 % | `██████████` | Fun-/Hook-/Reward-Regeln aus 358, object-first Bauplatzregeln aus 359, character-assisted Action-Regeln aus 360 und Flow-Rejoin-Grenzen aus 361 in kommenden Gameplay-/World-/Build-/Learning-Slices anwenden. |
 | Language Layer / Game Bible | M16T-LANGUAGE | 6 | 6 | 0 | 0 | 0 | 100.0 % | `██████████` | Talvori Game Bible, Language Layer, Language Passport, Internal Corpus und Context-before-Vocabulary-Regeln in kuenftigen World-/Learning-/Onboarding-/Language-Slices anwenden. |
 | Project Management / External Tool Sync | M16T-MGMT | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Repo bleibt Source of Truth; Notion/Linear/GitHub duerfen nur Spiegel, Aufgaben oder technische Review-Strukturen nach Freigabe sein. |
-| Professional Design / UX Gates | M16T-DESIGN | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Kein komplexer Island-/World-/BuildChoice-Code ohne Flow-, Wireflow-, Kamera-, Slot- und Visual-QA-Klaerung vorab. |
+| Professional Design / UX Gates | M16T-DESIGN | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Cozy Island Diorama Builder als M16-BY-Richtung und M16-BZ-Art-Pipeline vor komplexem Island-/World-/BuildChoice-Code anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
 | Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
@@ -951,8 +952,73 @@ M16-BW operationalisiert fuer kuenftige Slices:
 - Starter-Insel-Designwert: ca. 12 sichtbare Slots im MVP, 6 sofort nutzbar,
   6 spaeter, langfristige Reserve ca. 16-20 Slots; Slots bleiben neutral und
   Terrain blockiert Kategorien nicht hart.
-- Empfohlener naechster Schritt vor Flutter-Code ist M16-BX Low-Fidelity
-  Island Build Flow Wireflow als repo-nativer Visual-/Design-Gate-Slice.
+- Empfohlener naechster Schritt war M16-BX Low-Fidelity Island Build Flow
+  Wireflow; dieser Stand wurde spaeter als
+  `wip m16-bx low fidelity wireflow not accepted` gestashed, weil er formal
+  korrekt, aber visuell zu schwach und zu arbeitsblattartig war.
+
+M16-BY erledigt:
+
+- M16T-DESIGN-007
+- M16T-DESIGN-008
+- M16T-DESIGN-009
+- M16T-DESIGN-010
+
+M16-BY operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/365-modern-mobile-game-direction-board.md` definiert die
+  moderne Talvori Game-DNA als cozy adventure construction world:
+  island-first, object-first, character-assisted, context-based language
+  learning, ohne Schul-/Worksheet- oder Menue-first-Gefuehl.
+- Das Direction Board unter
+  `docs/world_design/previews/m16_by_modern_mobile_game_direction_board/`
+  setzt eine hochwertigere visuelle Grundlage als M16-BX: Hero-Phone,
+  Game-DNA, Flow-Pillars, empfohlenes Pattern, Avoid-Liste und naechstes
+  Konzeptziel.
+- M16-BY macht `Cozy Island Diorama Builder` zur inhaltlichen Richtung:
+  grosses 2.5D-Insel-Diorama, sichtbare Slots als Orte, Build Station am Slot
+  als Weltobjekt, Worker/Tali/Vori als emotionale Spielbegleitung und klare
+  Avoid-Liste gegen Schulblatt-, Corporate- und Menue-Optik.
+- Das konkrete `modern_mobile_game_direction_board_v2.*` ist kein
+  akzeptierter visueller Zielzustand. Es bleibt nur als abgelehnte
+  Zwischenvorschau nachvollziehbar.
+- Fuehrendes BuildChoice-Pattern ist nun `Build Station am Slot` mit
+  fokussierter Auswahl; ein Wheel darf nur noch als kleiner Teil dieser
+  Station dienen, nicht als alleinige Label-Wolke.
+- Urspruenglich empfohlener naechster Schritt war M16-BZ High-Fidelity Island
+  Build Flow Concept auf Basis der M16-BY-Richtung; der folgende M16-BZ-Nachtrag
+  schiebt davor ein Art-Pipeline-Gate, damit High-Fidelity nicht wieder ohne
+  Produktions- und Style-Konsistenz entsteht.
+
+Nachtrag M16-BZ:
+
+Der naechste Schritt wurde bewusst vorgeschaltet: Statt direkt High-Fidelity-
+Screens zu bauen, klaert M16-BZ zuerst die KI-Art-Produktionspipeline und
+Style-Konsistenz. High-Fidelity-Flow und Spielassets bleiben blockiert, bis
+Art Bible, Master References und Asset-Family-Spec folgen.
+
+M16-BZ erledigt:
+
+- M16T-ART-001
+- M16T-ART-002
+- M16T-ART-003
+- M16T-ART-004
+
+M16-BZ operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/366-ai-art-production-pipeline-and-style-consistency-gate.md`
+  definiert die Rollen von ChatGPT, Codex, KI-Bildtool,
+  Nachbearbeitungswerkzeugen und spaeterem Artist.
+- Das starke M16-BY-Referenzbild ist Art-Direction-Reference und
+  Dokumentationsmaterial, aber kein App-Screen und kein finales Asset.
+- Codex darf Art Direction, Pipeline, Datei- und QA-Regeln dokumentieren, aber
+  keine hochwertigen Spielbilder nachzeichnen oder als Produktionsbildgenerator
+  auftreten.
+- Talvori nutzt kuenftig kontrollierte Style-/Structure-Reference-Pipelines,
+  ggf. LoRA/ControlNet, manuelle Nachbearbeitung und strenge Asset-QA statt
+  freier Einzelprompts.
+- Empfohlener Folgepfad ist M16-CA Talvori Art Bible v1 -> M16-CB Starter
+  Island Master Reference Set -> M16-CC Asset Family and Export Spec.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
@@ -1028,10 +1094,10 @@ muessen fachlich harmonieren.
 
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
-| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code-Grenzen und verhindern falsche Weltreaktionen. |
+| MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-ART-001..004, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
@@ -1253,6 +1319,19 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-DESIGN-002 | [x] | Island build flow wireflow required before code | Der Inselbau-Flow braucht eine visuelle Reihenfolge, bevor Flutter-Layout entsteht. | M16-BW verlangt Low-Fidelity-Wireflow fuer Inselauswahl, Insel betreten, Karte bewegen/zoomen, Slot, BuildChoice, Grundstueck und Bauphase. | Flutter-Preview als Ersatz fuer fehlenden Wireflow. | nein |
 | M16T-DESIGN-003 | [x] | BuildChoice interaction pattern must be visually approved | BuildChoice kippt schnell in Bottom-Sheet, Label-Wolke oder technisches Menue. | M16-BW legt fest, dass In-World-Wheel, Werkbank, Showcase oder Companion/Worker-Vorschlag vor Code visuell entschieden werden muessen. | BuildChoice-Wheel oder BuildChoice-Panel ohne visuelle Freigabe. | nein |
 | M16T-DESIGN-004 | [x] | Pan/zoom/slot focus design gate | Mobile-Kamera, Slot-Fokus und Erreichbarkeit bestimmen das Spielgefuehl. | M16-BW dokumentiert native Pan/Pinch-Zoom-Erwartung, Slot-Tap-Fokus, Toolbelt-Grenzen und spaetere Kamera-/Map-Engine als eigenes Gate. | Dev-Pfeile, Zoom-Buttons, ungeregeltes Clamping oder verdeckte BuildChoice-Ghosts. | nein |
+| M16T-DESIGN-007 | [x] | Modern mobile game direction board | Low-Fidelity-Wireflow reicht nicht, wenn er wie ein Arbeitsblatt wirkt. | `365-modern-mobile-game-direction-board.md` definiert moderne Mobile-Game-DNA, Benchmark-Prinzipien, Hauptflow, Screen-Richtung und Visual Direction Board. | Neuer Wireflow oder Flutter-Code ohne moderne Game-Direction. | nein |
+| M16T-DESIGN-008 | [x] | Game-DNA before high-fidelity island flow | High-Fidelity-Flow braucht eine klare Talvori-Game-DNA. | M16-BY legt cozy adventure construction world, island-first, object-first, character-assisted und context-based language learning als Richtung fest. | High-Fidelity-Screens, die wieder nach Schule, Formular oder Menue-first wirken. | nein |
+| M16T-DESIGN-009 | [x] | BuildChoice pattern selected by game feel | BuildChoice darf nicht nur nach technischer Einfachheit entschieden werden. | M16-BY waehlt Build Station am Slot mit fokussierter Auswahl als fuehrendes Pattern und verwirft Bottom-Sheet, Vollbild-Menue und reine Listenwahl fuer den Hauptmoment. | BuildChoice-Wheel, Bottom-Sheet oder Kartenliste ohne Spielgefuehl-Pruefung. | nein |
+| M16T-DESIGN-010 | [x] | Cozy island diorama direction separated from rejected v2 board | Die moderne Richtung muss sich wie Mobile Game und nicht wie Corporate-Folie anfuehlen, darf aber nicht aus einem schwachen Zwischenboard abgeleitet werden. | M16-BY haelt Cozy Island Diorama Builder, Build Station am Slot, Worker/Tali/Vori und klare Avoid-Liste als konzeptionelle Richtung fest; `modern_mobile_game_direction_board_v2.*` ist als nicht akzeptierte Zwischenvorschau eingeordnet. | High-Fidelity-Flow oder Flutter-Code, der wieder nach Schulblatt, Menue, Dashboard, isoliertem Wheel oder dem abgelehnten v2-Board als Zielbild wirkt. | nein |
+
+### M16T-ART
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-ART-001 | [x] | AI art production ownership | Ohne echten Artist braucht Talvori klare Rollen statt zufaelliger Einzelprompts. | `366-ai-art-production-pipeline-and-style-consistency-gate.md` trennt ChatGPT, Codex, KI-Bildtool, Nachbearbeitungstools und spaeteren Artist. | Unklare Verantwortung fuer Bildgenerierung, Art Direction oder Asset-Freigabe. | nein |
+| M16T-ART-002 | [x] | Reference image is direction, not asset | Das starke Referenzbild darf nicht versehentlich als App-Screen oder Spielasset behandelt werden. | Referenzbild-Regel dokumentiert ist: Art-Direction-Reference, Dokumentationsmaterial, nicht nach `assets/`, nicht von Codex nachzeichnen. | Referenzbild kopieren, vereinfachen, nachzeichnen oder als finales Asset nutzen. | nein |
+| M16T-ART-003 | [x] | Style consistency pipeline required | Talvori braucht wiedererkennbare Weltgrafik statt Stilbruch zwischen einzelnen KI-Bildern. | Kontrollierte Pipeline mit Style/Structure References, ggf. LoRA/ControlNet, manueller Nachbearbeitung und QA dokumentiert ist. | Freie Einzelprompts, zufaellige Stilwechsel oder finale Bilder ohne Pruefung. | nein |
+| M16T-ART-004 | [x] | Engine-ready asset export rules | Schoene Bilder reichen nicht, wenn sie nicht layerbar, skalierbar oder lizenzklar sind. | Engine-ready Exportregeln fuer PNG/WebP mit Transparenz, getrennte Layer, Metadaten, Quellen/Prompts/Referenzen und eigenes Asset-Gate stehen. | Riesige Gesamtbilder, unklare Lizenz, fehlende Metadaten oder `assets/`-Writes ohne Gate. | nein |
 
 ### M16T-SOCIAL
 

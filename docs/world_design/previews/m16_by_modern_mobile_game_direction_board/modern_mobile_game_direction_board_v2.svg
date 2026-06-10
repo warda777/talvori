@@ -1,0 +1,400 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1100" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">M16-BY v2 Modern Mobile Game Direction Board</title>
+  <desc id="desc">Repo-native documentation board for Talvori's Cozy Island Diorama Builder direction. It shows an island diorama, a build station at a slot, worker and companion presence, avoided patterns, and the next visual target.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0d2830"/>
+      <stop offset="0.46" stop-color="#14586b"/>
+      <stop offset="1" stop-color="#0b1e25"/>
+    </linearGradient>
+    <radialGradient id="seaGlow" cx="50%" cy="34%" r="67%">
+      <stop offset="0" stop-color="#43b6ba" stop-opacity="0.55"/>
+      <stop offset="0.54" stop-color="#1c6d75" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#092025" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#123239" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#07181d" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff3ad"/>
+      <stop offset="0.55" stop-color="#e6b654"/>
+      <stop offset="1" stop-color="#9d6b21"/>
+    </linearGradient>
+    <linearGradient id="islandTop" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#a9db6b"/>
+      <stop offset="0.45" stop-color="#5dae57"/>
+      <stop offset="1" stop-color="#23704c"/>
+    </linearGradient>
+    <linearGradient id="cliff" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#9b7448"/>
+      <stop offset="1" stop-color="#4a3327"/>
+    </linearGradient>
+    <linearGradient id="station" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#7a4b27"/>
+      <stop offset="1" stop-color="#372116"/>
+    </linearGradient>
+    <linearGradient id="ghost" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff8cf" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#cda45d" stop-opacity="0.48"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#020b0d" flood-opacity="0.45"/>
+    </filter>
+    <filter id="tightShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#020b0d" flood-opacity="0.38"/>
+    </filter>
+    <filter id="warmGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.93  0 1 0 0 0.71  0 0 1 0 0.25  0 0 0 0.62 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .title { font: 800 46px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #fff1c6; letter-spacing: 1px; }
+      .subtitle { font: 600 19px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ccefe5; }
+      .eyebrow { font: 800 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f4cd63; letter-spacing: 1.8px; }
+      .h2 { font: 800 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #fff0c1; }
+      .h3 { font: 800 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f5d76e; }
+      .body { font: 500 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #e6f8ef; }
+      .small { font: 600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #cae5dc; }
+      .tiny { font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #c6e2d8; }
+      .label { font: 800 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #fff0c1; }
+      .avoid { font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f0d8c8; }
+      .flowTitle { font: 800 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #fff0c1; }
+      .flowText { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #cfece3; }
+      .cardStroke { stroke: #b9dc70; stroke-opacity: 0.36; stroke-width: 1.5; }
+      .goldStroke { stroke: #e7c65d; stroke-opacity: 0.68; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1100" fill="url(#sky)"/>
+  <rect width="1800" height="1100" fill="url(#seaGlow)"/>
+  <path d="M0 795 C260 735 410 825 625 772 C890 706 990 801 1224 742 C1440 687 1580 743 1800 694 L1800 1100 L0 1100 Z" fill="#06171b" opacity="0.42"/>
+  <path d="M72 172 C270 92 436 91 642 139 C820 180 988 134 1164 84 C1348 32 1554 54 1720 115" fill="none" stroke="#9edeca" stroke-opacity="0.17" stroke-width="3"/>
+
+  <g transform="translate(38 32)">
+    <text class="title" x="0" y="46">TALVORI</text>
+    <text class="subtitle" x="4" y="78">M16-BY v2</text>
+    <text class="small" x="4" y="106">Cozy Island Diorama Builder</text>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <rect x="270" y="42" width="1038" height="676" rx="28" fill="#102f36" fill-opacity="0.76" class="goldStroke"/>
+    <rect x="286" y="58" width="1006" height="644" rx="22" fill="url(#sky)" opacity="0.78"/>
+
+    <g transform="translate(302 82)">
+      <text class="eyebrow" x="388" y="24">THE FEEL WE AIM FOR</text>
+      <text class="subtitle" x="276" y="54">Warm · living · playful · meaningful · world-first</text>
+    </g>
+
+    <g transform="translate(282 122)">
+      <ellipse cx="504" cy="370" rx="470" ry="185" fill="#061316" opacity="0.42"/>
+      <path d="M112 319 C180 167 326 97 515 91 C713 85 853 169 918 303 C874 455 710 535 500 531 C290 527 148 455 112 319 Z" fill="url(#cliff)"/>
+      <path d="M88 275 C152 100 330 20 535 39 C742 58 883 145 944 275 C881 408 729 472 508 470 C302 468 150 408 88 275 Z" fill="url(#islandTop)" stroke="#d7e27a" stroke-opacity="0.32" stroke-width="3"/>
+      <path d="M172 319 C290 388 488 392 620 346 C742 302 822 318 884 363" fill="none" stroke="#f1d58a" stroke-width="22" stroke-linecap="round" stroke-opacity="0.42"/>
+      <path d="M224 223 C350 273 462 259 581 205 C686 158 796 165 888 214" fill="none" stroke="#f6e0a7" stroke-width="18" stroke-linecap="round" stroke-opacity="0.35"/>
+      <path d="M286 390 C350 348 407 323 485 331 C578 342 664 392 720 440" fill="none" stroke="#f6e0a7" stroke-width="13" stroke-linecap="round" stroke-opacity="0.32"/>
+
+      <g opacity="0.95">
+        <circle cx="231" cy="184" r="27" fill="#2d7d42"/>
+        <circle cx="253" cy="169" r="24" fill="#5ea244"/>
+        <circle cx="210" cy="160" r="23" fill="#6eac4b"/>
+        <rect x="226" y="184" width="13" height="45" rx="5" fill="#8d5b2c"/>
+        <circle cx="820" cy="248" r="31" fill="#316f3d"/>
+        <circle cx="846" cy="230" r="23" fill="#6daa4a"/>
+        <circle cx="795" cy="230" r="25" fill="#77b553"/>
+        <rect x="816" y="249" width="13" height="46" rx="5" fill="#8d5b2c"/>
+        <circle cx="424" cy="111" r="31" fill="#3a7a42"/>
+        <circle cx="453" cy="93" r="23" fill="#6fb04a"/>
+        <circle cx="398" cy="91" r="24" fill="#7bb757"/>
+        <rect x="420" y="112" width="14" height="50" rx="5" fill="#8d5b2c"/>
+        <circle cx="618" cy="122" r="27" fill="#336e3c"/>
+        <circle cx="642" cy="107" r="21" fill="#6baa47"/>
+        <circle cx="596" cy="104" r="23" fill="#77b554"/>
+        <rect x="614" y="122" width="12" height="43" rx="5" fill="#8d5b2c"/>
+      </g>
+
+      <g filter="url(#tightShadow)">
+        <path d="M337 207 L407 171 L476 207 L476 289 L337 289 Z" fill="#b87537" stroke="#eec46c" stroke-width="2"/>
+        <path d="M319 208 L407 141 L497 208 Z" fill="#7e331f" stroke="#f1d472" stroke-width="3"/>
+        <rect x="389" y="238" width="35" height="51" rx="5" fill="#43261c"/>
+        <rect x="348" y="224" width="31" height="28" rx="4" fill="#f1d77f"/>
+        <rect x="438" y="224" width="31" height="28" rx="4" fill="#f1d77f"/>
+        <path d="M313 291 C360 319 451 319 503 291" fill="none" stroke="#321b14" stroke-width="8" stroke-opacity="0.3"/>
+      </g>
+
+      <g>
+        <g transform="translate(652 318)" filter="url(#warmGlow)">
+          <path d="M-70 8 C-36 -28 40 -35 86 2 C60 28 -17 41 -70 8 Z" fill="#e4d383" fill-opacity="0.42" stroke="#fff1a6" stroke-width="4" stroke-dasharray="13 10"/>
+          <path d="M-46 15 L-8 -6 L35 7 L-2 30 Z" fill="#f9e6a0" fill-opacity="0.68"/>
+          <circle cx="-2" cy="-38" r="18" fill="url(#gold)"/>
+          <path d="M-2 -25 L-2 18" stroke="#573617" stroke-width="8" stroke-linecap="round"/>
+        </g>
+
+        <g transform="translate(630 396)" filter="url(#softShadow)">
+          <path d="M0 72 L26 20 L314 20 L356 68 L336 184 L21 184 Z" fill="url(#station)" stroke="#edc568" stroke-opacity="0.7" stroke-width="3"/>
+          <path d="M29 26 L302 26 L339 70 L18 70 Z" fill="#996033"/>
+          <rect x="52" y="78" width="230" height="72" rx="12" fill="#2e1e17" opacity="0.76"/>
+          <path d="M74 64 L101 16 L127 64" fill="none" stroke="#d6a354" stroke-width="8" stroke-linejoin="round"/>
+          <path d="M92 24 L92 -20" stroke="#bf8950" stroke-width="9" stroke-linecap="round"/>
+          <path d="M60 -20 C88 -44 119 -38 145 -16" fill="none" stroke="#d9b16c" stroke-width="8" stroke-linecap="round"/>
+          <text class="h3" x="60" y="106">Build Station am Slot</text>
+          <text class="small" x="62" y="131">Bauen beginnt hier im Ort.</text>
+
+          <g transform="translate(70 154)">
+            <rect x="0" y="-22" width="70" height="88" rx="14" fill="#6c3b22" stroke="#f1d56e" stroke-width="3"/>
+            <path d="M15 11 L36 -10 L57 11 L57 43 L15 43 Z" fill="#c57935"/>
+            <path d="M10 12 L36 -18 L62 12 Z" fill="#7d3320"/>
+            <text class="tiny" x="22" y="58">Haus</text>
+          </g>
+          <g transform="translate(154 161)" opacity="0.74">
+            <rect x="0" y="-18" width="60" height="72" rx="12" fill="#3d5d3c" stroke="#e0c16a" stroke-opacity="0.55" stroke-width="2"/>
+            <path d="M13 25 C25 2 37 2 49 25" fill="#76b853"/>
+            <path d="M30 0 L30 35" stroke="#c9a55a" stroke-width="5" stroke-linecap="round"/>
+            <text class="tiny" x="9" y="67">Garten</text>
+          </g>
+          <g transform="translate(222 161)" opacity="0.65">
+            <rect x="0" y="-18" width="60" height="72" rx="12" fill="#415b63" stroke="#e0c16a" stroke-opacity="0.45" stroke-width="2"/>
+            <path d="M14 20 L30 -2 L48 20 L48 39 L14 39 Z" fill="#94a8a1"/>
+            <text class="tiny" x="1" y="67">Werkstatt</text>
+          </g>
+          <g transform="translate(289 161)" opacity="0.58">
+            <rect x="0" y="-18" width="58" height="72" rx="12" fill="#4d4638" stroke="#e0c16a" stroke-opacity="0.4" stroke-width="2"/>
+            <path d="M12 34 L12 13 L46 13 L46 34 Z" fill="#b78445"/>
+            <path d="M17 34 L17 22 L41 22 L41 34" stroke="#573617" stroke-width="4"/>
+            <text class="tiny" x="10" y="67">Garage</text>
+          </g>
+          <g transform="translate(294 57)">
+            <rect x="0" y="0" width="36" height="31" rx="7" fill="#79532b" opacity="0.75"/>
+            <circle cx="9" cy="8" r="3" fill="#dec16b"/>
+            <circle cx="18" cy="13" r="3" fill="#dec16b"/>
+            <circle cx="27" cy="8" r="3" fill="#dec16b"/>
+          </g>
+        </g>
+
+        <g transform="translate(940 294)" filter="url(#tightShadow)">
+          <circle cx="36" cy="35" r="30" fill="#c98b55"/>
+          <path d="M13 76 C22 51 53 51 63 76 L69 128 L9 128 Z" fill="#35675a"/>
+          <circle cx="26" cy="32" r="4" fill="#2b160f"/>
+          <circle cx="46" cy="32" r="4" fill="#2b160f"/>
+          <path d="M28 47 C35 54 43 54 50 47" fill="none" stroke="#4a2318" stroke-width="4" stroke-linecap="round"/>
+          <path d="M7 75 C-12 93 -19 114 -8 126" fill="none" stroke="#c98b55" stroke-width="10" stroke-linecap="round"/>
+          <path d="M66 76 C91 88 103 110 99 128" fill="none" stroke="#c98b55" stroke-width="10" stroke-linecap="round"/>
+          <path d="M18 8 C36 -20 67 7 47 22 C65 12 78 28 66 42 C74 19 49 -2 18 8 Z" fill="#5b2d1b"/>
+        </g>
+
+        <g transform="translate(730 176)">
+          <path d="M0 0 L236 0 Q256 0 256 20 L256 95 Q256 115 236 115 L60 115 L28 148 L34 115 L0 115 Q-20 115 -20 95 L-20 20 Q-20 0 0 0 Z" fill="#fff4d5" stroke="#b98a4d" stroke-width="2" filter="url(#tightShadow)"/>
+          <text x="18" y="35" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="18" font-weight="800" fill="#2a2018">Sieh dir diesen Ort an.</text>
+          <text x="18" y="65" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="17" font-weight="700" fill="#2a2018">Was moechtest du</text>
+          <text x="18" y="91" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="17" font-weight="700" fill="#2a2018">hier bauen?</text>
+        </g>
+      </g>
+
+      <g transform="translate(48 490)">
+        <rect x="0" y="0" width="168" height="56" rx="14" fill="#112c32" stroke="#e2c45d" stroke-opacity="0.42"/>
+        <text class="label" x="51" y="23">Insel</text>
+        <text class="tiny" x="51" y="42">dein Ort</text>
+        <path d="M18 34 C28 18 43 18 54 34 Z" fill="#76b853"/>
+      </g>
+      <g transform="translate(236 490)">
+        <rect x="0" y="0" width="168" height="56" rx="14" fill="#112c32" stroke="#e2c45d" stroke-opacity="0.42"/>
+        <text class="label" x="50" y="23">Slot</text>
+        <text class="tiny" x="50" y="42">frei waehlen</text>
+        <circle cx="30" cy="29" r="15" fill="#d8bf65"/>
+      </g>
+      <g transform="translate(424 490)">
+        <rect x="0" y="0" width="180" height="56" rx="14" fill="#112c32" stroke="#e2c45d" stroke-opacity="0.42"/>
+        <text class="label" x="49" y="23">Station</text>
+        <text class="tiny" x="49" y="42">am Ort</text>
+        <rect x="19" y="18" width="25" height="22" rx="4" fill="#a76b35"/>
+      </g>
+      <g transform="translate(624 490)">
+        <rect x="0" y="0" width="180" height="56" rx="14" fill="#112c32" stroke="#e2c45d" stroke-opacity="0.42"/>
+        <text class="label" x="49" y="23">Worker</text>
+        <text class="tiny" x="49" y="42">Welt aendert sich</text>
+        <circle cx="29" cy="24" r="12" fill="#d39558"/>
+        <path d="M17 43 C22 28 36 28 42 43 Z" fill="#476b56"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(28 156)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="246" height="416" rx="22" fill="url(#panel)" class="cardStroke"/>
+    <text class="eyebrow" x="28" y="35">GAME DNA</text>
+    <g transform="translate(28 70)">
+      <path d="M0 28 C12 5 34 5 48 28 Z" fill="#91c25d"/>
+      <text class="h3" x="62" y="20">Island-first</text>
+      <text class="small" x="62" y="42">Deine Insel.</text>
+    </g>
+    <g transform="translate(28 142)">
+      <rect x="4" y="10" width="39" height="34" rx="9" fill="#d5b15f"/>
+      <text class="h3" x="62" y="20">Object-first</text>
+      <text class="small" x="62" y="42">Ort vor Text.</text>
+    </g>
+    <g transform="translate(28 214)">
+      <circle cx="23" cy="24" r="19" fill="#d49458"/>
+      <path d="M5 54 C12 35 35 35 43 54 Z" fill="#39665a"/>
+      <text class="h3" x="62" y="20">Character-assisted</text>
+      <text class="small" x="62" y="42">Worker macht Arbeit sichtbar.</text>
+    </g>
+    <g transform="translate(28 292)">
+      <path d="M4 44 L25 5 L47 44 Z" fill="#6da64f"/>
+      <circle cx="25" cy="27" r="9" fill="#fff0aa"/>
+      <text class="h3" x="62" y="20">Context learning</text>
+      <text class="small" x="62" y="42">Sprache waechst aus Welt.</text>
+    </g>
+    <g transform="translate(28 356)">
+      <path d="M6 33 C21 7 43 8 56 33 C42 56 20 56 6 33 Z" fill="#7bbf60"/>
+      <text class="h3" x="62" y="20">No school feeling</text>
+      <text class="small" x="62" y="42">Nur Spielgefuehl.</text>
+    </g>
+  </g>
+
+  <g transform="translate(1328 46)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="438" height="196" rx="22" fill="url(#panel)" class="goldStroke"/>
+    <text class="eyebrow" x="24" y="34">RECOMMENDED PATTERN</text>
+    <text class="h2" x="24" y="72">Build Station am Slot</text>
+    <text class="body" x="24" y="104">Weltobjekt statt Auswahlpanel.</text>
+    <text class="small" x="24" y="135">Haus klar, 2-3 Ideen ruhig,</text>
+    <text class="small" x="24" y="158">mehr nur als Kiste / spaeter.</text>
+    <g transform="translate(316 65)">
+      <rect x="0" y="52" width="84" height="30" rx="8" fill="#81532b"/>
+      <path d="M11 51 L42 4 L74 51" fill="none" stroke="#d9b16b" stroke-width="8" stroke-linejoin="round"/>
+      <path d="M42 4 L42 -31" stroke="#b9824e" stroke-width="8" stroke-linecap="round"/>
+      <path d="M13 -31 C39 -51 67 -45 87 -26" fill="none" stroke="#e8c370" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="104" cy="39" r="17" fill="#d49458"/>
+      <path d="M92 81 C98 59 113 59 120 81 Z" fill="#44685a"/>
+    </g>
+  </g>
+
+  <g transform="translate(1328 266)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="438" height="170" rx="22" fill="url(#panel)" class="cardStroke"/>
+    <text class="eyebrow" x="24" y="34">THREE DIRECTIONS</text>
+    <g transform="translate(24 60)">
+      <rect x="0" y="0" width="390" height="34" rx="17" fill="#25483b" stroke="#dcdf6e" stroke-width="2"/>
+      <text class="label" x="18" y="23">A) Cozy Island Diorama Builder · chosen</text>
+    </g>
+    <g transform="translate(24 100)">
+      <rect x="0" y="0" width="390" height="27" rx="14" fill="#17313a" stroke="#88ac6e" stroke-opacity="0.5"/>
+      <text class="tiny" x="18" y="18">B) Base Builder Tactical Map · structure only</text>
+    </g>
+    <g transform="translate(24 133)">
+      <rect x="0" y="0" width="390" height="27" rx="14" fill="#17313a" stroke="#88ac6e" stroke-opacity="0.5"/>
+      <text class="tiny" x="18" y="18">C) Storybook Adventure Island · warmth only</text>
+    </g>
+  </g>
+
+  <g transform="translate(1328 460)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="438" height="220" rx="22" fill="#171b1d" fill-opacity="0.86" stroke="#e07b5e" stroke-opacity="0.48" stroke-width="2"/>
+    <text class="eyebrow" x="24" y="34" fill="#ffaf72">WHAT WE AVOID</text>
+    <g transform="translate(26 63)">
+      <text class="avoid" x="34" y="0">Bottom Sheet als Hauptentscheidung</text>
+      <path d="M0 -13 L16 3 M16 -13 L0 3" stroke="#f26d54" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(26 95)">
+      <text class="avoid" x="34" y="0">Vollbild-Menue fuer Slot-Bauen</text>
+      <path d="M0 -13 L16 3 M16 -13 L0 3" stroke="#f26d54" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(26 127)">
+      <text class="avoid" x="34" y="0">Label-Wolke / acht gleiche Optionen</text>
+      <path d="M0 -13 L16 3 M16 -13 L0 3" stroke="#f26d54" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(26 159)">
+      <text class="avoid" x="34" y="0">Worksheet, Dashboard, Formular</text>
+      <path d="M0 -13 L16 3 M16 -13 L0 3" stroke="#f26d54" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(26 191)">
+      <text class="avoid" x="34" y="0">Timer, Economy, FOMO, Pay-to-Win</text>
+      <path d="M0 -13 L16 3 M16 -13 L0 3" stroke="#f26d54" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g transform="translate(1328 706)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="438" height="188" rx="22" fill="url(#panel)" class="cardStroke"/>
+    <text class="eyebrow" x="24" y="34">NEXT VISUAL TARGET</text>
+    <text class="h2" x="24" y="75">M16-BZ</text>
+    <text class="body" x="24" y="107">High-Fidelity Island Build Flow</text>
+    <text class="small" x="24" y="137">Basis: v2, Build Station, Diorama.</text>
+    <text class="small" x="24" y="160">Visuell stark. Spielgefuehl zuerst.</text>
+    <g transform="translate(334 65)">
+      <path d="M0 0 L67 -20 L92 61 L29 82 Z" fill="#d6c58a" stroke="#67583d" stroke-width="2"/>
+      <path d="M25 15 C44 6 57 25 46 41 C63 39 65 59 45 62 C28 65 16 52 24 39 C6 34 8 21 25 15 Z" fill="none" stroke="#4c5238" stroke-width="3"/>
+      <path d="M69 13 L78 44 L55 50" fill="none" stroke="#4c5238" stroke-width="3"/>
+    </g>
+  </g>
+
+  <g transform="translate(28 760)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="1266" height="174" rx="24" fill="#0c252c" fill-opacity="0.82" class="cardStroke"/>
+    <text class="eyebrow" x="26" y="35">IDEAL PLAYER FLOW</text>
+    <g transform="translate(30 58)">
+      <g>
+        <rect x="0" y="0" width="132" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <path d="M25 58 C46 26 88 25 108 58 Z" fill="#6fb451"/>
+        <text class="flowTitle" x="0" y="115">1. Insel</text>
+        <text class="flowText" x="0" y="137">Showcase waehlen</text>
+      </g>
+      <path d="M154 39 L190 39 M178 27 L190 39 L178 51" stroke="#f3dc7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(206 0)">
+        <rect x="0" y="0" width="132" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <path d="M21 62 C53 25 91 35 116 61" fill="none" stroke="#77bb55" stroke-width="15" stroke-linecap="round"/>
+        <circle cx="51" cy="42" r="9" fill="#f1d86d"/>
+        <text class="flowTitle" x="0" y="115">2. Karte</text>
+        <text class="flowText" x="0" y="137">erkunden</text>
+      </g>
+      <path d="M360 39 L396 39 M384 27 L396 39 L384 51" stroke="#f3dc7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(412 0)">
+        <rect x="0" y="0" width="132" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <ellipse cx="66" cy="45" rx="44" ry="22" fill="#5ea857"/>
+        <circle cx="66" cy="39" r="12" fill="url(#gold)"/>
+        <text class="flowTitle" x="0" y="115">3. Ort</text>
+        <text class="flowText" x="0" y="137">frei waehlen</text>
+      </g>
+      <path d="M566 39 L602 39 M590 27 L602 39 L590 51" stroke="#f3dc7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(618 0)">
+        <rect x="0" y="0" width="132" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <rect x="34" y="45" width="67" height="21" rx="6" fill="#8f5a31"/>
+        <path d="M41 45 L67 15 L95 45" fill="none" stroke="#dcb369" stroke-width="7"/>
+        <text class="flowTitle" x="0" y="115">4. Station</text>
+        <text class="flowText" x="0" y="137">am Slot bauen</text>
+      </g>
+      <path d="M772 39 L808 39 M796 27 L808 39 L796 51" stroke="#f3dc7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(824 0)">
+        <rect x="0" y="0" width="132" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <circle cx="49" cy="32" r="15" fill="#d39558"/>
+        <path d="M35 61 C42 42 57 42 64 61 Z" fill="#3c6556"/>
+        <path d="M77 58 L104 30" stroke="#dec16c" stroke-width="7" stroke-linecap="round"/>
+        <text class="flowTitle" x="0" y="115">5. Worker</text>
+        <text class="flowText" x="0" y="137">macht Arbeit sichtbar</text>
+      </g>
+      <path d="M978 39 L1014 39 M1002 27 L1014 39 L1002 51" stroke="#f3dc7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(1030 0)">
+        <rect x="0" y="0" width="158" height="84" rx="16" fill="#183942" stroke="#b7d869" stroke-opacity="0.46"/>
+        <path d="M28 58 L48 22 L77 58 L102 26 L132 58" fill="none" stroke="#f3d878" stroke-width="8" stroke-linejoin="round"/>
+        <text class="flowTitle" x="0" y="115">6. Tiefe</text>
+        <text class="flowText" x="0" y="137">Haus -> Raum -> Moebel</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(28 976)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="386" height="106" rx="20" fill="#103237" fill-opacity="0.9" class="cardStroke"/>
+    <text class="eyebrow" x="24" y="34">OUR PROMISE</text>
+    <text class="body" x="24" y="66">Kein Druck. Keine Pflicht.</text>
+    <text class="small" x="24" y="88">Nur Spiel, Neugier und Sprache.</text>
+  </g>
+  <g transform="translate(438 976)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="638" height="106" rx="20" fill="#103237" fill-opacity="0.9" class="cardStroke"/>
+    <text class="eyebrow" x="24" y="34">RULES FOR FOLLOW-CODE</text>
+    <text class="body" x="24" y="66">No route · no BuildState · no assets · no persistence.</text>
+    <text class="small" x="24" y="88">Code starts only after M16-BZ makes the flow visually concrete.</text>
+  </g>
+  <g transform="translate(1100 976)" filter="url(#tightShadow)">
+    <rect x="0" y="0" width="666" height="106" rx="20" fill="#15323a" fill-opacity="0.92" stroke="#e2c45d" stroke-opacity="0.45" stroke-width="2"/>
+    <text class="h3" x="26" y="40">We build a world where language grows naturally.</text>
+    <text class="small" x="26" y="72">Building creates context. Learning uses context.</text>
+  </g>
+</svg>

@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120" role="img" aria-labelledby="title desc">
+  <title id="title">M16-BY Modern Mobile Game Direction Board</title>
+  <desc id="desc">A modern low to mid fidelity direction board for Talvori island build flow, showing game DNA, flow pillars, recommended build station pattern, avoid list and next concept target.</desc>
+  <defs>
+    <linearGradient id="backdrop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#162b35"/>
+      <stop offset="0.48" stop-color="#213d3a"/>
+      <stop offset="1" stop-color="#f1c66a"/>
+    </linearGradient>
+    <linearGradient id="islandGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c8f0d2"/>
+      <stop offset="1" stop-color="#6da36f"/>
+    </linearGradient>
+    <linearGradient id="phoneGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12313b"/>
+      <stop offset="1" stop-color="#0b171d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#061115" flood-opacity="0.32"/>
+    </filter>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#061115" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      .title { font: 800 44px Arial, sans-serif; fill: #f8f4e8; letter-spacing: 0; }
+      .subtitle { font: 500 20px Arial, sans-serif; fill: #dce6df; letter-spacing: 0; }
+      .section-title { font: 800 24px Arial, sans-serif; fill: #142229; letter-spacing: 0; }
+      .section-light { font: 800 24px Arial, sans-serif; fill: #f8f4e8; letter-spacing: 0; }
+      .label { font: 700 18px Arial, sans-serif; fill: #17242a; letter-spacing: 0; }
+      .small { font: 600 15px Arial, sans-serif; fill: #334348; letter-spacing: 0; }
+      .tiny { font: 700 12px Arial, sans-serif; fill: #435156; letter-spacing: 0; }
+      .light-small { font: 600 15px Arial, sans-serif; fill: #ecf4ed; letter-spacing: 0; }
+      .card { fill: #f8f4e8; stroke: rgba(255,255,255,0.5); stroke-width: 1; }
+      .dark-card { fill: rgba(13,30,37,0.72); stroke: rgba(255,255,255,0.16); stroke-width: 1; }
+      .pill { fill: #ffffff; stroke: #d9d0bc; stroke-width: 1.5; }
+      .amber { fill: #f4cf78; }
+      .mint { fill: #a7d8a7; }
+      .teal { fill: #83c4c9; }
+      .coral { fill: #f2a178; }
+      .slate { fill: #394c56; }
+      .line { fill: none; stroke: #f3d37f; stroke-width: 5; stroke-linecap: round; }
+      .thin-line { fill: none; stroke: #5b6c70; stroke-width: 2; stroke-linecap: round; }
+      .safe-line { fill: none; stroke: #769d7b; stroke-width: 4; stroke-linecap: round; }
+      .avoid-line { fill: none; stroke: #d57a70; stroke-width: 4; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1120" fill="url(#backdrop)"/>
+  <path d="M0 828 C270 755 470 925 760 846 C1050 767 1190 642 1800 720 L1800 1120 L0 1120 Z" fill="#f6efe0" opacity="0.95"/>
+
+  <text x="72" y="78" class="title">Talvori Modern Mobile Game Direction Board</text>
+  <text x="74" y="112" class="subtitle">Cozy adventure construction world: island-first, object-first, character-assisted, context-based language learning.</text>
+  <text x="1500" y="76" class="subtitle">M16-BY / no code / no assets</text>
+
+  <!-- Left DNA card -->
+  <g filter="url(#cardShadow)">
+    <rect class="card" x="72" y="160" width="380" height="310" rx="28"/>
+    <text x="102" y="202" class="section-title">Game DNA</text>
+    <text x="102" y="238" class="small">The screen should feel like a place,</text>
+    <text x="102" y="260" class="small">not a worksheet or menu flow.</text>
+    <g transform="translate(102 294)">
+      <rect class="pill" x="0" y="0" width="142" height="38" rx="19"/>
+      <circle class="mint" cx="22" cy="19" r="10"/>
+      <text x="42" y="25" class="tiny">Island-first</text>
+      <rect class="pill" x="156" y="0" width="156" height="38" rx="19"/>
+      <circle class="amber" cx="178" cy="19" r="10"/>
+      <text x="198" y="25" class="tiny">Object-first</text>
+      <rect class="pill" x="0" y="52" width="180" height="38" rx="19"/>
+      <circle class="teal" cx="22" cy="71" r="10"/>
+      <text x="42" y="77" class="tiny">Worker action</text>
+      <rect class="pill" x="194" y="52" width="142" height="38" rx="19"/>
+      <circle class="coral" cx="216" cy="71" r="10"/>
+      <text x="236" y="77" class="tiny">No school</text>
+    </g>
+    <path class="safe-line" d="M102 414 L394 414"/>
+    <text x="102" y="444" class="small">Build creates context. Language grows there.</text>
+  </g>
+
+  <!-- Hero phone -->
+  <g filter="url(#softShadow)">
+    <rect x="570" y="140" width="520" height="800" rx="70" fill="#061115"/>
+    <rect x="602" y="182" width="456" height="726" rx="48" fill="url(#phoneGlass)"/>
+    <rect x="764" y="162" width="132" height="16" rx="8" fill="#26383f"/>
+    <text x="640" y="232" class="light-small">Such dir eine Insel aus.</text>
+    <ellipse cx="830" cy="514" rx="300" ry="244" fill="#8ec9ce" opacity="0.95"/>
+    <path d="M655 492 C700 340 942 314 1004 462 C1058 588 934 733 760 688 C659 662 613 585 655 492Z" fill="url(#islandGlow)" stroke="#e8f6cf" stroke-width="6"/>
+    <path d="M716 498 C760 410 892 408 947 488 C990 550 935 628 819 643 C727 655 673 590 716 498Z" fill="#edf4c9" opacity="0.64" stroke="#7ea66d" stroke-width="3"/>
+    <path d="M676 568 C746 542 821 540 924 568" class="thin-line"/>
+    <path d="M741 439 C810 465 872 456 936 413" class="thin-line" opacity="0.65"/>
+    <circle cx="790" cy="516" r="24" fill="#fff3b0" stroke="#f4b63d" stroke-width="6"/>
+    <circle cx="714" cy="455" r="14" fill="#eafce5" stroke="#328b52" stroke-width="4"/>
+    <circle cx="884" cy="452" r="14" fill="#eafce5" stroke="#328b52" stroke-width="4"/>
+    <circle cx="746" cy="614" r="14" fill="#eafce5" stroke="#328b52" stroke-width="4"/>
+    <circle cx="940" cy="600" r="14" fill="#eafce5" stroke="#328b52" stroke-width="4"/>
+    <circle cx="978" cy="520" r="12" fill="#d7ded7" stroke="#8b928b" stroke-width="3" stroke-dasharray="6 5"/>
+    <circle cx="677" cy="610" r="12" fill="#d7ded7" stroke="#8b928b" stroke-width="3" stroke-dasharray="6 5"/>
+    <g transform="translate(678 700)">
+      <rect x="0" y="0" width="304" height="88" rx="28" fill="#fff6dc" stroke="#f0c75f" stroke-width="4"/>
+      <text x="28" y="34" class="label">Build Station am Slot</text>
+      <text x="28" y="62" class="small">Haus gross. Rest ruhig.</text>
+      <path d="M236 25 L260 10 L284 25 L284 58 L236 58 Z" fill="#fffdf3" stroke="#c8871e" stroke-width="4"/>
+    </g>
+    <g transform="translate(718 794)">
+      <circle cx="0" cy="0" r="13" fill="#f6d6a0" stroke="#26383f" stroke-width="2"/>
+      <rect x="-11" y="14" width="24" height="36" rx="9" fill="#5d86c6" stroke="#26383f" stroke-width="2"/>
+      <path d="M18 24 L58 6" stroke="#d2b474" stroke-width="5" stroke-linecap="round"/>
+      <text x="84" y="32" class="light-small">Worker macht Bau lebendig.</text>
+    </g>
+  </g>
+
+  <!-- Right pattern decision -->
+  <g filter="url(#cardShadow)">
+    <rect class="card" x="1220" y="160" width="500" height="310" rx="28"/>
+    <text x="1250" y="202" class="section-title">Recommended Pattern</text>
+    <text x="1250" y="236" class="label">In-world Build Station + focused choice</text>
+    <text x="1250" y="266" class="small">Not a bottom menu. Not a label cloud.</text>
+    <g transform="translate(1260 300)">
+      <rect x="0" y="0" width="168" height="112" rx="22" fill="#fff4cd" stroke="#c88921" stroke-width="4"/>
+      <path d="M46 60 L84 28 L122 60 L122 91 L46 91 Z" fill="#fffdf2" stroke="#9b6617" stroke-width="4"/>
+      <text x="58" y="28" class="tiny">Haus</text>
+      <rect x="190" y="10" width="108" height="40" rx="20" fill="#e8efe8" stroke="#99a59b" stroke-width="2"/>
+      <text x="212" y="36" class="tiny">Garten</text>
+      <rect x="310" y="10" width="120" height="40" rx="20" fill="#e8efe8" stroke="#99a59b" stroke-width="2"/>
+      <text x="326" y="36" class="tiny">Werkstatt</text>
+      <rect x="190" y="64" width="108" height="40" rx="20" fill="#e8efe8" stroke="#99a59b" stroke-width="2"/>
+      <text x="211" y="90" class="tiny">Garage</text>
+      <circle cx="326" cy="84" r="5" fill="#66746a"/>
+      <circle cx="342" cy="84" r="5" fill="#66746a"/>
+      <circle cx="358" cy="84" r="5" fill="#66746a"/>
+      <text x="380" y="89" class="tiny">more later</text>
+    </g>
+  </g>
+
+  <!-- Flow pillars -->
+  <g filter="url(#cardShadow)">
+    <rect class="dark-card" x="72" y="535" width="410" height="360" rx="30"/>
+    <text x="102" y="580" class="section-light">Flow Pillars</text>
+    <g transform="translate(102 624)">
+      <circle class="amber" cx="20" cy="20" r="18"/>
+      <text x="54" y="26" class="light-small">Island showcase first</text>
+      <circle class="mint" cx="20" cy="76" r="18"/>
+      <text x="54" y="82" class="light-small">Native map gestures</text>
+      <circle class="teal" cx="20" cy="132" r="18"/>
+      <text x="54" y="138" class="light-small">Neutral slots, real choice</text>
+      <circle class="coral" cx="20" cy="188" r="18"/>
+      <text x="54" y="194" class="light-small">Build idea lives at the place</text>
+      <circle fill="#d9ead2" cx="20" cy="244" r="18"/>
+      <text x="54" y="250" class="light-small">Worker changes the world</text>
+    </g>
+  </g>
+
+  <!-- Avoid -->
+  <g filter="url(#cardShadow)">
+    <rect class="card" x="1220" y="535" width="500" height="360" rx="30"/>
+    <text x="1250" y="580" class="section-title">What To Avoid</text>
+    <g transform="translate(1254 626)">
+      <path class="avoid-line" d="M0 0 L30 30 M30 0 L0 30"/>
+      <text x="52" y="22" class="small">Worksheet panels and admin boards</text>
+      <path class="avoid-line" d="M0 58 L30 88 M30 58 L0 88"/>
+      <text x="52" y="80" class="small">Bottom sheet as the main decision</text>
+      <path class="avoid-line" d="M0 116 L30 146 M30 116 L0 146"/>
+      <text x="52" y="138" class="small">Eight equal labels around one slot</text>
+      <path class="avoid-line" d="M0 174 L30 204 M30 174 L0 204"/>
+      <text x="52" y="196" class="small">Timer, economy, FOMO or school feeling</text>
+      <path class="avoid-line" d="M0 232 L30 262 M30 232 L0 262"/>
+      <text x="52" y="254" class="small">App route feeling before camera feeling</text>
+    </g>
+  </g>
+
+  <!-- Bottom recipe strip -->
+  <g filter="url(#cardShadow)">
+    <rect class="card" x="520" y="965" width="760" height="100" rx="30"/>
+    <text x="550" y="1004" class="section-title">Next Visual Concept Target</text>
+    <text x="550" y="1038" class="small">M16-BZ High-Fidelity Island Build Flow Concept: one vertical mobile flow, modern composition, still no product code.</text>
+  </g>
+  <g transform="translate(650 842)">
+    <rect x="0" y="0" width="76" height="38" rx="19" fill="#f4cf78"/>
+    <text x="13" y="25" class="tiny">Select</text>
+    <path class="line" d="M86 19 L104 19"/>
+    <rect x="114" y="0" width="86" height="38" rx="19" fill="#a7d8a7"/>
+    <text x="131" y="25" class="tiny">Explore</text>
+    <path class="line" d="M210 19 L228 19"/>
+    <rect x="238" y="0" width="82" height="38" rx="19" fill="#83c4c9"/>
+    <text x="255" y="25" class="tiny">Choose</text>
+    <path class="line" d="M330 19 L348 19"/>
+    <rect x="358" y="0" width="74" height="38" rx="19" fill="#f2a178"/>
+    <text x="376" y="25" class="tiny">Build</text>
+  </g>
+</svg>

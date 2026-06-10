@@ -132,6 +132,7 @@ Non-Goals:
 | `357-game-like-island-selection-and-construction-camera-flow-gate.md` | Korrigiert den ersten Construction-Learning-Codepfad zu Game-like Insel-Showcase, Insel betreten, Kamera-Zoom, Bauplatz, visueller BuildChoice und minimalem HUD. |
 | `361-local-construction-preview-boundary-and-flow-rejoin-gate.md` | Boundary fuer den Flow-Rejoin nach M16-BQ: lokale Preview verbindet Uferhain, Slot, BuildChoice, Kamera/Fokus und object-based Worker-Bauplatz, ohne App-Integration, Route, Persistenz oder BuildState. |
 | `363-professional-island-build-flow-design-gate.md` | Design-before-Code-Gate nach gestopptem M16-BT: komplexe Inselbau-, Slot-, Kamera- und BuildChoice-Flows brauchen Research, Wireflow, visuelle Preview und Visual-QA vor weiterem Flutter-Code. |
+| `365-modern-mobile-game-direction-board.md` | Modernes Mobile-Game-Direction-Board nach gestopptem M16-BX: M16-BY definiert Cozy Island Diorama Builder, Build Station am Slot und Worker/Companion als inhaltliche Richtung, ohne das konkrete v2-Board als visuelles Zielbild freizugeben. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -155,6 +156,7 @@ Non-Goals:
 | Dokument | Kernregel |
 | --- | --- |
 | `289-asset-prioritization-scope-gate.md` | Asset-Scope braucht eigenes Gate; keine Spielassets in Planungs-Slices. |
+| `366-ai-art-production-pipeline-and-style-consistency-gate.md` | KI-Art-Produktion braucht Rollen, Style/Structure References, Style Bible, Master References, Asset-QA und Engine-ready Exportregeln; Referenzbilder sind Richtung, keine Assets. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -191,6 +193,7 @@ Non-Goals:
 | --- | --- |
 | `350-interaction-pattern-decision-matrix.md` | Wheel, Drag, Popup, HUD, Bottom-Sheet, Showcase, Werkbank, Codex-Seite und Map/Board werden nach Aktionstyp, Risiko, Informationsmenge und Spielkontext bewusst gewaehlt. |
 | `363-professional-island-build-flow-design-gate.md` | Komplexe Island-/Slot-/BuildChoice-/Kamera-Flows brauchen Flow, Wireflow, Visual-Konzept, Interaktionsregeln und Visual-QA vor Code. |
+| `365-modern-mobile-game-direction-board.md` | Fuehrende BuildChoice-Richtung ist Build Station am Slot als Weltobjekt; Wheel nur als kleiner Teil der Station, nicht als alleinige Label-Wolke oder UI-Menue. |
 | `350-interaction-pattern-decision-matrix.md` Research-Check | Bei unklarer UI-/Spielaufbau-Entscheidung muss vor Umsetzung ein kurzer Benchmark-/Research-Check gegen erfolgreiche Spiel-/UI-Muster erfolgen. |
 
 ### 4.16 Visual-QA / Preview-Diagramme
@@ -198,6 +201,8 @@ Non-Goals:
 | Dokument | Kernregel |
 | --- | --- |
 | `322-next-safe-preview-slice-decision-gate.md` | Visual-QA prueft Text-Containment, Innenabstand, Kartenabstand, Footer und Contact Sheet. |
+| `365-modern-mobile-game-direction-board.md` | M16-BY-Visuals sind Direction-Board-Dokumentationsmaterial; das konkrete v2-Board ist nur abgelehnter Zwischenstand. Kuenftige High-Fidelity- oder Code-Slices muessen die konzeptionelle Cozy-Island-Diorama-Richtung und Build Station am Slot beruecksichtigen. |
+| `366-ai-art-production-pipeline-and-style-consistency-gate.md` | Pipeline-Visuals duerfen Prozessdiagramme sein, aber keine neuen Spielbilder; finale Assets brauchen eigenes Asset-Gate. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -222,19 +227,20 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Companion / Sensitive Slice | `328`, `334`, `274`, `333`, `331`, `332`, `327` |
 | Learning State / SRS Slice | `328`, `330`, `331`, `332`, `333`, `334`, `335` und spaeter SRS-/Migration-Docs |
 | World / Island / Plot Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachanker oder Context Before Vocabulary betroffen ist, `328`, `345` mit Play-First + Island-First Rule, `350`, `351`, `353` wenn Starter-Insel, Biome, Kategorie-Scope, Terrain-Variante oder Insel-Identitaet betroffen ist, `355` wenn Weltfortschritt, BuildChoice, Bauphase, Raum oder Container/Depth betroffen ist, `356` wenn Uferhain-Startslot, Zuhause/Haus, Grundstueckszoom oder Fundament-Candidate betroffen ist, `357` wenn Inselauswahl, Weltansicht, Kamera-Fokus, Bauplatz oder M16-BM betroffen ist, `358` wenn Weltneugier, Spielspannung, Belohnung, Mission oder naechster Hook betroffen ist, `359` wenn Bauplatzproblem, Objektmanipulation oder sichtbare Weltveraenderung betroffen ist, `360` wenn eine Figur, ein Worker, Tali/Vori oder ein Weltobjekt eine Weltaktion sichtbar tragen koennte, `321`, `318`, `320`, `272`, `273`, `276`, `331`, `333` |
-| Construction Rejoin / Buildsite Preview Slice | `328`, `336`, `345`, `350`, `351`, `353`, `355`, `356`, `357`, `358`, `359`, `360`, `361`, `363` wenn Inselbau-Flow, Slot-Freiheit, BuildChoice-Pattern, Kamera/Pan/Zoom oder komplexe Layout-Entscheidung betroffen ist; jeder Rejoin-Slice muss klaeren, welcher isolierte Proof verbunden wird, was Preview bleibt, welche Datei geaendert werden darf, ob BQ als Muster/Kopie/Import/Referenz genutzt wird und warum keine App-Integration, Route, Navigation, Persistenz oder BuildState entsteht. |
-| Professional Design / UX Gate Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `350`, `351`, `353`, `355`, `357`, `358`, `359`, `360`, `361`, `363` und betroffene Fachdocs; komplexe World-/UI-/BuildChoice-/Kamera- oder Inselbau-Entscheidungen muessen Flow, Wireflow, Pattern-Entscheidung, Kamera-/Gestenmodell, Copy, Visual-QA und erlaubte Folge-Dateien klaeren, bevor neuer Code entsteht. |
+| Construction Rejoin / Buildsite Preview Slice | `328`, `336`, `345`, `350`, `351`, `353`, `355`, `356`, `357`, `358`, `359`, `360`, `361`, `363`, `365`, bei visueller Qualitaet auch `366` wenn Inselbau-Flow, Slot-Freiheit, BuildChoice-Pattern, Kamera/Pan/Zoom, moderne Game-Direction oder komplexe Layout-Entscheidung betroffen ist; jeder Rejoin-Slice muss klaeren, welcher isolierte Proof verbunden wird, was Preview bleibt, welche Datei geaendert werden darf, ob BQ als Muster/Kopie/Import/Referenz genutzt wird, ob die M16-BY-Richtung und M16-BZ-Pipeline beruecksichtigt werden und warum keine App-Integration, Route, Navigation, Persistenz oder BuildState entsteht. |
+| Professional Design / UX Gate Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `350`, `351`, `353`, `355`, `357`, `358`, `359`, `360`, `361`, `363`, `365`, bei Art-/Asset-Fragen auch `366` und betroffene Fachdocs; komplexe World-/UI-/BuildChoice-/Kamera- oder Inselbau-Entscheidungen muessen Game-DNA, Flow, Wireflow, Pattern-Entscheidung, starkes Referenzbild als Art-Direction-Reference, Kamera-/Gestenmodell, Copy, Visual-QA und erlaubte Folge-Dateien klaeren, bevor neuer Code entsteht. |
 | Container / Depth Slice | `328`, `355` wenn Container als Ausbau-/Lernspine betroffen ist, `358` wenn Oeffnen, Finden, Sammeln, Container-Hook oder Belohnung als neue Moeglichkeit betroffen ist, `360` wenn Figur/Worker/Tali/Vori oder Objektaktion das Oeffnen, Sortieren, Tragen, Bergen oder Einsammeln sichtbarer machen koennte, `331`, `333`, `276`, `256`, `257`, `264`, `265` |
 | Build-Wheel Slice | `328`, `350`, `351`, `353` wenn Starter-Insel, Terrain-Variante oder Kategorie-Scope betroffen ist, `355`, `356` wenn Zuhause/Haus/Fundament-Vertical-Slice betroffen ist, `357` wenn BuildChoice visuell, Showcase oder Bauplatz-Kamera betroffen ist, `358` wenn Bauhandlung, Spielspannung, Belohnung oder naechster Hook betroffen ist, `359` wenn BuildChoice in Bauplatz-Puzzle, Objekt- oder Weltveraenderung uebersetzt wird, `360` wenn BuildChoice oder Bauabschnitt durch Worker-/Figurenhandlung lebendiger werden koennte, `318`, `320`, `331`, `332`, `333`, `327`; Build-Wheel-Code bleibt bis eigenem Gate blockiert. |
 | Mobile / Accessibility Slice | `328`, `276`, `277`, relevante Preview-/Visual-Reviews und Stop-Regeln aus `327`. |
-| Asset Slice | `328`, `289`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md` |
+| Asset Slice | `328`, `289`, `366`, `274`, `276`, `320`, `assets/images/world/buildable_islands/forest_clearing/template.md`; keine finalen Assets ohne Asset-Gate, keine Bilder nach `assets/` ohne Freigabe, keine freien Einzelprompts als Produktionspipeline. |
+| AI Art / Asset Pipeline Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `365`, `366`, `289` und betroffene Asset-Scope-Docs; klaert Rollen, Referenzen, Style Bible, Tool-Pipeline, Postprocess, QA, Exportmetadaten und Stop-Regeln. Codex darf Bilder nicht nachzeichnen, sondern nur dokumentieren, strukturieren und pruefen. |
 | Data / Persistence Slice | `328`, `326`, `327`, `333`, `335`, plus eigenes Datenmodell-/Migration-/Privacy-Gate. |
 | UI / MVP Screen Slice | `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn Starter-Insel, Plot-Slot, Kategorie, Variante, Unlock oder BuildChoice betroffen ist, `353` wenn Inselidentitaet, Starter-Biome oder Terrain-Variante betroffen ist, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum oder Container betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `357` wenn Showcase, Weltansicht, Kamera-Zoom, Bauplatz, Bauphase oder minimales HUD betroffen ist, `358` wenn Player Hook, UI-Reward, Spielspannung, Mission oder Textreduktion fuer Spielgefuehl betroffen ist, `359` wenn Text durch sichtbares Problem, Objektmanipulation und Weltveraenderung ersetzt werden muss, `360` wenn sichtbare Figuren-/Worker-Handlung UI-Bestaetigung ersetzen oder staerken koennte, `337`, `332`, `334`, betroffene Feature-Docs und Visual-/Accessibility-Regeln. |
 | App-Integration Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary in App-Flow ueberfuehrt wuerde, `328`, `345` mit Play-First + Island-First Rule, `350`, `351` wenn World/Island/Plot betroffen ist, `353` wenn Starter-Insel oder Future-Island-Family betroffen ist, `355` wenn Construction-Learning-Spine betroffen ist, `356` wenn erster Foundation-/Haus-Vertical-Slice betroffen ist, `357` wenn Kamera-/Showcase-Flow betroffen ist, `358` wenn Gameplay-Hook, Reward/neue Moeglichkeit oder Mission in App-Flow ueberfuehrt wuerde, `327`, `329`, betroffene Feature-Docs, Architecture/Boundary Gate und Route-Gate. |
-| Implementierungs-Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Zielsprachen, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary betroffen sind, `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
+| Implementierungs-Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Zielsprachen, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary betroffen sind, `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, `363` und `365` wenn komplexer Island-/Slot-/BuildChoice-/Kamera-Code nach M16-BY entsteht; Folge-Code muss Cozy Island Diorama Builder und Build Station am Slot beruecksichtigen und darf nicht nur auf abgelehntem Low-Fidelity-Wireflow oder dem v1-Uebergangsboard basieren, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Project Management / External Tool Sync Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `362` und betroffene Tool-/Plugin-Regeln; keine Notion-, Linear-, GitHub-, Supabase-, API-Key- oder sonstigen externen Writes ohne ausdrueckliche Freigabe. |
-| Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bevorzugt PNG + SVG erzeugen. |
+| Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bei komplexem Island-Build-Flow auch `363` und `365`, aber nicht das abgelehnte v2-Board als Zielbild verwenden; bei Art-/Asset-Pipeline auch `366`; bevorzugt PNG + SVG erzeugen. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
 
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts
@@ -347,6 +353,25 @@ Research, Visuals oder Review muss enthalten:
 - Antwort auf: Ist Flow, Wireflow, BuildChoice-Pattern, Kamera-/Gestenmodell,
   Slotanzahl, Copy, Visual-QA und erlaubter Folge-Datei-Scope vor Code
   geklaert; wenn nein, muss zuerst ein Design-/Wireflow-Slice entstehen?,
+- Modern Mobile Game Direction Board aus `365`, wenn High-Fidelity-Flow,
+  neuer Wireflow, Rejoin-Code oder komplexer Island-/Slot-/BuildChoice-/
+  Kamera-Code nach dem gestoppten M16-BX betroffen ist,
+- Antwort auf: Ist die moderne Talvori Game-DNA akzeptiert, wird BuildChoice
+  als Build Station am Slot statt Bottom-Sheet/List/Labelwolke behandelt,
+  basiert der naechste Schritt auf der konzeptionellen M16-BY-Richtung und
+  nicht auf dem abgelehnten v2-Board, welche Patterns wurden wegen Schul-/
+  Worksheet-/Menue-Gefuehl verworfen und warum basiert Folge-Code nicht nur
+  auf abgelehntem Low-Fidelity-Wireflow, v1-Uebergangsboard oder
+  v2-Zwischenvorschau?,
+- AI Art Production Pipeline aus `366`, wenn KI-Bilder, Referenzbilder,
+  Spielgrafiken, Style Bible, Master References, Asset-Familien,
+  Engine-ready Export, Art Direction oder Bildkonsistenz betroffen sind,
+- Antwort auf: Was ist nur Art-Direction-Reference, was ist Style Reference,
+  was ist Structure Reference, welches Tool generiert, was wird manuell
+  nachbearbeitet, welche QA prueft Stilbruch, welche Metadaten sind noetig
+  und warum entsteht noch kein finales Asset unter `assets/`?,
+- Antwort auf: Warum zeichnet Codex keine hochwertigen Spielbilder nach und
+  warum sind freie Einzelprompts keine Produktionspipeline?,
 - wenn die UI-/Spielaufbau-Entscheidung unklar ist: Antwort auf, ob Research
   noetig war, welche Benchmark-Muster geprueft wurden, welche Spiel-/UI-Logik
   als Vorbild diente, warum das gewaehlte Muster passt und warum Alternativen
