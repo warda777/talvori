@@ -40,6 +40,14 @@ const _reviewZones = [
   _ReviewZone('R13', 0.74, 0.36, 0.076, 0.050),
 ];
 
+const _visitWaypoints = [
+  _VisitWaypoint('Start', 0.33, 0.68),
+  _VisitWaypoint('Hub', 0.46, 0.58),
+  _VisitWaypoint('Lichtung', 0.50, 0.51),
+  _VisitWaypoint('Hain', 0.62, 0.43),
+  _VisitWaypoint('Blick', 0.68, 0.38),
+];
+
 enum _UferwaldCameraMode { buildMap, overview, visitWander, objectFocus }
 
 extension _UferwaldCameraModeLabel on _UferwaldCameraMode {
@@ -149,14 +157,18 @@ class UferwaldMapInteractionPreview extends StatefulWidget {
 
 class _UferwaldMapInteractionPreviewState
     extends State<UferwaldMapInteractionPreview>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TransformationController _mapController = TransformationController();
   late final AnimationController _cameraReturnController;
+  late final AnimationController _walkerMoveController;
   Animation<Matrix4>? _cameraReturnAnimation;
+  Animation<Offset>? _walkerMoveAnimation;
   bool _showOverlay = true;
   bool _viewWasInitialized = false;
   _UferwaldCameraMode _cameraMode = _UferwaldCameraMode.buildMap;
   String? _selectedZoneLabel;
+  int _walkerWaypointIndex = 0;
+  Offset _walkerNormalizedPosition = _visitWaypoints.first.normalizedCenter;
   Size? _lastViewportSize;
 
   @override
@@ -166,12 +178,19 @@ class _UferwaldMapInteractionPreviewState
       vsync: this,
       duration: const Duration(milliseconds: 220),
     )..addListener(_handleCameraReturnTick);
+    _walkerMoveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    )..addListener(_handleWalkerMoveTick);
   }
 
   @override
   void dispose() {
     _cameraReturnController
       ..removeListener(_handleCameraReturnTick)
+      ..dispose();
+    _walkerMoveController
+      ..removeListener(_handleWalkerMoveTick)
       ..dispose();
     _mapController.dispose();
     super.dispose();
@@ -224,11 +243,14 @@ class _UferwaldMapInteractionPreviewState
                             cameraMode: _cameraMode,
                             showFreeBuildOverlay: showFreeBuildOverlay,
                             selectedZoneLabel: _selectedZoneLabel,
+                            walkerPosition: _walkerNormalizedPosition,
+                            activeVisitWaypointIndex: _walkerWaypointIndex,
                             minScale: cameraSettings.minScale,
                             maxScale: cameraSettings.maxScale,
                             onInteractionStart: _handleInteractionStart,
                             onInteractionEnd: _handleInteractionEnd,
                             onZoneSelected: _selectZone,
+                            onVisitWaypointSelected: _moveWalkerToWaypoint,
                           ),
                           const IgnorePointer(child: _MapEdgeMask()),
                         ],
@@ -264,6 +286,16 @@ class _UferwaldMapInteractionPreviewState
                     selectedZoneLabel: _selectedZoneLabel,
                   ),
                 ),
+                if (_cameraMode == _UferwaldCameraMode.visitWander)
+                  Positioned(
+                    right: 16,
+                    bottom: 82,
+                    child: _VisitWalkerPanel(
+                      currentWaypoint: _currentVisitWaypoint,
+                      nextWaypoint: _nextVisitWaypoint,
+                      onNextStep: _moveWalkerToNextWaypoint,
+                    ),
+                  ),
               ],
             );
           },
@@ -368,6 +400,15 @@ class _UferwaldMapInteractionPreviewState
     }
   }
 
+  void _handleWalkerMoveTick() {
+    final value = _walkerMoveAnimation?.value;
+    if (value != null && mounted) {
+      setState(() {
+        _walkerNormalizedPosition = value;
+      });
+    }
+  }
+
   void _animateCameraTo(Matrix4 targetMatrix) {
     _cameraReturnController.stop();
     _cameraReturnAnimation =
@@ -390,7 +431,7 @@ class _UferwaldMapInteractionPreviewState
         return _focusedMapMatrix(
           viewportSize,
           settings.initialScale,
-          const Offset(0.48, 0.55),
+          _walkerNormalizedPosition,
         );
       case _UferwaldCameraMode.objectFocus:
         return _focusedMapMatrix(
@@ -485,6 +526,55 @@ class _UferwaldMapInteractionPreviewState
     return true;
   }
 
+  void _moveWalkerToNextWaypoint() {
+    _moveWalkerToWaypoint(_nextVisitWaypointIndex);
+  }
+
+  void _moveWalkerToWaypoint(int waypointIndex) {
+    if (waypointIndex == _walkerWaypointIndex ||
+        waypointIndex < 0 ||
+        waypointIndex >= _visitWaypoints.length) {
+      return;
+    }
+
+    final target = _visitWaypoints[waypointIndex].normalizedCenter;
+    _walkerMoveController.stop();
+    _walkerMoveAnimation =
+        Tween<Offset>(begin: _walkerNormalizedPosition, end: target).animate(
+          CurvedAnimation(
+            parent: _walkerMoveController,
+            curve: Curves.easeInOutCubic,
+          ),
+        );
+
+    setState(() {
+      _walkerWaypointIndex = waypointIndex;
+    });
+    _walkerMoveController.forward(from: 0);
+    _followWalker(target);
+  }
+
+  void _followWalker(Offset target) {
+    if (_cameraMode != _UferwaldCameraMode.visitWander) {
+      return;
+    }
+
+    final viewportSize = _lastViewportSize;
+    if (viewportSize == null) {
+      return;
+    }
+
+    final settings = _UferwaldCameraSettings.forMode(
+      viewportSize,
+      _UferwaldCameraMode.visitWander,
+    );
+    final currentScale = _mapController.value
+        .getMaxScaleOnAxis()
+        .clamp(settings.minScale, settings.maxScale)
+        .toDouble();
+    _animateCameraTo(_focusedMapMatrix(viewportSize, currentScale, target));
+  }
+
   _ReviewZone? get _selectedReviewZone {
     final label = _selectedZoneLabel;
     if (label == null) {
@@ -498,6 +588,18 @@ class _UferwaldMapInteractionPreviewState
     }
 
     return null;
+  }
+
+  int get _nextVisitWaypointIndex {
+    return (_walkerWaypointIndex + 1) % _visitWaypoints.length;
+  }
+
+  _VisitWaypoint get _currentVisitWaypoint {
+    return _visitWaypoints[_walkerWaypointIndex];
+  }
+
+  _VisitWaypoint get _nextVisitWaypoint {
+    return _visitWaypoints[_nextVisitWaypointIndex];
   }
 }
 
@@ -580,11 +682,14 @@ class _InteractiveUferwaldMap extends StatelessWidget {
     required this.cameraMode,
     required this.showFreeBuildOverlay,
     required this.selectedZoneLabel,
+    required this.walkerPosition,
+    required this.activeVisitWaypointIndex,
     required this.minScale,
     required this.maxScale,
     required this.onInteractionStart,
     required this.onInteractionEnd,
     required this.onZoneSelected,
+    required this.onVisitWaypointSelected,
   });
 
   final File imageFile;
@@ -593,11 +698,14 @@ class _InteractiveUferwaldMap extends StatelessWidget {
   final _UferwaldCameraMode cameraMode;
   final bool showFreeBuildOverlay;
   final String? selectedZoneLabel;
+  final Offset walkerPosition;
+  final int activeVisitWaypointIndex;
   final double minScale;
   final double maxScale;
   final GestureScaleStartCallback onInteractionStart;
   final GestureScaleEndCallback onInteractionEnd;
   final ValueChanged<String?> onZoneSelected;
+  final ValueChanged<int> onVisitWaypointSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +732,14 @@ class _InteractiveUferwaldMap extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapUp: (details) {
+          if (cameraMode == _UferwaldCameraMode.visitWander) {
+            final waypointIndex = _visitWaypointAt(details.localPosition);
+            if (waypointIndex != null) {
+              onVisitWaypointSelected(waypointIndex);
+            }
+            return;
+          }
+
           onZoneSelected(_zoneAt(details.localPosition)?.label);
         },
         child: SizedBox(
@@ -659,7 +775,12 @@ class _InteractiveUferwaldMap extends StatelessWidget {
                   ),
                 ),
               if (cameraMode == _UferwaldCameraMode.visitWander)
-                const CustomPaint(painter: _UferwaldVisitPathPainter()),
+                CustomPaint(
+                  painter: _UferwaldVisitPathPainter(
+                    walkerPosition: walkerPosition,
+                    activeWaypointIndex: activeVisitWaypointIndex,
+                  ),
+                ),
             ],
           ),
         ),
@@ -671,6 +792,18 @@ class _InteractiveUferwaldMap extends StatelessWidget {
     for (final zone in _reviewZones.reversed) {
       if (zone.contains(localPosition, const Size(_mapSize, _mapSize))) {
         return zone;
+      }
+    }
+
+    return null;
+  }
+
+  int? _visitWaypointAt(Offset localPosition) {
+    for (var i = 0; i < _visitWaypoints.length; i++) {
+      final waypoint = _visitWaypoints[i];
+      final center = waypoint.toOffset(const Size(_mapSize, _mapSize));
+      if ((localPosition - center).distance <= 40) {
+        return i;
       }
     }
 
@@ -1419,10 +1552,104 @@ class _BottomPreviewNote extends StatelessWidget {
       case _UferwaldCameraMode.overview:
         return 'Overview/Review: komplette Insel sichtbar, nicht der normale Bau-Modus.';
       case _UferwaldCameraMode.visitWander:
-        return 'Visit/Wander Preview: ruhiger Ausschnitt, keine Bau-Entscheidung.';
+        return 'Visit/Wander Preview: Wegpunkt antippen oder Weiter nutzen. Kein echtes Movement-System.';
       case _UferwaldCameraMode.objectFocus:
         return '${selectedZoneLabel ?? 'R1'} im Object Focus · Umgebung bleibt sichtbar.';
     }
+  }
+}
+
+class _VisitWalkerPanel extends StatelessWidget {
+  const _VisitWalkerPanel({
+    required this.currentWaypoint,
+    required this.nextWaypoint,
+    required this.onNextStep,
+  });
+
+  final _VisitWaypoint currentWaypoint;
+  final _VisitWaypoint nextWaypoint;
+  final VoidCallback onNextStep;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 245),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xE60A111A),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0x66FFE6A3)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x66000000),
+              blurRadius: 24,
+              offset: Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.directions_walk, size: 18, color: _mint),
+                  const SizedBox(width: 7),
+                  Flexible(
+                    child: Text(
+                      currentWaypoint.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Naechster Halt: ${nextWaypoint.label}',
+                style: const TextStyle(
+                  color: Color(0xE6FFFFFF),
+                  fontSize: 11,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.icon(
+                  onPressed: onNextStep,
+                  icon: const Icon(Icons.arrow_forward, size: 17),
+                  label: const Text('Weiter'),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: _mint,
+                    foregroundColor: const Color(0xFF06101A),
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -1465,7 +1692,13 @@ class _MissingImageNotice extends StatelessWidget {
 }
 
 class _UferwaldVisitPathPainter extends CustomPainter {
-  const _UferwaldVisitPathPainter();
+  const _UferwaldVisitPathPainter({
+    required this.walkerPosition,
+    required this.activeWaypointIndex,
+  });
+
+  final Offset walkerPosition;
+  final int activeWaypointIndex;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1484,7 +1717,10 @@ class _UferwaldVisitPathPainter extends CustomPainter {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final path = Path()
-      ..moveTo(size.width * 0.33, size.height * 0.68)
+      ..moveTo(
+        size.width * _visitWaypoints.first.x,
+        size.height * _visitWaypoints.first.y,
+      )
       ..cubicTo(
         size.width * 0.41,
         size.height * 0.62,
@@ -1504,37 +1740,122 @@ class _UferwaldVisitPathPainter extends CustomPainter {
 
     canvas.drawPath(path, glowPaint);
     canvas.drawPath(path, pathPaint);
-    _drawVisitDot(canvas, size, const Offset(0.49, 0.51), 'Hub');
-    _drawVisitDot(canvas, size, const Offset(0.66, 0.39), 'Weg');
+    final nextWaypointIndex =
+        (activeWaypointIndex + 1) % _visitWaypoints.length;
+    for (var i = 0; i < _visitWaypoints.length; i++) {
+      final waypoint = _visitWaypoints[i];
+      _drawVisitDot(
+        canvas,
+        size,
+        waypoint.normalizedCenter,
+        label: i == activeWaypointIndex
+            ? waypoint.label
+            : i == nextWaypointIndex
+            ? 'Weiter'
+            : null,
+        isActive: i == activeWaypointIndex,
+        isNext: i == nextWaypointIndex,
+      );
+    }
+    _drawWalker(canvas, size);
   }
 
   void _drawVisitDot(
     Canvas canvas,
     Size size,
-    Offset normalized,
-    String label,
-  ) {
+    Offset normalized, {
+    required String? label,
+    required bool isActive,
+    required bool isNext,
+  }) {
     final center = Offset(
       size.width * normalized.dx,
       size.height * normalized.dy,
     );
     final dotPaint = Paint()
-      ..color = const Color(0xFFFFE6A3)
+      ..color = isActive
+          ? const Color(0xFF66E5B4)
+          : isNext
+          ? const Color(0xFFFFE6A3)
+          : const Color(0xCCFFFFFF)
       ..style = PaintingStyle.fill;
     final borderPaint = Paint()
-      ..color = const Color(0xFF3B2B16)
+      ..color = isNext ? const Color(0xFFFFE6A3) : const Color(0xFF3B2B16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isNext ? 5 : 3;
+
+    canvas.drawCircle(center, isActive ? 14 : 10, dotPaint);
+    canvas.drawCircle(center, isActive ? 14 : 10, borderPaint);
+
+    if (label != null) {
+      _drawText(
+        canvas,
+        label,
+        center + const Offset(16, -9),
+        const TextStyle(
+          color: Colors.white,
+          fontSize: 19,
+          height: 1,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0,
+        ),
+      );
+    }
+  }
+
+  void _drawWalker(Canvas canvas, Size size) {
+    final center = Offset(
+      size.width * walkerPosition.dx,
+      size.height * walkerPosition.dy,
+    );
+    final shadowPaint = Paint()
+      ..color = const Color(0x66000000)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    final bodyPaint = Paint()
+      ..color = const Color(0xFF12222B)
+      ..style = PaintingStyle.fill;
+    final coatPaint = Paint()
+      ..color = _mint
+      ..style = PaintingStyle.fill;
+    final headPaint = Paint()
+      ..color = const Color(0xFFFFD7A8)
+      ..style = PaintingStyle.fill;
+    final outlinePaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
-    canvas.drawCircle(center, 11, dotPaint);
-    canvas.drawCircle(center, 11, borderPaint);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: center + const Offset(0, 21),
+        width: 48,
+        height: 16,
+      ),
+      shadowPaint,
+    );
+    canvas.drawCircle(center, 22, bodyPaint);
+    canvas.drawCircle(center, 22, outlinePaint);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: center + const Offset(0, 8),
+          width: 22,
+          height: 24,
+        ),
+        const Radius.circular(10),
+      ),
+      coatPaint,
+    );
+    canvas.drawCircle(center + const Offset(0, -9), 8, headPaint);
+    canvas.drawCircle(center + const Offset(0, -9), 8, outlinePaint);
+
     _drawText(
       canvas,
-      label,
-      center + const Offset(15, -9),
+      'Besuch',
+      center + const Offset(-29, -45),
       const TextStyle(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: 17,
         height: 1,
         fontWeight: FontWeight.w900,
         letterSpacing: 0,
@@ -1552,7 +1873,10 @@ class _UferwaldVisitPathPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _UferwaldVisitPathPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _UferwaldVisitPathPainter oldDelegate) {
+    return oldDelegate.walkerPosition != walkerPosition ||
+        oldDelegate.activeWaypointIndex != activeWaypointIndex;
+  }
 }
 
 class _UferwaldObjectFocusPainter extends CustomPainter {
@@ -1948,5 +2272,19 @@ class _ReviewZone {
     final dx = (point.dx - rect.center.dx) / (rect.width / 2);
     final dy = (point.dy - rect.center.dy) / (rect.height / 2);
     return dx * dx + dy * dy <= 1;
+  }
+}
+
+class _VisitWaypoint {
+  const _VisitWaypoint(this.label, this.x, this.y);
+
+  final String label;
+  final double x;
+  final double y;
+
+  Offset get normalizedCenter => Offset(x, y);
+
+  Offset toOffset(Size size) {
+    return Offset(size.width * x, size.height * y);
   }
 }
