@@ -154,6 +154,7 @@ Non-Goals:
 | `383-talvori-camera-modes-and-visit-wander-rule.md` | M16-CV-Kamera-Modus-Gate: trennt Build/Map, Overview, Visit/Wander und Object Focus als Pflichtpruefung fuer World-/Map-/Build-/UI-/Asset-Entscheidungen; keine Code-, Asset-, Cloud-, App- oder Persistenzfreigabe. |
 | `384-uferwald-playable-map-layer-and-mask-architecture.md` | M16-DA-Playable-Map-Architecture-Gate: legt fest, dass sichtbare Art-Bilder nicht die technische Spielkarte sind; technische Layer, Masks, Zonen, Pfade, Hindernisse, Build-Footprints, Sort-Bands und Landmark-Anchors muessen vor Rendering, Build/Map oder Visit/Wander-Interaktion definiert werden; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `385-uferwald-technical-layer-and-mask-spec.md` | M16-DB-Technical-Layer-/Masken-Spec: konkretisiert fuer Uferwald `base_rock_shape`, `grass_terrain_mask`, `water_river_mask`, `walkable_path_layer`, `tree_obstacle_layer`, `rock_cliff_obstacle_layer`, `buildable_zone_layer`, `plot_footprint_layer`, `no_walk_mask`, `no_build_mask`, `depth_sort_bands` und `landmark_anchor_layer`; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
+| `386-uferwald-technical-layer-manifest.md` | M16-DC-Technical-Layer-Manifest: erste maschinennahe Planungsstruktur fuer `map_id: uferwald_starter_island`, `coordinate_space: normalized_0_1`, Layer-IDs, geplante Anchor-IDs, erlaubte Modi, blockierte Nutzungen und offene Messfragen; keine Runtime-Daten, Code-, Bild-, Asset-, App- oder Persistenzfreigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -198,6 +199,7 @@ Non-Goals:
 | `383-talvori-camera-modes-and-visit-wander-rule.md` | Talvori-Kamera-Modi: Pflicht fuer World-/Map-/Build-/UI-/Asset-Entscheidungen, wenn Build/Map, Overview, Visit/Wander, Object Focus, Besucheransichten, begehbare Nutzerinseln oder Posterbild-Risiko betroffen sind. |
 | `384-uferwald-playable-map-layer-and-mask-architecture.md` | Playable-Map-Layer-/Masken-Architektur: Pflicht, wenn aus Uferwald oder einer World-Karte echte Bewegung, Build/Map-Logik, Walkability, Collision, Pfade, Grundstuecke, Build-Zonen, No-Walk-/No-Build-Masks, Hindernisse, Sort-Bands, Landmark-Anchors oder Runtime-Mapdaten entstehen koennten. |
 | `385-uferwald-technical-layer-and-mask-spec.md` | Uferwald Technical Layer-/Masken-Spec: Pflicht, wenn technische Map-Layer, Masken, Datenformen, Build-/Walkability-Zonen, Plot-Footprints, Obstacles, No-Walk-/No-Build-Masks, Depth-/Sort-Bands, Landmark-Anchors oder ein spaeteres technisches Uferwald-Manifest betroffen sind. |
+| `386-uferwald-technical-layer-manifest.md` | Uferwald Technical Layer Manifest: Pflicht, wenn `uferwald_starter_island`, technische Layer-IDs, geplante Anchor-IDs, offene Messfragen, Layer-Manifeste, Vector-Planung, Map-Manifeste oder spaetere Runtime-Map-Gates betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -399,6 +401,14 @@ Zusaetzliche M16-CG-Kandidatenregel:
   Object Focus oder Overview mit echter Kartenlogik betroffen sind. 385 ist
   keine Code-, Bild-, Asset-, Runtime-Map-, App-, Persistenz-, BuildState-
   oder `assets/`-Freigabe.
+- 386 ist das M16-DC-Uferwald-Technical-Layer-Manifest. Es ist Pflicht, wenn
+  `map_id: uferwald_starter_island`, `coordinate_space: normalized_0_1`,
+  technische Layer-IDs, geplante Anchor-IDs, `allowed_modes`, `blocked_uses`,
+  offene Messfragen, Mess-/Vector-Planung, spaetere Map-Manifeste,
+  Runtime-Map-Gates oder technische Uferwald-Folgearbeit betroffen sind. 386
+  enthaelt keine finalen Koordinaten und keine Runtime-Daten. 386 ist keine
+  Code-, Bild-, Asset-, Runtime-Map-, App-, Persistenz-, BuildState- oder
+  `assets/`-Freigabe.
 
 ### 5.1 Uferwald-/World-Preview Device-Test-Regel
 
