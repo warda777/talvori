@@ -140,6 +140,7 @@ Non-Goals:
 | `370-asset-family-and-export-spec.md` | Asset-Family-/Export-Spec-Gate fuer Familien, Layer, Exportformate, Groessen, Benennung, Metadaten, QA-Status und spaeteres Asset-Gate; keine Asset-, Bild-, Candidate- oder Code-Freigabe. |
 | `371-starter-island-asset-candidate-gate.md` | Starter-Island-Asset-Candidate-Gate: entscheidet `island_base` als erste Candidate-Familie und definiert M16-CF-Grenzen; keine Asset-, Bild-, Candidate-, Engine-ready- oder Code-Freigabe. |
 | `372-starter-island-base-candidate-generation-gate.md` | M16-CF-Freigabeplanung fuer M16-CG: definiert Dokumentationspfad, Dateinamen, Tool-Rollen, Prompt/Negative Prompt, Metadaten und QA fuer spaetere `island_base`-Candidates; erzeugt selbst keine Bilder/Dateien. |
+| `previews/m16_cg_starter_island_base_candidate_generation/` | M16-CG-`island_base`-Dokumentationscandidates fuer Uferhain: drei Candidate-PNGs, Contact Sheet und Metadata-/QA-Datei; Kontextmaterial, keine Assets, keine App-Screens und keine Engine-ready Candidates. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -169,6 +170,8 @@ Non-Goals:
 | `370-asset-family-and-export-spec.md` | Definiert Asset-Familien, Layer, Exportformate, Groessen, Benennung, Source-/Prompt-/Reference-Metadaten, QA-Status und Gate-Regeln, bevor echte Dateien oder Engine-ready Candidates entstehen duerfen. |
 | `371-starter-island-asset-candidate-gate.md` | Definiert das erste Starter-Island-Candidate-Gate: `island_base` zuerst, M16-CF nur mit expliziter Bild-/Tool-/Pfad-/Metadaten-/QA-Freigabe; keine `assets/`-Writes oder Engine-ready Candidates. |
 | `372-starter-island-base-candidate-generation-gate.md` | Definiert die konkrete M16-CG-Vorbereitung fuer `island_base`: erlaubter Dokumentationspfad, Dateinamen, Prompt-/Negative-Prompt-Anforderungen, Pflichtmetadaten, QA und Maximalstatus `asset_candidate`. |
+| `previews/m16_cg_starter_island_base_candidate_generation/talvori_island_base_uferhain_candidate_metadata.md` | Fuehrende M16-CG-Candidate-Metadaten und QA fuer die Uferhain-`island_base`-PNGs; pruefen vor jeder weiteren Candidate-, Asset-, Layer- oder Engine-ready-Entscheidung. |
+| `previews/m16_cg_starter_island_base_candidate_generation/talvori_island_base_uferhain_contact_sheet_1x.png` | M16-CG-Contact-Sheet fuer schnelle visuelle Candidate-Review; Dokumentationsvisual, kein Spielasset und kein App-Screen. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -220,6 +223,7 @@ Non-Goals:
 | `370-asset-family-and-export-spec.md` | Visuelle Folgearbeiten mit Asset-Familien, Export, Layern, Groessen, Namen, QA-Status oder Engine-ready Candidates muessen die Spec lesen; 370 selbst erzeugt keine Bilder/Assets. |
 | `371-starter-island-asset-candidate-gate.md` | Visuelle Folgearbeiten zum ersten Starter-Island-Candidate muessen `island_base` als erste Familie und die M16-CF-Grenzen lesen; 371 selbst erzeugt keine Bilder/Assets/Candidates. |
 | `372-starter-island-base-candidate-generation-gate.md` | M16-CG oder andere `island_base`-Bildgenerierungs-Slices muessen 372 lesen; 372 selbst erzeugt keinen Preview-Ordner, keine PNG/SVG und keine Candidates. |
+| `previews/m16_cg_starter_island_base_candidate_generation/` | Bestehende M16-CG-Candidates muessen mit Metadata-Datei und Contact Sheet gelesen werden; sie bleiben Dokumentationscandidates mit Maximalstatus `asset_candidate`. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -261,6 +265,16 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Prompt Compression / Template Slice | `AGENTS.md`, `328`, `336`, `369` falls vorhanden, `docs/world_design/prompt_templates/README.md` falls vorhanden, betroffene Template-Dateien; klaert Kurzprompt-Pflichtfelder, Template-Vererbung, Standardchecks, Output-Regeln, Commit-Grenzen und External-Write-Grenzen, ohne Implementierung freizugeben. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bei komplexem Island-Build-Flow auch `363` und `365`, aber nicht das abgelehnte v2-Board als Zielbild verwenden; bei Art-/Asset-Pipeline auch `366`; bei Stil, Kamera, Figuren, HUD, Gebaeuden, Insel, Build Station oder Asset-Familien auch `367`; bei Starter-Insel/Uferhain, Build Station, Haus-Bauphasen, Figuren, HUD, Slot/Marker/Layer oder Master References auch `368`; bei Asset-Familien, Exportformaten, Layern, Groessen, Benennung, Metadaten, QA-Status oder Engine-ready Candidates auch `370`; bei Starter-Island-Candidate, `island_base` oder M16-CF auch `371`; bei M16-CG, Candidate-Bildgenerierung, erlaubtem Dokumentationspfad, Dateinamen, Prompt/Negative Prompt oder Uferhain-QA auch `372`; bevorzugt PNG + SVG erzeugen, sofern der Prompt Visuals erlaubt. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
+
+Zusaetzliche M16-CG-Kandidatenregel:
+
+- Wenn ein spaeterer Slice Uferhain-`island_base`-Candidates, Candidate-Auswahl,
+  Asset-Review, Layer-Planung, Engine-ready-Vorbereitung oder Bild-QA
+  betrifft, muessen neben 371/372 auch die M16-CG-Metadatendatei und das
+  Contact Sheet im Preview-Ordner gelesen werden.
+- Die Candidate-PNGs bleiben Dokumentationsmaterial mit Maximalstatus
+  `asset_candidate`: keine Assets, keine App-Screens, keine Engine-ready
+  Candidates, keine approved Assets und keine Produktintegration.
 
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts
 
