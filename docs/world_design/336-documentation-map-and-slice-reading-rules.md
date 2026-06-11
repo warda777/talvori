@@ -377,6 +377,46 @@ Zusaetzliche M16-CG-Kandidatenregel:
   keine Code-, Asset-, Cloud-, App-, Persistenz-, BuildState- oder
   `assets/`-Freigabe.
 
+### 5.1 Uferwald-/World-Preview Device-Test-Regel
+
+Fuer Uferwald-, World-, Map-, Camera-, Visit- oder Wander-Preview-Slices ist
+ein echter iPhone-Test bevorzugt, sobald die Preview lokal lauffaehig ist und
+Docs-Bilder ueber HTTP geladen werden. Ein Simulator-Run darf weiter genutzt
+werden, muss im Abschluss aber eindeutig als Simulator-Test gekennzeichnet
+werden und ersetzt den echten iPhone-Test nicht, wenn echte Device-Interaktion
+gefordert ist.
+
+Wenn Preview-Bilder aus `docs/world_design/previews/` ueber HTTP geladen
+werden, muss der Docs-Server aus dem Repo-Root fuer echte iPhones an allen
+Interfaces lauschen:
+
+```bash
+cd /Users/andreaswarda/Documents/Dev/talvori
+python3 -m http.server 8765 --bind 0.0.0.0
+```
+
+Fuer echtes iPhone-Testing der aktuellen Uferwald Map Interaction Preview muss
+`TALVORI_DOCS_HOST=192.168.178.60` gesetzt werden:
+
+```bash
+cd /Users/andreaswarda/Documents/Dev/talvori
+flutter run -t lib/features/world/local_world/ui/widgets/previews/uferwald_map_interaction_preview.dart \
+  -d 00008130-001948CA2613803A \
+  --dart-define=TALVORI_DOCS_HOST=192.168.178.60
+```
+
+Der Simulator darf den Default-Host `127.0.0.1` verwenden, muss aber als
+Simulator-Test berichtet werden, zum Beispiel:
+
+```bash
+cd /Users/andreaswarda/Documents/Dev/talvori
+flutter run -t lib/features/world/local_world/ui/widgets/previews/uferwald_map_interaction_preview.dart \
+  -d 5D153FED-C3EA-4C92-BF5D-40E71BF5E281
+```
+
+Diese Regel ist eine Test-/Preview-Regel. Sie ist keine App-Integration, keine
+Route, keine Persistenz-, Asset-, Engine-ready- oder `assets/`-Freigabe.
+
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts
 
 Kuenftige Codex-Prompts duerfen als Kurzprompt auf ein Template aus
