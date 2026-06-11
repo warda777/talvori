@@ -8,23 +8,22 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CV`
+Aktive Sprint-ID: `M16-DA`
 
 Sprint Goal:
 
-> Talvori-Kamera-Modi als feste World-/Map-/Build-/UI-/Asset-Regel
-> verankern: Build/Map, Overview, Visit/Wander und Object Focus muessen
-> kuenftig getrennt geprueft werden, ohne Code, Assets oder App-Integration
-> freizugeben.
+> Spielbare Uferwald-/World-Karten duerfen nicht aus fertigen Gesamtbildern
+> geraten werden: technische Layer, Masks, Zonen, Pfade, Hindernisse,
+> Build-Zonen und Sort-Bands muessen vor Rendering oder Navigation feststehen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 298 |
+| Gesamtanzahl M16-T-Items | 299 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 274 |
+| Erledigt `[x]` | 275 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.0 % |
@@ -90,7 +89,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 80 | 78 | 1 | 0 | 1 | 98.1 % | `██████████` | M16-CR visualisiert Uferwald-Anchors, Placement-Zonen, Sort-Bands und Layer-Reihenfolge als Dokumentationsoverlay; `assets/`, Engine-ready Candidates, approved Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 81 | 79 | 1 | 0 | 1 | 98.1 % | `██████████` | M16-DA verankert technische Layer-/Masken-/Zonenarchitektur vor spielbarer Karte; `assets/`, Engine-ready Candidates, approved Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -385,6 +384,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-078 | [x] | Uferwald placement and zone QA | Uferwald braucht klare Trennung von Build-Reserve, Wasser, Hain, Klippen und No-Overlap. | M16-CP dokumentiert Buildable Footprint, Soft Placement, Reserve, No-Build, No-Overlap, Water-only und Terrain-sensitive Zones. | Kategorieplaetze, UI-Safe-Areas oder Build Stations entstehen implizit. | nein |
 | M16T-ASSET-079 | [x] | Uferwald zoom and scale QA | Review muss klaeren, was 1x/2x/3x bereits zeigen und was nicht. | `talvori_uferwald_layer_postprocess_qa.md` prueft Zoom-out, Mid-Zoom, Zoom-in-Risiko und markiert 2x/3x als Review-Kopien ohne neue Source-Details. | Upscales werden mit echter Detail- oder Produktionsqualitaet verwechselt. | nein |
 | M16T-ASSET-080 | [x] | Uferwald layer readiness assessment | Der Slice darf nicht vortaeuschen, dass echte Layer schon existieren. | M16-CP dokumentiert: flaches `island_base`-Bitmap vorhanden, transparente Einzel-Layer NEIN, separate echte Layer NEIN, produktionsreife Layer blockiert. | Monolithisches RGB-PNG wird als transparente Layer- oder Engine-ready-Basis verkauft. | nein |
+| M16T-ASSET-081 | [x] | Playable map layer and mask architecture before rendering | Spielbare Karten duerfen nicht aus fertigen Gesamtbildern geraten werden. | `384-uferwald-playable-map-layer-and-mask-architecture.md` definiert technische Layer, Masks, Zonen, Pfade, Hindernisse, Build-Footprints, Sort-Bands und Landmark-Anchors als Pflicht vor Rendering, Build/Map oder Visit/Wander-Interaktion. | Gameplay-Pfade, Collision, Grundstuecke oder Build-Zonen werden aus Pixelbildern geraten. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1553,6 +1553,31 @@ M16-CV operationalisiert fuer kuenftige Slices:
 - Naechster sinnvoller Folge-Slice ist M16-CW Uferwald Camera Modes Preview
   Toggle, falls weiterhin isoliert und ohne App-/Asset-/Persistenzfreigabe.
 
+M16-DA erledigt:
+
+- M16T-ASSET-081
+
+M16-DA operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/384-uferwald-playable-map-layer-and-mask-architecture.md`
+  definiert: sichtbares Art-Bild ist nicht die technische Spielkarte.
+- Visit/Wander darf Wege, Walkability, Hindernisse oder Sortierung nicht aus
+  einem fertigen Bild erraten.
+- Build/Map darf Grundstuecke, Build-Zonen, Footprints oder No-Build-Masks
+  nicht aus einem fertigen Bild erraten.
+- Vor Rendering, Layer-Art oder simulierter Navigation muessen technische
+  Layer/Masks/Zonen wie `walkable_path_layer`, `buildable_zone_layer`,
+  `no_walk_mask`, `no_build_mask`, `depth_sort_bands` und
+  `landmark_anchor_layer` definiert sein.
+- M16-CY-FIX-3 bleibt ein gutes UX-Risiko-Beispiel: schoener Look und
+  spielerische Stationen reichen nicht fuer produktionsfaehige Navigation,
+  solange der Pfadverlauf aus Pixeln interpretiert werden muss.
+- 384 ist ein Docs-/Architecture-Gate: kein Code, keine Bilder, keine Assets,
+  keine Runtime-Mapdaten, keine App-Integration, keine Persistenz und kein
+  BuildState.
+- Naechster sinnvoller Folge-Slice ist M16-DB Uferwald Technical Layer and
+  Mask Spec.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1630,7 +1655,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..080, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..081, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake

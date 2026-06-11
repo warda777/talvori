@@ -152,6 +152,7 @@ Non-Goals:
 | `381-uferwald-anchor-zone-layer-overlay-plan.md` | M16-CR-Overlay-Plan: visualisiert Uferwald-Anchors, Placement-Zonen, No-Build/No-Overlap, Water-only/Terrain-sensitive Bereiche, Sort-Bands und Layer-Reihenfolge ueber dem 1x-Kandidaten; Dokumentationsvisual, keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
 | `382-uferwald-mobile-map-camera-research-and-decision.md` | M16-CT-Research-/Decision-Gate: entscheidet fullscreen/cover Uferwald-Map-Kamera, dynamische Cover-Skalen, Pan-Bounds, Edge-Masking und naechsten Preview-Fix; keine Asset-, App- oder Produktfreigabe. |
 | `383-talvori-camera-modes-and-visit-wander-rule.md` | M16-CV-Kamera-Modus-Gate: trennt Build/Map, Overview, Visit/Wander und Object Focus als Pflichtpruefung fuer World-/Map-/Build-/UI-/Asset-Entscheidungen; keine Code-, Asset-, Cloud-, App- oder Persistenzfreigabe. |
+| `384-uferwald-playable-map-layer-and-mask-architecture.md` | M16-DA-Playable-Map-Architecture-Gate: legt fest, dass sichtbare Art-Bilder nicht die technische Spielkarte sind; technische Layer, Masks, Zonen, Pfade, Hindernisse, Build-Footprints, Sort-Bands und Landmark-Anchors muessen vor Rendering, Build/Map oder Visit/Wander-Interaktion definiert werden; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -194,6 +195,7 @@ Non-Goals:
 | `381-uferwald-anchor-zone-layer-overlay-plan.md` | Uferwald-Overlay-Plan: Pflicht fuer Uferwald-Anchors, Placement-Zonen, No-Build-/No-Overlap, Sort-Bands, Layer-Reihenfolge, Overlay-Review, externe Layer-Separation-Briefs und spaetere Layer-Candidate-Gates. |
 | `382-uferwald-mobile-map-camera-research-and-decision.md` | Uferwald-Mobile-Kamera-Entscheid: Pflicht fuer fullscreen/cover Map-Preview, min/max Scale, Pan-Bounds, Edge-Masking, HUD-Dichte und lokale Review-Zonen-Interaktion. |
 | `383-talvori-camera-modes-and-visit-wander-rule.md` | Talvori-Kamera-Modi: Pflicht fuer World-/Map-/Build-/UI-/Asset-Entscheidungen, wenn Build/Map, Overview, Visit/Wander, Object Focus, Besucheransichten, begehbare Nutzerinseln oder Posterbild-Risiko betroffen sind. |
+| `384-uferwald-playable-map-layer-and-mask-architecture.md` | Playable-Map-Layer-/Masken-Architektur: Pflicht, wenn aus Uferwald oder einer World-Karte echte Bewegung, Build/Map-Logik, Walkability, Collision, Pfade, Grundstuecke, Build-Zonen, No-Walk-/No-Build-Masks, Hindernisse, Sort-Bands, Landmark-Anchors oder Runtime-Mapdaten entstehen koennten. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -376,6 +378,15 @@ Zusaetzliche M16-CG-Kandidatenregel:
   oder eine einzige Map-Kamera funktioniert, ist nicht commitfaehig. 383 ist
   keine Code-, Asset-, Cloud-, App-, Persistenz-, BuildState- oder
   `assets/`-Freigabe.
+- 384 ist das M16-DA-Playable-Map-Layer-/Masken-Architecture-Gate. Es ist
+  Pflicht, wenn Uferwald oder eine andere World-Karte spielbare Bewegung,
+  Build/Map-Logik, Walkability, Collision, Pfade, Grundstuecke, Build-Zonen,
+  Hindernisse, No-Walk-/No-Build-Masks, Depth-/Sort-Bands, Landmark-Anchors,
+  Rendering aus technischen Daten oder Runtime-Mapdaten betreffen koennte.
+  Sichtbares Art-Bild ist nicht die technische Spielkarte. Wenn technische
+  Layer/Masks/Zonen fehlen und Gameplay-Logik aus Pixeln geraten wuerde, ist
+  der Slice nicht commitfaehig. 384 ist keine Code-, Bild-, Asset-,
+  Runtime-Map-, App-, Persistenz-, BuildState- oder `assets/`-Freigabe.
 
 ### 5.1 Uferwald-/World-Preview Device-Test-Regel
 
