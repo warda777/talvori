@@ -1,32 +1,33 @@
 # M16-T: Talvori Learning Game Readiness ToDo Checklist
 
-Stand: 2026-06-10
+Stand: 2026-06-11
 
 Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 ## 0. Product Delivery Dashboard
 
-Letzte Aktualisierung: 2026-06-10
+Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-BZ`
+Aktive Sprint-ID: `M16-CA`
 
 Sprint Goal:
 
-> KI-gestuetzte Art-Produktion, Style-Konsistenz, Referenzbild-Grenzen und
-> Engine-ready Exportregeln klaeren, bevor Talvori Spielassets oder
-> High-Fidelity-Flows erzeugt.
+> Talvori Art Bible v1 als Style-System-Gate definieren, damit Kamera,
+> Perspektive, Diorama-Stil, Figuren, Build Station, HUD, Metadaten und QA
+> gegen Stilbruch vor Master References, Asset-Spec und spaeterem Code
+> geklaert sind.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 202 |
+| Gesamtanzahl M16-T-Items | 208 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 178 |
+| Erledigt `[x]` | 184 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 91.1 % |
+| Gewichteter Fortschritt | 91.3 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -90,7 +91,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
 | Asset Scope | M16T-ASSET | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Asset-Scope bleibt blockiert; Lizenz-/Quelle-/Benennung-Regeln in spaeteren Asset-Slices anwenden. |
-| AI Art / Asset Pipeline | M16T-ART | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Kontrollierte KI-Art-Pipeline, Style Bible, Master References und Engine-ready Exportregeln vor Spielassets anwenden. |
+| AI Art / Asset Pipeline | M16T-ART | 10 | 10 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Master References, Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
 | Review Queue | M16T-QUEUE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Queue-Regeln in kuenftigen Semantik-/MVP-Slices anwenden. |
@@ -1020,6 +1021,37 @@ M16-BZ operationalisiert fuer kuenftige Slices:
 - Empfohlener Folgepfad ist M16-CA Talvori Art Bible v1 -> M16-CB Starter
   Island Master Reference Set -> M16-CC Asset Family and Export Spec.
 
+M16-CA erledigt:
+
+- M16T-ART-005
+- M16T-ART-006
+- M16T-ART-007
+- M16T-ART-008
+- M16T-ART-009
+- M16T-ART-010
+
+M16-CA operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/367-talvori-art-bible-v1.md` definiert die Talvori Art
+  Bible v1 als Style-System-Gate, nicht als Asset- oder Code-Freigabe.
+- Fuehrende visuelle Sprache ist ein warmes, hochwertiges 2.5D-Cozy-Island-
+  Diorama mit island-first, object-first, character-assisted und
+  context-based language learning.
+- Kamera, Perspektive, Insel-/Diorama-Proportionen, Licht, Farbpalette,
+  Formensprache, Detailgrad, Kanten, Schatten und Materialgefuehl sind als
+  gemeinsame Style-Regeln vor Master References festgelegt.
+- Tali, Vori und Worker muessen zur Inselperspektive gehoeren und duerfen
+  nicht wie fremde Sticker wirken.
+- Build Station am Slot bleibt das fuehrende BuildChoice-Pattern; Wheel,
+  Karten oder Listen duerfen nur untergeordnet helfen.
+- UI, HUD und Bubbles muessen wie Spiel-HUD wirken, nicht wie Web-App,
+  Dashboard, Worksheet oder Tutorial-Panel.
+- Prompt-, Source- und Reference-Metadaten sowie QA-Regeln gegen Stilbruch
+  sind Pflicht fuer spaetere Bild- oder Asset-Kandidaten.
+- Der Folgepfad bleibt M16-CB Starter Island Master Reference Set -> M16-CC
+  Asset Family and Export Spec -> erst danach High-Fidelity Flow oder
+  Flutter-Code.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1097,7 +1129,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-ART-001..004, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-ART-001..010, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
@@ -1332,6 +1364,12 @@ Nicht blind kopieren. Nur Prinzipien ableiten:
 | M16T-ART-002 | [x] | Reference image is direction, not asset | Das starke Referenzbild darf nicht versehentlich als App-Screen oder Spielasset behandelt werden. | Referenzbild-Regel dokumentiert ist: Art-Direction-Reference, Dokumentationsmaterial, nicht nach `assets/`, nicht von Codex nachzeichnen. | Referenzbild kopieren, vereinfachen, nachzeichnen oder als finales Asset nutzen. | nein |
 | M16T-ART-003 | [x] | Style consistency pipeline required | Talvori braucht wiedererkennbare Weltgrafik statt Stilbruch zwischen einzelnen KI-Bildern. | Kontrollierte Pipeline mit Style/Structure References, ggf. LoRA/ControlNet, manueller Nachbearbeitung und QA dokumentiert ist. | Freie Einzelprompts, zufaellige Stilwechsel oder finale Bilder ohne Pruefung. | nein |
 | M16T-ART-004 | [x] | Engine-ready asset export rules | Schoene Bilder reichen nicht, wenn sie nicht layerbar, skalierbar oder lizenzklar sind. | Engine-ready Exportregeln fuer PNG/WebP mit Transparenz, getrennte Layer, Metadaten, Quellen/Prompts/Referenzen und eigenes Asset-Gate stehen. | Riesige Gesamtbilder, unklare Lizenz, fehlende Metadaten oder `assets/`-Writes ohne Gate. | nein |
+| M16T-ART-005 | [x] | Talvori Art Bible v1 | Pipeline-Regeln brauchen ein konkretes Style-System, bevor Master References oder Asset-Familien entstehen. | `367-talvori-art-bible-v1.md` definiert Visual North Star, Kamera, Perspektive, Diorama-Stil, Licht, Farbe, Formen, Figuren, Build Station, HUD, Metadaten, QA und Stop-Regeln. | Master References, High-Fidelity-Flows oder Flutter-Code ohne Art Bible. | nein |
+| M16T-ART-006 | [x] | Camera, perspective and diorama style system | Insel, Slots, Gebaeude und Figuren muessen in derselben 2.5D-Welt stehen. | Art Bible legt 2.5D-Diorama-Perspektive, Kamera-Gefuehl, Insel-/Slot-Proportionen und Tiefe Insel -> Grundstueck -> Gebaeude -> Raum -> Moebel -> Container fest. | Assets mit uneinheitlicher Perspektive oder technischer Editor-Draufsicht. | nein |
+| M16T-ART-007 | [x] | Character and worker visual style rules | Tali, Vori und Worker muessen emotional wirken, ohne wie fremde Sticker auszusehen. | Art Bible definiert gemeinsame Figurenperspektive, Licht, Proportionen, Silhouetten, Gesten und Worker-Auftrag-vs-direkte-Steuerung-Grenze. | Figuren aus anderem Stil, Joystick-/Pathfinding-Scope oder Worker als reines UI-Icon. | nein |
+| M16T-ART-008 | [x] | UI/HUD and bubble visual style rules | Spiel-HUD darf nicht wieder Web-App, Dashboard, Worksheet oder Tutorial-Panel werden. | Art Bible definiert kleine, ruhige, kontextuelle HUD-/Bubble-Regeln, Copy-Beispiele und verbotene sichtbare technische Begriffe. | Bottom-Sheet, Menue-first, Quizkarte oder dominante Admin-Kaesten als Hauptspielmoment. | nein |
+| M16T-ART-009 | [x] | Art QA checklist against style drift | KI- und Nachbearbeitungsprozesse brauchen harte Pruefpunkte gegen Collage-Stil. | Art Bible listet QA gegen Kamera-, Licht-, Farb-, Form-, Detail-, Figuren-, Gebaeude-, UI-, Layer-, Export- und Metadatenbruch. | Stilbruch zwischen Insel, Gebaeude, Figuren, UI oder Asset-Familien. | nein |
+| M16T-ART-010 | [x] | Prompt/reference metadata standard | Spaetere Bild- und Asset-Kandidaten brauchen nachvollziehbare Quellen, Prompts und Referenzen. | Art Bible definiert Mindestfelder fuer asset_family, working_name, purpose, source_tool, prompt, references, seed/generation_id, postprocess_tool, license_notes, export_format, layer_notes, qa_status und approved/blocked scope. | Bilder ohne Source-/Prompt-/Reference-/License-/QA-Metadaten. | nein |
 
 ### M16T-SOCIAL
 
