@@ -156,6 +156,7 @@ Non-Goals:
 | `385-uferwald-technical-layer-and-mask-spec.md` | M16-DB-Technical-Layer-/Masken-Spec: konkretisiert fuer Uferwald `base_rock_shape`, `grass_terrain_mask`, `water_river_mask`, `walkable_path_layer`, `tree_obstacle_layer`, `rock_cliff_obstacle_layer`, `buildable_zone_layer`, `plot_footprint_layer`, `no_walk_mask`, `no_build_mask`, `depth_sort_bands` und `landmark_anchor_layer`; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `386-uferwald-technical-layer-manifest.md` | M16-DC-Technical-Layer-Manifest: erste maschinennahe Planungsstruktur fuer `map_id: uferwald_starter_island`, `coordinate_space: normalized_0_1`, Layer-IDs, geplante Anchor-IDs, erlaubte Modi, blockierte Nutzungen und offene Messfragen; keine Runtime-Daten, Code-, Bild-, Asset-, App- oder Persistenzfreigabe. |
 | `387-uferwald-technical-measurement-and-vector-planning-gate.md` | M16-DD-Measurement-/Vector-Planning-Gate: definiert Messreihenfolge, erlaubte Ableitungen aus technischen Source-Layern, Pixel-Ableitungsverbote, moegliche Tools wie Figma/SVG/JSON/YAML/manuelle Polygonplanung und QA vor Runtime-Manifesten; keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
+| `388-uferwald-measurement-source-and-vector-workspace-plan.md` | M16-DE-Measurement-Workspace-Format-Decision-Gate: entscheidet Markdown + SVG-Dokumentationsvisual als naechsten Mess-/Vector-Weg, haelt Figma-Writes und JSON/YAML-Runtime-Daten geschlossen und gibt keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -202,6 +203,7 @@ Non-Goals:
 | `385-uferwald-technical-layer-and-mask-spec.md` | Uferwald Technical Layer-/Masken-Spec: Pflicht, wenn technische Map-Layer, Masken, Datenformen, Build-/Walkability-Zonen, Plot-Footprints, Obstacles, No-Walk-/No-Build-Masks, Depth-/Sort-Bands, Landmark-Anchors oder ein spaeteres technisches Uferwald-Manifest betroffen sind. |
 | `386-uferwald-technical-layer-manifest.md` | Uferwald Technical Layer Manifest: Pflicht, wenn `uferwald_starter_island`, technische Layer-IDs, geplante Anchor-IDs, offene Messfragen, Layer-Manifeste, Vector-Planung, Map-Manifeste oder spaetere Runtime-Map-Gates betroffen sind. |
 | `387-uferwald-technical-measurement-and-vector-planning-gate.md` | Uferwald Measurement-/Vector-Planning-Gate: Pflicht, wenn Messreihenfolge, manuelle Polygonplanung, Figma/SVG/JSON/YAML-Planung, Pixeltracing-Grenzen, Source-Layer-Ableitung, Vector-Arbeitsflaechen, QA vor Runtime-Manifesten oder technische Uferwald-Messarbeit betroffen sind. |
+| `388-uferwald-measurement-source-and-vector-workspace-plan.md` | Uferwald Measurement Workspace Format Decision: Pflicht, wenn der naechste Mess-/Vector-Arbeitsraum, Markdown-vs-SVG-vs-Figma-vs-JSON/YAML, SVG-Dokumentationsvisuals, Figma-Write-Grenzen, JSON/YAML-Runtime-Risiko oder Formatentscheidungen fuer technische Uferwald-Folgearbeit betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -421,6 +423,16 @@ Zusaetzliche M16-CG-Kandidatenregel:
   `no_build_mask`, `depth_sort_bands` oder `landmark_anchor_layer` betroffen
   sind. 387 ist keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App-,
   Persistenz-, BuildState- oder `assets/`-Freigabe.
+- 388 ist das M16-DE-Uferwald-Measurement-Source-and-Vector-Workspace-Plan-
+  Gate. Es ist Pflicht, wenn Formatentscheidungen fuer technische
+  Uferwald-Messarbeit, Markdown-only, SVG-Dokumentationsvisuals,
+  Figma-Arbeitsraeume, Figma-Writes, JSON/YAML-Planungsstrukturen,
+  JSON/YAML-Runtime-Risiko, Vector-/Polygon-Dateien oder der naechste
+  Mess-/Vector-Slice betroffen sind. 388 entscheidet Markdown + SVG-
+  Dokumentationsvisual als naechsten Weg, erzeugt selbst aber keine SVG/PNG,
+  kein Figma, kein JSON/YAML, keine Koordinaten und keine Runtime-Daten. 388
+  ist keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App-, Persistenz-,
+  BuildState- oder `assets/`-Freigabe.
 
 ### 5.1 Uferwald-/World-Preview Device-Test-Regel
 
