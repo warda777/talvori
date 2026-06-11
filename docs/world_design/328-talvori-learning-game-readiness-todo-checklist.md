@@ -8,25 +8,25 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CB`
+Aktive Sprint-ID: `M16-CD`
 
 Sprint Goal:
 
-> Starter Island Master Reference Set als Markdown-Reference-Brief-Gate
-> definieren, damit Uferhain, Build Station, Haus-Bauphasen, Worker/Tali/Vori,
-> UI/HUD und Slot/Layer-Familien vor M16-CC sauber eingegrenzt sind.
+> Codex Prompt Compression und Slice Templates definieren, damit kuenftige
+> Kurzprompts Pflichtlektuere, M16-T-ID-Abgleich, Stop-Regeln, Checks,
+> Output-Regeln sowie Commit- und External-Write-Grenzen sicher erben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 215 |
+| Gesamtanzahl M16-T-Items | 219 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 191 |
+| Erledigt `[x]` | 195 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 91.6 % |
+| Gewichteter Fortschritt | 91.8 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -103,8 +103,8 @@ ihrem Detail-Gate Fortschritt bei.
 | Project Management / External Tool Sync | M16T-MGMT | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Repo bleibt Source of Truth; Notion/Linear/GitHub duerfen nur Spiegel, Aufgaben oder technische Review-Strukturen nach Freigabe sein. |
 | Professional Design / UX Gates | M16T-DESIGN | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Cozy Island Diorama Builder als M16-BY-Richtung und M16-BZ-Art-Pipeline vor komplexem Island-/World-/BuildChoice-Code anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
-| Dokumentations- und Visual-QA | M16T-DOC | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
-| Commit-/Review-Hygiene | M16T-GIT | 3 | 2 | 0 | 0 | 1 | 66.7 % | `███████░░░` | Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
+| Dokumentations- und Visual-QA | M16T-DOC | 7 | 5 | 1 | 0 | 1 | 78.6 % | `████████░░` | Prompt-Templates, Reading Rules und Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
+| Commit-/Review-Hygiene | M16T-GIT | 4 | 3 | 0 | 0 | 1 | 75.0 % | `████████░░` | Template-basierte Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
 
 ## 1. Zweck
 
@@ -351,6 +351,9 @@ ausdruecklich freigegeben werden.
 | M16T-DOC-002 | [x] | Pflichtlektuere-Regel pro Slice-Typ | Unterschiedliche Slice-Typen brauchen andere Pflichtdocs. | Slice-Typen mit Pflichtlektuerelisten dokumentiert sind. | Unvollstaendige Quellenlage. | nein |
 | M16T-DOC-003 | [~] | Visual-QA-Regel | Diagramme muessen lesbar und ueberlappungsfrei bleiben. | Text-Containment, Innenabstand, Kartenabstand, Footer, Contact Sheet geprueft werden. | Unlesbare Visuals. | nein |
 | M16T-DOC-004 | [!] | Keine Screenshots als Repo-Artefakte | Screenshots koennen App-Screens oder falsche Freigabe suggerieren. | Dokumentationsvisuals bleiben generiert/gezeichnet, nicht Screenshot-Artefakte. | Screenshot-Dateien. | nein |
+| M16T-DOC-005 | [x] | Codex prompt compression gate | Lange Prompts sollen kuerzer werden, ohne Sicherheitsregeln zu verlieren. | `369-codex-prompt-compression-and-slice-template-gate.md` definiert AGENTS.md/328/336/Templates-Rollen, Kurzprompt-Pflichtfelder, geerbte Regeln, Risiken und Stop-Regeln. | Kurzprompts ohne Repo-verankerte Regeln. | nein |
+| M16T-DOC-006 | [x] | Slice prompt templates | Wiederkehrende Slice-Arbeit braucht robuste Vorlagen statt Prompt-Flut. | `docs/world_design/prompt_templates/` enthaelt README sowie Templates fuer Docs-only, Review, Art/Master-Reference, Visual Documentation und Implementation Slices. | Template-Flut, fehlende Templates oder Templates als Implementierungsfreigabe. | nein |
+| M16T-DOC-007 | [x] | Short prompt workflow with template inheritance | Kuerzere Prompts duerfen nicht vage werden. | Kurzprompt-Regel verlangt Slice-ID, Template, Ziel, erwartete Dateien/Bereiche, besondere Grenzen und Commit-Status; 336 und Templates liefern Pflichtlektuere, Stop-Regeln, Checks und Output-Regeln. | Kurzprompt ohne Ziel, Dateien, Grenzen oder Commit-Status. | nein |
 
 ## 26. Commit-/Review-Hygiene
 
@@ -359,6 +362,7 @@ ausdruecklich freigegeben werden.
 | M16T-GIT-001 | [x] | `git status` vor Commit | Unbeabsichtigte Dateien sollen sichtbar bleiben. | Jeder Abschluss `git status --short` berichtet. | Commit ohne Status. | nein |
 | M16T-GIT-002 | [x] | Scope gegen Stop-Regeln pruefen | Stop-Regeln verhindern Drift. | Jede Abschlussausgabe Stop-Regeln bestaetigt. | Drift in App/Assets/Persistenz. | nein |
 | M16T-GIT-003 | [!] | Commit erst nach separater Freigabe | Review kann vor Commit noch korrigieren. | Nutzer gibt Commit explizit frei. | Automatischer Commit. | nein |
+| M16T-GIT-004 | [x] | Template-based standard checks remain mandatory | Prompt-Kompression darf Checks nicht optional machen. | 369, 336 und Templates erben `git status --short`, `git diff --check`, Scope-Check und Abschlussbericht; Review-/Docs-/Art-/Visual-/Implementation-Templates nennen ihre Standardchecks. | Kurzprompt laesst Status, Diff, Scope oder Commit-Grenze fallen. | nein |
 
 ## 27. Aktueller Stand nach Erstellung
 
@@ -1079,6 +1083,29 @@ M16-CB operationalisiert fuer kuenftige Slices:
 - Der Folgepfad bleibt M16-CC Asset Family and Export Spec -> danach erst
   High-Fidelity Flow oder Flutter-Code pruefen.
 
+M16-CD erledigt:
+
+- M16T-DOC-005
+- M16T-DOC-006
+- M16T-DOC-007
+- M16T-GIT-004
+
+M16-CD operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/369-codex-prompt-compression-and-slice-template-gate.md`
+  definiert das Zielmodell fuer kuerzere Codex-Prompts ohne Verlust von
+  Pflichtlektuere, Stop-Regeln, M16-T-ID-Abgleich, Checks, Output-Regeln,
+  Commit-Grenzen oder External-Write-Grenzen.
+- `docs/world_design/prompt_templates/` enthaelt wiederverwendbare
+  Arbeitsvertraege fuer Docs-only, Review, Art/Master-Reference, Visual
+  Documentation und Implementation Slices.
+- Kurzprompts muessen kuenftig mindestens Slice-ID, Template, Ziel, erwartete
+  Dateien oder Bereiche, besondere Grenzen und Commit-Status nennen.
+- Templates ersetzen 336 nicht, sondern erben Routing, Pflichtlektuere und
+  Standardchecks aus 336.
+- Der Folgepfad bleibt: M16-CC kann danach mit Kurzprompt und Template
+  `art_master_reference_slice` gestartet werden.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1156,7 +1183,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-ART-001..017, M16T-DOC-001..004, M16T-GIT-001..003, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..004, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake

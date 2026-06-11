@@ -72,6 +72,8 @@ Non-Goals:
 | `328-talvori-learning-game-readiness-todo-checklist.md` | Bei jedem Slice mit M16-T-IDs, Dashboard, Status oder Fortschritt. |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Bei Scrum-lite, MVP-Roadmap, Change-/Idea-Intake und Research-Gates. |
 | `336-documentation-map-and-slice-reading-rules.md` | Bei jedem neuen World-/Learning-/Semantics-/Docs-/Commit-Slice als Lese-Kompass. |
+| `369-codex-prompt-compression-and-slice-template-gate.md` | Bei Kurzprompt-, Template-, Prompt-Kompressions-, Standardcheck- oder Slice-Arbeitsvertrag-Fragen. |
+| `prompt_templates/` | Wiederverwendbare Arbeitsvertraege fuer Docs-only, Review, Art/Master-Reference, Visual Documentation und Implementation Slices; ersetzt 336 nicht und gibt keine Implementierung frei. |
 
 ### 4.2 Minimaler Lernloop
 
@@ -247,14 +249,38 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 | Implementierungs-Slice | `talvori_game_bible.md` wenn Produktidentitaet, Sprachschicht, Zielsprachen, Language Passport, Internal Corpus, Optional Capture oder Context Before Vocabulary betroffen sind, `328`, `336`, `345` mit Play-First + Island-First Rule, `350` wenn UI, World, Gameplay, Navigation oder Interaktion betroffen ist, `351` wenn Starter-Insel, Plot-Slots, Kategorie-Templates, Varianten, Unlocks oder BuildChoice betroffen sind, `353` wenn Starter-Insel-Identitaet, Biome, Kategorie-Scope oder Terrain-Variante betroffen sind, `355` wenn Spielmoment, BuildChoice, Bau-/Ausbaufortschritt, Raum, Container/Depth oder Lernhandlung betroffen ist, `356` wenn erster lokaler Foundation-/Haus-Vertical-Slice, Grundstueckszoom, Fundament-Candidate oder M16-BK betroffen ist, `357` wenn Insel-Showcase, Kamera-Zoom, Bauplatz, visuelle BuildChoice, M16-BM oder Construction-HUD betroffen ist, `358` wenn Gameplay, World, BuildChoice, Learning, Mission, Reward, Hook oder Spielspannung betroffen ist, `359` wenn Bauaufgabe, Puzzle, Mission, Belohnung, Objektmanipulation oder Button-Quiz-Risiko betroffen ist, `360` wenn Figur/Worker/Tali/Vori, Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen, Werkstatt oder Container betroffen ist, `361` wenn isolierte Proofs, BQ-Muster, Uferhain/Slot/BuildChoice/Kamera und Buildsite-Rejoin verbunden werden, `363` und `365` wenn komplexer Island-/Slot-/BuildChoice-/Kamera-Code nach M16-BY entsteht, `367` wenn visuelle Qualitaet, Art Style, HUD, Figuren, Build Station, Insel oder Gebaeude betroffen sind, `368` wenn Uferhain, Build Station, Haus-Bauphasen, Worker/Tali/Vori, HUD oder Slot/Marker/Layer betroffen sind; Folge-Code muss Cozy Island Diorama Builder, Build Station am Slot, Art Bible und Master-Reference-Briefs beruecksichtigen und darf nicht nur auf abgelehntem Low-Fidelity-Wireflow, v1-Uebergangsboard oder v2-Zwischenvorschau basieren, betroffene Fachdocs, erwartete Dateien und harte Scope-/Stop-Regeln. |
 | Research / Benchmark Slice | `328`, `345`, `329`, `327`, betroffene M16-T-IDs und eigene Research-Frage. |
 | Project Management / External Tool Sync Slice | `AGENTS.md`, `talvori_game_bible.md`, `328`, `336`, `362` und betroffene Tool-/Plugin-Regeln; keine Notion-, Linear-, GitHub-, Supabase-, API-Key- oder sonstigen externen Writes ohne ausdrueckliche Freigabe. |
+| Prompt Compression / Template Slice | `AGENTS.md`, `328`, `336`, `369` falls vorhanden, `docs/world_design/prompt_templates/README.md` falls vorhanden, betroffene Template-Dateien; klaert Kurzprompt-Pflichtfelder, Template-Vererbung, Standardchecks, Output-Regeln, Commit-Grenzen und External-Write-Grenzen, ohne Implementierung freizugeben. |
 | Visual Documentation Slice | `328`, `327`, relevante Fachdocs, Visual-QA-Regel, erwarteter Preview-Ordner; bei komplexem Island-Build-Flow auch `363` und `365`, aber nicht das abgelehnte v2-Board als Zielbild verwenden; bei Art-/Asset-Pipeline auch `366`; bei Stil, Kamera, Figuren, HUD, Gebaeuden, Insel, Build Station oder Asset-Familien auch `367`; bei Starter-Insel/Uferhain, Build Station, Haus-Bauphasen, Figuren, HUD, Slot/Marker/Layer oder Master References auch `368`; bevorzugt PNG + SVG erzeugen, sofern der Prompt Visuals erlaubt. |
 | Commit / Review Slice | `328`, `336`, erwartete Dateien, `git status --short`, `git diff --check`, Scope-Check. |
 
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts
 
-Jeder kuenftige Codex-Prompt fuer World, Learning, Semantics, Reward, Queue,
-Companion, Sensitive, Plot, Build, Container, Assets, Data, App-Integration,
-Research, Visuals oder Review muss enthalten:
+Kuenftige Codex-Prompts duerfen als Kurzprompt auf ein Template aus
+`docs/world_design/prompt_templates/` verweisen. Ein Kurzprompt ist nur gueltig,
+wenn er mindestens enthaelt:
+
+- Slice-ID,
+- Template-Name,
+- Ziel,
+- erwartete Dateien oder erlaubte Dateibereiche,
+- besondere Grenzen oder Abweichungen,
+- klare Nicht-Commit-Regel oder ausdrueckliche separate Commit-Freigabe.
+
+Bei Kurzprompts erbt Codex Pflichtlektuere, M16-T-ID-Abgleich,
+Standard-Stop-Regeln, Output-Regeln, Scope-Check, `git status --short`,
+`git diff --check`, Commit-Grenzen und External-Write-Grenzen aus 336 und dem
+genannten Template. Templates ersetzen 336 nicht und geben keine
+Implementierung frei.
+
+Wenn kein Template genannt ist oder die Aufgabe komplex/riskant ist, muss
+Codex den passenden Slice-Typ aus 336 ableiten und berichten. Bei unklarer
+Template- oder ID-Lage bleibt der Slice Analyse/Review und darf keine
+Implementierung starten.
+
+Jeder kuenftige Vollprompt oder aus Template geerbte Arbeitsvertrag fuer
+World, Learning, Semantics, Reward, Queue, Companion, Sensitive, Plot, Build,
+Container, Assets, Data, App-Integration, Research, Visuals oder Review muss
+beruecksichtigen:
 
 - Sprint-ID,
 - Ziel,
@@ -415,6 +441,9 @@ Slice ein Planungs-/Audit-Slice und darf keine Implementierung freigeben.
 
 Jede kuenftige Codex-Ausgabe muss berichten:
 
+- genutztes Template, falls ein Kurzprompt oder Template-System verwendet
+  wurde,
+- welche Regeln aus 336 und Template geerbt wurden,
 - erstellte/geaenderte Dateien,
 - geaenderte M16-T-IDs,
 - neuer Fortschritt, wenn 328 geaendert wurde,
