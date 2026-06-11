@@ -8,24 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CK`
+Aktive Sprint-ID: `M16-CL`
 
 Sprint Goal:
 
-> Externen Postprocess- und Layer-Production-Brief fuer Candidate A
-> erstellen, ohne Bilder, Assets, Engine-ready, App oder Code freizugeben.
+> Anchor-/Registration-/Placement-Logik als festen Pruefstandard fuer
+> spaetere Layer- und Bildarbeit verankern, ohne Bilder, Assets oder Code.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 263 |
+| Gesamtanzahl M16-T-Items | 271 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 239 |
+| Erledigt `[x]` | 247 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 93.2 % |
+| Gewichteter Fortschritt | 93.4 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -88,7 +88,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 48 | 46 | 1 | 0 | 1 | 96.9 % | `██████████` | Candidate A nur ueber externe Postprocess-/Layer-Briefs weiterfuehren; assets, Engine-ready Candidates, neue Bilder in Codex und approved Assets bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 56 | 54 | 1 | 0 | 1 | 97.3 % | `██████████` | Anchor-/Registration-/Placement-Logik vor weiterer Layer-/Bildarbeit anwenden; assets, Engine-ready Candidates, neue Bilder in Codex und approved Assets bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -348,6 +348,14 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-046 | [x] | Layer target briefs for Uferhain | `island_base`, Wasser, Terrain und Slots brauchen getrennte Produktionsanforderungen. | 375 definiert fuer `island_base`, `water_paths`, `terrain_layers`, `slot_markers` und optional spaeter `build_stations` Zweck, Uebernahme, Neuzeichnung, Verbote, Exportidee, Metadaten und QA. | Ein monolithisches Gesamtbild ersetzt die Layerfamilien. | nein |
 | M16T-ASSET-047 | [x] | Layer postprocess metadata and QA standard | Spaetere Layer-Candidates muessen pruefbar bleiben. | 375 definiert Pflichtmetadaten, Maximalstatus `layer_postprocess_candidate`, QA fuer Uferhain, Candidate-A-Struktur, Layertrennung, Neutralitaet, Mobile-Lesbarkeit, Pfadschutz und Statusschutz. | Layer-Candidates ohne Source, Lizenz, QA oder Statusschutz. | nein |
 | M16T-ASSET-048 | [x] | No production permission in M16-CK | Der externe Brief darf keine Bild-, Asset- oder Code-Freigabe werden. | 375 sagt explizit: keine neuen Bilder, keine PNG/SVG, kein Preview-Ordner, kein `assets/`, kein Engine-ready, kein approved Asset, kein Code und kein Commit. | M16-CK wird als Produktions- oder Integrationsfreigabe gelesen. | nein |
+| M16T-ASSET-049 | [x] | Anchor registration and placement gate | Spaetere Layer muessen reproduzierbar ueberlagerbar sein. | `376-anchor-registration-and-placement-logic-gate.md` definiert Anchor-, Registration-, Placement-, Layer- und Sorting-Standard vor weiterer Bild-/Layerarbeit. | Layer passen nur visuell ungefaehr zusammen. | nein |
+| M16T-ASSET-050 | [x] | Fixed canvas and framing rules | Layer duerfen nicht frei im Crop driften. | 376 definiert feste Canvas-, Ratio-, Framing-, Crop-, Kamera- und Padding-Regeln fuer verwandte Layerfamilien. | Bildvarianten haben unterschiedliche Ausschnitte oder Perspektiven. | nein |
+| M16T-ASSET-051 | [x] | Origin and pivot logic | Platzierung braucht stabile Bezugspunkte. | 376 trennt `canvas_origin`, `world_origin`, `layer_pivot` und `placement_pivot` inklusive Pivot-Regeln je Layer-Familie. | Objektpositionen beziehen sich auf Auge-Mass oder Bildmitte. | nein |
+| M16T-ASSET-052 | [x] | Anchor point naming and documentation standard | Spaetere Anchors muessen benannt und pruefbar sein. | 376 definiert Pflicht-Anchors wie `main_build_area_anchor`, `house_primary_anchor`, `hub_center_anchor`, River-, Grove- und Reserve-Anchors plus Dokumentationsfelder. | Anchors fehlen oder sind unbenannt. | nein |
+| M16T-ASSET-053 | [x] | Placement zone taxonomy | Reserve, Build-Footprint und No-Build duerfen nicht vermischt werden. | 376 definiert Buildable Footprints, Soft Placement Zones, Reserve Zones, No-Build Zones, No-Overlap Zones, Water-only und terrain-sensitive areas. | Neutrale Reserve wird zu echter Platzierung oder Kategorieplatz. | nein |
+| M16T-ASSET-054 | [x] | Layer order and depth sorting standard | Ueber-/Unterlagerung darf nicht aus Pixeln geraten werden. | 376 definiert feste Layer-Reihenfolge, Sort-Bands, Sort-Anchor, Sort-Offset und Occlusion-Regeln fuer spaetere Candidates. | Implizite Sortierung aus dem Bild oder verdeckte Figuren/Stationen. | nein |
+| M16T-ASSET-055 | [x] | Candidate A anchor and zone derivation | Candidate A ist ohne Anchors nicht produktionsreif. | 376 beschreibt, welche Anchors und Zonen aus Candidate A abgeleitet werden sollen und was weiterhin nicht uebernommen werden darf. | Candidate A wird ohne Registration als Layergrundlage genutzt. | nein |
+| M16T-ASSET-056 | [x] | Anchor QA before image/layer progress | Bild- und Layer-Slices brauchen Commitfaehigkeitskriterien. | 376 definiert QA: Canvas, Framing, Origin/Pivot, Anchors, Placement-Zonen, No-Build/No-Overlap, Layer-Reihenfolge, Sorting und Ueberlagerbarkeit muessen JA sein. | Bildfreigabe ohne Anchor-/Registration-Pruefung. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1333,6 +1341,37 @@ M16-CK operationalisiert fuer kuenftige Slices:
   `layer_postprocess_candidate`; `engine_ready_candidate`, `approved_asset`,
   `assets/`, Flutter/App-Integration und Produktivmechanik bleiben blockiert.
 
+M16-CL erledigt:
+
+- M16T-ASSET-049
+- M16T-ASSET-050
+- M16T-ASSET-051
+- M16T-ASSET-052
+- M16T-ASSET-053
+- M16T-ASSET-054
+- M16T-ASSET-055
+- M16T-ASSET-056
+
+M16-CL operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/376-anchor-registration-and-placement-logic-gate.md`
+  macht Canvas, Framing, Origin/Pivot, Anchor Points, Placement-Zonen,
+  No-Build-/No-Overlap-Zonen, Layer-Reihenfolge und Depth-/Sorting zu
+  Pflichtpruefungen vor weiterer Bild-/Layerarbeit.
+- Pflicht-Anchors fuer Uferhain sind u. a. `main_build_area_anchor`,
+  `house_primary_anchor`, `hub_center_anchor`, `river_entry_anchor`,
+  `river_exit_anchor`, `grove_anchor`, `reserve_zone_anchor_north` und
+  `reserve_zone_anchor_south`.
+- 376 trennt Anchor Points von Placement-Zonen und stellt klar: neutrale
+  Reserve ist noch keine echte Platzierung, kein BuildState und keine
+  Persistenz.
+- Kuenftige Bild-/Layer-/Candidate-Slices sind nicht commitfaehig, wenn
+  Canvas-Regel, Framing, Origin/Pivot, Anchors, Placement-Zonen,
+  No-Build-/No-Overlap-Zonen, Layer-Reihenfolge, Sorting oder
+  Ueberlagerbarkeit fehlen.
+- 376 ist keine Bild-, Asset-, Code-, App-, Engine-ready- oder
+  `assets/`-Freigabe.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1410,7 +1449,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..048, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..056, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
