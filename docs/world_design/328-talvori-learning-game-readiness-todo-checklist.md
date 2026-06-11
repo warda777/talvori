@@ -8,24 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CM`
+Aktive Sprint-ID: `M16-CN`
 
 Sprint Goal:
 
-> Candidate A in ein Anchor-/Placement-/Registration-Manifest und einen
-> Layer-Generation-Brief uebersetzen, ohne Bilder, Assets oder Code.
+> Permission Gate fuer erste Uferhain-Layer-Postprocess-Bildarbeit festlegen,
+> ohne in diesem Slice Bilder, Assets oder Code zu erzeugen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 279 |
+| Gesamtanzahl M16-T-Items | 287 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 255 |
+| Erledigt `[x]` | 263 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 93.5 % |
+| Gewichteter Fortschritt | 93.7 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -88,7 +88,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 64 | 62 | 1 | 0 | 1 | 97.7 % | `██████████` | Candidate-A-Anchor-Manifest und Placement-Zonen vor weiterer Layer-/Bildarbeit anwenden; assets, Engine-ready Candidates, neue Bilder in Codex und approved Assets bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 72 | 70 | 1 | 0 | 1 | 97.9 % | `██████████` | M16-CO darf spaeter nur eng begrenzte Uferhain-`island_base`-Layer-Postprocess-Bildarbeit oeffnen; assets, Engine-ready Candidates, neue Bilder in Codex und approved Assets bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -364,6 +364,14 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-062 | [x] | Anchor metadata extension standard | Spaetere Layer-Metadaten brauchen Registration-Felder. | 377 ergaenzt Pflichtfelder wie `anchor_manifest`, `anchor_manifest_version`, `canvas_family`, `world_origin`, `required_anchors_present`, Placement-/No-Build-/No-Overlap-Status und Registration-QA. | Layer-Candidates ohne Anchor-/Registration-Metadaten. | nein |
 | M16T-ASSET-063 | [x] | Image/layer slice commitability via manifest | Kuenftige Bild-/Layer-Slices duerfen nur mit vollstaendiger Registration commitfaehig sein. | 377 definiert Commitfaehigkeitsregeln: kein Anchor-Manifest, keine Placement-Zonen, keine No-Build-/No-Overlap-Zonen oder kein Depth-/Sorting = nicht commitfaehig. | Bildarbeit wird trotz fehlender Registration akzeptiert. | nein |
 | M16T-ASSET-064 | [x] | No image/asset/code generation in M16-CM | Der Manifest-Slice darf nicht zur stillen Produktion werden. | 377 bleibt reiner Anchor-Manifest-/Layer-Generation-Brief ohne neue Bilder, PNG/SVG, Preview-Ordner, `assets/`, Engine-ready, Code oder Commit. | M16-CM erzeugt Bilder, Assets, Engine-ready Candidates oder Flutter-Code. | nein |
+| M16T-ASSET-065 | [x] | First Uferhain layer postprocess permission gate | Der erste echte Layer-Postprocess-Schritt braucht eine separate Bildarbeitsentscheidung. | `378-first-uferhain-layer-postprocess-candidate-permission-gate.md` klaert, dass M16-CN selbst keine Bilder erzeugt, aber M16-CO unter engen Bedingungen vorbereiten darf. | Bildarbeit startet ohne Permission Gate. | nein |
+| M16T-ASSET-066 | [x] | M16-CO documentation path and filenames | Spaetere Layer-Dateien brauchen vor Produktion erlaubte Pfade und Namen. | 378 definiert den einzigen spaeteren M16-CO-Dokumentationspfad sowie erlaubte Dateinamen fuer `island_base`, optional `water_paths`, Metadata, Anchor-Manifest und Contact Sheet. | Zufallspfade, Dateien unter `assets/` oder unklare Namen. | nein |
+| M16T-ASSET-067 | [x] | First layer family decision: island_base postprocess | Die erste Bildarbeit muss die Inselbasis stabilisieren, nicht Terrain, Slots oder Stationen vorziehen. | 378 erlaubt fuer M16-CO bevorzugt nur `island_base`; `water_paths` nur optional fuer Registration; `terrain_layers`, `slot_markers` als Bild und `build_stations` bleiben blockiert. | Terrain-/Slot-/Build-Station-Bilder entstehen zu frueh. | nein |
+| M16T-ASSET-068 | [x] | Layer postprocess max status protection | Der erste Postprocess-Candidate darf nicht zu Engine-ready oder approved Asset driften. | 378 setzt Maximalstatus `layer_postprocess_candidate` und blockiert `engine_ready_candidate`, `approved_asset`, `production_asset`, `runtime_asset` und `app_asset`. | Status wird zu hoch gesetzt oder als Produktdatei gelesen. | nein |
+| M16T-ASSET-069 | [x] | Anchor registration mandatory for M16-CO | Bildarbeit darf nur mit Canvas-, Origin-, Pivot-, Framing- und Anchor-Pflicht weitergehen. | 378 verlangt `canvas_family`, `canvas_origin`, `world_origin`, `layer_pivot`, `framing_lock`, 377-Anchor-Manifest, Placement-Zonen, No-Build-/No-Overlap-Zonen und Sort-Bands. | Layer-Candidate ohne Registration, Anchors oder Zonen. | nein |
+| M16T-ASSET-070 | [x] | Future image tool role boundary | Codex darf auch nach Permission Gate nicht zum Bildgenerator werden. | 378 trennt Folgearbeit: ChatGPT/image_gen oder benanntes externes Tool darf nur im M16-CO-Folgeprompt Bilder erzeugen; Codex bleibt bei Intake, Metadaten, QA, Dateieinordnung und Checks. | Codex startet KI-Bildtools, zeichnet Candidate A nach oder gibt Assets frei. | nein |
+| M16T-ASSET-071 | [x] | First layer prompt and negative constraints | Spaetere Bildprompts brauchen klare Grenzen gegen Pixelkopie, UI, Figuren, Kategorieplaetze und Build Stations. | 378 dokumentiert Pflichtsatz, positive Uferhain-/2.5D-Diorama-Richtung und Negative-Grenzen fuer M16-CO. | Freie Einzelprompts oder Bilder mit Text, UI, Slots, Gebaeuden, Figuren oder Build Stations. | nein |
+| M16T-ASSET-072 | [x] | M16-CO QA and commitability guard | Der Folge-Slice braucht harte Blocker gegen fehlende Metadaten, falschen Pfad und Statusdrift. | 378 definiert QA: fehlende Anchor-/Registration-Logik, fehlende Metadaten, `assets/`-Pfad, zu hoher Status oder Candidate-A-Pixelziel machen M16-CO nicht commitfaehig. | M16-CO akzeptiert Bilddateien ohne QA oder mit falschem Scope. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1413,6 +1421,40 @@ M16-CM operationalisiert fuer kuenftige Slices:
 - 377 ist keine Bild-, Asset-, Code-, App-, Engine-ready- oder
   `assets/`-Freigabe; Candidate A bleibt Strukturreferenz, kein Pixelziel.
 
+M16-CN erledigt:
+
+- M16T-ASSET-065
+- M16T-ASSET-066
+- M16T-ASSET-067
+- M16T-ASSET-068
+- M16T-ASSET-069
+- M16T-ASSET-070
+- M16T-ASSET-071
+- M16T-ASSET-072
+
+M16-CN operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/378-first-uferhain-layer-postprocess-candidate-permission-gate.md`
+  entscheidet: In M16-CN selbst entstehen keine Bilder; ein spaeterer
+  M16-CO-Folgeprompt darf aber unter engen Bedingungen erste
+  Uferhain-`island_base`-Layer-Postprocess-Bildarbeit oeffnen.
+- Erste erlaubte Familie fuer M16-CO ist `island_base`; `water_paths` ist nur
+  optional, wenn es fuer Registration noetig ist. `terrain_layers`,
+  `slot_markers` als Bild, `build_stations`, `building_phases`,
+  `workers_companions` und `ui_hud_bubbles` bleiben blockiert.
+- Erlaubter spaeterer Pfad ist ausschliesslich
+  `docs/world_design/previews/m16_co_first_uferhain_layer_postprocess_candidate/`.
+  Dateien unter `assets/` bleiben blockiert.
+- Maximalstatus fuer M16-CO ist `layer_postprocess_candidate`. Engine-ready,
+  approved Asset, production/runtime/app asset und Produktintegration bleiben
+  blockiert.
+- M16-CO ist nicht commitfaehig, wenn Anchor-/Registration-Logik,
+  Placement-Zonen, No-Build-/No-Overlap-Zonen, Sort-Bands, Metadaten,
+  Anchor-Manifest oder Pfad-/Statusschutz fehlen.
+- Codex bleibt auch nach dem Permission Gate bei Intake, Metadaten, QA,
+  Dateieinordnung und Checks; Bildgenerierung muss im Folgeprompt explizit
+  fuer ChatGPT/image_gen oder ein extern benanntes Tool geoeffnet werden.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1490,7 +1532,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..064, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..072, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
