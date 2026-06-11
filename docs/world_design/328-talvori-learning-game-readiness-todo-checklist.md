@@ -8,26 +8,25 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CI`
+Aktive Sprint-ID: `M16-CJ`
 
 Sprint Goal:
 
-> Candidate A als primaere Uferhain-`island_base`-Strukturreferenz sperren
-> und Postprocess-/Layer-Regeln dokumentieren, ohne Asset-, Engine-ready-,
-> App- oder Code-Freigabe zu oeffnen.
+> Candidate A in einen konkreten Layer- und Postprocess-Plan uebersetzen,
+> ohne neue Bilder, Assets, Engine-ready, App- oder Code-Freigabe zu oeffnen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 250 |
+| Gesamtanzahl M16-T-Items | 257 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 226 |
+| Erledigt `[x]` | 233 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 92.8 % |
-| Fortschrittsbalken | `██████████████████░░` |
+| Gewichteter Fortschritt | 93.0 % |
+| Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
 
@@ -89,7 +88,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 35 | 33 | 1 | 0 | 1 | 95.7 % | `██████████` | Candidate A als Strukturreferenz, Postprocess-Brief und Layer-Trennung anwenden; assets, Engine-ready Candidates und approved Assets bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 42 | 40 | 1 | 0 | 1 | 96.4 % | `██████████` | Candidate A als Layer-/Postprocess-Plan anwenden; assets, Engine-ready Candidates, neue Bilder und approved Assets bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -336,6 +335,13 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-033 | [x] | Uferhain layer separation brief | Inselbasis, Terrain, Wasser, Slots, Station, Figuren und HUD muessen getrennt bleiben. | 373 ordnet Candidate-A-Struktur den spaeteren Familien `island_base`, `terrain_layers`, `water_paths`, `slot_markers`, `build_stations`, `building_phases`, `workers_companions` und `ui_hud_bubbles` zu. | Monolithisches Gesamtbild oder eingebackte Slots/Stationen. | nein |
 | M16T-ASSET-034 | [x] | Candidate B/C secondary reference boundary | Sekundaere Kandidaten duerfen die Primary-Struktur nicht verwischen. | 373 haelt B nur als Riverarm-/Terrassen-Vergleich und C nur als Reserve-/Groessenvergleich, aber nicht als Primary. | Uneindeutige Candidate-Auswahl oder Sprung zu B/C ohne Review. | nein |
 | M16T-ASSET-035 | [x] | Layer/postprocess plan before code | Nach Candidate-Review darf nicht direkt Flutter-Code starten. | 373 empfiehlt M16-CJ Candidate A Layer and Postprocess Plan vor neuen Bildern, Engine-ready, Assets oder Code. | Direkter Sprung zu High-Fidelity, Engine-ready Export oder Implementierung. | nein |
+| M16T-ASSET-036 | [x] | Candidate A layer and postprocess plan | Der Structure-Lock muss in konkrete Folgearbeit uebersetzt werden. | `374-candidate-a-layer-and-postprocess-plan.md` definiert Layer-Zielbild, Familien, Postprocess-Regeln, QA und Folgepfad fuer Candidate A. | Sprung von Structure-Lock direkt zu Bildproduktion oder Code. | nein |
+| M16T-ASSET-037 | [x] | island_base layer plan before pixels | Die Inselbasis darf nicht als monolithisches Candidate-Bild uebernommen werden. | 374 definiert `island_base` als Basisform/Silhouette mit getrenntem Wasser, Terrain, Slots, Stationen, Figuren und HUD. | Candidate A wird ausgeschnitten, kopiert oder als Runtime-Basis gelesen. | nein |
+| M16T-ASSET-038 | [x] | water_paths and terrain_layers separation plan | Uferhain braucht Wasserarm und Hain, aber beides muss layerbar bleiben. | 374 trennt `water_paths` und `terrain_layers` mit eigenen Postprocess-Regeln fuer Ufer, Hain, Lichtung, Felsen und Hoehen. | Wasser, Baeume und Felsen bleiben untrennbar im Basisbild. | nein |
+| M16T-ASSET-039 | [x] | Neutral slot marker planning after terrain | Slot-Reserven muessen neutral bleiben und duerfen nicht Kategorieplaetze werden. | 374 plant `slot_markers` erst nach `island_base`, `water_paths` und `terrain_layers`, mit ca. 12 neutralen Reserven und 16-20 Langfristreserve. | Hausplatz, Marktplatz, Pins, Icons oder feste Kategoriepads. | nein |
+| M16T-ASSET-040 | [x] | Build Station and later families sequencing | Station, Bauphasen, Figuren und HUD duerfen nicht vor Basis/Layerlogik entstehen. | 374 legt die Reihenfolge `build_stations` -> `building_phases` -> `workers_companions` -> `ui_hud_bubbles` nach Basis-, Wasser-, Terrain- und Slotplanung fest. | Build Station, Figuren oder HUD werden in die Inselbasis eingebacken. | nein |
+| M16T-ASSET-041 | [x] | Candidate A postprocess QA criteria | Folgearbeit braucht pruefbare Kriterien gegen Monolith, Pads und Stilbruch. | 374 definiert QA fuer Strukturreferenz, Uferhain-Identitaet, Layertrennung, Slotreserve, mobile Lesbarkeit, Statusschutz und Pfadschutz. | Postprocess ohne QA oder mit verlorenem Uferhain-Charakter. | nein |
+| M16T-ASSET-042 | [x] | No image/code/asset generation in M16-CJ | Der Layer-Plan darf keine stillschweigende Produktionsfreigabe werden. | 374 sagt explizit: keine neuen Bilder, keine PNG/SVG, kein Preview-Ordner, kein `assets/`, kein Engine-ready, kein Code und kein Commit. | M16-CJ erzeugt Bilder, Assets, Engine-ready Candidates oder Flutter-Code. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1263,6 +1269,36 @@ M16-CI operationalisiert fuer kuenftige Slices:
 - Der Folgepfad bleibt: M16-CJ Candidate A Layer and Postprocess Plan vor neuen
   Bildern, Engine-ready, Assets oder Flutter-Code.
 
+M16-CJ erledigt:
+
+- M16T-ASSET-036
+- M16T-ASSET-037
+- M16T-ASSET-038
+- M16T-ASSET-039
+- M16T-ASSET-040
+- M16T-ASSET-041
+- M16T-ASSET-042
+
+M16-CJ operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/374-candidate-a-layer-and-postprocess-plan.md`
+  uebersetzt Candidate A in einen konkreten Layer- und Postprocess-Plan, ohne
+  das Pixelbild als Asset, Zielbild, Engine-ready Candidate oder Runtime-Basis
+  zu uebernehmen.
+- Die verbindliche Layer-Reihenfolge lautet: `island_base`, `water_paths`,
+  `terrain_layers`, neutrale `slot_markers`, danach `build_stations`,
+  `building_phases`, `workers_companions` und `ui_hud_bubbles`.
+- 374 trennt, was aus Candidate A strukturell uebernommen wird
+  (Silhouette, Wasserbezug, Flussarm, Lichtung, Hain, ruhige Randbereiche,
+  Hoehenlogik und Slot-Reserve) und was nicht uebernommen wird
+  (Pixelqualitaet, monolithisches Gesamtbild, feste Pads, Kategorieplaetze,
+  eingebackene Wege, UI, Figuren oder Gebaeude).
+- Neue Bildgenerierung bleibt fuer M16-CJ ausgeschlossen. Spaetere visuelle
+  Arbeit braucht ein eigenes Freigabe-Gate mit Rollen, Pfaden, Metadaten und
+  QA.
+- Der Folgepfad bleibt: M16-CK Candidate A External Postprocess and Layer
+  Production Brief vor Engine-ready, `assets/` oder Flutter-Code.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1340,7 +1376,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..035, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..042, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
