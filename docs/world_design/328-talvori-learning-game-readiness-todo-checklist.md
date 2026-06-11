@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-DG`
+Aktive Sprint-ID: `M16-DH`
 
 Sprint Goal:
 
-> Uferwald bekommt ein fachliches Technical Measurement Review zum M16-DF-
-> Messplan: ausreichend fuer Review, aber noch nicht ausreichend fuer
-> JSON/YAML-, Runtime- oder Flutter-Folgearbeit ohne Measurement Precision
-> Pass.
+> Uferwald bekommt den Measurement Precision Pass: Pfadbreiten, Wasser-,
+> Baum-/Hain-, Fels-/Klippen-, No-Walk-/No-Build-, Pfad-gegen-Blocker-,
+> Sort-/Occlusion- und Anchor-Rollen-Regeln werden fachlich praezisiert,
+> ohne neue Visuals, JSON/YAML, Runtime-Daten, Assets oder Code zu erzeugen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 305 |
+| Gesamtanzahl M16-T-Items | 306 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 281 |
+| Erledigt `[x]` | 282 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.1 % |
@@ -90,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 87 | 85 | 1 | 0 | 1 | 98.3 % | `██████████` | M16-DG reviewt den M16-DF-Messplan: genug fuer Review, aber Pfadbreiten, Wasser-/Baum-/Felsgrenzen, No-Walk/No-Build, Sort-Bands und Pfad-gegen-Blocker-QA muessen vor JSON/YAML, Runtime, Assets oder Code praezisiert werden. |
+| Asset Scope | M16T-ASSET | 88 | 86 | 1 | 0 | 1 | 98.3 % | `██████████` | M16-DH praezisiert Pfadbreiten, Wasser-/Baum-/Felsgrenzen, No-Walk/No-Build, Pfad-gegen-Blocker-QA, Sort-/Occlusion und Anchor-Rollen; JSON/YAML, Runtime, Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -392,6 +392,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-085 | [x] | Uferwald measurement workspace format decision | Vor echten Vector-/Polygon-Dateien braucht der naechste Schritt eine klare Formatentscheidung. | `388-uferwald-measurement-source-and-vector-workspace-plan.md` vergleicht Markdown-only, SVG-Plan, Figma-Plan und JSON/YAML-Planungsstruktur und entscheidet Markdown + SVG-Dokumentationsvisual als naechsten Weg, ohne Figma-Write, JSON/YAML-Runtime-Daten, Koordinaten oder Datei-Erzeugung. | Vector-, Figma-, SVG- oder JSON/YAML-Arbeit startet ohne Formatentscheidung und Scope-Grenzen. | nein |
 | M16T-ASSET-086 | [x] | Uferwald measurement SVG documentation visual | Die Formatentscheidung braucht einen ersten visuellen Messplan, ohne Runtime-Daten zu erzeugen. | `389-uferwald-measurement-svg-documentation-plan.md` und der M16-DF-Preview-Ordner erzeugen SVG und PNG als `documentation_only`, `not_runtime_data`, `not_asset` und `not_engine_ready`; Layer/Masks/Zonen sind sichtbar pruefbar, aber keine finalen Koordinaten, keine Runtime-Mapdaten und keine Assets. | SVG/PNG wird als Runtime-Geometrie, Asset, Figma-Ersatz oder finale Koordinatenquelle gelesen. | nein |
 | M16T-ASSET-087 | [x] | Uferwald technical measurement review | Der SVG-Messplan muss fachlich bewertet werden, bevor daraus praezisere Mess- oder Schemaarbeit entsteht. | `390-uferwald-technical-measurement-review.md` prueft M16-DF gegen Pfadbreiten, Baum-/Wasser-/Felsblocker, No-Walk, No-Build, organische Build-Zonen, Sort-Bands, Landmark-Anker und Pfad-gegen-Blocker-Konflikte und empfiehlt einen Measurement Precision Pass vor JSON/YAML oder Runtime-Daten. | Direkter Sprung zu JSON/YAML, Runtime-Mapdaten, Flutter-Logik oder Asset-Arbeit trotz unklarer Messbasis. | nein |
+| M16T-ASSET-088 | [x] | Uferwald measurement precision pass | Der Review braucht verbindliche Praezisionsregeln, bevor ein weiterer Visual- oder Schema-Schritt entsteht. | `391-uferwald-measurement-precision-pass.md` definiert relative Pfadbreiten, Planungskorridor-vs-Runtime-Pfad, Wassergrenzen, Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln und Anchor-Rollen ohne neue Bilder, SVG/PNG, JSON/YAML, Runtime-Daten, Assets oder Code. | Visual-/JSON/YAML-/Runtime-Folgearbeit startet ohne Praezisionsregeln und verwechselt Review-Geometrie mit technischer Karte. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1713,6 +1714,29 @@ M16-DG operationalisiert fuer kuenftige Slices:
 - Der naechste sinnvolle Folge-Slice ist M16-DH Uferwald Measurement
   Precision Pass, nicht direkt JSON/YAML oder Runtime-Daten.
 
+M16-DH erledigt:
+
+- M16T-ASSET-088
+
+M16-DH operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/391-uferwald-measurement-precision-pass.md`
+  definiert relative Pfadbreiten, `planning_path_corridor` vs.
+  `runtime_path_centerline`, Station-Abstand und Kamera-Follow-Abstand.
+- Wassergrenzen, Uferpuffer, River Entry/Exit sowie Bruecken-/Furt-Blockade
+  sind fachlich geklaert.
+- Baum-/Hainrollen trennen `decorative_tree`, `soft_forest_edge`,
+  `hard_tree_blocker` und `tree_occlusion_edge`.
+- Fels-/Klippenrollen trennen `decorative_rock`, `hard_rock_blocker`,
+  `cliff_edge` und `height_occlusion_edge`.
+- No-Walk- und No-Build-Unionen sind als getrennte Review-Formeln definiert.
+- Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln und Anchor-Rollen sind
+  ausreichend fuer einen naechsten Visual-Precision-Pass.
+- JSON/YAML, Runtime-Mapdaten, Flutter-Code, Assets und finale Koordinaten
+  bleiben weiterhin blockiert.
+- Der naechste sinnvolle Folge-Slice ist M16-DI Uferwald Measurement Visual
+  Precision Pass.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1790,7 +1814,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..087, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..088, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
