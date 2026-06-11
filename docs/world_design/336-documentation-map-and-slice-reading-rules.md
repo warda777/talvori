@@ -150,6 +150,8 @@ Non-Goals:
 | `379-uferwald-layer-candidate-intake-and-qa.md` | M16-CP-Intake-/QA-Gate: dokumentiert Uferwald-`island_base`-Layer-Postprocess-Candidate, 1x/2x/3x-Review-Kopien, Contact Sheet, Metadata, gemessene Doku-Anchors, Zoom-/Scale-QA und Layer-Readiness; keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
 | `380-uferwald-layer-candidate-review-and-postprocess-decision.md` | M16-CQ-Review-/Decision-Gate: entscheidet Uferwald als Arbeitsname und fuehrende Struktur-/Postprocess-Referenz, empfiehlt M16-CR Anchor-/Zone-/Layer-Overlay-Plan und bleibt keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
 | `381-uferwald-anchor-zone-layer-overlay-plan.md` | M16-CR-Overlay-Plan: visualisiert Uferwald-Anchors, Placement-Zonen, No-Build/No-Overlap, Water-only/Terrain-sensitive Bereiche, Sort-Bands und Layer-Reihenfolge ueber dem 1x-Kandidaten; Dokumentationsvisual, keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
+| `382-uferwald-mobile-map-camera-research-and-decision.md` | M16-CT-Research-/Decision-Gate: entscheidet fullscreen/cover Uferwald-Map-Kamera, dynamische Cover-Skalen, Pan-Bounds, Edge-Masking und naechsten Preview-Fix; keine Asset-, App- oder Produktfreigabe. |
+| `383-talvori-camera-modes-and-visit-wander-rule.md` | M16-CV-Kamera-Modus-Gate: trennt Build/Map, Overview, Visit/Wander und Object Focus als Pflichtpruefung fuer World-/Map-/Build-/UI-/Asset-Entscheidungen; keine Code-, Asset-, Cloud-, App- oder Persistenzfreigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -190,6 +192,8 @@ Non-Goals:
 | `379-uferwald-layer-candidate-intake-and-qa.md` | Uferwald-Layer-Candidate-Intake: Pflicht fuer M16-CP-Folgearbeit, Uferwald, 1x/2x/3x-Review-Kopien, Contact Sheet, Metadata, gemessene Anchor-Manifeste, Zoom-/Scale-QA, Candidate-Intake und Layer-Readiness. |
 | `380-uferwald-layer-candidate-review-and-postprocess-decision.md` | Uferwald-Layer-Candidate-Review: Pflicht fuer Uferwald-Arbeitsnamen, Postprocess-Entscheidung, Strukturreferenz-Status, Overlay-Planung, externe Layerarbeit, Figma-/Overlay-Folgearbeit und Asset-/Layer-Gates. |
 | `381-uferwald-anchor-zone-layer-overlay-plan.md` | Uferwald-Overlay-Plan: Pflicht fuer Uferwald-Anchors, Placement-Zonen, No-Build-/No-Overlap, Sort-Bands, Layer-Reihenfolge, Overlay-Review, externe Layer-Separation-Briefs und spaetere Layer-Candidate-Gates. |
+| `382-uferwald-mobile-map-camera-research-and-decision.md` | Uferwald-Mobile-Kamera-Entscheid: Pflicht fuer fullscreen/cover Map-Preview, min/max Scale, Pan-Bounds, Edge-Masking, HUD-Dichte und lokale Review-Zonen-Interaktion. |
+| `383-talvori-camera-modes-and-visit-wander-rule.md` | Talvori-Kamera-Modi: Pflicht fuer World-/Map-/Build-/UI-/Asset-Entscheidungen, wenn Build/Map, Overview, Visit/Wander, Object Focus, Besucheransichten, begehbare Nutzerinseln oder Posterbild-Risiko betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -358,6 +362,19 @@ Zusaetzliche M16-CG-Kandidatenregel:
   Overlay-Review, externe Layer-Separation-Briefs oder spaetere
   Layer-Candidate-Gates betroffen sind. 381 ist ein Dokumentationsvisual-Gate
   und keine Asset-, Code-, App-, Engine-ready-, Produktions- oder
+  `assets/`-Freigabe.
+- 382 ist das M16-CT-Uferwald-Mobile-Map-Kamera-Research-Gate. Es ist Pflicht,
+  wenn Uferwald fullscreen/cover, minScale/maxScale, Pan-Bounds,
+  Edge-Masking/Ocean-Background, HUD-Dichte, Overview oder der naechste
+  lokale Map-Preview-Fix betroffen sind. 382 ist keine Asset-, Code-, App-,
+  Engine-ready-, Produktions- oder `assets/`-Freigabe.
+- 383 ist das M16-CV-Talvori-Kamera-Modus-Gate. Es ist Pflicht, wenn World-,
+  Map-, Build-, UI-, Asset-, Layer-, Besucher-, Cloud-, Overview- oder
+  Object-Focus-Entscheidungen betroffen sind. Jeder solche Slice muss
+  Build/Map Camera, Overview Camera, Visit/Wander Camera und Object Focus
+  Camera pruefen. Eine Architektur, die nur fuer ein statisches Posterbild
+  oder eine einzige Map-Kamera funktioniert, ist nicht commitfaehig. 383 ist
+  keine Code-, Asset-, Cloud-, App-, Persistenz-, BuildState- oder
   `assets/`-Freigabe.
 
 ## 6. Prompt-Regel fuer kuenftige Codex-Prompts

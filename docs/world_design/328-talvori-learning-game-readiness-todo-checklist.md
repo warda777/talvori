@@ -8,25 +8,26 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CR`
+Aktive Sprint-ID: `M16-CV`
 
 Sprint Goal:
 
-> Uferwald-`island_base`-Anchor-, Zone- und Layer-Overlay-Plan als
-> Dokumentationsvisual erzeugen, ohne neue Spielbilder, Assets, Engine-ready
-> Dateien oder Code freizugeben.
+> Talvori-Kamera-Modi als feste World-/Map-/Build-/UI-/Asset-Regel
+> verankern: Build/Map, Overview, Visit/Wander und Object Focus muessen
+> kuenftig getrennt geprueft werden, ohne Code, Assets oder App-Integration
+> freizugeben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 295 |
+| Gesamtanzahl M16-T-Items | 298 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 271 |
+| Erledigt `[x]` | 274 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 93.9 % |
+| Gewichteter Fortschritt | 94.0 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -82,7 +83,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | ThemeIsland-/Plot-Capacity in konkreten spaeteren Slices anwenden. |
+| World / Island / Plot | M16T-WORLD | 7 | 6 | 1 | 0 | 0 | 92.9 % | `█████████░` | Kamera-Modi, Visit-/Wander-Abgrenzung und freie Plot-/Capacity-Regeln in konkreten spaeteren Slices anwenden. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -245,6 +246,9 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-002 | [~] | ThemeIsland-/Plot-Capacity-Regeln | Inselgroesse entsteht aus Theme-Bedarf, nicht aus fixer Mini-Insel. | M16-I/K-Regeln in spaetere Preview-/Code-Gates uebernommen sind. | Dorf als globale Grundlage. | nein |
 | M16T-WORLD-003 | [x] | Generische Plot-Familien | Kategorien brauchen wiederverwendbare Plot-Familien. | Plot-Familien fuer Water, Path, Residential, Garden, Hub, Container, Edge usw. dokumentiert sind. | Feste Gebaeudelisten. | nein |
 | M16T-WORLD-004 | [x] | Plot-Capability ist Erlaubnis, keine Pflichtbelegung | Capabilities duerfen keine automatische Belegung erzeugen. | Jeder Plot-Slice diese Regel als Stop-Regel nennt. | Capability -> Placement. | nein |
+| M16T-WORLD-005 | [x] | Camera modes gate for world decisions | World-/Map-/Build-/UI-/Asset-Entscheidungen duerfen nicht nur eine Kamera annehmen. | `383-talvori-camera-modes-and-visit-wander-rule.md` definiert Build/Map, Overview, Visit/Wander und Object Focus als Pflichtpruefung. | Architektur nur fuer eine statische Map-Kamera. | nein |
+| M16T-WORLD-006 | [x] | Visit/Wander is separate from Build/Map | Spaetere Cloud-/Besucheransichten duerfen nicht nachtraeglich an eine reine Build-Karte angeklebt werden. | 383 dokumentiert: Uferwald Map-/Build-Modus ist nicht automatisch Wander-/Besucher-Modus; Nutzerinseln muessen individuell begehbar/besuchbar bleiben. | Build-Preview wird als Besuchsmodus gelesen. | nein |
+| M16T-WORLD-007 | [x] | Overview and Object Focus camera boundaries | Vollstaendige Inselansicht und Objektfokus brauchen eigene Regeln statt Poster- oder Bottom-Sheet-Logik. | 383 trennt Overview als bewussten Ueberblick und Object Focus fuer Build Station, Haus, Worker, Raum, Moebel oder Container mit Rueckweg zur Welt. | Komplettansicht als Default oder Objektfokus als Route/Formular. | nein |
 
 ## 14. Container / Depth
 
@@ -1525,6 +1529,29 @@ M16-CR Visual-Documentation-Folge ohne neue M16-T-IDs:
 - Naechster empfohlener Slice ist M16-CS Uferwald External Layer Separation
   Brief, bevor externe Paintover-/Layerarbeit oder echte Layer-Candidates
   geoeffnet werden.
+
+M16-CV erledigt:
+
+- M16T-WORLD-005
+- M16T-WORLD-006
+- M16T-WORLD-007
+
+M16-CV operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/383-talvori-camera-modes-and-visit-wander-rule.md`
+  definiert Build/Map Camera, Overview Camera, Visit/Wander Camera und Object
+  Focus Camera als Pflichtpruefung fuer kuenftige World-/Map-/Build-/UI-/
+  Asset-Entscheidungen.
+- Uferwald Map-/Build-Modus ist nicht automatisch Wander-/Besucher-Modus.
+  Spaetere Cloud-/Besucheransichten und individuell begehbare Nutzerinseln
+  muessen von Anfang an mitgedacht werden.
+- Keine Architektur darf nur auf ein statisches Posterbild oder eine einzige
+  Map-Kamera ausgelegt werden. Overview und Object Focus sind eigene Modi und
+  keine impliziten Defaults.
+- 383 ist ein Docs-Gate: kein Code, keine Bilder, keine Assets, keine Route,
+  keine Persistenz, kein BuildState und keine App-Integration.
+- Naechster sinnvoller Folge-Slice ist M16-CW Uferwald Camera Modes Preview
+  Toggle, falls weiterhin isoliert und ohne App-/Asset-/Persistenzfreigabe.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
