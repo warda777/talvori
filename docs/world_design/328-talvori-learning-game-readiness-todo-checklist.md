@@ -8,26 +8,26 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CE`
+Aktive Sprint-ID: `M16-CF`
 
 Sprint Goal:
 
-> Starter Island Asset Candidate Gate vorbereiten und entscheiden, welche
-> einzelne Starter-Island-Asset-Familie als erstes eng begrenztes
-> Candidate-Gate sinnvoll ist, ohne Bilder, Assets oder Engine-ready
-> Candidates zu erzeugen.
+> Starter Island Base Candidate Generation Gate als Freigabeplanung
+> vorbereiten, damit M16-CG spaeter eng begrenzte `island_base`-
+> Dokumentationscandidates erzeugen darf, ohne Assets, Engine-ready
+> Candidates oder App-Integration zu oeffnen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 232 |
+| Gesamtanzahl M16-T-Items | 238 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 208 |
+| Erledigt `[x]` | 214 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 92.2 % |
+| Gewichteter Fortschritt | 92.4 % |
 | Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
@@ -90,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 17 | 15 | 1 | 0 | 1 | 91.2 % | `█████████░` | Erstes Candidate-Gate auf `island_base` vorbereiten; echte Dateien unter assets und Engine-ready Candidates bleiben bis eigenem Asset-Gate blockiert. |
+| Asset Scope | M16T-ASSET | 23 | 21 | 1 | 0 | 1 | 93.5 % | `█████████░` | M16-CG fuer `island_base`-Dokumentationscandidates vorbereiten; assets, Engine-ready Candidates und approved Assets bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -319,6 +319,12 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-015 | [x] | Starter island candidate source and metadata requirements | Jeder spaetere Kandidat braucht nachvollziehbare Quelle, Prompt, Reference, Lizenz und Status. | M16-CF-Pflichtfelder und starter-island-spezifische Checks fuer Uferhain, Slotkapazitaet, Perspektive, Layer und Pfad dokumentiert sind. | Candidate ohne Source-/Prompt-/Reference-Metadaten. | nein |
 | M16T-ASSET-016 | [x] | Starter island candidate QA and path boundaries | Candidate-Visuals duerfen nicht als Asset, App-Screen oder Engine-ready Export gelesen werden. | QA-Kriterien und Pfadgrenzen ausserhalb `assets/` fuer M16-CF dokumentiert sind. | Bilder unter `assets/`, fehlende QA oder App-Screen-Missverstaendnis. | nein |
 | M16T-ASSET-017 | [x] | M16-CF candidate generation permission boundary | Der naechste Slice muss wissen, ob Bildgenerierung erlaubt werden darf. | M16-CF darf nur mit expliziter Bild-/Tool-/Pfad-/Metadaten-/QA-Freigabe `island_base`-Candidates erzeugen; Engine-ready und Produktintegration bleiben blockiert. | M16-CF startet Bilder oder Integration ohne ausdruecklichen Scope. | nein |
+| M16T-ASSET-018 | [x] | Starter Island Base Candidate Generation Gate | Der erste moegliche Bildgenerierungs-Slice braucht eine konkrete Freigabeplanung. | `372-starter-island-base-candidate-generation-gate.md` definiert M16-CG als eng begrenztes `island_base`-Candidate-Gate ohne aktuelle Bild-/Asset-Erzeugung. | Bildgenerierung ohne Pfad-, Tool-, Metadata- und QA-Grenzen. | nein |
+| M16T-ASSET-019 | [x] | Candidate documentation path and filenames | Candidate-Dateien brauchen erlaubte Pfade und stabile Namen, bevor sie entstehen. | M16-CG-Dokumentationspfad und erlaubte Dateinamenmuster fuer 2-3 `island_base`-Candidates, Contact Sheet und Metadata-Datei sind definiert. | Zufallsnamen, falsche Pfade oder Dateien unter `assets/`. | nein |
+| M16T-ASSET-020 | [x] | Candidate tool roles and prompt requirements | Bildgenerierung braucht klare Rollen und Promptgrenzen. | Rollen fuer ChatGPT, KI-Bildtool, Figma/Photopea/Aseprite/Artist und Codex sowie Prompt-/Negative-Prompt-Anforderungen sind dokumentiert. | Freie Einzelprompts oder Codex als Bildgenerator. | nein |
+| M16T-ASSET-021 | [x] | Island base metadata schema | Jeder Candidate muss Source, Prompt, Reference, Lizenz, Status und QA nachvollziehbar machen. | Pflichtmetadaten fuer `island_base`, M16-CG, Style/Structure/Master/Gate-References und Uferhain-spezifische Checks sind definiert. | Candidate ohne Metadaten oder Status. | nein |
+| M16T-ASSET-022 | [x] | Uferhain island_base QA checklist | Uferhain-Candidates brauchen harte Review-Kriterien gegen generische Inseln. | QA-Checkliste fuer Uferhain-Identitaet, Perspektive, Slotreserve, Layerbarkeit, Mobile-Lesbarkeit, Referenzschutz, Pfadschutz und Statusschutz steht. | Generische Insel, Kategorieplaetze, UI-/Worksheet-Look oder Referenzkopie. | nein |
+| M16T-ASSET-023 | [x] | M16-CG image generation permission boundary | Der naechste Slice darf nur klar begrenzt Bilder erzeugen. | M16-CG darf maximal 2-3 `island_base`-Dokumentationscandidates erzeugen; `engine_ready_candidate`, `approved_asset`, `assets/` und Flutter/App-Integration bleiben blockiert. | M16-CG oeffnet Engine-ready, Assets oder Produktintegration. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1169,6 +1175,29 @@ M16-CE operationalisiert fuer kuenftige Slices:
 - Dateien unter `assets/`, Engine-ready Candidates, approved Assets,
   App-Integration und Flutter-Code bleiben weiterhin blockiert.
 
+M16-CF erledigt:
+
+- M16T-ASSET-018
+- M16T-ASSET-019
+- M16T-ASSET-020
+- M16T-ASSET-021
+- M16T-ASSET-022
+- M16T-ASSET-023
+
+M16-CF operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/372-starter-island-base-candidate-generation-gate.md`
+  definiert den einzigen spaeter erlaubten Dokumentationspfad fuer M16-CG,
+  ohne ihn jetzt zu erzeugen.
+- M16-CG darf spaeter nur 2-3 `island_base`-Dokumentationscandidates,
+  Contact Sheet und Metadata-Datei erzeugen, wenn der Folgeprompt Bilder
+  ausdruecklich erlaubt.
+- Prompt, Negative Prompt, Tool-Rollen, Dateinamen, Metadaten und Uferhain-QA
+  sind vor der ersten Bildgenerierung festgelegt.
+- Maximalstatus fuer M16-CG bleibt `asset_candidate`; `engine_ready_candidate`,
+  `approved_asset`, Dateien unter `assets/`, Flutter-Code und App-Integration
+  bleiben blockiert.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1246,7 +1275,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..017, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..023, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
