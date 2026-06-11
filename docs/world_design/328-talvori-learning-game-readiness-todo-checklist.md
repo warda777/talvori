@@ -8,23 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-DH`
+Aktive Sprint-ID: `M16-DI`
 
 Sprint Goal:
 
-> Uferwald bekommt den Measurement Precision Pass: Pfadbreiten, Wasser-,
-> Baum-/Hain-, Fels-/Klippen-, No-Walk-/No-Build-, Pfad-gegen-Blocker-,
-> Sort-/Occlusion- und Anchor-Rollen-Regeln werden fachlich praezisiert,
-> ohne neue Visuals, JSON/YAML, Runtime-Daten, Assets oder Code zu erzeugen.
+> Uferwald bekommt den Measurement Visual Precision Pass: Die M16-DH-Regeln
+> fuer Pfadbreiten, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen,
+> No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten
+> und Anchor-Rollen werden als SVG/PNG-Dokumentationsvisual sichtbar geprueft,
+> ohne Runtime-Daten, JSON/YAML, Assets oder Code zu erzeugen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 306 |
+| Gesamtanzahl M16-T-Items | 307 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 282 |
+| Erledigt `[x]` | 283 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.1 % |
@@ -90,7 +91,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 88 | 86 | 1 | 0 | 1 | 98.3 % | `██████████` | M16-DH praezisiert Pfadbreiten, Wasser-/Baum-/Felsgrenzen, No-Walk/No-Build, Pfad-gegen-Blocker-QA, Sort-/Occlusion und Anchor-Rollen; JSON/YAML, Runtime, Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 89 | 87 | 1 | 0 | 1 | 98.3 % | `██████████` | M16-DI macht die Measurement-Precision-Regeln als SVG/PNG-Dokumentationsvisual sichtbar pruefbar; JSON/YAML, Runtime, Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -393,6 +394,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-086 | [x] | Uferwald measurement SVG documentation visual | Die Formatentscheidung braucht einen ersten visuellen Messplan, ohne Runtime-Daten zu erzeugen. | `389-uferwald-measurement-svg-documentation-plan.md` und der M16-DF-Preview-Ordner erzeugen SVG und PNG als `documentation_only`, `not_runtime_data`, `not_asset` und `not_engine_ready`; Layer/Masks/Zonen sind sichtbar pruefbar, aber keine finalen Koordinaten, keine Runtime-Mapdaten und keine Assets. | SVG/PNG wird als Runtime-Geometrie, Asset, Figma-Ersatz oder finale Koordinatenquelle gelesen. | nein |
 | M16T-ASSET-087 | [x] | Uferwald technical measurement review | Der SVG-Messplan muss fachlich bewertet werden, bevor daraus praezisere Mess- oder Schemaarbeit entsteht. | `390-uferwald-technical-measurement-review.md` prueft M16-DF gegen Pfadbreiten, Baum-/Wasser-/Felsblocker, No-Walk, No-Build, organische Build-Zonen, Sort-Bands, Landmark-Anker und Pfad-gegen-Blocker-Konflikte und empfiehlt einen Measurement Precision Pass vor JSON/YAML oder Runtime-Daten. | Direkter Sprung zu JSON/YAML, Runtime-Mapdaten, Flutter-Logik oder Asset-Arbeit trotz unklarer Messbasis. | nein |
 | M16T-ASSET-088 | [x] | Uferwald measurement precision pass | Der Review braucht verbindliche Praezisionsregeln, bevor ein weiterer Visual- oder Schema-Schritt entsteht. | `391-uferwald-measurement-precision-pass.md` definiert relative Pfadbreiten, Planungskorridor-vs-Runtime-Pfad, Wassergrenzen, Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln und Anchor-Rollen ohne neue Bilder, SVG/PNG, JSON/YAML, Runtime-Daten, Assets oder Code. | Visual-/JSON/YAML-/Runtime-Folgearbeit startet ohne Praezisionsregeln und verwechselt Review-Geometrie mit technischer Karte. | nein |
+| M16T-ASSET-089 | [x] | Uferwald measurement visual precision pass | Die M16-DH-Regeln muessen sichtbar pruefbar werden, bevor Schema-/Runtime-Arbeit startet. | `392-uferwald-measurement-visual-precision-pass.md` und der M16-DI-Preview-Ordner zeigen Pfadbreiten, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten und Anchor-Rollen als `documentation_only`, `planning_visual`, `not_runtime_data`, `not_asset` und `not_engine_ready`. | Visual-/JSON/YAML-/Runtime-Folgearbeit startet ohne sichtbare Precision-QA oder liest das Visual als Runtime-Daten. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1736,6 +1738,25 @@ M16-DH operationalisiert fuer kuenftige Slices:
   bleiben weiterhin blockiert.
 - Der naechste sinnvolle Folge-Slice ist M16-DI Uferwald Measurement Visual
   Precision Pass.
+
+M16-DI erledigt:
+
+- M16T-ASSET-089
+
+M16-DI operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/392-uferwald-measurement-visual-precision-pass.md`
+  dokumentiert, dass die M16-DH-Regeln als SVG/PNG-Dokumentationsvisual
+  sichtbar geprueft wurden.
+- Der M16-DI-Preview-Ordner enthaelt `documentation_only`- und
+  `planning_visual`-Visuals fuer `planning_path_corridor`, Pfadbreiten,
+  Engpass-Marker, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen,
+  No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten
+  und Anchor-Rollen.
+- M16-DI erzeugt keine finalen Koordinaten, keine Runtime-Path-Centerline,
+  keine JSON/YAML-Daten, keine Assets, keine Runtime-Mapdaten und keinen Code.
+- Der naechste sinnvolle Folge-Slice ist M16-DJ Uferwald Visual Precision
+  Review.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst

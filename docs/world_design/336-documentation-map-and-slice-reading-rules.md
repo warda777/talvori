@@ -160,6 +160,7 @@ Non-Goals:
 | `389-uferwald-measurement-svg-documentation-plan.md` | M16-DF-Measurement-SVG-Documentation-Plan: dokumentiert SVG/PNG als reines Messplan-Visual fuer technische Uferwald-Layer, Masks, Zonen, Sort-Bands und Landmark-Anker; keine finalen Koordinaten, keine Runtime-Mapdaten, keine Assets, keine Figma-Writes, keine JSON/YAML-Daten und keine Code-/App-Freigabe. |
 | `390-uferwald-technical-measurement-review.md` | M16-DG-Technical-Measurement-Review: bewertet den M16-DF-Messplan gegen Pfadbreiten, Wasser-/Baum-/Felsblocker, No-Walk/No-Build, organische Build-Zonen, Sort-Bands, Landmark-Anker und Pfad-gegen-Blocker-QA; empfiehlt Measurement Precision Pass vor JSON/YAML-, Runtime-, Asset- oder Code-Folgearbeit. |
 | `391-uferwald-measurement-precision-pass.md` | M16-DH-Measurement-Precision-Pass: praezisiert Pfadbreiten, Planungskorridor-vs-Runtime-Pfad, Wassergrenzen, Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln und Anchor-Rollen; keine Bilder, SVG/PNG, JSON/YAML, Runtime-Daten, Assets oder Code. |
+| `392-uferwald-measurement-visual-precision-pass.md` | M16-DI-Measurement-Visual-Precision-Pass: visualisiert die M16-DH-Regeln als SVG/PNG-Dokumentationsvisual mit Pfadbreiten, Wasser-/Uferpuffern, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten und Anchor-Rollen; keine finalen Koordinaten, keine Runtime-Path-Centerline, keine JSON/YAML-Daten, keine Assets und keine Code-/App-Freigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -210,6 +211,7 @@ Non-Goals:
 | `389-uferwald-measurement-svg-documentation-plan.md` | Uferwald Measurement SVG Documentation Plan: Pflicht, wenn der M16-DF-SVG-/PNG-Messplan, technische Layer/Masks/Zonen-Visual-QA, No-Walk/No-Build-Trennung, Build-Zonen als organische Eignungsraeume, Pfadkorridore, Sort-Bands oder Landmark-Anker betroffen sind. |
 | `390-uferwald-technical-measurement-review.md` | Uferwald Technical Measurement Review: Pflicht, wenn technische Uferwald-Messpraezisierung, Pfadbreiten, harte Wasser-/Baum-/Felsgrenzen, No-Walk-/No-Build-Union-Regeln, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln, Anchor-Rollen oder JSON/YAML-/Runtime-Vorbereitung betroffen sind. |
 | `391-uferwald-measurement-precision-pass.md` | Uferwald Measurement Precision Pass: Pflicht, wenn Pfadbreiten, Planungskorridor-vs-Runtime-Pfad, Station-/Kamera-Follow-Abstaende, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten, Anchor-Rollen oder ein Visual-Precision-Pass betroffen sind. |
+| `392-uferwald-measurement-visual-precision-pass.md` | Uferwald Measurement Visual Precision Pass: Pflicht, wenn der M16-DI-SVG-/PNG-Plan, Pfadbreiten-Visual-QA, Wasser-/Uferpuffer-Visualisierung, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Review-Unionen, Pfad-gegen-Blocker-QA-Marker, Sort-/Occlusion-Kanten, Anchor-Rollen oder spaetere Schema-/Runtime-Vorbereitung betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -274,6 +276,7 @@ Non-Goals:
 | `389-uferwald-measurement-svg-documentation-plan.md` | Uferwald-Messplan-Visuals, technische Layer-/Masken-/Zonen-Overlays, No-Walk/No-Build-Trennung, organische Build-Zonen, Pfadkorridore, Sort-Bands oder Landmark-Anker muessen 389 lesen; 389 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, Code-, App- oder `assets/`-Freigabe. |
 | `390-uferwald-technical-measurement-review.md` | Technische Uferwald-Messreviews, Measurement-Precision-Folgearbeit, Pfadbreiten, Wasser-/Baum-/Felsblocker, No-Walk-/No-Build-Praezisierung, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln, Anchor-Rollen oder JSON/YAML-/Runtime-Vorbereitung muessen 390 lesen; 390 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, Code-, App- oder `assets/`-Freigabe. |
 | `391-uferwald-measurement-precision-pass.md` | Uferwald-Visual-Precision-Folgearbeit, Pfadbreiten, Planning-Korridore, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten oder Anchor-Rollen muessen 391 lesen; 391 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `392-uferwald-measurement-visual-precision-pass.md` | Uferwald-Visual-Precision-Review, M16-DI-SVG/PNG, Pfadbreiten- und Engpass-Visuals, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Review-Unionen, QA-Marker, Sort-/Occlusion-Kanten oder Anchor-Rollen muessen 392 lesen; 392 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -302,6 +305,16 @@ Nach M16-DH muss bei jeder Uferwald-Mess-/Vector-/Layer-Folgearbeit zusaetzlich
 naechsten Visual-Precision-Pass, blockiert aber weiterhin JSON/YAML,
 Runtime-Mapdaten, Flutter-Code, Assets, finale Koordinaten und Figma-Writes,
 bis die Praezisionsregeln visuell geprueft und separat reviewt wurden.
+
+Nach M16-DI muss bei jeder Uferwald-Mess-/Vector-/Layer-/Schema-/Runtime-
+Folgearbeit zusaetzlich
+`392-uferwald-measurement-visual-precision-pass.md` gelesen werden, wenn
+Pfadbreiten, Engpaesse, Wasser-/Uferpuffer, Baum-/Hainrollen,
+Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA,
+Sort-/Occlusion-Kanten oder Anchor-Rollen betroffen sind. 392 ist ein
+Dokumentationsvisual-Gate und bleibt keine Freigabe fuer finale Koordinaten,
+Runtime-Path-Centerlines, JSON/YAML, Flutter-Code, Assets, Figma-Writes oder
+App-Integration.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 

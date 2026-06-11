@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1250" viewBox="0 0 1800 1250" role="img" aria-labelledby="title desc">
+  <title id="title">M16-DI-FIX Uferwald Measurement Visual Precision Pass</title>
+  <desc id="desc">Four separated documentation-only review panels for walkable water, build no-build, obstacles occlusion and anchors sort bands. Not runtime data, not an asset and not engine-ready.</desc>
+  <style>
+    .bg{fill:#f8f2e6}.panel{fill:#fffaf0;stroke:#3a3328;stroke-width:2}.title{font-family:Arial,sans-serif;font-size:38px;font-weight:800;fill:#232019}.sub{font-family:Arial,sans-serif;font-size:18px;font-weight:700;fill:#665c4c}.badge{fill:#2f5848}.bt{font-family:Arial,sans-serif;font-size:15px;font-weight:800;fill:#fff8e8}.h{font-family:Arial,sans-serif;font-size:25px;font-weight:800;fill:#232019}.t{font-family:Arial,sans-serif;font-size:17px;font-weight:700;fill:#3d352a}.s{font-family:Arial,sans-serif;font-size:14px;font-weight:700;fill:#665c4c}
+  </style>
+  <rect class="bg" width="1800" height="1250"/>
+  <text x="42" y="58" class="title">M16-DI-FIX Uferwald Measurement Visual Precision Pass</text>
+  <text x="44" y="91" class="sub">Separated review views make running, building, blockers, water, sorting and anchors readable at a glance.</text>
+  <g transform="translate(42 112)">
+    <rect class="badge" width="170" height="34" rx="11"/><text class="bt" x="15" y="23">documentation_only</text>
+    <rect class="badge" x="184" width="150" height="34" rx="11"/><text class="bt" x="199" y="23">planning_visual</text>
+    <rect class="badge" x="348" width="160" height="34" rx="11"/><text class="bt" x="363" y="23">not_runtime_data</text>
+    <rect class="badge" x="522" width="105" height="34" rx="11"/><text class="bt" x="537" y="23">not_asset</text>
+    <rect class="badge" x="641" width="150" height="34" rx="11"/><text class="bt" x="656" y="23">not_engine_ready</text>
+  </g>
+  <g transform="translate(58 180)">
+    <rect class="panel" width="810" height="430" rx="18"/>
+    <text class="h" x="28" y="42">01 Walkable / Water</text><text class="t" x="28" y="76">Wide corridor, water boundary, no-walk buffer, bottleneck QA.</text>
+    <ellipse cx="390" cy="238" rx="280" ry="145" fill="#cdbb7a" opacity=".72" stroke="#75683f" stroke-width="3" stroke-dasharray="10 8"/>
+    <path d="M100 260 C220 215 310 245 415 305 C500 355 605 322 660 270" fill="none" stroke="#6eb9dc" stroke-width="72" stroke-linecap="round" opacity=".85"/>
+    <path d="M120 300 C240 270 360 265 485 325" fill="none" stroke="#f1cc64" stroke-width="58" stroke-linecap="round" opacity=".9"/>
+    <path d="M300 275 C360 275 420 295 485 325" fill="none" stroke="#b8791b" stroke-width="42" stroke-linecap="round" opacity=".85"/>
+    <circle cx="510" cy="310" r="18" fill="#2d9468"/><text class="bt" x="503" y="316">v</text><path d="M350 252 L372 292 L328 292 Z" fill="#f0b54b" stroke="#8a5b00" stroke-width="3"/>
+    <text class="s" x="28" y="392">Where may a visitor walk, and where does water block?</text>
+  </g>
+  <g transform="translate(930 180)">
+    <rect class="panel" width="810" height="430" rx="18"/>
+    <text class="h" x="28" y="42">02 Build / No-Build</text><text class="t" x="28" y="76">Organic build zones separate from no-build, water, path and hub guards.</text>
+    <ellipse cx="390" cy="238" rx="280" ry="145" fill="#cdbb7a" opacity=".72" stroke="#75683f" stroke-width="3" stroke-dasharray="10 8"/>
+    <ellipse cx="350" cy="220" rx="120" ry="70" fill="#77c76e" opacity=".72" stroke="#3d8b48" stroke-width="4" stroke-dasharray="9 7"/>
+    <ellipse cx="520" cy="285" rx="145" ry="78" fill="#77c76e" opacity=".72" stroke="#3d8b48" stroke-width="4" stroke-dasharray="9 7"/>
+    <ellipse cx="265" cy="315" rx="120" ry="62" fill="#8b5dc7" opacity=".26" stroke="#6a45a4" stroke-width="4"/>
+    <path d="M160 320 C300 292 455 255 635 265" fill="none" stroke="#df9a3a" stroke-width="36" stroke-linecap="round" opacity=".55"/>
+    <circle cx="420" cy="245" r="56" fill="#f0a445" opacity=".30" stroke="#f0a445" stroke-width="4"/>
+    <text class="s" x="28" y="392">Where could building be possible, and what remains protected?</text>
+  </g>
+  <g transform="translate(58 660)">
+    <rect class="panel" width="810" height="430" rx="18"/>
+    <text class="h" x="28" y="42">03 Obstacles / Occlusion</text><text class="t" x="28" y="76">Decorative elements, hard blockers and occlusion edges are separated.</text>
+    <ellipse cx="390" cy="238" rx="280" ry="145" fill="#cdbb7a" opacity=".72" stroke="#75683f" stroke-width="3" stroke-dasharray="10 8"/>
+    <ellipse cx="545" cy="205" rx="145" ry="95" fill="#245f4c" opacity=".82" stroke="#164233" stroke-width="4"/>
+    <circle cx="445" cy="170" r="18" fill="#66ac5a" stroke="#2a5f3e" stroke-width="3"/><circle cx="655" cy="230" r="16" fill="#66ac5a" stroke="#2a5f3e" stroke-width="3"/>
+    <path d="M430 285 C525 330 640 315 700 260" fill="none" stroke="#173a2e" stroke-width="8" stroke-linecap="round" stroke-dasharray="16 10"/>
+    <ellipse cx="250" cy="235" rx="86" ry="55" fill="#5f5850" opacity=".72" stroke="#423e38" stroke-width="4"/>
+    <ellipse cx="165" cy="238" rx="28" ry="16" fill="#979087" stroke="#514d48" stroke-width="3"/>
+    <path d="M195 302 C280 348 385 334 455 282" fill="none" stroke="#433f38" stroke-width="8" stroke-dasharray="14 9"/>
+    <text class="s" x="28" y="392">What blocks, what is only decoration, and what only occludes?</text>
+  </g>
+  <g transform="translate(930 660)">
+    <rect class="panel" width="810" height="430" rx="18"/>
+    <text class="h" x="28" y="42">04 Anchors / Sort-Bands</text><text class="t" x="28" y="76">Roles are visible without final coordinates or runtime anchors.</text>
+    <rect x="105" y="112" width="600" height="72" fill="#d9eac8"/><rect x="105" y="184" width="600" height="85" fill="#fff0bb"/><rect x="105" y="269" width="600" height="100" fill="#ead1ad"/>
+    <ellipse cx="405" cy="240" rx="250" ry="118" fill="#cdbb7a" opacity=".58" stroke="#75683f" stroke-width="3" stroke-dasharray="10 8"/>
+    <polygon points="210,245 235,270 210,295 185,270" fill="#4c9bd7" stroke="#1d5f91" stroke-width="4"/><circle cx="320" cy="300" r="23" fill="#f0cc65" stroke="#5f4c1a" stroke-width="4"/>
+    <rect x="445" y="218" width="44" height="44" rx="7" fill="#78c46c" stroke="#2c7a43" stroke-width="4"/><polygon points="575,225 600,250 575,275 550,250" fill="#8068d8" stroke="#44348c" stroke-width="4"/>
+    <text class="s" x="28" y="392">Which points orient, guide paths, reference builds or focus objects?</text>
+  </g>
+  <text class="t" x="58" y="1156">Detail PNGs are the primary review material: 01 walk/water, 02 build/no-build, 03 obstacles/occlusion, 04 anchors/sort.</text>
+  <text class="s" x="58" y="1188">No final coordinates. No runtime path centerline. No JSON/YAML. No assets. No app integration.</text>
+</svg>
