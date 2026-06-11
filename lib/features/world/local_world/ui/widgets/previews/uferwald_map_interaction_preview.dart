@@ -40,6 +40,75 @@ const _reviewZones = [
   _ReviewZone('R13', 0.74, 0.36, 0.076, 0.050),
 ];
 
+enum _UferwaldCameraMode { buildMap, overview, visitWander, objectFocus }
+
+extension _UferwaldCameraModeLabel on _UferwaldCameraMode {
+  String get label {
+    switch (this) {
+      case _UferwaldCameraMode.buildMap:
+        return 'Build/Map';
+      case _UferwaldCameraMode.overview:
+        return 'Overview';
+      case _UferwaldCameraMode.visitWander:
+        return 'Visit';
+      case _UferwaldCameraMode.objectFocus:
+        return 'Object';
+    }
+  }
+
+  String get shortLabel {
+    switch (this) {
+      case _UferwaldCameraMode.buildMap:
+        return 'Bauen';
+      case _UferwaldCameraMode.overview:
+        return 'Ueberblick';
+      case _UferwaldCameraMode.visitWander:
+        return 'Besuch';
+      case _UferwaldCameraMode.objectFocus:
+        return 'Fokus';
+    }
+  }
+
+  String get compactLabel {
+    switch (this) {
+      case _UferwaldCameraMode.buildMap:
+        return 'Bau';
+      case _UferwaldCameraMode.overview:
+        return 'Alle';
+      case _UferwaldCameraMode.visitWander:
+        return 'Weg';
+      case _UferwaldCameraMode.objectFocus:
+        return 'Obj';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case _UferwaldCameraMode.buildMap:
+        return Icons.map_outlined;
+      case _UferwaldCameraMode.overview:
+        return Icons.public;
+      case _UferwaldCameraMode.visitWander:
+        return Icons.directions_walk;
+      case _UferwaldCameraMode.objectFocus:
+        return Icons.center_focus_strong;
+    }
+  }
+
+  String get hint {
+    switch (this) {
+      case _UferwaldCameraMode.buildMap:
+        return '6 freie Baukapazitaeten, Zonen antippbar.';
+      case _UferwaldCameraMode.overview:
+        return 'Review-Blick auf die ganze Insel.';
+      case _UferwaldCameraMode.visitWander:
+        return 'Ruhiger Besuchsblick, kein Bau-Overlay.';
+      case _UferwaldCameraMode.objectFocus:
+        return 'Ausgewaehlten Bereich mit Umgebung zeigen.';
+    }
+  }
+}
+
 // Local manual launch target only:
 // flutter run -t lib/features/world/local_world/ui/widgets/previews/uferwald_map_interaction_preview.dart -d macos
 //
@@ -86,6 +155,7 @@ class _UferwaldMapInteractionPreviewState
   Animation<Matrix4>? _cameraReturnAnimation;
   bool _showOverlay = true;
   bool _viewWasInitialized = false;
+  _UferwaldCameraMode _cameraMode = _UferwaldCameraMode.buildMap;
   String? _selectedZoneLabel;
   Size? _lastViewportSize;
 
@@ -117,10 +187,15 @@ class _UferwaldMapInteractionPreviewState
         child: LayoutBuilder(
           builder: (context, constraints) {
             final viewportSize = constraints.biggest;
-            final cameraMetrics = _UferwaldCameraMetrics.forViewport(
+            final cameraSettings = _UferwaldCameraSettings.forMode(
               viewportSize,
+              _cameraMode,
             );
             _scheduleInitialView(viewportSize);
+            final showFreeBuildOverlay =
+                _showOverlay &&
+                (_cameraMode == _UferwaldCameraMode.buildMap ||
+                    _cameraMode == _UferwaldCameraMode.overview);
 
             return Stack(
               children: [
@@ -146,10 +221,11 @@ class _UferwaldMapInteractionPreviewState
                             imageFile: imageFile,
                             overlayImageFile: overlayImageFile,
                             controller: _mapController,
-                            showOverlay: _showOverlay,
+                            cameraMode: _cameraMode,
+                            showFreeBuildOverlay: showFreeBuildOverlay,
                             selectedZoneLabel: _selectedZoneLabel,
-                            minScale: cameraMetrics.minScale,
-                            maxScale: cameraMetrics.maxScale,
+                            minScale: cameraSettings.minScale,
+                            maxScale: cameraSettings.maxScale,
                             onInteractionStart: _handleInteractionStart,
                             onInteractionEnd: _handleInteractionEnd,
                             onZoneSelected: _selectZone,
@@ -165,7 +241,12 @@ class _UferwaldMapInteractionPreviewState
                   right: 16,
                   top: 16,
                   child: _TopPreviewControls(
+                    cameraMode: _cameraMode,
                     showOverlay: _showOverlay,
+                    overlayEnabled:
+                        _cameraMode != _UferwaldCameraMode.visitWander,
+                    selectedZoneLabel: _selectedZoneLabel,
+                    onCameraModeChanged: _setCameraMode,
                     onOverlayChanged: (value) {
                       setState(() {
                         _showOverlay = value;
@@ -179,6 +260,7 @@ class _UferwaldMapInteractionPreviewState
                   right: 16,
                   bottom: 16,
                   child: _BottomPreviewNote(
+                    cameraMode: _cameraMode,
                     selectedZoneLabel: _selectedZoneLabel,
                   ),
                 ),
@@ -204,7 +286,7 @@ class _UferwaldMapInteractionPreviewState
       }
 
       if (!_viewWasInitialized) {
-        _mapController.value = _playableCoverMapMatrix(viewportSize);
+        _mapController.value = _matrixForMode(viewportSize, _cameraMode);
         _viewWasInitialized = true;
         return;
       }
@@ -212,6 +294,7 @@ class _UferwaldMapInteractionPreviewState
       _mapController.value = _clampedMapMatrix(
         viewportSize,
         _mapController.value,
+        _cameraMode,
       );
     });
   }
@@ -222,12 +305,37 @@ class _UferwaldMapInteractionPreviewState
       return;
     }
 
-    _animateCameraTo(_playableCoverMapMatrix(viewportSize));
+    _animateCameraTo(_matrixForMode(viewportSize, _cameraMode));
   }
 
   void _selectZone(String? label) {
     setState(() {
       _selectedZoneLabel = label;
+    });
+
+    if (_cameraMode == _UferwaldCameraMode.objectFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final viewportSize = _lastViewportSize;
+        if (mounted && viewportSize != null) {
+          _animateCameraTo(_matrixForMode(viewportSize, _cameraMode));
+        }
+      });
+    }
+  }
+
+  void _setCameraMode(_UferwaldCameraMode mode) {
+    setState(() {
+      _cameraMode = mode;
+      if (mode == _UferwaldCameraMode.objectFocus) {
+        _selectedZoneLabel ??= 'R1';
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewportSize = _lastViewportSize;
+      if (mounted && viewportSize != null) {
+        _animateCameraTo(_matrixForMode(viewportSize, mode));
+      }
     });
   }
 
@@ -241,7 +349,11 @@ class _UferwaldMapInteractionPreviewState
       return;
     }
 
-    final clampedMatrix = _clampedMapMatrix(viewportSize, _mapController.value);
+    final clampedMatrix = _clampedMapMatrix(
+      viewportSize,
+      _mapController.value,
+      _cameraMode,
+    );
     if (_matrixCloseEnough(_mapController.value, clampedMatrix)) {
       return;
     }
@@ -268,13 +380,33 @@ class _UferwaldMapInteractionPreviewState
     _cameraReturnController.forward(from: 0);
   }
 
-  Matrix4 _playableCoverMapMatrix(Size viewportSize) {
-    final metrics = _UferwaldCameraMetrics.forViewport(viewportSize);
-    return _centeredMapMatrix(viewportSize, metrics.initialScale);
+  Matrix4 _matrixForMode(Size viewportSize, _UferwaldCameraMode mode) {
+    final settings = _UferwaldCameraSettings.forMode(viewportSize, mode);
+    switch (mode) {
+      case _UferwaldCameraMode.buildMap:
+      case _UferwaldCameraMode.overview:
+        return _centeredMapMatrix(viewportSize, settings.initialScale);
+      case _UferwaldCameraMode.visitWander:
+        return _focusedMapMatrix(
+          viewportSize,
+          settings.initialScale,
+          const Offset(0.48, 0.55),
+        );
+      case _UferwaldCameraMode.objectFocus:
+        return _focusedMapMatrix(
+          viewportSize,
+          settings.initialScale,
+          _selectedReviewZone?.normalizedCenter ?? const Offset(0.40, 0.54),
+        );
+    }
   }
 
-  Matrix4 _clampedMapMatrix(Size viewportSize, Matrix4 matrix) {
-    final metrics = _UferwaldCameraMetrics.forViewport(viewportSize);
+  Matrix4 _clampedMapMatrix(
+    Size viewportSize,
+    Matrix4 matrix,
+    _UferwaldCameraMode mode,
+  ) {
+    final metrics = _UferwaldCameraSettings.forMode(viewportSize, mode);
     final scale = matrix
         .getMaxScaleOnAxis()
         .clamp(metrics.minScale, metrics.maxScale)
@@ -306,6 +438,28 @@ class _UferwaldMapInteractionPreviewState
       ..scaleByDouble(scale, scale, scale, 1);
   }
 
+  Matrix4 _focusedMapMatrix(
+    Size viewportSize,
+    double scale,
+    Offset normalizedCenter,
+  ) {
+    final scaledMapSize = _mapSize * scale;
+    final dx = _clampedAxisOffset(
+      (viewportSize.width / 2) - (normalizedCenter.dx * scaledMapSize),
+      viewportSize.width,
+      scaledMapSize,
+    );
+    final dy = _clampedAxisOffset(
+      (viewportSize.height / 2) - (normalizedCenter.dy * scaledMapSize),
+      viewportSize.height,
+      scaledMapSize,
+    );
+
+    return Matrix4.identity()
+      ..translateByDouble(dx, dy, 0, 1)
+      ..scaleByDouble(scale, scale, scale, 1);
+  }
+
   double _clampedAxisOffset(
     double offset,
     double viewportExtent,
@@ -330,10 +484,25 @@ class _UferwaldMapInteractionPreviewState
 
     return true;
   }
+
+  _ReviewZone? get _selectedReviewZone {
+    final label = _selectedZoneLabel;
+    if (label == null) {
+      return null;
+    }
+
+    for (final zone in _reviewZones) {
+      if (zone.label == label) {
+        return zone;
+      }
+    }
+
+    return null;
+  }
 }
 
-class _UferwaldCameraMetrics {
-  const _UferwaldCameraMetrics({
+class _UferwaldCameraSettings {
+  const _UferwaldCameraSettings({
     required this.coverScale,
     required this.containScale,
     required this.minScale,
@@ -342,7 +511,10 @@ class _UferwaldCameraMetrics {
     required this.maxScale,
   });
 
-  factory _UferwaldCameraMetrics.forViewport(Size viewportSize) {
+  factory _UferwaldCameraSettings.forMode(
+    Size viewportSize,
+    _UferwaldCameraMode mode,
+  ) {
     final coverScale = math.max(
       viewportSize.width / _mapSize,
       viewportSize.height / _mapSize,
@@ -352,14 +524,44 @@ class _UferwaldCameraMetrics {
       viewportSize.height / _mapSize,
     );
 
-    return _UferwaldCameraMetrics(
-      coverScale: coverScale,
-      containScale: containScale,
-      minScale: coverScale * 1.02,
-      initialScale: coverScale * 1.12,
-      overviewScale: containScale * 0.94,
-      maxScale: coverScale * 3.0,
-    );
+    switch (mode) {
+      case _UferwaldCameraMode.buildMap:
+        return _UferwaldCameraSettings(
+          coverScale: coverScale,
+          containScale: containScale,
+          minScale: coverScale * 1.02,
+          initialScale: coverScale * 1.12,
+          overviewScale: containScale * 0.94,
+          maxScale: coverScale * 3.0,
+        );
+      case _UferwaldCameraMode.overview:
+        return _UferwaldCameraSettings(
+          coverScale: coverScale,
+          containScale: containScale,
+          minScale: containScale * 0.84,
+          initialScale: containScale * 0.94,
+          overviewScale: containScale * 0.94,
+          maxScale: coverScale * 2.4,
+        );
+      case _UferwaldCameraMode.visitWander:
+        return _UferwaldCameraSettings(
+          coverScale: coverScale,
+          containScale: containScale,
+          minScale: coverScale * 1.08,
+          initialScale: coverScale * 1.42,
+          overviewScale: containScale * 0.94,
+          maxScale: coverScale * 3.2,
+        );
+      case _UferwaldCameraMode.objectFocus:
+        return _UferwaldCameraSettings(
+          coverScale: coverScale,
+          containScale: containScale,
+          minScale: coverScale * 1.12,
+          initialScale: coverScale * 2.05,
+          overviewScale: containScale * 0.94,
+          maxScale: coverScale * 3.6,
+        );
+    }
   }
 
   final double coverScale;
@@ -375,7 +577,8 @@ class _InteractiveUferwaldMap extends StatelessWidget {
     required this.imageFile,
     required this.overlayImageFile,
     required this.controller,
-    required this.showOverlay,
+    required this.cameraMode,
+    required this.showFreeBuildOverlay,
     required this.selectedZoneLabel,
     required this.minScale,
     required this.maxScale,
@@ -387,7 +590,8 @@ class _InteractiveUferwaldMap extends StatelessWidget {
   final File imageFile;
   final File overlayImageFile;
   final TransformationController controller;
-  final bool showOverlay;
+  final _UferwaldCameraMode cameraMode;
+  final bool showFreeBuildOverlay;
   final String? selectedZoneLabel;
   final double minScale;
   final double maxScale;
@@ -436,7 +640,7 @@ class _InteractiveUferwaldMap extends StatelessWidget {
                   return _MissingImageNotice(imageUrl: baseImageUrl);
                 },
               ),
-              if (showOverlay) ...[
+              if (showFreeBuildOverlay) ...[
                 _ImageLoadProbe(
                   imageProvider: overlayImageProvider,
                   imageUrl: overlayImageUrl,
@@ -448,6 +652,14 @@ class _InteractiveUferwaldMap extends StatelessWidget {
                   ),
                 ),
               ],
+              if (cameraMode == _UferwaldCameraMode.objectFocus)
+                CustomPaint(
+                  painter: _UferwaldObjectFocusPainter(
+                    selectedZoneLabel: selectedZoneLabel,
+                  ),
+                ),
+              if (cameraMode == _UferwaldCameraMode.visitWander)
+                const CustomPaint(painter: _UferwaldVisitPathPainter()),
             ],
           ),
         ),
@@ -636,12 +848,20 @@ class _ImageLoadError extends StatelessWidget {
 
 class _TopPreviewControls extends StatelessWidget {
   const _TopPreviewControls({
+    required this.cameraMode,
     required this.showOverlay,
+    required this.overlayEnabled,
+    required this.selectedZoneLabel,
+    required this.onCameraModeChanged,
     required this.onOverlayChanged,
     required this.onResetView,
   });
 
+  final _UferwaldCameraMode cameraMode;
   final bool showOverlay;
+  final bool overlayEnabled;
+  final String? selectedZoneLabel;
+  final ValueChanged<_UferwaldCameraMode> onCameraModeChanged;
   final ValueChanged<bool> onOverlayChanged;
   final VoidCallback onResetView;
 
@@ -650,15 +870,32 @@ class _TopPreviewControls extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 700) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Expanded(child: _CompactCapacityChip()),
-              const SizedBox(width: 8),
-              _CompactToolPanel(
-                showOverlay: showOverlay,
-                onOverlayChanged: onOverlayChanged,
-                onResetView: onResetView,
+              _CameraModeSelector(
+                cameraMode: cameraMode,
+                compact: true,
+                onCameraModeChanged: onCameraModeChanged,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _CompactModeChip(
+                      cameraMode: cameraMode,
+                      selectedZoneLabel: selectedZoneLabel,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _CompactToolPanel(
+                    showOverlay: showOverlay,
+                    overlayEnabled: overlayEnabled,
+                    onOverlayChanged: onOverlayChanged,
+                    onResetView: onResetView,
+                  ),
+                ],
               ),
             ],
           );
@@ -667,10 +904,23 @@ class _TopPreviewControls extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(child: _CapacityPanel(showOverlay: showOverlay)),
+            Flexible(
+              child: _CapacityPanel(
+                cameraMode: cameraMode,
+                showOverlay: showOverlay,
+                selectedZoneLabel: selectedZoneLabel,
+              ),
+            ),
+            const Spacer(),
+            _CameraModeSelector(
+              cameraMode: cameraMode,
+              compact: false,
+              onCameraModeChanged: onCameraModeChanged,
+            ),
             const Spacer(),
             _ToolPanel(
               showOverlay: showOverlay,
+              overlayEnabled: overlayEnabled,
               onOverlayChanged: onOverlayChanged,
               onResetView: onResetView,
             ),
@@ -681,11 +931,101 @@ class _TopPreviewControls extends StatelessWidget {
   }
 }
 
-class _CompactCapacityChip extends StatelessWidget {
-  const _CompactCapacityChip();
+class _CameraModeSelector extends StatelessWidget {
+  const _CameraModeSelector({
+    required this.cameraMode,
+    required this.compact,
+    required this.onCameraModeChanged,
+  });
+
+  final _UferwaldCameraMode cameraMode;
+  final bool compact;
+  final ValueChanged<_UferwaldCameraMode> onCameraModeChanged;
 
   @override
   Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _panel,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _panelBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x55000000),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: SegmentedButton<_UferwaldCameraMode>(
+          segments: [
+            for (final mode in _UferwaldCameraMode.values)
+              ButtonSegment(
+                value: mode,
+                icon: Icon(mode.icon, size: 17),
+                label: Text(compact ? mode.compactLabel : mode.shortLabel),
+              ),
+          ],
+          selected: {cameraMode},
+          onSelectionChanged: (selection) {
+            onCameraModeChanged(selection.first);
+          },
+          showSelectedIcon: false,
+          style: ButtonStyle(
+            visualDensity: VisualDensity.compact,
+            foregroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return const Color(0xFF06101A);
+              }
+
+              return Colors.white;
+            }),
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return _mint;
+              }
+
+              return Colors.transparent;
+            }),
+            side: const WidgetStatePropertyAll(BorderSide.none),
+            textStyle: const WidgetStatePropertyAll(
+              TextStyle(
+                fontSize: 11,
+                height: 1,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
+            ),
+            padding: const WidgetStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 8),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactModeChip extends StatelessWidget {
+  const _CompactModeChip({
+    required this.cameraMode,
+    required this.selectedZoneLabel,
+  });
+
+  final _UferwaldCameraMode cameraMode;
+  final String? selectedZoneLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBuildMode = cameraMode == _UferwaldCameraMode.buildMap;
+    final text = isBuildMode
+        ? '6 frei'
+        : cameraMode == _UferwaldCameraMode.objectFocus
+        ? '${selectedZoneLabel ?? 'R1'} Fokus'
+        : cameraMode.shortLabel;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _panel,
@@ -699,13 +1039,15 @@ class _CompactCapacityChip extends StatelessWidget {
           ),
         ],
       ),
-      child: const Padding(
-        padding: EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
         child: Row(
           children: [
+            Icon(cameraMode.icon, color: _mint, size: 18),
+            const SizedBox(width: 8),
             Text(
-              '6 frei',
-              style: TextStyle(
+              text,
+              style: const TextStyle(
                 color: _mint,
                 fontSize: 14,
                 height: 1,
@@ -713,8 +1055,10 @@ class _CompactCapacityChip extends StatelessWidget {
                 letterSpacing: 0,
               ),
             ),
-            SizedBox(width: 9),
-            Expanded(child: _TinyCapacityDots()),
+            if (isBuildMode) ...[
+              const SizedBox(width: 9),
+              const Expanded(child: _TinyCapacityDots()),
+            ],
           ],
         ),
       ),
@@ -748,11 +1092,13 @@ class _TinyCapacityDots extends StatelessWidget {
 class _CompactToolPanel extends StatelessWidget {
   const _CompactToolPanel({
     required this.showOverlay,
+    required this.overlayEnabled,
     required this.onOverlayChanged,
     required this.onResetView,
   });
 
   final bool showOverlay;
+  final bool overlayEnabled;
   final ValueChanged<bool> onOverlayChanged;
   final VoidCallback onResetView;
 
@@ -777,12 +1123,22 @@ class _CompactToolPanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Tooltip(
-              message: showOverlay ? 'Overlay ausblenden' : 'Overlay anzeigen',
+              message: overlayEnabled
+                  ? showOverlay
+                        ? 'Overlay ausblenden'
+                        : 'Overlay anzeigen'
+                  : 'Im Besuchsmodus ausgeblendet',
               child: IconButton(
-                onPressed: () => onOverlayChanged(!showOverlay),
+                onPressed: overlayEnabled
+                    ? () => onOverlayChanged(!showOverlay)
+                    : null,
                 icon: Icon(
                   showOverlay ? Icons.layers : Icons.layers_clear,
-                  color: showOverlay ? _mint : Colors.white70,
+                  color: overlayEnabled
+                      ? showOverlay
+                            ? _mint
+                            : Colors.white70
+                      : Colors.white30,
                 ),
               ),
             ),
@@ -801,12 +1157,23 @@ class _CompactToolPanel extends StatelessWidget {
 }
 
 class _CapacityPanel extends StatelessWidget {
-  const _CapacityPanel({required this.showOverlay});
+  const _CapacityPanel({
+    required this.cameraMode,
+    required this.showOverlay,
+    required this.selectedZoneLabel,
+  });
 
+  final _UferwaldCameraMode cameraMode;
   final bool showOverlay;
+  final String? selectedZoneLabel;
 
   @override
   Widget build(BuildContext context) {
+    final title = cameraMode == _UferwaldCameraMode.buildMap
+        ? 'Uferwald Preview'
+        : cameraMode.label;
+    final body = _modeBodyText(cameraMode, showOverlay, selectedZoneLabel);
+
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 360),
       child: DecoratedBox(
@@ -828,9 +1195,9 @@ class _CapacityPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Uferwald Preview',
-                style: TextStyle(
+              Text(
+                title,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   height: 1.15,
@@ -839,12 +1206,12 @@ class _CapacityPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 9),
-              const _CapacityDots(),
-              const SizedBox(height: 8),
+              if (cameraMode == _UferwaldCameraMode.buildMap) ...[
+                const _CapacityDots(),
+                const SizedBox(height: 8),
+              ],
               Text(
-                showOverlay
-                    ? '6 freie Baukapazitäten. Die grünen Räume sind nur Auswahlräume.'
-                    : '6 freie Baukapazitäten. Freie Ortswahl bleibt sichtbar.',
+                body,
                 style: const TextStyle(
                   color: Color(0xE6FFFFFF),
                   fontSize: 12,
@@ -853,9 +1220,9 @@ class _CapacityPanel extends StatelessWidget {
                   letterSpacing: 0,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 8),
               const Text(
-                'Keine festen Slots. Keine Kategorieplätze.',
+                'Keine Speicherung. Kein BuildState. Keine App-Integration.',
                 style: TextStyle(
                   color: Color(0xB8FFFFFF),
                   fontSize: 11,
@@ -869,6 +1236,25 @@ class _CapacityPanel extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _modeBodyText(
+    _UferwaldCameraMode mode,
+    bool showOverlay,
+    String? selectedZoneLabel,
+  ) {
+    switch (mode) {
+      case _UferwaldCameraMode.buildMap:
+        return showOverlay
+            ? '6 freie Baukapazitaeten. Die gruenen Raeume sind nur Auswahlraeume.'
+            : '6 freie Baukapazitaeten. Freie Ortswahl bleibt sichtbar.';
+      case _UferwaldCameraMode.overview:
+        return '${mode.hint} Nicht der normale Bau-Default.';
+      case _UferwaldCameraMode.visitWander:
+        return mode.hint;
+      case _UferwaldCameraMode.objectFocus:
+        return '${selectedZoneLabel ?? 'R1'}: ${mode.hint}';
+    }
   }
 }
 
@@ -917,11 +1303,13 @@ class _CapacityDots extends StatelessWidget {
 class _ToolPanel extends StatelessWidget {
   const _ToolPanel({
     required this.showOverlay,
+    required this.overlayEnabled,
     required this.onOverlayChanged,
     required this.onResetView,
   });
 
   final bool showOverlay;
+  final bool overlayEnabled;
   final ValueChanged<bool> onOverlayChanged;
   final VoidCallback onResetView;
 
@@ -963,7 +1351,7 @@ class _ToolPanel extends StatelessWidget {
                 ),
                 Switch(
                   value: showOverlay,
-                  onChanged: onOverlayChanged,
+                  onChanged: overlayEnabled ? onOverlayChanged : null,
                   activeThumbColor: _mint,
                   activeTrackColor: const Color(0x6636E7B7),
                 ),
@@ -982,16 +1370,17 @@ class _ToolPanel extends StatelessWidget {
 }
 
 class _BottomPreviewNote extends StatelessWidget {
-  const _BottomPreviewNote({required this.selectedZoneLabel});
+  const _BottomPreviewNote({
+    required this.cameraMode,
+    required this.selectedZoneLabel,
+  });
 
+  final _UferwaldCameraMode cameraMode;
   final String? selectedZoneLabel;
 
   @override
   Widget build(BuildContext context) {
-    final selectedZoneLabel = this.selectedZoneLabel;
-    final text = selectedZoneLabel == null
-        ? 'Karte schieben, näher ran. Keine Speicherung, keine Bebauung.'
-        : '$selectedZoneLabel ausgewählt · Auswahlraum, kein fester Slot · keine Bebauung.';
+    final text = _noteText(cameraMode, selectedZoneLabel);
 
     return Center(
       child: ConstrainedBox(
@@ -1019,6 +1408,21 @@ class _BottomPreviewNote extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _noteText(_UferwaldCameraMode mode, String? selectedZoneLabel) {
+    switch (mode) {
+      case _UferwaldCameraMode.buildMap:
+        return selectedZoneLabel == null
+            ? 'Karte schieben, naeher ran. 6 freie Baukapazitaeten.'
+            : '$selectedZoneLabel ausgewaehlt · Auswahlraum, kein fester Slot.';
+      case _UferwaldCameraMode.overview:
+        return 'Overview/Review: komplette Insel sichtbar, nicht der normale Bau-Modus.';
+      case _UferwaldCameraMode.visitWander:
+        return 'Visit/Wander Preview: ruhiger Ausschnitt, keine Bau-Entscheidung.';
+      case _UferwaldCameraMode.objectFocus:
+        return '${selectedZoneLabel ?? 'R1'} im Object Focus · Umgebung bleibt sichtbar.';
+    }
   }
 }
 
@@ -1057,6 +1461,207 @@ class _MissingImageNotice extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _UferwaldVisitPathPainter extends CustomPainter {
+  const _UferwaldVisitPathPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pathPaint = Paint()
+      ..color = const Color(0x88FFE6A3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final glowPaint = Paint()
+      ..color = const Color(0x44FFE6A3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 22
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+
+    final path = Path()
+      ..moveTo(size.width * 0.33, size.height * 0.68)
+      ..cubicTo(
+        size.width * 0.41,
+        size.height * 0.62,
+        size.width * 0.45,
+        size.height * 0.56,
+        size.width * 0.49,
+        size.height * 0.51,
+      )
+      ..cubicTo(
+        size.width * 0.55,
+        size.height * 0.46,
+        size.width * 0.60,
+        size.height * 0.43,
+        size.width * 0.66,
+        size.height * 0.39,
+      );
+
+    canvas.drawPath(path, glowPaint);
+    canvas.drawPath(path, pathPaint);
+    _drawVisitDot(canvas, size, const Offset(0.49, 0.51), 'Hub');
+    _drawVisitDot(canvas, size, const Offset(0.66, 0.39), 'Weg');
+  }
+
+  void _drawVisitDot(
+    Canvas canvas,
+    Size size,
+    Offset normalized,
+    String label,
+  ) {
+    final center = Offset(
+      size.width * normalized.dx,
+      size.height * normalized.dy,
+    );
+    final dotPaint = Paint()
+      ..color = const Color(0xFFFFE6A3)
+      ..style = PaintingStyle.fill;
+    final borderPaint = Paint()
+      ..color = const Color(0xFF3B2B16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    canvas.drawCircle(center, 11, dotPaint);
+    canvas.drawCircle(center, 11, borderPaint);
+    _drawText(
+      canvas,
+      label,
+      center + const Offset(15, -9),
+      const TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        height: 1,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0,
+      ),
+    );
+  }
+
+  void _drawText(Canvas canvas, String text, Offset offset, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    painter.paint(canvas, offset);
+  }
+
+  @override
+  bool shouldRepaint(covariant _UferwaldVisitPathPainter oldDelegate) => false;
+}
+
+class _UferwaldObjectFocusPainter extends CustomPainter {
+  const _UferwaldObjectFocusPainter({required this.selectedZoneLabel});
+
+  final String? selectedZoneLabel;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final zone = _selectedZone ?? _reviewZones.first;
+    final rect = zone.toRect(size);
+    final glowPaint = Paint()
+      ..color = const Color(0x88FFD36E)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
+    final fillPaint = Paint()
+      ..color = const Color(0x33FFD36E)
+      ..style = PaintingStyle.fill;
+    final strokePaint = Paint()
+      ..color = const Color(0xFFFFF2A6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8;
+    final contextPaint = Paint()
+      ..color = const Color(0x55FFFFFF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    final focusRect = Rect.fromCenter(
+      center: rect.center,
+      width: rect.width * 2.0,
+      height: rect.height * 1.9,
+    );
+    canvas.drawOval(focusRect, glowPaint);
+    canvas.drawOval(focusRect, fillPaint);
+    canvas.drawOval(focusRect, strokePaint);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: rect.center,
+        width: rect.width * 2.65,
+        height: rect.height * 2.45,
+      ),
+      contextPaint,
+    );
+    _drawFocusLabel(canvas, zone.label, rect.center);
+  }
+
+  _ReviewZone? get _selectedZone {
+    final label = selectedZoneLabel;
+    if (label == null) {
+      return null;
+    }
+
+    for (final zone in _reviewZones) {
+      if (zone.label == label) {
+        return zone;
+      }
+    }
+
+    return null;
+  }
+
+  void _drawFocusLabel(Canvas canvas, String label, Offset center) {
+    final chipRect = Rect.fromCenter(
+      center: center + const Offset(0, -58),
+      width: 122,
+      height: 36,
+    );
+    final chipPaint = Paint()
+      ..color = const Color(0xF2FFF2A6)
+      ..style = PaintingStyle.fill;
+    final chipBorderPaint = Paint()
+      ..color = const Color(0xFF3B2B16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(chipRect, const Radius.circular(18)),
+      chipPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(chipRect, const Radius.circular(18)),
+      chipBorderPaint,
+    );
+
+    final painter = TextPainter(
+      text: TextSpan(
+        text: '$label Fokus',
+        style: const TextStyle(
+          color: Color(0xFF3B2B16),
+          fontSize: 17,
+          height: 1,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout(maxWidth: chipRect.width - 16);
+    painter.paint(
+      canvas,
+      Offset(
+        chipRect.center.dx - (painter.width / 2),
+        chipRect.center.dy - (painter.height / 2),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _UferwaldObjectFocusPainter oldDelegate) {
+    return oldDelegate.selectedZoneLabel != selectedZoneLabel;
   }
 }
 
@@ -1327,6 +1932,8 @@ class _ReviewZone {
   final double y;
   final double rx;
   final double ry;
+
+  Offset get normalizedCenter => Offset(x, y);
 
   Rect toRect(Size size) {
     return Rect.fromCenter(
