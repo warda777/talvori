@@ -8,14 +8,13 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CP`
+Aktive Sprint-ID: `M16-CQ`
 
 Sprint Goal:
 
-> Uferwald-`island_base`-Layer-Postprocess-Candidate aus erlaubter lokaler
-> Quelle in den Docs-Preview-Pfad uebernehmen, Review-Kopien, Contact Sheet,
-> Metadaten, gemessene Anchors und QA dokumentieren, ohne Assets oder Code
-> freizugeben.
+> Uferwald-`island_base`-Layer-Postprocess-Candidate fachlich reviewen,
+> Arbeitsnamen und Strukturreferenz-Status entscheiden und den naechsten
+> Overlay-/Postprocess-Schritt festlegen, ohne neue Bilder, Assets oder Code.
 
 ### 0.1 Gesamtfortschritt
 
@@ -90,7 +89,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 80 | 78 | 1 | 0 | 1 | 98.1 % | `██████████` | M16-CP dokumentiert Uferwald-Intake, 1x/2x/3x-Review, Contact Sheet, Anchors und Layer-Readiness; `assets/`, Engine-ready Candidates, approved Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 80 | 78 | 1 | 0 | 1 | 98.1 % | `██████████` | M16-CQ fuehrt Uferwald als Struktur-/Postprocess-Referenz weiter; naechster Schritt ist ein Anchor-/Zone-/Layer-Overlay-Plan, waehrend `assets/`, Engine-ready Candidates, approved Assets und Code blockiert bleiben. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -1495,6 +1494,22 @@ M16-CP operationalisiert fuer kuenftige Slices:
   `terrain_layers` oder `slot_markers` sind weiterhin nicht vorhanden und
   blockiert, bis ein eigener externer/Layer-Postprocess-Slice sie erzeugt und
   prueft.
+
+M16-CQ Review-/Decision-Folge ohne neue M16-T-IDs:
+
+- `docs/world_design/380-uferwald-layer-candidate-review-and-postprocess-decision.md`
+  entscheidet, dass Uferwald als Arbeitsname fuer diesen Candidate und als
+  fuehrende Struktur-/Postprocess-Referenz weitergefuehrt wird.
+- Uferhain bleibt als bestehende Design-/Docs-Linie erhalten; M16-CQ trifft
+  keine finale Produkt- oder Inselbenennung.
+- Der Candidate wird nicht als Pixelziel, Asset, Engine-ready Basis,
+  approved Asset oder Produktdatei uebernommen.
+- Fuer spaetere externe Layerarbeit ist Uferwald nur teilweise geeignet:
+  stark als Struktur-/Stimmungs-/Registration-Referenz, aber nicht als direkt
+  zerschneidbare Produktionsgrafik.
+- Naechster empfohlener Slice ist M16-CR Uferwald Anchor, Zone and Layer
+  Overlay Plan. Erst danach sollte Paintover, Layer-Separation, Water-Paths
+  oder Terrain-/No-Build-Folgearbeit geoeffnet werden.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
