@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" role="img" aria-labelledby="title desc">
+  <title id="title">Uferwald Measurement SVG Documentation Plan</title>
+  <desc id="desc">Documentation-only schematic for Uferwald technical layers, masks, zones, anchors and depth bands. Not runtime data, not asset, not engine-ready.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f6f1e8; }
+      .panel { fill: #fffaf0; stroke: #2d3440; stroke-width: 2; }
+      .title { font: 700 34px Arial, sans-serif; fill: #24303c; }
+      .subtitle { font: 600 18px Arial, sans-serif; fill: #405061; }
+      .label { font: 700 18px Arial, sans-serif; fill: #26313b; }
+      .small { font: 500 15px Arial, sans-serif; fill: #344251; }
+      .tiny { font: 500 13px Arial, sans-serif; fill: #344251; }
+      .status { font: 700 16px Arial, sans-serif; fill: #24303c; }
+      .badge { fill: #e9f2ff; stroke: #395873; stroke-width: 1.5; }
+      .badge2 { fill: #fff1dc; stroke: #8b6a2b; stroke-width: 1.5; }
+      .land { fill: #d9bd7f; stroke: #7a5b31; stroke-width: 5; stroke-dasharray: 14 10; }
+      .grass { fill: #9fcf84; opacity: 0.82; stroke: #477a3b; stroke-width: 3; }
+      .water { fill: #69b9d6; opacity: 0.78; stroke: #1e7899; stroke-width: 4; }
+      .trees { fill: #4e8f56; opacity: 0.82; stroke: #255d31; stroke-width: 3; }
+      .rocks { fill: #9d9a8d; opacity: 0.86; stroke: #60635e; stroke-width: 3; }
+      .path { fill: none; stroke: #f4e7bc; stroke-width: 32; stroke-linecap: round; stroke-linejoin: round; }
+      .pathEdge { fill: none; stroke: #9d7d3f; stroke-width: 4; stroke-dasharray: 10 10; stroke-linecap: round; stroke-linejoin: round; }
+      .buildable { fill: #5fc681; opacity: 0.35; stroke: #177a40; stroke-width: 4; stroke-dasharray: 12 8; }
+      .noWalk { fill: none; stroke: #d74d45; stroke-width: 6; stroke-dasharray: 8 8; }
+      .noBuild { fill: #a463d8; opacity: 0.16; stroke: #7b37a8; stroke-width: 4; stroke-dasharray: 14 8; }
+      .bandNorth { fill: #7cb8db; opacity: 0.16; }
+      .bandMid { fill: #8ad08d; opacity: 0.13; }
+      .bandSouth { fill: #f0b36b; opacity: 0.14; }
+      .anchor { fill: #fffdf6; stroke: #202733; stroke-width: 4; }
+      .anchorText { font: 700 15px Arial, sans-serif; fill: #202733; text-anchor: middle; dominant-baseline: central; }
+      .legendSwatch { stroke: #2d3440; stroke-width: 1.2; }
+    </style>
+    <pattern id="redHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#d74d45" stroke-width="3" opacity="0.55"/>
+    </pattern>
+    <pattern id="purpleHatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#7b37a8" stroke-width="3" opacity="0.45"/>
+    </pattern>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1100"/>
+  <text class="title" x="60" y="58">M16-DF Uferwald Measurement SVG Documentation Plan</text>
+  <text class="subtitle" x="60" y="88">Technical layer and mask review visual. No final coordinates. No runtime map data.</text>
+
+  <g transform="translate(60 112)">
+    <rect class="badge" x="0" y="0" width="205" height="34" rx="8"/>
+    <text class="status" x="18" y="23">documentation_only</text>
+    <rect class="badge" x="220" y="0" width="185" height="34" rx="8"/>
+    <text class="status" x="238" y="23">not_runtime_data</text>
+    <rect class="badge2" x="420" y="0" width="118" height="34" rx="8"/>
+    <text class="status" x="440" y="23">not_asset</text>
+    <rect class="badge2" x="553" y="0" width="170" height="34" rx="8"/>
+    <text class="status" x="571" y="23">not_engine_ready</text>
+  </g>
+
+  <rect class="panel" x="50" y="170" width="1040" height="800" rx="14"/>
+  <rect class="panel" x="1120" y="170" width="430" height="800" rx="14"/>
+
+  <g id="plan-canvas" transform="translate(80 205)">
+    <rect x="0" y="0" width="980" height="720" fill="#dceff0" stroke="#65727f" stroke-width="2"/>
+    <rect class="bandNorth" x="0" y="0" width="980" height="230"/>
+    <rect class="bandMid" x="0" y="230" width="980" height="275"/>
+    <rect class="bandSouth" x="0" y="505" width="980" height="215"/>
+    <text class="tiny" x="18" y="28">depth_sort_bands: background_north</text>
+    <text class="tiny" x="18" y="258">depth_sort_bands: midground_center</text>
+    <text class="tiny" x="18" y="535">depth_sort_bands: foreground_south</text>
+
+    <path class="land" d="M205 112 C280 48 410 42 507 74 C610 108 705 75 780 145 C860 220 875 352 827 452 C780 551 689 638 551 650 C414 663 279 623 190 548 C104 474 80 345 116 236 C134 182 160 145 205 112 Z"/>
+
+    <path class="grass" d="M236 215 C327 160 448 153 540 187 C633 221 705 296 691 393 C678 493 563 559 436 550 C305 541 209 469 197 367 C188 294 196 246 236 215 Z"/>
+    <path class="water" d="M332 50 C310 118 321 162 366 197 C421 239 466 275 457 334 C447 407 520 441 590 480 C655 518 693 563 705 676 L790 672 C773 548 722 492 651 449 C586 409 533 377 546 322 C563 251 515 205 441 158 C391 126 382 84 405 32 Z"/>
+    <path class="water" d="M64 580 C142 538 229 532 326 570 C405 601 493 663 621 680 C480 719 287 712 157 666 C105 648 77 617 64 580 Z"/>
+
+    <path class="trees" d="M600 118 C690 96 760 151 785 230 C815 324 750 401 648 397 C560 393 515 325 536 242 C550 184 561 137 600 118 Z"/>
+    <path class="trees" d="M245 128 C301 96 363 106 395 157 C423 203 395 262 332 276 C270 291 214 263 197 212 C184 173 204 151 245 128 Z"/>
+    <path class="rocks" d="M145 426 C193 396 247 415 260 459 C276 512 224 554 164 534 C114 517 99 457 145 426 Z"/>
+    <path class="rocks" d="M710 465 C778 453 837 505 816 568 C797 625 723 638 681 592 C641 548 660 476 710 465 Z"/>
+    <path class="rocks" d="M730 170 C781 170 824 209 821 260 C818 304 769 329 720 307 C669 284 674 178 730 170 Z"/>
+
+    <path class="path" d="M192 620 C247 540 315 495 392 464 C472 432 535 395 573 334 C606 280 586 230 545 191"/>
+    <path class="pathEdge" d="M192 620 C247 540 315 495 392 464 C472 432 535 395 573 334 C606 280 586 230 545 191"/>
+    <path class="path" d="M382 462 C455 505 540 528 648 520"/>
+    <path class="pathEdge" d="M382 462 C455 505 540 528 648 520"/>
+
+    <ellipse class="buildable" cx="352" cy="398" rx="118" ry="74"/>
+    <ellipse class="buildable" cx="504" cy="432" rx="112" ry="72"/>
+    <ellipse class="buildable" cx="313" cy="520" rx="88" ry="54"/>
+    <ellipse class="buildable" cx="631" cy="560" rx="105" ry="58"/>
+
+    <path class="noBuild" d="M580 90 C700 62 816 123 854 230 C896 347 817 444 681 438 C556 433 485 333 512 220 C528 151 542 112 580 90 Z"/>
+    <path class="noBuild" d="M124 390 C197 348 281 375 298 452 C318 537 231 604 135 571 C64 546 48 432 124 390 Z"/>
+    <path class="noBuild" d="M687 430 C779 401 878 467 848 572 C821 665 704 683 643 608 C590 543 613 452 687 430 Z"/>
+
+    <path class="noWalk" d="M332 50 C310 118 321 162 366 197 C421 239 466 275 457 334 C447 407 520 441 590 480 C655 518 693 563 705 676"/>
+    <path class="noWalk" d="M600 118 C690 96 760 151 785 230 C815 324 750 401 648 397 C560 393 515 325 536 242 C550 184 561 137 600 118 Z"/>
+    <path class="noWalk" d="M145 426 C193 396 247 415 260 459 C276 512 224 554 164 534 C114 517 99 457 145 426 Z"/>
+    <path d="M116 236 C134 182 160 145 205 112 C280 48 410 42 507 74 C610 108 705 75 780 145 C860 220 875 352 827 452 C780 551 689 638 551 650 C414 663 279 623 190 548 C104 474 80 345 116 236 Z" fill="url(#redHatch)" opacity="0.07"/>
+    <path d="M580 90 C700 62 816 123 854 230 C896 347 817 444 681 438 C556 433 485 333 512 220 C528 151 542 112 580 90 Z" fill="url(#purpleHatch)" opacity="0.12"/>
+
+    <g id="anchors">
+      <circle class="anchor" cx="404" cy="405" r="17"/><text class="anchorText" x="404" y="405">A1</text>
+      <circle class="anchor" cx="482" cy="386" r="17"/><text class="anchorText" x="482" y="386">A2</text>
+      <circle class="anchor" cx="347" cy="442" r="17"/><text class="anchorText" x="347" y="442">A3</text>
+      <circle class="anchor" cx="376" cy="120" r="17"/><text class="anchorText" x="376" y="120">A4</text>
+      <circle class="anchor" cx="698" cy="625" r="17"/><text class="anchorText" x="698" y="625">A5</text>
+      <circle class="anchor" cx="667" cy="250" r="17"/><text class="anchorText" x="667" y="250">A6</text>
+      <circle class="anchor" cx="490" cy="175" r="17"/><text class="anchorText" x="490" y="175">A7</text>
+      <circle class="anchor" cx="635" cy="545" r="17"/><text class="anchorText" x="635" y="545">A8</text>
+    </g>
+
+    <text class="small" x="650" y="34">planning canvas: rough schematic only</text>
+    <text class="tiny" x="650" y="58">No measured polygon points. No final anchors.</text>
+    <text class="tiny" x="650" y="82">Visible plan supports review, not runtime.</text>
+  </g>
+
+  <g id="legend" transform="translate(1145 205)">
+    <text class="label" x="0" y="0">Layer / Mask Legend</text>
+    <rect class="legendSwatch land" x="0" y="25" width="38" height="20"/><text class="small" x="52" y="41">base_rock_shape</text>
+    <rect class="legendSwatch water" x="0" y="61" width="38" height="20"/><text class="small" x="52" y="77">water_river_mask</text>
+    <rect class="legendSwatch trees" x="0" y="97" width="38" height="20"/><text class="small" x="52" y="113">tree_obstacle_layer</text>
+    <rect class="legendSwatch rocks" x="0" y="133" width="38" height="20"/><text class="small" x="52" y="149">rock_cliff_obstacle_layer</text>
+    <line x1="0" y1="179" x2="38" y2="179" class="path" stroke-width="15"/><line x1="0" y1="179" x2="38" y2="179" class="pathEdge"/><text class="small" x="52" y="185">walkable_path_layer</text>
+    <ellipse class="buildable" cx="19" cy="219" rx="28" ry="16"/><text class="small" x="52" y="225">buildable_zone_layer</text>
+    <line x1="0" y1="263" x2="42" y2="263" class="noWalk"/><text class="small" x="52" y="269">no_walk_mask</text>
+    <rect class="noBuild" x="0" y="294" width="42" height="24"/><text class="small" x="52" y="312">no_build_mask</text>
+    <rect class="bandNorth" x="0" y="338" width="42" height="17"/><rect class="bandMid" x="0" y="355" width="42" height="17"/><rect class="bandSouth" x="0" y="372" width="42" height="17"/><text class="small" x="52" y="367">depth_sort_bands</text>
+    <circle class="anchor" cx="19" cy="424" r="14"/><text class="anchorText" x="19" y="424">A</text><text class="small" x="52" y="430">landmark_anchor_layer</text>
+
+    <text class="label" x="0" y="485">Anchor Labels</text>
+    <text class="tiny" x="0" y="516">A1 main_build_area_anchor</text>
+    <text class="tiny" x="0" y="540">A2 hub_center_anchor</text>
+    <text class="tiny" x="0" y="564">A3 house_primary_anchor</text>
+    <text class="tiny" x="0" y="588">A4 river_entry_anchor</text>
+    <text class="tiny" x="0" y="612">A5 river_exit_anchor</text>
+    <text class="tiny" x="0" y="636">A6 grove_anchor</text>
+    <text class="tiny" x="0" y="660">A7 reserve_zone_anchor_north</text>
+    <text class="tiny" x="0" y="684">A8 reserve_zone_anchor_south</text>
+
+    <text class="label" x="0" y="735">Critical Reading</text>
+    <text class="tiny" x="0" y="764">Build zones = organic suitability areas,</text>
+    <text class="tiny" x="0" y="786">not fixed slots or category plots.</text>
+    <text class="tiny" x="0" y="814">Paths = planning corridors, not</text>
+    <text class="tiny" x="0" y="836">runtime pathfinding or collision.</text>
+  </g>
+
+  <g transform="translate(60 1000)">
+    <text class="small" x="0" y="0">M16-DF status: documentation_only / not_runtime_data / not_asset / not_engine_ready</text>
+    <text class="small" x="0" y="28">No final coordinates. No JSON/YAML runtime data. No Figma write. No assets. No App integration.</text>
+  </g>
+</svg>

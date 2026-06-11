@@ -157,6 +157,7 @@ Non-Goals:
 | `386-uferwald-technical-layer-manifest.md` | M16-DC-Technical-Layer-Manifest: erste maschinennahe Planungsstruktur fuer `map_id: uferwald_starter_island`, `coordinate_space: normalized_0_1`, Layer-IDs, geplante Anchor-IDs, erlaubte Modi, blockierte Nutzungen und offene Messfragen; keine Runtime-Daten, Code-, Bild-, Asset-, App- oder Persistenzfreigabe. |
 | `387-uferwald-technical-measurement-and-vector-planning-gate.md` | M16-DD-Measurement-/Vector-Planning-Gate: definiert Messreihenfolge, erlaubte Ableitungen aus technischen Source-Layern, Pixel-Ableitungsverbote, moegliche Tools wie Figma/SVG/JSON/YAML/manuelle Polygonplanung und QA vor Runtime-Manifesten; keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `388-uferwald-measurement-source-and-vector-workspace-plan.md` | M16-DE-Measurement-Workspace-Format-Decision-Gate: entscheidet Markdown + SVG-Dokumentationsvisual als naechsten Mess-/Vector-Weg, haelt Figma-Writes und JSON/YAML-Runtime-Daten geschlossen und gibt keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
+| `389-uferwald-measurement-svg-documentation-plan.md` | M16-DF-Measurement-SVG-Documentation-Plan: dokumentiert SVG/PNG als reines Messplan-Visual fuer technische Uferwald-Layer, Masks, Zonen, Sort-Bands und Landmark-Anker; keine finalen Koordinaten, keine Runtime-Mapdaten, keine Assets, keine Figma-Writes, keine JSON/YAML-Daten und keine Code-/App-Freigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -204,6 +205,7 @@ Non-Goals:
 | `386-uferwald-technical-layer-manifest.md` | Uferwald Technical Layer Manifest: Pflicht, wenn `uferwald_starter_island`, technische Layer-IDs, geplante Anchor-IDs, offene Messfragen, Layer-Manifeste, Vector-Planung, Map-Manifeste oder spaetere Runtime-Map-Gates betroffen sind. |
 | `387-uferwald-technical-measurement-and-vector-planning-gate.md` | Uferwald Measurement-/Vector-Planning-Gate: Pflicht, wenn Messreihenfolge, manuelle Polygonplanung, Figma/SVG/JSON/YAML-Planung, Pixeltracing-Grenzen, Source-Layer-Ableitung, Vector-Arbeitsflaechen, QA vor Runtime-Manifesten oder technische Uferwald-Messarbeit betroffen sind. |
 | `388-uferwald-measurement-source-and-vector-workspace-plan.md` | Uferwald Measurement Workspace Format Decision: Pflicht, wenn der naechste Mess-/Vector-Arbeitsraum, Markdown-vs-SVG-vs-Figma-vs-JSON/YAML, SVG-Dokumentationsvisuals, Figma-Write-Grenzen, JSON/YAML-Runtime-Risiko oder Formatentscheidungen fuer technische Uferwald-Folgearbeit betroffen sind. |
+| `389-uferwald-measurement-svg-documentation-plan.md` | Uferwald Measurement SVG Documentation Plan: Pflicht, wenn der M16-DF-SVG-/PNG-Messplan, technische Layer/Masks/Zonen-Visual-QA, No-Walk/No-Build-Trennung, Build-Zonen als organische Eignungsraeume, Pfadkorridore, Sort-Bands oder Landmark-Anker betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -265,6 +267,7 @@ Non-Goals:
 | `379-uferwald-layer-candidate-intake-and-qa.md` | Uferwald, M16-CP-Folgearbeit, Layer-Postprocess-Candidates, gemessene Anchor-Manifeste, Zoom-/Scale-QA, 1x/2x/3x-Review-Kopien, Contact Sheet, Candidate-Intake oder spaetere Layerproduktion muessen 379 lesen; 379 ist keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
 | `380-uferwald-layer-candidate-review-and-postprocess-decision.md` | Uferwald, Layer-Candidate-Review, Postprocess-Decision, Strukturreferenz-Status, externe Layerarbeit, Figma-/Overlay-Planung, Anchor-/Placement-/Registration-Folgearbeit oder Asset-/Layer-Gates muessen 380 lesen; 380 ist keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
 | `381-uferwald-anchor-zone-layer-overlay-plan.md` | Uferwald-Overlay-Visuals, Anchor-/Zonen-Planung, Sort-Bands, Layer-Reihenfolge, externe Layer-Separation-Briefs oder spaetere Layer-Candidate-Gates muessen 381 lesen; 381 ist keine Asset-, Code-, App-, Engine-ready- oder `assets/`-Freigabe. |
+| `389-uferwald-measurement-svg-documentation-plan.md` | Uferwald-Messplan-Visuals, technische Layer-/Masken-/Zonen-Overlays, No-Walk/No-Build-Trennung, organische Build-Zonen, Pfadkorridore, Sort-Bands oder Landmark-Anker muessen 389 lesen; 389 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -272,6 +275,13 @@ PNG fuer schnelle Vorschau, SVG fuer verlustfreie Zoom- und
 Dokumentationsqualitaet. Text-Containment, ausreichender Innenabstand,
 lesbare Contact Sheets und keine Ueberlappungen von Karten, Labels, Pfeilen,
 Titeln, Footern oder Legenden sind harte Commit-Voraussetzungen.
+
+Fuer Uferwald-Mess-/Vector-/Masken-Visuals muessen `384`, `385`, `386`, `387`,
+`388` und `389` gelesen werden, sobald technische Layer/Masks/Zonen, SVG-
+Dokumentationsvisuals, Pfadkorridore, Build-Zonen, No-Walk/No-Build, Sort-
+Bands, Landmark-Anker oder Runtime-Risiko betroffen sind. 389 bleibt
+Dokumentation und ist keine Freigabe fuer finale Koordinaten, JSON/YAML-
+Runtime-Daten, Figma-Writes, Assets, Code oder App-Integration.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 
