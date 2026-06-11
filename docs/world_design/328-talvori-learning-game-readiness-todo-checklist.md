@@ -8,24 +8,26 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-11
 
-Aktive Sprint-ID: `M16-CN`
+Aktive Sprint-ID: `M16-CP`
 
 Sprint Goal:
 
-> Permission Gate fuer erste Uferhain-Layer-Postprocess-Bildarbeit festlegen,
-> ohne in diesem Slice Bilder, Assets oder Code zu erzeugen.
+> Uferwald-`island_base`-Layer-Postprocess-Candidate aus erlaubter lokaler
+> Quelle in den Docs-Preview-Pfad uebernehmen, Review-Kopien, Contact Sheet,
+> Metadaten, gemessene Anchors und QA dokumentieren, ohne Assets oder Code
+> freizugeben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 287 |
+| Gesamtanzahl M16-T-Items | 295 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 263 |
+| Erledigt `[x]` | 271 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 93.7 % |
+| Gewichteter Fortschritt | 93.9 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -88,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 72 | 70 | 1 | 0 | 1 | 97.9 % | `██████████` | M16-CO darf spaeter nur eng begrenzte Uferhain-`island_base`-Layer-Postprocess-Bildarbeit oeffnen; assets, Engine-ready Candidates, neue Bilder in Codex und approved Assets bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 80 | 78 | 1 | 0 | 1 | 98.1 % | `██████████` | M16-CP dokumentiert Uferwald-Intake, 1x/2x/3x-Review, Contact Sheet, Anchors und Layer-Readiness; `assets/`, Engine-ready Candidates, approved Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -372,6 +374,14 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-070 | [x] | Future image tool role boundary | Codex darf auch nach Permission Gate nicht zum Bildgenerator werden. | 378 trennt Folgearbeit: ChatGPT/image_gen oder benanntes externes Tool darf nur im M16-CO-Folgeprompt Bilder erzeugen; Codex bleibt bei Intake, Metadaten, QA, Dateieinordnung und Checks. | Codex startet KI-Bildtools, zeichnet Candidate A nach oder gibt Assets frei. | nein |
 | M16T-ASSET-071 | [x] | First layer prompt and negative constraints | Spaetere Bildprompts brauchen klare Grenzen gegen Pixelkopie, UI, Figuren, Kategorieplaetze und Build Stations. | 378 dokumentiert Pflichtsatz, positive Uferhain-/2.5D-Diorama-Richtung und Negative-Grenzen fuer M16-CO. | Freie Einzelprompts oder Bilder mit Text, UI, Slots, Gebaeuden, Figuren oder Build Stations. | nein |
 | M16T-ASSET-072 | [x] | M16-CO QA and commitability guard | Der Folge-Slice braucht harte Blocker gegen fehlende Metadaten, falschen Pfad und Statusdrift. | 378 definiert QA: fehlende Anchor-/Registration-Logik, fehlende Metadaten, `assets/`-Pfad, zu hoher Status oder Candidate-A-Pixelziel machen M16-CO nicht commitfaehig. | M16-CO akzeptiert Bilddateien ohne QA oder mit falschem Scope. | nein |
+| M16T-ASSET-073 | [x] | Uferwald layer candidate intake | Der erste externe Uferwald-Candidate muss sauber in Docs uebernommen werden. | `379-uferwald-layer-candidate-intake-and-qa.md` dokumentiert Quelle, Pfad, Status, Name, Scope, Grenzen und Folgepfad. | Lokale Datei wird verschoben, falsch eingeordnet oder als Asset gelesen. | nein |
+| M16T-ASSET-074 | [x] | Uferwald 1x/2x/3x review copies | Zoom-/Scale-QA braucht pruefbare Dokumentationskopien, aber keine Produktions-Exporte. | M16-CP legt 1x, 2x und 3x PNGs im erlaubten Preview-Pfad an und markiert 2x/3x als Review-Kopien. | Upscales werden als Engine-ready oder echte Asset-Exports gelesen. | nein |
+| M16T-ASSET-075 | [x] | Uferwald contact sheet | Review-Kopien muessen schnell visuell pruefbar sein. | `talvori_uferwald_layer_postprocess_contact_sheet_1x.png` zeigt 1x/2x/3x mit Status `layer_postprocess_candidate`, documentation only, not asset, not engine-ready und not production. | Unlesbares Contact Sheet oder App-Screen-Missverstaendnis. | nein |
+| M16T-ASSET-076 | [x] | Uferwald metadata record | Jeder uebernommene Candidate braucht Quelle, Status, Scope, Tool-Rollen und Lizenznotiz. | `talvori_uferwald_layer_postprocess_metadata.md` dokumentiert Pflichtfelder, Hashes, Dateigroessen, erlaubten Scope, blockierten Scope und Tool-Rollen. | Candidate ohne nachvollziehbare Quelle, Status oder Rolle. | nein |
+| M16T-ASSET-077 | [x] | Uferwald measured anchor manifest | Die Bildarbeit braucht echte gemessene Doku-Anker, aber keine Runtime-Koordinaten. | `talvori_uferwald_layer_postprocess_anchor_manifest.md` dokumentiert Canvas, Origin, Pivot, Coordinate Space, acht Anchors, Zonen und Sort-Bands mit `measured_on_candidate_bitmap_not_final_runtime_anchor`. | Anker fehlen oder werden als final/runtime gelesen. | nein |
+| M16T-ASSET-078 | [x] | Uferwald placement and zone QA | Uferwald braucht klare Trennung von Build-Reserve, Wasser, Hain, Klippen und No-Overlap. | M16-CP dokumentiert Buildable Footprint, Soft Placement, Reserve, No-Build, No-Overlap, Water-only und Terrain-sensitive Zones. | Kategorieplaetze, UI-Safe-Areas oder Build Stations entstehen implizit. | nein |
+| M16T-ASSET-079 | [x] | Uferwald zoom and scale QA | Review muss klaeren, was 1x/2x/3x bereits zeigen und was nicht. | `talvori_uferwald_layer_postprocess_qa.md` prueft Zoom-out, Mid-Zoom, Zoom-in-Risiko und markiert 2x/3x als Review-Kopien ohne neue Source-Details. | Upscales werden mit echter Detail- oder Produktionsqualitaet verwechselt. | nein |
+| M16T-ASSET-080 | [x] | Uferwald layer readiness assessment | Der Slice darf nicht vortaeuschen, dass echte Layer schon existieren. | M16-CP dokumentiert: flaches `island_base`-Bitmap vorhanden, transparente Einzel-Layer NEIN, separate echte Layer NEIN, produktionsreife Layer blockiert. | Monolithisches RGB-PNG wird als transparente Layer- oder Engine-ready-Basis verkauft. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1455,6 +1465,37 @@ M16-CN operationalisiert fuer kuenftige Slices:
   Dateieinordnung und Checks; Bildgenerierung muss im Folgeprompt explizit
   fuer ChatGPT/image_gen oder ein extern benanntes Tool geoeffnet werden.
 
+M16-CP erledigt:
+
+- M16T-ASSET-073
+- M16T-ASSET-074
+- M16T-ASSET-075
+- M16T-ASSET-076
+- M16T-ASSET-077
+- M16T-ASSET-078
+- M16T-ASSET-079
+- M16T-ASSET-080
+
+M16-CP operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/379-uferwald-layer-candidate-intake-and-qa.md`
+  uebernimmt genau eine freigegebene lokale Uferwald-`island_base`-Datei aus
+  Downloads in den Docs-Preview-Pfad und dokumentiert sie als
+  `layer_postprocess_candidate`.
+- Der M16-CP-Preview-Ordner enthaelt 1x/2x/3x-Review-Kopien, ein Contact
+  Sheet, Metadata, gemessene Doku-Anker und QA. Diese Dateien sind
+  Dokumentationsmaterial, keine Assets, keine App-Screens, keine
+  Engine-ready Candidates und keine Produktionsdateien.
+- Die gemessenen Anchor-Koordinaten gelten nur fuer das aktuelle Kandidaten-
+  Bitmap: `measured_on_candidate_bitmap_not_final_runtime_anchor`.
+- 1x/2x/3x sind Review-Kopien. 2x und 3x sind Upscales ohne neue
+  Source-Details und duerfen nicht als produktive Exportqualitaet gelesen
+  werden.
+- Echte transparente Einzel-Layer und separate Familien wie `water_paths`,
+  `terrain_layers` oder `slot_markers` sind weiterhin nicht vorhanden und
+  blockiert, bis ein eigener externer/Layer-Postprocess-Slice sie erzeugt und
+  prueft.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -1532,7 +1573,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..072, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..080, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
