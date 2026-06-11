@@ -386,6 +386,19 @@ werden, muss im Abschluss aber eindeutig als Simulator-Test gekennzeichnet
 werden und ersetzt den echten iPhone-Test nicht, wenn echte Device-Interaktion
 gefordert ist.
 
+Codex darf den Simulator fuer schnelle eigene Debug- und Smoke-Tests nutzen,
+zum Beispiel um Analyzer-nahe Runtime-Fehler, Layout-Assertions oder lokale
+Interaktionspfade schnell zu pruefen. Dieser Test muss im Abschluss immer als
+Simulator-Test berichtet werden.
+
+Wenn Andreas testen soll, muss Codex den echten iPhone-Befehl ausgeben. Wenn
+Touch-Gefuehl, Kamera-Follow, Labels, Device-UX oder Commitfaehigkeit bewertet
+werden, ist der echte iPhone-Test bevorzugt und fuer die Entscheidung
+massgeblich. Scheitert das echte iPhone wegen nativer Installations-,
+Signierungs-, Launch- oder Attach-Probleme, muss Codex das als Blocker
+berichten und darf einen erfolgreichen Simulator-Test nicht als Ersatz fuer
+Commitfaehigkeit verkaufen.
+
 Wenn Preview-Bilder aus `docs/world_design/previews/` ueber HTTP geladen
 werden, muss der Docs-Server aus dem Repo-Root fuer echte iPhones an allen
 Interfaces lauschen:
