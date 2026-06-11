@@ -155,6 +155,7 @@ Non-Goals:
 | `384-uferwald-playable-map-layer-and-mask-architecture.md` | M16-DA-Playable-Map-Architecture-Gate: legt fest, dass sichtbare Art-Bilder nicht die technische Spielkarte sind; technische Layer, Masks, Zonen, Pfade, Hindernisse, Build-Footprints, Sort-Bands und Landmark-Anchors muessen vor Rendering, Build/Map oder Visit/Wander-Interaktion definiert werden; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `385-uferwald-technical-layer-and-mask-spec.md` | M16-DB-Technical-Layer-/Masken-Spec: konkretisiert fuer Uferwald `base_rock_shape`, `grass_terrain_mask`, `water_river_mask`, `walkable_path_layer`, `tree_obstacle_layer`, `rock_cliff_obstacle_layer`, `buildable_zone_layer`, `plot_footprint_layer`, `no_walk_mask`, `no_build_mask`, `depth_sort_bands` und `landmark_anchor_layer`; keine Code-, Bild-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `386-uferwald-technical-layer-manifest.md` | M16-DC-Technical-Layer-Manifest: erste maschinennahe Planungsstruktur fuer `map_id: uferwald_starter_island`, `coordinate_space: normalized_0_1`, Layer-IDs, geplante Anchor-IDs, erlaubte Modi, blockierte Nutzungen und offene Messfragen; keine Runtime-Daten, Code-, Bild-, Asset-, App- oder Persistenzfreigabe. |
+| `387-uferwald-technical-measurement-and-vector-planning-gate.md` | M16-DD-Measurement-/Vector-Planning-Gate: definiert Messreihenfolge, erlaubte Ableitungen aus technischen Source-Layern, Pixel-Ableitungsverbote, moegliche Tools wie Figma/SVG/JSON/YAML/manuelle Polygonplanung und QA vor Runtime-Manifesten; keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App- oder Persistenzfreigabe. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -200,6 +201,7 @@ Non-Goals:
 | `384-uferwald-playable-map-layer-and-mask-architecture.md` | Playable-Map-Layer-/Masken-Architektur: Pflicht, wenn aus Uferwald oder einer World-Karte echte Bewegung, Build/Map-Logik, Walkability, Collision, Pfade, Grundstuecke, Build-Zonen, No-Walk-/No-Build-Masks, Hindernisse, Sort-Bands, Landmark-Anchors oder Runtime-Mapdaten entstehen koennten. |
 | `385-uferwald-technical-layer-and-mask-spec.md` | Uferwald Technical Layer-/Masken-Spec: Pflicht, wenn technische Map-Layer, Masken, Datenformen, Build-/Walkability-Zonen, Plot-Footprints, Obstacles, No-Walk-/No-Build-Masks, Depth-/Sort-Bands, Landmark-Anchors oder ein spaeteres technisches Uferwald-Manifest betroffen sind. |
 | `386-uferwald-technical-layer-manifest.md` | Uferwald Technical Layer Manifest: Pflicht, wenn `uferwald_starter_island`, technische Layer-IDs, geplante Anchor-IDs, offene Messfragen, Layer-Manifeste, Vector-Planung, Map-Manifeste oder spaetere Runtime-Map-Gates betroffen sind. |
+| `387-uferwald-technical-measurement-and-vector-planning-gate.md` | Uferwald Measurement-/Vector-Planning-Gate: Pflicht, wenn Messreihenfolge, manuelle Polygonplanung, Figma/SVG/JSON/YAML-Planung, Pixeltracing-Grenzen, Source-Layer-Ableitung, Vector-Arbeitsflaechen, QA vor Runtime-Manifesten oder technische Uferwald-Messarbeit betroffen sind. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -409,6 +411,16 @@ Zusaetzliche M16-CG-Kandidatenregel:
   enthaelt keine finalen Koordinaten und keine Runtime-Daten. 386 ist keine
   Code-, Bild-, Asset-, Runtime-Map-, App-, Persistenz-, BuildState- oder
   `assets/`-Freigabe.
+- 387 ist das M16-DD-Uferwald-Technical-Measurement-/Vector-Planning-Gate. Es
+  ist Pflicht, wenn Messreihenfolge, manuelle Polygonplanung, Figma-/SVG-/
+  JSON-/YAML-Planung, Pixel-Ableitungsverbote, Source-Layer-Ableitungen,
+  technische Vector-Arbeitsflaechen, QA vor Runtime-Manifesten oder
+  Messarbeit fuer `base_rock_shape`, `water_river_mask`,
+  `walkable_path_layer`, `tree_obstacle_layer`, `rock_cliff_obstacle_layer`,
+  `buildable_zone_layer`, `plot_footprint_layer`, `no_walk_mask`,
+  `no_build_mask`, `depth_sort_bands` oder `landmark_anchor_layer` betroffen
+  sind. 387 ist keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App-,
+  Persistenz-, BuildState- oder `assets/`-Freigabe.
 
 ### 5.1 Uferwald-/World-Preview Device-Test-Regel
 
