@@ -165,6 +165,7 @@ Non-Goals:
 | `394-uferwald-technical-planning-schema-gate.md` | M16-DK-Technical-Planning-Schema-Gate: definiert ein Markdown-Schema fuer Layer-IDs, Rollen-/Status-Enums, Pflichtfelder, QA-Felder, offene Messfragen und Blockerstatus; erzeugt keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Visuals, Assets oder Code. |
 | `395-uferwald-planning-schema-review.md` | M16-DL-Planning-Schema-Review: reviewt das M16-DK-Feldschema, bestaetigt es als ausreichend, verneint M16-DK-FIX und erlaubt M16-DM nur als enges JSON/YAML-Planning-Format-Gate; keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | M16-DM-JSON/YAML-Planning-Format-Gate: bevorzugt YAML als spaeteres Planning-Format und definiert erlaubte Feldgruppen, Pflichtstatus, verbotene Felder, Platzhalter und QA vor echten Dateien; erzeugt keine `.json`, `.yaml`, `.yml`, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| `397-uferwald-json-yaml-planning-format-review.md` | M16-DN-JSON/YAML-Planning-Format-Review: bestaetigt M16-DM als ausreichend, verneint M16-DM-FIX und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Statusschutz und Datei-Check; keine `.json`-/`.yaml`-/`.yml`-Datei, keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -220,6 +221,7 @@ Non-Goals:
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald Technical Planning Schema Gate: Pflicht, wenn technische Uferwald-Schemafelder, Layer-IDs, Rollen-/Status-Enums, QA-Felder, offene Messfragen, Blockerstatus, JSON/YAML-Planning-Format-Gates, Runtime-Risiko oder Schema-Review betroffen sind. 394 ist keine JSON/YAML-, Runtime-, Koordinaten-, Polygon-, Asset-, Visual-, Code- oder `assets/`-Freigabe. |
 | `395-uferwald-planning-schema-review.md` | Uferwald Planning Schema Review: Pflicht, wenn nach M16-DK ein JSON/YAML-Planning-Format-Gate, Schema-Fix, Format-Skeleton, Feldgruppen-Review, Runtime-Risiko, Koordinaten-/Polygon-Grenze oder M16-DM-Vorbereitung betroffen ist. 395 entscheidet: M16-DK ist ausreichend, M16-DK-FIX ist nicht noetig, M16-DM darf nur als enges Planning-Format-Gate vorbereitet werden. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald JSON/YAML Planning Format Gate: Pflicht, wenn ein YAML-/JSON-Planning-Format, Planning-Skeleton, erlaubter Planning-Pfad, Formatstatus, Feldgruppen, Platzhalter, verbotene Geometriewerte, Datei-Check oder M16-DN/M16-DO-Vorbereitung betroffen ist. 396 ist keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
+| `397-uferwald-json-yaml-planning-format-review.md` | Uferwald JSON/YAML Planning Format Review: Pflicht, wenn M16-DO, ein YAML Planning Skeleton, eine echte `.yaml`-Planungsdatei, Datei-Checks, Statusschutz, Format-Fix, Runtime-Risiko oder JSON/YAML-Folgefreigabe betroffen sind. 397 erlaubt M16-DO nur als enges Skeleton-Gate und ist selbst keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -289,6 +291,7 @@ Non-Goals:
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald-Schema-Review, JSON/YAML-Planning-Format-Gates, technische Feldkataloge, Layer-Rollen, Enums, QA-Felder, offene Messfragen, Blockerstatus oder Runtime-Vorbereitung muessen 394 lesen; 394 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `395-uferwald-planning-schema-review.md` | Uferwald-Planning-Schema-Review, M16-DM-Vorbereitung, JSON/YAML-Planning-Format-Gates, Schema-Fix-Entscheidungen, Feldgruppen-/Enum-/QA-Review, Koordinaten-/Polygon-Grenzen oder Runtime-Risiko muessen 395 lesen; 395 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald-JSON/YAML-Planning-Format-Gate, M16-DN-Review, M16-DO-Skeleton-Vorbereitung, YAML-vs-JSON-Entscheidungen, Planning-Pfade, Pflichtstatuswerte, verbotene Geometriefelder, Datei-Checks oder Runtime-Risiko muessen 396 lesen; 396 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `397-uferwald-json-yaml-planning-format-review.md` | Uferwald-JSON/YAML-Planning-Format-Review, M16-DO-Skeleton-Vorbereitung, echte `.yaml`-Folgefreigabe, Datei-Check, Statusschutz, Format-Fix-Entscheidung, verbotene Geometriewerte oder Runtime-Risiko muessen 397 lesen; 397 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -365,6 +368,19 @@ separaten Folgeprompt blockiert; finale Koordinaten, Polygone,
 Path-Centerlines, Path-Nodes, Build-Zonen-Polygone, No-Walk-/No-Build-
 Unionen als echte Werte, Pixelableitung, Runtime-Status, Assets, Flutter-Code
 und App-Integration bleiben weiterhin geschlossen.
+
+Nach M16-DN muss bei jedem M16-DO-Skeleton-Slice, jeder echten `.yaml`-
+Folgefreigabe, jedem JSON/YAML-Format-Fix, jedem Datei-Check fuer
+Planning-Skeletons und jeder Runtime-naeheren Uferwald-Formatarbeit
+zusaetzlich `397-uferwald-json-yaml-planning-format-review.md` gelesen werden.
+397 entscheidet, dass M16-DM ausreichend ist und kein M16-DM-FIX noetig ist.
+M16-DO darf vorbereitet werden, aber eine echte `.yaml`-Datei darf nur mit
+expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Maximalstatus,
+Statusschutz und Datei-Check entstehen. `.json` und `.yml` bleiben ohne
+separate Freigabe blockiert; Runtime-Daten, finale Koordinaten, Polygone,
+Path-Centerlines, Path-Nodes, Build-Zonen-Polygone, No-Walk-/No-Build-
+Unionen als echte Werte, Pixelableitung, Assets, Flutter-Code und
+App-Integration bleiben geschlossen.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 

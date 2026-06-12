@@ -8,23 +8,25 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DM`
+Aktive Sprint-ID: `M16-DN`
 
 Sprint Goal:
 
-> Uferwald bekommt das JSON/YAML Planning Format Gate: YAML wird als erstes
-> spaeteres Planning-Format bevorzugt, aber M16-DM erzeugt nur Markdown-
-> Formatregeln; echte `.json`-/`.yaml`-/`.yml`-Dateien, Runtime-Daten,
-> Koordinaten, Polygone, Path-Centerlines, Assets und Code bleiben blockiert.
+> Uferwald bekommt das JSON/YAML Planning Format Review: M16-DM ist
+> ausreichend, ein M16-DM-FIX ist nicht noetig und M16-DO darf als enges YAML
+> Planning Skeleton Gate vorbereitet werden. Eine echte `.yaml`-Datei bleibt
+> nur mit expliziter Folgefreigabe, exaktem Pfad, Statusschutz und Datei-Check
+> erlaubt; Runtime-Daten, Koordinaten, Polygone, Path-Centerlines, Assets und
+> Code bleiben blockiert.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 311 |
+| Gesamtanzahl M16-T-Items | 312 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 287 |
+| Erledigt `[x]` | 288 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.2 % |
@@ -90,7 +92,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 93 | 91 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DM bevorzugt YAML als spaeteres Planning-Format, definiert aber nur Markdown-Formatregeln; echte `.json`-/`.yaml`-/`.yml`-Dateien, Runtime-Daten, Koordinaten, Polygone, Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 94 | 92 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DN bestaetigt M16-DM als ausreichend und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe; echte Runtime-Daten, Koordinaten, Polygone, Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -398,6 +400,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-091 | [x] | Uferwald technical planning schema gate | Vor JSON/YAML- oder Runtime-naeherer Planung braucht Uferwald ein Feldschema, das Werte, Koordinaten und Polygone weiterhin blockiert. | `394-uferwald-technical-planning-schema-gate.md` definiert Layer-IDs, Layer-Rollen, gemeinsame Pflichtfelder, Geometry-Placeholder, Rollen-/Status-Enums, QA-Felder, offene Messfragen, Pixelableitungsverbote, manuelle Messpflichten, Runtime-Review-Pflichten und Blockerstatus als Markdown-Schema ohne echte JSON/YAML-Datei, Runtime-Daten, finale Koordinaten, Visuals, Assets oder Code. | JSON/YAML-, Runtime- oder Vector-Folgearbeit startet ohne Feldschema oder liest Schemafelder als echte Daten. | nein |
 | M16T-ASSET-092 | [x] | Uferwald planning schema review | Das M16-DK-Feldschema muss fachlich reviewt werden, bevor ein JSON/YAML-Planning-Format-Gate vorbereitet wird. | `395-uferwald-planning-schema-review.md` bestaetigt M16-DK als ausreichend, verneint M16-DK-FIX und erlaubt M16-DM nur als enges Planning-Format-Gate ohne Runtime-Daten, finale Koordinaten, Polygone, Assets oder Code. | JSON/YAML-Formatarbeit startet ohne Review oder liest Schemafelder als echte Daten. | nein |
 | M16T-ASSET-093 | [x] | Uferwald JSON/YAML planning format gate | Vor einer echten Planungsdatei braucht Uferwald eine Formatentscheidung und harte Datei-/Runtime-Grenzen. | `396-uferwald-json-yaml-planning-format-gate.md` bevorzugt YAML als spaeteres Planning-Format, definiert erlaubte Feldgruppen, Pflichtstatuswerte, verbotene Felder, Platzhalter und QA-Regeln, erzeugt aber keine `.json`, `.yaml`, `.yml`, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. | Skeleton-Datei oder Runtime-naeheres Format entsteht ohne Format-Gate, Review und Statusschutz. | nein |
+| M16T-ASSET-094 | [x] | Uferwald JSON/YAML planning format review | Das Format-Gate muss vor einem echten Skeleton-Slice fachlich reviewt werden. | `397-uferwald-json-yaml-planning-format-review.md` bestaetigt M16-DM als ausreichend, verneint M16-DM-FIX und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Statusschutz und Datei-Check; Runtime-Daten, finale Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets und Code bleiben blockiert. | Echte YAML-/JSON-Datei oder Skeleton entsteht ohne Review-Entscheidung, Statusschutz oder Datei-Check. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1841,6 +1844,24 @@ M16-DM operationalisiert fuer kuenftige Slices:
   blockiert.
 - Der naechste sinnvolle Folge-Slice ist M16-DN Uferwald JSON/YAML Planning
   Format Review, bevor ein echter Skeleton-Slice vorbereitet wird.
+
+M16-DN erledigt:
+
+- M16T-ASSET-094
+
+M16-DN operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/397-uferwald-json-yaml-planning-format-review.md`
+  bestaetigt M16-DM als ausreichend und verneint M16-DM-FIX.
+- M16-DN entscheidet: M16-DO Uferwald YAML Planning Skeleton Gate darf
+  vorbereitet werden.
+- Eine echte `.yaml`-Datei darf in M16-DO nur entstehen, wenn der Folgeprompt
+  Pfad, Dateiname, Maximalstatus, Statusschutz und Datei-Check ausdruecklich
+  oeffnet.
+- `.json` und `.yml` bleiben ohne separate explizite Folgefreigabe blockiert.
+- Finale Koordinaten, Polygonpunkte, Path-Centerlines, Path-Nodes, Build-
+  Zonen-Polygone, No-Walk-/No-Build-Unionen als echte Werte, Pixelableitung,
+  Runtime-Status, Assets, App-Integration und Code bleiben blockiert.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
