@@ -8,24 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DJ`
+Aktive Sprint-ID: `M16-DK`
 
 Sprint Goal:
 
-> Uferwald bekommt den Visual Precision Review: Die vier M16-DI-
-> Pruefansichten werden fachlich bewertet, um zu entscheiden, ob ein
-> Schema-/Planungs-Gate vorbereitet werden darf oder ob ein M16-DI-FIX-2
-> noetig ist; keine neuen Bilder, keine SVG/PNG, kein JSON/YAML, keine
-> Runtime-Daten, keine Assets und kein Code.
+> Uferwald bekommt das Technical Planning Schema Gate: Die spaetere
+> Planungsstruktur wird als reines Markdown-Schema fuer Layer-IDs,
+> Rollen-/Status-Enums, Pflichtfelder, QA-Felder, offene Messfragen und
+> Blockerstatus definiert; keine JSON/YAML-Datei, keine Runtime-Daten,
+> keine finalen Koordinaten, keine Visuals, keine Assets und kein Code.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 308 |
+| Gesamtanzahl M16-T-Items | 309 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 284 |
+| Erledigt `[x]` | 285 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.2 % |
@@ -91,7 +91,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 90 | 88 | 1 | 0 | 1 | 98.3 % | `██████████` | M16-DJ entscheidet: M16-DI ist ausreichend fuer ein Docs-only Schema-/Planungs-Gate; M16-DI-FIX-2, JSON/YAML, Runtime, Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 91 | 89 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DK definiert ein reines Markdown-Schema fuer Uferwald-Planungsfelder; echte JSON/YAML-Dateien, Runtime-Daten, Koordinaten, Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -396,6 +396,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-088 | [x] | Uferwald measurement precision pass | Der Review braucht verbindliche Praezisionsregeln, bevor ein weiterer Visual- oder Schema-Schritt entsteht. | `391-uferwald-measurement-precision-pass.md` definiert relative Pfadbreiten, Planungskorridor-vs-Runtime-Pfad, Wassergrenzen, Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Regeln und Anchor-Rollen ohne neue Bilder, SVG/PNG, JSON/YAML, Runtime-Daten, Assets oder Code. | Visual-/JSON/YAML-/Runtime-Folgearbeit startet ohne Praezisionsregeln und verwechselt Review-Geometrie mit technischer Karte. | nein |
 | M16T-ASSET-089 | [x] | Uferwald measurement visual precision pass | Die M16-DH-Regeln muessen sichtbar pruefbar werden, bevor Schema-/Runtime-Arbeit startet. | `392-uferwald-measurement-visual-precision-pass.md` und der M16-DI-Preview-Ordner zeigen Pfadbreiten, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten und Anchor-Rollen als `documentation_only`, `planning_visual`, `not_runtime_data`, `not_asset` und `not_engine_ready`. | Visual-/JSON/YAML-/Runtime-Folgearbeit startet ohne sichtbare Precision-QA oder liest das Visual als Runtime-Daten. | nein |
 | M16T-ASSET-090 | [x] | Uferwald visual precision review | Der M16-DI-Visual-Pass muss fachlich entschieden werden, bevor Schema-/Planungsarbeit startet. | `393-uferwald-visual-precision-review.md` bewertet die vier Detailansichten, Contact Sheet, Overview-SVG/PNG und README; entscheidet, dass ein Docs-only Schema-/Planungs-Gate sinnvoll ist und M16-DI-FIX-2 nicht noetig ist; JSON/YAML, Runtime-Daten, finale Koordinaten, Assets und Code bleiben blockiert. | Schema-/Planungsarbeit startet ohne Review-Entscheidung oder liest die M16-DI-Visuals als Runtime-Geometrie. | nein |
+| M16T-ASSET-091 | [x] | Uferwald technical planning schema gate | Vor JSON/YAML- oder Runtime-naeherer Planung braucht Uferwald ein Feldschema, das Werte, Koordinaten und Polygone weiterhin blockiert. | `394-uferwald-technical-planning-schema-gate.md` definiert Layer-IDs, Layer-Rollen, gemeinsame Pflichtfelder, Geometry-Placeholder, Rollen-/Status-Enums, QA-Felder, offene Messfragen, Pixelableitungsverbote, manuelle Messpflichten, Runtime-Review-Pflichten und Blockerstatus als Markdown-Schema ohne echte JSON/YAML-Datei, Runtime-Daten, finale Koordinaten, Visuals, Assets oder Code. | JSON/YAML-, Runtime- oder Vector-Folgearbeit startet ohne Feldschema oder liest Schemafelder als echte Daten. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1776,6 +1777,27 @@ M16-DJ operationalisiert fuer kuenftige Slices:
   Koordinaten, keine neuen Visuals, keine Assets und keinen Code frei.
 - Der naechste sinnvolle Folge-Slice ist M16-DK Uferwald Technical Planning
   Schema Gate.
+
+M16-DK erledigt:
+
+- M16T-ASSET-091
+
+M16-DK operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/394-uferwald-technical-planning-schema-gate.md`
+  definiert ein reines Markdown-Schema fuer spaetere Uferwald-
+  Planungsstrukturen.
+- Das Schema umfasst Layer-IDs, Layer-Rollen, gemeinsame Pflichtfelder,
+  Geometry-Placeholder, Rollen-/Status-Enums fuer Walkability, Buildability,
+  Obstacles, Occlusion, Anchors, Sort-Bands, Path Corridor und Water/Buffer,
+  QA-Felder, offene Messfragen und Blockerstatus.
+- M16-DK verbietet weiterhin Pixelableitung fuer Walkability, Buildability,
+  Collision, Wassergrenzen, Blocker, No-Walk/No-Build, Path-Centerlines,
+  Footprints, Anchors, Sort-Bands und Kapazitaeten.
+- M16-DK erzeugt keine JSON/YAML-Datei, keine Runtime-Mapdaten, keine finalen
+  Koordinaten, keine Polygone, keine Visuals, keine Assets und keinen Code.
+- Der naechste sinnvolle Folge-Slice ist M16-DL Uferwald Planning Schema
+  Review, bevor ein enges JSON/YAML-Planning-Format-Gate vorbereitet wird.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
