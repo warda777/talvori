@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `ITALY-CITY-FOOTPRINTS-ISTAT`
+Aktive Sprint-ID: `ITALY-PLAYABLE-CITY-AREAS`
 
 Sprint Goal:
 
-> ISTAT Comuni wird als Source-of-Truth-Kandidat fuer italienische
-> Stadt-/Gemeindegrundformen geprueft; die 13 Stadtanker erhalten
-> Dokumentations-Footprints, bleiben aber `not_runtime_data` und muessen
-> spaeter gameplaygerecht zu spielbaren Stadtbereichen abstrahiert werden.
+> Aus den ISTAT-Comuni-Stadtgrundformen werden fuer alle 13 italienischen
+> Stadtanker Talvori-gerechte `playable_city_area`-Kandidaten abgeleitet:
+> Stadtkern, Reserve, Rand/No-Build und Start-Bauplatz bleiben sichtbar,
+> aber `not_runtime_data`.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 325 |
+| Gesamtanzahl M16-T-Items | 326 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 301 |
+| Erledigt `[x]` | 302 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.5 % |
@@ -83,7 +83,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 14 | 13 | 1 | 0 | 0 | 96.4 % | `██████████` | Italien bleibt erster Prototyp, jetzt mit geprueftem ISTAT-Comuni-Kandidaten fuer Stadtgrundformen: echte Comune-Umrisse duerfen als Dokumentationsvisual dienen, muessen aber spaeter Talvori-gerecht zu spielbaren Stadtbereichen abstrahiert werden. |
+| World / Island / Plot | M16T-WORLD | 15 | 14 | 1 | 0 | 0 | 96.7 % | `██████████` | Italien bleibt erster Prototyp; die 13 ISTAT-Comuni-Footprints wurden jetzt zu Talvori-gerechten `playable_city_area`-Kandidaten abstrahiert, ohne Runtime-Geometrie, Assets oder App-Daten zu erzeugen. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -256,6 +256,7 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-012 | [x] | Italien-Stadtanker fuer Makro-Blockout | Der sichtbare Blockout braucht echte italienische Orientierungspunkte, bevor Wege, Wasser und Bauflaechen erneut ausgerichtet werden. | `408-italy-city-anchor-plan.md` legt Rom, Florenz, Venedig, Mailand, Neapel und Bologna als sofort wichtige Stadtanker fest, definiert Pisa, Verona, Genua, Bari, Palermo, Catania und Cagliari als Reserveanker, bevorzugt Natural Earth Populated Places als spaeteren offenen Stadtpunkt-Kandidaten und blockiert finale Koordinaten/Runtime-Daten. | Blockout bleibt abstrakt, Madrid oder andere Nicht-Italien-Anker werden aufgenommen, OSM/ISTAT werden ohne Lizenzgate genutzt oder Stadtpunkte werden als Runtime-Koordinaten gelesen. | nein |
 | M16T-WORLD-013 | [x] | Europa-Land-/Stadt-Zoom-Architektur | Der Italien-Prototyp darf keine Italien-Sonderarchitektur werden, wenn Talvori spaeter weitere europaeische Laender aufnehmen soll. | `409-europe-country-city-zoom-architecture-gate.md` definiert Europa-Overview -> Land-Auswahl -> Landkarte -> Stadtanker -> Stadtgrundform/Stadtbereich -> Bauflaechen/Wege/Gebaeude/Lernorte, nutzt Italien als ersten Prototyp und verankert Natural Earth Admin 0, Natural Earth Populated Places und laenderspezifische Stadt-/Gemeindequellen als Source-Kandidaten. | Italien-only Architektur, ungepruefte OSM-/MapTiler-/OpenMapTiles-/free-map.org-Uebernahme, Kartenbild-/Tile-Tracing, Runtime-Koordinaten, YAML/JSON, Assets oder App-Code vor eigenem Gate. | nein |
 | M16T-WORLD-014 | [x] | Italien-Stadtgrundformen aus ISTAT-Comuni | Der Europa->Land->Stadt-Zoom braucht echte Stadt-/Gemeindegrundformen, bevor spielbare Stadtbereiche frei erfunden werden. | `410-italy-city-footprints-istat-comuni-gate.md` und `previews/italy_city_footprints_istat_comuni/` pruefen ISTAT Comuni 2026 generalisiert als CC-BY-4.0-Quelle und zeigen die 13 Stadtgrundformen als Dokumentationsvisual mit Statusschutz. | ISTAT-Grenzen werden als Runtime-Polygone, Collision, Build-Zones, Pathfinding, YAML/JSON, Assets oder App-Daten gelesen; Namen werden per unsicherem Substring-Matching statt exakter `COMUNE`-/`PRO_COM_T`-Kontrolle gematcht. | nein |
+| M16T-WORLD-015 | [x] | Italien spielbare Stadtbereiche aus Stadtgrundformen | Echte Stadt-/Gemeindegrenzen duerfen nicht 1:1 Spielbereich werden, muessen aber Talvori-gerecht in pruefbare Stadtbereiche uebersetzt werden. | `411-italy-playable-city-areas-from-footprints.md` und `previews/italy_playable_city_areas_from_footprints/` leiten fuer alle 13 Stadtanker abstrakte `playable_city_area`-Kandidaten mit Stadtkern, Reserve, Rand/No-Build und Start-Bauplatz ab. | ISTAT-Footprints werden als Runtime-Geometrie, finale Koordinaten, Build-Zones, No-Walk/No-Build-Masken, YAML/JSON, Assets oder App-Daten gelesen. | nein |
 
 ## 14. Container / Depth
 
@@ -2175,6 +2176,27 @@ Das ISTAT-Comuni-Gate operationalisiert fuer kuenftige Slices:
   Daten, keine YAML/JSON, keine Assets und keine App-Daten.
 - Der naechste empfohlene Slice ist: Italien spielbare Stadtbereiche aus
   Stadtgrundformen ableiten.
+
+Italien spielbare Stadtbereiche aus Stadtgrundformen erledigt:
+
+- M16T-WORLD-015
+
+Das Playable-City-Area-Gate operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/411-italy-playable-city-areas-from-footprints.md`
+  uebersetzt die 13 ISTAT-Comuni-Footprints in abstrahierte
+  `playable_city_area`-Kandidaten.
+- Jede Stadt erhaelt im Dokumentationsvisual grob Stadtkern, Reserveflaeche,
+  Rand/No-Build und moeglichen Start-Bauplatz.
+- Kernstaedte werden staerker ausgearbeitet: Milano, Venezia, Bologna,
+  Firenze, Roma und Napoli.
+- Reserve-Staedte bleiben dezenter: Genova, Pisa, Verona, Bari, Palermo,
+  Catania und Cagliari.
+- Die echten ISTAT-Grenzen bleiben Source-Footprints. Sie sind keine
+  Runtime-Polygone, keine finalen Koordinaten, keine Build-Zones, keine
+  No-Walk-/No-Build-Masken, keine YAML/JSON, keine Assets und keine App-Daten.
+- Der naechste empfohlene Slice ist: Italien spielbare Stadtbereiche Review
+  und Stadt-Blockout-Entscheidung.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
