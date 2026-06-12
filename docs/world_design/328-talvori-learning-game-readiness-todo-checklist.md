@@ -8,27 +8,26 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DO`
+Aktive Sprint-ID: `M16-DP`
 
 Sprint Goal:
 
-> Uferwald bekommt ein echtes YAML Planning Skeleton mit strengem Statusschutz:
-> genau eine `.yaml`-Datei unter `docs/world_design/planning/uferwald/`,
-> maximal `planning_skeleton`, weiterhin `not_runtime_data`, keine finalen
-> Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets, App-Integration
-> oder Code.
+> Uferwald reviewt das echte YAML Planning Skeleton aus M16-DO: Syntax,
+> Dateigrenzen, Pflichtstatus, Layer-IDs und verbotene Werte werden geprueft;
+> M16-DO-FIX bleibt unnoetig, aber echte Messwerte, Runtime-Daten, Assets,
+> App-Integration und Code bleiben weiterhin blockiert.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 313 |
+| Gesamtanzahl M16-T-Items | 314 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 289 |
+| Erledigt `[x]` | 290 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 94.2 % |
+| Gewichteter Fortschritt | 94.3 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -91,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 95 | 93 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DO erzeugt genau ein YAML Planning Skeleton mit Statusschutz; es bleibt Planungsstruktur ohne Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| Asset Scope | M16T-ASSET | 96 | 94 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DP bestaetigt das YAML Planning Skeleton als ausreichend und erlaubt nur die Vorbereitung eines engen Measurement-/Value-Gates; echte Werte, Runtime-Daten, Assets und Code bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -401,6 +400,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-093 | [x] | Uferwald JSON/YAML planning format gate | Vor einer echten Planungsdatei braucht Uferwald eine Formatentscheidung und harte Datei-/Runtime-Grenzen. | `396-uferwald-json-yaml-planning-format-gate.md` bevorzugt YAML als spaeteres Planning-Format, definiert erlaubte Feldgruppen, Pflichtstatuswerte, verbotene Felder, Platzhalter und QA-Regeln, erzeugt aber keine `.json`, `.yaml`, `.yml`, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. | Skeleton-Datei oder Runtime-naeheres Format entsteht ohne Format-Gate, Review und Statusschutz. | nein |
 | M16T-ASSET-094 | [x] | Uferwald JSON/YAML planning format review | Das Format-Gate muss vor einem echten Skeleton-Slice fachlich reviewt werden. | `397-uferwald-json-yaml-planning-format-review.md` bestaetigt M16-DM als ausreichend, verneint M16-DM-FIX und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Statusschutz und Datei-Check; Runtime-Daten, finale Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets und Code bleiben blockiert. | Echte YAML-/JSON-Datei oder Skeleton entsteht ohne Review-Entscheidung, Statusschutz oder Datei-Check. | nein |
 | M16T-ASSET-095 | [x] | Uferwald YAML planning skeleton gate | Nach Format-Review braucht Uferwald genau eine erste Skeleton-Datei mit maximalem Planungsstatus. | `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` erzeugen genau eine echte `.yaml`-Planning-Skeleton-Datei mit Pflichtstatus `planning_skeleton`, `not_runtime_data`, `not_asset`, `not_engine_ready`, `no_geometry_values`, `no_final_coordinates` und `pixel_derivation_forbidden`; `.json`, `.yml`, weitere `.yaml`, Runtime-Daten, Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets und Code bleiben blockiert. | Skeleton wird als Runtime-Map, Geometriecontainer, Asset oder App-Import gelesen. | nein |
+| M16T-ASSET-096 | [x] | Uferwald YAML planning skeleton review | Das erste echte Skeleton muss vor jeder Messwert- oder Value-Naehe fachlich und technisch geprueft werden. | `399-uferwald-yaml-planning-skeleton-review.md` bestaetigt YAML-Syntax, exakten Pfad, Pflichtstatuswerte, erlaubte Feldgruppen, alle Pflicht-Layer-IDs und blockierte Geometrie-/Runtime-/Asset-Werte; M16-DO ist ausreichend, M16-DO-FIX ist nicht noetig und ein Measurement-/Value-Gate darf nur als eigener enger Folge-Slice vorbereitet werden. | Measurement-/Value-Folgearbeit startet ohne Skeleton-Review oder liest das Skeleton als Runtime-, Geometrie-, Asset- oder App-Import-Struktur. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1884,6 +1884,30 @@ M16-DO operationalisiert fuer kuenftige Slices:
 - Der naechste sinnvolle Folge-Slice ist M16-DP Uferwald YAML Planning
   Skeleton Review, bevor irgendein Measurement-/Value-/Runtime-Gate vorbereitet
   wird.
+
+M16-DP erledigt:
+
+- M16T-ASSET-096
+
+M16-DP operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/399-uferwald-yaml-planning-skeleton-review.md` reviewt
+  `398` und das echte YAML-Skeleton gegen Syntax, exakten Pfad, Datei-Checks,
+  Pflichtstatuswerte, erlaubte Feldgruppen, Pflicht-Layer-IDs und verbotene
+  Werte.
+- M16-DP entscheidet: M16-DO ist ausreichend und ein M16-DO-FIX ist nicht
+  noetig.
+- Verbotene Feldnamen wie `polygon_points`, `path_nodes` oder
+  `no_walk_union_values` sind im Skeleton nur akzeptabel, wenn sie als
+  Verbote, blockierter Scope oder QA-Risiko markiert sind; sie duerfen nicht
+  zu echten Wertelisten werden.
+- Ein Measurement-/Value-Gate darf vorbereitet werden, aber echte
+  Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Path-Edges, Build-
+  Zonen-Polygone, No-Walk-/No-Build-Unionen als echte Werte, Runtime-Daten,
+  Assets, App-Integration und Code bleiben bis zu eigener Folgefreigabe
+  blockiert.
+- Der naechste sinnvolle Folge-Slice ist M16-DQ Uferwald Measurement/Value
+  Gate Preparation.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
