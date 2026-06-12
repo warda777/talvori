@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DP`
+Aktive Sprint-ID: `M16-DQ`
 
 Sprint Goal:
 
-> Uferwald reviewt das echte YAML Planning Skeleton aus M16-DO: Syntax,
-> Dateigrenzen, Pflichtstatus, Layer-IDs und verbotene Werte werden geprueft;
-> M16-DO-FIX bleibt unnoetig, aber echte Messwerte, Runtime-Daten, Assets,
-> App-Integration und Code bleiben weiterhin blockiert.
+> Uferwald bereitet das erste Measurement-/Value-Gate vor: als erste spaeter
+> oeffnungsfaehige Wertfamilie werden risikoarme `anchor_review_values`
+> empfohlen, waehrend echte Werte, YAML-Aenderungen, Runtime-Daten,
+> Koordinaten, Polygone, Assets, App-Integration und Code blockiert bleiben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 314 |
+| Gesamtanzahl M16-T-Items | 315 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 290 |
+| Erledigt `[x]` | 291 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.3 % |
@@ -90,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 96 | 94 | 1 | 0 | 1 | 98.4 % | `██████████` | M16-DP bestaetigt das YAML Planning Skeleton als ausreichend und erlaubt nur die Vorbereitung eines engen Measurement-/Value-Gates; echte Werte, Runtime-Daten, Assets und Code bleiben blockiert. |
+| Asset Scope | M16T-ASSET | 97 | 95 | 1 | 0 | 1 | 98.5 % | `██████████` | M16-DQ empfiehlt `anchor_review_values` als erste spaeter oeffnungsfaehige Wertfamilie; M16-DR bleibt Markdown-only und echte Werte/YAML-Aenderungen bleiben blockiert. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -401,6 +401,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-094 | [x] | Uferwald JSON/YAML planning format review | Das Format-Gate muss vor einem echten Skeleton-Slice fachlich reviewt werden. | `397-uferwald-json-yaml-planning-format-review.md` bestaetigt M16-DM als ausreichend, verneint M16-DM-FIX und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Statusschutz und Datei-Check; Runtime-Daten, finale Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets und Code bleiben blockiert. | Echte YAML-/JSON-Datei oder Skeleton entsteht ohne Review-Entscheidung, Statusschutz oder Datei-Check. | nein |
 | M16T-ASSET-095 | [x] | Uferwald YAML planning skeleton gate | Nach Format-Review braucht Uferwald genau eine erste Skeleton-Datei mit maximalem Planungsstatus. | `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` erzeugen genau eine echte `.yaml`-Planning-Skeleton-Datei mit Pflichtstatus `planning_skeleton`, `not_runtime_data`, `not_asset`, `not_engine_ready`, `no_geometry_values`, `no_final_coordinates` und `pixel_derivation_forbidden`; `.json`, `.yml`, weitere `.yaml`, Runtime-Daten, Koordinaten, Polygone, Path-Centerlines, Path-Nodes, Assets und Code bleiben blockiert. | Skeleton wird als Runtime-Map, Geometriecontainer, Asset oder App-Import gelesen. | nein |
 | M16T-ASSET-096 | [x] | Uferwald YAML planning skeleton review | Das erste echte Skeleton muss vor jeder Messwert- oder Value-Naehe fachlich und technisch geprueft werden. | `399-uferwald-yaml-planning-skeleton-review.md` bestaetigt YAML-Syntax, exakten Pfad, Pflichtstatuswerte, erlaubte Feldgruppen, alle Pflicht-Layer-IDs und blockierte Geometrie-/Runtime-/Asset-Werte; M16-DO ist ausreichend, M16-DO-FIX ist nicht noetig und ein Measurement-/Value-Gate darf nur als eigener enger Folge-Slice vorbereitet werden. | Measurement-/Value-Folgearbeit startet ohne Skeleton-Review oder liest das Skeleton als Runtime-, Geometrie-, Asset- oder App-Import-Struktur. | nein |
+| M16T-ASSET-097 | [x] | Uferwald measurement/value gate preparation | Vor echten Messwerten muss entschieden werden, welche Wertfamilie zuerst sicher geoeffnet werden darf. | `400-uferwald-measurement-value-gate-preparation.md` vergleicht `anchor_review_values`, Path-, Water-, No-Walk-, No-Build-, Sort-Band- und Buildable-Zone-Wertfamilien, empfiehlt `anchor_review_values` als erste risikoarme Familie und haelt M16-DR weiterhin Markdown-only ohne YAML-Aenderung, echte Werte, Koordinaten, Polygone, Runtime-Daten, Assets oder Code. | Erster Value-Slice oeffnet Pfade, Koordinaten, Polygone, Unionen, YAML-Aenderungen oder Runtime-Daten ohne Vorbereitung. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1908,6 +1909,27 @@ M16-DP operationalisiert fuer kuenftige Slices:
   blockiert.
 - Der naechste sinnvolle Folge-Slice ist M16-DQ Uferwald Measurement/Value
   Gate Preparation.
+
+M16-DQ erledigt:
+
+- M16T-ASSET-097
+
+M16-DQ operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/400-uferwald-measurement-value-gate-preparation.md`
+  entscheidet `anchor_review_values` als erste spaeter oeffnungsfaehige
+  Wertfamilie.
+- `anchor_review_values` duerfen im ersten Value-Pfad nur Rollen-, Modus-,
+  Status- und QA-Werte vorbereiten; Koordinaten, `normalized_x`,
+  `normalized_y`, Polygone, Path-Centerlines, Path-Nodes, Path-Edges,
+  No-Walk-/No-Build-Unionen und Pixelableitung bleiben verboten.
+- Path-, Water-, No-Walk-, No-Build-, Sort-Band- und Buildable-Zone-
+  Wertfamilien bleiben fuer den ersten Value-Pfad blockiert, weil sie zu
+  schnell Runtime-, Geometrie-, Collision-, Renderer- oder Slot-Logik
+  suggerieren.
+- Der naechste sinnvolle Folge-Slice ist M16-DR Uferwald Anchor Review Values
+  Gate. M16-DR soll weiterhin Markdown-only bleiben und keine YAML-Aenderung
+  erzeugen.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst

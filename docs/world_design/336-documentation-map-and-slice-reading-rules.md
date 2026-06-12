@@ -169,6 +169,7 @@ Non-Goals:
 | `398-uferwald-yaml-planning-skeleton-gate.md` | M16-DO-YAML-Planning-Skeleton-Gate: erklaert die eine erlaubte Skeleton-Datei, ihren Statusschutz, enthaltene Feldgruppen, Layer-IDs, Verbote und M16-DP-Review-Pflicht; keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | M16-DO-YAML-Planning-Skeleton: genau eine echte YAML-Planungsdatei mit Maximalstatus `planning_skeleton`, `not_runtime_data`, `no_geometry_values` und `no_final_coordinates`; Pflichtkontext fuer M16-DP und alle spaeteren Uferwald-Skeleton-/Measurement-/Value-Gates, aber keine Runtime-Map. |
 | `399-uferwald-yaml-planning-skeleton-review.md` | M16-DP-YAML-Planning-Skeleton-Review: bestaetigt M16-DO und das Skeleton als ausreichend, verneint M16-DO-FIX und erlaubt nur die Vorbereitung eines engen Measurement-/Value-Gates; keine neue YAML/JSON/YML-Datei, keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| `400-uferwald-measurement-value-gate-preparation.md` | M16-DQ-Measurement-/Value-Gate-Preparation: vergleicht moegliche erste Wertfamilien, empfiehlt `anchor_review_values` als risikoarme erste Familie und haelt M16-DR Markdown-only; keine YAML-Aenderung, keine echten Werte, keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -227,6 +228,7 @@ Non-Goals:
 | `397-uferwald-json-yaml-planning-format-review.md` | Uferwald JSON/YAML Planning Format Review: Pflicht, wenn M16-DO, ein YAML Planning Skeleton, eine echte `.yaml`-Planungsdatei, Datei-Checks, Statusschutz, Format-Fix, Runtime-Risiko oder JSON/YAML-Folgefreigabe betroffen sind. 397 erlaubt M16-DO nur als enges Skeleton-Gate und ist selbst keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Pflicht, wenn M16-DP, YAML-Skeleton-Review, Skeleton-Fix, Feldgruppen, Layer-Definitionen, Statusschutz, Datei-Checks, offene Messfragen, Measurement-/Value-Gates oder Runtime-naehere Uferwald-Folgearbeit betroffen sind. 398 und das YAML-Skeleton sind keine Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `399-uferwald-yaml-planning-skeleton-review.md` | Uferwald YAML Planning Skeleton Review: Pflicht, wenn M16-DQ, Measurement-/Value-Gates, Skeleton-Fix, erste echte Wertoeffnung, Geometriewert-Review, YAML-Skeleton-Folgearbeit oder Runtime-naehere Uferwald-Planungsarbeit betroffen sind. 399 entscheidet: M16-DO ist ausreichend, M16-DO-FIX ist nicht noetig; echte Werte, Runtime-Daten, Assets, Code und App-Integration bleiben ohne eigenes Gate blockiert. |
+| `400-uferwald-measurement-value-gate-preparation.md` | Uferwald Measurement/Value Gate Preparation: Pflicht, wenn M16-DR, `anchor_review_values`, erste Value-Gates, Wertfamilien-Vergleich, YAML-Wertoeffnung, Anchor-Rollenwerte, erste Messwert-Folgearbeit oder Runtime-naehere Value-Arbeit betroffen sind. 400 erlaubt nur M16-DR als Markdown-only Anchor-Review-Values-Gate und gibt keine YAML-Aenderung, echten Werte, Runtime-Daten, Assets, Code oder App-Integration frei. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -299,6 +301,7 @@ Non-Goals:
 | `397-uferwald-json-yaml-planning-format-review.md` | Uferwald-JSON/YAML-Planning-Format-Review, M16-DO-Skeleton-Vorbereitung, echte `.yaml`-Folgefreigabe, Datei-Check, Statusschutz, Format-Fix-Entscheidung, verbotene Geometriewerte oder Runtime-Risiko muessen 397 lesen; 397 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Uferwald-YAML-Skeleton-Review, M16-DP, Skeleton-Fix, Feldgruppen, Layer-Definitionen, Statusschutz, offene Messfragen, Datei-Checks, Measurement-/Value-Gates oder Runtime-naehere Folgearbeit muessen 398 und das Skeleton lesen; beide sind keine Runtime-, Asset-, Figma-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `399-uferwald-yaml-planning-skeleton-review.md` | Uferwald-YAML-Skeleton-Review, M16-DQ, Measurement-/Value-Gate-Vorbereitung, Skeleton-Fix-Entscheidung, erste Wertoeffnung, Geometrie-/Koordinaten-/Path-/Union-Grenzen oder Runtime-naehere Folgearbeit muessen 399 lesen; 399 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Folge-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `400-uferwald-measurement-value-gate-preparation.md` | Uferwald-M16-DR-Vorbereitung, `anchor_review_values`, erste Value-Familie, Wertfamilien-Risiko, Anchor-Rollen-/Statuswerte, YAML-Wertvertrag oder spaetere Value-Oeffnung muessen 400 lesen; 400 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Folge-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -413,6 +416,18 @@ Runtime-Daten, finale Koordinaten, Polygone, Path-Centerlines, Path-Nodes,
 Path-Edges, Build-Zonen-Polygone, Plot-Footprint-Polygone, No-Walk-/No-
 Build-Unionen als echte Werte, Pixelableitung, Assets, Flutter-Code und
 App-Integration bleiben bis zu eigener, enger Folgefreigabe geschlossen.
+
+Nach M16-DQ muss bei jedem M16-DR-Anchor-Review-Values-Gate, jeder
+Wertfamilien-Oeffnung, jeder Anchor-Rollen-/Statuswert-Planung, jeder
+YAML-Wertvertragsentscheidung und jeder Runtime-naeheren Uferwald-Value-
+Arbeit zusaetzlich `400-uferwald-measurement-value-gate-preparation.md`
+gelesen werden. 400 empfiehlt `anchor_review_values` als erste spaeter
+oeffnungsfaehige Wertfamilie, aber nur fuer Rollen-, Modus-, Status- und
+QA-Werte ohne Koordinaten. M16-DR bleibt Markdown-only. Die bestehende YAML
+darf ohne spaeteren expliziten Folgeprompt nicht geaendert werden; echte
+Werte, Runtime-Daten, Koordinaten, Polygone, Path-Centerlines, Path-Nodes,
+Path-Edges, No-Walk-/No-Build-Unionen, Pixelableitung, Assets, Flutter-Code
+und App-Integration bleiben geschlossen.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 
