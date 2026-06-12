@@ -514,6 +514,315 @@ blocked_scope:
   route_or_navigation: blocked
   persistence_or_buildstate: blocked
 
+anchor_review_values:
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: hub_center_anchor
+    anchor_review_role: hub_reference
+    mode_relevance:
+      - Build/Map
+      - Overview
+      - Visit/Wander
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: central_hub_reference_only_no_position_no_interaction
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: main_build_area_anchor
+    anchor_review_role: build_reference
+    mode_relevance:
+      - Build/Map
+      - Overview
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - build_zone_polygons
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: build_review_reference_only_not_plot_not_footprint
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: house_primary_anchor
+    anchor_review_role: build_reference
+    mode_relevance:
+      - Build/Map
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - build_zone_polygons
+      - plot_footprint_polygons
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: house_build_reference_only_not_slot_not_runtime_target
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: river_entry_anchor
+    anchor_review_role: river_reference
+    mode_relevance:
+      - Overview
+      - Visit/Wander
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - path_nodes
+      - no_walk_union_values
+      - no_build_union_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: river_entry_review_reference_only_not_water_boundary
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: river_exit_anchor
+    anchor_review_role: river_reference
+    mode_relevance:
+      - Overview
+      - Visit/Wander
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - path_nodes
+      - no_walk_union_values
+      - no_build_union_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: river_exit_review_reference_only_not_water_boundary
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: grove_anchor
+    anchor_review_role: grove_reference
+    mode_relevance:
+      - Overview
+      - Visit/Wander
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - no_walk_union_values
+      - no_build_union_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: grove_review_reference_only_not_tree_blocker_value
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: reserve_zone_anchor_north
+    anchor_review_role: reserve_reference
+    mode_relevance:
+      - Build/Map
+      - Overview
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - build_zone_polygons
+      - plot_footprint_polygons
+      - no_build_union_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: northern_reserve_reference_only_not_build_zone
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: reserve_zone_anchor_south
+    anchor_review_role: reserve_reference
+    mode_relevance:
+      - Build/Map
+      - Overview
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - build_zone_polygons
+      - plot_footprint_polygons
+      - no_build_union_values
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: southern_reserve_reference_only_not_build_zone
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: startplatz_anchor
+    anchor_review_role: path_orientation_reference
+    mode_relevance:
+      - Overview
+      - Visit/Wander
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - path_centerline
+      - path_nodes
+      - path_edges
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: visit_orientation_reference_only_not_path_node
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
+  - value_family: anchor_review_values
+    value_status: review_values_only
+    anchor_id: aussichtspunkt_anchor
+    anchor_review_role: landmark
+    mode_relevance:
+      - Overview
+      - Visit/Wander
+      - Object Focus
+    measurement_requirement: manual_measurement_required
+    coordinate_status: no_coordinate_values
+    geometry_status: no_geometry_values
+    pixel_derivation_policy: pixel_derivation_forbidden
+    runtime_status: not_runtime_data
+    anchor_runtime_status: not_runtime_anchor
+    qa_status:
+      - review_required
+      - not_runtime_anchor
+      - blocked_until_measurement_gate
+    blocked_uses:
+      - coordinate_values
+      - geometry_values
+      - path_nodes
+      - runtime_anchor
+      - stored_interaction_point
+      - source_from_pixels
+      - derived_from_bitmap
+    review_note: landmark_reference_only_not_interaction_point
+    source_doc_reference: docs/world_design/401-uferwald-anchor-review-values-gate.md
+    next_gate_requirement: m16_dt_review_required_before_further_yaml_value_use
+
 next_review_gate:
   recommended_slice_id: M16-DP
   recommended_slice_name: Uferwald YAML Planning Skeleton Review

@@ -8,24 +8,24 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DR`
+Aktive Sprint-ID: `M16-DS`
 
 Sprint Goal:
 
-> Uferwald definiert den engen Markdown-Feldvertrag fuer
-> `anchor_review_values`: erlaubte Felder, Anchor-IDs, Rollen-, Modus- und
-> QA-/Statuswerte werden vorbereitet, waehrend echte Werte,
-> YAML-Aenderungen, Koordinaten, Geometrie, Runtime-Daten, Assets,
-> App-Integration und Code blockiert bleiben.
+> Uferwald erweitert die bestehende Skeleton-YAML eng um
+> `anchor_review_values`: nur Reviewwerte fuer Anchor-Rollen,
+> Modusbezuege, Statusschutz und QA entstehen, waehrend Koordinaten,
+> Geometrie, Runtime-Daten, Assets, App-Integration und Code blockiert
+> bleiben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 316 |
+| Gesamtanzahl M16-T-Items | 317 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 292 |
+| Erledigt `[x]` | 293 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.3 % |
@@ -91,7 +91,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 98 | 96 | 1 | 0 | 1 | 98.5 % | `██████████` | M16-DR definiert den `anchor_review_values`-Feldvertrag; M16-DS darf nur mit expliziter Folgefreigabe als enger YAML-Update-Gate-Slice vorbereitet werden. |
+| Asset Scope | M16T-ASSET | 99 | 97 | 1 | 0 | 1 | 98.5 % | `██████████` | M16-DS erweitert die bestehende Skeleton-YAML um `anchor_review_values` als reine Reviewwerte; M16-DT muss diese YAML-Erweiterung reviewen, bevor weitere Value- oder Runtime-Naehe entsteht. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -404,6 +404,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-096 | [x] | Uferwald YAML planning skeleton review | Das erste echte Skeleton muss vor jeder Messwert- oder Value-Naehe fachlich und technisch geprueft werden. | `399-uferwald-yaml-planning-skeleton-review.md` bestaetigt YAML-Syntax, exakten Pfad, Pflichtstatuswerte, erlaubte Feldgruppen, alle Pflicht-Layer-IDs und blockierte Geometrie-/Runtime-/Asset-Werte; M16-DO ist ausreichend, M16-DO-FIX ist nicht noetig und ein Measurement-/Value-Gate darf nur als eigener enger Folge-Slice vorbereitet werden. | Measurement-/Value-Folgearbeit startet ohne Skeleton-Review oder liest das Skeleton als Runtime-, Geometrie-, Asset- oder App-Import-Struktur. | nein |
 | M16T-ASSET-097 | [x] | Uferwald measurement/value gate preparation | Vor echten Messwerten muss entschieden werden, welche Wertfamilie zuerst sicher geoeffnet werden darf. | `400-uferwald-measurement-value-gate-preparation.md` vergleicht `anchor_review_values`, Path-, Water-, No-Walk-, No-Build-, Sort-Band- und Buildable-Zone-Wertfamilien, empfiehlt `anchor_review_values` als erste risikoarme Familie und haelt M16-DR weiterhin Markdown-only ohne YAML-Aenderung, echte Werte, Koordinaten, Polygone, Runtime-Daten, Assets oder Code. | Erster Value-Slice oeffnet Pfade, Koordinaten, Polygone, Unionen, YAML-Aenderungen oder Runtime-Daten ohne Vorbereitung. | nein |
 | M16T-ASSET-098 | [x] | Uferwald anchor review values gate | Die erste Wertfamilie braucht einen engen Feldvertrag, bevor eine YAML-Naehe erlaubt werden darf. | `401-uferwald-anchor-review-values-gate.md` definiert erlaubte Felder, Anchor-ID-Liste, Rollen-Enums, Modusbezuege, QA-/Statuswerte und verbotene Felder fuer `anchor_review_values`; M16-DR bleibt Markdown-only und erzeugt keine YAML-Aenderung, echte Werte, Koordinaten, Geometrie, Runtime-Daten, Assets oder Code. | M16-DS aendert YAML, oeffnet echte Werte, erzeugt Koordinaten/Path-/Union-Werte oder liest Anchors als Runtime-Interaktionspunkte. | nein |
+| M16T-ASSET-099 | [x] | Uferwald anchor review values YAML update gate | Die erste Wertfamilie darf nur eng und reviewgeschuetzt in der bestehenden Skeleton-YAML erscheinen. | `402-uferwald-anchor-review-values-yaml-update-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` ergaenzen `anchor_review_values` mit zehn bekannten Anchor-IDs, Review-Rollen, Modusbezuegen, Statusschutz, QA und `blocked_uses`; alle Eintraege bleiben `review_values_only`, `not_runtime_data`, `no_coordinate_values`, `no_geometry_values` und `pixel_derivation_forbidden`. | Anchor-Reviewwerte werden als Runtime-Anker, Koordinaten, Path-Nodes, Build-Zonen, No-Walk-/No-Build-Werte, Asset- oder App-Daten gelesen. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1958,6 +1959,29 @@ M16-DR operationalisiert fuer kuenftige Slices:
   YAML Update Gate. M16-DS darf nur mit expliziter Folgefreigabe, exakt einem
   Pfad, genau einer Wertfamilie und harten Datei-/Scope-Checks die bestehende
   Skeleton-YAML beruehren.
+
+M16-DS erledigt:
+
+- M16T-ASSET-099
+
+M16-DS operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/402-uferwald-anchor-review-values-yaml-update-gate.md`
+  dokumentiert die enge YAML-Aenderung.
+- `docs/world_design/planning/uferwald/uferwald_starter_island_planning_skeleton.yaml`
+  enthaelt jetzt eine klar abgegrenzte `anchor_review_values`-Sektion.
+- Die Sektion nutzt genau die bekannte Anchor-ID-Liste aus M16-DR und ordnet
+  nur Review-Rollen, Modusbezuege, Messpflichten, Statusschutz, QA und
+  `blocked_uses` zu.
+- Alle Eintraege bleiben `review_values_only`, `not_runtime_data`,
+  `no_coordinate_values`, `no_geometry_values`,
+  `pixel_derivation_forbidden` und `not_runtime_anchor`.
+- Neue `.yaml`-, `.yml`- oder `.json`-Dateien, Koordinaten, Pixelwerte,
+  Polygone, Path-Werte, No-Walk-/No-Build-Unionen, Runtime-Daten, Assets,
+  App-Integration und Code bleiben blockiert.
+- Der naechste sinnvolle Folge-Slice ist M16-DT Uferwald YAML Anchor Review
+  Values Review, bevor weitere Wertfamilien oder Runtime-naehere Gates
+  vorbereitet werden.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
