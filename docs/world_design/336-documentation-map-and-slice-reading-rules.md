@@ -164,6 +164,7 @@ Non-Goals:
 | `393-uferwald-visual-precision-review.md` | M16-DJ-Visual-Precision-Review: bewertet die vier M16-DI-Pruefansichten, Contact Sheet, Overview-SVG/PNG und README; gibt ein Docs-only Schema-/Planungs-Gate frei, aber keine JSON/YAML-Dateien, Runtime-Daten, finalen Koordinaten, Assets, Visuals oder Code. |
 | `394-uferwald-technical-planning-schema-gate.md` | M16-DK-Technical-Planning-Schema-Gate: definiert ein Markdown-Schema fuer Layer-IDs, Rollen-/Status-Enums, Pflichtfelder, QA-Felder, offene Messfragen und Blockerstatus; erzeugt keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Visuals, Assets oder Code. |
 | `395-uferwald-planning-schema-review.md` | M16-DL-Planning-Schema-Review: reviewt das M16-DK-Feldschema, bestaetigt es als ausreichend, verneint M16-DK-FIX und erlaubt M16-DM nur als enges JSON/YAML-Planning-Format-Gate; keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| `396-uferwald-json-yaml-planning-format-gate.md` | M16-DM-JSON/YAML-Planning-Format-Gate: bevorzugt YAML als spaeteres Planning-Format und definiert erlaubte Feldgruppen, Pflichtstatus, verbotene Felder, Platzhalter und QA vor echten Dateien; erzeugt keine `.json`, `.yaml`, `.yml`, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -218,6 +219,7 @@ Non-Goals:
 | `393-uferwald-visual-precision-review.md` | Uferwald Visual Precision Review: Pflicht, wenn nach M16-DI ein Schema-/Planungs-Gate, technische Feldstruktur, Vector-Planung, Messplanung, JSON/YAML-Risiko, Runtime-Vorbereitung oder M16-DI-Folgeentscheidung betroffen ist. 393 entscheidet: M16-DI-FIX-2 ist nicht noetig, aber Runtime-Daten, finale Koordinaten, Assets und Code bleiben blockiert. |
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald Technical Planning Schema Gate: Pflicht, wenn technische Uferwald-Schemafelder, Layer-IDs, Rollen-/Status-Enums, QA-Felder, offene Messfragen, Blockerstatus, JSON/YAML-Planning-Format-Gates, Runtime-Risiko oder Schema-Review betroffen sind. 394 ist keine JSON/YAML-, Runtime-, Koordinaten-, Polygon-, Asset-, Visual-, Code- oder `assets/`-Freigabe. |
 | `395-uferwald-planning-schema-review.md` | Uferwald Planning Schema Review: Pflicht, wenn nach M16-DK ein JSON/YAML-Planning-Format-Gate, Schema-Fix, Format-Skeleton, Feldgruppen-Review, Runtime-Risiko, Koordinaten-/Polygon-Grenze oder M16-DM-Vorbereitung betroffen ist. 395 entscheidet: M16-DK ist ausreichend, M16-DK-FIX ist nicht noetig, M16-DM darf nur als enges Planning-Format-Gate vorbereitet werden. |
+| `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald JSON/YAML Planning Format Gate: Pflicht, wenn ein YAML-/JSON-Planning-Format, Planning-Skeleton, erlaubter Planning-Pfad, Formatstatus, Feldgruppen, Platzhalter, verbotene Geometriewerte, Datei-Check oder M16-DN/M16-DO-Vorbereitung betroffen ist. 396 ist keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -286,6 +288,7 @@ Non-Goals:
 | `393-uferwald-visual-precision-review.md` | Uferwald-Schema-/Planungs-Gates nach M16-DI, M16-DI-Folgeentscheidungen, technische Feldmodelle, JSON/YAML-Risiko, Runtime-Vorbereitung, Vector-Planung oder weitere Visual-Fix-Entscheidungen muessen 393 lesen; 393 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald-Schema-Review, JSON/YAML-Planning-Format-Gates, technische Feldkataloge, Layer-Rollen, Enums, QA-Felder, offene Messfragen, Blockerstatus oder Runtime-Vorbereitung muessen 394 lesen; 394 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `395-uferwald-planning-schema-review.md` | Uferwald-Planning-Schema-Review, M16-DM-Vorbereitung, JSON/YAML-Planning-Format-Gates, Schema-Fix-Entscheidungen, Feldgruppen-/Enum-/QA-Review, Koordinaten-/Polygon-Grenzen oder Runtime-Risiko muessen 395 lesen; 395 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald-JSON/YAML-Planning-Format-Gate, M16-DN-Review, M16-DO-Skeleton-Vorbereitung, YAML-vs-JSON-Entscheidungen, Planning-Pfade, Pflichtstatuswerte, verbotene Geometriefelder, Datei-Checks oder Runtime-Risiko muessen 396 lesen; 396 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -351,6 +354,17 @@ Planning-Format-Gate: keine automatische JSON/YAML-Datei, keine Runtime-
 Mapdaten, keine finalen Koordinaten, keine Polygone, keine Path-Centerlines,
 keine Assets, keine Figma-Writes, kein Flutter-Code und keine App-Integration,
 sofern ein Folgeprompt diese Grenzen nicht ausdruecklich und separat oeffnet.
+
+Nach M16-DM muss bei jedem Uferwald-Planning-Skeleton, jedem YAML-/JSON-
+Dateivorschlag, jeder M16-DN-/M16-DO-Vorbereitung und jeder Runtime-naeheren
+Formatarbeit zusaetzlich
+`396-uferwald-json-yaml-planning-format-gate.md` gelesen werden. 396
+entscheidet YAML als erstes spaeteres Planning-Format, erzeugt aber keine
+echte `.yaml`, `.yml` oder `.json` Datei. Echte Dateien bleiben bis zu einem
+separaten Folgeprompt blockiert; finale Koordinaten, Polygone,
+Path-Centerlines, Path-Nodes, Build-Zonen-Polygone, No-Walk-/No-Build-
+Unionen als echte Werte, Pixelableitung, Runtime-Status, Assets, Flutter-Code
+und App-Integration bleiben weiterhin geschlossen.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 
