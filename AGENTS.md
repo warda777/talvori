@@ -56,6 +56,62 @@ relevant product docs before deciding:
 - `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md`
 - the latest relevant slice, gate or decision docs for the affected topic.
 
+## Short Prompt Rule for Talvori World Slices
+
+Short prompts are preferred when they clearly name the slice type, goal,
+expected files or file scope, special boundaries and commit status. The prompt
+does not need to repeat every standing rule from AGENTS.md, 328, 336 or the
+relevant gates.
+
+For every Talvori World, Island, Map, Build or Italy slice, Codex must do the
+missing routing work itself:
+
+- read `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md`,
+- read `docs/world_design/336-documentation-map-and-slice-reading-rules.md`,
+- read the mandatory documents named there for the affected slice type,
+- name affected M16T IDs when they matter,
+- check stop rules and scope boundaries,
+- run the appropriate status, diff and scope checks,
+- provide a concise Abschlussbericht.
+
+For Italy slices, these documents are currently leading whenever Italy shape,
+blockout, greybox, paths, water, buildable areas or technical layers are
+affected:
+
+- `docs/world_design/404-italy-prototype-production-plan.md`,
+- `docs/world_design/405-italy-shape-source-of-truth-gate.md`,
+- `docs/world_design/406-italy-working-contour-visual-gate.md`,
+- `docs/world_design/previews/italy_shape_working_contour/`.
+
+Avoid documentation loops. Once the repo has enough gate context to move
+visually or technically, prefer the next productive slice inside the approved
+boundaries: only as much documentation as needed, visible result when useful,
+greybox or preview before long theory, and code only when a slice explicitly
+opens the code scope.
+
+Current Italy world path:
+
+```text
+Italy working contour -> macro blockout with paths, water and buildable areas
+-> technical layers/masks -> game-like greybox -> later interaction
+```
+
+## Reuse-before-build Rule
+
+Before expensive custom World, Map, Flutter, Game Asset or Visual slice work,
+Codex should briefly check whether suitable open foundations already exist.
+Examples include Flutter packages, open SVG/vector data, Natural Earth,
+OpenGameArt, GitHub repositories, Figma/design resources and licensed or
+appropriate toolchains.
+
+The result must be reported: what was checked, whether it is suitable, license
+risk, and the decision to reuse, adapt or build in-house.
+
+Do not import or copy external assets, code or data before license,
+attribution, commercial usability and Talvori repo boundaries are checked.
+Reuse is welcome only when it fits Talvori's game feel, license requirements
+and technical architecture.
+
 ## Context Loading and Decision Rules
 
 - First identify affected areas: world design, learning logic, reward,
