@@ -8,26 +8,26 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DU`
+Aktive Sprint-ID: `ITALIEN-PROTOTYP-PLAN`
 
 Sprint Goal:
 
-> Uferwald bekommt eine verbindliche Island Build Blueprint Rule: sichtbare
-> Uferwald-/Island-/Map-/World-/Build-Previews muessen als fullscreen oder
-> near-fullscreen spielartiges Insel-Spielfeld gedacht werden, nicht als
-> Debug-Board, Tabelle, Kartenliste, Dashboard oder Tool-Ansicht.
+> Der naechste World-Prototyp wird als Italien-Prototyp geplant: echte
+> Italien-Kontur als erkennbare Aussenform, gameplaygerecht abstrahierte
+> Innenstruktur, technische Layer zuerst und fullscreen/near-fullscreen
+> Spielgefuehl statt Debug-, Tabellen- oder Tool-Ansicht.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 318 |
+| Gesamtanzahl M16-T-Items | 319 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 294 |
+| Erledigt `[x]` | 295 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 94.3 % |
+| Gewichteter Fortschritt | 94.4 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -83,7 +83,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 7 | 6 | 1 | 0 | 0 | 92.9 % | `█████████░` | Kamera-Modi, Visit-/Wander-Abgrenzung und freie Plot-/Capacity-Regeln in konkreten spaeteren Slices anwenden. |
+| World / Island / Plot | M16T-WORLD | 8 | 7 | 1 | 0 | 0 | 93.8 % | `█████████░` | Italien-Prototyp als naechsten World-Pfad anwenden: echte Landform als Aussenkontur, gameplaygerechte Abstraktion und technische Layer vor Rendering. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -249,6 +249,7 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-005 | [x] | Camera modes gate for world decisions | World-/Map-/Build-/UI-/Asset-Entscheidungen duerfen nicht nur eine Kamera annehmen. | `383-talvori-camera-modes-and-visit-wander-rule.md` definiert Build/Map, Overview, Visit/Wander und Object Focus als Pflichtpruefung. | Architektur nur fuer eine statische Map-Kamera. | nein |
 | M16T-WORLD-006 | [x] | Visit/Wander is separate from Build/Map | Spaetere Cloud-/Besucheransichten duerfen nicht nachtraeglich an eine reine Build-Karte angeklebt werden. | 383 dokumentiert: Uferwald Map-/Build-Modus ist nicht automatisch Wander-/Besucher-Modus; Nutzerinseln muessen individuell begehbar/besuchbar bleiben. | Build-Preview wird als Besuchsmodus gelesen. | nein |
 | M16T-WORLD-007 | [x] | Overview and Object Focus camera boundaries | Vollstaendige Inselansicht und Objektfokus brauchen eigene Regeln statt Poster- oder Bottom-Sheet-Logik. | 383 trennt Overview als bewussten Ueberblick und Object Focus fuer Build Station, Haus, Worker, Raum, Moebel oder Container mit Rueckweg zur Welt. | Komplettansicht als Default oder Objektfokus als Route/Formular. | nein |
+| M16T-WORLD-008 | [x] | Italien-Prototyp Produktionsplan | Der naechste World-Prototyp soll nicht mit frei erfundener Inselkontur starten. | `404-italy-prototype-production-plan.md` definiert Italien als echte Aussenkontur, gameplaygerechte Innenabstraktion, sprechende Folge-Slices, technische Layer-vor-Rendering und Stop-Regeln gegen Debug-/Tool-Optik. | Neuer World-Prototyp startet mit freier Form, ungeklaerter Quelle, aufgeklebten Slots oder Runtime-Arbeit vor Source-of-Truth/Greybox. | nein |
 
 ## 14. Container / Depth
 
@@ -2012,6 +2013,29 @@ M16-DU operationalisiert fuer kuenftige Slices:
   Wasser ohne Bruecken/Uebergaenge trennt.
 - 403 gibt weiterhin keinen Code, keine Assets, keine Runtime-Daten, keine
   YAML-/JSON-Dateien, keine App-Integration, keine Route, keine Persistenz und
+  keinen BuildState frei.
+
+Italien-Prototyp Produktionsplan erledigt:
+
+- M16T-WORLD-008
+
+Der Italien-Prototyp Produktionsplan operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/404-italy-prototype-production-plan.md` definiert den
+  naechsten World-Prototyp als Italien-Prototyp.
+- Der Prototyp startet mit echter Italien-Kontur als wiedererkennbare
+  Aussenform statt mit frei erfundener Inselgrundform.
+- Die Innenstruktur wird gameplaygerecht abstrahiert; Festland, Sizilien und
+  Sardinien werden als Bestandteile geprueft, kleine Nebeninseln nur bei
+  Gameplay-Relevanz.
+- Die Uferwald-Regeln bleiben als technische Produktionsregeln relevant:
+  fullscreen/near-fullscreen Spielgefuehl, 11-14 Bauflaechen, ca. 6 sofort
+  plausible Bauflaechen, Wege zu allen Bauflaechen, technische Layer zuerst,
+  keine Debug-/Tool-/Tabellen-/Dashboard-Optik.
+- Der naechste empfohlene Slice ist: Italien-Kontur als Source of Truth
+  festlegen.
+- 404 gibt keinen Code, keine Assets, keine Bilder, keine YAML-/JSON-Dateien,
+  keine Runtime-Daten, keine App-Integration, keine Route, keine Persistenz und
   keinen BuildState frei.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten

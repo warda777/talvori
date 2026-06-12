@@ -234,6 +234,7 @@ Non-Goals:
 | `401-uferwald-anchor-review-values-gate.md` | Uferwald Anchor Review Values Gate: Pflicht, wenn M16-DS, `anchor_review_values`, Anchor-ID-Vertraege, Anchor-Rollen-Enums, Modusbezuege, QA-/Statuswerte, YAML-Update-Gates oder Anchor-Review-Werte betroffen sind. 401 erlaubt nur einen spaeteren eng freigegebenen M16-DS-Pfad und gibt selbst keine YAML-Aenderung, echten Werte, Runtime-Daten, Assets, Code oder App-Integration frei. |
 | `402-uferwald-anchor-review-values-yaml-update-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Uferwald Anchor Review Values YAML Update: Pflicht, wenn M16-DT, `anchor_review_values`-Review, Anchor-Review-YAML, weitere Value-Gates, YAML-Wertfamilien, Reviewwerte, Runtime-naehere Anchor-Arbeit oder weitere Skeleton-Aenderungen betroffen sind. 402 und die YAML-Sektion geben keine Koordinaten, Geometrie, Runtime-Daten, Assets, Code oder App-Integration frei. |
 | `403-uferwald-island-build-blueprint-rule.md` | Uferwald Island Build Blueprint Rule: Pflicht vor jeder Uferwald-/Island-/Map-/World-/Build-/Preview-/Implementation-Arbeit, wenn sichtbare Inselstruktur, Fullscreen-Spielgefuehl, Wege, Bruecken, Slots, Build-Zonen, No-Walk/No-Build, Anchor-/Landmark-Punkte oder spielnahe Layout-Previews betroffen sind. 403 verhindert Debug-, Tabellen-, Kartenlisten-, Dashboard- und Tool-Optik und gibt keine Code-, Asset-, Runtime-, YAML-/JSON-, App- oder `assets/`-Freigabe. |
+| `404-italy-prototype-production-plan.md` | Italien-Prototyp Produktionsplan: Pflicht fuer kommende Italy-/Italien-/World-/Map-/Build-/Preview-/Implementation-Slices, wenn echte Landform als Aussenkontur, Italien-Kontur, Festland/Sizilien/Sardinien, gameplaygerechte Innenabstraktion, Bauflaechen, Wege, Wasser/Kueste, technische Layer/Masks, Greybox, Game-Look oder Slot-Interaktion betroffen sind. 404 uebertraegt die Uferwald-Produktionsregeln auf den Italien-Prototyp und gibt keine Code-, Bild-, Asset-, Runtime-, YAML-/JSON-, App- oder `assets/`-Freigabe. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -657,7 +658,38 @@ Stop-Regel:
 - 403 gibt keine Code-, Asset-, Runtime-, YAML-/JSON-, App-, Route-,
   Persistenz-, BuildState- oder `assets/`-Freigabe.
 
-### 5.2 Uferwald-/World-Preview Device-Test-Regel
+### 5.2 Italien-Prototyp Produktionsplan Pflichtregel
+
+`404-italy-prototype-production-plan.md` ist Pflicht fuer kommende Italy-,
+Italien-, World-, Map-, Build-, Preview- oder Implementierungs-Slices, wenn
+der neue Italien-Prototyp, eine echte Landform als Aussenkontur, die
+Italien-Kontur, Festland/Sizilien/Sardinien, gameplaygerechte
+Innenabstraktion, Bauflaechen, Wege, Wasser/Kueste, technische Layer/Masks,
+Greybox, Game-Look oder Slot-Interaktion betroffen sind.
+
+404 muss vor konkreter Folgearbeit angewendet werden:
+
+1. Erst 404 pruefen: Welcher sprechende Produktionsschritt ist betroffen,
+   und bleibt Italien als echte Aussenform fuehrend?
+2. Danach 403 pruefen: Dominiert Land/Karte als fullscreen oder
+   near-fullscreen Spielscreen statt Debug-, Tabellen-, Listen- oder
+   Tool-Ansicht?
+3. Danach 384/385 pruefen: Sind technische Layer, Masks, No-Walk/No-Build,
+   Wege, Bauflaechen und Anchors vor Rendering oder Interaktion geplant?
+
+Stop-Regel:
+
+- Kein Italy-/Italien-/World-/Map-/Build-Folge-Slice darf mit freier
+  Fantasie-Kontur starten, wenn der Italien-Prototyp betroffen ist.
+- Keine finale Kunst, Greybox, Bildgenerierung, Runtime-Implementierung oder
+  App-Integration ohne vorgelagerten Source-of-Truth- und Layout-Gate.
+- Keine Bauflaechen als aufgeklebte Kreise, keine harten sichtbaren
+  Kategorien wie `home/market/library` und keine Debug-/Tool-Optik als
+  Zielbild.
+- 404 gibt keine Code-, Bild-, Asset-, Runtime-, YAML-/JSON-, App-, Route-,
+  Persistenz-, BuildState- oder `assets/`-Freigabe.
+
+### 5.3 Uferwald-/World-Preview Device-Test-Regel
 
 Fuer Uferwald-, World-, Map-, Camera-, Visit- oder Wander-Preview-Slices ist
 ein echter iPhone-Test bevorzugt, sobald die Preview lokal lauffaehig ist und
