@@ -163,6 +163,7 @@ Non-Goals:
 | `392-uferwald-measurement-visual-precision-pass.md` | M16-DI-Measurement-Visual-Precision-Pass: visualisiert die M16-DH-Regeln als SVG/PNG-Dokumentationsvisual mit Pfadbreiten, Wasser-/Uferpuffern, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Unionen, Pfad-gegen-Blocker-QA, Sort-/Occlusion-Kanten und Anchor-Rollen; keine finalen Koordinaten, keine Runtime-Path-Centerline, keine JSON/YAML-Daten, keine Assets und keine Code-/App-Freigabe. |
 | `393-uferwald-visual-precision-review.md` | M16-DJ-Visual-Precision-Review: bewertet die vier M16-DI-Pruefansichten, Contact Sheet, Overview-SVG/PNG und README; gibt ein Docs-only Schema-/Planungs-Gate frei, aber keine JSON/YAML-Dateien, Runtime-Daten, finalen Koordinaten, Assets, Visuals oder Code. |
 | `394-uferwald-technical-planning-schema-gate.md` | M16-DK-Technical-Planning-Schema-Gate: definiert ein Markdown-Schema fuer Layer-IDs, Rollen-/Status-Enums, Pflichtfelder, QA-Felder, offene Messfragen und Blockerstatus; erzeugt keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Visuals, Assets oder Code. |
+| `395-uferwald-planning-schema-review.md` | M16-DL-Planning-Schema-Review: reviewt das M16-DK-Feldschema, bestaetigt es als ausreichend, verneint M16-DK-FIX und erlaubt M16-DM nur als enges JSON/YAML-Planning-Format-Gate; keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -216,6 +217,7 @@ Non-Goals:
 | `392-uferwald-measurement-visual-precision-pass.md` | Uferwald Measurement Visual Precision Pass: Pflicht, wenn der M16-DI-SVG-/PNG-Plan, Pfadbreiten-Visual-QA, Wasser-/Uferpuffer-Visualisierung, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Review-Unionen, Pfad-gegen-Blocker-QA-Marker, Sort-/Occlusion-Kanten, Anchor-Rollen oder spaetere Schema-/Runtime-Vorbereitung betroffen sind. |
 | `393-uferwald-visual-precision-review.md` | Uferwald Visual Precision Review: Pflicht, wenn nach M16-DI ein Schema-/Planungs-Gate, technische Feldstruktur, Vector-Planung, Messplanung, JSON/YAML-Risiko, Runtime-Vorbereitung oder M16-DI-Folgeentscheidung betroffen ist. 393 entscheidet: M16-DI-FIX-2 ist nicht noetig, aber Runtime-Daten, finale Koordinaten, Assets und Code bleiben blockiert. |
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald Technical Planning Schema Gate: Pflicht, wenn technische Uferwald-Schemafelder, Layer-IDs, Rollen-/Status-Enums, QA-Felder, offene Messfragen, Blockerstatus, JSON/YAML-Planning-Format-Gates, Runtime-Risiko oder Schema-Review betroffen sind. 394 ist keine JSON/YAML-, Runtime-, Koordinaten-, Polygon-, Asset-, Visual-, Code- oder `assets/`-Freigabe. |
+| `395-uferwald-planning-schema-review.md` | Uferwald Planning Schema Review: Pflicht, wenn nach M16-DK ein JSON/YAML-Planning-Format-Gate, Schema-Fix, Format-Skeleton, Feldgruppen-Review, Runtime-Risiko, Koordinaten-/Polygon-Grenze oder M16-DM-Vorbereitung betroffen ist. 395 entscheidet: M16-DK ist ausreichend, M16-DK-FIX ist nicht noetig, M16-DM darf nur als enges Planning-Format-Gate vorbereitet werden. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -283,6 +285,7 @@ Non-Goals:
 | `392-uferwald-measurement-visual-precision-pass.md` | Uferwald-Visual-Precision-Review, M16-DI-SVG/PNG, Pfadbreiten- und Engpass-Visuals, Wasser-/Uferpuffer, Baum-/Hainrollen, Fels-/Klippenrollen, No-Walk-/No-Build-Review-Unionen, QA-Marker, Sort-/Occlusion-Kanten oder Anchor-Rollen muessen 392 lesen; 392 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, Code-, App- oder `assets/`-Freigabe. |
 | `393-uferwald-visual-precision-review.md` | Uferwald-Schema-/Planungs-Gates nach M16-DI, M16-DI-Folgeentscheidungen, technische Feldmodelle, JSON/YAML-Risiko, Runtime-Vorbereitung, Vector-Planung oder weitere Visual-Fix-Entscheidungen muessen 393 lesen; 393 ist keine Runtime-, Asset-, Figma-, JSON/YAML-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `394-uferwald-technical-planning-schema-gate.md` | Uferwald-Schema-Review, JSON/YAML-Planning-Format-Gates, technische Feldkataloge, Layer-Rollen, Enums, QA-Felder, offene Messfragen, Blockerstatus oder Runtime-Vorbereitung muessen 394 lesen; 394 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `395-uferwald-planning-schema-review.md` | Uferwald-Planning-Schema-Review, M16-DM-Vorbereitung, JSON/YAML-Planning-Format-Gates, Schema-Fix-Entscheidungen, Feldgruppen-/Enum-/QA-Review, Koordinaten-/Polygon-Grenzen oder Runtime-Risiko muessen 395 lesen; 395 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -338,6 +341,16 @@ Messfragen und Blockerstatus. 394 erzeugt keine echten Werte und bleibt keine
 Freigabe fuer JSON/YAML-Dateien, Runtime-Mapdaten, finale Koordinaten,
 Polygone, neue Visuals, Flutter-Code, Assets, Figma-Writes oder
 App-Integration.
+
+Nach M16-DL muss bei jeder M16-DM-Vorbereitung, jedem JSON/YAML-Planning-
+Format-Gate, jedem Uferwald-Schema-Fix und jeder Runtime-naeheren
+Planungsstruktur zusaetzlich `395-uferwald-planning-schema-review.md` gelesen
+werden. 395 entscheidet, dass M16-DK ausreichend ist und kein M16-DK-FIX
+noetig ist. M16-DM darf vorbereitet werden, bleibt aber ein enges
+Planning-Format-Gate: keine automatische JSON/YAML-Datei, keine Runtime-
+Mapdaten, keine finalen Koordinaten, keine Polygone, keine Path-Centerlines,
+keine Assets, keine Figma-Writes, kein Flutter-Code und keine App-Integration,
+sofern ein Folgeprompt diese Grenzen nicht ausdruecklich und separat oeffnet.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 
