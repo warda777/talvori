@@ -1,0 +1,527 @@
+format_status: planning_skeleton
+runtime_status: not_runtime_data
+asset_status: not_asset
+engine_status: not_engine_ready
+geometry_status: no_geometry_values
+coordinate_status: no_final_coordinates
+pixel_derivation_policy: pixel_derivation_forbidden
+measurement_status: manual_measurement_required
+runtime_review_requirement: runtime_review_required_before_use
+source_truth_policy: technical_layers_not_art_pixels
+
+schema_header:
+  skeleton_id: uferwald_starter_island_planning_skeleton
+  slice_id: M16-DO
+  map_id: uferwald_starter_island
+  file_role: planning_structure_only
+  file_status: not_runtime_manifest
+  created_for_next_review_gate: M16-DP
+  exact_file_path: docs/world_design/planning/uferwald/uferwald_starter_island_planning_skeleton.yaml
+  yaml_file_rule: only_yaml_file_allowed_for_m16_do
+
+format_contract:
+  preferred_format: yaml
+  allowed_scope: planning_skeleton_fields_only
+  maximum_status: planning_skeleton
+  allowed_content:
+    - status_protection
+    - source_references
+    - layer_ids
+    - text_placeholders
+    - qa_requirements
+    - open_measurement_questions
+    - blocked_scope
+  forbidden_file_types:
+    - ".json"
+    - ".yml"
+  forbidden_sibling_yaml_files: second_yaml_file_for_m16_do
+  runtime_import_policy: forbidden
+  app_integration_policy: forbidden
+
+status_protection:
+  required_top_level_status_fields:
+    - format_status
+    - runtime_status
+    - asset_status
+    - engine_status
+    - geometry_status
+    - coordinate_status
+    - pixel_derivation_policy
+    - measurement_status
+    - runtime_review_requirement
+    - source_truth_policy
+  forbidden_fields:
+    - geometry_values
+    - coordinate_values
+    - polygon_points
+    - path_centerline
+    - path_nodes
+    - path_edges
+    - build_zone_polygons
+    - plot_footprint_polygons
+    - no_walk_union_values
+    - no_build_union_values
+    - source_from_pixels
+  forbidden_status_values:
+    - "runtime_status: runtime_ready"
+    - "asset_status: asset"
+    - "engine_status: engine_ready"
+  forbidden_value_patterns:
+    - numeric_coordinate_examples
+    - empty_geometry_lists
+    - point_arrays
+    - runtime_ready_flags
+    - asset_path_references
+
+source_docs:
+  required_docs_read_for_m16_do:
+    - docs/world_design/336-documentation-map-and-slice-reading-rules.md
+    - docs/world_design/397-uferwald-json-yaml-planning-format-review.md
+    - docs/world_design/396-uferwald-json-yaml-planning-format-gate.md
+    - docs/world_design/395-uferwald-planning-schema-review.md
+    - docs/world_design/394-uferwald-technical-planning-schema-gate.md
+    - docs/world_design/393-uferwald-visual-precision-review.md
+    - docs/world_design/392-uferwald-measurement-visual-precision-pass.md
+    - docs/world_design/391-uferwald-measurement-precision-pass.md
+    - docs/world_design/390-uferwald-technical-measurement-review.md
+    - docs/world_design/389-uferwald-measurement-svg-documentation-plan.md
+    - docs/world_design/388-uferwald-measurement-source-and-vector-workspace-plan.md
+    - docs/world_design/387-uferwald-technical-measurement-and-vector-planning-gate.md
+    - docs/world_design/386-uferwald-technical-layer-manifest.md
+    - docs/world_design/385-uferwald-technical-layer-and-mask-spec.md
+    - docs/world_design/384-uferwald-playable-map-layer-and-mask-architecture.md
+
+visual_references:
+  reference_policy: review_context_only
+  technical_source_policy: never_derive_technical_values_from_visuals
+  references:
+    - reference_id: m16_di_visual_precision_views
+      role: visual_review_context
+      status: not_geometry_source
+    - reference_id: m16_cp_uferwald_candidate
+      role: art_and_structure_context
+      status: not_technical_map
+
+layer_definitions:
+  - layer_id: base_rock_shape
+    layer_role: island_silhouette_and_hard_landmass_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - manual_polygon_candidate_without_values
+      - vector_outline_candidate_without_values
+      - raster_mask_plan_without_values
+    source_of_truth_policy: manual_measurement_required_not_pixels
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: outer_land_edge_and_hard_boundary_need_later_vector_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_status_protection_check
+      - qa_pixel_derivation_check
+      - qa_manual_measurement_check
+    open_measurements:
+      - where_exact_land_edge_should_be_measured_later
+      - where_edge_mask_margin_should_be_reviewed_later
+    blocked_uses:
+      - runtime_bounds
+      - walkability_from_shape
+      - buildability_from_shape
+
+  - layer_id: grass_terrain_mask
+    layer_role: terrain_surface_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - manual_terrain_region_candidate_without_values
+      - vector_area_candidate_without_values
+      - raster_mask_plan_without_values
+    source_of_truth_policy: technical_terrain_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: grass_and_soft_terrain_need_manual_zone_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_terrain_not_auto_walkable_check
+      - qa_terrain_not_auto_buildable_check
+      - qa_pixel_derivation_check
+    open_measurements:
+      - which_grass_regions_are_only_visual_context
+      - which_regions_need_terrain_sensitive_review
+    blocked_uses:
+      - automatic_walkability
+      - automatic_buildability
+      - fixed_plots
+
+  - layer_id: water_river_mask
+    layer_role: water_and_river_barrier_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - manual_water_region_candidate_without_values
+      - river_shape_candidate_without_values
+      - buffer_plan_without_values
+    source_of_truth_policy: manual_water_boundary_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: water_boundary_and_river_entry_exit_need_later_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_water_no_walk_check
+      - qa_water_no_build_check
+      - qa_bridge_or_ford_blocked_check
+    open_measurements:
+      - where_hard_water_boundary_should_be_measured_later
+      - where_river_entry_and_exit_should_be_reviewed_later
+    blocked_uses:
+      - bridge_permission
+      - ford_permission
+      - building_on_water
+
+  - layer_id: walkable_path_layer
+    layer_role: planning_path_corridor_structure
+    layer_status: not_measured
+    allowed_modes:
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - planning_path_corridor_candidate_without_values
+      - manual_path_network_candidate_without_values
+      - station_area_candidate_without_values
+    source_of_truth_policy: manual_path_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: path_corridors_need_later_manual_or_vector_measurement
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_path_vs_water_check
+      - qa_path_vs_obstacle_check
+      - qa_not_runtime_centerline_check
+    open_measurements:
+      - where_walkable_corridors_should_run_later
+      - which_station_areas_are_valid_after_no_walk_review
+    blocked_uses:
+      - runtime_path_centerline
+      - path_nodes_as_values
+      - path_edges_as_values
+
+  - layer_id: tree_obstacle_layer
+    layer_role: forest_tree_obstacle_and_occlusion_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - hard_tree_blocker_candidate_without_values
+      - soft_forest_edge_candidate_without_values
+      - tree_occlusion_edge_candidate_without_values
+    source_of_truth_policy: manual_forest_role_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: decorative_trees_and_hard_blockers_need_later_separation
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_decorative_vs_hard_blocker_check
+      - qa_occlusion_not_collision_check
+      - qa_pixel_derivation_check
+    open_measurements:
+      - which_tree_groups_are_hard_blockers_later
+      - which_forest_edges_are_only_occlusion_later
+    blocked_uses:
+      - decorative_tree_equals_collision
+      - automatic_no_walk_from_green_pixels
+      - automatic_no_build_from_green_pixels
+
+  - layer_id: rock_cliff_obstacle_layer
+    layer_role: rock_cliff_blocker_and_height_edge_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - hard_rock_blocker_candidate_without_values
+      - cliff_edge_candidate_without_values
+      - height_occlusion_edge_candidate_without_values
+    source_of_truth_policy: manual_rock_and_cliff_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: rock_blockers_and_cliff_edges_need_later_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_rock_blocker_check
+      - qa_cliff_buffer_check
+      - qa_height_occlusion_check
+    open_measurements:
+      - which_rocks_are_decorative_later
+      - which_cliff_edges_need_no_walk_and_no_build_buffers_later
+    blocked_uses:
+      - implicit_stairs
+      - path_connections_through_cliffs
+      - automatic_sorting_from_image_depth
+
+  - layer_id: buildable_zone_layer
+    layer_role: organic_buildability_candidate_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - soft_build_candidate_without_values
+      - suitability_region_candidate_without_values
+      - capacity_review_area_without_values
+    source_of_truth_policy: manual_buildability_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: buildable_zones_need_later_manual_suitability_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_build_zone_slot_check
+      - qa_no_build_union_check
+      - qa_category_binding_blocked_check
+    open_measurements:
+      - where_organic_build_candidates_are_plausible_later
+      - how_free_capacity_can_be_reviewed_without_fixed_slots_later
+    blocked_uses:
+      - fixed_slots
+      - fixed_category_plots
+      - automatic_build_placement
+
+  - layer_id: plot_footprint_layer
+    layer_role: future_object_footprint_and_attachment_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - footprint_class_candidate_without_values
+      - attachment_rule_candidate_without_values
+      - no_overlap_rule_candidate_without_values
+    source_of_truth_policy: future_asset_family_gate_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: object_sizes_and_attachment_spaces_need_later_gate
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_no_overlap_check
+      - qa_attachment_expansion_check
+      - qa_not_runtime_footprint_check
+    open_measurements:
+      - which_object_families_need_footprint_classes_later
+      - how_attachment_space_should_be_protected_later
+    blocked_uses:
+      - real_build_footprints
+      - object_placement
+      - persistence
+
+  - layer_id: no_walk_mask
+    layer_role: movement_blocker_review_union_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - review_union_candidate_without_values
+      - mask_plan_without_values
+      - blocker_summary_without_values
+    source_of_truth_policy: derive_later_only_from_reviewed_technical_layers
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: no_walk_union_needs_later_source_layer_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_no_walk_union_check
+      - qa_path_vs_water_check
+      - qa_path_vs_obstacle_check
+    open_measurements:
+      - which_source_layers_later_belong_to_no_walk_union
+      - which_path_candidates_fail_no_walk_review_later
+    blocked_uses:
+      - no_walk_union_values
+      - runtime_collision_mask
+      - automatic_mask_from_pixels
+
+  - layer_id: no_build_mask
+    layer_role: build_blocker_review_union_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - review_union_candidate_without_values
+      - mask_plan_without_values
+      - build_protection_summary_without_values
+    source_of_truth_policy: derive_later_only_from_reviewed_technical_layers
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: no_build_union_needs_later_source_layer_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_no_build_union_check
+      - qa_path_protection_check
+      - qa_anchor_protection_check
+    open_measurements:
+      - which_source_layers_later_belong_to_no_build_union
+      - where_hub_anchor_and_attachment_protection_should_apply_later
+    blocked_uses:
+      - no_build_union_values
+      - fixed_build_slots
+      - automatic_build_mask_from_pixels
+
+  - layer_id: depth_sort_bands
+    layer_role: foreground_midground_background_sort_review_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - sort_band_candidate_without_values
+      - occlusion_edge_candidate_without_values
+      - manual_sort_review_rule_without_values
+    source_of_truth_policy: manual_sort_and_occlusion_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: sort_bands_and_occlusion_edges_need_later_review
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_sort_renderer_check
+      - qa_occlusion_not_collision_check
+      - qa_not_renderer_implementation_check
+    open_measurements:
+      - where_foreground_midground_background_roles_should_be_reviewed_later
+      - which_edges_can_occlude_figures_or_objects_later
+    blocked_uses:
+      - renderer_implementation
+      - automatic_sorting_from_image_depth
+      - collision_mask
+
+  - layer_id: landmark_anchor_layer
+    layer_role: landmark_path_build_and_object_focus_reference_planning
+    layer_status: not_measured
+    allowed_modes:
+      - Build/Map
+      - Visit/Wander
+      - Object Focus
+      - Overview
+    data_form_candidates:
+      - anchor_role_candidate_without_values
+      - landmark_reference_candidate_without_values
+      - future_manual_anchor_record_without_values
+    source_of_truth_policy: manual_anchor_review_required
+    pixel_derivation_policy: pixel_derivation_forbidden
+    manual_measurement_requirement: anchors_need_later_manual_or_vector_measurement
+    runtime_review_requirement: runtime_review_required_before_use
+    qa_requirements:
+      - qa_anchor_runtime_check
+      - qa_no_final_coordinate_check
+      - qa_multi_role_anchor_review_check
+    open_measurements:
+      - which_landmarks_should_become_review_anchors_later
+      - which_references_may_be_path_build_or_object_focus_roles_later
+    blocked_uses:
+      - final_runtime_anchor
+      - stored_interaction_point
+      - coordinate_values
+
+geometry_placeholders:
+  allowed_placeholder_values:
+    - manual_measurement_required
+    - not_measured
+    - blocked_until_measurement_gate
+    - blocked_until_runtime_gate
+    - review_required
+  allowed_placeholder_roles:
+    - geometry_kind_candidate
+    - geometry_status
+    - coordinate_space_convention
+    - anchor_role_candidate
+    - sort_band_role_candidate
+    - measurement_question
+    - qa_required
+    - blocked_until_gate
+  forbidden_placeholder_patterns:
+    - numeric_x_or_y_examples
+    - coordinate_pairs
+    - point_arrays
+    - empty_geometry_containers
+    - runtime_centerline_placeholders
+
+qa_requirements:
+  m16_do_file_checks:
+    - exactly_one_yaml_file_created
+    - no_json_file_created
+    - no_yml_file_created
+    - no_assets_path_changes
+    - no_code_changes
+  skeleton_status_checks:
+    - format_status_must_remain_planning_skeleton
+    - runtime_status_must_remain_not_runtime_data
+    - geometry_status_must_remain_no_geometry_values
+    - coordinate_status_must_remain_no_final_coordinates
+    - pixel_derivation_must_remain_forbidden
+  future_review_checks:
+    - m16_dp_review_required_before_any_skeleton_use
+    - manual_measurement_gate_required_before_geometry_values
+    - runtime_gate_required_before_runtime_map_data
+    - asset_gate_required_before_any_assets_path
+
+open_measurements:
+  path_and_movement_questions:
+    - where_walkable_corridors_should_be_vector_reviewed_later
+    - where_station_candidates_should_be_measured_later
+    - how_path_widths_should_be_verified_against_marker_size_later
+  water_and_buffer_questions:
+    - where_hard_water_boundaries_should_be_measured_later
+    - where_water_no_walk_and_no_build_buffers_should_differ_later
+  obstacle_questions:
+    - which_trees_and_rocks_are_decorative_only_later
+    - which_tree_and_rock_groups_are_hard_blockers_later
+    - where_occlusion_edges_should_be_reviewed_later
+  build_questions:
+    - where_organic_build_candidate_areas_are_plausible_later
+    - how_free_capacity_can_be_reviewed_without_fixed_slots_later
+    - which_future_footprint_classes_need_attachment_space_later
+  sort_and_anchor_questions:
+    - where_sort_band_roles_should_be_reviewed_later
+    - which_landmarks_may_become_path_build_or_object_focus_references_later
+
+blocked_scope:
+  runtime_map_data: blocked
+  final_coordinates: blocked
+  polygons: blocked
+  path_centerlines: blocked
+  path_nodes: blocked
+  path_edges: blocked
+  build_zone_polygons: blocked
+  plot_footprint_polygons: blocked
+  no_walk_union_values: blocked
+  no_build_union_values: blocked
+  pixel_derived_values: blocked
+  assets_path: blocked
+  flutter_or_dart_code: blocked
+  app_integration: blocked
+  route_or_navigation: blocked
+  persistence_or_buildstate: blocked
+
+next_review_gate:
+  recommended_slice_id: M16-DP
+  recommended_slice_name: Uferwald YAML Planning Skeleton Review
+  review_goal: confirm_that_the_yaml_skeleton_is_safe_before_any_measurement_or_value_gate
+  still_blocked_after_m16_do:
+    - geometry_values
+    - coordinate_values
+    - polygon_points
+    - runtime_map_data
+    - assets
+    - code

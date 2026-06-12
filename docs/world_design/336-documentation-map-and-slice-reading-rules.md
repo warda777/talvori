@@ -166,6 +166,8 @@ Non-Goals:
 | `395-uferwald-planning-schema-review.md` | M16-DL-Planning-Schema-Review: reviewt das M16-DK-Feldschema, bestaetigt es als ausreichend, verneint M16-DK-FIX und erlaubt M16-DM nur als enges JSON/YAML-Planning-Format-Gate; keine JSON/YAML-Datei, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | M16-DM-JSON/YAML-Planning-Format-Gate: bevorzugt YAML als spaeteres Planning-Format und definiert erlaubte Feldgruppen, Pflichtstatus, verbotene Felder, Platzhalter und QA vor echten Dateien; erzeugt keine `.json`, `.yaml`, `.yml`, Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
 | `397-uferwald-json-yaml-planning-format-review.md` | M16-DN-JSON/YAML-Planning-Format-Review: bestaetigt M16-DM als ausreichend, verneint M16-DM-FIX und erlaubt M16-DO nur als enges YAML Planning Skeleton Gate mit expliziter Folgefreigabe, exaktem Pfad, Dateinamen, Statusschutz und Datei-Check; keine `.json`-/`.yaml`-/`.yml`-Datei, keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| `398-uferwald-yaml-planning-skeleton-gate.md` | M16-DO-YAML-Planning-Skeleton-Gate: erklaert die eine erlaubte Skeleton-Datei, ihren Statusschutz, enthaltene Feldgruppen, Layer-IDs, Verbote und M16-DP-Review-Pflicht; keine Runtime-Daten, Koordinaten, Polygone, Assets oder Code. |
+| `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | M16-DO-YAML-Planning-Skeleton: genau eine echte YAML-Planungsdatei mit Maximalstatus `planning_skeleton`, `not_runtime_data`, `no_geometry_values` und `no_final_coordinates`; Pflichtkontext fuer M16-DP und alle spaeteren Uferwald-Skeleton-/Measurement-/Value-Gates, aber keine Runtime-Map. |
 | `317-first-world-element-slice-scope-and-visual-plan.md` | Erste World-Elemente bleiben lokale, neutrale Previews. |
 
 ### 4.9 Container / Depth
@@ -222,6 +224,7 @@ Non-Goals:
 | `395-uferwald-planning-schema-review.md` | Uferwald Planning Schema Review: Pflicht, wenn nach M16-DK ein JSON/YAML-Planning-Format-Gate, Schema-Fix, Format-Skeleton, Feldgruppen-Review, Runtime-Risiko, Koordinaten-/Polygon-Grenze oder M16-DM-Vorbereitung betroffen ist. 395 entscheidet: M16-DK ist ausreichend, M16-DK-FIX ist nicht noetig, M16-DM darf nur als enges Planning-Format-Gate vorbereitet werden. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald JSON/YAML Planning Format Gate: Pflicht, wenn ein YAML-/JSON-Planning-Format, Planning-Skeleton, erlaubter Planning-Pfad, Formatstatus, Feldgruppen, Platzhalter, verbotene Geometriewerte, Datei-Check oder M16-DN/M16-DO-Vorbereitung betroffen ist. 396 ist keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `397-uferwald-json-yaml-planning-format-review.md` | Uferwald JSON/YAML Planning Format Review: Pflicht, wenn M16-DO, ein YAML Planning Skeleton, eine echte `.yaml`-Planungsdatei, Datei-Checks, Statusschutz, Format-Fix, Runtime-Risiko oder JSON/YAML-Folgefreigabe betroffen sind. 397 erlaubt M16-DO nur als enges Skeleton-Gate und ist selbst keine `.json`-, `.yaml`-, `.yml`-, Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
+| `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Pflicht, wenn M16-DP, YAML-Skeleton-Review, Skeleton-Fix, Feldgruppen, Layer-Definitionen, Statusschutz, Datei-Checks, offene Messfragen, Measurement-/Value-Gates oder Runtime-naehere Uferwald-Folgearbeit betroffen sind. 398 und das YAML-Skeleton sind keine Runtime-, Asset-, Code-, App- oder `assets/`-Freigabe. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -292,6 +295,7 @@ Non-Goals:
 | `395-uferwald-planning-schema-review.md` | Uferwald-Planning-Schema-Review, M16-DM-Vorbereitung, JSON/YAML-Planning-Format-Gates, Schema-Fix-Entscheidungen, Feldgruppen-/Enum-/QA-Review, Koordinaten-/Polygon-Grenzen oder Runtime-Risiko muessen 395 lesen; 395 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `396-uferwald-json-yaml-planning-format-gate.md` | Uferwald-JSON/YAML-Planning-Format-Gate, M16-DN-Review, M16-DO-Skeleton-Vorbereitung, YAML-vs-JSON-Entscheidungen, Planning-Pfade, Pflichtstatuswerte, verbotene Geometriefelder, Datei-Checks oder Runtime-Risiko muessen 396 lesen; 396 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | `397-uferwald-json-yaml-planning-format-review.md` | Uferwald-JSON/YAML-Planning-Format-Review, M16-DO-Skeleton-Vorbereitung, echte `.yaml`-Folgefreigabe, Datei-Check, Statusschutz, Format-Fix-Entscheidung, verbotene Geometriewerte oder Runtime-Risiko muessen 397 lesen; 397 ist keine Runtime-, Asset-, Figma-, JSON/YAML-Datei-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
+| `398-uferwald-yaml-planning-skeleton-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Uferwald-YAML-Skeleton-Review, M16-DP, Skeleton-Fix, Feldgruppen, Layer-Definitionen, Statusschutz, offene Messfragen, Datei-Checks, Measurement-/Value-Gates oder Runtime-naehere Folgearbeit muessen 398 und das Skeleton lesen; beide sind keine Runtime-, Asset-, Figma-, SVG/PNG-, Code-, App- oder `assets/`-Freigabe. |
 | alle M16-S bis M16-AA Preview-Ordner | Dokumentationsvisuals sind keine App-Screens, keine Screenshots, keine Assets. |
 
 Kuenftige Visual Documentation Slices sollen bevorzugt PNG und SVG erzeugen:
@@ -381,6 +385,19 @@ separate Freigabe blockiert; Runtime-Daten, finale Koordinaten, Polygone,
 Path-Centerlines, Path-Nodes, Build-Zonen-Polygone, No-Walk-/No-Build-
 Unionen als echte Werte, Pixelableitung, Assets, Flutter-Code und
 App-Integration bleiben geschlossen.
+
+Nach M16-DO muss bei jedem M16-DP-Skeleton-Review, jeder Skeleton-Korrektur,
+jedem Measurement-/Value-Gate, jeder echten Geometrie-Oeffnung und jeder
+Runtime-naeheren Uferwald-Planungsarbeit zusaetzlich
+`398-uferwald-yaml-planning-skeleton-gate.md` und
+`planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` gelesen
+werden. Das Skeleton ist genau eine echte `.yaml`-Planungsdatei mit
+Maximalstatus `planning_skeleton`; es bleibt `not_runtime_data`, `not_asset`,
+`not_engine_ready`, `no_geometry_values` und `no_final_coordinates`. Es darf
+nicht als Runtime-Map, Asset, App-Import, finale Koordinatenquelle, Polygon-
+Container, Path-Centerline-, Path-Node-, Build-Zonen- oder No-Walk-/No-Build-
+Union-Quelle gelesen werden. M16-DP muss vor jeder weiteren Datennaehe pruefen,
+ob das Skeleton weiterhin nur Planungsstruktur ist.
 
 ## 5. Slice-Typen mit Pflichtlektuere
 
