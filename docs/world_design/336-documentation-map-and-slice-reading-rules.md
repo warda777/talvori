@@ -233,6 +233,7 @@ Non-Goals:
 | `400-uferwald-measurement-value-gate-preparation.md` | Uferwald Measurement/Value Gate Preparation: Pflicht, wenn M16-DR, `anchor_review_values`, erste Value-Gates, Wertfamilien-Vergleich, YAML-Wertoeffnung, Anchor-Rollenwerte, erste Messwert-Folgearbeit oder Runtime-naehere Value-Arbeit betroffen sind. 400 erlaubt nur M16-DR als Markdown-only Anchor-Review-Values-Gate und gibt keine YAML-Aenderung, echten Werte, Runtime-Daten, Assets, Code oder App-Integration frei. |
 | `401-uferwald-anchor-review-values-gate.md` | Uferwald Anchor Review Values Gate: Pflicht, wenn M16-DS, `anchor_review_values`, Anchor-ID-Vertraege, Anchor-Rollen-Enums, Modusbezuege, QA-/Statuswerte, YAML-Update-Gates oder Anchor-Review-Werte betroffen sind. 401 erlaubt nur einen spaeteren eng freigegebenen M16-DS-Pfad und gibt selbst keine YAML-Aenderung, echten Werte, Runtime-Daten, Assets, Code oder App-Integration frei. |
 | `402-uferwald-anchor-review-values-yaml-update-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` | Uferwald Anchor Review Values YAML Update: Pflicht, wenn M16-DT, `anchor_review_values`-Review, Anchor-Review-YAML, weitere Value-Gates, YAML-Wertfamilien, Reviewwerte, Runtime-naehere Anchor-Arbeit oder weitere Skeleton-Aenderungen betroffen sind. 402 und die YAML-Sektion geben keine Koordinaten, Geometrie, Runtime-Daten, Assets, Code oder App-Integration frei. |
+| `403-uferwald-island-build-blueprint-rule.md` | Uferwald Island Build Blueprint Rule: Pflicht vor jeder Uferwald-/Island-/Map-/World-/Build-/Preview-/Implementation-Arbeit, wenn sichtbare Inselstruktur, Fullscreen-Spielgefuehl, Wege, Bruecken, Slots, Build-Zonen, No-Walk/No-Build, Anchor-/Landmark-Punkte oder spielnahe Layout-Previews betroffen sind. 403 verhindert Debug-, Tabellen-, Kartenlisten-, Dashboard- und Tool-Optik und gibt keine Code-, Asset-, Runtime-, YAML-/JSON-, App- oder `assets/`-Freigabe. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -620,7 +621,43 @@ Zusaetzliche M16-CG-Kandidatenregel:
   ist keine Code-, Bild-, SVG/PNG-, Asset-, Runtime-Map-, App-, Persistenz-,
   BuildState- oder `assets/`-Freigabe.
 
-### 5.1 Uferwald-/World-Preview Device-Test-Regel
+### 5.1 Uferwald Island Build Blueprint Pflichtregel
+
+`403-uferwald-island-build-blueprint-rule.md` ist Pflicht vor jeder
+Uferwald-, Island-, Map-, World-, Build-, Preview- oder Implementierungsarbeit,
+wenn sichtbare Inselstruktur, Fullscreen-Spielgefuehl, Wege, Bruecken,
+Grundflaechen/Slots, Build-Zonen, No-Walk-/No-Build-Flaechen,
+Anchor-/Landmark-Punkte oder spielnahe Layout-Previews betroffen sind.
+
+Kein weiterer Uferwald-Preview- oder Implementierungs-Slice ist
+commitfaehig, wenn 403 nicht gelesen und gegen den geplanten Screen angewendet
+wurde.
+
+403 muss vor 384/385/386 angewendet werden, wenn sichtbare Inselstruktur
+betroffen ist:
+
+1. Erst 403 pruefen: Wirkt die Ansicht wie ein spielartiges fullscreen oder
+   near-fullscreen Insel-Spielfeld statt wie Debug-Tool, Tabelle, Kartenliste
+   oder Admin-Board?
+2. Danach 384 pruefen: Ist sichtbar getrennt, dass Art-Bild nicht die
+   technische Spielkarte ist?
+3. Danach 385/386 pruefen: Sind technische Layer, Masks, Zonen, Anchors und
+   offene Messfragen fachlich sauber abgegrenzt?
+
+Stop-Regel:
+
+- Eine Uferwald-Ansicht ist nicht commitfaehig, wenn die Insel nicht die
+  Hauptflaeche des Screens ist.
+- Eine spielnahe Preview ist nicht commitfaehig, wenn technische Layernamen,
+  Debug-Labels, Tabellen, Listen oder grosse Legenden das Spielbild
+  dominieren.
+- Weniger als 11 geplante bebaubare Grundflaechen, fehlende Wege zu
+  Grundflaechen, fehlende Bruecken/Uebergaenge bei trennendem Wasser oder
+  isolierte Slots blockieren den Slice.
+- 403 gibt keine Code-, Asset-, Runtime-, YAML-/JSON-, App-, Route-,
+  Persistenz-, BuildState- oder `assets/`-Freigabe.
+
+### 5.2 Uferwald-/World-Preview Device-Test-Regel
 
 Fuer Uferwald-, World-, Map-, Camera-, Visit- oder Wander-Preview-Slices ist
 ein echter iPhone-Test bevorzugt, sobald die Preview lokal lauffaehig ist und

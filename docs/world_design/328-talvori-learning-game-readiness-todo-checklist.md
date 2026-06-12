@@ -8,24 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `M16-DS`
+Aktive Sprint-ID: `M16-DU`
 
 Sprint Goal:
 
-> Uferwald erweitert die bestehende Skeleton-YAML eng um
-> `anchor_review_values`: nur Reviewwerte fuer Anchor-Rollen,
-> Modusbezuege, Statusschutz und QA entstehen, waehrend Koordinaten,
-> Geometrie, Runtime-Daten, Assets, App-Integration und Code blockiert
-> bleiben.
+> Uferwald bekommt eine verbindliche Island Build Blueprint Rule: sichtbare
+> Uferwald-/Island-/Map-/World-/Build-Previews muessen als fullscreen oder
+> near-fullscreen spielartiges Insel-Spielfeld gedacht werden, nicht als
+> Debug-Board, Tabelle, Kartenliste, Dashboard oder Tool-Ansicht.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 317 |
+| Gesamtanzahl M16-T-Items | 318 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 293 |
+| Erledigt `[x]` | 294 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.3 % |
@@ -91,7 +90,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Tali/Vori Companion | M16T-COMP | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Companion-Regeln in kuenftigen Copy-/Review-Slices anwenden. |
 | Mobile / Clutter / Accessibility | M16T-MOBILE | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Dichte-, Overlay- und A11y-Regeln in kuenftigen MVP-Screens anwenden. |
 | Sensitive / Policy | M16T-SENS | 3 | 2 | 1 | 0 | 0 | 83.3 % | `████████░░` | Sensitive-no-deco/no-reward-Regel spaeter mit Asset-/World-Gates abschliessen. |
-| Asset Scope | M16T-ASSET | 99 | 97 | 1 | 0 | 1 | 98.5 % | `██████████` | M16-DS erweitert die bestehende Skeleton-YAML um `anchor_review_values` als reine Reviewwerte; M16-DT muss diese YAML-Erweiterung reviewen, bevor weitere Value- oder Runtime-Naehe entsteht. |
+| Asset Scope | M16T-ASSET | 100 | 98 | 1 | 0 | 1 | 98.5 % | `██████████` | M16-DU setzt die Uferwald Island Build Blueprint Rule als Pflicht vor weiteren Uferwald-/Island-/Map-/World-/Build-Previews: Insel als Spielscreen, nicht Debug-/Tool-Ansicht. |
 | AI Art / Asset Pipeline | M16T-ART | 17 | 17 | 0 | 0 | 0 | 100.0 % | `██████████` | Art Bible v1, Starter Island Master Reference Set, KI-Art-Pipeline, Style-Metadaten und QA gegen Stilbruch vor Asset-Spec, High-Fidelity oder Code anwenden. |
 | Datenmodell / Persistenz / Backend | M16T-DATA | 5 | 1 | 0 | 0 | 4 | 20.0 % | `██░░░░░░░░` | Offline-/Sync-Konfliktregeln anwenden; echte Datenmodell-/Persistenz-Gates bleiben blockiert. |
 | Confidence Scoring / AI Governance | M16T-AI | 4 | 2 | 2 | 0 | 0 | 75.0 % | `████████░░` | AI-/Privacy-Regeln in eigenem Provider-Governance-Gate vertiefen. |
@@ -405,6 +404,7 @@ ausdruecklich freigegeben werden.
 | M16T-ASSET-097 | [x] | Uferwald measurement/value gate preparation | Vor echten Messwerten muss entschieden werden, welche Wertfamilie zuerst sicher geoeffnet werden darf. | `400-uferwald-measurement-value-gate-preparation.md` vergleicht `anchor_review_values`, Path-, Water-, No-Walk-, No-Build-, Sort-Band- und Buildable-Zone-Wertfamilien, empfiehlt `anchor_review_values` als erste risikoarme Familie und haelt M16-DR weiterhin Markdown-only ohne YAML-Aenderung, echte Werte, Koordinaten, Polygone, Runtime-Daten, Assets oder Code. | Erster Value-Slice oeffnet Pfade, Koordinaten, Polygone, Unionen, YAML-Aenderungen oder Runtime-Daten ohne Vorbereitung. | nein |
 | M16T-ASSET-098 | [x] | Uferwald anchor review values gate | Die erste Wertfamilie braucht einen engen Feldvertrag, bevor eine YAML-Naehe erlaubt werden darf. | `401-uferwald-anchor-review-values-gate.md` definiert erlaubte Felder, Anchor-ID-Liste, Rollen-Enums, Modusbezuege, QA-/Statuswerte und verbotene Felder fuer `anchor_review_values`; M16-DR bleibt Markdown-only und erzeugt keine YAML-Aenderung, echte Werte, Koordinaten, Geometrie, Runtime-Daten, Assets oder Code. | M16-DS aendert YAML, oeffnet echte Werte, erzeugt Koordinaten/Path-/Union-Werte oder liest Anchors als Runtime-Interaktionspunkte. | nein |
 | M16T-ASSET-099 | [x] | Uferwald anchor review values YAML update gate | Die erste Wertfamilie darf nur eng und reviewgeschuetzt in der bestehenden Skeleton-YAML erscheinen. | `402-uferwald-anchor-review-values-yaml-update-gate.md` und `planning/uferwald/uferwald_starter_island_planning_skeleton.yaml` ergaenzen `anchor_review_values` mit zehn bekannten Anchor-IDs, Review-Rollen, Modusbezuegen, Statusschutz, QA und `blocked_uses`; alle Eintraege bleiben `review_values_only`, `not_runtime_data`, `no_coordinate_values`, `no_geometry_values` und `pixel_derivation_forbidden`. | Anchor-Reviewwerte werden als Runtime-Anker, Koordinaten, Path-Nodes, Build-Zonen, No-Walk-/No-Build-Werte, Asset- oder App-Daten gelesen. | nein |
+| M16T-ASSET-100 | [x] | Uferwald island build blueprint rule | Uferwald-Previews duerfen nicht wieder zu Debug-Boards, Tabellen, Kartenlisten oder Tool-Ansichten werden. | `403-uferwald-island-build-blueprint-rule.md` definiert Fullscreen-Spielgefuehl, 11-14 bebaubare Grundflaechen, Wege zu allen Grundflaechen, mindestens 2 Bruecken/Uebergaenge, Landschaftstopologie, HUD-/Debug-Grenzen, technische Layer-Reihenfolge und Stop-Regeln fuer kommende Uferwald-/Island-/Map-/World-/Build-Preview- oder Implementierungs-Slices. | Uferwald-Slices, in denen UI/Legende/Debug die Insel dominiert, Slots isoliert wirken, Wege/Bruecken fehlen oder technische Layernamen in spielnahen Previews sichtbar bleiben. | nein |
 
 ## 21. Datenmodell / Persistenz / Backend
 
@@ -1983,6 +1983,37 @@ M16-DS operationalisiert fuer kuenftige Slices:
   Values Review, bevor weitere Wertfamilien oder Runtime-naehere Gates
   vorbereitet werden.
 
+M16-DU erledigt:
+
+- M16T-ASSET-100
+
+M16-DU operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/403-uferwald-island-build-blueprint-rule.md` ist
+  Pflicht vor jeder Uferwald-/Island-/Map-/World-/Build-/Preview- oder
+  Implementierungsarbeit, wenn sichtbare Inselstruktur, Wege, Bruecken,
+  Slots, Build-Zonen, No-Walk-/No-Build-Flaechen, Landmark-/Anchor-Punkte
+  oder spielnahe Layout-Previews betroffen sind.
+- Uferwald ist als fullscreen oder near-fullscreen spielartiges 2.5D-
+  Insel-Spielfeld zu denken, nicht als Debug-Board, Tabelle, Kartenliste,
+  Dashboard, Admin-Ansicht oder Tool-UI.
+- Jede kuenftige Uferwald-Insel muss klare Inselgrundform, Wasser/Fluss,
+  mindestens 2 Bruecken/Uebergaenge, 11-14 bebaubare Grundflaechen, Wege zu
+  allen Grundflaechen, zentrale Lichtung/Hub, Startbereich, Hain, Ufer,
+  Fels-/Hoehenbereich, Reserve, No-Walk, No-Build und Landmark-/Anchor-Punkte
+  als Inselstruktur plausibel machen.
+- 403 muss vor 384/385/386 angewendet werden, wenn sichtbare Inselstruktur
+  betroffen ist: erst Game-Feel-/Blueprint-Check, dann technische Layer-,
+  Masken- und Manifest-Grenzen.
+- Nicht commitfaehig sind Uferwald-/Island-/Map-/Build-Previews, in denen die
+  Insel nicht die Hauptflaeche ist, UI/Legende/Debug mehr Raum als die Insel
+  einnimmt, technische Layernamen das Spielbild dominieren, weniger als 11
+  Grundflaechen geplant sind, Wege nicht zu allen Grundflaechen fuehren oder
+  Wasser ohne Bruecken/Uebergaenge trennt.
+- 403 gibt weiterhin keinen Code, keine Assets, keine Runtime-Daten, keine
+  YAML-/JSON-Dateien, keine App-Integration, keine Route, keine Persistenz und
+  keinen BuildState frei.
+
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
 bestehen und duerfen nicht nebenbei als Implementierungsfreigabe gelesen
@@ -2060,7 +2091,7 @@ muessen fachlich harmonieren.
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
 | Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..088, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..100, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
 | Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
