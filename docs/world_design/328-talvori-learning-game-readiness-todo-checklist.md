@@ -8,22 +8,22 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `ITALY-FIRST-CITY-DECISION`
+Aktive Sprint-ID: `WORLD-TRAVEL-ZOOM-GAMEFLOW`
 
 Sprint Goal:
 
-> Die 13 `playable_city_area`-Kandidaten werden reviewed und Firenze wird als
-> erste Stadt fuer den naechsten Stadt-Greybox-/Blockout-Pfad festgelegt;
-> Roma und Bologna bleiben Reserve-Kandidaten.
+> Talvori nutzt 411/412 nicht als iPhone-Karte, sondern legt einen
+> spielartigen World-Travel-Zoom-Flow fest: Globus -> Europa -> Italien ->
+> Firenze -> Bauflaechen, Wege, Lernorte und Gebaeude.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 327 |
+| Gesamtanzahl M16-T-Items | 328 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 303 |
+| Erledigt `[x]` | 304 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.5 % |
@@ -82,7 +82,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 16 | 15 | 1 | 0 | 0 | 96.9 % | `██████████` | Italien bleibt erster Prototyp; Firenze ist jetzt als erste Stadt-Greybox-Entscheidung gesetzt, waehrend Roma und Bologna als Reserve-Kandidaten fuer Haupt-Hub bzw. Wegekreuz folgen koennen. |
+| World / Island / Plot | M16T-WORLD | 17 | 16 | 1 | 0 | 0 | 97.1 % | `██████████` | Italien bleibt erster Prototyp; 411/412 bleiben Dokumentationsgrundlage, aber der naechste sichtbare Produktpfad ist ein spielartiger World-Travel-Zoom von Globus ueber Europa und Italien nach Firenze. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -257,6 +257,7 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-014 | [x] | Italien-Stadtgrundformen aus ISTAT-Comuni | Der Europa->Land->Stadt-Zoom braucht echte Stadt-/Gemeindegrundformen, bevor spielbare Stadtbereiche frei erfunden werden. | `410-italy-city-footprints-istat-comuni-gate.md` und `previews/italy_city_footprints_istat_comuni/` pruefen ISTAT Comuni 2026 generalisiert als CC-BY-4.0-Quelle und zeigen die 13 Stadtgrundformen als Dokumentationsvisual mit Statusschutz. | ISTAT-Grenzen werden als Runtime-Polygone, Collision, Build-Zones, Pathfinding, YAML/JSON, Assets oder App-Daten gelesen; Namen werden per unsicherem Substring-Matching statt exakter `COMUNE`-/`PRO_COM_T`-Kontrolle gematcht. | nein |
 | M16T-WORLD-015 | [x] | Italien spielbare Stadtbereiche aus Stadtgrundformen | Echte Stadt-/Gemeindegrenzen duerfen nicht 1:1 Spielbereich werden, muessen aber Talvori-gerecht in pruefbare Stadtbereiche uebersetzt werden. | `411-italy-playable-city-areas-from-footprints.md` und `previews/italy_playable_city_areas_from_footprints/` leiten fuer alle 13 Stadtanker abstrakte `playable_city_area`-Kandidaten mit Stadtkern, Reserve, Rand/No-Build und Start-Bauplatz ab. | ISTAT-Footprints werden als Runtime-Geometrie, finale Koordinaten, Build-Zones, No-Walk/No-Build-Masken, YAML/JSON, Assets oder App-Daten gelesen. | nein |
 | M16T-WORLD-016 | [x] | Italien erste Stadt-Greybox Entscheidung | Vor der ersten Stadt-Greybox muss klar sein, welcher `playable_city_area`-Kandidat genug Nutzen bei kontrollierbarem Risiko bietet. | `412-italy-playable-city-area-review-and-first-city-decision.md` reviewed alle 13 Kandidaten und legt Firenze als erste Stadt fest; Roma und Bologna bleiben Reserve-Kandidaten. | Erste Stadt wird wegen Wow-Faktor statt Spiel-/Risiko-Abwaegung gewaehlt oder echte Stadtgrenzen werden als Runtime-Polygone/Koordinaten uebernommen. | nein |
+| M16T-WORLD-017 | [x] | World-Travel Zoom als Spielnavigation | Talvori darf die 411-Dokumentationskarte nicht als App-Screen missverstehen, sondern braucht eine spielartige Reise von Welt zu Stadt. | `413-world-travel-zoom-navigation-gameflow-gate.md` definiert Globus -> Europa -> Italien -> Firenze -> Bauflaechen/Lernorte als spielnahen Zoom-Flow, mit Italien aktiv, anderen Laendern locked/ausgegraut und Firenze als erstem City-Zoom. | 411-Visual wird als iPhone-Screen uebernommen, die Ansicht wirkt wie GIS/Atlas/Dashboard/Debug-Tool oder Runtime/App/Asset-Arbeit entsteht vor eigenem Gate. | nein |
 
 ## 14. Container / Depth
 
@@ -2218,6 +2219,28 @@ Das Review-Gate operationalisiert fuer kuenftige Slices:
   YAML/JSON, keine Assets und keine App-Daten.
 - Der naechste empfohlene Slice ist: Erste Stadt-Greybox aus Firenze
   `playable_city_area` ableiten.
+
+World-Travel Zoom Flow als Spielnavigation erledigt:
+
+- M16T-WORLD-017
+
+Das Gameflow-Gate operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/413-world-travel-zoom-navigation-gameflow-gate.md`
+  legt fest, dass Talvori nicht die 411-Dokumentationskarte als iPhone-Screen
+  nutzt.
+- Der Ziel-Flow ist: Globus/Welt -> Europa/Weltregion -> Land auswaehlen ->
+  Italien-Landansicht -> Stadtanker auswaehlen -> Firenze-Stadtansicht ->
+  Bauflaechen, Wege, Lernorte und Gebaeude.
+- Benchmark-Muster aus Pokémon GO, Genshin Impact/HoYoLAB, Clash of Clans und
+  Everdale werden nur als Spielgefuehl-/Navigationsmuster genutzt; keine
+  fremden Screenshots, Assets, Kartenbilder, Code oder Daten werden
+  uebernommen.
+- Italien ist erstes aktives Land; andere Laender sollen sichtbar, aber locked
+  oder ausgegraut bleiben.
+- Firenze ist erster City-Zoom; 411/412 bleiben Backstage-Dokumentation,
+  keine App-Screens, keine Runtime-Geometrie und keine Asset-Freigabe.
+- Der naechste empfohlene Slice ist: World-Travel Zoom Flow Visual Preview.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
