@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `ITALIEN-CITY-ANCHORS`
+Aktive Sprint-ID: `EUROPE-COUNTRY-CITY-ZOOM`
 
 Sprint Goal:
 
-> Der Italien-Makro-Blockout wird vor der naechsten Visual-Ueberarbeitung an
-> echten italienischen Stadtankern ausgerichtet: Rom, Florenz, Venedig,
-> Mailand, Neapel und Bologna tragen den ersten Kern; weitere Staedte bleiben
-> Reserveanker.
+> Die Italien-Prototyp-Richtung wird zu einer Europa-Land-/Stadt-Zoom-
+> Architektur verallgemeinert: Italien bleibt erster Prototyp, aber
+> Laenderkonturen, Stadtanker, Stadtgrundformen und spielbare Stadtbereiche
+> muessen auf weitere europaeische Laender uebertragbar bleiben.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 323 |
+| Gesamtanzahl M16-T-Items | 324 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 299 |
+| Erledigt `[x]` | 300 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.4 % |
@@ -83,7 +83,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 12 | 11 | 1 | 0 | 0 | 95.8 % | `██████████` | Italien-Prototyp als naechsten World-Pfad anwenden: Natural-Earth-Source-of-Truth, sichtbare Arbeitskontur, Makro-Blockout, echte Stadtanker, gameplaygerechte Abstraktion und technische Layer vor Rendering. |
+| World / Island / Plot | M16T-WORLD | 13 | 12 | 1 | 0 | 0 | 96.2 % | `██████████` | Italien bleibt erster Prototyp, aber die neue Europa-Land-/Stadt-Zoom-Architektur muss fuer weitere Laender uebertragbar bleiben: Natural Earth fuer Laenderkonturen, Natural Earth Populated Places fuer Stadtanker-Kandidaten, laenderspezifische Stadt-/Gemeindequellen vor Stadtgrundformen. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -254,6 +254,7 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-010 | [x] | Italien-Arbeitskontur Dokumentationsvisual | Der Italien-Prototyp braucht ein sichtbares, pruefbares Arbeitsfundament statt weiterer reiner Doku-Schleifen. | `406-italy-working-contour-visual-gate.md` und `previews/italy_shape_working_contour/` enthalten eine vereinfachte Natural-Earth-basierte Italien-Kontur mit Festland, Sizilien und Sardinien als `documentation_only`, `not_asset`, `not_runtime_data` und `not_engine_ready`. | Runtime-Geometrie, finale Koordinaten, Assets, App-Code, fremde Kartenbilder oder Konturarbeit ohne Lizenz-/Source-of-Truth-Gate. | nein |
 | M16T-WORLD-011 | [x] | Italien-Makro-Blockout mit Wegen, Wasser und Bauflaechen | Der Italien-Prototyp braucht nach der Arbeitskontur ein sichtbares Spielraum-Blockout statt weiterer Theorie. | `407-italy-macro-blockout-paths-water-buildareas.md` und `previews/italy_macro_blockout_paths_water_buildareas/` zeigen Festland, Sizilien, Sardinien, 13 organische Bauflaechen, 6 sofort plausible Flaechen, 7 Reserveflaechen, Wege zu allen Flaechen, Wasser/Kueste, Uebergaenge und grobe No-Walk-/No-Build-Zonen als `documentation_only`, `not_asset`, `not_runtime_data` und `not_engine_ready`. | Runtime-Geometrie, finale Koordinaten, produktive Polygone, Assets, App-Code, GIS-/Debug-Look oder Bauflaechen ohne Wege. | nein |
 | M16T-WORLD-012 | [x] | Italien-Stadtanker fuer Makro-Blockout | Der sichtbare Blockout braucht echte italienische Orientierungspunkte, bevor Wege, Wasser und Bauflaechen erneut ausgerichtet werden. | `408-italy-city-anchor-plan.md` legt Rom, Florenz, Venedig, Mailand, Neapel und Bologna als sofort wichtige Stadtanker fest, definiert Pisa, Verona, Genua, Bari, Palermo, Catania und Cagliari als Reserveanker, bevorzugt Natural Earth Populated Places als spaeteren offenen Stadtpunkt-Kandidaten und blockiert finale Koordinaten/Runtime-Daten. | Blockout bleibt abstrakt, Madrid oder andere Nicht-Italien-Anker werden aufgenommen, OSM/ISTAT werden ohne Lizenzgate genutzt oder Stadtpunkte werden als Runtime-Koordinaten gelesen. | nein |
+| M16T-WORLD-013 | [x] | Europa-Land-/Stadt-Zoom-Architektur | Der Italien-Prototyp darf keine Italien-Sonderarchitektur werden, wenn Talvori spaeter weitere europaeische Laender aufnehmen soll. | `409-europe-country-city-zoom-architecture-gate.md` definiert Europa-Overview -> Land-Auswahl -> Landkarte -> Stadtanker -> Stadtgrundform/Stadtbereich -> Bauflaechen/Wege/Gebaeude/Lernorte, nutzt Italien als ersten Prototyp und verankert Natural Earth Admin 0, Natural Earth Populated Places und laenderspezifische Stadt-/Gemeindequellen als Source-Kandidaten. | Italien-only Architektur, ungepruefte OSM-/MapTiler-/OpenMapTiles-/free-map.org-Uebernahme, Kartenbild-/Tile-Tracing, Runtime-Koordinaten, YAML/JSON, Assets oder App-Code vor eigenem Gate. | nein |
 
 ## 14. Container / Depth
 
@@ -2116,6 +2117,35 @@ Das Stadtanker-Gate operationalisiert fuer kuenftige Slices:
 - Madrid wird ausgeschlossen, weil Madrid nicht in Italien liegt.
 - Der naechste empfohlene Slice ist: Italien-Makro-Blockout an Stadtankern
   ueberarbeiten.
+
+Europa-Land-/Stadt-Zoom-Architektur erledigt:
+
+- M16T-WORLD-013
+
+Das Europa-Zoom-Gate operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/409-europe-country-city-zoom-architecture-gate.md`
+  verallgemeinert die Italien-Richtung zu Europa-Overview -> Land-Auswahl ->
+  Landkarte -> Stadtanker -> Stadtgrundform/Stadtbereich ->
+  Bauflaechen/Wege/Gebaeude/Lernorte.
+- Italien bleibt erster konkreter Prototyp mit `country = Italy`, Natural
+  Earth Admin 0 als `country_shape_source`, Natural Earth Populated Places als
+  `city_anchor_source` und ISTAT Comuni als naechstem
+  `city_footprint_source`-Kandidaten.
+- Weitere europaeische Laender brauchen eigene Quellen-, Lizenz-,
+  Attributions- und Vereinfachungs-Gates fuer Laenderkontur, Stadtanker und
+  Stadt-/Gemeindegrenzen.
+- Reale Grenzen und Stadtformen sind Source-of-Truth-Kandidaten, aber
+  `playable_city_area`, `buildable_ground`, `reserved_ground`, `no_walk`,
+  `no_build` und `landmark_anchor` bleiben Talvori-gerecht abstrahiert.
+- OSM, OpenMapTiles, MapTiler, free-map.org und andere Tool-/Datenkandidaten
+  bleiben ohne eigenes Gate Kandidaten; Kartenbilder, Screenshots, Tiles,
+  Google/Apple/Pinterest/Atlasbilder und Luftbilder duerfen nicht kopiert oder
+  nachgezeichnet werden.
+- 409 gibt keine Runtime-Daten, keine finalen Koordinaten, keine YAML-/JSON-
+  Dateien, keine Assets, keinen Code und keine App-Integration frei.
+- Der naechste empfohlene Slice ist: Italien-Stadtgrundformen aus
+  ISTAT-Comuni pruefen/ableiten.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
