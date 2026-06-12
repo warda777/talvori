@@ -8,23 +8,23 @@ Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 Letzte Aktualisierung: 2026-06-12
 
-Aktive Sprint-ID: `ITALIEN-WORKING-CONTOUR`
+Aktive Sprint-ID: `ITALIEN-CITY-ANCHORS`
 
 Sprint Goal:
 
-> Die Natural-Earth-Source-of-Truth wird in eine erste sichtbare, vereinfachte
-> Italien-Arbeitskontur uebersetzt: Festland, Sizilien und Sardinien sind als
-> Dokumentationsvisual vorhanden, bleiben aber strikt not_asset,
-> not_runtime_data und not_engine_ready.
+> Der Italien-Makro-Blockout wird vor der naechsten Visual-Ueberarbeitung an
+> echten italienischen Stadtankern ausgerichtet: Rom, Florenz, Venedig,
+> Mailand, Neapel und Bologna tragen den ersten Kern; weitere Staedte bleiben
+> Reserveanker.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 321 |
+| Gesamtanzahl M16-T-Items | 323 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 297 |
+| Erledigt `[x]` | 299 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
 | Gewichteter Fortschritt | 94.4 % |
@@ -83,7 +83,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 10 | 9 | 1 | 0 | 0 | 95.0 % | `██████████` | Italien-Prototyp als naechsten World-Pfad anwenden: Natural-Earth-Source-of-Truth, sichtbare Arbeitskontur, echte Landform als Aussenkontur, gameplaygerechte Abstraktion und technische Layer vor Rendering. |
+| World / Island / Plot | M16T-WORLD | 12 | 11 | 1 | 0 | 0 | 95.8 % | `██████████` | Italien-Prototyp als naechsten World-Pfad anwenden: Natural-Earth-Source-of-Truth, sichtbare Arbeitskontur, Makro-Blockout, echte Stadtanker, gameplaygerechte Abstraktion und technische Layer vor Rendering. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -252,6 +252,8 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-008 | [x] | Italien-Prototyp Produktionsplan | Der naechste World-Prototyp soll nicht mit frei erfundener Inselkontur starten. | `404-italy-prototype-production-plan.md` definiert Italien als echte Aussenkontur, gameplaygerechte Innenabstraktion, sprechende Folge-Slices, technische Layer-vor-Rendering und Stop-Regeln gegen Debug-/Tool-Optik. | Neuer World-Prototyp startet mit freier Form, ungeklaerter Quelle, aufgeklebten Slots oder Runtime-Arbeit vor Source-of-Truth/Greybox. | nein |
 | M16T-WORLD-009 | [x] | Italien-Kontur Source-of-Truth Gate | Die echte Italien-Aussenkontur braucht eine rechtlich und fachlich saubere Quelle, bevor Konturdateien oder Greyboxes entstehen. | `405-italy-shape-source-of-truth-gate.md` empfiehlt Natural Earth Admin 0 - Countries als bevorzugte offene Vektorquelle, dokumentiert OSM nur als Lizenz-/Attributionskandidat, legt Festland/Sizilien/Sardinien als zu pruefende Bestandteile fest und definiert Vereinfachungs-/Stop-Regeln ohne Dateien, Koordinaten oder Runtime-Daten zu erzeugen. | Ungeklaerte Quelle, Google/Apple/Pinterest/Screenshot-/Atlas-Tracing, nicht erkennbare Italienform oder Runtime-Geometrie vor Source-of-Truth-Gate. | nein |
 | M16T-WORLD-010 | [x] | Italien-Arbeitskontur Dokumentationsvisual | Der Italien-Prototyp braucht ein sichtbares, pruefbares Arbeitsfundament statt weiterer reiner Doku-Schleifen. | `406-italy-working-contour-visual-gate.md` und `previews/italy_shape_working_contour/` enthalten eine vereinfachte Natural-Earth-basierte Italien-Kontur mit Festland, Sizilien und Sardinien als `documentation_only`, `not_asset`, `not_runtime_data` und `not_engine_ready`. | Runtime-Geometrie, finale Koordinaten, Assets, App-Code, fremde Kartenbilder oder Konturarbeit ohne Lizenz-/Source-of-Truth-Gate. | nein |
+| M16T-WORLD-011 | [x] | Italien-Makro-Blockout mit Wegen, Wasser und Bauflaechen | Der Italien-Prototyp braucht nach der Arbeitskontur ein sichtbares Spielraum-Blockout statt weiterer Theorie. | `407-italy-macro-blockout-paths-water-buildareas.md` und `previews/italy_macro_blockout_paths_water_buildareas/` zeigen Festland, Sizilien, Sardinien, 13 organische Bauflaechen, 6 sofort plausible Flaechen, 7 Reserveflaechen, Wege zu allen Flaechen, Wasser/Kueste, Uebergaenge und grobe No-Walk-/No-Build-Zonen als `documentation_only`, `not_asset`, `not_runtime_data` und `not_engine_ready`. | Runtime-Geometrie, finale Koordinaten, produktive Polygone, Assets, App-Code, GIS-/Debug-Look oder Bauflaechen ohne Wege. | nein |
+| M16T-WORLD-012 | [x] | Italien-Stadtanker fuer Makro-Blockout | Der sichtbare Blockout braucht echte italienische Orientierungspunkte, bevor Wege, Wasser und Bauflaechen erneut ausgerichtet werden. | `408-italy-city-anchor-plan.md` legt Rom, Florenz, Venedig, Mailand, Neapel und Bologna als sofort wichtige Stadtanker fest, definiert Pisa, Verona, Genua, Bari, Palermo, Catania und Cagliari als Reserveanker, bevorzugt Natural Earth Populated Places als spaeteren offenen Stadtpunkt-Kandidaten und blockiert finale Koordinaten/Runtime-Daten. | Blockout bleibt abstrakt, Madrid oder andere Nicht-Italien-Anker werden aufgenommen, OSM/ISTAT werden ohne Lizenzgate genutzt oder Stadtpunkte werden als Runtime-Koordinaten gelesen. | nein |
 
 ## 14. Container / Depth
 
@@ -2079,6 +2081,41 @@ Das Visual Gate operationalisiert fuer kuenftige Slices:
   `not_engine_ready`.
 - Der naechste empfohlene Slice ist: Italien-Makro-Blockout mit Wegen,
   Wasser und Bauflaechen.
+
+Italien-Makro-Blockout erledigt:
+
+- M16T-WORLD-011
+
+Das Blockout Gate operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/407-italy-macro-blockout-paths-water-buildareas.md`
+  dokumentiert den ersten sichtbaren Makro-Blockout fuer Italien.
+- `docs/world_design/previews/italy_macro_blockout_paths_water_buildareas/`
+  enthaelt SVG, PNG und Metadata fuer Wege, Wasser/Kueste, Uebergaenge,
+  Bauflaechen und grobe No-Walk-/No-Build-Bereiche.
+- Der Blockout nutzt die 406-Arbeitskontur als wiederverwendete Grundlage und
+  fuegt lokale Dokumentations-Overlays hinzu.
+- Statusschutz: `documentation_only`, `not_asset`, `not_runtime_data` und
+  `not_engine_ready`.
+- Der naechste empfohlene Slice ist: Italien technische Layer/Masks fuer
+  Makro-Blockout planen.
+
+Italien-Stadtanker fuer Makro-Blockout erledigt:
+
+- M16T-WORLD-012
+
+Das Stadtanker-Gate operationalisiert fuer kuenftige Slices:
+
+- `docs/world_design/408-italy-city-anchor-plan.md` legt echte italienische
+  Stadtanker fuer die Ueberarbeitung des Makro-Blockouts fest.
+- Sofort wichtig: Rom, Florenz, Venedig, Mailand, Neapel und Bologna.
+- Reserve: Pisa, Verona, Genua, Bari, Palermo, Catania und Cagliari.
+- Natural Earth Populated Places ist der bevorzugte spaetere offene
+  Stadtpunkt-Kandidat; OSM und ISTAT bleiben nur Kandidaten mit eigenem
+  Lizenz-/Attributionsgate.
+- Madrid wird ausgeschlossen, weil Madrid nicht in Italien liegt.
+- Der naechste empfohlene Slice ist: Italien-Makro-Blockout an Stadtankern
+  ueberarbeiten.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst
