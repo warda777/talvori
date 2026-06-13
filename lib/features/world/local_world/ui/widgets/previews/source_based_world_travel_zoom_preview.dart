@@ -1,0 +1,1429 @@
+// Isolated Talvori Welt travel showcase preview. Manual launch only; do not
+// export this file into product routes. The PNGs used here are preview
+// showcase images, not final product assets, not runtime map data and not
+// persistence.
+
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+void main() => runApp(const _WorldTravelShowcasePreviewApp());
+
+class _WorldTravelShowcasePreviewApp extends StatelessWidget {
+  const _WorldTravelShowcasePreviewApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: WorldTravelShowcasePreview(),
+    );
+  }
+}
+
+class WorldTravelShowcasePreview extends StatefulWidget {
+  const WorldTravelShowcasePreview({super.key});
+
+  @override
+  State<WorldTravelShowcasePreview> createState() =>
+      _WorldTravelShowcasePreviewState();
+}
+
+class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
+    with SingleTickerProviderStateMixin {
+  int _selectedIndex = _europeIndex;
+  int _selectedCountryIndex = _italyCountryIndex;
+  var _level = _TravelLevel.continent;
+  late final AnimationController _platformController;
+  Timer? _cityHintTimer;
+  bool _cityHintVisible = false;
+
+  _ContinentShowcase get _selected => _continents[_selectedIndex];
+
+  @override
+  void initState() {
+    super.initState();
+    _platformController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _cityHintTimer?.cancel();
+    _platformController.dispose();
+    super.dispose();
+  }
+
+  void _shiftContinent(int delta) {
+    setState(() {
+      _selectedIndex = (_selectedIndex + delta) % _continents.length;
+      if (_selectedIndex < 0) _selectedIndex += _continents.length;
+    });
+  }
+
+  void _selectContinent(int index) {
+    setState(() => _selectedIndex = index);
+  }
+
+  void _selectCountry(int index) {
+    setState(() {
+      _selectedCountryIndex = index;
+      _cityHintVisible = false;
+    });
+  }
+
+  void _handleSwipe(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() < 180) return;
+    _shiftContinent(velocity < 0 ? 1 : -1);
+  }
+
+  void _handleBack() {
+    if (_level == _TravelLevel.country) {
+      setState(() {
+        _level = _TravelLevel.continent;
+        _cityHintVisible = false;
+      });
+      return;
+    }
+    if (_selectedIndex == _europeIndex) return;
+    setState(() => _selectedIndex = _europeIndex);
+  }
+
+  void _openSelectedContinent() {
+    if (!_selected.isOpenable) return;
+    setState(() {
+      _level = _TravelLevel.country;
+      _selectedCountryIndex = _italyCountryIndex;
+      _cityHintVisible = false;
+    });
+  }
+
+  void _openSelectedCountry() {
+    setState(() => _cityHintVisible = true);
+    _cityHintTimer?.cancel();
+    _cityHintTimer = Timer(const Duration(milliseconds: 1700), () {
+      if (!mounted) return;
+      setState(() => _cityHintVisible = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _TravelColors.space,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragEnd: _level == _TravelLevel.continent
+            ? _handleSwipe
+            : null,
+        child: Stack(
+          children: [
+            Positioned.fill(child: CustomPaint(painter: _SpacePainter())),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Column(
+                      children: [
+                        _TopHud(
+                          title: _level == _TravelLevel.country
+                              ? _selected.label
+                              : 'Weltreise',
+                          onBack: _handleBack,
+                          backEnabled:
+                              _level == _TravelLevel.country ||
+                              _selectedIndex != _europeIndex,
+                        ),
+                        Expanded(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 380),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            child: _level == _TravelLevel.continent
+                                ? _ShowcaseStage(
+                                    key: const ValueKey('continent-stage'),
+                                    continent: _selected,
+                                    onOpen: _openSelectedContinent,
+                                  )
+                                : _CountrySelectionStage(
+                                    key: const ValueKey('country-stage'),
+                                    selectedIndex: _selectedCountryIndex,
+                                    platformAnimation: _platformController,
+                                    cityHintVisible: _cityHintVisible,
+                                    onSelect: _selectCountry,
+                                    onOpen: _openSelectedCountry,
+                                  ),
+                          ),
+                        ),
+                        if (_level == _TravelLevel.continent)
+                          _ContinentDock(
+                            selectedIndex: _selectedIndex,
+                            onSelect: _selectContinent,
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopHud extends StatelessWidget {
+  const _TopHud({
+    required this.title,
+    required this.onBack,
+    required this.backEnabled,
+  });
+
+  final String title;
+  final VoidCallback onBack;
+  final bool backEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _CircleHudButton(
+          icon: Icons.chevron_left_rounded,
+          onTap: onBack,
+          enabled: backEnabled,
+        ),
+        const SizedBox(width: 12),
+        _TitlePill(text: title),
+        const Spacer(),
+        const _CompanionPill(text: 'Wohin zuerst?'),
+      ],
+    );
+  }
+}
+
+class _ShowcaseStage extends StatelessWidget {
+  const _ShowcaseStage({
+    super.key,
+    required this.continent,
+    required this.onOpen,
+  });
+
+  final _ContinentShowcase continent;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageExtent = math.min(
+          constraints.maxWidth * 1.12,
+          constraints.maxHeight * 0.68,
+        );
+        final topGap = math.max(48.0, constraints.maxHeight * 0.12);
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: topGap),
+            SizedBox(
+              width: imageExtent,
+              height: imageExtent,
+              child: _HeroContinentImage(continent: continent),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              continent.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: _TravelColors.text,
+                fontSize: 27,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+                shadows: [Shadow(color: Color(0xDD02050A), blurRadius: 14)],
+              ),
+            ),
+            const SizedBox(height: 5),
+            continent.isOpenable
+                ? _OpenButton(label: 'Europa öffnen', onPressed: onOpen)
+                : const SizedBox(height: 28),
+            const Spacer(),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _HeroContinentImage extends StatelessWidget {
+  const _HeroContinentImage({required this.continent});
+
+  final _ContinentShowcase continent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [_ShowcaseImageAsset(continent: continent)],
+    );
+  }
+}
+
+class _ShowcaseImageAsset extends StatelessWidget {
+  const _ShowcaseImageAsset({required this.continent});
+
+  final _ContinentShowcase continent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      continent.heroAssetPath,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (context, error, stackTrace) {
+        return Center(
+          child: Text(
+            'Bild fehlt',
+            style: TextStyle(
+              color: _TravelColors.text.withValues(alpha: 0.76),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ContinentDock extends StatelessWidget {
+  const _ContinentDock({required this.selectedIndex, required this.onSelect});
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 98,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        itemBuilder: (context, index) {
+          final continent = _continents[index];
+          return _ContinentCard(
+            continent: continent,
+            selected: index == selectedIndex,
+            onTap: () => onSelect(index),
+          );
+        },
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemCount: _continents.length,
+      ),
+    );
+  }
+}
+
+class _ContinentCard extends StatelessWidget {
+  const _ContinentCard({
+    required this.continent,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _ContinentShowcase continent;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        width: selected ? 92 : 82,
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xCC0A1C2B) : const Color(0x99051018),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? _TravelColors.gold.withValues(alpha: 0.72)
+                : _TravelColors.homeCyan.withValues(alpha: 0.20),
+            width: selected ? 1.5 : 1.0,
+          ),
+          boxShadow: [
+            if (selected)
+              BoxShadow(
+                color: _TravelColors.gold.withValues(alpha: 0.18),
+                blurRadius: 22,
+              ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Transform.scale(
+                      scale: selected ? 1.08 : 1.03,
+                      child: Image.asset(
+                        continent.heroAssetPath,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.medium,
+                        opacity: AlwaysStoppedAnimation(
+                          continent.isOpenable ? 1 : 0.56,
+                        ),
+                      ),
+                    ),
+                    if (!continent.isOpenable)
+                      const Positioned(
+                        right: 4,
+                        top: 2,
+                        child: Icon(
+                          Icons.lock_rounded,
+                          color: Color(0xFFD6DEE8),
+                          size: 13,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                continent.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: selected
+                      ? _TravelColors.text
+                      : _TravelColors.text.withValues(alpha: 0.62),
+                  fontSize: selected ? 11 : 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountrySelectionStage extends StatefulWidget {
+  const _CountrySelectionStage({
+    super.key,
+    required this.selectedIndex,
+    required this.platformAnimation,
+    required this.cityHintVisible,
+    required this.onSelect,
+    required this.onOpen,
+  });
+
+  final int selectedIndex;
+  final Animation<double> platformAnimation;
+  final bool cityHintVisible;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onOpen;
+
+  @override
+  State<_CountrySelectionStage> createState() => _CountrySelectionStageState();
+}
+
+class _CountrySelectionStageState extends State<_CountrySelectionStage> {
+  static const _loopBasePage = 10000;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(
+      initialPage: _pageForLogicalIndex(widget.selectedIndex),
+      viewportFraction: 0.62,
+    );
+  }
+
+  int _countryIndexForPage(int page) {
+    return page % _countries.length;
+  }
+
+  int _pageForLogicalIndex(int logicalIndex) {
+    return _loopBasePage + logicalIndex;
+  }
+
+  int _nearestPageForLogicalIndex(int logicalIndex) {
+    final currentPage = _pageController.hasClients
+        ? (_pageController.page ?? _pageController.initialPage.toDouble())
+              .round()
+        : _pageController.initialPage;
+    final currentLogical = _countryIndexForPage(currentPage);
+    var delta = (logicalIndex - currentLogical) % _countries.length;
+    if (delta > _countries.length / 2) delta -= _countries.length;
+    return currentPage + delta;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CountrySelectionStage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedIndex != oldWidget.selectedIndex &&
+        _pageController.hasClients) {
+      _pageController.animateToPage(
+        _nearestPageForLogicalIndex(widget.selectedIndex),
+        duration: const Duration(milliseconds: 360),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedCountry = _countries[widget.selectedIndex];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 650;
+        final lightHeight = math.min(
+          compact ? 260.0 : 330.0,
+          constraints.maxHeight * 0.78,
+        );
+        final stageBottom = compact ? -8.0 : -10.0;
+        return Column(
+          children: [
+            Expanded(
+              child: Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    bottom: stageBottom,
+                    child: SizedBox(
+                      width: math.min(390, constraints.maxWidth * 0.94),
+                      height: lightHeight,
+                      child: AnimatedBuilder(
+                        animation: widget.platformAnimation,
+                        builder: (context, _) {
+                          return CustomPaint(
+                            painter: _CountryHeroLightPainter(
+                              progress: widget.platformAnimation.value,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  PageView.builder(
+                    controller: _pageController,
+                    physics: const BouncingScrollPhysics(),
+                    clipBehavior: Clip.none,
+                    onPageChanged: (page) {
+                      widget.onSelect(_countryIndexForPage(page));
+                    },
+                    itemBuilder: (context, index) {
+                      final countryIndex = _countryIndexForPage(index);
+                      final country = _countries[countryIndex];
+                      return AnimatedBuilder(
+                        animation: _pageController,
+                        builder: (context, child) {
+                          final currentPage =
+                              _pageController.hasClients &&
+                                  _pageController.position.haveDimensions
+                              ? _pageController.page ??
+                                    _pageController.initialPage.toDouble()
+                              : _pageController.initialPage.toDouble();
+                          final distance = (currentPage - index).abs().clamp(
+                            0.0,
+                            1.0,
+                          );
+                          final scale = 1.02 - distance * 0.24;
+                          final translateY = distance * (compact ? 64 : 86);
+                          final opacity = 1.0 - distance * 0.56;
+                          return Transform.translate(
+                            offset: Offset(0, translateY),
+                            child: Transform.scale(
+                              scale: scale,
+                              alignment: Alignment.center,
+                              child: Opacity(opacity: opacity, child: child),
+                            ),
+                          );
+                        },
+                        child: _CountryShowcaseItem(
+                          country: country,
+                          selected: countryIndex == widget.selectedIndex,
+                          onTap: () {
+                            if (countryIndex == widget.selectedIndex) {
+                              widget.onOpen();
+                              return;
+                            }
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 420),
+                              curve: Curves.easeOutCubic,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              child: _CountryTitle(
+                key: ValueKey(selectedCountry.label),
+                label: selectedCountry.label,
+              ),
+            ),
+            SizedBox(height: compact ? 5 : 7),
+            _OpenButton(label: 'Städte ansehen', onPressed: widget.onOpen),
+            SizedBox(height: compact ? 8 : 12),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 220),
+              opacity: widget.cityHintVisible ? 1 : 0,
+              child: _NextLevelHint(country: selectedCountry.label),
+            ),
+            SizedBox(height: compact ? 8 : 14),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CountryShowcaseItem extends StatelessWidget {
+  const _CountryShowcaseItem({
+    required this.country,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _CountryShowcase country;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: selected ? 0 : 12,
+          vertical: selected ? 0 : 18,
+        ),
+        child: Transform.translate(
+          offset: Offset(
+            0,
+            selected ? country.verticalOffset : country.verticalOffset * 0.45,
+          ),
+          child: Transform.scale(
+            scale: selected
+                ? 1.18 * country.visualScale
+                : 0.90 * country.sideScale,
+            child: Image.asset(
+              country.assetPath,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (context, error, stackTrace) {
+                return Center(
+                  child: Text(
+                    'Bild fehlt',
+                    style: TextStyle(
+                      color: _TravelColors.text.withValues(alpha: 0.72),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryTitle extends StatelessWidget {
+  const _CountryTitle({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final length = label.runes.length;
+    final fontSize = length >= 22
+        ? 25.5
+        : length >= 17
+        ? 27.5
+        : length >= 13
+        ? 29.5
+        : 31.0;
+
+    return SizedBox(
+      height: 64,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            label,
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: _TravelColors.text,
+              fontSize: fontSize,
+              height: 1.02,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0,
+              shadows: const [Shadow(color: Color(0xEE02050A), blurRadius: 16)],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryHeroLightPainter extends CustomPainter {
+  const _CountryHeroLightPainter({required this.progress});
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pulse = 0.5 + 0.5 * math.sin(progress * math.pi * 2);
+    final center = Offset(size.width / 2, size.height * 0.78);
+    final shadowRect = Rect.fromCenter(
+      center: center.translate(0, size.height * 0.035),
+      width: size.width * 0.64,
+      height: size.height * 0.11,
+    );
+    final ambientRect = Rect.fromCenter(
+      center: center.translate(0, -size.height * 0.22),
+      width: size.width * 1.04,
+      height: size.height * 0.95,
+    );
+    final floorRect = Rect.fromCenter(
+      center: center,
+      width: size.width * 0.96,
+      height: size.height * 0.18,
+    );
+    final beamRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height * 0.40),
+      width: size.width * 0.88,
+      height: size.height * 0.80,
+    );
+    final beamTop = size.height * 0.08;
+    final beamBottom = center.dy + size.height * 0.03;
+    final beamPath = Path()
+      ..moveTo(center.dx - size.width * 0.43, beamBottom)
+      ..cubicTo(
+        center.dx - size.width * 0.24,
+        size.height * 0.36,
+        center.dx - size.width * 0.10,
+        beamTop,
+        center.dx,
+        beamTop,
+      )
+      ..cubicTo(
+        center.dx + size.width * 0.10,
+        beamTop,
+        center.dx + size.width * 0.24,
+        size.height * 0.36,
+        center.dx + size.width * 0.43,
+        beamBottom,
+      )
+      ..quadraticBezierTo(
+        center.dx,
+        center.dy + size.height * 0.15,
+        center.dx - size.width * 0.43,
+        beamBottom,
+      )
+      ..close();
+    final coreRect = Rect.fromCenter(
+      center: Offset(center.dx, size.height * 0.46),
+      width: size.width * 0.42,
+      height: size.height * 0.78,
+    );
+
+    canvas.drawOval(
+      ambientRect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            _TravelColors.homeCyan.withValues(alpha: 0.13 + pulse * 0.025),
+            _TravelColors.homeViolet.withValues(alpha: 0.08),
+            Colors.transparent,
+          ],
+          stops: const [0, 0.50, 1],
+        ).createShader(ambientRect),
+    );
+
+    canvas.drawPath(
+      beamPath,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            _TravelColors.homeCyan.withValues(alpha: 0.25 + pulse * 0.045),
+            _TravelColors.homeViolet.withValues(alpha: 0.145),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.58, 1.0],
+        ).createShader(beamRect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 26),
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(coreRect, const Radius.circular(999)),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            _TravelColors.homeCyan.withValues(alpha: 0.12 + pulse * 0.025),
+            _TravelColors.homeViolet.withValues(alpha: 0.075),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.50, 1.0],
+        ).createShader(coreRect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24),
+    );
+
+    canvas.drawOval(
+      shadowRect,
+      Paint()
+        ..color = const Color(0xD002050A)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
+    );
+
+    canvas.drawOval(
+      floorRect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            _TravelColors.gold.withValues(alpha: 0.18 + pulse * 0.03),
+            _TravelColors.homeCyan.withValues(alpha: 0.18),
+            _TravelColors.homeViolet.withValues(alpha: 0.10),
+            Colors.transparent,
+          ],
+          stops: const [0, 0.42, 0.70, 1],
+        ).createShader(floorRect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CountryHeroLightPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
+}
+
+class _NextLevelHint extends StatelessWidget {
+  const _NextLevelHint({required this.country});
+
+  final String country;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xB607101A),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: _TravelColors.homeCyan.withValues(alpha: 0.26),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        child: Text(
+          '$country: Städte-Auswahl vorbereitet',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: _TravelColors.text.withValues(alpha: 0.78),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OpenButton extends StatelessWidget {
+  const _OpenButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: _TravelColors.gold,
+        foregroundColor: const Color(0xFF24160A),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        shape: const StadiumBorder(),
+        elevation: 0,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0,
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleHudButton extends StatelessWidget {
+  const _CircleHudButton({
+    required this.icon,
+    required this.onTap,
+    required this.enabled,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: enabled ? 1 : 0.54,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xAA07101A),
+            border: Border.all(
+              color: _TravelColors.homeCyan.withValues(alpha: 0.54),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _TravelColors.homeCyan.withValues(alpha: 0.16),
+                blurRadius: 18,
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(icon, color: _TravelColors.text, size: 26),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TitlePill extends StatelessWidget {
+  const _TitlePill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xB307101A),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: _TravelColors.homeCyan.withValues(alpha: 0.54),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _TravelColors.homeCyan.withValues(alpha: 0.13),
+            blurRadius: 15,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: _TravelColors.text,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompanionPill extends StatelessWidget {
+  const _CompanionPill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xEEF8E8C8),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: _TravelColors.gold.withValues(alpha: 0.20),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.auto_awesome_rounded,
+              color: Color(0xFFA76B1D),
+              size: 14,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF6A4513),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpacePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_TravelColors.space, Color(0xFF061221), Color(0xFF02050A)],
+          stops: [0, 0.48, 1],
+        ).createShader(rect),
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            _TravelColors.homeCyan.withValues(alpha: 0.12),
+            Colors.transparent,
+            _TravelColors.homeViolet.withValues(alpha: 0.11),
+          ],
+          stops: const [0, 0.52, 1],
+        ).createShader(rect),
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xF002050A), Color(0x0002050A), Color(0xAA02050A)],
+          stops: [0.0, 0.46, 1.0],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpacePainter oldDelegate) => false;
+}
+
+class _ContinentShowcase {
+  const _ContinentShowcase({
+    required this.label,
+    required this.heroAssetPath,
+    required this.isOpenable,
+  });
+
+  final String label;
+  final String heroAssetPath;
+  final bool isOpenable;
+}
+
+class _CountryShowcase {
+  const _CountryShowcase({
+    required this.label,
+    required this.assetPath,
+    this.visualScale = 1,
+    this.verticalOffset = 0,
+    this.sideScale = 1,
+  });
+
+  final String label;
+  final String assetPath;
+  final double visualScale;
+  final double verticalOffset;
+  final double sideScale;
+}
+
+class _TravelColors {
+  const _TravelColors._();
+
+  static const space = Color(0xFF02050A);
+  static const homeCyan = Color(0xFF00D8FF);
+  static const homeViolet = Color(0xFF9B4DFF);
+  static const text = Color(0xFFF4F8FF);
+  static const gold = Color(0xFFFFD69A);
+}
+
+const _assetBase = 'assets/images/world/travel/continent_showcase';
+const _countryAssetBase = 'assets/images/world/travel/country_showcase/cutout';
+const _europeIndex = 2;
+const _italyCountryIndex = 0;
+
+enum _TravelLevel { continent, country }
+
+const _continents = <_ContinentShowcase>[
+  _ContinentShowcase(
+    label: 'Nordamerika',
+    heroAssetPath: '$_assetBase/north_america_cutout.png',
+    isOpenable: false,
+  ),
+  _ContinentShowcase(
+    label: 'Südamerika',
+    heroAssetPath: '$_assetBase/south_america_cutout.png',
+    isOpenable: false,
+  ),
+  _ContinentShowcase(
+    label: 'Europa',
+    heroAssetPath: '$_assetBase/europe_cutout.png',
+    isOpenable: true,
+  ),
+  _ContinentShowcase(
+    label: 'Afrika',
+    heroAssetPath: '$_assetBase/africa_cutout.png',
+    isOpenable: false,
+  ),
+  _ContinentShowcase(
+    label: 'Asien',
+    heroAssetPath: '$_assetBase/asia_cutout.png',
+    isOpenable: false,
+  ),
+  _ContinentShowcase(
+    label: 'Australien',
+    heroAssetPath: '$_assetBase/australia_cutout.png',
+    isOpenable: false,
+  ),
+];
+
+const _countries = <_CountryShowcase>[
+  _CountryShowcase(
+    label: 'Italien',
+    assetPath: '$_countryAssetBase/italy_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Frankreich',
+    assetPath: '$_countryAssetBase/france_showcase.png',
+    visualScale: 0.97,
+  ),
+  _CountryShowcase(
+    label: 'Deutschland',
+    assetPath: '$_countryAssetBase/germany_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Spanien',
+    assetPath: '$_countryAssetBase/spain_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Portugal',
+    assetPath: '$_countryAssetBase/portugal_showcase.png',
+    visualScale: 0.82,
+    verticalOffset: 7,
+    sideScale: 0.88,
+  ),
+  _CountryShowcase(
+    label: 'Vereinigtes Königreich',
+    assetPath: '$_countryAssetBase/united_kingdom_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Irland',
+    assetPath: '$_countryAssetBase/ireland_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Island',
+    assetPath: '$_countryAssetBase/iceland_showcase.png',
+    visualScale: 1.1,
+    verticalOffset: -4,
+  ),
+  _CountryShowcase(
+    label: 'Norwegen',
+    assetPath: '$_countryAssetBase/norway_showcase.png',
+    visualScale: 1.02,
+  ),
+  _CountryShowcase(
+    label: 'Schweden',
+    assetPath: '$_countryAssetBase/sweden_showcase.png',
+    visualScale: 0.86,
+    verticalOffset: 8,
+    sideScale: 0.9,
+  ),
+  _CountryShowcase(
+    label: 'Finnland',
+    assetPath: '$_countryAssetBase/finland_showcase.png',
+    visualScale: 0.96,
+  ),
+  _CountryShowcase(
+    label: 'Dänemark',
+    assetPath: '$_countryAssetBase/denmark_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Niederlande',
+    assetPath: '$_countryAssetBase/netherlands_showcase.png',
+    visualScale: 1.02,
+  ),
+  _CountryShowcase(
+    label: 'Belgien',
+    assetPath: '$_countryAssetBase/belgium_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Luxemburg',
+    assetPath: '$_countryAssetBase/luxembourg_showcase.png',
+    visualScale: 1.05,
+  ),
+  _CountryShowcase(
+    label: 'Schweiz',
+    assetPath: '$_countryAssetBase/switzerland_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Österreich',
+    assetPath: '$_countryAssetBase/austria_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Liechtenstein',
+    assetPath: '$_countryAssetBase/liechtenstein_showcase.png',
+    visualScale: 0.9,
+    verticalOffset: 5,
+    sideScale: 0.92,
+  ),
+  _CountryShowcase(
+    label: 'Polen',
+    assetPath: '$_countryAssetBase/poland_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Tschechien',
+    assetPath: '$_countryAssetBase/czech_republic_showcase.png',
+    visualScale: 1.06,
+  ),
+  _CountryShowcase(
+    label: 'Slowakei',
+    assetPath: '$_countryAssetBase/slovakia_showcase.png',
+    visualScale: 1.27,
+    verticalOffset: -8,
+    sideScale: 1.1,
+  ),
+  _CountryShowcase(
+    label: 'Ungarn',
+    assetPath: '$_countryAssetBase/hungary_showcase.png',
+    visualScale: 1.08,
+  ),
+  _CountryShowcase(
+    label: 'Slowenien',
+    assetPath: '$_countryAssetBase/slovenia_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Kroatien',
+    assetPath: '$_countryAssetBase/croatia_showcase.png',
+    visualScale: 1.0,
+  ),
+  _CountryShowcase(
+    label: 'Bosnien & Herzegowina',
+    assetPath: '$_countryAssetBase/bosnia_and_herzegovina_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Serbien',
+    assetPath: '$_countryAssetBase/serbia_showcase.png',
+    visualScale: 0.98,
+  ),
+  _CountryShowcase(
+    label: 'Montenegro',
+    assetPath: '$_countryAssetBase/montenegro_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Kosovo',
+    assetPath: '$_countryAssetBase/kosovo_showcase.png',
+    visualScale: 1.0,
+  ),
+  _CountryShowcase(
+    label: 'Albanien',
+    assetPath: '$_countryAssetBase/albania_showcase.png',
+    visualScale: 0.94,
+    verticalOffset: 3,
+  ),
+  _CountryShowcase(
+    label: 'Nordmazedonien',
+    assetPath: '$_countryAssetBase/north_macedonia_showcase.png',
+    visualScale: 1.06,
+  ),
+  _CountryShowcase(
+    label: 'Griechenland',
+    assetPath: '$_countryAssetBase/greece_showcase.png',
+    visualScale: 1.04,
+  ),
+  _CountryShowcase(
+    label: 'Bulgarien',
+    assetPath: '$_countryAssetBase/bulgaria_showcase.png',
+    visualScale: 1.07,
+  ),
+  _CountryShowcase(
+    label: 'Rumänien',
+    assetPath: '$_countryAssetBase/romania_showcase.png',
+    visualScale: 1.07,
+  ),
+  _CountryShowcase(
+    label: 'Moldau',
+    assetPath: '$_countryAssetBase/moldova_showcase.png',
+    visualScale: 1.02,
+  ),
+  _CountryShowcase(
+    label: 'Ukraine',
+    assetPath: '$_countryAssetBase/ukraine_showcase.png',
+    visualScale: 1.18,
+    verticalOffset: -5,
+    sideScale: 1.08,
+  ),
+  _CountryShowcase(
+    label: 'Belarus',
+    assetPath: '$_countryAssetBase/belarus_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Litauen',
+    assetPath: '$_countryAssetBase/lithuania_showcase.png',
+    visualScale: 1.11,
+    verticalOffset: -4,
+  ),
+  _CountryShowcase(
+    label: 'Lettland',
+    assetPath: '$_countryAssetBase/latvia_showcase.png',
+    visualScale: 1.2,
+    verticalOffset: -6,
+    sideScale: 1.09,
+  ),
+  _CountryShowcase(
+    label: 'Estland',
+    assetPath: '$_countryAssetBase/estonia_showcase.png',
+    visualScale: 1.05,
+  ),
+  _CountryShowcase(
+    label: 'Russland',
+    assetPath: '$_countryAssetBase/russia_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Türkei',
+    assetPath: '$_countryAssetBase/turkey_showcase.png',
+    visualScale: 1.16,
+    verticalOffset: -5,
+    sideScale: 1.08,
+  ),
+  _CountryShowcase(
+    label: 'Zypern',
+    assetPath: '$_countryAssetBase/cyprus_showcase.png',
+    visualScale: 1.07,
+  ),
+  _CountryShowcase(
+    label: 'Malta',
+    assetPath: '$_countryAssetBase/malta_showcase.png',
+    visualScale: 1.04,
+  ),
+  _CountryShowcase(
+    label: 'San Marino',
+    assetPath: '$_countryAssetBase/san_marino_showcase.png',
+    visualScale: 0.94,
+    verticalOffset: 5,
+    sideScale: 0.95,
+  ),
+  _CountryShowcase(
+    label: 'Vatikanstadt',
+    assetPath: '$_countryAssetBase/vatican_city_showcase.png',
+    visualScale: 1.05,
+  ),
+  _CountryShowcase(
+    label: 'Monaco',
+    assetPath: '$_countryAssetBase/monaco_showcase.png',
+    visualScale: 1.08,
+  ),
+  _CountryShowcase(
+    label: 'Andorra',
+    assetPath: '$_countryAssetBase/andorra_showcase.png',
+    visualScale: 1.03,
+  ),
+  _CountryShowcase(
+    label: 'Georgien',
+    assetPath: '$_countryAssetBase/georgia_showcase.png',
+    visualScale: 1.05,
+  ),
+  _CountryShowcase(
+    label: 'Armenien',
+    assetPath: '$_countryAssetBase/armenia_showcase.png',
+    visualScale: 0.99,
+  ),
+  _CountryShowcase(
+    label: 'Aserbaidschan',
+    assetPath: '$_countryAssetBase/azerbaijan_showcase.png',
+    visualScale: 0.98,
+  ),
+];

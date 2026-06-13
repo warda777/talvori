@@ -57,6 +57,8 @@ flutter:
     - assets/images/
     - assets/images/mascot/
     - assets/images/world/
+    - assets/images/world/travel/continent_showcase/
+    - assets/images/world/travel/country_showcase/cutout/
     - assets/images/world/buildable_islands/forest_clearing/
     - assets/sounds/
     - assets/local_import/default_words_v1.json
