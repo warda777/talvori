@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+<title>Florenz Parcel Outlines</title>
+<desc>Visible parcel boundary outlines P01-P14.</desc>
+<rect width="100%" height="100%" fill="#06101d"/>
+<polygon id="P01" points="412.0,228.0 406.0,254.0 369.0,263.0 321.0,241.0 334.0,211.0 396.0,201.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="369.9" y="237.8" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P01</text>
+<polygon id="P02" points="488.0,236.0 546.0,232.0 590.0,264.0 572.0,298.0 510.0,298.0 486.0,266.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="534.6" y="271.9" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P02</text>
+<polygon id="P03" points="735.0,183.0 757.0,165.0 799.0,171.0 819.0,207.0 819.0,222.0 779.0,233.0 762.0,229.0 735.0,204.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="776.4" y="205.1" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P03</text>
+<polygon id="P04" points="873.0,147.0 939.0,150.0 968.0,182.0 954.0,225.0 890.0,219.0 870.0,184.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="917.2" y="191.0" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P04</text>
+<polygon id="P05" points="1089.0,292.0 1115.0,270.0 1163.0,268.0 1196.0,286.0 1198.0,320.0 1179.0,330.0 1121.0,318.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1149.7" y="303.2" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P05</text>
+<polygon id="P06" points="276.0,360.0 269.0,391.0 248.0,396.0 206.0,389.0 189.0,362.0 217.0,335.0 249.0,334.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="234.8" y="371.5" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P06</text>
+<polygon id="P07" points="484.0,566.0 467.0,600.0 433.0,603.0 407.0,597.0 396.0,563.0 418.0,542.0 460.0,542.0" fill="none" stroke="#ffd36c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="439.1" y="578.0" fill="#ffd36c" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P07</text>
+<polygon id="P08" points="446.0,482.0 434.0,513.0 379.0,517.0 349.0,487.0 372.0,460.0 422.0,457.0" fill="none" stroke="#b8e9ac" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="399.5" y="493.0" fill="#b8e9ac" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P08</text>
+<polygon id="P09" points="578.0,480.0 596.0,455.0 649.0,454.0 678.0,480.0 657.0,510.0 601.0,511.0" fill="none" stroke="#b8e9ac" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="627.1" y="488.4" fill="#b8e9ac" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P09</text>
+<polygon id="P10" points="806.0,580.0 799.0,615.0 756.0,621.0 717.0,594.0 738.0,560.0 780.0,556.0" fill="none" stroke="#b8e9ac" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="764.5" y="594.4" fill="#b8e9ac" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P10</text>
+<polygon id="P11" points="929.0,569.0 905.0,604.0 888.0,606.0 854.0,599.0 846.0,571.0 878.0,545.0 906.0,548.0" fill="none" stroke="#b8e9ac" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="886.3" y="582.0" fill="#b8e9ac" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P11</text>
+<polygon id="P12" points="1067.0,481.0 1085.0,513.0 1060.0,544.0 1027.0,546.0 996.0,524.0 1001.0,493.0 1014.0,484.0" fill="none" stroke="#bf62dc" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1039.3" y="518.3" fill="#bf62dc" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P12</text>
+<polygon id="P13" points="1104.0,392.0 1121.0,377.0 1169.0,387.0 1186.0,415.0 1172.0,442.0 1127.0,443.0" fill="none" stroke="#bf62dc" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1145.2" y="417.0" fill="#bf62dc" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P13</text>
+<polygon id="P14" points="1109.0,607.0 1095.0,638.0 1066.0,645.0 1023.0,626.0 1043.0,579.0 1088.0,578.0" fill="none" stroke="#bf62dc" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="1067.2" y="616.5" fill="#bf62dc" font-family="Arial" font-size="16" font-weight="700" text-anchor="middle">P14</text>
+</svg>

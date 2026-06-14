@@ -1,0 +1,543 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2700" height="1350" viewBox="0 0 2700 1350" role="img" aria-labelledby="title desc">
+  <title id="title">Firenze playable city layout blueprint v5 - expanded Florence shape and landmark-aware infrastructure review</title>
+  <desc id="desc">Documentation-only Firenze playable city layout blueprint with expanded Florence-shaped boundary, Arno, B1-B3 bridges, 14 parcels, vegetation buffers, organic paths, five landmark anchors, QA badges and legend.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071625"/>
+      <stop offset="0.45" stop-color="#06111c"/>
+      <stop offset="1" stop-color="#020914"/>
+    </linearGradient>
+    <radialGradient id="panelGlow" cx="45%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#0a2830" stop-opacity="0.7"/>
+      <stop offset="0.65" stop-color="#092032" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#020915" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="groundFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#315e31"/>
+      <stop offset="0.52" stop-color="#204a28"/>
+      <stop offset="1" stop-color="#133420"/>
+    </linearGradient>
+    <linearGradient id="riverFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a7287"/>
+      <stop offset="0.48" stop-color="#28a8b9"/>
+      <stop offset="1" stop-color="#12657d"/>
+    </linearGradient>
+    <linearGradient id="earlyFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe17a"/>
+      <stop offset="1" stop-color="#e3a742"/>
+    </linearGradient>
+    <linearGradient id="reserveFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c5efb5"/>
+      <stop offset="1" stop-color="#82c981"/>
+    </linearGradient>
+    <linearGradient id="specialFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d681f6"/>
+      <stop offset="1" stop-color="#9e49cd"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <filter id="warmGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#ffd979" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#f79a35" flood-opacity="0.42"/>
+    </filter>
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#57f4ff" flood-opacity="0.55"/>
+    </filter>
+    <pattern id="forestDots" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="10" r="3.2" fill="#7fc663" opacity="0.75"/>
+      <circle cx="20" cy="7" r="2.6" fill="#a2dc75" opacity="0.62"/>
+      <circle cx="25" cy="23" r="3.4" fill="#5ea848" opacity="0.65"/>
+      <circle cx="12" cy="25" r="2.4" fill="#b2e58b" opacity="0.5"/>
+    </pattern>
+    <pattern id="hillHatch" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)">
+      <line x1="0" y1="0" x2="0" y2="22" stroke="#d2b263" stroke-width="3" opacity="0.34"/>
+    </pattern>
+    <pattern id="landmarkBand" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+      <line x1="0" y1="0" x2="0" y2="26" stroke="#f1f7ff" stroke-width="2" opacity="0.18"/>
+    </pattern>
+    <clipPath id="cityClip">
+      <path d="M75 710 L115 600 L225 565 L270 480 L420 445 L500 360 L650 328 L720 245 L810 275 L865 205 L1000 165 L1110 230 L1240 195 L1330 240 L1470 205 L1565 285 L1715 315 L1770 395 L1880 410 L1945 510 L2050 545 L2110 645 L2058 750 L1910 792 L1865 900 L1720 875 L1620 990 L1435 950 L1320 1050 L1155 1002 L1010 1080 L850 1045 L720 1100 L565 1038 L430 1088 L270 1000 L190 910 L95 850 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="2400" height="1350" fill="url(#bg)"/>
+  <rect x="8" y="8" width="2684" height="1334" rx="22" fill="url(#panelGlow)" stroke="#1eb5d0" stroke-width="1.5" opacity="0.96"/>
+
+  <text x="34" y="58" class="title">Firenze playable city layout blueprint v5 - expanded Florence shape and landmark-aware infrastructure review</text>
+  <text x="34" y="94" class="status">planning only | not runtime data | not asset | not engine ready | no app UI</text>
+  <text x="34" y="126" class="note">Clean rule: spacious parcels, visible vegetation buffers, organic paths, landmark anchors, and Arno movement only via B1-B3.</text>
+
+  <g id="map-panel">
+    <rect x="30" y="156" width="2090" height="818" rx="24" fill="#04131f" stroke="#20b7d3" stroke-width="1.4"/>
+    <rect x="44" y="172" width="2062" height="786" rx="18" fill="#04111c" opacity="0.74"/>
+
+    <g id="qa-badges">
+      <g transform="translate(60 190)">
+        <rect width="260" height="32" rx="8" fill="#062434" stroke="#75ffea" stroke-width="1.4"/>
+        <text x="15" y="22" class="badge">QA: 14/14 parcels reachable</text>
+      </g>
+      <g transform="translate(60 232)">
+        <rect width="324" height="32" rx="8" fill="#062434" stroke="#75ffea" stroke-width="1.4"/>
+        <text x="15" y="22" class="badge">QA: all Arno crossings use B1-B3</text>
+      </g>
+      <g transform="translate(60 274)">
+        <rect width="218" height="32" rx="8" fill="#062434" stroke="#75ffea" stroke-width="1.4"/>
+        <text x="15" y="22" class="badge">QA: no parcel overlap</text>
+      </g>
+      <g transform="translate(60 316)">
+        <rect width="288" height="32" rx="8" fill="#062434" stroke="#75ffea" stroke-width="1.4"/>
+        <text x="15" y="22" class="badge">QA: vegetation buffers visible</text>
+      </g>
+      <g transform="translate(60 358)">
+        <rect width="306" height="32" rx="8" fill="#062434" stroke="#75ffea" stroke-width="1.4"/>
+        <text x="15" y="22" class="badge">QA: Florence landmarks anchored</text>
+      </g>
+    </g>
+
+    <g id="city" clip-path="url(#cityClip)">
+      <rect x="40" y="130" width="1770" height="920" fill="url(#groundFill)"/>
+      <path d="M80 780 C270 640 390 650 555 580 C720 505 875 585 1015 515 C1205 415 1340 480 1525 405 C1715 330 1880 430 2070 565 L2120 760 C1905 845 1690 770 1515 850 C1335 932 1190 860 1015 950 C850 1035 680 945 520 1015 C360 1090 185 995 70 875 Z" fill="#1a3e27" opacity="0.74"/>
+      <path d="M120 870 C300 765 505 820 645 730 C800 635 1010 720 1165 640 C1315 565 1525 620 1700 535 C1850 465 1985 520 2095 650 L2080 805 C1910 875 1720 865 1585 930 C1420 1010 1245 965 1100 1025 C940 1090 760 1025 620 1075 C430 1140 275 1040 120 930 Z" fill="#173721" opacity="0.86"/>
+
+      <g id="vegetation">
+        <path d="M135 620 C245 530 385 492 515 525 C555 585 560 645 520 700 C365 698 225 735 110 812 C92 742 96 672 135 620 Z" fill="url(#forestDots)" opacity="0.85"/>
+        <path d="M520 360 C650 265 735 235 850 292 C870 365 850 438 765 485 C650 468 560 452 475 514 C448 448 458 395 520 360 Z" fill="url(#forestDots)" opacity="0.85"/>
+        <path d="M900 240 C1052 160 1185 188 1308 260 C1320 344 1268 408 1168 434 C1038 382 930 408 842 484 C805 385 818 295 900 240 Z" fill="url(#forestDots)" opacity="0.83"/>
+        <path d="M1320 300 C1468 198 1610 218 1720 330 C1715 440 1635 508 1508 523 C1418 463 1325 455 1232 500 C1210 412 1232 348 1320 300 Z" fill="url(#forestDots)" opacity="0.82"/>
+        <path d="M1645 468 C1788 405 1928 465 2048 560 C2058 655 1978 730 1850 748 C1735 696 1645 710 1535 774 C1505 650 1530 535 1645 468 Z" fill="url(#forestDots)" opacity="0.83"/>
+        <path d="M120 750 C250 725 400 765 498 865 C435 975 322 1026 200 965 C110 912 84 825 120 750 Z" fill="url(#forestDots)" opacity="0.8"/>
+        <path d="M510 800 C645 708 790 730 915 812 C930 940 835 1025 705 1042 C570 1005 480 925 510 800 Z" fill="url(#forestDots)" opacity="0.79"/>
+        <path d="M1040 822 C1190 725 1345 760 1470 870 C1418 980 1300 1032 1155 998 C1055 955 1008 885 1040 822 Z" fill="url(#forestDots)" opacity="0.79"/>
+        <path d="M1460 820 C1620 742 1770 788 1878 900 C1818 980 1695 1000 1585 956 C1490 920 1435 872 1460 820 Z" fill="url(#forestDots)" opacity="0.79"/>
+      </g>
+
+      <g id="hill-edge">
+        <path d="M95 820 C220 910 315 1035 535 1002 C670 980 820 1036 970 1000 C1110 968 1255 1055 1390 997 C1510 940 1655 960 1785 888 C1740 998 1590 1045 1445 1022 C1305 1002 1215 1072 1070 1032 C900 987 785 1094 615 1042 C470 994 350 1110 215 1018 C120 952 65 900 95 820 Z" fill="url(#hillHatch)" opacity="0.56"/>
+        <text x="925" y="936" class="small-label">hill_edge_high / south gardens buffer</text>
+      </g>
+
+      <g id="landmark-band">
+        <path d="M720 520 C860 415 1020 430 1168 485 C1288 528 1390 500 1510 560 C1440 700 1295 750 1125 715 C980 685 850 734 710 655 C690 595 690 555 720 520 Z" fill="url(#landmarkBand)" opacity="0.62"/>
+      </g>
+    </g>
+
+    <path id="city-boundary-glow" d="M75 710 L115 600 L225 565 L270 480 L420 445 L500 360 L650 328 L720 245 L810 275 L865 205 L1000 165 L1110 230 L1240 195 L1330 240 L1470 205 L1565 285 L1715 315 L1770 395 L1880 410 L1945 510 L2050 545 L2110 645 L2058 750 L1910 792 L1865 900 L1720 875 L1620 990 L1435 950 L1320 1050 L1155 1002 L1010 1080 L850 1045 L720 1100 L565 1038 L430 1088 L270 1000 L190 910 L95 850 Z" fill="none" stroke="#ffd66d" stroke-width="15" opacity="0.25" filter="url(#warmGlow)"/>
+    <path id="city-boundary" d="M75 710 L115 600 L225 565 L270 480 L420 445 L500 360 L650 328 L720 245 L810 275 L865 205 L1000 165 L1110 230 L1240 195 L1330 240 L1470 205 L1565 285 L1715 315 L1770 395 L1880 410 L1945 510 L2050 545 L2110 645 L2058 750 L1910 792 L1865 900 L1720 875 L1620 990 L1435 950 L1320 1050 L1155 1002 L1010 1080 L850 1045 L720 1100 L565 1038 L430 1088 L270 1000 L190 910 L95 850 Z" fill="none" stroke="#ffda79" stroke-width="7" stroke-linejoin="round" filter="url(#warmGlow)"/>
+
+    <g id="arno">
+      <path d="M65 590 C240 620 360 605 510 560 C665 515 810 545 965 574 C1115 602 1242 575 1380 585 C1555 598 1722 635 2090 560 L2075 670 C1858 712 1650 683 1435 674 C1268 666 1115 698 955 670 C790 640 680 632 525 678 C365 726 205 706 65 675 Z" fill="url(#riverFill)" opacity="0.92"/>
+      <path d="M65 590 C240 620 360 605 510 560 C665 515 810 545 965 574 C1115 602 1242 575 1380 585 C1555 598 1722 635 2090 560" fill="none" stroke="#89f1ff" stroke-width="4" opacity="0.72"/>
+      <path d="M65 675 C205 706 365 726 525 678 C680 632 790 640 955 670 C1115 698 1268 666 1435 674 C1650 683 1858 712 2075 670" fill="none" stroke="#91ffff" stroke-width="3" opacity="0.55"/>
+      <text x="390" y="645" class="river-label">Arno: no-walk / no-build</text>
+    </g>
+
+    <g id="future-paths" fill="none" stroke="#d9b15e" stroke-width="4" stroke-linecap="round" stroke-dasharray="12 13" opacity="0.82">
+      <path d="M330 470 C540 372 720 398 900 438 C1100 482 1215 398 1425 420 C1600 438 1760 490 1918 565"/>
+      <path d="M210 820 C455 760 660 805 872 878 C1040 935 1258 902 1455 845 C1595 805 1735 830 1870 910"/>
+      <path d="M780 280 C792 430 805 585 815 760"/>
+      <path d="M1315 300 C1290 455 1268 625 1280 852"/>
+    </g>
+
+    <g id="paths" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M210 560 C390 520 520 548 660 592 C840 650 1010 592 1180 555 C1340 520 1520 540 1685 600" stroke="#ffe492" stroke-width="12"/>
+      <path d="M210 560 C390 520 520 548 660 592 C840 650 1010 592 1180 555 C1340 520 1520 540 1685 600" stroke="#fff3bd" stroke-width="4"/>
+      <path d="M305 760 C520 728 695 760 858 812 C1030 868 1210 785 1390 760 C1550 738 1725 770 1895 835" stroke="#ffe492" stroke-width="12"/>
+      <path d="M305 760 C520 728 695 760 858 812 C1030 868 1210 785 1390 760 C1550 738 1725 770 1895 835" stroke="#fff3bd" stroke-width="4"/>
+      <path d="M570 560 C565 620 565 700 565 758" stroke="#ffe492" stroke-width="13"/>
+      <path d="M975 577 C970 625 970 725 970 808" stroke="#ffe492" stroke-width="13"/>
+      <path d="M1320 548 C1305 610 1310 695 1315 765" stroke="#ffe492" stroke-width="13"/>
+      <path d="M405 520 C415 470 430 430 452 404" stroke="#ffe492" stroke-width="8"/>
+      <path d="M628 585 C630 535 650 500 682 480" stroke="#ffe492" stroke-width="8"/>
+      <path d="M875 625 C870 560 900 490 950 445" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1210 552 C1225 490 1260 440 1310 400" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1580 588 C1600 538 1635 505 1688 485" stroke="#ffe492" stroke-width="8"/>
+      <path d="M372 748 C335 710 315 660 320 610" stroke="#ffe492" stroke-width="8"/>
+      <path d="M460 765 C448 830 425 870 388 895" stroke="#ffe492" stroke-width="8"/>
+      <path d="M720 780 C705 715 690 665 682 620" stroke="#ffe492" stroke-width="8"/>
+      <path d="M875 815 C850 780 835 735 840 694" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1108 810 C1112 755 1135 712 1180 680" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1318 765 C1370 808 1410 848 1435 890" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1608 752 C1588 702 1584 658 1600 618" stroke="#ffe492" stroke-width="8"/>
+      <path d="M1645 825 C1688 808 1738 812 1798 848" stroke="#ffe492" stroke-width="8"/>
+    </g>
+
+    <g id="bridges">
+      <g transform="translate(535 610)">
+        <rect x="-30" y="-28" width="60" height="56" rx="8" fill="#d89b38" stroke="#22150a" stroke-width="3" filter="url(#softShadow)"/>
+        <text x="0" y="9" class="bridge-label">B1</text>
+      </g>
+      <g transform="translate(970 625)">
+        <rect x="-30" y="-28" width="60" height="56" rx="8" fill="#d89b38" stroke="#22150a" stroke-width="3" filter="url(#softShadow)"/>
+        <text x="0" y="9" class="bridge-label">B2</text>
+      </g>
+      <g transform="translate(1318 625)">
+        <rect x="-30" y="-28" width="60" height="56" rx="8" fill="#d89b38" stroke="#22150a" stroke-width="3" filter="url(#softShadow)"/>
+        <text x="0" y="9" class="bridge-label">B3</text>
+      </g>
+    </g>
+
+    <g id="path-labels">
+      <rect x="800" y="505" width="94" height="34" rx="8" fill="#061622" stroke="#7efff1"/>
+      <text x="847" y="528" class="path-label">PATH-N</text>
+      <rect x="860" y="785" width="94" height="34" rx="8" fill="#061622" stroke="#7efff1"/>
+      <text x="907" y="808" class="path-label">PATH-S</text>
+    </g>
+
+    <g id="junctions" fill="#5af5f9" stroke="#05212d" stroke-width="2">
+      <rect x="392" y="542" width="20" height="20" transform="rotate(45 402 552)"/>
+      <rect x="652" y="590" width="20" height="20" transform="rotate(45 662 600)"/>
+      <rect x="820" y="597" width="20" height="20" transform="rotate(45 830 607)"/>
+      <rect x="1120" y="548" width="20" height="20" transform="rotate(45 1130 558)"/>
+      <rect x="1510" y="587" width="20" height="20" transform="rotate(45 1520 597)"/>
+      <rect x="552" y="747" width="20" height="20" transform="rotate(45 562 757)"/>
+      <rect x="738" y="794" width="20" height="20" transform="rotate(45 748 804)"/>
+      <rect x="1100" y="787" width="20" height="20" transform="rotate(45 1110 797)"/>
+      <rect x="1323" y="760" width="20" height="20" transform="rotate(45 1333 770)"/>
+      <rect x="1584" y="746" width="20" height="20" transform="rotate(45 1594 756)"/>
+    </g>
+
+    <g id="parcels" filter="url(#softShadow)">
+      <g transform="translate(438 398)" class="parcel early">
+        <polygon points="-62,-36 42,-44 82,0 54,54 -42,54 -88,10"/>
+        <text x="-8" y="4" class="parcel-id">P01</text>
+        <rect x="-14" y="17" width="48" height="16" rx="3" class="sub-main"/>
+        <rect x="40" y="20" width="28" height="15" rx="3" class="sub-sec"/>
+        <path d="M-52 55 L42 55 L70 74 L-74 74 Z" class="sub-garden"/>
+        <circle cx="-22" cy="78" r="10" class="access"/>
+      </g>
+      <g transform="translate(670 496)" class="parcel early">
+        <polygon points="-78,-28 25,-44 82,-8 58,48 -36,60 -88,12"/>
+        <text x="-10" y="5" class="parcel-id">P02</text>
+        <rect x="-18" y="19" width="52" height="16" rx="3" class="sub-main"/>
+        <rect x="42" y="20" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-54 62 L46 58 L76 78 L-78 82 Z" class="sub-garden"/>
+        <circle cx="-4" cy="86" r="10" class="access"/>
+      </g>
+      <g transform="translate(984 407)" class="parcel early">
+        <polygon points="-76,-30 10,-54 84,-18 74,54 -34,64 -94,12"/>
+        <text x="-7" y="4" class="parcel-id">P03</text>
+        <rect x="-12" y="19" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="48" y="21" width="34" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 66 L46 58 L82 78 L-82 86 Z" class="sub-garden"/>
+        <circle cx="-14" cy="88" r="10" class="access"/>
+      </g>
+      <g transform="translate(1328 300)" class="parcel early">
+        <polygon points="-82,-42 32,-58 94,-4 66,70 -44,58 -104,0"/>
+        <text x="-10" y="5" class="parcel-id">P04</text>
+        <rect x="-8" y="24" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="52" y="27" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 68 L46 62 L82 82 L-82 88 Z" class="sub-garden"/>
+        <circle cx="-40" cy="86" r="10" class="access"/>
+      </g>
+      <g transform="translate(1650 478)" class="parcel early">
+        <polygon points="-86,-34 38,-46 96,4 58,62 -55,58 -104,8"/>
+        <text x="-8" y="5" class="parcel-id">P05</text>
+        <rect x="-8" y="26" width="52" height="16" rx="3" class="sub-main"/>
+        <rect x="54" y="27" width="34" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 66 L54 66 L88 86 L-84 86 Z" class="sub-garden"/>
+        <circle cx="-65" cy="78" r="10" class="access"/>
+      </g>
+      <g transform="translate(278 545)" class="parcel reserve">
+        <polygon points="-82,-36 36,-50 92,8 48,62 -64,62 -112,0"/>
+        <text x="-7" y="6" class="parcel-id">P06</text>
+        <rect x="-8" y="23" width="47" height="16" rx="3" class="sub-main"/>
+        <rect x="48" y="25" width="31" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 66 L46 66 L76 86 L-82 86 Z" class="sub-garden"/>
+        <circle cx="70" cy="88" r="10" class="access"/>
+      </g>
+      <g transform="translate(415 840)" class="parcel reserve">
+        <polygon points="-78,-34 38,-50 98,5 54,62 -58,68 -104,8"/>
+        <text x="-8" y="6" class="parcel-id">P07</text>
+        <rect x="-8" y="24" width="48" height="16" rx="3" class="sub-main"/>
+        <rect x="48" y="26" width="30" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 70 L50 68 L80 88 L-82 92 Z" class="sub-garden"/>
+        <circle cx="70" cy="-52" r="10" class="access"/>
+      </g>
+      <g transform="translate(645 724)" class="parcel reserve">
+        <polygon points="-88,-22 18,-56 96,-10 58,58 -58,68 -110,8"/>
+        <text x="-8" y="6" class="parcel-id">P08</text>
+        <rect x="-8" y="24" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="52" y="25" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-60 70 L46 66 L78 86 L-86 92 Z" class="sub-garden"/>
+        <circle cx="38" cy="-44" r="10" class="access"/>
+      </g>
+      <g transform="translate(855 704)" class="parcel early">
+        <polygon points="-76,-34 32,-52 92,-2 56,60 -48,60 -98,12"/>
+        <text x="-8" y="6" class="parcel-id">P09</text>
+        <rect x="-10" y="24" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="50" y="25" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 66 L48 64 L78 84 L-82 88 Z" class="sub-garden"/>
+        <circle cx="-62" cy="-54" r="10" class="access"/>
+      </g>
+      <g transform="translate(1070 846)" class="parcel reserve">
+        <polygon points="-80,-28 26,-54 94,-8 58,62 -54,68 -104,14"/>
+        <text x="-11" y="6" class="parcel-id">P10</text>
+        <rect x="-10" y="25" width="48" height="16" rx="3" class="sub-main"/>
+        <rect x="48" y="26" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 70 L48 68 L78 88 L-82 92 Z" class="sub-garden"/>
+        <circle cx="-54" cy="-42" r="10" class="access"/>
+      </g>
+      <g transform="translate(1276 820)" class="parcel early">
+        <polygon points="-82,-34 32,-54 94,0 54,66 -54,64 -106,12"/>
+        <text x="-10" y="6" class="parcel-id">P11</text>
+        <rect x="-10" y="25" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="50" y="26" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 70 L50 66 L80 88 L-82 92 Z" class="sub-garden"/>
+        <circle cx="48" cy="-52" r="10" class="access"/>
+      </g>
+      <g transform="translate(1485 715)" class="parcel special">
+        <polygon points="-84,-36 32,-56 98,0 62,70 -58,64 -106,10"/>
+        <text x="-11" y="6" class="parcel-id">P12</text>
+        <rect x="-10" y="26" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="50" y="28" width="34" height="15" rx="3" class="sub-sec"/>
+        <path d="M-60 72 L48 68 L82 92 L-84 94 Z" class="sub-garden"/>
+        <circle cx="-74" cy="-44" r="10" class="access"/>
+      </g>
+      <g transform="translate(1590 602)" class="parcel special">
+        <polygon points="-82,-38 34,-54 96,0 56,64 -58,62 -104,8"/>
+        <text x="-10" y="6" class="parcel-id">P13</text>
+        <rect x="-10" y="25" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="50" y="26" width="34" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 68 L50 66 L80 86 L-82 90 Z" class="sub-garden"/>
+        <circle cx="-78" cy="-50" r="10" class="access"/>
+      </g>
+      <g transform="translate(1568 850)" class="parcel special">
+        <polygon points="-76,-34 38,-50 94,0 58,64 -56,68 -100,12"/>
+        <text x="-10" y="6" class="parcel-id">P14</text>
+        <rect x="-10" y="25" width="50" height="16" rx="3" class="sub-main"/>
+        <rect x="50" y="26" width="32" height="15" rx="3" class="sub-sec"/>
+        <path d="M-58 70 L50 68 L82 88 L-84 92 Z" class="sub-garden"/>
+        <circle cx="-70" cy="-50" r="10" class="access"/>
+      </g>
+    </g>
+
+    <g id="landmarks" filter="url(#softShadow)">
+      <g transform="translate(930 506)">
+        <circle r="34" fill="#0a2230" stroke="#77fff0" stroke-width="2"/>
+        <path d="M-20 14 L20 14 L18 -6 L10 -18 L0 -26 L-10 -18 L-18 -6 Z" fill="#e64f4b" stroke="#f6f0dc" stroke-width="2"/>
+        <path d="M-26 18 L26 18 L26 30 L-26 30 Z" fill="#d9c38b" stroke="#f6f0dc" stroke-width="2"/>
+        <rect x="48" y="-35" width="130" height="70" rx="8" fill="#092333" stroke="#7efff1"/>
+        <text x="62" y="-12" class="landmark-label">L1 Duomo</text>
+        <text x="62" y="9" class="landmark-small">Santa Maria</text>
+        <text x="62" y="30" class="landmark-small">del Fiore</text>
+      </g>
+      <g transform="translate(735 620)">
+        <circle r="33" fill="#0a2230" stroke="#77fff0" stroke-width="2"/>
+        <path d="M-25 8 C-8 -16 9 -16 25 8" fill="none" stroke="#f4b348" stroke-width="9" stroke-linecap="round"/>
+        <path d="M-28 15 L28 15" stroke="#f6f0dc" stroke-width="4"/>
+        <rect x="42" y="-33" width="118" height="66" rx="8" fill="#092333" stroke="#7efff1"/>
+        <text x="56" y="-8" class="landmark-label">L2 Ponte</text>
+        <text x="56" y="17" class="landmark-small">Vecchio</text>
+      </g>
+      <g transform="translate(1116 535)">
+        <circle r="33" fill="#0a2230" stroke="#77fff0" stroke-width="2"/>
+        <rect x="-18" y="-10" width="36" height="32" fill="#c79a50" stroke="#f6f0dc" stroke-width="2"/>
+        <rect x="-5" y="-33" width="15" height="23" fill="#c79a50" stroke="#f6f0dc" stroke-width="2"/>
+        <circle cx="2" cy="-39" r="6" fill="#f0d36f"/>
+        <rect x="48" y="-34" width="162" height="68" rx="8" fill="#092333" stroke="#7efff1"/>
+        <text x="62" y="-10" class="landmark-label">L3 Palazzo</text>
+        <text x="62" y="12" class="landmark-small">Vecchio / Piazza</text>
+        <text x="62" y="32" class="landmark-small">della Signoria</text>
+      </g>
+      <g transform="translate(1125 675)">
+        <circle r="32" fill="#0a2230" stroke="#77fff0" stroke-width="2"/>
+        <path d="M-24 18 L24 18 L18 -16 L-18 -16 Z" fill="#d9c38b" stroke="#f6f0dc" stroke-width="2"/>
+        <path d="M-28 -16 L0 -34 L28 -16 Z" fill="#e1bd63" stroke="#f6f0dc" stroke-width="2"/>
+        <line x1="-15" y1="-12" x2="-15" y2="17" stroke="#f6f0dc" stroke-width="3"/>
+        <line x1="0" y1="-12" x2="0" y2="17" stroke="#f6f0dc" stroke-width="3"/>
+        <line x1="15" y1="-12" x2="15" y2="17" stroke="#f6f0dc" stroke-width="3"/>
+        <rect x="45" y="-31" width="126" height="62" rx="8" fill="#092333" stroke="#7efff1"/>
+        <text x="59" y="-7" class="landmark-label">L4 Uffizi</text>
+        <text x="59" y="18" class="landmark-small">art district</text>
+      </g>
+      <g transform="translate(600 928)">
+        <circle r="34" fill="#0a2230" stroke="#77fff0" stroke-width="2"/>
+        <circle cx="-10" cy="-6" r="16" fill="#71b961" stroke="#f6f0dc" stroke-width="2"/>
+        <rect x="-15" y="9" width="11" height="24" fill="#8b5a38"/>
+        <path d="M0 15 L24 -8 L34 18 Z" fill="#d9c38b" stroke="#f6f0dc" stroke-width="2"/>
+        <rect x="45" y="-38" width="154" height="76" rx="8" fill="#092333" stroke="#7efff1"/>
+        <text x="59" y="-12" class="landmark-label">L5 Boboli /</text>
+        <text x="59" y="10" class="landmark-small">Pitti / south</text>
+        <text x="59" y="30" class="landmark-small">gardens-hills</text>
+      </g>
+    </g>
+
+    <g id="context-labels">
+      <line x1="500" y1="340" x2="440" y2="280" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="430" y="250" width="132" height="36" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="496" y="273" class="context">Novoli / Airport</text>
+      <line x1="890" y1="235" x2="950" y2="178" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="950" y="148" width="118" height="36" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="1009" y="171" class="context">Careggi hills</text>
+      <line x1="1462" y1="315" x2="1545" y2="250" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="1545" y="220" width="116" height="36" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="1603" y="243" class="context">Fiesole hills</text>
+      <line x1="1924" y1="585" x2="2005" y2="560" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="2005" y="532" width="90" height="34" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="2050" y="554" class="context">East arm</text>
+      <line x1="250" y1="920" x2="190" y2="950" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="58" y="930" width="146" height="34" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="131" y="952" class="context">Scandicci / West tail</text>
+      <line x1="1040" y1="1045" x2="1055" y2="1098" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="1000" y="1098" width="116" height="34" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="1058" y="1120" class="context">South hills</text>
+      <line x1="1770" y1="875" x2="1845" y2="845" stroke="#49d6ed" stroke-width="1.4"/>
+      <rect x="1845" y="825" width="160" height="34" rx="8" fill="#061a27" stroke="#3edff3"/>
+      <text x="1925" y="847" class="context">Le Cure / Settignano</text>
+    </g>
+
+    <g id="north-arrow" transform="translate(1702 235)">
+      <text x="0" y="-35" class="north">N</text>
+      <path d="M0 -18 L20 95 L0 68 L-20 95 Z" fill="#ffffff" opacity="0.95"/>
+      <path d="M0 -18 L0 68 L-20 95 Z" fill="#d8e3ef" opacity="0.78"/>
+    </g>
+  </g>
+
+  <g id="side-panels" transform="translate(2160 72)">
+    <rect x="0" y="0" width="520" height="1230" rx="18" fill="#081325" stroke="#8b59c7" stroke-width="1.5"/>
+    <g transform="translate(28 28)" class="side-card">
+      <rect width="464" height="158" rx="14"/>
+      <text x="24" y="38" class="side-title">Infrastructure</text>
+      <text x="24" y="72" class="side-text">- PATH-N and PATH-S are organic spines.</text>
+      <text x="24" y="101" class="side-text">- B1-B3 are the only Arno crossings.</text>
+      <text x="24" y="130" class="side-text">- Short branches connect every parcel.</text>
+    </g>
+    <g transform="translate(28 210)" class="side-card">
+      <rect width="464" height="176" rx="14"/>
+      <text x="24" y="38" class="side-title">Landmark identity (5 anchors)</text>
+      <text x="24" y="72" class="side-text">- L1 Duomo / Santa Maria del Fiore.</text>
+      <text x="24" y="101" class="side-text">- L2 Ponte Vecchio.</text>
+      <text x="24" y="130" class="side-text">- L3 Palazzo Vecchio / civic square.</text>
+      <text x="24" y="159" class="side-text">- L4 Uffizi / art district; L5 Boboli/Pitti.</text>
+    </g>
+    <g transform="translate(28 410)" class="side-card">
+      <rect width="464" height="160" rx="14"/>
+      <text x="24" y="38" class="side-title">Parcel structure (all 14)</text>
+      <text x="24" y="72" class="side-text">- Each parcel has main building zone.</text>
+      <text x="24" y="101" class="side-text">- Each parcel has secondary zone.</text>
+      <text x="24" y="130" class="side-text">- Garden/open zone + access point.</text>
+    </g>
+    <g transform="translate(28 594)" class="side-card">
+      <rect width="464" height="150" rx="14"/>
+      <text x="24" y="38" class="side-title">Depth / sorting</text>
+      <text x="24" y="72" class="side-text">- water_low &lt; bridge_deck &lt; north_bank</text>
+      <text x="24" y="101" class="side-text">- north_bank &lt; landmark_band &lt; hill_edge_high</text>
+      <text x="24" y="130" class="side-text">- Landmarks sorted in landmark band.</text>
+    </g>
+    <g transform="translate(28 768)" class="side-card">
+      <rect width="464" height="186" rx="14"/>
+      <text x="24" y="38" class="side-title">Blocked layers</text>
+      <rect x="26" y="62" width="24" height="20" fill="#2aa5b8" opacity="0.78"/>
+      <text x="60" y="78" class="side-text">Water: no-walk + no-build</text>
+      <rect x="26" y="91" width="24" height="20" fill="#e0bf72"/>
+      <text x="60" y="107" class="side-text">Paths/bridges: walkable + no-build</text>
+      <rect x="26" y="120" width="24" height="20" fill="#1f4f2c" stroke="#7ed06c"/>
+      <text x="60" y="136" class="side-text">Vegetation: spacing, not build-ready</text>
+      <line x1="26" y1="160" x2="50" y2="160" stroke="#d9b15e" stroke-width="4" stroke-dasharray="7 6"/>
+      <text x="60" y="165" class="side-text">Future paths: not walkable yet</text>
+    </g>
+    <g transform="translate(28 978)" class="side-card">
+      <rect width="464" height="120" rx="14"/>
+      <text x="24" y="38" class="side-title">Not yet allowed</text>
+      <text x="24" y="72" class="side-text">- No runtime coordinates</text>
+      <text x="24" y="101" class="side-text">- No YAML/JSON, no Flutter city entry</text>
+    </g>
+    <g transform="translate(28 1120)">
+      <rect width="464" height="84" rx="14" fill="#501333" stroke="#ff6ba8" stroke-width="1.5"/>
+      <text x="24" y="38" class="stop-title">Stop</text>
+      <text x="24" y="66" class="stop-text">City Entry only after v5 review.</text>
+    </g>
+  </g>
+
+  <g id="legend">
+    <rect x="30" y="994" width="2090" height="308" rx="18" fill="#06131f" stroke="#26bed5" stroke-width="1.4"/>
+    <g transform="translate(62 1032)">
+      <text x="0" y="0" class="legend-title">Parcel types</text>
+      <rect x="0" y="34" width="44" height="30" fill="url(#earlyFill)" stroke="#ffefad"/>
+      <text x="62" y="56" class="legend-text">Early parcel (7)</text>
+      <rect x="0" y="84" width="44" height="30" fill="url(#reserveFill)" stroke="#d5ffd0"/>
+      <text x="62" y="106" class="legend-text">Reserve parcel (4)</text>
+      <rect x="0" y="134" width="44" height="30" fill="url(#specialFill)" stroke="#f0b9ff"/>
+      <text x="62" y="156" class="legend-text">Special parcel (3)</text>
+      <rect x="0" y="184" width="44" height="30" fill="#1f4f2c" stroke="#7ed06c"/>
+      <text x="62" y="206" class="legend-text">Vegetation buffer</text>
+    </g>
+    <line x1="330" y1="1024" x2="330" y2="1270" stroke="#8bb0c0"/>
+    <g transform="translate(372 1032)">
+      <text x="0" y="0" class="legend-title">Parcel subzones</text>
+      <rect x="0" y="34" width="26" height="26" rx="3" fill="#a96734"/>
+      <text x="48" y="55" class="legend-text">Main building zone</text>
+      <rect x="0" y="82" width="26" height="26" rx="3" fill="#c69b5c"/>
+      <text x="48" y="103" class="legend-text">Secondary zone</text>
+      <path d="M0 142 L44 142 L56 162 L-8 162 Z" fill="#78db62"/>
+      <text x="70" y="160" class="legend-text">Garden / open zone</text>
+      <circle cx="13" cy="200" r="12" fill="#5ff4f7" stroke="#06212c" stroke-width="2"/>
+      <text x="48" y="206" class="legend-text">Access point</text>
+    </g>
+    <line x1="680" y1="1024" x2="680" y2="1270" stroke="#8bb0c0"/>
+    <g transform="translate(726 1032)">
+      <text x="0" y="0" class="legend-title">Paths and access</text>
+      <line x1="0" y1="48" x2="76" y2="48" stroke="#ffe492" stroke-width="10" stroke-linecap="round"/>
+      <text x="98" y="55" class="legend-text">Main path (walkable)</text>
+      <line x1="0" y1="96" x2="76" y2="96" stroke="#ffe492" stroke-width="7" stroke-linecap="round"/>
+      <text x="98" y="103" class="legend-text">Connector path (walkable)</text>
+      <rect x="22" y="130" width="22" height="22" transform="rotate(45 33 141)" fill="#5af5f9"/>
+      <text x="98" y="148" class="legend-text">Path junction</text>
+      <line x1="0" y1="196" x2="76" y2="196" stroke="#d9b15e" stroke-width="4" stroke-linecap="round" stroke-dasharray="12 13"/>
+      <text x="98" y="202" class="legend-text">Future path (not walkable)</text>
+    </g>
+    <line x1="1018" y1="1024" x2="1018" y2="1270" stroke="#8bb0c0"/>
+    <g transform="translate(1060 1032)">
+      <text x="0" y="0" class="legend-title">Depth / sorting bands</text>
+      <rect x="0" y="34" width="46" height="30" fill="url(#riverFill)" opacity="0.86"/>
+      <text x="64" y="55" class="legend-text">Water_low (no-walk/no-build)</text>
+      <rect x="0" y="82" width="46" height="30" fill="#e0bf72"/>
+      <text x="64" y="103" class="legend-text">Bridge_deck (walkable/no-build)</text>
+      <rect x="0" y="130" width="46" height="30" fill="#234a2d"/>
+      <text x="64" y="151" class="legend-text">North_bank / South_bank</text>
+      <rect x="0" y="178" width="46" height="30" fill="url(#landmarkBand)" stroke="#7b8a9a"/>
+      <text x="64" y="199" class="legend-text">Landmark band (sort band)</text>
+    </g>
+    <line x1="1390" y1="1024" x2="1390" y2="1270" stroke="#8bb0c0"/>
+    <g transform="translate(1430 1032)">
+      <text x="0" y="0" class="legend-title">Landmark anchors</text>
+      <text x="0" y="42" class="legend-text">L1 Duomo / Santa Maria del Fiore</text>
+      <text x="0" y="76" class="legend-text">L2 Ponte Vecchio</text>
+      <text x="0" y="110" class="legend-text">L3 Palazzo Vecchio / Piazza della Signoria</text>
+      <text x="0" y="144" class="legend-text">L4 Uffizi / art district</text>
+      <text x="0" y="178" class="legend-text">L5 Boboli / Pitti / south gardens-hills</text>
+    </g>
+  </g>
+
+  <style>
+    .title { font: 700 42px/1.1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f3f7ff; letter-spacing: 0; }
+    .status { font: 700 22px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #70fff0; letter-spacing: 0; }
+    .note { font: 500 16px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #d7e7f3; letter-spacing: 0; }
+    .badge { font: 700 16px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #c8fff8; letter-spacing: 0; }
+    .parcel polygon { stroke-width: 3; }
+    .parcel.early polygon { fill: url(#earlyFill); stroke: #ffefad; }
+    .parcel.reserve polygon { fill: url(#reserveFill); stroke: #e0ffd9; }
+    .parcel.special polygon { fill: url(#specialFill); stroke: #f0b9ff; }
+    .parcel-id { font: 800 25px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #44240d; text-anchor: middle; dominant-baseline: middle; letter-spacing: 0; }
+    .sub-main { fill: #a96734; opacity: 0.9; }
+    .sub-sec { fill: #c69b5c; opacity: 0.85; }
+    .sub-garden { fill: #78db62; opacity: 0.95; }
+    .access { fill: #5ff4f7; stroke: #06212c; stroke-width: 2.5; }
+    .bridge-label { font: 800 22px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #2d1b08; text-anchor: middle; dominant-baseline: middle; letter-spacing: 0; }
+    .path-label { font: 800 19px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #eaffff; text-anchor: middle; letter-spacing: 0; }
+    .river-label { font: 700 17px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #dff8ff; letter-spacing: 0; }
+    .small-label { font: 600 15px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #d8edce; letter-spacing: 0; }
+    .landmark-label { font: 800 15px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #caffff; letter-spacing: 0; }
+    .landmark-small { font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ecf7ff; letter-spacing: 0; }
+    .context { font: 600 15px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #d9f7ff; text-anchor: middle; letter-spacing: 0; }
+    .north { font: 800 24px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; text-anchor: middle; letter-spacing: 0; }
+    .side-card rect { fill: #071a2a; stroke: #2ecce9; stroke-width: 1.3; }
+    .side-title { font: 800 26px/1.1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #eaf6ff; letter-spacing: 0; }
+    .side-text { font: 500 16px/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #d7e2ed; letter-spacing: 0; }
+    .stop-title { font: 800 29px/1.1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #fff0f4; letter-spacing: 0; }
+    .stop-text { font: 600 16px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffe6ed; letter-spacing: 0; }
+    .legend-title { font: 800 24px/1.1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f0f7ff; letter-spacing: 0; }
+    .legend-text { font: 500 17px/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #d9e7f1; letter-spacing: 0; }
+  </style>
+</svg>

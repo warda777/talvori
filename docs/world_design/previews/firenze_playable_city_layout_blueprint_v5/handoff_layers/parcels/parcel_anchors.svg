@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+<title>Florenz Parcel Anchors</title>
+<desc>Center and entry anchors for each parcel.</desc>
+<rect width="100%" height="100%" fill="#06101d"/>
+<polygon id="P01-outline" points="412.0,228.0 406.0,254.0 369.0,263.0 321.0,241.0 334.0,211.0 396.0,201.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P01-anchor-center" cx="369.9" cy="231.8" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P01-anchor-entry" cx="369.9" cy="258.8" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="369.9" y1="231.8" x2="369.9" y2="258.8" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="379.9" y="221.8" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P01-C</text>
+<text x="379.9" y="270.8" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P01-E</text>
+<polygon id="P02-outline" points="488.0,236.0 546.0,232.0 590.0,264.0 572.0,298.0 510.0,298.0 486.0,266.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P02-anchor-center" cx="534.6" cy="265.9" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P02-anchor-entry" cx="534.6" cy="294.0" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="534.6" y1="265.9" x2="534.6" y2="294.0" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="544.6" y="255.9" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P02-C</text>
+<text x="544.6" y="306.0" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P02-E</text>
+<polygon id="P03-outline" points="735.0,183.0 757.0,165.0 799.0,171.0 819.0,207.0 819.0,222.0 779.0,233.0 762.0,229.0 735.0,204.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P03-anchor-center" cx="776.4" cy="199.1" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P03-anchor-entry" cx="776.4" cy="228.4" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="776.4" y1="199.1" x2="776.4" y2="228.4" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="786.4" y="189.1" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P03-C</text>
+<text x="786.4" y="240.4" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P03-E</text>
+<polygon id="P04-outline" points="873.0,147.0 939.0,150.0 968.0,182.0 954.0,225.0 890.0,219.0 870.0,184.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P04-anchor-center" cx="917.2" cy="185.0" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P04-anchor-entry" cx="917.2" cy="217.5" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="917.2" y1="185.0" x2="917.2" y2="217.5" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="927.2" y="175.0" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P04-C</text>
+<text x="927.2" y="229.5" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P04-E</text>
+<polygon id="P05-outline" points="1089.0,292.0 1115.0,270.0 1163.0,268.0 1196.0,286.0 1198.0,320.0 1179.0,330.0 1121.0,318.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P05-anchor-center" cx="1149.7" cy="297.2" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P05-anchor-entry" cx="1149.7" cy="319.9" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="1149.7" y1="297.2" x2="1149.7" y2="319.9" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="1159.7" y="287.2" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P05-C</text>
+<text x="1159.7" y="331.9" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P05-E</text>
+<polygon id="P06-outline" points="276.0,360.0 269.0,391.0 248.0,396.0 206.0,389.0 189.0,362.0 217.0,335.0 249.0,334.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P06-anchor-center" cx="234.8" cy="365.5" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P06-anchor-entry" cx="234.8" cy="389.8" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="234.8" y1="365.5" x2="234.8" y2="389.8" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="244.8" y="355.5" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P06-C</text>
+<text x="244.8" y="401.8" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P06-E</text>
+<polygon id="P07-outline" points="484.0,566.0 467.0,600.0 433.0,603.0 407.0,597.0 396.0,563.0 418.0,542.0 460.0,542.0" fill="none" stroke="#ffd36c" stroke-width="3" opacity="0.65"/>
+<circle id="P07-anchor-center" cx="439.1" cy="572.0" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P07-anchor-entry" cx="439.1" cy="598.5" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="439.1" y1="572.0" x2="439.1" y2="598.5" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="449.1" y="562.0" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P07-C</text>
+<text x="449.1" y="610.5" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P07-E</text>
+<polygon id="P08-outline" points="446.0,482.0 434.0,513.0 379.0,517.0 349.0,487.0 372.0,460.0 422.0,457.0" fill="none" stroke="#b8e9ac" stroke-width="3" opacity="0.65"/>
+<circle id="P08-anchor-center" cx="399.5" cy="487.0" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P08-anchor-entry" cx="399.5" cy="511.5" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="399.5" y1="487.0" x2="399.5" y2="511.5" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="409.5" y="477.0" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P08-C</text>
+<text x="409.5" y="523.5" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P08-E</text>
+<polygon id="P09-outline" points="578.0,480.0 596.0,455.0 649.0,454.0 678.0,480.0 657.0,510.0 601.0,511.0" fill="none" stroke="#b8e9ac" stroke-width="3" opacity="0.65"/>
+<circle id="P09-anchor-center" cx="627.1" cy="482.4" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P09-anchor-entry" cx="627.1" cy="506.5" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="627.1" y1="482.4" x2="627.1" y2="506.5" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="637.1" y="472.4" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P09-C</text>
+<text x="637.1" y="518.5" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P09-E</text>
+<polygon id="P10-outline" points="806.0,580.0 799.0,615.0 756.0,621.0 717.0,594.0 738.0,560.0 780.0,556.0" fill="none" stroke="#b8e9ac" stroke-width="3" opacity="0.65"/>
+<circle id="P10-anchor-center" cx="764.5" cy="588.4" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P10-anchor-entry" cx="764.5" cy="615.8" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="764.5" y1="588.4" x2="764.5" y2="615.8" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="774.5" y="578.4" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P10-C</text>
+<text x="774.5" y="627.8" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P10-E</text>
+<polygon id="P11-outline" points="929.0,569.0 905.0,604.0 888.0,606.0 854.0,599.0 846.0,571.0 878.0,545.0 906.0,548.0" fill="none" stroke="#b8e9ac" stroke-width="3" opacity="0.65"/>
+<circle id="P11-anchor-center" cx="886.3" cy="576.0" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P11-anchor-entry" cx="886.3" cy="601.6" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="886.3" y1="576.0" x2="886.3" y2="601.6" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="896.3" y="566.0" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P11-C</text>
+<text x="896.3" y="613.6" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P11-E</text>
+<polygon id="P12-outline" points="1067.0,481.0 1085.0,513.0 1060.0,544.0 1027.0,546.0 996.0,524.0 1001.0,493.0 1014.0,484.0" fill="none" stroke="#bf62dc" stroke-width="3" opacity="0.65"/>
+<circle id="P12-anchor-center" cx="1039.3" cy="512.3" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P12-anchor-entry" cx="1039.3" cy="541.3" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="1039.3" y1="512.3" x2="1039.3" y2="541.3" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="1049.3" y="502.3" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P12-C</text>
+<text x="1049.3" y="553.3" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P12-E</text>
+<polygon id="P13-outline" points="1104.0,392.0 1121.0,377.0 1169.0,387.0 1186.0,415.0 1172.0,442.0 1127.0,443.0" fill="none" stroke="#bf62dc" stroke-width="3" opacity="0.65"/>
+<circle id="P13-anchor-center" cx="1145.2" cy="411.0" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P13-anchor-entry" cx="1145.2" cy="438.6" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="1145.2" y1="411.0" x2="1145.2" y2="438.6" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="1155.2" y="401.0" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P13-C</text>
+<text x="1155.2" y="450.6" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P13-E</text>
+<polygon id="P14-outline" points="1109.0,607.0 1095.0,638.0 1066.0,645.0 1023.0,626.0 1043.0,579.0 1088.0,578.0" fill="none" stroke="#bf62dc" stroke-width="3" opacity="0.65"/>
+<circle id="P14-anchor-center" cx="1067.2" cy="610.5" r="7" fill="#39d6f5" stroke="#08394a" stroke-width="2"/>
+<circle id="P14-anchor-entry" cx="1067.2" cy="640.7" r="7" fill="#7ef18e" stroke="#1f4b27" stroke-width="2"/>
+<line x1="1067.2" y1="610.5" x2="1067.2" y2="640.7" stroke="#58c8ff" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+<text x="1077.2" y="600.5" fill="#39d6f5" font-family="Arial" font-size="11" font-weight="700">P14-C</text>
+<text x="1077.2" y="652.7" fill="#7ef18e" font-family="Arial" font-size="11" font-weight="700">P14-E</text>
+</svg>

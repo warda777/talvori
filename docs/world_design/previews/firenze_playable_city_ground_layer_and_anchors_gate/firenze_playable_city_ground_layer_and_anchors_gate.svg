@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Firenze playable city ground layer and anchors gate</title>
+  <desc id="desc">Documentation-only planning diagram showing Firenze ground shape, playable area, river and bridge candidates, path network, buildable ground candidates, no-walk and no-build zones, landmark anchors and start anchor.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.52" stop-color="#0a1422"/>
+      <stop offset="1" stop-color="#05070e"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#254034"/>
+      <stop offset="0.5" stop-color="#617547"/>
+      <stop offset="1" stop-color="#2d4950"/>
+    </linearGradient>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#12445a"/>
+      <stop offset="0.5" stop-color="#1b7894"/>
+      <stop offset="1" stop-color="#14344f"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="13" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <style>
+      .title { font: 800 42px Arial, Helvetica, sans-serif; fill: #f5f8ff; }
+      .subtitle { font: 700 21px Arial, Helvetica, sans-serif; fill: #92fff0; }
+      .small { font: 700 18px Arial, Helvetica, sans-serif; fill: #dce8f5; }
+      .tiny { font: 700 15px Arial, Helvetica, sans-serif; fill: #c9d5e2; }
+      .tag { font: 800 15px Arial, Helvetica, sans-serif; fill: #07111f; }
+      .panel-title { font: 800 20px Arial, Helvetica, sans-serif; fill: #f5f8ff; }
+      .panel-text { font: 700 16px Arial, Helvetica, sans-serif; fill: #cdd8e5; }
+      .layer-label { font: 800 14px Arial, Helvetica, sans-serif; fill: #07111f; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="355" cy="470" r="360" fill="#00d8ff" opacity="0.05"/>
+  <circle cx="1180" cy="360" r="360" fill="#9b4dff" opacity="0.05"/>
+
+  <text x="72" y="72" class="title">Firenze playable city ground layer and anchors gate</text>
+  <text x="74" y="112" class="subtitle">documentation_only | not_runtime_data | not_asset | not_engine_ready</text>
+
+  <g transform="translate(70 160)">
+    <rect x="0" y="0" width="1030" height="770" rx="34" fill="#07101a" opacity="0.72" stroke="#2d5f73" stroke-width="2"/>
+    <text x="38" y="54" class="panel-title">Planning diagram, not app UI</text>
+    <text x="38" y="84" class="panel-text">Layer families must be reviewed before another City Entry preview.</text>
+
+    <g transform="translate(90 95)" filter="url(#shadow)">
+      <path d="M356 60 C510 18 690 65 770 180 C842 286 797 440 666 540 C531 642 315 650 198 540 C87 437 63 272 143 158 C192 88 269 82 356 60 Z" fill="url(#ground)" stroke="#f7d28e" stroke-width="8"/>
+      <path d="M356 60 C510 18 690 65 770 180 C842 286 797 440 666 540 C531 642 315 650 198 540 C87 437 63 272 143 158 C192 88 269 82 356 60 Z" fill="none" stroke="#ffb766" stroke-width="18" opacity="0.18" filter="url(#softGlow)"/>
+
+      <path d="M178 371 C286 309 372 412 478 350 C594 282 653 364 774 294 L812 362 C674 432 600 352 495 420 C371 498 285 393 164 454 Z" fill="url(#river)" opacity="0.95" stroke="#8df7ff" stroke-width="3"/>
+      <path d="M195 414 C310 356 386 450 498 392 C615 331 684 399 807 329" fill="none" stroke="#c8ffff" stroke-width="4" opacity="0.35"/>
+
+      <ellipse cx="455" cy="303" rx="245" ry="188" fill="#b6e780" opacity="0.18" stroke="#c7ff94" stroke-width="5" stroke-dasharray="12 10"/>
+      <rect x="324" y="200" width="170" height="34" rx="17" fill="#d7f7b7" opacity="0.82" stroke="#07111f" stroke-width="1.5"/>
+      <text x="342" y="221" class="layer-label">playable_city_area</text>
+
+      <path d="M250 245 C360 175 560 180 670 270" fill="none" stroke="#f5d07c" stroke-width="12" opacity="0.72" stroke-linecap="round"/>
+      <path d="M300 500 C380 430 505 420 630 485" fill="none" stroke="#f5d07c" stroke-width="10" opacity="0.62" stroke-linecap="round"/>
+      <path d="M458 250 C450 330 435 435 380 530" fill="none" stroke="#f5d07c" stroke-width="9" opacity="0.55" stroke-linecap="round"/>
+
+      <rect x="387" y="344" width="94" height="26" rx="13" fill="#f6d28b" stroke="#4b2f1b" stroke-width="3"/>
+      <rect x="628" y="335" width="94" height="26" rx="13" fill="#f6d28b" stroke="#4b2f1b" stroke-width="3"/>
+      <rect x="356" y="371" width="142" height="32" rx="16" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="373" y="393" class="tiny">bridge_anchor_a</text>
+      <rect x="604" y="364" width="142" height="32" rx="16" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="621" y="386" class="tiny">bridge_anchor_b</text>
+
+      <ellipse cx="354" cy="252" rx="70" ry="42" fill="#f4cf73" opacity="0.8" stroke="#fff0b9" stroke-width="3"/>
+      <ellipse cx="571" cy="273" rx="76" ry="45" fill="#f4cf73" opacity="0.8" stroke="#fff0b9" stroke-width="3"/>
+      <ellipse cx="379" cy="502" rx="82" ry="48" fill="#f4cf73" opacity="0.8" stroke="#fff0b9" stroke-width="3"/>
+      <rect x="258" y="132" width="252" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="276" y="154" class="tiny">buildable_ground_candidates</text>
+
+      <ellipse cx="650" cy="512" rx="96" ry="58" fill="#a7f2a0" opacity="0.32" stroke="#bdf9c2" stroke-width="3" stroke-dasharray="9 8"/>
+      <rect x="599" y="578" width="154" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="617" y="600" class="tiny">reserved_ground</text>
+
+      <path d="M148 154 C202 86 313 72 384 70 C335 114 287 164 260 229 C214 230 171 201 148 154 Z" fill="#18202a" opacity="0.74" stroke="#8b95a1" stroke-width="3"/>
+      <rect x="137" y="94" width="124" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="155" y="116" class="tiny">no_walk edge</text>
+
+      <path d="M677 124 C755 180 806 266 801 330 C750 284 706 258 651 246 C666 198 676 157 677 124 Z" fill="#5f3141" opacity="0.58" stroke="#ff8ab3" stroke-width="3"/>
+      <rect x="678" y="201" width="94" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="696" y="223" class="tiny">no_build</text>
+
+      <circle cx="452" cy="317" r="15" fill="#00d8ff" stroke="#f5f8ff" stroke-width="5"/>
+      <rect x="374" y="269" width="130" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="392" y="291" class="tiny">start_anchor</text>
+      <circle cx="530" cy="224" r="12" fill="#ffcf79" stroke="#f5f8ff" stroke-width="4"/>
+      <circle cx="365" cy="426" r="12" fill="#ffcf79" stroke="#f5f8ff" stroke-width="4"/>
+      <circle cx="610" cy="425" r="12" fill="#ffcf79" stroke="#f5f8ff" stroke-width="4"/>
+      <rect x="534" y="182" width="196" height="34" rx="17" fill="#07111f" opacity="0.84" stroke="#315066" stroke-width="1.5"/>
+      <text x="548" y="205" class="tiny">landmark_anchor_layer</text>
+
+      <rect x="92" y="612" width="700" height="46" rx="23" fill="#07111f" opacity="0.86" stroke="#44d8e8" stroke-width="2"/>
+      <text x="126" y="642" class="small">All shapes are review candidates only; no runtime geometry, no app data.</text>
+    </g>
+  </g>
+
+  <g transform="translate(1140 160)">
+    <rect x="0" y="0" width="390" height="770" rx="30" fill="#07101a" opacity="0.82" stroke="#543b77" stroke-width="2"/>
+    <text x="28" y="52" class="panel-title">Required source line</text>
+    <text x="28" y="88" class="panel-text">ISTAT Comuni 2026</text>
+    <text x="28" y="116" class="panel-text">COMUNE: Firenze</text>
+    <text x="28" y="144" class="panel-text">PRO_COM_T: 048017</text>
+
+    <rect x="28" y="184" width="334" height="86" rx="18" fill="#142130" stroke="#2d5f73" stroke-width="2"/>
+    <text x="48" y="216" class="panel-title">Must define first</text>
+    <text x="48" y="246" class="panel-text">ground | paths | river | bridges</text>
+
+    <rect x="28" y="296" width="334" height="136" rx="18" fill="#142130" stroke="#2d5f73" stroke-width="2"/>
+    <text x="48" y="328" class="panel-title">Build rules</text>
+    <text x="48" y="360" class="panel-text">Buildable candidates</text>
+    <text x="48" y="388" class="panel-text">Reserved ground</text>
+    <text x="48" y="416" class="panel-text">No-Walk and No-Build split</text>
+
+    <rect x="28" y="458" width="334" height="126" rx="18" fill="#142130" stroke="#2d5f73" stroke-width="2"/>
+    <text x="48" y="490" class="panel-title">Anchor rules</text>
+    <text x="48" y="522" class="panel-text">Start anchor</text>
+    <text x="48" y="550" class="panel-text">Landmark anchors</text>
+    <text x="48" y="578" class="panel-text">Bridge anchors</text>
+
+    <rect x="28" y="612" width="334" height="104" rx="18" fill="#2a1720" stroke="#ff8ab3" stroke-width="2"/>
+    <text x="48" y="644" class="panel-title">Blocked now</text>
+    <text x="48" y="676" class="panel-text">No City Entry UI</text>
+    <text x="48" y="704" class="panel-text">No free build spots</text>
+  </g>
+
+  <g transform="translate(74 930)">
+    <rect x="0" y="0" width="1454" height="42" rx="21" fill="#f7d28e" opacity="0.92"/>
+    <text x="26" y="28" class="tag">Next allowed slice after review: Firenze city ground visual diagram / greybox preview</text>
+  </g>
+</svg>

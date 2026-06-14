@@ -1,33 +1,36 @@
 # M16-T: Talvori Learning Game Readiness ToDo Checklist
 
-Stand: 2026-06-12
+Stand: 2026-06-14
 
 Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 ## 0. Product Delivery Dashboard
 
-Letzte Aktualisierung: 2026-06-12
+Letzte Aktualisierung: 2026-06-14
 
-Aktive Sprint-ID: `WORLD-TRAVEL-SOURCE-REBUILD`
+Aktive Sprint-ID: `FIRENZE-LAYOUT-BLUEPRINT-V5`
 
 Sprint Goal:
 
-> Talvori verwirft die erste freie World-Travel-Preview und setzt fuer den
-> naechsten sichtbaren Neuaufbau eine source-based Regel: Globus, Europa,
-> Laender, Italien und Firenze duerfen nicht frei gemalt werden, wenn offene
-> Konturgrundlagen vorhanden sind.
+> Talvori ersetzt den Firenze-v4-Zwischenstand durch den fuehrenden
+> Firenze-v5-Blueprint: Expanded Florence Shape and Landmark-Aware
+> Infrastructure Review mit 14 Parcel Candidates, B1-B3 als einzigen
+> Arno-Querungen, organischem PATH-N/PATH-S, Vegetationspuffern,
+> L1-L5 Landmark-Ankern, No-Overlap-QA, Branch/Future Paths,
+> Depth-/Sorting-Bands, No-Walk/No-Build, Anchors und Reachability-Review vor
+> City Entry.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 329 |
+| Gesamtanzahl M16-T-Items | 332 |
 | Offen `[ ]` | 0 |
 | Teilweise erledigt `[~]` | 12 |
-| Erledigt `[x]` | 305 |
+| Erledigt `[x]` | 308 |
 | Blockiert `[!]` | 12 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 94.5 % |
+| Gewichteter Fortschritt | 94.6 % |
 | Fortschrittsbalken | `███████████████████░` |
 
 Naechste empfohlene IDs:
@@ -83,7 +86,7 @@ ihrem Detail-Gate Fortschritt bei.
 | Semantik-System | M16T-SEM | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Semantik-Regeln in kuenftigen Word-/World-Slices anwenden. |
 | 20.000+-Wort-Skalierung | M16T-SCALE | 4 | 3 | 1 | 0 | 0 | 87.5 % | `█████████░` | Confidence-/Privacy-Folgeregeln fuer Massensemantik klaeren. |
 | Reward ohne Druck | M16T-REWARD | 5 | 5 | 0 | 0 | 0 | 100.0 % | `██████████` | Reward-Regeln in kuenftigen MVP-/Companion-Slices anwenden. |
-| World / Island / Plot | M16T-WORLD | 18 | 17 | 1 | 0 | 0 | 97.2 % | `██████████` | Der freie World-Travel-Prototyp ist verworfen; der naechste sichtbare Produktpfad ist ein source-based World-Travel-Zoom mit echten offenen Konturen fuer Globus/Europa/Italien und Firenze als erstem City-Zoom. |
+| World / Island / Plot | M16T-WORLD | 21 | 20 | 1 | 0 | 0 | 97.6 % | `██████████` | Kuenftige Stadt-/Insel-/District-/Plot-Focus-Flaechen muessen `416` anwenden; Firenze-Folgearbeit muss zusaetzlich `417` mit Grundstuecksanzahl, Parcel-Struktur, vollstaendigem Wegenetz, future/reserve paths und Reachability vor City Entry anwenden. |
 | Container / Depth | M16T-DEPTH | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | TinyObject-/Container-Regeln in kuenftigen World-/UI-Slices als Stop-Regel anwenden. |
 | Build-Wheel | M16T-WHEEL | 4 | 2 | 1 | 0 | 1 | 62.5 % | `██████░░░░` | Wheel-Code weiter blockiert halten; In-place-Regeln erst mit eigenem Gate anwenden. |
 | Undo / Reversibility | M16T-UNDO | 3 | 3 | 0 | 0 | 0 | 100.0 % | `██████████` | Undo-/Resizing-Regeln in spaeteren Persistenz- und World-Slices anwenden. |
@@ -260,6 +263,9 @@ ausdruecklich freigegeben werden.
 | M16T-WORLD-016 | [x] | Italien erste Stadt-Greybox Entscheidung | Vor der ersten Stadt-Greybox muss klar sein, welcher `playable_city_area`-Kandidat genug Nutzen bei kontrollierbarem Risiko bietet. | `412-italy-playable-city-area-review-and-first-city-decision.md` reviewed alle 13 Kandidaten und legt Firenze als erste Stadt fest; Roma und Bologna bleiben Reserve-Kandidaten. | Erste Stadt wird wegen Wow-Faktor statt Spiel-/Risiko-Abwaegung gewaehlt oder echte Stadtgrenzen werden als Runtime-Polygone/Koordinaten uebernommen. | nein |
 | M16T-WORLD-017 | [x] | World-Travel Zoom als Spielnavigation | Talvori darf die 411-Dokumentationskarte nicht als App-Screen missverstehen, sondern braucht eine spielartige Reise von Welt zu Stadt. | `413-world-travel-zoom-navigation-gameflow-gate.md` definiert Globus -> Europa -> Italien -> Firenze -> Bauflaechen/Lernorte als spielnahen Zoom-Flow, mit Italien aktiv, anderen Laendern locked/ausgegraut und Firenze als erstem City-Zoom. | 411-Visual wird als iPhone-Screen uebernommen, die Ansicht wirkt wie GIS/Atlas/Dashboard/Debug-Tool oder Runtime/App/Asset-Arbeit entsteht vor eigenem Gate. | nein |
 | M16T-WORLD-018 | [x] | World-Travel Preview source-based rebuild rule | Der erste isolierte Preview-Proof hat gezeigt, dass spielartige Kamera allein nicht reicht, wenn Globus, Europa, Laender oder Italien frei erfunden wirken. | `414-world-travel-preview-fail-review-and-source-based-rebuild-plan.md` verwirft die freie Preview und legt fest: keine frei gemalten Laender-/Globus-/Stadtformen, wenn echte offene Konturen verfuegbar sind; naechster Preview-Aufbau muss source-based starten. | Neue World-Travel-Preview nutzt Fantasie-Blobs, erkennt Italien nicht, kopiert 411 als App-Screen oder erzeugt Runtime-/Asset-/YAML-/JSON-/App-Daten ohne Gate. | nein |
+| M16T-WORLD-019 | [x] | Firenze Ground Layer And Anchors Gate | Firenze darf nicht als frei erfundene City-Entry-Flaeche starten, nur weil 412 die Stadt als ersten Kandidaten gewaehlt hat. | `415-firenze-playable-city-ground-layer-and-anchors-gate.md` definiert die benoetigten Florenz-Ground-/Layer-/Anchor-Familien, verweist auf ISTAT `PRO_COM_T=048017`, stoppt freie Baupunkte und erzeugt ein Dokumentationsvisual. | City-Entry-App-Preview vor Ground-/Layer-/Anchor-Gate, frei gesetzte Bauflaechen, UI-Orte ohne Anchor-Logik oder Runtime-Daten aus Dokumentationsannahmen. | nein |
+| M16T-WORLD-020 | [x] | Talvori Playable Area Specification Standard v1 | Ground-/Layer-/Anchor-Gates definieren Familien, aber eine professionelle spielbare Flaeche braucht auch Koordinatenraum, Metrics, Occupancy, Collision, Navigation, Reachability, Parcel-Struktur und Visual-QA als gemeinsamen Vertrag. | `416-talvori-playable-area-specification-standard-v1.md` und `previews/talvori_playable_area_specification_standard_v1/` definieren den verbindlichen Area-Spec-Standard inklusive Area Layout Blueprint fuer Stadt-, Insel-, District- und Plot-Focus-Flaechen. | Playable Preview ohne Area-Spec, Slots ohne Boundary/Path/No-Build-Check, konkrete Flaeche ohne Parcel-Anzahl/Parcel-Struktur/complete path network plan, Stadtansicht ohne Reachability, Collision als No-Walk/No-Build missverstanden oder Runtime-/YAML-/JSON-/Asset-/App-Daten aus dem Standard. | nein |
+| M16T-WORLD-021 | [x] | Firenze Playable City Layout Blueprint v5 | 416 definiert den Standard, aber Firenze braucht vor City Entry eine konkrete, reviewbare Grundstuecks-, Wege-, Bruecken-, Landmark-, Depth-, Spacing- und Reachability-Planung. | `417-firenze-playable-city-layout-blueprint-v5.md` und `previews/firenze_playable_city_layout_blueprint_v5/` ersetzen v0/v1/v2 sowie den v3-/v4-Zwischenstand. V5 plant 14 Parcel Candidates, 7 Early-Use-, 4 Reserve-/Expansion- und 3 Special-/Landmark-nahe Flaechen, groessere Firenze-Ground-Shape, Vegetationspuffer, organisches PATH-N/PATH-S, Branch/Future Paths, B1-B3 als einzige Arno-Querungen, L1-L5 Landmark-Anker, Depth-/Sorting-Bands, No-Walk/No-Build, Anchors, No-Overlap und Reachability als `documentation_only`. | City Entry vor 417-v5-Review, runde/generische oder zu gedrungene Firenze-Form, fehlende Florenz-Identitaetsanker, frei gesetzte Parcels, fehlende Parcel-Substruktur, fehlende Vegetations-/No-Overlap-Puffer, Wege ohne Zukunftsplanung, Arno-Querung ausserhalb B1-B3 oder Runtime-/YAML-/JSON-/Asset-/App-Daten. | nein |
 
 ## 14. Container / Depth
 
@@ -2263,6 +2269,90 @@ Das Fail-Review operationalisiert fuer kuenftige Slices:
   HUD-arm sein.
 - Der naechste empfohlene Slice ist: Source-based World-Travel Zoom Preview
   mit echten Konturen.
+
+Firenze Ground Layer And Anchors Gate erledigt:
+
+- M16T-WORLD-019
+
+Das Gate operationalisiert fuer kuenftige Firenze-City-Slices:
+
+- `docs/world_design/415-firenze-playable-city-ground-layer-and-anchors-gate.md`
+  stoppt die freie Florenz-City-Entry-WIP und fordert vor jeder Stadt-Preview
+  eine nachvollziehbare Ground-/Layer-/Anchor-Grundlage.
+- Florenz bleibt erste Stadt-Greybox aus 412; Source-Grundlage bleibt ISTAT
+  Comuni 2026 mit Firenze `PRO_COM_T=048017` aus 410 und die daraus
+  abstrahierte `playable_city_area` aus 411.
+- Pflichtfamilien fuer Folgearbeit sind `firenze_city_ground_shape`,
+  `firenze_playable_city_area`, `firenze_path_network_layer`,
+  `firenze_river_bridge_layer`, `firenze_buildable_ground_candidates`,
+  `firenze_reserved_ground`, `firenze_no_walk_layer`,
+  `firenze_no_build_layer`, `firenze_landmark_anchor_layer` und
+  `firenze_start_anchor`.
+- Das Dokumentationsvisual liegt unter
+  `docs/world_design/previews/firenze_playable_city_ground_layer_and_anchors_gate/`
+  und bleibt `documentation_only`, `not_asset`, `not_runtime_data` und
+  `not_engine_ready`.
+- Der naechste erlaubte Folgeslice ist: Firenze city ground visual diagram /
+  greybox preview.
+
+Talvori Playable Area Specification Standard v1 erledigt:
+
+- M16T-WORLD-020
+
+Der Standard operationalisiert fuer kuenftige City-/Island-/Area-Slices:
+
+- `docs/world_design/416-talvori-playable-area-specification-standard-v1.md`
+  definiert eine verbindliche Area-Spec vor spielbaren Stadt-, Insel-,
+  District- oder Plot-Focus-Previews.
+- Pflichtfamilien sind `area_identity`, `coordinate_system`, `metrics_v1`,
+  `playable_boundary`, `terrain_zones`, `water_layer`, `path_road_layer`,
+  `build_slots`, `anchor_points`, `occupancy_state`,
+  `collision_obstacles`, `navigation_walkable_area`, `no_walk_zones`,
+  `no_build_zones`, `semantic_zones`, `source_traceability`,
+  `visual_debug_overlay` und der neue `Area Layout Blueprint`.
+- Jeder konkrete Area-Spec-Slice muss zusaetzlich Parcel Count,
+  Parcel-Substruktur, complete path network plan, Parcel Access Rule,
+  Future-Visibility-Regel, City-Shape-Recognition-Regel und Blueprint-Visual
+  liefern.
+- Das Standardvisual liegt unter
+  `docs/world_design/previews/talvori_playable_area_specification_standard_v1/`
+  und bleibt `documentation_only`, `planning_standard`, `not_asset`,
+  `not_runtime_data` und `not_engine_ready`.
+- Fuer Firenze gilt ab dem naechsten Slice: Die runde 415-Gate-Form muss
+  korrigiert werden; Firenze braucht Boundary -> Metrics -> Terrain Zones ->
+  Arno/Bridge Layer -> Path Layer -> Build Slot Candidates -> Anchors ->
+  No-Walk/No-Build -> Collision/Navigation Review -> Visual QA.
+
+Firenze Playable City Layout Blueprint v5 erledigt:
+
+- M16T-WORLD-021
+
+Der fuehrende v5-Blueprint konkretisiert Firenze als erste Anwendung von 416
+und ersetzt den v4-Zwischenstand, der raeumlich und identitaetsseitig noch
+nicht ausreichend war:
+
+- `docs/world_design/417-firenze-playable-city-layout-blueprint-v5.md`
+  ersetzt die runde 415-Erstform und die v0/v1/v2-/v3-/v4-
+  Zwischenrichtungen durch eine groessere Florenz-orientierte Ground-Shape mit
+  breiter Westseite, kompaktem Kern, noerdlichen Ausbuchtungen, oestlichem
+  Arm, suedlicher Huegelkante und Arno-Korridor.
+- V5 vergroessert die wahrgenommene Gesamtflaeche weiter, haelt Parcels mit
+  viel Abstand, fuehrt sichtbare Vegetations-/Freiraumpuffer ein, verankert
+  L1-L5 als Florenz-Identitaetsanker und prueft No-Overlap zwischen
+  Parcel-Flaechen, Wegen, Arno und Boundary.
+- Geplant sind 14 `buildable parcel candidates`: 7 Early-Use-, 4
+  Reserve-/Expansion- und 3 Special-/Landmark-nahe Parcels.
+- Jedes Parcel braucht Hauptflaeche, Nebenflaeche, Garten-/Freiraum,
+  Zugang, Zukunftsreserve, No-Build-Clearance, Pfadanschluss und Status
+  `candidate_only`.
+- Das Wegenetz muss vollstaendig geplant sein: `PATH-N`, `PATH-S`,
+  als organische Hauptwege, Connector Paths nur ueber `B1`, `B2`, `B3`,
+  Branch Paths zu jedem Parcel und gestrichelte future/reserve paths.
+- Depth-/Sorting-Bands muessen sichtbar bleiben: `water_low`, `bridge_deck`,
+  `north_bank`, `south_bank`, `landmark_band` und `hill_edge_high`.
+- City Entry bleibt blockiert, bis 417 v5 reviewed ist; keine Parcel-, Path-,
+  Bridge-, Anchor- oder No-Walk/No-Build-Annahme darf als Runtime-Daten,
+  YAML/JSON, Asset, App-Route oder Persistenz gelesen werden.
 
 Damit bleiben keine normalen offenen `[ ]` M16-T-Items und keine ausgelagerten
 `[>]` Detail-Gates. Blockierte und teilweise erledigte Gates bleiben bewusst

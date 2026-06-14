@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Talvori playable area specification standard v1</title>
+  <desc id="desc">Documentation-only planning diagram for playable area specification layers: boundary, water, paths, build slots, occupancy, collision, navigation, no-walk, no-build, anchors and semantic zones.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06101c"/>
+      <stop offset="0.5" stop-color="#0b1523"/>
+      <stop offset="1" stop-color="#050711"/>
+    </linearGradient>
+    <radialGradient id="mapGlow" cx="45%" cy="42%" r="65%">
+      <stop offset="0" stop-color="#19495a" stop-opacity="0.34"/>
+      <stop offset="0.58" stop-color="#143044" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#06101c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#253c34"/>
+      <stop offset="0.46" stop-color="#5f7247"/>
+      <stop offset="1" stop-color="#263d49"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c3149"/>
+      <stop offset="0.5" stop-color="#2e8fad"/>
+      <stop offset="1" stop-color="#0e3654"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+    <filter id="glow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .title { font: 800 43px Arial, Helvetica, sans-serif; fill: #f5f8ff; }
+      .subtitle { font: 700 21px Arial, Helvetica, sans-serif; fill: #88fff0; }
+      .panel-title { font: 800 20px Arial, Helvetica, sans-serif; fill: #f5f8ff; }
+      .panel-text { font: 700 16px Arial, Helvetica, sans-serif; fill: #ccd7e2; }
+      .label { font: 800 14px Arial, Helvetica, sans-serif; fill: #06101c; }
+      .label-dark { font: 800 14px Arial, Helvetica, sans-serif; fill: #f5f8ff; }
+      .legend { font: 800 15px Arial, Helvetica, sans-serif; fill: #dce8f5; }
+      .tiny { font: 700 13px Arial, Helvetica, sans-serif; fill: #c8d3df; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="360" cy="455" r="460" fill="url(#mapGlow)"/>
+  <circle cx="1280" cy="160" r="320" fill="#8d55ff" opacity="0.06"/>
+
+  <text x="72" y="76" class="title">Talvori playable area specification standard v1</text>
+  <text x="74" y="116" class="subtitle">planning only | not runtime data | not asset | not engine ready</text>
+
+  <g transform="translate(58 152)">
+    <rect x="0" y="0" width="1032" height="772" rx="34" fill="#07111d" opacity="0.73" stroke="#275467" stroke-width="2"/>
+    <text x="36" y="50" class="panel-title">Layered playable area contract</text>
+    <text x="36" y="80" class="panel-text">Area Spec links boundary, metrics, walkability, collision, slots and anchors before a preview may become playable.</text>
+
+    <g transform="translate(92 112)" filter="url(#softShadow)">
+      <path d="M366 32 C493 8 624 49 717 145 C826 258 813 414 730 519 C633 642 446 688 276 624 C147 574 57 450 73 313 C88 179 221 91 366 32 Z" fill="url(#ground)" stroke="#f5c77a" stroke-width="8"/>
+      <path d="M366 32 C493 8 624 49 717 145 C826 258 813 414 730 519 C633 642 446 688 276 624 C147 574 57 450 73 313 C88 179 221 91 366 32 Z" fill="none" stroke="#ffc56d" stroke-width="20" opacity="0.17" filter="url(#glow)"/>
+
+      <path d="M92 393 C190 316 292 374 398 326 C513 274 615 318 768 239 L814 315 C659 403 535 356 421 409 C304 464 198 405 99 482 Z" fill="url(#water)" stroke="#93f7ff" stroke-width="4"/>
+      <rect x="102" y="502" width="116" height="32" rx="16" fill="#102539" stroke="#54cfe4" stroke-width="2"/>
+      <text x="124" y="523" class="label-dark">water</text>
+
+      <ellipse cx="424" cy="315" rx="266" ry="201" fill="#c0f08b" opacity="0.16" stroke="#b8ff94" stroke-width="5" stroke-dasharray="13 9"/>
+      <rect x="316" y="84" width="154" height="32" rx="16" fill="#d8f8b5" stroke="#0a161f" stroke-width="2"/>
+      <text x="337" y="105" class="label">walkable area</text>
+
+      <path d="M195 261 C283 181 438 171 581 233 C658 268 704 322 747 378" fill="none" stroke="#ffe2a1" stroke-width="13" stroke-linecap="round"/>
+      <path d="M310 555 C392 470 523 431 666 472" fill="none" stroke="#ffe2a1" stroke-width="11" stroke-linecap="round"/>
+      <path d="M438 206 C441 307 428 421 365 565" fill="none" stroke="#ffe2a1" stroke-width="10" stroke-linecap="round"/>
+      <rect x="585" y="200" width="74" height="30" rx="15" fill="#ffde9d" stroke="#382414" stroke-width="2"/>
+      <text x="606" y="220" class="label">path</text>
+
+      <rect x="386" y="355" width="104" height="28" rx="14" fill="#f7d395" stroke="#442b18" stroke-width="3"/>
+      <rect x="630" y="314" width="104" height="28" rx="14" fill="#f7d395" stroke="#442b18" stroke-width="3"/>
+      <rect x="610" y="349" width="132" height="32" rx="16" fill="#102539" stroke="#54cfe4" stroke-width="2"/>
+      <text x="628" y="370" class="label-dark">bridge anchor</text>
+
+      <ellipse cx="305" cy="236" rx="72" ry="44" fill="#f7d071" opacity="0.9" stroke="#fff1bd" stroke-width="3"/>
+      <ellipse cx="536" cy="243" rx="92" ry="48" fill="#f7d071" opacity="0.9" stroke="#fff1bd" stroke-width="3"/>
+      <ellipse cx="337" cy="528" rx="84" ry="51" fill="#f7d071" opacity="0.9" stroke="#fff1bd" stroke-width="3"/>
+      <ellipse cx="583" cy="548" rx="75" ry="46" fill="#b5f2aa" opacity="0.44" stroke="#c9ffd1" stroke-width="3" stroke-dasharray="9 8"/>
+      <rect x="207" y="159" width="132" height="32" rx="16" fill="#f7d071" stroke="#3e2b14" stroke-width="2"/>
+      <text x="226" y="180" class="label">build slots</text>
+      <rect x="616" y="512" width="126" height="32" rx="16" fill="#102539" stroke="#54cfe4" stroke-width="2"/>
+      <text x="635" y="533" class="label-dark">reserved</text>
+
+      <path d="M138 174 C199 82 325 49 433 42 C345 118 287 201 269 277 C214 277 161 231 138 174 Z" fill="#131820" opacity="0.78" stroke="#8f9aa8" stroke-width="3"/>
+      <rect x="102" y="116" width="118" height="32" rx="16" fill="#111923" stroke="#8f9aa8" stroke-width="2"/>
+      <text x="122" y="137" class="label-dark">no-walk</text>
+
+      <path d="M685 95 C761 151 806 234 790 318 C727 273 669 250 613 236 C641 189 665 139 685 95 Z" fill="#653045" opacity="0.62" stroke="#ff8fb1" stroke-width="3"/>
+      <rect x="677" y="161" width="104" height="32" rx="16" fill="#111923" stroke="#ff8fb1" stroke-width="2"/>
+      <text x="696" y="182" class="label-dark">no-build</text>
+
+      <circle cx="305" cy="236" r="57" fill="none" stroke="#ffad66" stroke-width="3" stroke-dasharray="7 8" opacity="0.9"/>
+      <circle cx="536" cy="243" r="68" fill="none" stroke="#ffad66" stroke-width="3" stroke-dasharray="7 8" opacity="0.9"/>
+      <circle cx="337" cy="528" r="65" fill="none" stroke="#ffad66" stroke-width="3" stroke-dasharray="7 8" opacity="0.9"/>
+      <rect x="204" y="304" width="150" height="32" rx="16" fill="#111923" stroke="#ffad66" stroke-width="2"/>
+      <text x="223" y="325" class="label-dark">collision radii</text>
+
+      <circle cx="425" cy="298" r="16" fill="#00d8ff" stroke="#f4fbff" stroke-width="5"/>
+      <circle cx="516" cy="202" r="13" fill="#ffd57b" stroke="#f4fbff" stroke-width="4"/>
+      <circle cx="310" cy="417" r="13" fill="#ffd57b" stroke="#f4fbff" stroke-width="4"/>
+      <circle cx="620" cy="446" r="13" fill="#ffd57b" stroke="#f4fbff" stroke-width="4"/>
+      <rect x="360" y="252" width="122" height="32" rx="16" fill="#102539" stroke="#54cfe4" stroke-width="2"/>
+      <text x="379" y="273" class="label-dark">start anchor</text>
+      <rect x="529" y="454" width="154" height="32" rx="16" fill="#102539" stroke="#54cfe4" stroke-width="2"/>
+      <text x="547" y="475" class="label-dark">landmark anchor</text>
+
+      <ellipse cx="455" cy="176" rx="118" ry="55" fill="#9c74ff" opacity="0.2" stroke="#c2a9ff" stroke-width="2"/>
+      <ellipse cx="278" cy="420" rx="118" ry="58" fill="#81ffd6" opacity="0.16" stroke="#a7ffe4" stroke-width="2"/>
+      <rect x="472" y="126" width="132" height="32" rx="16" fill="#102539" stroke="#7f61d8" stroke-width="2"/>
+      <text x="490" y="147" class="label-dark">semantic zone</text>
+    </g>
+
+    <g transform="translate(40 684)">
+      <rect x="0" y="0" width="952" height="54" rx="24" fill="#07111d" stroke="#2d5f73" stroke-width="2" opacity="0.94"/>
+      <circle cx="32" cy="27" r="9" fill="#f5c77a"/>
+      <text x="50" y="32" class="legend">Boundary</text>
+      <rect x="150" y="18" width="26" height="16" rx="6" fill="#2e8fad"/>
+      <text x="187" y="32" class="legend">Water</text>
+      <line x1="280" y1="27" x2="328" y2="27" stroke="#ffe2a1" stroke-width="8" stroke-linecap="round"/>
+      <text x="344" y="32" class="legend">Paths</text>
+      <ellipse cx="452" cy="27" rx="20" ry="12" fill="#f7d071"/>
+      <text x="480" y="32" class="legend">Build Slots</text>
+      <circle cx="622" cy="27" r="13" fill="none" stroke="#ffad66" stroke-width="3"/>
+      <text x="646" y="32" class="legend">Collision</text>
+      <circle cx="770" cy="27" r="10" fill="#00d8ff" stroke="#f4fbff" stroke-width="3"/>
+      <text x="792" y="32" class="legend">Anchors</text>
+    </g>
+  </g>
+
+  <g transform="translate(1128 152)">
+    <rect x="0" y="0" width="410" height="772" rx="34" fill="#07111d" opacity="0.82" stroke="#543b77" stroke-width="2"/>
+    <text x="28" y="50" class="panel-title">Required contract</text>
+
+    <g transform="translate(28 82)">
+      <rect x="0" y="0" width="354" height="86" rx="18" fill="#121d2b" stroke="#2d5f73" stroke-width="2"/>
+      <text x="20" y="32" class="panel-title">1. Identity + Source</text>
+      <text x="20" y="60" class="panel-text">area_id, type, source_basis, status</text>
+    </g>
+
+    <g transform="translate(28 188)">
+      <rect x="0" y="0" width="354" height="104" rx="18" fill="#121d2b" stroke="#2d5f73" stroke-width="2"/>
+      <text x="20" y="32" class="panel-title">2. Metrics + Coordinate Space</text>
+      <text x="20" y="60" class="panel-text">review_px or normalized_0_1</text>
+      <text x="20" y="84" class="panel-text">path, bridge, slot, tap target sizes</text>
+    </g>
+
+    <g transform="translate(28 312)">
+      <rect x="0" y="0" width="354" height="104" rx="18" fill="#121d2b" stroke="#2d5f73" stroke-width="2"/>
+      <text x="20" y="32" class="panel-title">3. Slots + Occupancy</text>
+      <text x="20" y="60" class="panel-text">candidate_only until own gate</text>
+      <text x="20" y="84" class="panel-text">no free slots without path access</text>
+    </g>
+
+    <g transform="translate(28 436)">
+      <rect x="0" y="0" width="354" height="104" rx="18" fill="#121d2b" stroke="#2d5f73" stroke-width="2"/>
+      <text x="20" y="32" class="panel-title">4. Collision + Navigation</text>
+      <text x="20" y="60" class="panel-text">collision is not automatically no-walk</text>
+      <text x="20" y="84" class="panel-text">reachability check before city entry</text>
+    </g>
+
+    <g transform="translate(28 560)">
+      <rect x="0" y="0" width="354" height="132" rx="18" fill="#231525" stroke="#ff8fb1" stroke-width="2"/>
+      <text x="20" y="32" class="panel-title">Stop before preview</text>
+      <text x="20" y="60" class="panel-text">No area spec, no playable preview.</text>
+      <text x="20" y="84" class="panel-text">No anchors without purpose.</text>
+      <text x="20" y="108" class="panel-text">No runtime/YAML/JSON/app data.</text>
+    </g>
+
+    <text x="28" y="734" class="tiny">This diagram explains the standard, not a product map.</text>
+  </g>
+</svg>
