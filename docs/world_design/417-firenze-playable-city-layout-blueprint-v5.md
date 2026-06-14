@@ -295,6 +295,7 @@ keine Assets, keine finalen Koordinaten und keine App-Integration.
 | `streets/` | Strassen-/Wegeflaeche, Mittellinien, Knotenpunkte | Prueft PATH-N/PATH-S, Connector Paths, Branch Paths, Knoten und spaetere Reachability. |
 | `parcels/` | Grundstuecksflaechen, Innenzonen, Puffer, Anker | Prueft 14 Parcel Candidates, Subzonen, Access Points, Clearance und No-Overlap. |
 | `landmarks/` | reservierte Sehenswuerdigkeitsflaechen, Kern, Interaktion, Puffer, Anker | Prueft L1-L5 Landmark-Identitaet, geschuetzte Kerne, Interaktionszonen und No-Build-Puffer. |
+| `correction_metadata/` | finale planning-only Korrektur-Metadaten | Ergaenzt B1-B3-IDs, Future-Path-Status, Boundary-Buffer-Review-Area, River/Core-Korrekturkandidaten und erlaubte Landmark-Buffer-Naehe ohne Original-Handoff-SVGs zu ueberschreiben. |
 
 Stop-Regel:
 
@@ -302,8 +303,8 @@ Stop-Regel:
 - Kein Handoff-Layer darf als Runtime-Polygon, Koordinate, Collision,
   Pathfinding, Build-Zone, No-Walk-/No-Build-Maske, Asset, YAML/JSON,
   App-Route oder Persistenz gelesen werden.
-- Der naechste erlaubte Schritt ist ein Review der Layer-Konsistenz; danach
-  darf ein eigener Metrics-/Reachability-/Collision-Review-Slice folgen.
+- Der naechste erlaubte Schritt ist ein erneuter Metrics-/Reachability-/
+  Collision-Review gegen Original-Handoff-Layer plus `correction_metadata/`.
 
 ## 15. Stop-Regeln
 
