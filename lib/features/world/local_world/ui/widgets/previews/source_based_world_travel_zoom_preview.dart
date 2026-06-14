@@ -4,6 +4,7 @@
 // persistence.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -38,9 +39,7 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
   var _level = _TravelLevel.continent;
   late final AnimationController _platformController;
   Timer? _cityHintTimer;
-  Timer? _cityEntryTimer;
   bool _cityHintVisible = false;
-  bool _cityEntryVisible = false;
 
   _ContinentShowcase get _selected => _continents[_selectedIndex];
 
@@ -56,7 +55,6 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
   @override
   void dispose() {
     _cityHintTimer?.cancel();
-    _cityEntryTimer?.cancel();
     _platformController.dispose();
     super.dispose();
   }
@@ -76,15 +74,11 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
     setState(() {
       _selectedCountryIndex = index;
       _cityHintVisible = false;
-      _cityEntryVisible = false;
     });
   }
 
   void _selectCity(int index) {
-    setState(() {
-      _selectedCityIndex = index;
-      _cityEntryVisible = false;
-    });
+    setState(() => _selectedCityIndex = index);
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -94,10 +88,13 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
   }
 
   void _handleBack() {
+    if (_level == _TravelLevel.firenzePlanningLayer) {
+      setState(() => _level = _TravelLevel.cityMap);
+      return;
+    }
     if (_level == _TravelLevel.cityMap) {
       setState(() {
         _level = _TravelLevel.country;
-        _cityEntryVisible = false;
       });
       return;
     }
@@ -127,7 +124,6 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
         _level = _TravelLevel.cityMap;
         _selectedCityIndex = _firenzeCityIndex;
         _cityHintVisible = false;
-        _cityEntryVisible = false;
       });
       return;
     }
@@ -140,12 +136,8 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
   }
 
   void _enterSelectedCity() {
-    setState(() => _cityEntryVisible = true);
-    _cityEntryTimer?.cancel();
-    _cityEntryTimer = Timer(const Duration(milliseconds: 1700), () {
-      if (!mounted) return;
-      setState(() => _cityEntryVisible = false);
-    });
+    if (_italyCities[_selectedCityIndex].label != 'Florenz') return;
+    setState(() => _level = _TravelLevel.firenzePlanningLayer);
   }
 
   @override
@@ -171,10 +163,12 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
                           title: switch (_level) {
                             _TravelLevel.country => _selected.label,
                             _TravelLevel.cityMap => 'Italien',
+                            _TravelLevel.firenzePlanningLayer => 'Florenz',
                             _TravelLevel.continent => 'Weltreise',
                           },
                           onBack: _handleBack,
                           backEnabled:
+                              _level == _TravelLevel.firenzePlanningLayer ||
                               _level == _TravelLevel.cityMap ||
                               _level == _TravelLevel.country ||
                               _selectedIndex != _europeIndex,
@@ -184,29 +178,34 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
                             duration: const Duration(milliseconds: 380),
                             switchInCurve: Curves.easeOutCubic,
                             switchOutCurve: Curves.easeInCubic,
-                            child: _level == _TravelLevel.continent
-                                ? _ShowcaseStage(
-                                    key: const ValueKey('continent-stage'),
-                                    continent: _selected,
-                                    onOpen: _openSelectedContinent,
-                                  )
-                                : _level == _TravelLevel.country
-                                ? _CountrySelectionStage(
-                                    key: const ValueKey('country-stage'),
-                                    selectedIndex: _selectedCountryIndex,
-                                    platformAnimation: _platformController,
-                                    cityHintVisible: _cityHintVisible,
-                                    onSelect: _selectCountry,
-                                    onOpen: _openSelectedCountry,
-                                  )
-                                : _ItalyCityHotspotStage(
-                                    key: const ValueKey('italy-city-map-stage'),
-                                    selectedIndex: _selectedCityIndex,
-                                    entryVisible: _cityEntryVisible,
-                                    animation: _platformController,
-                                    onSelect: _selectCity,
-                                    onEnter: _enterSelectedCity,
+                            child: switch (_level) {
+                              _TravelLevel.continent => _ShowcaseStage(
+                                key: const ValueKey('continent-stage'),
+                                continent: _selected,
+                                onOpen: _openSelectedContinent,
+                              ),
+                              _TravelLevel.country => _CountrySelectionStage(
+                                key: const ValueKey('country-stage'),
+                                selectedIndex: _selectedCountryIndex,
+                                platformAnimation: _platformController,
+                                cityHintVisible: _cityHintVisible,
+                                onSelect: _selectCountry,
+                                onOpen: _openSelectedCountry,
+                              ),
+                              _TravelLevel.cityMap => _ItalyCityHotspotStage(
+                                key: const ValueKey('italy-city-map-stage'),
+                                selectedIndex: _selectedCityIndex,
+                                animation: _platformController,
+                                onSelect: _selectCity,
+                                onEnter: _enterSelectedCity,
+                              ),
+                              _TravelLevel.firenzePlanningLayer =>
+                                const _FirenzePlanningLayerPreviewStage(
+                                  key: ValueKey(
+                                    'firenze-planning-layer-preview',
                                   ),
+                                ),
+                            },
                           ),
                         ),
                         if (_level == _TravelLevel.continent)
@@ -665,14 +664,12 @@ class _ItalyCityHotspotStage extends StatelessWidget {
   const _ItalyCityHotspotStage({
     super.key,
     required this.selectedIndex,
-    required this.entryVisible,
     required this.animation,
     required this.onSelect,
     required this.onEnter,
   });
 
   final int selectedIndex;
-  final bool entryVisible;
   final Animation<double> animation;
   final ValueChanged<int> onSelect;
   final VoidCallback onEnter;
@@ -790,7 +787,7 @@ class _ItalyCityHotspotStage extends StatelessWidget {
             ),
             _CityInfoPanel(
               city: selectedCity,
-              entryVisible: entryVisible,
+              entryVisible: false,
               onEnter: selectedCity.available ? onEnter : null,
             ),
             SizedBox(height: compact ? 6 : 10),
@@ -821,6 +818,346 @@ class _ItalyCityHotspotStage extends StatelessWidget {
     }
 
     return nearestDistance <= hitRadius ? nearestIndex : null;
+  }
+}
+
+class _FirenzePlanningLayerPreviewStage extends StatelessWidget {
+  const _FirenzePlanningLayerPreviewStage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 660;
+        return Column(
+          children: [
+            const SizedBox(height: 12),
+            const _PlanningStatusStrip(),
+            SizedBox(height: compact ? 10 : 14),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(26),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: const Color(0xD9081726),
+                    border: Border.all(
+                      color: _TravelColors.homeCyan.withValues(alpha: 0.36),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _TravelColors.homeViolet.withValues(alpha: 0.18),
+                        blurRadius: 34,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _DocsPreviewImage(
+                        path: _firenzeBlueprintPreviewPath,
+                        fit: BoxFit.contain,
+                        label: 'Firenze V5 Blueprint',
+                      ),
+                      const Positioned(
+                        left: 14,
+                        top: 14,
+                        child: _PlanningBadge(text: 'visual-only'),
+                      ),
+                      const Positioned(
+                        right: 14,
+                        top: 14,
+                        child: _PlanningBadge(text: 'not runtime'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: compact ? 10 : 14),
+            SizedBox(
+              height: compact ? 118 : 138,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: _firenzePlanningLayers.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  return _PlanningLayerCard(
+                    layer: _firenzePlanningLayers[index],
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: compact ? 8 : 12),
+            const _PlanningLayerRulesPanel(),
+            SizedBox(height: compact ? 4 : 8),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PlanningStatusStrip extends StatelessWidget {
+  const _PlanningStatusStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xCC07101A),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: _TravelColors.homeCyan.withValues(alpha: 0.34),
+        ),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        child: Row(
+          children: [
+            Icon(Icons.layers_rounded, color: _TravelColors.homeCyan, size: 18),
+            SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                'Firenze Planning-Layer Preview · visual-only · keine Runtime-Geometrie',
+                maxLines: 2,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                  color: _TravelColors.text,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanningLayerCard extends StatelessWidget {
+  const _PlanningLayerCard({required this.layer});
+
+  final _FirenzePlanningLayer layer;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 154,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xC907101A),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: layer.accent.withValues(alpha: 0.44)),
+          boxShadow: [
+            BoxShadow(
+              color: layer.accent.withValues(alpha: 0.10),
+              blurRadius: 18,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(7),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: _DocsPreviewImage(
+                    path: layer.path,
+                    fit: BoxFit.cover,
+                    label: layer.title,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                layer.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: _TravelColors.text,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                layer.note,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: layer.accent.withValues(alpha: 0.88),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanningLayerRulesPanel extends StatelessWidget {
+  const _PlanningLayerRulesPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 430),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xD707101A),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: _TravelColors.gold.withValues(alpha: 0.40)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(13, 10, 13, 10),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.visibility_rounded,
+                color: _TravelColors.gold,
+                size: 19,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'B1-B3, P06/P13, Core-Candidates und Buffer-only werden nur als bestehende Planungs-Layer gezeigt.',
+                  maxLines: 3,
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(
+                    color: _TravelColors.text.withValues(alpha: 0.78),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
+                    height: 1.18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanningBadge extends StatelessWidget {
+  const _PlanningBadge({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xDD06101A),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: _TravelColors.homeCyan.withValues(alpha: 0.50),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: _TravelColors.text,
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DocsPreviewImage extends StatelessWidget {
+  const _DocsPreviewImage({
+    required this.path,
+    required this.label,
+    this.fit = BoxFit.contain,
+  });
+
+  final String path;
+  final String label;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: _docsImageProvider(path),
+      fit: fit,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (context, error, stackTrace) {
+        return _DocsPreviewImageFallback(
+          label: label,
+          url: _docsImageUrl(path),
+        );
+      },
+    );
+  }
+}
+
+class _DocsPreviewImageFallback extends StatelessWidget {
+  const _DocsPreviewImageFallback({required this.label, required this.url});
+
+  final String label;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xF006101A)),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.image_not_supported_rounded,
+                color: _TravelColors.homeCyan,
+                size: 28,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: _TravelColors.text,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                url,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _TravelColors.text.withValues(alpha: 0.56),
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -2238,6 +2575,20 @@ class _ItalyCityHotspot {
   final bool available;
 }
 
+class _FirenzePlanningLayer {
+  const _FirenzePlanningLayer({
+    required this.title,
+    required this.note,
+    required this.path,
+    required this.accent,
+  });
+
+  final String title;
+  final String note;
+  final String path;
+  final Color accent;
+}
+
 enum _CityBeaconKind { culture, hub, water, coast, volcano, tower, city }
 
 enum _CityLabelPlacement {
@@ -2263,6 +2614,16 @@ class _TravelColors {
 
 const _assetBase = 'assets/images/world/travel/continent_showcase';
 const _countryAssetBase = 'assets/images/world/travel/country_showcase/cutout';
+const _firenzePreviewBase =
+    'docs/world_design/previews/firenze_playable_city_layout_blueprint_v5';
+const _firenzeHandoffBase = '$_firenzePreviewBase/handoff_layers';
+const _firenzeBlueprintPreviewPath =
+    '$_firenzePreviewBase/firenze_playable_city_layout_blueprint_v5.png';
+const _docsHost = String.fromEnvironment(
+  'TALVORI_DOCS_HOST',
+  defaultValue: '127.0.0.1',
+);
+const _docsPort = int.fromEnvironment('TALVORI_DOCS_PORT', defaultValue: 8765);
 const _europeIndex = 2;
 const _italyCountryIndex = 0;
 const _firenzeCityIndex = 1;
@@ -2271,7 +2632,17 @@ const _cityLabelMinWidth = 56.0;
 const _cityLabelMaxWidth = 86.0;
 const _cityLabelHeight = 30.0;
 
-enum _TravelLevel { continent, country, cityMap }
+enum _TravelLevel { continent, country, cityMap, firenzePlanningLayer }
+
+String _docsImageUrl(String path) {
+  return 'http://$_docsHost:$_docsPort/$path';
+}
+
+ImageProvider _docsImageProvider(String path) {
+  final file = File('${Directory.current.path}/$path');
+  if (file.existsSync()) return FileImage(file);
+  return NetworkImage(_docsImageUrl(path));
+}
 
 const _continents = <_ContinentShowcase>[
   _ContinentShowcase(
@@ -2575,6 +2946,66 @@ const _countries = <_CountryShowcase>[
     label: 'Aserbaidschan',
     assetPath: '$_countryAssetBase/azerbaijan_showcase.png',
     visualScale: 0.98,
+  ),
+];
+
+const _firenzePlanningLayers = <_FirenzePlanningLayer>[
+  _FirenzePlanningLayer(
+    title: 'Boundary',
+    note: 'Planning layer',
+    path: '$_firenzeHandoffBase/boundary/florenz_playable_boundary_area.png',
+    accent: _TravelColors.homeCyan,
+  ),
+  _FirenzePlanningLayer(
+    title: 'River',
+    note: 'Arno no-walk/no-build',
+    path: '$_firenzeHandoffBase/river/geschlossene_flaeche_preview.png',
+    accent: Color(0xFF66D9FF),
+  ),
+  _FirenzePlanningLayer(
+    title: 'Streets',
+    note: 'PATH-N/S + branches',
+    path: '$_firenzeHandoffBase/streets/street_combined_preview.png',
+    accent: _TravelColors.gold,
+  ),
+  _FirenzePlanningLayer(
+    title: 'Parcels',
+    note: 'Candidate only',
+    path: '$_firenzeHandoffBase/parcels/parcel_buildable_areas_preview.png',
+    accent: Color(0xFF9DF08A),
+  ),
+  _FirenzePlanningLayer(
+    title: 'Landmarks',
+    note: 'L1-L5 reserved',
+    path: '$_firenzeHandoffBase/landmarks/landmark_anchors.png',
+    accent: _TravelColors.homeViolet,
+  ),
+  _FirenzePlanningLayer(
+    title: 'B1-B3',
+    note: 'Bridge metadata',
+    path: '$_firenzeHandoffBase/correction_metadata/bridge_ids_b1_b2_b3.png',
+    accent: _TravelColors.gold,
+  ),
+  _FirenzePlanningLayer(
+    title: 'River/Core',
+    note: 'Correction metadata',
+    path:
+        '$_firenzeHandoffBase/correction_metadata/parcel_river_core_correction_candidates.png',
+    accent: Color(0xFFFF7A93),
+  ),
+  _FirenzePlanningLayer(
+    title: 'Allowed Buffer',
+    note: 'P02/P05/P07/P09/P10',
+    path:
+        '$_firenzeHandoffBase/correction_metadata/landmark_buffer_allowed_proximity.png',
+    accent: Color(0xFF9DF08A),
+  ),
+  _FirenzePlanningLayer(
+    title: 'Candidates',
+    note: 'P06/P13 + core-clear',
+    path:
+        '$_firenzeHandoffBase/correction_candidates/correction_candidates_combined_review.png',
+    accent: _TravelColors.homeCyan,
   ),
 ];
 
