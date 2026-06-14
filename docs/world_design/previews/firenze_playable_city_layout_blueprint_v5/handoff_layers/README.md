@@ -18,6 +18,7 @@ Engine-ready Assets.
 | `parcels/` | Grundstuecksflaechen, Innenzonen, Puffer und Anker | Prueft 14 Parcel Candidates, Subzonen, Access Points, Clearance und No-Overlap. |
 | `landmarks/` | Reservierte Sehenswuerdigkeitsflaechen, Kern, Interaktion, Puffer und Anker | Prueft L1-L5 Landmark-Identitaet, Schutzraeume und spaetere Interaktionskandidaten. |
 | `correction_metadata/` | Finale planning-only Korrektur-Metadaten fuer B1-B3, Future Paths, Boundary Buffer, River/Core-Kandidaten und erlaubte Landmark-Buffer-Naehe | Ergaenzt die Handoff-Familie, ohne Original-Layer zu ueberschreiben oder Runtime-Geometrie freizugeben. |
+| `correction_candidates/` | Additive planning-only Korrekturkandidaten fuer River-clear, Protected-Core-clear und Buildable-/Subzone-Clips | Macht die in `424` entschiedenen minimalen Korrekturstrategien sichtbar, ohne Original-Handoff-Layer zu ueberschreiben oder finale Polygone zu erzeugen. |
 
 ## Stop-Regel
 
@@ -28,6 +29,6 @@ No-Build-Maske, Asset, App-Route, YAML/JSON oder Persistenz gelesen werden.
 ## Naechster erlaubter Schritt
 
 Naechster erlaubter Schritt ist ein erneuter Metrics-/Reachability-/
-Collision-Review gegen die Original-Handoff-Layer plus
-`correction_metadata/`. Eine Flutter-City-Entry-Preview bleibt bis dahin
+Collision-Review gegen die Original-Handoff-Layer plus `correction_metadata/`
+und `correction_candidates/`. Eine Flutter-City-Entry-Preview bleibt bis dahin
 blockiert.
