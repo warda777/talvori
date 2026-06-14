@@ -175,6 +175,7 @@ class _WorldTravelShowcasePreviewState extends State<WorldTravelShowcasePreview>
                           },
                           onBack: _handleBack,
                           backEnabled:
+                              _level == _TravelLevel.cityMap ||
                               _level == _TravelLevel.country ||
                               _selectedIndex != _europeIndex,
                         ),
