@@ -252,7 +252,7 @@ Non-Goals:
 | `415-firenze-playable-city-ground-layer-and-anchors-gate.md` und `previews/firenze_playable_city_ground_layer_and_anchors_gate/` | Firenze Ground Layer And Anchors Gate: Pflicht fuer kommende Firenze-/Florenz-/City-Entry-/City-Ground-/Greybox-/Buildable-Ground-/Path-/River-/Bridge-/No-Walk-/No-Build-/Landmark-/Start-Anchor-Slices. 415 stoppt freie Stadtflaechen, verlangt ISTAT-/411-basierte Ground-/Layer-/Anchor-Planung und gibt keine Runtime-Daten, finalen Koordinaten, YAML/JSON, Assets, Code, App-Route oder App-Integration frei. |
 | `416-talvori-playable-area-specification-standard-v1.md` und `previews/talvori_playable_area_specification_standard_v1/` | Talvori Playable Area Specification Standard v1: Pflicht fuer kommende City-/Stadt-/Island-/Insel-/District-/Plot-Focus-/Playable-Area-/Build-Slot-/Walkability-/Collision-/No-Walk-/No-Build-/Anchor-/Greybox-Slices. 416 definiert Area Identity, Koordinatenraum, Metrics, Boundary, Terrain, Water, Paths, Build Slots, Occupancy, Collision, Navigation, No-Walk/No-Build, Semantic Zones, Source Traceability und Visual-QA als Planungsstandard und gibt keine Runtime-Daten, finalen Koordinaten, YAML/JSON, Assets, Code oder App-Integration frei. |
 | `417-firenze-playable-city-layout-blueprint-v5.md`, `previews/firenze_playable_city_layout_blueprint_v5/` und `previews/firenze_playable_city_layout_blueprint_v5/handoff_layers/` | Firenze Playable City Layout Blueprint v5: Pflicht fuer kommende Firenze-/Florenz-/City-Entry-/City-Ground-/Playable-Area-/Buildable-Ground-/Parcel-/Path-/River-/Bridge-/No-Walk-/No-Build-/Landmark-/Start-Anchor-Slices. 417 v5 konkretisiert 416 fuer Firenze mit expanded Florence-shaped Ground Shape, 14 Parcel Candidates, 7 Early-Use-, 4 Reserve-/Expansion- und 3 Special-/Landmark-nahen Flaechen, Vegetationspuffern, organischem PATH-N/PATH-S, Branch/Future Paths, B1-B3 als einzigen Arno-Querungen, L1-L5 Landmark-Ankern, Depth-/Sorting-Bands, No-Walk/No-Build, Anchors, No-Overlap und Reachability-Review. Die Handoff-Layer sind als planning-only Boundary-/River-/Street-/Parcel-/Landmark-Layer mitzulesen; keine Runtime-Daten, finalen Koordinaten, YAML/JSON, Assets, Code, App-Route oder App-Integration. |
-| `426-firenze-master-technical-layout-readiness-check.md`, `427-firenze-area-specification-extraction-plan.md`, `428-firenze-area-specification-planning-extraction-v1.md`, `429-firenze-area-specification-planning-extraction-review-v1.md` und `430-firenze-area-specification-metrics-and-reachability-review-plan.md` | Aktuelle Firenze-Master-/Area-Specification-Kette nach 417 v5. Pflicht fuer kommende Firenze-/Florenz-/Area-Specification-/Metrics-/Reachability-/Walkability-/City-Entry-Vorbereitungsslices. 426 bestaetigt die Master-SVG als technische Planungsquelle, 427 plant die Extraction, 428 extrahiert planning-only Registries, 429 reviewt die Extraction als planning-only PASS und 430 plant den Metrics-/Reachability-Review. Naechster enger Slice ist `Firenze Area-Specification Metrics and Reachability Review v1`; weiterhin keine Runtime-Daten, finalen Koordinaten, JSON/YAML/YML, Flutter-/Dart-Daten, Collision-/Pathfinding-Daten, Assets, App-Route oder App-Integration. |
+| `426-firenze-master-technical-layout-readiness-check.md`, `427-firenze-area-specification-extraction-plan.md`, `428-firenze-area-specification-planning-extraction-v1.md`, `429-firenze-area-specification-planning-extraction-review-v1.md`, `430-firenze-area-specification-metrics-and-reachability-review-plan.md` und `431-firenze-area-specification-metrics-and-reachability-review-v1.md` | Aktuelle Firenze-Master-/Area-Specification-Kette nach 417 v5. Pflicht fuer kommende Firenze-/Florenz-/Area-Specification-/Metrics-/Reachability-/Walkability-/City-Entry-Vorbereitungsslices. 426 bestaetigt die Master-SVG als technische Planungsquelle, 427 plant die Extraction, 428 extrahiert planning-only Registries, 429 reviewt die Extraction als planning-only PASS, 430 plant den Metrics-/Reachability-Review und 431 gibt die planning-only Master-Topologie fuer einen engen graph-authentischen First-Fun-Proof frei. Weiterhin keine produktiven Runtime-Daten, finalen Koordinaten, JSON/YAML/YML, Collision-/Pathfinding-Daten, App-Route oder Persistenz. |
 | `assets/images/world/buildable_islands/forest_clearing/template.md` | Waldlichtung/Previews sind Starter-/Testformen, keine App-/Assetfreigabe. |
 
 ### 4.12 Datenmodell / Persistenz / Backend
@@ -1025,6 +1025,82 @@ Stop-Regel:
 - 414 gibt keine neue Preview-, Code-, Asset-, Runtime-, YAML-/JSON-, App-,
   Route-, Persistenz-, BuildState- oder `assets/`-Freigabe.
 
+### 5.12a Talvori Game-Feel, Benchmark and Playable Progress Rule
+
+Fuer World-, Travel-, City-, Parcel-, Gameplay-, Preview- und
+Implementierungs-Slices muss Talvori Spannung, Klarheit, Neugier und
+Fortschrittswirkung erfolgreicher Spiele wie Clash of Clans anstreben, aber
+Prinzipien nur in Talvori uebersetzen: Artstyle, Figuren, UI, Oekonomie,
+Kampf, Monetarisierung und IP anderer Spiele werden nicht kopiert.
+
+Jeder relevante Slice muss Player Hook, sichtbares Ziel, kleine Huerde oder
+Aufgabe, konkrete Weltaktion, unmittelbares visuelles/audio-/haptisches
+Feedback, Belohnung oder neue Moeglichkeit und naechsten freiwilligen Hook
+klaeren oder umsetzen. Bestehende Talvori-Research-/Benchmark-Dokumente sind
+zuerst zu nutzen; bleibt eine Interaktion unklar, werden gezielt 1-3
+erfolgreiche Spiele oder bewaehrte Spielmuster verglichen. Im Abschluss muss
+stehen, welches Muster uebernommen, wie es fuer Talvori uebersetzt und was
+bewusst nicht kopiert wurde.
+
+Nach einem bestandenen Gate muss der naechste Slice ein sichtbares oder
+spielbares Ergebnis erzeugen; kein zusaetzliches Plan-/Review-Dokument ohne
+konkret benannten Blocker. Ein spielbares Ergebnis braucht mindestens
+Spielerentscheidung, Weltreaktion, sichtbare Zustandsaenderung, naechsten
+Zielhinweis und Device-Test. Welt-, Kontinent-, Land-, Stadt- und
+Grundstuecksebenen duerfen nicht dieselbe Kartenmenue-Interaktion wiederholen:
+jede Ebene braucht eigene Ankunfts-, Entdeckungs- oder Aktionsqualitaet.
+Gefuehrte Kamera ist primaer; freies Pan/Zoom ist sekundaer und darf nicht
+noetig sein, um das aktive Ziel wiederzufinden.
+
+Navigation Fidelity Rule: Game-Feel darf die technische Source of Truth niemals
+ueberschreiben. Sichtbare Figurenbewegung in City-/World-Previews muss
+vorhandene Navigation-Nodes und Navigation-Edges verwenden; freie oder
+geschaetzte Route-Waypoints sind verboten. `city_spawn_start` darf nur ueber
+vorhandene Graph-Edges verlassen werden, Grundstuecksrouten enden an
+`P##_entry_1` oder `P##_entry_2` und muessen direkt davor das passende
+`P##_access_1` oder `P##_access_2` nutzen. `P##_anchor` bleibt visuelle
+Grundstuecks-/Kamerareferenz und ist niemals Laufziel. Arno-Querungen sind nur
+ueber vollstaendige Bridge-Ketten `B##_N -> B##_M -> B##_S` oder umgekehrt
+erlaubt. Wenn keine quelltreuen Preview-Koordinaten vorliegen, muss Bewegung
+stoppen; Codex darf keine Ersatzroute erfinden.
+
+Living World, Landscape and Camera Bounds Rule: Haupt-World-/City-/Build-
+Szenen muessen sich wie lebende Spielwelten anfuehlen, nicht wie Karten-, GIS-
+oder Auswahlmenues. Spielwelt, Figuren, kleine Arbeitsablaeufe und sichtbare
+Zustandsaenderungen bleiben auch hinter UI-Overlays sichtbar. World-/City-/
+Parcel-/Build-Spielmodi verwenden bevorzugt Landscape; bei Portrait wird die
+Szene pausiert und ein kompakter `Geraet drehen`-Hinweis gezeigt. Gefuehrte
+Kamera ist primaer, freies Pan/Zoom sekundaer; die Kamera muss an gestaltete
+World-Bounds geklemmt sein. Ausserhalb der spielbaren Boundary braucht die
+Szene einen nicht spielbaren Scenic Ring statt leerem/schwarzem Raum.
+Ambient-Figuren duerfen nur echte Navigation-Edges oder explizit freigegebene
+Ambient Paths verwenden. Player-facing Szenen duerfen keine technischen
+G-/U-/Node-/Edge-Labels, Debug-Boundaries oder Admin-/GIS-Optik zeigen. Nach
+Spieleraktionen muss mindestens eine dauerhafte sichtbare Weltveraenderung
+bestehen bleiben.
+
+Living World Production Sequence Rule: Flutter bleibt App-/HUD-Schicht; Flame
+ist die vorgesehene Runtime-Schicht fuer lebendige World-/City-Szenen mit Game
+Loop, World, Kamera, Figuren, VFX und Depth Sorting. Technische Navigation,
+sichtbare Art und Character-Animation bleiben getrennte Systeme. Fuer
+lebendige World-/City-Arbeit gilt die Reihenfolge: technischen Kern
+stabilisieren -> Flame World/Camera Proof -> eine Basisfigur produzieren ->
+isolierter Character Motion Proof -> eine Figur auf echter Graph-Route ->
+Character-Varianten -> Lane-/Activity-System -> kleine NPC-Population -> ein
+Art-Vertical-Slice -> Umweltanimation -> First-Fun-Loop -> danach erst auf die
+ganze Stadt skalieren.
+
+Kein Schritt darf uebersprungen werden: keine Figurenvarianten vor Freigabe der
+Basisfigur, keine NPC-Menge vor einer funktionierenden Einzelfigur, keine
+vollstaendige Stadt-Art vor einem freigegebenen District-Slice und keine
+App-Integration/Persistenz vor bestandenem First-Fun-Loop. Codex darf keine
+prozeduralen Ersatzfiguren zeichnen; fehlt ein notwendiges Asset, folgt zuerst
+ein enger Asset-Production-Slice. Jeder Codex-Slice setzt nur einen klaren
+Baustein um und braucht erwartete Dateien, sichtbaren Nachweis, Tests, echten
+Device-Test und separate Commit-Freigabe. Die technische Firenze-Source-of-
+Truth bleibt verbindlich; bestehende Game-Feel-, Navigation-Fidelity- und
+Living-World-Regeln bleiben bestehen und werden nicht dupliziert.
+
 ### 5.13 Playable Area Specification Pflichtregel
 
 `416-talvori-playable-area-specification-standard-v1.md` ist Pflicht fuer
@@ -1099,9 +1175,18 @@ Aktuelle Firenze-Master-/Area-Specification-Reihenfolge nach 417 v5:
 4. `429-firenze-area-specification-planning-extraction-review-v1.md` pruefen:
    428 ist planning-only PASS; Runtime, JSON/YAML und Flutter bleiben gesperrt.
 5. `430-firenze-area-specification-metrics-and-reachability-review-plan.md`
-   pruefen: Der naechste erlaubte enge Slice ist `Firenze Area-Specification
-   Metrics and Reachability Review v1`, weiterhin ohne Runtime, JSON/YAML,
-   Flutter, Koordinaten, Collision oder Pathfinding.
+   pruefen: Metrics-/Reachability-Pruefung ist geplant, weiterhin ohne Runtime,
+   JSON/YAML, Flutter, Koordinaten, Collision oder Pathfinding.
+6. `431-firenze-area-specification-metrics-and-reachability-review-v1.md`
+   pruefen: Die Master-Topologie ist planning-only PASS und darf fuer einen
+   engen graph-authentischen First-Fun-Proof als Preview-Quelle verwendet
+   werden.
+
+Fuer aktuelle Firenze-Arbeit hat die Master-SVG-/426+-Kette Vorrang vor den
+aelteren Geometrie-Zaehlungen aus 417. Aktuell gelten P01-P14, L01-L06,
+B01-B08, 181 Navigation Nodes und 221 Navigation Edges. B1-B3/L1-L5 aus 417
+sind historischer Blueprint-Kontext, nicht die aktuelle Implementierungsquelle.
+Der aktuelle naechste Schritt ist ein graph-authentischer First-Fun-Proof.
 
 Stop-Regel:
 
@@ -1116,10 +1201,10 @@ Stop-Regel:
   als die geplanten 14 Parcel Candidates fuehrt, Parcel-Zugaenge nicht klaert,
   Vegetations-/No-Overlap-Puffer unterschlaegt, L1-L5 Landmark-Anker nicht
   sichtbar macht oder future/reserve paths erst spaeter frei erfindet.
-- Der naechste erlaubte fachliche Schritt nach 430 ist `Firenze
-  Area-Specification Metrics and Reachability Review v1`, nicht direkt eine
-  freie Stadt-UI. City Entry bleibt blockiert, bis Metrics-/Reachability-Review
-  und Folge-Gates explizit freigeben.
+- Nach 431 ist nur ein graph-authentischer First-Fun-Proof commitfaehig, der
+  Master-SVG-Nodes/-Edges nutzt. Freie Stadt-UI, freie Routen, Runtime-Daten,
+  App-Route, Persistenz, Collision und produktives Pathfinding bleiben
+  blockiert.
 
 ### 5.15 Uferwald-/World-Preview Device-Test-Regel
 
