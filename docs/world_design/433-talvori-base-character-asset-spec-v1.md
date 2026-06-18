@@ -1,9 +1,9 @@
 # 433 Talvori Base Character Asset Spec v1
 
-Status: specification_only / planning_only  
-Scope: one base character asset specification  
-Runtime release: NO  
-Flutter/Flame implementation: NO  
+Status: specification_only / planning_only
+Scope: one base character asset specification
+Runtime release: NO
+Flutter/Flame implementation: NO
 Sprite asset generation: NO
 
 ## 1. Ziel
@@ -227,10 +227,10 @@ Sie erzeugt keine Spielgrafik und keine Figur.
 
 ## 12. Ergebnis
 
-Base Character Asset Specification: PASS  
-Runtime-Freigabe: NO  
-Sprite-Asset-Freigabe: NO  
-Flame-Character-Integration: NO  
+Base Character Asset Specification: PASS
+Runtime-Freigabe: NO
+Sprite-Asset-Freigabe: NO
+Flame-Character-Integration: NO
 Naechster enger Slice: `Firenze Character Motion Lab 2B`, nach echter
 Asset-Bereitstellung fuer `citizen_base_01`.
 
