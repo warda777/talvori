@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">citizen_base_01 idle frame production prep</title>
+  <desc id="desc">Documentation diagram for the 8 direction by 2 frame idle sprite sheet contract, foot anchor, padding and QA gate.</desc>
+  <defs>
+    <style>
+      .bg { fill: #101827; }
+      .panel { fill: #172235; stroke: #3f5b7e; stroke-width: 2; }
+      .panel2 { fill: #142b2d; stroke: #4a756d; stroke-width: 2; }
+      .panel3 { fill: #2b2038; stroke: #72578d; stroke-width: 2; }
+      .title { fill: #f7f1df; font-family: Inter, Arial, sans-serif; font-size: 34px; font-weight: 800; }
+      .subtitle { fill: #bfcbda; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 500; }
+      .h { fill: #f7f1df; font-family: Inter, Arial, sans-serif; font-size: 23px; font-weight: 800; }
+      .text { fill: #dce6f2; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 500; }
+      .small { fill: #c5d1df; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 500; }
+      .label { fill: #0f1724; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 800; }
+      .lightLabel { fill: #f7f1df; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 800; }
+      .cell { fill: #21324b; stroke: #6683a7; stroke-width: 1.2; }
+      .frame { fill: #d9e9ff; stroke: #ffffff; stroke-width: 1.5; }
+      .padding { fill: none; stroke: #6aa1cf; stroke-width: 2; stroke-dasharray: 8 8; }
+      .axis { stroke: #ffcf5a; stroke-width: 2; stroke-dasharray: 7 7; }
+      .anchor { fill: #ffcf5a; stroke: #101827; stroke-width: 2; }
+      .shadow { fill: #0d1117; opacity: 0.35; }
+      .gate { fill: #8ad2c8; stroke: #b9eee8; stroke-width: 2; }
+      .warn { fill: #ffdf82; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 800; }
+      .arrow { stroke: #ffd066; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowHead); }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ffd066"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1600" height="980"/>
+  <text class="title" x="70" y="66">citizen_base_01 Idle Frame Production Prep</text>
+  <text class="subtitle" x="70" y="98">Documentation only: no sprite asset, no Flame integration, no Motion Lab.</text>
+
+  <rect class="panel" x="60" y="130" width="820" height="600" rx="18"/>
+  <text class="h" x="90" y="174">Idle sheet contract: 8 rows x 2 frames</text>
+  <text class="text" x="90" y="206">Direction order stays stable from top to bottom.</text>
+
+  <g transform="translate(105,238)">
+    <text class="small" x="92" y="-16">Frame 0</text>
+    <text class="small" x="250" y="-16">Frame 1</text>
+    <text class="small" x="405" y="-16">Frame size: 96 x 128 px</text>
+
+    <text class="lightLabel" x="0" y="38">N</text>
+    <rect class="cell" x="75" y="0" width="110" height="50" rx="7"/><rect class="cell" x="230" y="0" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="98">NE</text>
+    <rect class="cell" x="75" y="60" width="110" height="50" rx="7"/><rect class="cell" x="230" y="60" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="158">E</text>
+    <rect class="cell" x="75" y="120" width="110" height="50" rx="7"/><rect class="cell" x="230" y="120" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="218">SE</text>
+    <rect class="cell" x="75" y="180" width="110" height="50" rx="7"/><rect class="cell" x="230" y="180" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="278">S</text>
+    <rect class="cell" x="75" y="240" width="110" height="50" rx="7"/><rect class="cell" x="230" y="240" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="338">SW</text>
+    <rect class="cell" x="75" y="300" width="110" height="50" rx="7"/><rect class="cell" x="230" y="300" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="398">W</text>
+    <rect class="cell" x="75" y="360" width="110" height="50" rx="7"/><rect class="cell" x="230" y="360" width="110" height="50" rx="7"/>
+    <text class="lightLabel" x="0" y="458">NW</text>
+    <rect class="cell" x="75" y="420" width="110" height="50" rx="7"/><rect class="cell" x="230" y="420" width="110" height="50" rx="7"/>
+  </g>
+
+  <g transform="translate(560,268)">
+    <rect class="frame" x="0" y="0" width="192" height="256" rx="8"/>
+    <rect class="padding" x="16" y="16" width="160" height="224" rx="4"/>
+    <line class="axis" x1="96" y1="0" x2="96" y2="256"/>
+    <line class="axis" x1="0" y1="236" x2="192" y2="236"/>
+    <ellipse class="shadow" cx="96" cy="222" rx="52" ry="13"/>
+    <circle class="anchor" cx="96" cy="236" r="9"/>
+    <text class="small" x="0" y="292">Safe padding: 8 px minimum</text>
+    <text class="small" x="0" y="318">Foot anchor: (48, 118)</text>
+    <text class="small" x="0" y="344">Scaled diagram shows 2x frame.</text>
+  </g>
+
+  <rect class="panel2" x="920" y="130" width="620" height="290" rx="18"/>
+  <text class="h" x="950" y="174">Idle motion rule</text>
+  <text class="text" x="950" y="206">Frame 0 and Frame 1 may change only subtly.</text>
+  <text class="small" x="950" y="242">Allowed: breath, shoulder, head, cloth micro-shift.</text>
+  <text class="small" x="950" y="272">Blocked: foot shift, pose turn, puppet arms, size change.</text>
+  <text class="small" x="950" y="302">Same foot anchor for every frame and direction.</text>
+  <text class="small" x="950" y="332">Shadow remains stable under the feet.</text>
+  <text class="warn" x="950" y="374">No walk frames in this production step.</text>
+
+  <rect class="panel3" x="920" y="455" width="620" height="275" rx="18"/>
+  <text class="h" x="950" y="499">Detail reduction before sprite production</text>
+  <text class="small" x="950" y="536">Keep: silhouette, shirt, vest/short coat, belt, boots, bag.</text>
+  <text class="small" x="950" y="566">Reduce: tiny buckles, many straps, small ornaments.</text>
+  <text class="small" x="950" y="596">Aim: neutral Talvori citizen/explorer, not heroic unit.</text>
+  <text class="small" x="950" y="626">No weapons, no combat pose, no copied external style.</text>
+  <path class="arrow" d="M960,670 H1130"/>
+  <rect class="gate" x="1150" y="640" width="270" height="62" rx="16"/>
+  <text class="label" x="1190" y="665">QA before Asset Intake</text>
+  <text class="label" x="1190" y="686">2A.2-idle only after PNG</text>
+
+  <rect class="panel" x="60" y="765" width="1480" height="140" rx="18"/>
+  <text class="h" x="90" y="810">Production output expected later, not in this slice</text>
+  <text class="text" x="90" y="842">Transparent PNG sheet: 8 rows x 2 columns, 96 x 128 px per frame, foot anchor (48,118), contact sheet and Markdown metadata.</text>
+  <text class="subtitle" x="90" y="878">This diagram is a technical production guide only. It creates no game art, no assets and no runtime character code.</text>
+</svg>
