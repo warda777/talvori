@@ -129,4 +129,3 @@ Ziel des naechsten Slices sollte sein, aus dem freigegebenen maennlichen
 8-Richtungs-Design eine klare Idle-Produktionsvorbereitung abzuleiten:
 Framegrenzen, Fussanker, Transparenzanforderung, Kontaktbogen und
 Source-/License-Metadata. Noch kein Motion Lab vor Asset Intake PASS.
-
