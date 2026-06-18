@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">citizen_base_01 asset production flow</title>
+  <desc id="desc">Documentation process diagram from specification 433 through asset production, metadata, QA, intake and later motion lab.</desc>
+  <defs>
+    <style>
+      .bg { fill: #101827; }
+      .panel { fill: #172235; stroke: #3f5b7e; stroke-width: 2; }
+      .panel2 { fill: #142b2d; stroke: #4a756d; stroke-width: 2; }
+      .panel3 { fill: #2b2038; stroke: #72578d; stroke-width: 2; }
+      .title { fill: #f7f1df; font-family: Inter, Arial, sans-serif; font-size: 34px; font-weight: 800; }
+      .subtitle { fill: #bfcbda; font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 500; }
+      .h { fill: #f7f1df; font-family: Inter, Arial, sans-serif; font-size: 22px; font-weight: 800; }
+      .text { fill: #dce6f2; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 500; }
+      .small { fill: #c5d1df; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 500; }
+      .label { fill: #101827; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 800; }
+      .step { fill: #ffd066; stroke: #ffe6a8; stroke-width: 2; }
+      .gate { fill: #8ad2c8; stroke: #b9eee8; stroke-width: 2; }
+      .blocked { fill: #523044; stroke: #ff9ab8; stroke-width: 2; }
+      .arrow { stroke: #ffd066; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowHead); }
+      .thin { stroke: #8ad2c8; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowHeadTeal); }
+    </style>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#ffd066"/>
+    </marker>
+    <marker id="arrowHeadTeal" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#8ad2c8"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <text class="title" x="70" y="68">citizen_base_01 Asset Production Flow</text>
+  <text class="subtitle" x="70" y="100">Planning only: no sprite files, no Flame character integration, no code-drawn replacement.</text>
+
+  <rect class="panel" x="60" y="140" width="1480" height="355" rx="18"/>
+  <text class="h" x="90" y="184">Production path</text>
+  <text class="text" x="90" y="214">One base character moves from specification to verified asset intake before any Motion Lab is allowed.</text>
+
+  <g transform="translate(95,270)">
+    <rect class="step" x="0" y="0" width="165" height="90" rx="16"/>
+    <text class="label" x="28" y="36">Spec 433</text>
+    <text class="label" x="28" y="62">citizen_base_01</text>
+    <path class="arrow" d="M180,45 H232"/>
+
+    <rect class="step" x="250" y="0" width="185" height="90" rx="16"/>
+    <text class="label" x="278" y="36">Art production</text>
+    <text class="label" x="278" y="62">true asset only</text>
+    <path class="arrow" d="M450,45 H502"/>
+
+    <rect class="step" x="520" y="0" width="180" height="90" rx="16"/>
+    <text class="label" x="548" y="36">Sprite sheets</text>
+    <text class="label" x="548" y="62">idle + walk</text>
+    <path class="arrow" d="M715,45 H767"/>
+
+    <rect class="step" x="785" y="0" width="165" height="90" rx="16"/>
+    <text class="label" x="813" y="36">Metadata</text>
+    <text class="label" x="813" y="62">source + anchors</text>
+    <path class="arrow" d="M965,45 H1017"/>
+
+    <rect class="gate" x="1035" y="0" width="130" height="90" rx="16"/>
+    <text class="label" x="1070" y="36">QA</text>
+    <text class="label" x="1060" y="62">visual gate</text>
+    <path class="arrow" d="M1180,45 H1232"/>
+
+    <rect class="gate" x="1238" y="0" width="172" height="90" rx="16"/>
+    <text class="label" x="1263" y="36">Asset Intake</text>
+    <text class="label" x="1278" y="62">2A.2 PASS</text>
+  </g>
+
+  <path class="thin" d="M1420,315 C1490,315 1490,430 1330,430"/>
+  <rect class="panel2" x="1145" y="392" width="265" height="70" rx="16"/>
+  <text class="h" x="1172" y="421">Motion Lab 2B</text>
+  <text class="small" x="1172" y="444">Only after intake PASS</text>
+
+  <rect class="panel2" x="60" y="535" width="700" height="245" rx="18"/>
+  <text class="h" x="90" y="578">Chosen MVP production method</text>
+  <text class="text" x="90" y="612">Transparent PNG sprite sheets.</text>
+  <text class="small" x="90" y="646">idle_8dir: 8 rows x 2 frames</text>
+  <text class="small" x="90" y="674">walk_8dir: 8 rows x 4 frames</text>
+  <text class="small" x="90" y="702">Frame suggestion: 96 x 128 px</text>
+  <text class="small" x="90" y="730">Foot anchor: bottomCenter, suggested (48, 118)</text>
+  <text class="small" x="90" y="758">No whole-body runtime rotation.</text>
+
+  <rect class="panel3" x="805" y="535" width="735" height="245" rx="18"/>
+  <text class="h" x="835" y="578">Blocked until true assets exist</text>
+  <text class="text" x="835" y="612">CHARACTER_ASSET_BLOCKER stays active.</text>
+  <g transform="translate(835,642)">
+    <rect class="blocked" x="0" y="0" width="250" height="44" rx="14"/>
+    <text class="small" x="22" y="28">No procedural character</text>
+    <rect class="blocked" x="270" y="0" width="210" height="44" rx="14"/>
+    <text class="small" x="292" y="28">No fake sprite</text>
+    <rect class="blocked" x="500" y="0" width="185" height="44" rx="14"/>
+    <text class="small" x="522" y="28">No app integration</text>
+  </g>
+  <text class="small" x="835" y="728">Next slice: Firenze Character Asset Intake 2A.2.</text>
+  <text class="small" x="835" y="756">Motion Lab 2B cannot start before 2A.2 PASS.</text>
+
+  <text class="subtitle" x="70" y="842">Documentation graphic only. It does not create game art, assets, metadata files or runtime character code.</text>
+</svg>
