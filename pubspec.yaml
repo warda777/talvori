@@ -38,6 +38,7 @@ dependencies:
   speech_to_text: ^7.4.0
   flutter_tts: ^4.2.3
   flutter_globe_3d: ^2.2.5
+  flame: ^1.37.0
 
 dev_dependencies:
   flutter_test:
