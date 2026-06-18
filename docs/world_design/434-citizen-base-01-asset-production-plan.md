@@ -1,9 +1,9 @@
 # 434 Citizen Base 01 Asset Production Plan
 
-Status: production_plan_only / documentation_only  
-Character: `citizen_base_01`  
-Runtime release: NO  
-Sprite asset generation: NO  
+Status: production_plan_only / documentation_only
+Character: `citizen_base_01`
+Runtime release: NO
+Sprite asset generation: NO
 Flame integration: NO
 
 ## 1. Ziel
@@ -192,9 +192,9 @@ Es erzeugt keine Spielgrafik und keine Sprite-Assets.
 ## 12. Ergebnis
 
 Produktionsweg: transparente PNG-Sprite-Sheets fuer `idle_8dir` und
-`walk_8dir`.  
-Asset-Produktion in diesem Slice: NO.  
-Runtime-/Flame-Integration in diesem Slice: NO.  
+`walk_8dir`.
+Asset-Produktion in diesem Slice: NO.
+Runtime-/Flame-Integration in diesem Slice: NO.
 Naechster enger Slice: `Firenze Character Asset Intake 2A.2`, sobald echte
 `citizen_base_01`-PNG-Sheets oder Einzelbilder bereitstehen.
 
