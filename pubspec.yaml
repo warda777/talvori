@@ -57,6 +57,7 @@ flutter:
     - assets/images/
     - assets/images/mascot/
     - assets/images/world/
+    - assets/images/world/previews/firenze_city_entry/
     - assets/images/world/travel/continent_showcase/
     - assets/images/world/travel/country_showcase/cutout/
     - assets/images/world/buildable_islands/forest_clearing/
