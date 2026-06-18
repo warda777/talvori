@@ -147,4 +147,3 @@ Spielstil.
 Naechster konkreter Schritt: echte 8-Richtungs-Design-Preview produzieren.
 Erst danach duerfen Idle-/Walk-Frames und spaeter `Firenze Character Asset
 Intake 2A.2` folgen.
-
