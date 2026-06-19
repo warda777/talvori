@@ -17,13 +17,19 @@ Figuren-Dateien. Er ist die Produktionsbruecke zwischen der Spezifikation in
 `433-talvori-base-character-asset-spec-v1.md` und einem spaeteren
 Asset-Intake.
 
+Hinweis nach
+`438-talvori-modern-2d-25d-character-sprite-style-decision.md`: Der alte
+`96 x 128` Pixel-Art-Teststand ist fuer finale Talvori-Characters verworfen.
+Die aktuelle Produktion zielt auf moderne stilisierte 2D-/2.5D-Sprites mit
+`128 x 192` Frames.
+
 ## 2. Produktionsentscheidung
 
 Vergleich der moeglichen Wege:
 
 | Weg | Staerken | Risiken | Entscheidung |
 | --- | --- | --- | --- |
-| Sprite-Sheet mit Aseprite, Photoshop, Krita oder Pixel-Tool | Schnell pruefbar, Flame-kompatibel, transparente PNGs reichen fuer Motion Proof, geringer Runtime-Aufwand | Asset-Produktion muss sauber Richtung, Fussanker und Frame-Stabilitaet halten | Waehlen |
+| Sprite-Sheet mit Aseprite, Photoshop, Krita oder Art-Tool | Schnell pruefbar, Flame-kompatibel, transparente PNGs reichen fuer Motion Proof, geringer Runtime-Aufwand | Asset-Produktion muss sauber Richtung, Fussanker und Frame-Stabilitaet halten | Waehlen |
 | Rive-Rig | Gute Vektor-/Rig-Animationen, spaeter stark fuer UI-nahe Figuren | Neue Authoring-Disziplin, Rigging-Aufwand, Motion-Proof waere weniger direkt spritebasiert | Nicht fuer MVP |
 | Spine/Rig-System | Stark fuer komplexe Character-Animationen | Neue Runtime-/Toolchain-Komplexitaet, Lizenz-/Pipeline-Aufwand, overpowered fuer eine Basisfigur | Nicht fuer MVP |
 
@@ -42,8 +48,10 @@ Aus 433 uebernommene verbindliche Anforderungen:
 - 8 Richtungen: `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`.
 - `idle`: 2 Frames je Richtung.
 - `walk`: 4 Frames je Richtung.
-- Framegroesse: 96 x 128 px als Startvorschlag.
-- Fussanker: fixer `bottomCenter`, vorgeschlagen `(48, 118)`.
+- Framegroesse: `128 x 192` px.
+- `idle_8dir`: `256 x 1536` px.
+- `walk_8dir`: `512 x 1536` px.
+- Fussanker: fixer `bottomCenter`, Zielwert `(64, 180)`.
 - Hintergrund: transparent.
 - Figurengroesse: zwischen Frames stabil.
 - Schatten: separat oder stabil gebacken, ohne Positionssprung.
@@ -73,11 +81,11 @@ Die spaetere Datei `citizen_base_01_metadata.md` muss mindestens enthalten:
 | --- | --- |
 | `status` | Asset-Status, z. B. `intake_candidate`, `qa_pass`, `blocked` |
 | `source` / `license` | Ursprung, Rechte, Nutzbarkeit fuer Talvori |
-| `frame_width` / `frame_height` | Erwartet `96` / `128`, falls nicht bewusst geaendert |
+| `frame_width` / `frame_height` | Erwartet `128` / `192` |
 | `directions` | `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW` |
 | `frame_counts` | `idle=2`, `walk=4` pro Richtung |
 | `direction_order` | Zeilenreihenfolge exakt wie in 433 |
-| `foot_anchor` | `bottomCenter`, vorgeschlagen `(48, 118)` |
+| `foot_anchor` | `bottomCenter`, Zielwert `(64, 180)` |
 | `shadow_anchor` | separat oder an Fussanker gebunden |
 | `scale_hint` | geplanter Flame-/World-Scale-Hinweis |
 | `allowed_runtime_use` | isolierter Motion Proof, spaeter echte Character-Runtime |
@@ -193,8 +201,11 @@ Es erzeugt keine Spielgrafik und keine Sprite-Assets.
 
 Produktionsweg: transparente PNG-Sprite-Sheets fuer `idle_8dir` und
 `walk_8dir`.
+Aktuelle Zielwerte nach 438: `128 x 192` Frame, `256 x 1536` Idle Sheet,
+`512 x 1536` Walk Sheet, Fussanker `(64, 180)`.
+v1-v4 und lokale leere `96 x 128` Templates bleiben Dokumentations- bzw.
+Testkandidaten und sind keine Produktionsquelle.
 Asset-Produktion in diesem Slice: NO.
 Runtime-/Flame-Integration in diesem Slice: NO.
 Naechster enger Slice: `Firenze Character Asset Intake 2A.2`, sobald echte
 `citizen_base_01`-PNG-Sheets oder Einzelbilder bereitstehen.
-

@@ -36,6 +36,17 @@ Animationsmuster duerfen nicht kopiert werden.
 
 ## 3. Technisches Sprite-Ziel
 
+Aktueller Zielvertrag nach
+`438-talvori-modern-2d-25d-character-sprite-style-decision.md`:
+
+- Talvori nutzt moderne stilisierte 2D-/2.5D-Mobile-Game-Sprites.
+- `96 x 128` war ein klassischer Pixel-Art-Teststand und ist als finales
+  Character-Ziel verworfen.
+- Framegroesse: `128 x 192` px.
+- `idle_8dir`: `256 x 1536` px.
+- `walk_8dir`: `512 x 1536` px.
+- Fussanker: `(64, 180)`.
+
 Bevorzugtes Ziel:
 
 - 8 Richtungen: `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`.
@@ -92,10 +103,12 @@ Sheet-Regel:
 - Richtung-Reihenfolge: `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`.
 - `idle_8dir`: 8 Zeilen x 2 Spalten.
 - `walk_8dir`: 8 Zeilen x 4 Spalten.
-- Framegroesse Vorschlag: 96 x 128 px.
-- Padding: mindestens 8 px transparente Sicherheitszone um die Figur.
-- Fussanker: `bottomCenter`, vorgeschlagen bei `(48, 118)` innerhalb eines
-  96 x 128 Frames.
+- Framegroesse: `128 x 192` px.
+- `idle_8dir`-Sheetgroesse: `256 x 1536` px.
+- `walk_8dir`-Sheetgroesse: `512 x 1536` px.
+- Padding: transparente Sicherheitszone um die Figur.
+- Fussanker: `bottomCenter`, Zielwert `(64, 180)` innerhalb eines
+  `128 x 192` Frames.
 - Schatten: eigene Ebene oder baked shadow mit Mittelpunkt unter dem
   Fussanker; Schatten darf nicht rotieren.
 - Flame-Skalierung: Sprite wird aus World Units skaliert, ohne separate
@@ -103,10 +116,10 @@ Sheet-Regel:
 
 Layout:
 
-| Sheet | Zeilen | Spalten | Frames je Richtung | Richtung-Reihenfolge |
-| --- | ---: | ---: | ---: | --- |
-| `idle_8dir` | 8 | 2 | 2 | N, NE, E, SE, S, SW, W, NW |
-| `walk_8dir` | 8 | 4 | 4 | N, NE, E, SE, S, SW, W, NW |
+| Sheet | Groesse | Zeilen | Spalten | Frames je Richtung | Richtung-Reihenfolge |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `idle_8dir` | 256 x 1536 | 8 | 2 | 2 | N, NE, E, SE, S, SW, W, NW |
+| `walk_8dir` | 512 x 1536 | 8 | 4 | 4 | N, NE, E, SE, S, SW, W, NW |
 
 ## 6. Motion-Regeln
 
@@ -211,6 +224,10 @@ Die Grafik zeigt nur das technische Sheet-/Motion-Prinzip:
 
 Sie erzeugt keine Spielgrafik und keine Figur.
 
+Hinweis: Die Grafik und fruehere `96 x 128`-Beispiele sind historischer
+Layout-/Motion-Teststand. Der aktuelle Produktionszielwert kommt aus 438:
+`128 x 192` Frames mit Fussanker `(64, 180)`.
+
 ## 11. Grenzen
 
 - Keine App-Integration.
@@ -231,6 +248,7 @@ Base Character Asset Specification: PASS
 Runtime-Freigabe: NO
 Sprite-Asset-Freigabe: NO
 Flame-Character-Integration: NO
+Aktuelle Sprite-Zielwerte nach 438: `128 x 192` Frame, `256 x 1536` Idle
+Sheet, `512 x 1536` Walk Sheet, Fussanker `(64, 180)`.
 Naechster enger Slice: `Firenze Character Motion Lab 2B`, nach echter
 Asset-Bereitstellung fuer `citizen_base_01`.
-

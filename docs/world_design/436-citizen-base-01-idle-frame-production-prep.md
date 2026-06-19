@@ -24,6 +24,10 @@ Flame-Integration und kein Motion Lab.
 - Keine Variantenproduktion vor Freigabe der Basisfigur.
 - Die PASS-Entscheidung ist keine Sprite-Sheet-, Runtime-, Flame- oder
   Asset-Import-Freigabe.
+- Nach
+  `438-talvori-modern-2d-25d-character-sprite-style-decision.md` ist der alte
+  `96 x 128` Pixel-Art-Teststand verworfen. Diese Prep bleibt historischer
+  Dokumentationskontext; aktuelles Ziel ist `128 x 192`.
 
 ## 3. Idle-Ziel
 
@@ -32,9 +36,10 @@ Verbindlicher Idle-Zielvertrag:
 - 8 Richtungen: `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`.
 - 2 Idle-Frames je Richtung.
 - Sheet-Layout: 8 Zeilen x 2 Spalten.
-- Framegroesse: 96 x 128 px.
+- Framegroesse: `128 x 192` px.
+- Sheetgroesse: `256 x 1536` px.
 - Hintergrund: transparent.
-- Fussanker: fixer `bottomCenter`, Startvorschlag `(48, 118)`.
+- Fussanker: fixer `bottomCenter`, Zielwert `(64, 180)`.
 - Schatten: separat oder stabil gebacken.
 - Keine Runtime-Ganzkoerperrotation.
 - Richtungsauswahl spaeter ueber Direction Buckets, nicht ueber freie
@@ -58,13 +63,13 @@ Aus dem Design-Preview fuer die Idle-Produktion ableiten:
 
 Frame-Vertrag:
 
-- Jedes Frame ist exakt 96 x 128 px.
-- Safe Padding mindestens 8 px.
+- Jedes Frame ist exakt `128 x 192` px.
+- Safe Padding bleibt eine transparente Sicherheitszone um die Figur.
 - Kopf darf oben nicht anschneiden.
 - Stiefel und Schatten duerfen unten nicht anschneiden.
 - Alle Richtungen muessen gleiche visuelle Hoehe behalten.
-- Frame-Mittelachse liegt bei `x=48`.
-- Fussanker liegt bei `y=118`.
+- Frame-Mittelachse liegt bei `x=64`.
+- Fussanker liegt bei `y=180`.
 - Der freie Bereich unter dem Fussanker bleibt fuer Schatten und Padding
   kontrolliert.
 
@@ -102,8 +107,9 @@ Auftrag fuer externe Bild-/Sprite-Produktion:
 
 > Erzeuge `citizen_base_01_idle_8dir` als transparentes PNG-Sprite-Sheet.
 > Das Sheet hat 8 Zeilen und 2 Spalten. Die Richtung-Reihenfolge ist
-> `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`. Jedes Frame ist 96 x 128 px.
-> Der Fussanker ist `bottomCenter`, vorgeschlagen bei `(48, 118)`, und muss
+> `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`. Jedes Frame ist 128 x 192 px.
+> Das Idle-Sheet ist 256 x 1536 px. Der Fussanker ist `bottomCenter`, Zielwert
+> `(64, 180)`, und muss
 > fuer jedes Frame identisch bleiben. Reduziere die Detaildichte des
 > Design-Previews, erhalte aber Silhouette, Kopf-/Koerperlesbarkeit,
 > Kleidungsschichten, Stiefel und einfache Tasche. Keine Walk-Frames, keine
@@ -124,10 +130,10 @@ Die spaetere Metadata muss mindestens enthalten:
 | --- | --- |
 | `source` / `license` | Ursprung, Rechte, Talvori-Nutzbarkeit |
 | `tool` / `author` | Produktionswerkzeug und Urheber |
-| `frame_size` | `96 x 128` |
+| `frame_size` | `128 x 192` |
 | `direction_order` | `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW` |
 | `frame_count` | `idle=2` je Richtung |
-| `foot_anchor` | `bottomCenter`, vorgeschlagen `(48, 118)` |
+| `foot_anchor` | `bottomCenter`, Zielwert `(64, 180)` |
 | `shadow_anchor` | separat oder stabil an Fussanker gebunden |
 | `status` | `idle_candidate` |
 | `blocked_uses` | keine App-Integration, keine NPC-Population, keine Walk-Animation-Freigabe |
@@ -172,8 +178,9 @@ docs/world_design/previews/citizen_base_01_idle_frame_prep/citizen_base_01_idle_
 Das Diagramm zeigt nur den technischen Idle-Frame-Vertrag:
 
 - 8 Zeilen x 2 Spalten,
-- Framegroesse 96 x 128,
-- Fussanker `(48, 118)`,
+- historischer Framegroesse-Teststand 96 x 128,
+- aktueller Zielwert nach 438: 128 x 192,
+- aktueller Fussanker `(64, 180)`,
 - Safe Padding,
 - Frame 0 / Frame 1 je Richtung,
 - QA-Gate vor Asset Intake.
@@ -199,5 +206,9 @@ Es erzeugt keine Spielgrafik und keine Figur.
 Idle-Frame-Vertrag: PASS fuer Produktionsvorbereitung.
 Detailreduktionsentscheidung: Konzept-Silhouette behalten, Mini-Ornamente und
 Hero-/Abenteurer-Dichte reduzieren.
+Aktuelle Zielwerte nach 438: `128 x 192` Frame, `256 x 1536` Idle Sheet,
+Fussanker `(64, 180)`.
+v1-v4 und lokale leere `96 x 128` Templates bleiben Dokumentations- bzw.
+Testkandidaten und sind keine Produktionsquelle.
 Naechster Schritt: echte `citizen_base_01_idle_8dir`-Produktion ausserhalb von
 Codex, danach `Firenze Character Asset Intake 2A.2-idle`.

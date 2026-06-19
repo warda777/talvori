@@ -77,18 +77,24 @@ Ab jetzt gilt fuer den naechsten PASS-faehigen Kandidaten:
 Verbindliches Idle-Ziel:
 
 - echtes transparentes PNG,
-- Gesamtgroesse `192 x 1024` px,
+- Gesamtgroesse `256 x 1536` px,
 - Layout `2 x 8`,
-- Framegroesse `96 x 128` px,
+- Framegroesse `128 x 192` px,
 - Direction Order: `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`,
 - Spalte 1: Idle Frame 0,
 - Spalte 2: Idle Frame 1,
-- Fussanker: `(48, 118)` in jedem `96 x 128` Frame,
+- Fussanker: `(64, 180)` in jedem `128 x 192` Frame,
 - 16 gefuellte Frames,
 - keine Walk-Frames,
 - keine Varianten,
 - keine Bodenplatten,
 - kein eingebranntes Checkerboard.
+
+Hinweis nach
+`438-talvori-modern-2d-25d-character-sprite-style-decision.md`: Der fruehere
+`96 x 128` / `192 x 1024` Pixel-Art-Teststand und die lokalen leeren
+`96 x 128` Templates unter `_incoming_character_assets/` sind verworfen und
+werden nicht importiert.
 
 ## 6. Manuelle Arbeit in Aseprite
 
@@ -97,8 +103,8 @@ Vor jedem Export pruefen:
 - Hintergrund ist wirklich transparent.
 - Zwischen Beinen und Armen gibt es keine weissen oder hellen Restflaechen.
 - Kopf, Haare, Haende, Stiefel, Tasche und Schatten sind nicht abgeschnitten.
-- Jede Figur bleibt vollstaendig innerhalb des `96 x 128` Frames.
-- Der Fussanker bleibt frameuebergreifend stabil bei `(48, 118)`.
+- Jede Figur bleibt vollstaendig innerhalb des `128 x 192` Frames.
+- Der Fussanker bleibt frameuebergreifend stabil bei `(64, 180)`.
 - Schatten liegt nur unter den Fuessen und springt nicht zwischen Frame 0 und
   Frame 1.
 - Es gibt keine Bodenflaechen, Panels, Labels, Rasterlinien oder Text im
@@ -108,7 +114,7 @@ Vor jedem Export pruefen:
 
 Empfohlene Aseprite-Arbeitsweise:
 
-1. In einer `.aseprite`-Arbeitsdatei mit festen `96 x 128` Frames arbeiten.
+1. In einer `.aseprite`-Arbeitsdatei mit festen `128 x 192` Frames arbeiten.
 2. Pro Richtung zwei Idle-Frames als minimale Atem-/Standvariation anlegen.
 3. Fussanker und Schatten in der Arbeitsdatei sichtbar kontrollieren.
 4. Vor Export auf transparentem, dunklem und hellem Hintergrund pruefen.
@@ -169,5 +175,11 @@ Workflow-Status: PASS als Produktionsanweisung.
 
 RGB-Contact-Sheet-Extraktion: gestoppt als Hauptweg.
 
+Aktuelle Zielwerte nach 438: `128 x 192` Frame, `256 x 1536` Idle Sheet,
+`512 x 1536` Walk Sheet, Fussanker `(64, 180)`.
+
+v1-v4 und lokale leere `96 x 128` Templates bleiben Dokumentations- bzw.
+Testkandidaten und sind keine Produktionsquelle.
+
 Naechster Schritt: manueller Aseprite-Export eines echten transparenten
-PNG-Kandidaten nach `_incoming_character_assets/`.
+`256 x 1536` PNG-Kandidaten nach `_incoming_character_assets/`.

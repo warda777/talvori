@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="880" viewBox="0 0 1500 880" role="img" aria-labelledby="title desc">
+  <title id="title">Talvori Modern 2D/2.5D Character Sprite Style Decision</title>
+  <desc id="desc">Decision overview showing 96 by 128 pixel art test rejected and 128 by 192 modern 2D/2.5D sprites selected.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-15%" width="120%" height="135%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#172018" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M 1 1 L 11 6 L 1 11 z" fill="#355449"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="880" fill="#f2edde"/>
+  <rect x="48" y="44" width="1404" height="792" rx="26" fill="#fffaf0" stroke="#d7c8a8" stroke-width="2"/>
+  <text x="86" y="96" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="700" fill="#21372f">Talvori Character Sprite Style Decision</text>
+  <text x="86" y="130" font-family="Inter, Arial, sans-serif" font-size="17" fill="#53625b">Classic 96 x 128 pixel-art tests stop here. Modern stylized 2D/2.5D mobile-game sprites become the active target.</text>
+
+  <g filter="url(#shadow)" font-family="Inter, Arial, sans-serif">
+    <rect x="90" y="184" width="580" height="290" rx="22" fill="#f7e5df" stroke="#c47b67" stroke-width="3"/>
+    <text x="126" y="232" font-size="25" font-weight="700" fill="#6a3328">Rejected final direction</text>
+    <text x="126" y="270" font-size="20" font-weight="700" fill="#4c342d">96 x 128 Pixel-Art teststand</text>
+    <text x="126" y="312" font-size="17" fill="#6c4d44">Too small for Talvori detail and silhouette.</text>
+    <text x="126" y="342" font-size="17" fill="#6c4d44">RGB contact-sheet extraction produced artifacts.</text>
+    <text x="126" y="372" font-size="17" fill="#6c4d44">v1-v4 remain documentation candidates only.</text>
+    <text x="126" y="402" font-size="17" fill="#6c4d44">Local 96 x 128 templates are rejected.</text>
+    <rect x="430" y="250" width="118" height="166" rx="10" fill="#fff8f3" stroke="#b86758" stroke-width="2"/>
+    <line x1="489" y1="250" x2="489" y2="416" stroke="#b86758" stroke-width="2"/>
+    <line x1="430" y1="333" x2="548" y2="333" stroke="#b86758" stroke-width="2"/>
+    <text x="489" y="445" text-anchor="middle" font-size="15" fill="#7a493f">old 2 x 8 test</text>
+  </g>
+
+  <g filter="url(#shadow)" font-family="Inter, Arial, sans-serif">
+    <rect x="830" y="184" width="580" height="290" rx="22" fill="#e6f2ec" stroke="#6e9d80" stroke-width="3"/>
+    <text x="866" y="232" font-size="25" font-weight="700" fill="#244935">Selected MVP direction</text>
+    <text x="866" y="270" font-size="20" font-weight="700" fill="#2f4b3d">128 x 192 modern 2D/2.5D</text>
+    <text x="866" y="312" font-size="17" fill="#435f52">Hand-painted / mobile-game-art feel.</text>
+    <text x="866" y="342" font-size="17" fill="#435f52">Clear silhouette and true PNG transparency.</text>
+    <text x="866" y="372" font-size="17" fill="#435f52">Idle sheet: 256 x 1536.</text>
+    <text x="866" y="402" font-size="17" fill="#435f52">Walk sheet: 512 x 1536.</text>
+    <text x="866" y="432" font-size="17" fill="#435f52">Foot anchor: (64,180).</text>
+    <rect x="1192" y="236" width="142" height="212" rx="12" fill="#fbfff8" stroke="#5f8f70" stroke-width="2"/>
+    <line x1="1263" y1="236" x2="1263" y2="448" stroke="#5f8f70" stroke-width="2"/>
+    <line x1="1192" y1="342" x2="1334" y2="342" stroke="#5f8f70" stroke-width="2"/>
+    <circle cx="1263" cy="430" r="6" fill="#d4513f"/>
+    <text x="1263" y="464" text-anchor="middle" font-size="15" fill="#476653">new 2 x 8 idle</text>
+  </g>
+
+  <line x1="690" y1="328" x2="808" y2="328" stroke="#355449" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="748" y="302" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#355449">decision</text>
+
+  <g font-family="Inter, Arial, sans-serif" filter="url(#shadow)">
+    <rect x="110" y="560" width="220" height="126" rx="18" fill="#e9edf4" stroke="#788da9" stroke-width="2"/>
+    <text x="136" y="604" font-size="19" font-weight="700" fill="#31445f">Aseprite</text>
+    <text x="136" y="632" font-size="15" fill="#4f6178">manual export</text>
+    <text x="136" y="656" font-size="15" fill="#4f6178">true alpha PNG</text>
+
+    <rect x="410" y="560" width="220" height="126" rx="18" fill="#efe8f6" stroke="#967bb8" stroke-width="2"/>
+    <text x="436" y="604" font-size="19" font-weight="700" fill="#42325c">Codex</text>
+    <text x="436" y="632" font-size="15" fill="#5f5274">intake only</text>
+    <text x="436" y="656" font-size="15" fill="#5f5274">QA and reports</text>
+
+    <rect x="710" y="560" width="220" height="126" rx="18" fill="#fff3dc" stroke="#c39a4e" stroke-width="2"/>
+    <text x="736" y="604" font-size="19" font-weight="700" fill="#5a421f">Import Gate</text>
+    <text x="736" y="632" font-size="15" fill="#705837">metadata</text>
+    <text x="736" y="656" font-size="15" fill="#705837">license / source</text>
+
+    <rect x="1010" y="560" width="220" height="126" rx="18" fill="#e5f0f5" stroke="#7398aa" stroke-width="2"/>
+    <text x="1036" y="604" font-size="19" font-weight="700" fill="#2c4655">Motion Lab</text>
+    <text x="1036" y="632" font-size="15" fill="#4f6472">after gate</text>
+    <text x="1036" y="656" font-size="15" fill="#4f6472">not in this slice</text>
+  </g>
+
+  <g stroke="#355449" stroke-width="3" marker-end="url(#arrow)" fill="none">
+    <line x1="340" y1="623" x2="398" y2="623"/>
+    <line x1="640" y1="623" x2="698" y2="623"/>
+    <line x1="940" y1="623" x2="998" y2="623"/>
+  </g>
+
+  <rect x="110" y="738" width="1270" height="56" rx="16" fill="#fff4d8" stroke="#d5b76a" stroke-width="2"/>
+  <text x="138" y="773" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#5d4720">Boundary:</text>
+  <text x="230" y="773" font-family="Inter, Arial, sans-serif" font-size="17" fill="#5d4720">No character PNG production asset, no retouching, no Flame integration, no Motion Lab, no assets import.</text>
+</svg>
