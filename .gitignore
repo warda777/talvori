@@ -129,3 +129,4 @@ supabase/.temp/
 .DS_Store
 docs/word-review/vocabulary_review_seed.csv
 docs/word-review/*_working.csv
+_incoming_character_assets/
