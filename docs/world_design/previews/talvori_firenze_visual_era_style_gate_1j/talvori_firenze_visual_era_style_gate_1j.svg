@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <style>
+      .bg { fill: #172024; }
+      .panel { fill: #243138; stroke: #48606a; stroke-width: 2; }
+      .panel-soft { fill: #2b393f; stroke: #5b737a; stroke-width: 2; }
+      .selected { fill: #2f433c; stroke: #e8bf63; stroke-width: 4; }
+      .rejected { fill: #3a3031; stroke: #9a5a58; stroke-width: 3; }
+      .title { fill: #f7ead4; font-family: Arial, sans-serif; font-size: 36px; font-weight: 700; }
+      .subtitle { fill: #cbd8d8; font-family: Arial, sans-serif; font-size: 20px; }
+      .label { fill: #f7ead4; font-family: Arial, sans-serif; font-size: 22px; font-weight: 700; }
+      .text { fill: #d5dfdc; font-family: Arial, sans-serif; font-size: 17px; }
+      .small { fill: #b9c8c5; font-family: Arial, sans-serif; font-size: 14px; }
+      .accent { fill: #66dce7; }
+      .gold { fill: #e8bf63; }
+      .muted { fill: #8fa09e; font-family: Arial, sans-serif; font-size: 15px; }
+      .line { stroke: #728a8c; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #728a8c; stroke-width: 1.5; fill: none; }
+      .swatch { stroke: #f7ead4; stroke-width: 1.5; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 7 3 L 0 6 Z" fill="#728a8c"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1000"/>
+  <text class="title" x="60" y="68">Talvori Firenze Visual Era Gate 1J</text>
+  <text class="subtitle" x="60" y="102">Decision: Neo-Renaissance / Magical Renaissance. Layout, river, roads, plots and graph stay protected.</text>
+
+  <rect class="rejected" x="60" y="150" width="450" height="190" rx="18"/>
+  <text class="label" x="90" y="195">A) Modern Firenze</text>
+  <text class="text" x="90" y="232">Easy modern function, but high risk:</text>
+  <text class="small" x="90" y="262">cars, asphalt, real signage, app-like panels,</text>
+  <text class="small" x="90" y="286">and a break with the Explorer sprite style.</text>
+  <text class="muted" x="90" y="318">Decision: rejected for main visual era.</text>
+
+  <rect class="rejected" x="575" y="150" width="450" height="190" rx="18"/>
+  <text class="label" x="605" y="195">B) Historic Renaissance</text>
+  <text class="text" x="605" y="232">Strong Firenze identity, but risky:</text>
+  <text class="small" x="605" y="262">museum reconstruction, tiny detail, weak</text>
+  <text class="small" x="605" y="286">modern learning function, less Talvori magic.</text>
+  <text class="muted" x="605" y="318">Decision: source inspiration only.</text>
+
+  <rect class="selected" x="1090" y="150" width="450" height="190" rx="18"/>
+  <text class="label" x="1120" y="195">C) Talvori Neo-Renaissance</text>
+  <text class="text" x="1120" y="232">Selected direction:</text>
+  <text class="small" x="1120" y="262">Renaissance-inspired, stylized, warm,</text>
+  <text class="small" x="1120" y="286">game-readable and open to magic/learning.</text>
+  <text class="gold" x="1120" y="318">Decision: PASS.</text>
+
+  <line class="line" x1="800" y1="360" x2="800" y2="430"/>
+
+  <rect class="panel" x="60" y="430" width="700" height="245" rx="18"/>
+  <text class="label" x="90" y="475">Firenze Visual Contract v1</text>
+  <text class="text" x="90" y="512">World first: playable city, not GIS or dashboard.</text>
+  <text class="text" x="90" y="545">Warm stone, terracotta, cypress green, Arno teal.</text>
+  <text class="text" x="90" y="578">Cyan/lilac/gold only for interaction and language magic.</text>
+  <text class="text" x="90" y="611">Modern functions become Talvori artifacts: lanterns,</text>
+  <text class="text" x="90" y="644">lexicon stones, translation prisms and companion signals.</text>
+
+  <rect class="panel" x="840" y="430" width="700" height="245" rx="18"/>
+  <text class="label" x="870" y="475">Protected Technical Core</text>
+  <text class="text" x="870" y="512">Boundary, Arno, roads, P01-P14 and landmarks stay.</text>
+  <text class="text" x="870" y="545">Navigation graph stays: 181 nodes, 221 edges.</text>
+  <text class="text" x="870" y="578">Visual skin may change. Gameplay layer may not.</text>
+  <text class="text" x="870" y="611">No free roads, no free river crossings, no asset import.</text>
+  <text class="text" x="870" y="644">Source-of-truth remains Firenze Master / 426+ chain.</text>
+
+  <rect class="panel-soft" x="60" y="720" width="470" height="190" rx="18"/>
+  <text class="label" x="90" y="760">Palette</text>
+  <rect class="swatch" x="90" y="795" width="54" height="54" fill="#d6b47c"/>
+  <rect class="swatch" x="154" y="795" width="54" height="54" fill="#b96943"/>
+  <rect class="swatch" x="218" y="795" width="54" height="54" fill="#466d4c"/>
+  <rect class="swatch" x="282" y="795" width="54" height="54" fill="#2a7d86"/>
+  <rect class="swatch" x="346" y="795" width="54" height="54" fill="#7a61d8"/>
+  <rect class="swatch" x="410" y="795" width="54" height="54" fill="#66dce7"/>
+  <text class="small" x="90" y="880">Base warm. Accents sparse. No neon city.</text>
+
+  <rect class="panel-soft" x="565" y="720" width="470" height="190" rx="18"/>
+  <text class="label" x="595" y="760">Abo-Month Asset Focus</text>
+  <text class="text" x="595" y="798">1. Reusable props and road kit</text>
+  <text class="text" x="595" y="828">2. Building/street modules</text>
+  <text class="text" x="595" y="858">3. Bridge, Arno, landmark silhouettes</text>
+  <text class="text" x="595" y="888">4. Character render sources after base gate</text>
+
+  <rect class="panel-soft" x="1070" y="720" width="470" height="190" rx="18"/>
+  <text class="label" x="1100" y="760">Next Slice</text>
+  <text class="text" x="1100" y="798">1K Visual Direction Board</text>
+  <text class="small" x="1100" y="828">Small district/street-corner reference.</text>
+  <text class="small" x="1100" y="854">Prompt families + QA checklist.</text>
+  <text class="small" x="1100" y="880">No runtime, no assets, no layout change.</text>
+</svg>
