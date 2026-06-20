@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+  <defs>
+    <style>
+      .bg { fill: #171f22; }
+      .panel { fill: #253238; stroke: #506871; stroke-width: 2; }
+      .panel2 { fill: #2d3b3e; stroke: #637b7c; stroke-width: 2; }
+      .selected { fill: #2f4339; stroke: #e5bc63; stroke-width: 4; }
+      .warn { fill: #3b3032; stroke: #a85f5a; stroke-width: 3; }
+      .title { fill: #f7ecd8; font-family: Arial, sans-serif; font-size: 38px; font-weight: 700; }
+      .subtitle { fill: #cad8d6; font-family: Arial, sans-serif; font-size: 20px; }
+      .h { fill: #f7ecd8; font-family: Arial, sans-serif; font-size: 23px; font-weight: 700; }
+      .t { fill: #d5dfdc; font-family: Arial, sans-serif; font-size: 17px; }
+      .s { fill: #b7c7c4; font-family: Arial, sans-serif; font-size: 14px; }
+      .xs { fill: #a9bbb8; font-family: Arial, sans-serif; font-size: 12px; }
+      .gold { fill: #e5bc63; }
+      .cyan { fill: #66dce7; }
+      .violet { fill: #8d70db; }
+      .swatch { stroke: #f7ecd8; stroke-width: 1.4; }
+      .line { stroke: #788e8e; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #657d7d; stroke-width: 1.4; fill: none; }
+      .road { fill: #bfae89; stroke: #efe1bf; stroke-width: 3; }
+      .cobble { stroke: #8e7e61; stroke-width: 1.5; fill: none; opacity: 0.9; }
+      .stone { fill: #d7c79f; stroke: #f4e8c5; stroke-width: 2; }
+      .plant { fill: #416b4b; stroke: #90ac72; stroke-width: 2; }
+      .wood { fill: #8a6045; stroke: #c59a6b; stroke-width: 2; }
+      .glow { fill: #66dce7; opacity: 0.28; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 7 3 L 0 6 Z" fill="#788e8e"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="1200"/>
+  <text class="title" x="60" y="68">Talvori Firenze Neo-Renaissance Visual Direction Board 1K</text>
+  <text class="subtitle" x="60" y="104">Street-Corner Vertical Slice: style, prompt families, QA, and protected Firenze gameplay layer. No runtime asset.</text>
+
+  <rect class="selected" x="60" y="145" width="520" height="185" rx="18"/>
+  <text class="h" x="92" y="190">Selected Style</text>
+  <text class="t" x="92" y="226">Talvori Neo-Renaissance / Magical Renaissance</text>
+  <text class="s" x="92" y="258">Warm Firenze-inspired craft, 2.5D mobile clarity,</text>
+  <text class="s" x="92" y="282">language magic as world objects, not app panels.</text>
+  <text class="gold" x="92" y="312">Cyan/Lilac/Gold = sparse interaction accents.</text>
+
+  <rect class="panel" x="620" y="145" width="530" height="185" rx="18"/>
+  <text class="h" x="652" y="190">Street-Corner Slice</text>
+  <text class="t" x="652" y="226">One road patch + curb/steps + facade hint.</text>
+  <text class="t" x="652" y="258">Word lantern, market props, cypress planter.</text>
+  <text class="s" x="652" y="290">Defines skin language only; does not replace Firenze map.</text>
+
+  <rect class="panel" x="1190" y="145" width="550" height="185" rx="18"/>
+  <text class="h" x="1222" y="190">Protected Technical Layer</text>
+  <text class="t" x="1222" y="226">Boundary, Arno, roads, bridges B01-B08 stay.</text>
+  <text class="t" x="1222" y="258">P01-P14, graph, city_spawn_start stay.</text>
+  <text class="s" x="1222" y="290">Visual skin may change; gameplay geometry may not.</text>
+
+  <rect class="panel2" x="60" y="370" width="520" height="245" rx="18"/>
+  <text class="h" x="92" y="412">Palette</text>
+  <rect class="swatch" x="92" y="442" width="62" height="62" fill="#d6c49b"/>
+  <rect class="swatch" x="166" y="442" width="62" height="62" fill="#ba704b"/>
+  <rect class="swatch" x="240" y="442" width="62" height="62" fill="#8a6045"/>
+  <rect class="swatch" x="314" y="442" width="62" height="62" fill="#416b4b"/>
+  <rect class="swatch" x="388" y="442" width="62" height="62" fill="#2d7f86"/>
+  <rect class="swatch" x="462" y="442" width="62" height="62" fill="#66dce7"/>
+  <text class="xs" x="94" y="526">stone</text>
+  <text class="xs" x="168" y="526">terra</text>
+  <text class="xs" x="242" y="526">wood</text>
+  <text class="xs" x="316" y="526">cypress</text>
+  <text class="xs" x="390" y="526">arno</text>
+  <text class="xs" x="464" y="526">magic</text>
+  <text class="s" x="92" y="570">Base warm and readable. Accents stay rare.</text>
+  <text class="s" x="92" y="594">No beige-only city, no full neon world.</text>
+
+  <rect class="panel2" x="620" y="370" width="530" height="245" rx="18"/>
+  <text class="h" x="652" y="412">Material Families</text>
+  <text class="t" x="652" y="450">Limestone / plaster / sandstone</text>
+  <text class="t" x="652" y="482">Terracotta / wood / bronze / ceramic</text>
+  <text class="t" x="652" y="514">Cypress / olive / herb planters</text>
+  <text class="t" x="652" y="546">Glass and crystal only as crafted magic</text>
+  <text class="s" x="652" y="586">Hand-painted, clean silhouettes, mobile readable.</text>
+
+  <rect class="panel2" x="1190" y="370" width="550" height="245" rx="18"/>
+  <text class="h" x="1222" y="412">Modern Functions Become Artifacts</text>
+  <text class="t" x="1222" y="450">Quest -> word lantern / wax seal</text>
+  <text class="t" x="1222" y="482">Learning -> lexicon stone / scroll</text>
+  <text class="t" x="1222" y="514">Translate -> prism workbench</text>
+  <text class="t" x="1222" y="546">Progress -> build flag / material crate</text>
+  <text class="s" x="1222" y="586">No tablets, phones, sci-fi screens or UI panels.</text>
+
+  <rect class="panel" x="60" y="655" width="790" height="330" rx="18"/>
+  <text class="h" x="92" y="697">Mini Street-Corner Composition</text>
+  <path class="road" d="M 128 914 L 380 735 L 790 735 L 538 914 Z"/>
+  <path class="cobble" d="M 178 879 L 420 746"/>
+  <path class="cobble" d="M 260 897 L 514 746"/>
+  <path class="cobble" d="M 350 899 L 612 746"/>
+  <path class="cobble" d="M 445 897 L 705 746"/>
+  <path class="cobble" d="M 232 844 L 645 844"/>
+  <path class="cobble" d="M 300 806 L 715 806"/>
+  <path class="cobble" d="M 370 767 L 770 767"/>
+  <rect class="stone" x="154" y="680" width="560" height="42" rx="8"/>
+  <rect class="stone" x="184" y="638" width="500" height="42" rx="8"/>
+  <rect class="wood" x="246" y="590" width="78" height="90" rx="8"/>
+  <rect class="wood" x="340" y="610" width="120" height="70" rx="8"/>
+  <circle class="glow" cx="604" cy="638" r="54"/>
+  <rect x="586" y="610" width="36" height="58" rx="10" fill="#70523e" stroke="#e5bc63" stroke-width="2"/>
+  <circle class="cyan" cx="604" cy="632" r="13"/>
+  <rect class="stone" x="560" y="664" width="88" height="16" rx="6"/>
+  <path class="plant" d="M 728 672 C 700 632 706 586 740 544 C 773 594 770 637 746 672 Z"/>
+  <rect x="710" y="672" width="58" height="32" rx="8" fill="#ba704b" stroke="#e8c796" stroke-width="2"/>
+  <text class="xs" x="125" y="950">Road + curb define scale before any full district art.</text>
+
+  <rect class="panel" x="900" y="655" width="390" height="330" rx="18"/>
+  <text class="h" x="932" y="697">Priority-1 Prompt Families</text>
+  <text class="t" x="932" y="738">1. cobble road tile set</text>
+  <text class="t" x="932" y="774">2. stone curb and steps</text>
+  <text class="t" x="932" y="810">3. word lantern</text>
+  <text class="t" x="932" y="846">4. cypress planter</text>
+  <text class="t" x="932" y="882">5. market crates/barrels</text>
+  <text class="s" x="932" y="930">Optional after scale holds:</text>
+  <text class="s" x="932" y="954">neo renaissance house facade A</text>
+
+  <rect class="warn" x="1330" y="655" width="410" height="330" rx="18"/>
+  <text class="h" x="1362" y="697">No-Go Style Breaks</text>
+  <text class="t" x="1362" y="738">No modern realism: cars, asphalt, phones.</text>
+  <text class="t" x="1362" y="774">No GIS/admin labels or debug boundaries.</text>
+  <text class="t" x="1362" y="810">No cyberpunk neon city or sci-fi UI.</text>
+  <text class="t" x="1362" y="846">No exact landmark-copy as first kit.</text>
+  <text class="t" x="1362" y="882">No Clash/RoK/fantasy franchise cloning.</text>
+  <text class="s" x="1362" y="930">If scale/material fails, stop before mass assets.</text>
+
+  <rect class="panel2" x="60" y="1030" width="1680" height="105" rx="18"/>
+  <text class="h" x="92" y="1073">First Meshy Test Recommendation</text>
+  <text class="t" x="92" y="1110">Start with `firenze_cobble_road_tile_set_v1`, then `firenze_stone_curb_and_steps_v1`: they define scale, material, route readability, and the Explorer footpoint contract.</text>
+</svg>
