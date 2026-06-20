@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+  <defs>
+    <style>
+      .bg { fill: #172024; }
+      .panel { fill: #253238; stroke: #536b72; stroke-width: 2; }
+      .panel2 { fill: #2d3b3e; stroke: #657e82; stroke-width: 2; }
+      .lock { fill: #2d3a45; stroke: #68d2df; stroke-width: 4; }
+      .decision { fill: #304437; stroke: #e6bd63; stroke-width: 4; }
+      .warn { fill: #3c3032; stroke: #a85f5a; stroke-width: 3; }
+      .title { fill: #f7ecd8; font-family: Arial, sans-serif; font-size: 38px; font-weight: 700; }
+      .subtitle { fill: #c9d8d6; font-family: Arial, sans-serif; font-size: 20px; }
+      .h { fill: #f7ecd8; font-family: Arial, sans-serif; font-size: 23px; font-weight: 700; }
+      .t { fill: #d8e1de; font-family: Arial, sans-serif; font-size: 17px; }
+      .s { fill: #b9c8c5; font-family: Arial, sans-serif; font-size: 14px; }
+      .xs { fill: #aabbb8; font-family: Arial, sans-serif; font-size: 12px; }
+      .gold { fill: #e6bd63; }
+      .cyan { fill: #68d2df; }
+      .line { stroke: #7f9494; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #708686; stroke-width: 1.5; fill: none; }
+      .road1 { stroke: #d8cba3; stroke-width: 26; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .road2 { stroke: #bfae86; stroke-width: 18; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .road3 { stroke: #a58e69; stroke-width: 12; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .node { fill: #68d2df; stroke: #d9fcff; stroke-width: 2; }
+      .cap { fill: #d8cba3; stroke: #f4e9c8; stroke-width: 3; }
+      .piece { fill: #c8b98f; stroke: #f3e2b7; stroke-width: 2; }
+      .curb { fill: #e3d6b4; stroke: #a58a5d; stroke-width: 2; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 7 3 L 0 6 Z" fill="#7f9494"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="1200"/>
+  <text class="title" x="60" y="68">Talvori Firenze Road Infrastructure Kit Architecture 1L</text>
+  <text class="subtitle" x="60" y="104">Decision: protected gameplay graph + Blender-first flat road kit + Meshy for materials/props only.</text>
+
+  <rect class="lock" x="60" y="145" width="510" height="235" rx="18"/>
+  <text class="h" x="92" y="188">Protected Gameplay Graph</text>
+  <path class="thin" d="M 125 300 L 210 232 L 310 260 L 410 210 L 502 292"/>
+  <circle class="node" cx="125" cy="300" r="10"/>
+  <circle class="node" cx="210" cy="232" r="10"/>
+  <circle class="node" cx="310" cy="260" r="10"/>
+  <circle class="node" cx="410" cy="210" r="10"/>
+  <circle class="node" cx="502" cy="292" r="10"/>
+  <text class="t" x="92" y="335">181 nodes / 221 edges stay source-of-truth.</text>
+  <text class="s" x="92" y="360">P01-P14, B01-B08 and city_spawn_start protected.</text>
+
+  <line class="line" x1="585" y1="263" x2="685" y2="263"/>
+
+  <rect class="decision" x="700" y="145" width="410" height="235" rx="18"/>
+  <text class="h" x="732" y="188">Road Profile Assignment</text>
+  <text class="t" x="732" y="226">primary_road</text>
+  <text class="t" x="732" y="256">secondary_road</text>
+  <text class="t" x="732" y="286">alley_or_plot_path</text>
+  <text class="t" x="732" y="316">bridge_deck</text>
+  <text class="t" x="732" y="346">plaza_or_junction</text>
+
+  <line class="line" x1="1125" y1="263" x2="1225" y2="263"/>
+
+  <rect class="panel" x="1240" y="145" width="500" height="235" rx="18"/>
+  <text class="h" x="1272" y="188">Visual Skin Layer</text>
+  <path class="road1" d="M 1300 310 C 1360 235 1438 240 1510 300 C 1565 344 1630 350 1692 302"/>
+  <path class="road2" d="M 1320 250 C 1380 220 1440 216 1490 250"/>
+  <path class="road3" d="M 1505 310 C 1540 275 1585 260 1650 250"/>
+  <circle class="cap" cx="1510" cy="300" r="32"/>
+  <text class="s" x="1272" y="360">Flat road strips, curbs, decals and junction caps.</text>
+
+  <rect class="panel2" x="60" y="430" width="520" height="300" rx="18"/>
+  <text class="h" x="92" y="472">FirenzeRoadProfile v1</text>
+  <text class="t" x="92" y="512">primary: broad warm limestone cobbles</text>
+  <text class="t" x="92" y="548">secondary: narrower readable cobbles</text>
+  <text class="t" x="92" y="584">alley/path: plot access, no high curb</text>
+  <text class="t" x="92" y="620">bridge: deck skin over B##_N/M/S chain</text>
+  <text class="t" x="92" y="656">plaza: junction cap, not new graph</text>
+  <text class="s" x="92" y="700">Widths are visual planning targets, not runtime masks.</text>
+
+  <rect class="panel2" x="640" y="430" width="520" height="300" rx="18"/>
+  <text class="h" x="672" y="472">Minimal Kit Pieces</text>
+  <text class="t" x="672" y="512">straight / gentle_curve / strong_curve / s_curve</text>
+  <text class="t" x="672" y="548">t_junction / y_junction / cross_junction</text>
+  <text class="t" x="672" y="584">plaza_patch / bridge_approach</text>
+  <text class="t" x="672" y="620">curb_edge / variation_decals</text>
+  <g transform="translate(700 650)">
+    <rect class="piece" x="0" y="0" width="98" height="34" rx="8"/>
+    <path class="piece" d="M 130 34 C 130 6 154 0 190 0 L 226 0 L 226 34 L 180 34 C 160 34 150 42 150 60 L 150 84 L 116 84 L 116 54 C 116 44 120 38 130 34 Z"/>
+    <circle class="cap" cx="300" cy="32" r="30"/>
+    <rect class="curb" x="360" y="5" width="105" height="18" rx="6"/>
+  </g>
+
+  <rect class="panel2" x="1220" y="430" width="520" height="300" rx="18"/>
+  <text class="h" x="1252" y="472">Meshy vs Blender Responsibility</text>
+  <text class="gold" x="1252" y="512">Meshy may provide:</text>
+  <text class="t" x="1252" y="544">materials, props, low curb candidates</text>
+  <text class="t" x="1252" y="576">surface style references, GLB previews</text>
+  <text class="cyan" x="1252" y="626">Blender/Codex controls:</text>
+  <text class="t" x="1252" y="658">flat geometry, curves, junction caps, scale</text>
+  <text class="t" x="1252" y="690">Route-Camera compatible renders</text>
+
+  <rect class="warn" x="60" y="780" width="520" height="250" rx="18"/>
+  <text class="h" x="92" y="822">Meshy Must Not Build</text>
+  <text class="t" x="92" y="862">complete road networks</text>
+  <text class="t" x="92" y="896">new Firenze topology</text>
+  <text class="t" x="92" y="930">massive stone blocks / walls / tunnels</text>
+  <text class="t" x="92" y="964">collision, route, or runtime-ready assets</text>
+
+  <rect class="panel" x="640" y="780" width="520" height="250" rx="18"/>
+  <text class="h" x="672" y="822">Pipeline</text>
+  <text class="t" x="672" y="862">A. Blender Road Geometry Lab</text>
+  <text class="t" x="672" y="896">B. Meshy/AI material reference test</text>
+  <text class="t" x="672" y="930">C. Junction Cap Test</text>
+  <text class="t" x="672" y="964">D. Firenze Graph Skin Preview later</text>
+
+  <rect class="panel" x="1220" y="780" width="520" height="250" rx="18"/>
+  <text class="h" x="1252" y="822">Next Slice 1M</text>
+  <text class="t" x="1252" y="862">Blender-first flat road pieces</text>
+  <text class="t" x="1252" y="896">straight, gentle_curve, t_junction</text>
+  <text class="t" x="1252" y="930">curb_edge, optional bridge_approach</text>
+  <text class="s" x="1252" y="972">No assets import. No runtime. No layout change.</text>
+
+  <rect class="panel2" x="60" y="1070" width="1680" height="74" rx="18"/>
+  <text class="h" x="92" y="1116">Decision: Hybrid Road Kit. Gameplay graph remains protected; visual roads are a separate skin built from Blender-controlled flat pieces, with Meshy only as material/prop support.</text>
+</svg>
