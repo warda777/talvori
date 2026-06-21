@@ -6,6 +6,17 @@ Production assets: NO
 Firenze layout changes: NO
 Commit: NO
 
+Superseded for production direction 2026-06-21:
+
+`442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` fuehren die neue
+Produktionsrichtung. Dieses Dokument bleibt als Road-/Graph-/Visual-Skin-Proof
+und Analyse gueltig, aber Blender-first Road-Kit-Produktion ist nicht mehr der
+primaere Produktionsweg. Fuer P02 startet Produktion mit einem coherent
+environment kit und Unity-Prefab-/Road-/District-Assembly; Blender/Codex bauen
+kontrollierte Luecken, Anpassungen oder QA-Proofs, nicht die finale Stadt-Art
+aus Primitiven.
+
 ## 1. Ziel
 
 Dieser Slice entscheidet, wie Firenze-Strassen visuell als Talvori Neo-
@@ -66,6 +77,11 @@ Gewaehlte Architektur:
 Hybrid: protected gameplay graph + Blender-first flat road geometry +
 profile-based visual road skin + small Meshy material/prop candidates.
 ```
+
+Hinweis ab `442`/`443`: Diese Architektur beschreibt den damaligen Proof- und
+Analyseweg. Fuer P02-Produktion fuehrt nun coherent environment kit first;
+Blender-first Road Geometry bleibt als kontrolliertes Luecken-, Anpassungs-
+oder QA-Werkzeug erhalten, nicht als primaerer Stadtproduktionsplan.
 
 Kern:
 

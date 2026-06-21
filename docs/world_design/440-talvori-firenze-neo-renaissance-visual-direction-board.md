@@ -6,6 +6,15 @@ Production assets: NO
 Firenze layout changes: NO
 Commit: NO
 
+Unity Platform Update 2026-06-21:
+
+Dieses Board bleibt als Talvori Neo-Renaissance Stilreferenz gueltig. Ab
+`442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` dient es vor allem
+als Richtung fuer Unity-Environment-Kit-Intake, P02-District-Assembly,
+Materialfamilien, Props und mobile Lesbarkeit. Es ist kein Flutter-Street-
+Runtime-Ziel und kein Produktionsasset-Gate.
+
 ## 1. Ziel
 
 Dieser Slice konkretisiert die in `439` entschiedene Richtung fuer genau einen
@@ -34,7 +43,8 @@ Fuehrend:
 
 Relevante lokale Regeln:
 
-- Talvori ist eine warme 2D-/2.5D-Welt, kein Dashboard.
+- Talvori ist eine warme isometrische 3D-Welt mit 2D-/2.5D-Lesbarkeit, kein
+  Dashboard.
 - Weltobjekte muessen dieselbe Perspektive, Lichtlogik und Materialfamilie
   teilen.
 - KI-/Meshy-Outputs sind Kandidaten, keine Assets.

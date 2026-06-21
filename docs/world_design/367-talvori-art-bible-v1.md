@@ -1,8 +1,18 @@
 # M16-CA: Talvori Art Bible v1
 
-Stand: 2026-06-11
+Stand: 2026-06-21
 
 Status: `Docs-/Style-Gate-Slice / keine Implementierung`
+
+Unity Platform Supersession 2026-06-21:
+
+`442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` fuehren die neue
+Runtime-Richtung. Diese Art Bible bleibt als Stil- und QA-Grundlage gueltig,
+wird aber fuer Unity Echtzeit-3D, feste isometrische Kamera, mobile
+Lesbarkeit, Materialfamilien, Lichtfamilien und coherent environment kits
+weitergedacht. Die alten 2.5D-Diorama-Regeln sind historische
+Lesbarkeits-/Stilanker, nicht mehr die primaere technische Runtime-Vorgabe.
 
 ## 1. Zweck und Non-Goals
 
@@ -14,6 +24,8 @@ Ziel:
 
 - Talvori soll als warmes, hochwertiges 2.5D-Cozy-Island-Diorama lesbar
   werden.
+- Fuer neue Districts soll diese Lesbarkeit in eine warme, isometrische Unity
+  3D-Welt mit konsistenten Materialien und Lichtfamilien uebersetzt werden.
 - Insel, Slots, Build Station, Gebaeude, Figuren und HUD sollen zur selben
   visuellen Welt gehoeren.
 - Kuenftige KI-Referenzen, Master-Referenzen und Asset-Familien sollen gegen

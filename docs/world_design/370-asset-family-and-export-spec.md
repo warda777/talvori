@@ -1,8 +1,17 @@
 # M16-CC: Asset Family and Export Spec
 
-Stand: 2026-06-11
+Stand: 2026-06-21
 
 Status: `Markdown-Docs-/Asset-Spec-Gate / keine Asset-Freigabe`
+
+Unity Platform Supersession 2026-06-21:
+
+Ab `442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` ist Unity 6 URP die
+primaere Game-Runtime. Diese Spec bleibt gueltig, wird aber um Unity-Import,
+Prefabs, Colliders, LODs, Addressables und Lizenzmanifest erweitert. 2D-/Layer-
+und Flutter-nahe Regeln bleiben historische Foundation- und Fallback-Regeln,
+aber nicht der primaere District-Produktionsweg.
 
 Template: `docs/world_design/prompt_templates/art_master_reference_slice.md`
 
@@ -30,6 +39,7 @@ Non-Goals:
 - keine finalen Spielbilder,
 - keine App-Screens,
 - keine Flutter-/Dart-Dateien,
+- keine Unity-Dateien,
 - keine App-Integration,
 - keine Route,
 - keine Navigation,
@@ -41,6 +51,26 @@ Non-Goals:
 
 M16-CC ist eine Spezifikation. Es sagt, was spaeter erlaubt werden kann, aber
 es erlaubt noch keine Datei, kein Bild und keine Produktintegration.
+
+## 1a. Unity Importstandard ab 442/443
+
+Fuer neue Unity-District- und Environment-Kit-Arbeit muss jedes Asset-Gate
+zusaetzlich diese Angaben pruefen:
+
+| Feld | Pflicht |
+| --- | --- |
+| Unity Units | Massstab in Metern oder expliziter projektspezifischer Unit-Vertrag; Explorer- und District-Scale muessen zusammenpassen. |
+| Pivot / Origin | Platzierungs- und Interaktionspivot dokumentiert; Props stehen plausibel auf Bodenhoehe. |
+| Colliders | Keine implizite Navigation; Collider-Typ, Groesse und Zweck muessen explizit sein. |
+| NavMesh | Begehbarkeit kommt aus dem Unity-/District-Setup, nicht automatisch aus sichtbarer Art. |
+| LODs | LOD- oder mobile Budget-Aussage fuer groessere Props, Gebaeude und Kits. |
+| Prefabs | Prefab-Name, Variante, Abhaengigkeiten und erlaubter District-Kontext. |
+| Texturbudget | Aufloesung, Materialanzahl, URP-Kompatibilitaet, Atlas-/Trim-Sheet-Nutzung falls relevant. |
+| Addressable Labels | Spaeteres Label-Konzept fuer District, Kit, Variant, Prop und QA-Status. |
+| License Manifest | Quelle, Lizenz, kommerzielle Nutzbarkeit, Attribution, Tool, Autor und Exportdatum. |
+
+Diese Angaben sind keine Importfreigabe. Sie definieren nur, was spaeter vor
+einem Unity-Asset-Gate vorliegen muss.
 
 ## 2. Eingangsquellen und Abgrenzung
 
@@ -413,4 +443,3 @@ M16-CE Starter Island Asset Candidate Gate
 Dieses Folge-Gate duerfte erst dann Bilder oder Dateien erlauben, wenn es
 explizit Asset-Scope, Quellen, Metadaten, QA, erlaubte Pfade und Integrations-
 Grenzen definiert.
-

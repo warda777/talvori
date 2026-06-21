@@ -1,8 +1,19 @@
 # M16-BZ: AI Art Production Pipeline and Style Consistency Gate
 
-Stand: 2026-06-10
+Stand: 2026-06-21
 
 Status: `Docs-/Pipeline-Gate-Slice / keine Implementierung`
+
+Unity Platform Supersession 2026-06-21:
+
+Ab `442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` gilt fuer Firenze
+und neue World-Produktion: coherent environment kit first. KI- und
+Generator-Tools dienen kontrollierten Luecken, Varianten, Konzepten oder
+Talvori-spezifischen Sonderobjekten. Lizenz, Provenance, kommerzielle
+Nutzbarkeit, Importstandard und QA sind Pflicht vor jedem Asset-Gate. Codex
+bleibt Technical Environment Assembler und baut keine finale Stadt-Art aus
+Primitiven.
 
 ## 1. Zweck
 
@@ -13,7 +24,7 @@ Ziel ist keine freie Bildproduktion und keine Asset-Freigabe. Ziel ist eine
 kontrollierte KI-gestuetzte Art-Pipeline, die professioneller arbeitet als
 Einzelprompts und Style-Brueche frueh verhindert.
 
-M16-BZ gibt keinen Code, keine Flutter-/Dart-Dateien, keine App-Integration,
+M16-BZ gibt keinen Code, keine Flutter-/Dart-/Unity-Dateien, keine App-Integration,
 keine Route, keine Navigation, keine Persistenz, keine Assets unter `assets/`,
 keine Tests, keine Figma-/Notion-/Linear-/GitHub-Writes, keinen Plugin-Write,
 keinen BuildState und keine Produktivmechanik frei.
@@ -23,7 +34,7 @@ keinen BuildState und keine Produktivmechanik frei.
 | Rolle | Aufgabe | Grenze |
 | --- | --- | --- |
 | ChatGPT | Art Direction, Referenzbilder, Prompts, Style Bible, Moodboards und QA-Regeln vorbereiten. | Nicht alleinige Asset-Wahrheit; keine ungeprueften finalen Spielassets. |
-| Codex | Dokumentation, Pipeline-Regeln, Dateistruktur, Exportregeln, spaetere Flutter-Integrationsgrenzen und Checks pflegen. | Codex soll keine hochwertigen Spielbilder nachzeichnen oder als Bildgenerator auftreten. |
+| Codex | Dokumentation, Pipeline-Regeln, Dateistruktur, Unity-Import-/Prefab-/QA-Regeln, Exportregeln, Integrationsgrenzen und Checks pflegen. | Codex soll keine hochwertigen Spielbilder nachzeichnen, keine finale Stadt aus Primitiven bauen und nicht als Bildgenerator auftreten. |
 | KI-Bildtool | Bilder mit Style References, Structure References, ggf. LoRA oder ControlNet generieren. | Keine freien Einzelprompts ohne Referenz; keine finale Asset-Freigabe ohne QA. |
 | Figma / Photoshop / Photopea / Aseprite | Nachbearbeitung, Zuschnitt, Layering, Layout, Export und Konsistenzkorrektur. | Keine externen Writes oder Designfile-Aenderungen ohne Freigabe. |
 | Spaeterer Artist | Optional Finalisierung, Paintover, Konsistenzpruefung, Charakter-/Asset-System und Produktionsqualitaet. | Kommt, sobald Budget/Bedarf da ist; ersetzt nicht die jetzige Gate-Struktur. |

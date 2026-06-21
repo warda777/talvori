@@ -1,11 +1,20 @@
 # 431: Firenze Area-Specification Metrics and Reachability Review v1
 
-Stand: 2026-06-18
+Stand: 2026-06-21
 
 Status: `documentation_only` / `metrics_reachability_review_v1` /
 `planning_only` / `not_runtime_data` / `no_json_yaml` / `no_flutter` /
 `no_collision` / `no_pathfinding` / `no_coordinates` /
 `no_app_integration` / `no_assets` / `no_commit`
+
+Unity Platform Supersession 2026-06-21:
+
+Ab `442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` bleibt diese
+Area-/Reachability-Review eine planning-only Grundlage fuer Firenze Overview,
+District-Definitionen und P02-Auswahl. P01-P14 sind District-/Plot-Anker,
+Entry-/Exit- und Nachbarschaftsvertraege bleiben erhalten, aber der Graph
+erzeugt nicht automatisch detaillierte Unity-Street-Geometrie.
 
 ## 1. Ziel
 

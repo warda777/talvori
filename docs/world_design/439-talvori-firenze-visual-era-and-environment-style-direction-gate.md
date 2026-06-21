@@ -6,6 +6,15 @@ Production assets: NO
 Firenze layout changes: NO
 Commit: NO
 
+Unity Platform Update 2026-06-21:
+
+Die Entscheidung `Talvori Neo-Renaissance / Magical Renaissance` bleibt gueltig.
+Ab `442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` wird sie jedoch fuer
+Unity 6 URP, modulare Districts, P02 und coherent environment kits angewendet.
+Die Flutter-Sprite-/Street-Proofs bis `1I` bleiben historische technische
+Proofs, nicht primaerer Runtime-Weg.
+
 ## 1. Ziel
 
 Dieser Slice entscheidet die erste visuelle Epochen- und Environment-Richtung

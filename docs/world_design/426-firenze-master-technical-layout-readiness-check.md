@@ -1,10 +1,20 @@
 # 426: Firenze Master Technical Layout Readiness Check
 
-Stand: 2026-06-18
+Stand: 2026-06-21
 
 Status: `documentation_only` / `readiness_check` / `planning_only` /
 `not_runtime_data` / `no_json_yaml` / `no_flutter` / `no_app_integration` /
 `no_assets` / `no_commit`
+
+Unity Platform Supersession 2026-06-21:
+
+`442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` fuehren die neue
+Runtime-Richtung. Diese Firenze-Master-SVG bleibt technische Planungs- und
+Overview-Quelle. Firenze Overview bleibt Karte/Orientierung; P01-P14 werden
+District-Definitionen und Planungspunkte. Entry/Exit- und
+Nachbarschaftsvertraege bleiben wertvoll. Der Graph ist nicht automatisch
+detaillierte Unity-Street-Geometrie.
 
 ## 1. Ziel
 

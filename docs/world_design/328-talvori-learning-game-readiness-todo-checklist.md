@@ -1,37 +1,34 @@
 # M16-T: Talvori Learning Game Readiness ToDo Checklist
 
-Stand: 2026-06-14
+Stand: 2026-06-21
 
 Status: `fortlaufende ToDo-/Gate-Liste gestartet / keine Implementierung`
 
 ## 0. Product Delivery Dashboard
 
-Letzte Aktualisierung: 2026-06-14
+Letzte Aktualisierung: 2026-06-21
 
-Aktive Sprint-ID: `FIRENZE-LAYOUT-BLUEPRINT-V5`
+Aktive Sprint-ID: `UNITY-MODULAR-DISTRICT-ARCH-MIGRATION-2A`
 
 Sprint Goal:
 
-> Talvori ersetzt den Firenze-v4-Zwischenstand durch den fuehrenden
-> Firenze-v5-Blueprint: Expanded Florence Shape and Landmark-Aware
-> Infrastructure Review mit 14 Parcel Candidates, B1-B3 als einzigen
-> Arno-Querungen, organischem PATH-N/PATH-S, Vegetationspuffern,
-> L1-L5 Landmark-Ankern, No-Overlap-QA, Branch/Future Paths,
-> Depth-/Sorting-Bands, No-Walk/No-Build, Anchors und Reachability-Review vor
-> City Entry.
+> Talvori migriert die fuehrende Dokumentation auf Unity 6 URP,
+> modulare District-Szenen, P02 als ersten lokalen Vertical Slice,
+> Flutter-Freeze, Asset-Kit-first und gate-basierte Online-/Chat-Grenzen,
+> ohne Unity-Projekt, Runtime-Code oder Assets zu erzeugen.
 
 ### 0.1 Gesamtfortschritt
 
 | Kennzahl | Wert |
 | --- | --- |
-| Gesamtanzahl M16-T-Items | 332 |
+| Gesamtanzahl M16-T-Items | 351 |
 | Offen `[ ]` | 0 |
-| Teilweise erledigt `[~]` | 12 |
+| Teilweise erledigt `[~]` | 17 |
 | Erledigt `[x]` | 308 |
-| Blockiert `[!]` | 12 |
+| Blockiert `[!]` | 26 |
 | Ausgelagert `[>]` | 0 |
-| Gewichteter Fortschritt | 94.6 % |
-| Fortschrittsbalken | `███████████████████░` |
+| Gewichteter Fortschritt | 90.2 % |
+| Fortschrittsbalken | `██████████████████░░` |
 
 Naechste empfohlene IDs:
 
@@ -45,6 +42,25 @@ Naechste empfohlene IDs:
 - M16T-ARCH-002
 - M16T-ARCH-003
 - M16T-ARCH-004
+- M16T-UNITY-001
+- M16T-UNITY-002
+- M16T-UNITY-003
+- M16T-UNITY-004
+- M16T-PACKAGE-001
+- M16T-PACKAGE-002
+- M16T-PACKAGE-003
+- M16T-MIGRATION-001
+- M16T-MIGRATION-002
+- M16T-MIGRATION-003
+- M16T-ONLINE-001
+- M16T-ONLINE-002
+- M16T-ONLINE-003
+- M16T-ONLINE-004
+- M16T-CHAT-001
+- M16T-CHAT-002
+- M16T-KIT-001
+- M16T-KIT-002
+- M16T-KIT-003
 - M16T-DOC-003
 - M16T-GIT-003
 - M16T-LEARN-002
@@ -73,7 +89,7 @@ Lesart fuer `[>]`:
 Ausgelagerte Items bleiben in der Gesamtzahl sichtbar, tragen aber erst nach
 ihrem Detail-Gate Fortschritt bei.
 
-### 0.3 Bereichs-Dashboard fuer 32 Bereiche
+### 0.3 Bereichs-Dashboard fuer 38 Bereiche
 
 | Bereich | ID-Gruppe | Items | Erledigt | Teilweise | Offen | Blockiert | Prozent | Balken | Naechste empfohlene Aktion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -107,6 +123,12 @@ ihrem Detail-Gate Fortschritt bei.
 | Project Management / External Tool Sync | M16T-MGMT | 4 | 4 | 0 | 0 | 0 | 100.0 % | `██████████` | Repo bleibt Source of Truth; Notion/Linear/GitHub duerfen nur Spiegel, Aufgaben oder technische Review-Strukturen nach Freigabe sein. |
 | Professional Design / UX Gates | M16T-DESIGN | 8 | 8 | 0 | 0 | 0 | 100.0 % | `██████████` | Cozy Island Diorama Builder als M16-BY-Richtung und M16-BZ-Art-Pipeline vor komplexem Island-/World-/BuildChoice-Code anwenden. |
 | Technische Architektur / App-Integration | M16T-ARCH | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Boundaries klaeren, App-Integration blockiert halten. |
+| Unity Platform | M16T-UNITY | 4 | 0 | 1 | 0 | 3 | 12.5 % | `█░░░░░░░░░` | Unity 6 URP als Runtime-Richtung ist dokumentiert; separates Unity-Projekt, P02 und technische Proofs bleiben Gates. |
+| Content / District Packaging | M16T-PACKAGE | 3 | 0 | 1 | 0 | 2 | 16.7 % | `██░░░░░░░░` | Modular geladene Districts und Addressables planen, aber erst nach lokalem P02 beweisen. |
+| Architecture Migration | M16T-MIGRATION | 3 | 0 | 2 | 0 | 1 | 33.3 % | `███░░░░░░░` | Flutter-Freeze und Proof-Supersession dokumentieren; neue Flutter-Street-Arbeit blockiert halten. |
+| Online / Sessions / Social | M16T-ONLINE | 4 | 0 | 0 | 0 | 4 | 0.0 % | `░░░░░░░░░░` | Provider-neutrale Interfaces, UGS/Nakama und instanzierte Districts erst nach lokalem P02-Gate oeffnen. |
+| Chat / Moderation | M16T-CHAT | 2 | 0 | 0 | 0 | 2 | 0.0 % | `░░░░░░░░░░` | Chat bleibt blockiert bis Auth-, Moderations-, Blockier- und Melde-Gates stehen. |
+| Environment Kit / Licensing | M16T-KIT | 3 | 0 | 1 | 0 | 2 | 16.7 % | `██░░░░░░░░` | Coherent Environment Kit first dokumentieren; Lizenz-/Provenance- und Meshy/Sloyd-Grenzen vor Asset-Import pruefen. |
 | Dokumentations- und Visual-QA | M16T-DOC | 7 | 5 | 1 | 0 | 1 | 78.6 % | `████████░░` | Prompt-Templates, Reading Rules und Visual-QA-Regel anwenden; Screenshots bleiben blockiert. |
 | Commit-/Review-Hygiene | M16T-GIT | 4 | 3 | 0 | 0 | 1 | 75.0 % | `████████░░` | Template-basierte Status-, Diff- und Scope-Checks vor Commit weiter anwenden. |
 
@@ -459,6 +481,55 @@ ausdruecklich freigegeben werden.
 | M16T-ARCH-002 | [!] | App-Integration weiter blockieren | Lokale Previews sind keine produktiven Screens. | App-Integration-Gate separat freigegeben ist. | Home/World/Onboarding-Integration. | nein |
 | M16T-ARCH-003 | [!] | Route-Gate | Neue Routen koennen Produktfluss veraendern. | Route-Gate mit UX, Guardrails und Tests existiert. | Route/neue Seite. | nein |
 | M16T-ARCH-004 | [!] | Test-/Performance-/Accessibility-Gate | Produktive Systeme brauchen technische Pruefung. | Test-, Perf- und A11y-Plan freigegeben ist. | Produktive Implementierung ohne Pruefung. | nein |
+
+## 24a. Unity Platform
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-UNITY-001 | [~] | Unity 6 URP Platform Decision | Die primaere Runtime muss eindeutig sein, bevor weitere Weltarbeit entsteht. | `442` ist akzeptiert und ein separates Unity-Prototyp-Gate ist vorbereitet. | Unity-Implementierung ohne Projekt-/Repo-Gate. | nein |
+| M16T-UNITY-002 | [!] | Separates Unity-Prototyp-Projekt | Der Unity-Prototyp soll nicht unkontrolliert in die Flutter Foundation Build wachsen. | Eigenes Unity-Projekt/Repo mit Version, Struktur und Build-Zielen freigegeben ist. | Unity-Projektdateien in diesem Repo ohne Gate. | nein |
+| M16T-UNITY-003 | [!] | P02 Local Vertical Slice | P02 ist der erste kleine Beweis fuer Bewegung, Kamera, Learning Loop und District-Gefuehl. | Lokaler P02-Slice in Unity technisch und visuell geprueft ist. | Online, Full City oder Asset-Produktion vor P02. | nein |
+| M16T-UNITY-004 | [!] | Unity Import/NavMesh/Prefab Proof | Runtime-Qualitaet braucht Massstab, Pivot, NavMesh, Prefabs und Build-QA. | Importstandard, NavMesh, Prefabs, Kamera und lokaler Build im Unity-Prototyp geprueft sind. | Produktive Unity-Integration ohne technische QA. | nein |
+
+## 24b. Content / District Packaging
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-PACKAGE-001 | [~] | Modular District Packaging | Staedte sollen aus separat ladbaren Districts bestehen. | District-Paketvertrag in `442`/`443` steht und P02-Paketstruktur vorbereitet ist. | Monolithische Stadtproduktion. | nein |
+| M16T-PACKAGE-002 | [!] | Addressables Second-District Proof | Modularitaet ist erst bewiesen, wenn ein zweiter District separat geladen werden kann. | Zweiter District als Addressables-/Scene-Paket nach P02 funktioniert. | Addressables als Produktionssystem vor P02. | nein |
+| M16T-PACKAGE-003 | [!] | Fixed Build/Upgrade Slot Contract | Agency soll in festen Slots passieren, nicht als freier City Builder. | Slot-IDs, Bounds, Upgrade-Stufen und Save-/Online-Ownership geklaert sind. | Freies Bauen im MVP. | nein |
+
+## 24c. Architecture Migration
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-MIGRATION-001 | [~] | Flutter Freeze / Unity Boundary | Flutter bleibt wertvolle Referenz, darf aber nicht unklar weiter als Welt-Runtime laufen. | Flutter-Rolle, Legacy-Gate und Unity-Grenze in fuehrenden Docs verankert sind. | Neue Firenze-Street-/3D-Welt in Flutter ohne Gate. | nein |
+| M16T-MIGRATION-002 | [~] | Historical Proof Supersession | 1T-1X und 1Y sollen als Erkenntnis bleiben, aber nicht mehr fuehren. | Historische Proofs sind mit kurzer Supersession auf `442`/`443` eingeordnet. | Alte Proofs gelten als Produktionsweg. | nein |
+| M16T-MIGRATION-003 | [!] | Legacy Gate Enforcement | Die neue Grenze muss spaeter in Templates/Checks sichtbar werden. | Prompts/Templates pruefen neue Flutter-Legacy-Grenze reproduzierbar. | Scope Drift zur alten Flutter-Welt. | nein |
+
+## 24d. Online / Sessions / Social
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-ONLINE-001 | [!] | Provider-neutrale Service Interfaces | UGS/Nakama sollen austauschbar bleiben, bis das Vergleichsgate entscheidet. | Auth, Profile, District Instance, World State, Inventory, Friends/Presence und Chat Interfaces geplant sind. | Direkte Provider-Kopplung. | nein |
+| M16T-ONLINE-002 | [!] | UGS/Nakama Evaluation Gate | Provider-Wahl beeinflusst Kosten, Betrieb, Moderation und Architektur. | Vergleich mit Kriterien, Risiko, Kosten und Prototype-Scope dokumentiert ist. | Provider-Festlegung ohne Gate. | nein |
+| M16T-ONLINE-003 | [!] | Instanced District Model | Online soll kleine Instanzen nutzen, nicht nahtloses MMO. | Personal, public social und party quest Districts als Modell geprueft sind. | Globale frei bebaubare Welt. | nein |
+| M16T-ONLINE-004 | [!] | Server-authoritative World State | Online-Weltzustand braucht Autoritaet und Konfliktregeln. | Ownership, Persistence, Sync und Konfliktmodell fuer District State geklaert sind. | Client-authoritative Produktionsstate. | nein |
+
+## 24e. Chat / Moderation
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-CHAT-001 | [!] | Chat Moderation Gate | Human Chat ist risikoreich und braucht Sicherheitsgrenzen. | Auth, Moderation, Blockieren, Melden, Logging und Abuse-Handling dokumentiert und geprueft sind. | Produktiver Chat. | nein |
+| M16T-CHAT-002 | [!] | Friends / Presence / Chat Scope | Social soll mit Freunden, Presence und kontrollierten Raeumen starten. | Friends/Presence-Scope, Companion-vs-Human-Chat-Grenze und Instanzbezug geklaert sind. | Globaler oeffentlicher Chat. | nein |
+
+## 24f. Environment Kit / Licensing
+
+| ID | Status | Thema | Warum wichtig | Done wenn | Blockiert | Darf Code erzeugen |
+| --- | --- | --- | --- | --- | --- | --- |
+| M16T-KIT-001 | [~] | Coherent Environment Kit First | Die sichtbare Stadt braucht konsistente Kit-Qualitaet statt primitives Final-Art. | Kit-first-Regel in `442`, `366`, `367` und `370` steht und Intake-Kriterien vorbereitet sind. | Final-Art aus isolierten Primitiven. | nein |
+| M16T-KIT-002 | [!] | Kit Licensing / Provenance Manifest | Externe Kits duerfen nur mit klarer Lizenz und Herkunft genutzt werden. | Lizenz, Attribution, kommerzielle Nutzbarkeit, Quelle, Version und Asset-Manifest geprueft sind. | Asset-Import ohne Provenance. | nein |
+| M16T-KIT-003 | [!] | Meshy/Sloyd Role Gate | Generatoren sollen Sonderobjekte und Varianten liefern, nicht die Stadt-Topologie. | Meshy/Sloyd-Grenzen, Exportziele und QA-Gates fuer Spezialobjekte definiert sind. | Meshy-only City/Road-Produktion. | nein |
 
 ## 25. Dokumentations- und Visual-QA
 
@@ -2429,10 +2500,10 @@ muessen fachlich harmonieren.
 | Klassifizierung | Bereiche / IDs | Warum |
 | --- | --- | --- |
 | MVP-kritisch | M16T-PROD-001..003, M16T-CORE-001..003, M16T-L2W-001..003, M16T-LEARN-001..002, M16T-WOT-001..008, M16T-SEM-001..004, M16T-SCALE-001..004, M16T-REWARD-001..005, M16T-WORLD-001, M16T-WORLD-004, M16T-SENS-001..003, M16T-QUEUE-001..004, M16T-GAME-001..004, M16T-PLAY-001..005, M16T-PLAY-007..009, M16T-INFRA-001..012, M16T-SPINE-001..015, M16T-FUN-001..019, M16T-LANGUAGE-001..006, M16T-DESIGN-001..004, M16T-DESIGN-007..010, M16T-MVP-004 | Diese Punkte definieren den kleinen spielbaren Lernloop, das Play-First-/Island-First-Gefuehl, die Starter-Insel-Grundlage, den Construction-Learning-Spine, den Fun-/Adventure-/Curiosity-Layer, object-first Bauplatzregeln, character-assisted World Actions, Flow-Rejoin-Grenzen, Language-Layer-/Game-Bible-Regeln, professionelle Design-before-Code- und Cozy-Island-Diorama-Game-Direction-Grenzen und verhindern falsche Weltreaktionen. |
-| Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries und Datenentscheidungen. |
+| Vor MVP zu klaeren | M16T-MOBILE-001..004, M16T-COMP-001..004, M16T-ARCH-001, M16T-ARCH-002, M16T-ARCH-003, M16T-UNITY-001..004, M16T-PACKAGE-001..003, M16T-MIGRATION-001..003, M16T-KIT-001..003, M16T-DATA-001, M16T-DATA-002, M16T-UNDO-001 | Produktive Nutzbarkeit braucht Mobile, Companion-Grenzen, technische Boundaries, Unity/P02, District Packaging, Flutter-Freeze, Environment Kit und Datenentscheidungen. |
 | Nach MVP | M16T-WHEEL-002..004, M16T-WORLD-002..003, M16T-DEPTH-001..002, M16T-SOCIAL-001..003, M16T-METRICS-001..003 | Wichtig, aber nicht zwingend fuer ersten spielbaren Lernloop. |
-| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ASSET-001..100, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
-| Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
+| Produktions-/release-kritisch | M16T-DATA-003..005, M16T-ARCH-004, M16T-ONLINE-001..004, M16T-CHAT-001..002, M16T-ASSET-001..100, M16T-ART-001..017, M16T-DOC-001..007, M16T-GIT-001..004, M16T-MGMT-001..004 | Noetig fuer echte Produktqualitaet, Release, Daten-, Online-, Social-, Chat-, Asset-, Art-Pipeline-, Style-System-, Master-Reference-, Prompt-Template-, Commit- und Projektmanagement-Sicherheit. |
+| Blockiert bis eigenes Gate | M16T-WHEEL-001, M16T-ASSET-001, M16T-DATA-001..003, M16T-DATA-005, M16T-ARCH-002..004, M16T-UNITY-002..004, M16T-PACKAGE-002..003, M16T-MIGRATION-003, M16T-ONLINE-001..004, M16T-CHAT-001..002, M16T-KIT-002..003, M16T-DOC-004, M16T-GIT-003 | Diese Themen duerfen nicht nebenbei umgesetzt werden. |
 
 ## 30. Change-/Idea-Intake
 

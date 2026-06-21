@@ -6,6 +6,15 @@ Runtime asset import: NO
 Flame integration: NO
 Motion Lab: NO
 
+Unity Platform Supersession 2026-06-21:
+
+`442-talvori-unity-modular-district-platform-decision.md` und
+`443-p02-vertical-slice-and-online-foundation-roadmap.md` machen den 3D
+Explorer zum primaeren Unity-Prototyp-Charakter. Die hier entschiedenen
+8-Direction-Sprite-Regeln bleiben als Fallback, Overview-/Marker-Option,
+Historical Proof und Style-Lesbarkeitsreferenz erhalten. Sie sind nicht mehr
+der primaere Character-Runtime-Weg fuer P02.
+
 ## 1. Ziel
 
 Dieser Slice entscheidet die Character-Asset-Richtung fuer Talvori neu:
