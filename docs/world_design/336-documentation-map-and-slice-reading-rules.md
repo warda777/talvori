@@ -72,6 +72,7 @@ Non-Goals:
 | `362-notion-linear-project-management-mapping.md` | Bei Projektmanagement-, Notion-, Linear-, GitHub-, externer Tool-Sync- oder Plugin-Write-Grenzen. |
 | `442-talvori-unity-modular-district-platform-decision.md` | Primaere Plattform- und Produktarchitektur fuer Unity 6 URP, modular geladene Districts, Flutter-Freeze, Asset-Kit-first, Codex-/Meshy-/Sloyd-/Adventure-Creator-Rollen und Online-Grenzen. |
 | `443-p02-vertical-slice-and-online-foundation-roadmap.md` | Primaere Roadmap fuer P02 Local Vertical Slice, District Packaging, fixed Build/Upgrade Slots, Addressables, Adventure Creator Compatibility, Provider Evaluation, instanzierte Districts und Chat-/Moderationsgates. |
+| `444-unity-prototype-foundation-readiness-plan.md` | G1-Readiness-Plan fuer den separaten Unity-P02-Prototyp: Repo-Entscheidung, Unity-Version, URP, Git LFS, Unity `.gitignore`, Minimal-Szene, macOS Build, Explorer-Import-Vorbereitung und Environment-Kit-Intake-Vorbereitung. |
 | `talvori_game_bible.md` | Bei Produktidentitaet, Sprachschicht, Language Passport, Zielsprachen, Internal Corpus, Optional Capture, Context Before Vocabulary und Talvori-Welt-Grundlogik. |
 | `328-talvori-learning-game-readiness-todo-checklist.md` | Bei jedem Slice mit M16-T-IDs, Dashboard, Status oder Fortschritt. |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Bei Scrum-lite, MVP-Roadmap, Change-/Idea-Intake und Research-Gates. |
@@ -506,7 +507,7 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
-| Unity Platform Foundation Slice | `AGENTS.md`, `442`, `443`, `talvori_game_bible.md`, `328`, `336`, `366`, `367`, `370`; Pflicht fuer Unity-Version, separates Unity-Projekt/Repo, URP, Build-Ziele, Projektstruktur, Editor-Scripts, Importregeln, lokale Builds oder Unity-Implementierungsgates. Keine Unity-Dateien ohne ausdruecklichen Implementierungs-Slice. |
+| Unity Platform Foundation Slice | `AGENTS.md`, `442`, `443`, `444`, `talvori_game_bible.md`, `328`, `336`, `366`, `367`, `370`; Pflicht fuer Unity-Version, separates Unity-Projekt/Repo, URP, Build-Ziele, Projektstruktur, Editor-Scripts, Importregeln, lokale Builds oder Unity-Implementierungsgates. Keine Unity-Dateien ohne ausdruecklichen Implementierungs-Slice. |
 | Environment Kit Intake Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `366`, `367`, `370`, `439`, `440`; Pflicht fuer coherent environment kit selection, Lizenz/Provenance, Unity-Kompatibilitaet, URP-Materialien, Scale, Pivots, Colliders, LODs, Prefabs, Texturbudgets und spaetere Addressables Labels. Meshy/Sloyd duerfen hier nur Sonderobjekte, Varianten oder kontrollierte Luecken vorbereiten. |
 | District Vertical Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `426`, `431`, `439`, `440`, `441` als historische Proof-Referenz; Pflicht fuer P02, District-Szenen, Entry/Exit-Vertraege, fixed Build/Upgrade Slots, NavMesh, Kamera, lokale Interaktionen und P01-P14 District-Definitionen. Keine neue Firenze-Topologie und keine Flutter-Street-Art ohne Legacy Gate. |
 | Addressables / City Content Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `370`; Pflicht fuer District Packaging, Addressable Labels, modularen Content, zweite District-Proofs, Lizenzmanifest, Prefab-/Scene-Grenzen und spaetere City-Paketierung. Nicht vor lokalem P02-Gate als Produktionssystem behandeln. |
