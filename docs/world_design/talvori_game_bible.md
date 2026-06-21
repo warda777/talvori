@@ -1,6 +1,6 @@
 # Talvori Game Bible
 
-Stand: 2026-06-10
+Stand: 2026-06-21
 
 Status: `Produkt-/Game-/Lern-/Sprachreferenz / keine Implementierung`
 
@@ -8,9 +8,25 @@ Diese Game Bible ist die fuehrende Produktreferenz fuer Talvori Welt. Sie ist
 kein Chatverlauf, kein Code-Gate, keine Persistenzfreigabe und keine
 Produktivmechanik-Freigabe.
 
+Unity Platform Supersession 2026-06-21:
+
+- `442-talvori-unity-modular-district-platform-decision.md` und
+  `443-p02-vertical-slice-and-online-foundation-roadmap.md` fuehren die
+  Runtime- und Plattformarchitektur.
+- Talvori ist nun primaer ein isometrisches 3D-Erkundungs- und Lernspiel in
+  Unity 6 URP.
+- Städte bestehen aus modularen, groesstenteils vorgebauten District-Szenen.
+- Spieler veraendern feste Build-/Upgrade-Slots, nicht eine frei bebaubare
+  Stadt.
+- Der lokale P02-Slice kommt vor Online, Chat oder globaler Social-Welt.
+- Aeltere 2D/2.5D-Formulierungen bleiben fuer mobile Lesbarkeit,
+  Produktgefuehl und historische Foundation-Referenz nuetzlich, sind aber
+  nicht mehr die primaere Runtime-Architektur.
+
 ## 1. Product Identity
 
-Talvori ist ein 2D/2.5D world-building language-learning game.
+Talvori ist ein isometrisches 3D exploration-and-learning game mit modularen
+Districts, sichtbarem Weltfortschritt und kontextbasiertem Sprachlernen.
 
 Der Spieler baut eine persoenliche Welt. Lernen entsteht nicht als isoliertes
 Vokabelfenster, sondern durch Situationen, Objekte, Saetze, Aussprache,

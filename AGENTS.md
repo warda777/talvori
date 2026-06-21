@@ -21,6 +21,12 @@ Core direction:
 - The old vocabulary-app MVP public launch is paused.
 - The current app becomes the Foundation Build for a world/city learning
   experience.
+- Unity 6 URP is the primary game-runtime direction for Talvori Welt.
+- The first Unity prototype is built as a separate project/repository after
+  documentation approval, not inside this Flutter Foundation Build by default.
+- Flutter is frozen as the existing domain/app reference for learning,
+  Companion, import, words and product flows; no further Firenze Street or 3D
+  world art is built in Flutter/Flame without a dedicated legacy gate.
 - The public product should communicate that building creates context, learning
   uses context, and language grows from words into sentences, pronunciation and
   conversations.
@@ -51,6 +57,8 @@ Core direction:
 For non-trivial Talvori work, AGENTS.md is only the short constitution. Load the
 relevant product docs before deciding:
 
+- `docs/world_design/442-talvori-unity-modular-district-platform-decision.md`
+- `docs/world_design/443-p02-vertical-slice-and-online-foundation-roadmap.md`
 - `docs/world_design/talvori_game_bible.md`
 - `docs/world_design/336-documentation-map-and-slice-reading-rules.md`
 - `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md`
@@ -299,9 +307,40 @@ Suggested `SKILL.md` content:
 
 - Keep learning logic, world logic, Companion logic, social logic and rendering
   separated.
-- Flutter remains the app/UI base.
-- Early world prototypes may use Flutter widgets and `CustomPainter`.
-- Flame, Rive, Tiled or JSON map tooling can come later if useful.
+- Unity 6 URP is the primary runtime direction for game-world exploration,
+  district scenes, 3D characters, camera, NavMesh, prefabs, Addressables and
+  world QA.
+- Do not create or modify a Unity project before the relevant documentation,
+  repository and implementation gates are approved.
+- The Unity prototype starts as a separate project/repository.
+- Flutter remains the Foundation Build and domain/app reference, not the
+  primary runtime for new Firenze Street or 3D world art.
+- No further Flutter/Flame Firenze-Street-/3D-World-Art-Code without a named
+  Flutter Legacy Gate.
+- Firenze Overview remains a map/orientation layer. Playable districts are
+  separate Unity scenes.
+- P02 is the first Unity vertical slice.
+- Cities are modular, separately loadable district scenes.
+- Districts are mostly prebuilt; player changes happen through fixed build and
+  upgrade slots.
+- Do not build a free city builder for the MVP.
+- Do not build a seamless MMO or globally freely buildable world.
+- Use an asset-kit-first environment strategy. A coherent kit should provide
+  most visible city structure before bespoke object generation fills gaps.
+- Meshy and Sloyd may provide Talvori-specific special objects and variants,
+  not complete city topology.
+- Codex is the Technical Environment Assembler: import, prefabs, editor
+  scripts, scale, pivots, NavMesh, colliders, Addressables, configuration,
+  builds and QA.
+- Codex is not an autonomous art director and must not assemble final city art
+  from primitives as a production solution.
+- Adventure Creator is optional for dialogue, hotspots, cutscenes and local
+  adventure flow, but it is not source of truth for learning, quest, build,
+  online or world state.
+- Online code waits until a local P02 Unity slice works.
+- Online services must be abstracted behind Talvori-owned interfaces. UGS and
+  Nakama remain provider candidates until a comparison gate.
+- Chat requires auth, moderation, block and report gates before product use.
 - Cloud is later; local prototype first.
 - AI may generate sentences, explanations and action suggestions.
 - Deterministic app/backend logic controls rewards, ownership, premium and
@@ -315,7 +354,16 @@ Suggested `SKILL.md` content:
 - Supabase remains strategically important, but no Supabase writes are allowed
   without explicit approval.
 
-## Near-Term Roadmap
+## Foundation Build / Legacy App Roadmap
+
+This roadmap describes Foundation-Build, legacy app and product-flow ideas that
+remain valuable as reference material. It is not the primary Unity game-runtime
+roadmap. For the primary Unity/P02 game-runtime sequence, follow
+`docs/world_design/442-talvori-unity-modular-district-platform-decision.md` and
+`docs/world_design/443-p02-vertical-slice-and-online-foundation-roadmap.md`.
+No new Firenze Street or 3D world work should be built in Flutter/Flame without
+a named Flutter Legacy Gate. Unity P02 gates G1-G10 in `443` lead the new
+game-runtime order.
 
 ### Phase 0: Foundation Sichern
 

@@ -1,6 +1,6 @@
 # M16-AB: Documentation Map and Slice Reading Rules
 
-Stand: 2026-06-11
+Stand: 2026-06-21
 
 Status: `Dokumentations-/Visual-Slice gestartet / keine Implementierung`
 
@@ -36,6 +36,8 @@ Non-Goals:
 | Dokument | Rolle fuer M16-AB |
 | --- | --- |
 | `AGENTS.md` | Kurze Codex-Verfassung, Plugin-/Skill-Routing und externe Write-Grenzen. |
+| `docs/world_design/442-talvori-unity-modular-district-platform-decision.md` | Fuehrende Plattformentscheidung: Unity 6 URP, modular geladene Districts, Flutter-Freeze, Asset-Kit-first, kein freier City Builder, kein Online vor lokalem P02-Gate. |
+| `docs/world_design/443-p02-vertical-slice-and-online-foundation-roadmap.md` | Fuehrende Roadmap fuer P02 Unity Vertical Slice, District Packaging, Addressables, Adventure Creator Compatibility und Online-Foundation-Gates. |
 | `docs/world_design/talvori_game_bible.md` | Primaere Produkt-, Game-, Lern- und Sprachreferenz fuer Talvori Welt. |
 | `docs/world_design/328-talvori-learning-game-readiness-todo-checklist.md` | Fuehrendes M16-T-Backlog, Dashboard, Statuslegende und ID-System. |
 | `docs/world_design/327-talvori-learning-game-logic-readiness-review.md` | Readiness Review, Staerken, Blocker und produktive System-Gates. |
@@ -68,12 +70,29 @@ Non-Goals:
 | --- | --- |
 | `327-talvori-learning-game-logic-readiness-review.md` | Bei Readiness-, Audit-, Risiko- und Produktlogik-Entscheidungen. |
 | `362-notion-linear-project-management-mapping.md` | Bei Projektmanagement-, Notion-, Linear-, GitHub-, externer Tool-Sync- oder Plugin-Write-Grenzen. |
+| `442-talvori-unity-modular-district-platform-decision.md` | Primaere Plattform- und Produktarchitektur fuer Unity 6 URP, modular geladene Districts, Flutter-Freeze, Asset-Kit-first, Codex-/Meshy-/Sloyd-/Adventure-Creator-Rollen und Online-Grenzen. |
+| `443-p02-vertical-slice-and-online-foundation-roadmap.md` | Primaere Roadmap fuer P02 Local Vertical Slice, District Packaging, fixed Build/Upgrade Slots, Addressables, Adventure Creator Compatibility, Provider Evaluation, instanzierte Districts und Chat-/Moderationsgates. |
 | `talvori_game_bible.md` | Bei Produktidentitaet, Sprachschicht, Language Passport, Zielsprachen, Internal Corpus, Optional Capture, Context Before Vocabulary und Talvori-Welt-Grundlogik. |
 | `328-talvori-learning-game-readiness-todo-checklist.md` | Bei jedem Slice mit M16-T-IDs, Dashboard, Status oder Fortschritt. |
 | `329-talvori-product-delivery-dashboard-and-scrum-lite.md` | Bei Scrum-lite, MVP-Roadmap, Change-/Idea-Intake und Research-Gates. |
 | `336-documentation-map-and-slice-reading-rules.md` | Bei jedem neuen World-/Learning-/Semantics-/Docs-/Commit-Slice als Lese-Kompass. |
 | `369-codex-prompt-compression-and-slice-template-gate.md` | Bei Kurzprompt-, Template-, Prompt-Kompressions-, Standardcheck- oder Slice-Arbeitsvertrag-Fragen. |
 | `prompt_templates/` | Wiederverwendbare Arbeitsvertraege fuer Docs-only, Review, Art/Master-Reference, Visual Documentation und Implementation Slices; ersetzt 336 nicht und gibt keine Implementierung frei. |
+
+### 4.1a Source-of-Truth-Hierarchie
+
+Wenn Dokumente widersprechen, gilt ab 2026-06-21 diese Reihenfolge:
+
+1. `AGENTS.md`
+2. `442-talvori-unity-modular-district-platform-decision.md`
+3. `443-p02-vertical-slice-and-online-foundation-roadmap.md`
+4. `talvori_game_bible.md`
+5. `328-talvori-learning-game-readiness-todo-checklist.md`
+6. Domain Docs, historische Proofs und lokale Slice-Berichte
+
+Flutter-/Flame-Street-Proofs, Road-Skin-Overlays und Flutter-gezeichnete
+Street-Playfields bleiben historische technische Erkenntnisse. Sie sind nicht
+mehr primaerer Runtime- oder Visual-Produktionsweg fuer Firenze.
 
 ### 4.2 Minimaler Lernloop
 
@@ -199,7 +218,7 @@ Non-Goals:
 | `367-talvori-art-bible-v1.md` | Definiert die visuelle Sprache, Style-Metadaten und QA-Grenzen, bevor M16-CB Master References oder M16-CC Asset-Family-Spec entstehen. |
 | `368-starter-island-master-reference-set.md` | Definiert Starter-Island-, Build-Station-, Figuren-, HUD- und Slot/Layer-Reference-Briefs fuer M16-CC; keine Master-Reference-Bilder und keine Assets. |
 | `370-asset-family-and-export-spec.md` | Definiert Asset-Familien, Layer, Exportformate, Groessen, Benennung, Source-/Prompt-/Reference-Metadaten, QA-Status und Gate-Regeln, bevor echte Dateien oder Engine-ready Candidates entstehen duerfen. |
-| `438-talvori-modern-2d-25d-character-sprite-style-decision.md` | Fuehrende Character-Sprite-Stilentscheidung: Talvori verwirft `96 x 128` Pixel-Art als finales Character-Ziel und nutzt moderne stilisierte 2D-/2.5D-Sprites mit `128 x 192` Frames, `256 x 1536` Idle Sheet, `512 x 1536` Walk Sheet und Fussanker `(64, 180)`; keine Asset-, Flame-, Motion-Lab- oder `assets/`-Freigabe. |
+| `438-talvori-modern-2d-25d-character-sprite-style-decision.md` | Historische Character-Sprite-Stilentscheidung: 2D-/2.5D-Sprites bleiben Fallback, Overview-/Legacy-Proof und Referenzmaterial. Fuer den primaeren Unity-Prototyp gilt ab `442`/`443` der 3D Explorer in Unity 6 URP; keine Asset-, Flame-, Motion-Lab- oder `assets/`-Freigabe. |
 | `371-starter-island-asset-candidate-gate.md` | Definiert das erste Starter-Island-Candidate-Gate: `island_base` zuerst, M16-CF nur mit expliziter Bild-/Tool-/Pfad-/Metadaten-/QA-Freigabe; keine `assets/`-Writes oder Engine-ready Candidates. |
 | `372-starter-island-base-candidate-generation-gate.md` | Definiert die konkrete M16-CG-Vorbereitung fuer `island_base`: erlaubter Dokumentationspfad, Dateinamen, Prompt-/Negative-Prompt-Anforderungen, Pflichtmetadaten, QA und Maximalstatus `asset_candidate`. |
 | `previews/m16_cg_starter_island_base_candidate_generation/talvori_island_base_uferhain_candidate_metadata.md` | Fuehrende M16-CG-Candidate-Metadaten und QA fuer die Uferhain-`island_base`-PNGs; pruefen vor jeder weiteren Candidate-, Asset-, Layer- oder Engine-ready-Entscheidung. |
@@ -487,6 +506,15 @@ Mindest-Pflichtlektuere pro Slice-Typ.
 
 | Slice-Typ | Pflichtlektuere |
 | --- | --- |
+| Unity Platform Foundation Slice | `AGENTS.md`, `442`, `443`, `talvori_game_bible.md`, `328`, `336`, `366`, `367`, `370`; Pflicht fuer Unity-Version, separates Unity-Projekt/Repo, URP, Build-Ziele, Projektstruktur, Editor-Scripts, Importregeln, lokale Builds oder Unity-Implementierungsgates. Keine Unity-Dateien ohne ausdruecklichen Implementierungs-Slice. |
+| Environment Kit Intake Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `366`, `367`, `370`, `439`, `440`; Pflicht fuer coherent environment kit selection, Lizenz/Provenance, Unity-Kompatibilitaet, URP-Materialien, Scale, Pivots, Colliders, LODs, Prefabs, Texturbudgets und spaetere Addressables Labels. Meshy/Sloyd duerfen hier nur Sonderobjekte, Varianten oder kontrollierte Luecken vorbereiten. |
+| District Vertical Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `426`, `431`, `439`, `440`, `441` als historische Proof-Referenz; Pflicht fuer P02, District-Szenen, Entry/Exit-Vertraege, fixed Build/Upgrade Slots, NavMesh, Kamera, lokale Interaktionen und P01-P14 District-Definitionen. Keine neue Firenze-Topologie und keine Flutter-Street-Art ohne Legacy Gate. |
+| Addressables / City Content Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `370`; Pflicht fuer District Packaging, Addressable Labels, modularen Content, zweite District-Proofs, Lizenzmanifest, Prefab-/Scene-Grenzen und spaetere City-Paketierung. Nicht vor lokalem P02-Gate als Produktionssystem behandeln. |
+| Adventure Creator Compatibility Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, betroffene Unity-/Interaction-Dokumente; Pflicht fuer Dialogue, Hotspots, Cutscenes, lokale Adventure-Flows und Save-State-Grenzen. Adventure Creator darf nicht Source of Truth fuer Learning, Quest, Build, Online oder Weltzustand werden. |
+| Backend Provider Evaluation Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, Daten-/Privacy-/Backend-Fachdokumente; Pflicht fuer UGS/Nakama-Vergleich, provider-neutrale Interfaces, Auth/Session, District Instances, Server Authority, Datenmodell und Kosten/Risiko. Keine Online-Implementierung vor lokalem P02-Gate. |
+| Online / Social / Chat Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `334`, relevante Privacy-/Safety-/Social-Dokumente; Pflicht fuer personal/public/party District Instances, Friends/Presence, Chat, Moderation, Blockieren, Melden, Auth und Abuse-Gates. Kein Chat ohne eigenes Moderationsgate. |
+| Flutter Legacy / Companion Slice | `AGENTS.md`, `442`, `443`, `talvori_game_bible.md`, `328`, `336`, betroffene Flutter-/Companion-/Learning-Fachdokumente; Pflicht, wenn bestehender Flutter-Code, Companion, Import, Words, Learning, Profile oder alte Proof-Previews beruehrt werden. Keine neue Firenze-Street-/3D-Welt in Flutter/Flame ohne benanntes Legacy Gate. |
+| Asset Licensing / Provenance Slice | `AGENTS.md`, `442`, `443`, `328`, `336`, `366`, `370`; Pflicht fuer externe Kits, Meshy/Sloyd, Store-Assets, Texturen, GLB/FBX/Blend, Quellen, kommerzielle Nutzbarkeit, Attribution, License Manifest und Asset-Archivierung. Keine Assets nach `assets/` ohne eigenes Asset-Gate. |
 | Learning Loop Slice | `328`, `345`, `355` wenn Welt-/Bau-/Ausbau-Fortschritt betroffen ist, `356` wenn der erste Foundation-/Haus-Vertical-Slice oder M16-BK betroffen ist, `358` wenn Spielhandlung, Hook, Mission, Reward oder Motivation betroffen ist, `359` wenn Bauaufgabe, Puzzle, objektbasierte Lernhandlung oder Belohnung als Weltveraenderung betroffen ist, `360` wenn Figur/Worker/Tali/Vori, sichtbare Objektaktion, Bauhandlung, Reparatur, Sammeln, Tragen, Oeffnen oder Container betroffen ist, `327`, `330`, `331`, `332`, `335`, `329` |
 | Language Layer / Onboarding Slice | `talvori_game_bible.md`, `328`, `336`, `345`, `330`, `331`, `333`, `335` und betroffene Feature-Docs; Pflicht wenn Produktidentitaet, Sprachschicht, aktive Zielsprache, UI language, Companion language, Language Passport, Level/Scaffolding, Internal Corpus, Optional Capture, Import/Sharing oder Context Before Vocabulary betroffen sind. |
 | Word Outcome Slice | `328`, `330`, `331`, `333`, `321`, `323`, `274`, `276` |
@@ -1080,27 +1108,29 @@ G-/U-/Node-/Edge-Labels, Debug-Boundaries oder Admin-/GIS-Optik zeigen. Nach
 Spieleraktionen muss mindestens eine dauerhafte sichtbare Weltveraenderung
 bestehen bleiben.
 
-Living World Production Sequence Rule: Flutter bleibt App-/HUD-Schicht; Flame
-ist die vorgesehene Runtime-Schicht fuer lebendige World-/City-Szenen mit Game
-Loop, World, Kamera, Figuren, VFX und Depth Sorting. Technische Navigation,
-sichtbare Art und Character-Animation bleiben getrennte Systeme. Fuer
-lebendige World-/City-Arbeit gilt die Reihenfolge: technischen Kern
-stabilisieren -> Flame World/Camera Proof -> eine Basisfigur produzieren ->
-isolierter Character Motion Proof -> eine Figur auf echter Graph-Route ->
-Character-Varianten -> Lane-/Activity-System -> kleine NPC-Population -> ein
-Art-Vertical-Slice -> Umweltanimation -> First-Fun-Loop -> danach erst auf die
-ganze Stadt skalieren.
+Unity Living World Production Sequence Rule: Unity 6 URP ist die primaere
+Game-Runtime fuer lebendige World-/City-/District-Szenen. Flutter bleibt
+Foundation-/Domain-/Legacy-Reference und darf keine neue Firenze-Street- oder
+3D-World-Art ohne eigenes Legacy Gate oeffnen. Technische Navigation,
+sichtbare Art, Character-Animation, Learning State und Online State bleiben
+getrennte Systeme. Fuer neue lebendige World-/City-Arbeit gilt die Reihenfolge:
+`442`/`443` akzeptieren -> separates Unity-Projekt/Repo planen -> coherent
+Environment Kit intake -> P02 District Blockout/Import -> Unity Explorer
+Movement/Camera/NavMesh Proof -> lokaler Learning-/Build-Slot-Loop ->
+Adventure-Creator-Compatibility-Gate -> Addressables Second-District Proof ->
+Provider Evaluation -> instanzierte Online-Districts -> Chat-/Moderationsgate.
 
-Kein Schritt darf uebersprungen werden: keine Figurenvarianten vor Freigabe der
-Basisfigur, keine NPC-Menge vor einer funktionierenden Einzelfigur, keine
-vollstaendige Stadt-Art vor einem freigegebenen District-Slice und keine
-App-Integration/Persistenz vor bestandenem First-Fun-Loop. Codex darf keine
-prozeduralen Ersatzfiguren zeichnen; fehlt ein notwendiges Asset, folgt zuerst
-ein enger Asset-Production-Slice. Jeder Codex-Slice setzt nur einen klaren
+Kein Schritt darf uebersprungen werden: kein Unity-Projekt ohne
+Implementierungsgate, keine vollstaendige Stadt-Art vor einem freigegebenen
+District-Slice, keine Asset-Kit-Umgehung durch primitive Final-Art, kein Online-
+Code vor lokalem P02-Gate und kein Chat ohne Auth-/Moderations-/Block-/Report-
+Gate. Codex ist Technical Environment Assembler, nicht autonomer Art Director.
+Fehlt ein notwendiges Asset oder Kit, folgt zuerst ein enger
+Environment-Kit-/Asset-Intake-Slice. Jeder Codex-Slice setzt nur einen klaren
 Baustein um und braucht erwartete Dateien, sichtbaren Nachweis, Tests, echten
-Device-Test und separate Commit-Freigabe. Die technische Firenze-Source-of-
-Truth bleibt verbindlich; bestehende Game-Feel-, Navigation-Fidelity- und
-Living-World-Regeln bleiben bestehen und werden nicht dupliziert.
+Device-Test wo sinnvoll und separate Commit-Freigabe. Die technische Firenze-
+Source-of-Truth bleibt verbindlich, aber der Graph ist nicht automatisch
+detaillierte Unity-Street-Geometrie.
 
 ### 5.13 Playable Area Specification Pflichtregel
 
